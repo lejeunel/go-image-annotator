@@ -57,9 +57,10 @@ func NewTestComponents(t *testing.T) (Services, context.Context) {
 	labelRepo := r.NewSQLLabelRepo(db)
 	KVStore := NewMockKVStoreClient()
 
-	imageService := s.ImageService{KeyValueStoreClient: KVStore, ImageRepo: imageRepo, MaxPageSize: 2,
+	imageService := s.ImageService{KeyValueStoreClient: KVStore, ImageRepo: imageRepo,
+		LabelRepo: labelRepo, MaxPageSize: 2,
 		DefaultPageSize: 2, RemoteScheme: "scheme", RemoteBucketName: "mybucket"}
-	labelService := s.LabelService{LabelRepo: labelRepo, MaxPageSize: 2,
+	labelService := s.LabelService{LabelRepo: labelRepo, ImageRepo: imageRepo, MaxPageSize: 2,
 		DefaultPageSize: 2}
 
 	return Services{Images: &imageService, Labels: &labelService}, context.Background()

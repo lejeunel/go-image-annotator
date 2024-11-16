@@ -14,6 +14,7 @@ type Image struct {
 	CreatedAt string    `db:"created_at"`
 	UpdatedAt string    `db:"updated_at"`
 	Data      []byte
+	Labels    []Label
 }
 
 // func (im Image) Validate() error {

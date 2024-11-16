@@ -16,6 +16,7 @@ import (
 type ImageService struct {
 	KeyValueStoreClient KeyValueStoreClient
 	ImageRepo           r.ImageRepo
+	LabelRepo           r.LabelRepo
 	MaxPageSize         int
 	DefaultPageSize     int
 	RemoteScheme        string
@@ -43,6 +44,10 @@ func (s *ImageService) checkSHA256(image *m.Image) error {
 
 func (s *ImageService) setURI(image *m.Image) {
 	image.Uri = s.RemoteScheme + "://" + s.RemoteBucketName + "/" + image.Id.String() + ".png"
+}
+
+func (s *ImageService) Delete(ctx context.Context, image *m.Image) error {
+	return s.ImageRepo.Delete(ctx, image)
 }
 
 func (s *ImageService) Save(ctx context.Context, image *m.Image) (*m.Image, error) {
@@ -82,6 +87,12 @@ func (s *ImageService) GetOne(ctx context.Context, id string) (*m.Image, error) 
 		return nil, err
 	}
 
+	labels, err := s.LabelRepo.GetLabelsOfImage(ctx, image)
+	if err != nil {
+		return nil, err
+	}
+	image.Labels = labels
+
 	data, err := s.KeyValueStoreClient.Download(ctx, image.Uri)
 
 	if err != nil {
@@ -91,4 +102,20 @@ func (s *ImageService) GetOne(ctx context.Context, id string) (*m.Image, error) 
 	image.Data = data
 
 	return image, nil
+}
+
+func (s *ImageService) ApplyLabel(ctx context.Context, image *m.Image, label *m.Label) (*m.Image, error) {
+	if err := s.ImageRepo.ApplyLabel(ctx, image, label); err != nil {
+		return nil, err
+	}
+
+	labels, err := s.LabelRepo.GetLabelsOfImage(ctx, image)
+	if err != nil {
+		return nil, err
+	}
+
+	image.Labels = labels
+
+	return image, nil
+
 }

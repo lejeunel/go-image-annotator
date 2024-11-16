@@ -5,15 +5,26 @@ import (
 	"testing"
 )
 
-func TestInvalidLabelShouldFail(t *testing.T) {
-	s, ctx := NewTestComponents(t)
-	label := &m.Label{Name: "the name with spaces"}
+func TestCreatingInvalidLabelShouldFail(t *testing.T) {
+	tests := map[string]struct {
+		name string
+	}{
+		"with spaces":         {name: "the name with spaces"},
+		"with capitals":       {name: "LaBeL NaMe"},
+		"with specials chars": {name: "l4b3l n4m3"},
+	}
 
-	label, err := s.Labels.Create(ctx, label)
-	AssertError(t, err)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			s, ctx := NewTestComponents(t)
+			label := &m.Label{Name: tc.name}
+			label, err := s.Labels.Create(ctx, label)
+			AssertError(t, err)
+		})
+	}
 }
 
-func TestCreateLabel(t *testing.T) {
+func TestCreateAndRetrieveLabel(t *testing.T) {
 	s, ctx := NewTestComponents(t)
 	label := &m.Label{Name: "thelabel",
 		Description: "the description"}
@@ -29,6 +40,51 @@ func TestCreateLabel(t *testing.T) {
 
 	if label.Description != retrievedLabel.Description {
 		t.Fatalf("expected to retrieve identical label descriptions. Wanted %v, got %v", label.Description, retrievedLabel.Description)
+	}
+
+}
+
+func TestDeleteLabel(t *testing.T) {
+	s, ctx := NewTestComponents(t)
+	label := &m.Label{Name: "thelabel"}
+
+	label, err := s.Labels.Create(ctx, label)
+	err = s.Labels.Delete(ctx, label)
+
+	AssertNoError(t, err)
+
+	label, err = s.Labels.GetOne(ctx, label.Id.String())
+	AssertError(t, err)
+
+}
+
+func TestDeletingUsedLabelShouldFail(t *testing.T) {
+	s, ctx := NewTestComponents(t)
+	label := &m.Label{Name: "thelabel"}
+
+	label, _ = s.Labels.Create(ctx, label)
+	image := &m.Image{Data: testImage}
+	image, _ = s.Images.ApplyLabel(ctx, image, label)
+
+	err := s.Labels.Delete(ctx, label)
+
+	AssertError(t, err)
+
+}
+
+func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
+	s, ctx := NewTestComponents(t)
+	label := &m.Label{Name: "thelabel"}
+	label, _ = s.Labels.Create(ctx, label)
+	image := &m.Image{Data: testImage}
+	image, _ = s.Images.ApplyLabel(ctx, image, label)
+
+	s.Labels.Delete(ctx, label)
+	s.Images.Delete(ctx, image)
+	numAssociatedImages, _ := s.Images.LabelRepo.NumImagesWithLabel(ctx, label)
+
+	if numAssociatedImages != 0 {
+		t.Fatalf("expected to have 0 associated images, got %v", numAssociatedImages)
 	}
 
 }

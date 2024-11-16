@@ -48,3 +48,22 @@ func TestSavingCorruptedImageWithSHA256ShouldFail(t *testing.T) {
 	AssertError(t, err)
 
 }
+
+func TestApplyingLabelsToImage(t *testing.T) {
+	s, ctx := NewTestComponents(t)
+
+	image := &m.Image{Data: testImage}
+	label := &m.Label{Name: "mylabel"}
+
+	image, _ = s.Images.Save(ctx, image)
+	label, _ = s.Labels.Create(ctx, label)
+
+	image, _ = s.Images.ApplyLabel(ctx, image, label)
+
+	retrievedImage, _ := s.Images.GetOne(ctx, image.Id.String())
+	nLabels := len(retrievedImage.Labels)
+	if len(retrievedImage.Labels) != 1 {
+		t.Fatalf("expected to retrieve image with 1 label, but got %v.", nLabels)
+	}
+
+}

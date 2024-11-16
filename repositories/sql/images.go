@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	e "go-image-annotator/errors"
@@ -41,6 +42,24 @@ func (r SQLImageRepo) GetOne(ctx context.Context, id string) (*m.Image, error) {
 	}
 
 	return &image, nil
+}
+
+func (r SQLImageRepo) Delete(ctx context.Context, image *m.Image) error {
+	_, err_image := r.Db.Exec("DELETE FROM images WHERE id=?", image.Id.String())
+	_, err_assoc := r.Db.Exec("DELETE FROM image_label_assoc WHERE image_id=?", image.Id.String())
+	return errors.Join(err_image, err_assoc)
+}
+
+func (r SQLImageRepo) ApplyLabel(ctx context.Context, image *m.Image, label *m.Label) error {
+	now := time.Now().String()
+	query := "INSERT INTO image_label_assoc (image_id, label_id, created_at) VALUES (?, ?, ?)"
+	_, err := r.Db.Exec(query, image.Id, label.Id, now)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *SQLImageRepo) Nums() (int64, error) {
