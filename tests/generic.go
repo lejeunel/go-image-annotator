@@ -16,6 +16,7 @@ var testImage []byte
 
 type Services struct {
 	Images *s.ImageService
+	Labels *s.LabelService
 }
 
 type MockKVStoreClient struct {
@@ -53,12 +54,15 @@ func NewTestComponents(t *testing.T) (Services, context.Context) {
 		panic(err)
 	}
 	imageRepo := r.NewSQLImageRepo(db)
+	labelRepo := r.NewSQLLabelRepo(db)
 	KVStore := NewMockKVStoreClient()
 
 	imageService := s.ImageService{KeyValueStoreClient: KVStore, ImageRepo: imageRepo, MaxPageSize: 2,
 		DefaultPageSize: 2, RemoteScheme: "scheme", RemoteBucketName: "mybucket"}
+	labelService := s.LabelService{LabelRepo: labelRepo, MaxPageSize: 2,
+		DefaultPageSize: 2}
 
-	return Services{Images: &imageService}, context.Background()
+	return Services{Images: &imageService, Labels: &labelService}, context.Background()
 
 }
 

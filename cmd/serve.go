@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	goose "github.com/pressly/goose/v3"
-	a "go-image-annotator/app"
-	c "go-image-annotator/config"
+	"context"
+	tmpl "go-image-annotator/templates"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -17,11 +17,8 @@ var serveCmd = &cobra.Command{
 }
 
 func serve() {
-	cfg := c.NewConfig()
-	app := a.NewApp(cfg)
 
-	goose.SetDialect(string(goose.DialectSQLite3))
-	// goose.Up(app.DB.DB, "migrations")
+	component := tmpl.Hello("Bob")
+	component.Render(context.Background(), os.Stdout)
 
-	app.Run(cfg.Port)
 }

@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "go-image-annotator",
-	Short: "Bookstore application",
+	Short: "Image Annotator",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()
