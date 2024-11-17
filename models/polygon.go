@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/google/uuid"
 )
@@ -26,6 +28,21 @@ func (p *Polygon) Validate() error {
 		validation.Field(&p.MinY, validation.Min(0)))
 }
 
+func validateBoundingBoxPoints(bbox *Polygon) error {
+	if bbox.Points[0][0] > bbox.Points[1][0] {
+		return errors.New(fmt.Sprintf("BoundingBox should have x0 > x1, got %v<=%v", bbox.Points[0][0],
+			bbox.Points[1][0]))
+	}
+
+	if bbox.Points[0][1] > bbox.Points[1][1] {
+		return errors.New(fmt.Sprintf("BoundingBox should have y0 > y1, got %v<=%v", bbox.Points[0][1],
+			bbox.Points[1][1]))
+	}
+
+	return nil
+
+}
+
 func (p *Polygon) SetLabel(label *Label) error {
 	p.Label = label
 
@@ -39,6 +56,10 @@ func NewBoundingBox(x0, y0, x1, y1 int) (*Polygon, error) {
 	}
 
 	if err := p.Validate(); err != nil {
+		return nil, err
+	}
+
+	if err := validateBoundingBoxPoints(p); err != nil {
 		return nil, err
 	}
 
