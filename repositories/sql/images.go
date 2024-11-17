@@ -20,7 +20,7 @@ func NewSQLImageRepo(db *sqlx.DB) *SQLImageRepo {
 
 }
 
-func (r SQLImageRepo) Create(ctx context.Context, image *m.Image) (*m.Image, error) {
+func (r *SQLImageRepo) Create(ctx context.Context, image *m.Image) (*m.Image, error) {
 	now := time.Now().String()
 	query := "INSERT INTO images (id, uri, created_at, updated_at, sha256, width, height, mimetype) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 	_, err := r.Db.Exec(query, image.Id, image.Uri, now,
@@ -33,7 +33,7 @@ func (r SQLImageRepo) Create(ctx context.Context, image *m.Image) (*m.Image, err
 	return image, nil
 }
 
-func (r SQLImageRepo) GetOne(ctx context.Context, id string) (*m.Image, error) {
+func (r *SQLImageRepo) GetOne(ctx context.Context, id string) (*m.Image, error) {
 	image := m.Image{}
 	err := r.Db.Get(&image, "SELECT id,uri,created_at,updated_at,sha256,width,height,mimetype FROM images WHERE id=?", id)
 
@@ -44,22 +44,10 @@ func (r SQLImageRepo) GetOne(ctx context.Context, id string) (*m.Image, error) {
 	return &image, nil
 }
 
-func (r SQLImageRepo) Delete(ctx context.Context, image *m.Image) error {
+func (r *SQLImageRepo) Delete(ctx context.Context, image *m.Image) error {
 	_, err_image := r.Db.Exec("DELETE FROM images WHERE id=?", image.Id.String())
 	_, err_assoc := r.Db.Exec("DELETE FROM image_label_assoc WHERE image_id=?", image.Id.String())
 	return errors.Join(err_image, err_assoc)
-}
-
-func (r SQLImageRepo) ApplyLabel(ctx context.Context, image *m.Image, label *m.Label) error {
-	now := time.Now().String()
-	query := "INSERT INTO image_label_assoc (image_id, label_id, created_at) VALUES (?, ?, ?)"
-	_, err := r.Db.Exec(query, image.Id, label.Id, now)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (r *SQLImageRepo) Nums() (int64, error) {

@@ -19,7 +19,7 @@ func NewSQLLabelRepo(db *sqlx.DB) *SQLLabelRepo {
 
 }
 
-func (r SQLLabelRepo) Create(ctx context.Context, label *m.Label) (*m.Label, error) {
+func (r *SQLLabelRepo) Create(ctx context.Context, label *m.Label) (*m.Label, error) {
 	now := time.Now().String()
 	query := "INSERT INTO labels (id, name, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
 	_, err := r.Db.Exec(query, label.Id, label.Name, label.Description, now,
@@ -32,7 +32,7 @@ func (r SQLLabelRepo) Create(ctx context.Context, label *m.Label) (*m.Label, err
 	return label, nil
 }
 
-func (r SQLLabelRepo) NumImagesWithLabel(ctx context.Context, label *m.Label) (int, error) {
+func (r *SQLLabelRepo) NumImagesWithLabel(ctx context.Context, label *m.Label) (int, error) {
 	var nImages int
 	err := r.Db.QueryRow("SELECT COUNT(*) FROM image_label_assoc WHERE label_id = ?",
 		label.Id).Scan(&nImages)
@@ -44,12 +44,12 @@ func (r SQLLabelRepo) NumImagesWithLabel(ctx context.Context, label *m.Label) (i
 
 }
 
-func (r SQLLabelRepo) Delete(ctx context.Context, label *m.Label) error {
+func (r *SQLLabelRepo) Delete(ctx context.Context, label *m.Label) error {
 	_, err := r.Db.Exec("DELETE FROM labels WHERE id=?", label.Id.String())
 	return err
 }
 
-func (r SQLLabelRepo) GetOne(ctx context.Context, id string) (*m.Label, error) {
+func (r *SQLLabelRepo) GetOne(ctx context.Context, id string) (*m.Label, error) {
 	label := m.Label{}
 	err := r.Db.Get(&label, "SELECT id,name,description FROM labels WHERE id=?", id)
 
@@ -60,7 +60,7 @@ func (r SQLLabelRepo) GetOne(ctx context.Context, id string) (*m.Label, error) {
 	return &label, nil
 }
 
-func (r SQLLabelRepo) GetLabelsOfImage(ctx context.Context, image *m.Image) ([]m.Label, error) {
+func (r *SQLLabelRepo) GetLabelsOfImage(ctx context.Context, image *m.Image) ([]m.Label, error) {
 	var labelIds []string
 	var labels []m.Label
 
@@ -81,6 +81,18 @@ func (r SQLLabelRepo) GetLabelsOfImage(ctx context.Context, image *m.Image) ([]m
 
 	return labels, nil
 
+}
+
+func (r *SQLLabelRepo) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) error {
+	now := time.Now().String()
+	query := "INSERT INTO image_label_assoc (image_id, label_id, created_at) VALUES (?, ?, ?)"
+	_, err := r.Db.Exec(query, image.Id, label.Id, now)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *SQLLabelRepo) Nums() (int64, error) {

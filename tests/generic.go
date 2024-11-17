@@ -15,8 +15,8 @@ import (
 var testImage []byte
 
 type Services struct {
-	Images *s.ImageService
-	Labels *s.LabelService
+	Images      *s.ImageService
+	Annotations *s.AnnotationService
 }
 
 type MockKVStoreClient struct {
@@ -60,10 +60,10 @@ func NewTestComponents(t *testing.T) (Services, context.Context) {
 	imageService := s.ImageService{KeyValueStoreClient: KVStore, ImageRepo: imageRepo,
 		LabelRepo: labelRepo, MaxPageSize: 2,
 		DefaultPageSize: 2, RemoteScheme: "scheme", RemoteBucketName: "mybucket"}
-	labelService := s.LabelService{LabelRepo: labelRepo, ImageRepo: imageRepo, MaxPageSize: 2,
+	labelService := s.AnnotationService{LabelRepo: labelRepo, ImageRepo: imageRepo, MaxPageSize: 2,
 		DefaultPageSize: 2}
 
-	return Services{Images: &imageService, Labels: &labelService}, context.Background()
+	return Services{Images: &imageService, Annotations: &labelService}, context.Background()
 
 }
 

@@ -56,9 +56,9 @@ func TestApplyingLabelsToImage(t *testing.T) {
 	label := &m.Label{Name: "mylabel"}
 
 	image, _ = s.Images.Save(ctx, image)
-	label, _ = s.Labels.Create(ctx, label)
+	label, _ = s.Annotations.Create(ctx, label)
 
-	image, _ = s.Images.ApplyLabel(ctx, image, label)
+	image, _ = s.Annotations.ApplyLabelToImage(ctx, label, image)
 
 	retrievedImage, _ := s.Images.GetOne(ctx, image.Id.String())
 	nLabels := len(retrievedImage.Labels)

@@ -8,14 +8,14 @@ import (
 	r "go-image-annotator/repositories"
 )
 
-type LabelService struct {
+type AnnotationService struct {
 	LabelRepo       r.LabelRepo
 	ImageRepo       r.ImageRepo
 	MaxPageSize     int
 	DefaultPageSize int
 }
 
-func (s *LabelService) Create(ctx context.Context, label *m.Label) (*m.Label, error) {
+func (s *AnnotationService) Create(ctx context.Context, label *m.Label) (*m.Label, error) {
 
 	if err := label.Validate(); err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (s *LabelService) Create(ctx context.Context, label *m.Label) (*m.Label, er
 
 }
 
-func (s *LabelService) GetOne(ctx context.Context, id string) (*m.Label, error) {
+func (s *AnnotationService) GetOne(ctx context.Context, id string) (*m.Label, error) {
 
 	label, err := s.LabelRepo.GetOne(ctx, id)
 	if err != nil {
@@ -42,7 +42,7 @@ func (s *LabelService) GetOne(ctx context.Context, id string) (*m.Label, error) 
 
 }
 
-func (s *LabelService) Delete(ctx context.Context, label *m.Label) error {
+func (s *AnnotationService) Delete(ctx context.Context, label *m.Label) error {
 
 	numImages, err := s.LabelRepo.NumImagesWithLabel(ctx, label)
 	if err != nil {
@@ -54,5 +54,21 @@ func (s *LabelService) Delete(ctx context.Context, label *m.Label) error {
 	}
 
 	return s.LabelRepo.Delete(ctx, label)
+
+}
+
+func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) (*m.Image, error) {
+	if err := s.LabelRepo.ApplyLabelToImage(ctx, label, image); err != nil {
+		return nil, err
+	}
+
+	labels, err := s.LabelRepo.GetLabelsOfImage(ctx, image)
+	if err != nil {
+		return nil, err
+	}
+
+	image.Labels = labels
+
+	return image, nil
 
 }

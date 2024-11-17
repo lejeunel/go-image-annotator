@@ -18,7 +18,7 @@ func TestCreatingInvalidLabelShouldFail(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			s, ctx := NewTestComponents(t)
 			label := &m.Label{Name: tc.name}
-			label, err := s.Labels.Create(ctx, label)
+			label, err := s.Annotations.Create(ctx, label)
 			AssertError(t, err)
 		})
 	}
@@ -29,10 +29,10 @@ func TestCreateAndRetrieveLabel(t *testing.T) {
 	label := &m.Label{Name: "thelabel",
 		Description: "the description"}
 
-	label, err := s.Labels.Create(ctx, label)
+	label, err := s.Annotations.Create(ctx, label)
 	AssertNoError(t, err)
 
-	retrievedLabel, err := s.Labels.GetOne(ctx, label.Id.String())
+	retrievedLabel, err := s.Annotations.GetOne(ctx, label.Id.String())
 
 	if label.Name != retrievedLabel.Name {
 		t.Fatalf("expected to retrieve identical label names. Wanted %v, got %v", label.Name, retrievedLabel.Name)
@@ -48,12 +48,12 @@ func TestDeleteLabel(t *testing.T) {
 	s, ctx := NewTestComponents(t)
 	label := &m.Label{Name: "thelabel"}
 
-	label, err := s.Labels.Create(ctx, label)
-	err = s.Labels.Delete(ctx, label)
+	label, err := s.Annotations.Create(ctx, label)
+	err = s.Annotations.Delete(ctx, label)
 
 	AssertNoError(t, err)
 
-	label, err = s.Labels.GetOne(ctx, label.Id.String())
+	label, err = s.Annotations.GetOne(ctx, label.Id.String())
 	AssertError(t, err)
 
 }
@@ -62,11 +62,11 @@ func TestDeletingUsedLabelShouldFail(t *testing.T) {
 	s, ctx := NewTestComponents(t)
 	label := &m.Label{Name: "thelabel"}
 
-	label, _ = s.Labels.Create(ctx, label)
+	label, _ = s.Annotations.Create(ctx, label)
 	image := &m.Image{Data: testImage}
-	image, _ = s.Images.ApplyLabel(ctx, image, label)
+	image, _ = s.Annotations.ApplyLabelToImage(ctx, label, image)
 
-	err := s.Labels.Delete(ctx, label)
+	err := s.Annotations.Delete(ctx, label)
 
 	AssertError(t, err)
 
@@ -75,11 +75,11 @@ func TestDeletingUsedLabelShouldFail(t *testing.T) {
 func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 	s, ctx := NewTestComponents(t)
 	label := &m.Label{Name: "thelabel"}
-	label, _ = s.Labels.Create(ctx, label)
+	label, _ = s.Annotations.Create(ctx, label)
 	image := &m.Image{Data: testImage}
-	image, _ = s.Images.ApplyLabel(ctx, image, label)
+	image, _ = s.Annotations.ApplyLabelToImage(ctx, label, image)
 
-	s.Labels.Delete(ctx, label)
+	s.Annotations.Delete(ctx, label)
 	s.Images.Delete(ctx, image)
 	numAssociatedImages, _ := s.Images.LabelRepo.NumImagesWithLabel(ctx, label)
 

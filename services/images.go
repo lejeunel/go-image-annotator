@@ -103,19 +103,3 @@ func (s *ImageService) GetOne(ctx context.Context, id string) (*m.Image, error) 
 
 	return image, nil
 }
-
-func (s *ImageService) ApplyLabel(ctx context.Context, image *m.Image, label *m.Label) (*m.Image, error) {
-	if err := s.ImageRepo.ApplyLabel(ctx, image, label); err != nil {
-		return nil, err
-	}
-
-	labels, err := s.LabelRepo.GetLabelsOfImage(ctx, image)
-	if err != nil {
-		return nil, err
-	}
-
-	image.Labels = labels
-
-	return image, nil
-
-}
