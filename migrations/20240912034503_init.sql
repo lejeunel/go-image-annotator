@@ -30,6 +30,22 @@ CREATE TABLE IF NOT EXISTS image_label_assoc (
     FOREIGN KEY (label_id) REFERENCES labels(id)
 );
 
+CREATE TABLE IF NOT EXISTS polygons (
+    id varchar(16) PRIMARY KEY,
+    image_id varchar(16),
+    label_id varchar(16),
+    created_at text,
+    updated_at text,
+    type_ varchar(16),
+    min_x int,
+    min_y int,
+    max_x int,
+    max_y int,
+    points text,
+    FOREIGN KEY (image_id) REFERENCES images(id),
+    FOREIGN KEY (label_id) REFERENCES labels(id)
+);
+
 -- +goose Down
 
 DROP TABLE images;

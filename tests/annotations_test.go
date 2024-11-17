@@ -88,3 +88,77 @@ func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 	}
 
 }
+
+func TestApplyingLabelToImage(t *testing.T) {
+	s, ctx := NewTestComponents(t)
+
+	image := &m.Image{Data: testImage}
+	label := &m.Label{Name: "mylabel"}
+
+	image, _ = s.Images.Save(ctx, image)
+	label, _ = s.Annotations.Create(ctx, label)
+
+	image, _ = s.Annotations.ApplyLabelToImage(ctx, label, image)
+
+	retrievedImage, _ := s.Images.GetOne(ctx, image.Id.String())
+	nLabels := len(retrievedImage.Labels)
+	if len(retrievedImage.Labels) != 1 {
+		t.Fatalf("expected to retrieve image with 1 label, but got %v.", nLabels)
+	}
+
+}
+
+func TestApplyingPolygonToImage(t *testing.T) {
+	s, ctx := NewTestComponents(t)
+
+	image := &m.Image{Data: testImage}
+	label := &m.Label{Name: "mylabel"}
+
+	image, _ = s.Images.Save(ctx, image)
+	label, _ = s.Annotations.Create(ctx, label)
+
+	polygon, err := m.NewBoundingBox(10, 10, 30, 30)
+	AssertNoError(t, err)
+	polygon.SetLabel(label)
+
+	image, err = s.Annotations.ApplyPolygonToImage(ctx, polygon, image)
+	AssertNoError(t, err)
+
+	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String())
+	AssertNoError(t, err)
+
+	polygons := retrievedImage.Polygons
+	if len(polygons) != 1 {
+		t.Fatalf("expected to retrieve image with 1 polygon, but got %v.", len(polygons))
+	}
+
+	polygonLabel := polygons[0].Label.Name
+	if polygonLabel != "mylabel" {
+		t.Fatalf("expected to retrieve polygon with label mylabel, but got %v.", polygonLabel)
+	}
+
+}
+
+func TestInvalidBoundingBoxesShouldFail(t *testing.T) {
+	tests := map[string]struct {
+		type_ string
+		x0    int
+		y0    int
+		x1    int
+		y1    int
+	}{
+		"negative values": {x0: -2, y0: 4, x1: 5, y1: 9},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			s, ctx := NewTestComponents(t)
+			image := &m.Image{Data: testImage}
+
+			image, _ = s.Images.Save(ctx, image)
+			_, err := m.NewBoundingBox(tc.x0, tc.y0, tc.x1, tc.y1)
+
+			AssertError(t, err)
+		})
+	}
+}

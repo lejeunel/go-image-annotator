@@ -93,6 +93,12 @@ func (s *ImageService) GetOne(ctx context.Context, id string) (*m.Image, error) 
 	}
 	image.Labels = labels
 
+	polygons, err := s.LabelRepo.GetPolygonsOfImage(ctx, image)
+	if err != nil {
+		return nil, err
+	}
+	image.Polygons = polygons
+
 	data, err := s.KeyValueStoreClient.Download(ctx, image.Uri)
 
 	if err != nil {

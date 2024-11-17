@@ -72,3 +72,11 @@ func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Labe
 	return image, nil
 
 }
+func (s *AnnotationService) ApplyPolygonToImage(ctx context.Context, polygon *m.Polygon, image *m.Image) (*m.Image, error) {
+	image.Polygons = append(image.Polygons, polygon)
+
+	if err := s.LabelRepo.ApplyPolygonToImage(ctx, polygon, image); err != nil {
+		return nil, err
+	}
+	return image, nil
+}
