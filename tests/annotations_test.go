@@ -148,6 +148,7 @@ func TestInvalidBoundingBoxesShouldFail(t *testing.T) {
 		y1    int
 	}{
 		"negative values": {x0: -2, y0: 4, x1: 5, y1: 9},
+		"negative values": {x0: -2, y0: 4, x1: 5, y1: 9},
 	}
 
 	for name, tc := range tests {
