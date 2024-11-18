@@ -16,7 +16,7 @@ import (
 type ImageService struct {
 	KeyValueStoreClient KeyValueStoreClient
 	ImageRepo           r.ImageRepo
-	LabelRepo           r.LabelRepo
+	LabelRepo           r.AnnotationRepo
 	MaxPageSize         int
 	DefaultPageSize     int
 	RemoteScheme        string

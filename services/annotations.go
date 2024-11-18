@@ -9,7 +9,7 @@ import (
 )
 
 type AnnotationService struct {
-	LabelRepo       r.LabelRepo
+	LabelRepo       r.AnnotationRepo
 	ImageRepo       r.ImageRepo
 	MaxPageSize     int
 	DefaultPageSize int
@@ -23,7 +23,7 @@ func (s *AnnotationService) Create(ctx context.Context, label *m.Label) (*m.Labe
 
 	label.Id = uuid.New()
 
-	label, err := s.LabelRepo.Create(ctx, label)
+	label, err := s.LabelRepo.CreateLabel(ctx, label)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func (s *AnnotationService) Create(ctx context.Context, label *m.Label) (*m.Labe
 
 func (s *AnnotationService) GetOne(ctx context.Context, id string) (*m.Label, error) {
 
-	label, err := s.LabelRepo.GetOne(ctx, id)
+	label, err := s.LabelRepo.GetOneLabel(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +53,13 @@ func (s *AnnotationService) Delete(ctx context.Context, label *m.Label) error {
 		return e.ErrForbiddenDeletingDependency{ParentEntity: "image", ParentId: label.Id.String(), ChildEntity: "label"}
 	}
 
-	return s.LabelRepo.Delete(ctx, label)
+	return s.LabelRepo.DeleteLabel(ctx, label)
 
+}
+
+func (s *AnnotationService) DeletePolygon(ctx context.Context, polygon *m.Polygon) error {
+
+	return s.LabelRepo.DeletePolygon(ctx, polygon)
 }
 
 func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) (*m.Image, error) {

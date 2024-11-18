@@ -10,17 +10,17 @@ import (
 	"time"
 )
 
-type SQLLabelRepo struct {
+type SQLAnnotationRepo struct {
 	Db *sqlx.DB
 }
 
-func NewSQLLabelRepo(db *sqlx.DB) *SQLLabelRepo {
+func NewSQLLabelRepo(db *sqlx.DB) *SQLAnnotationRepo {
 
-	return &SQLLabelRepo{Db: db}
+	return &SQLAnnotationRepo{Db: db}
 
 }
 
-func (r *SQLLabelRepo) Create(ctx context.Context, label *m.Label) (*m.Label, error) {
+func (r *SQLAnnotationRepo) CreateLabel(ctx context.Context, label *m.Label) (*m.Label, error) {
 	now := time.Now().String()
 	query := "INSERT INTO labels (id, name, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
 	_, err := r.Db.Exec(query, label.Id, label.Name, label.Description, now,
@@ -33,7 +33,7 @@ func (r *SQLLabelRepo) Create(ctx context.Context, label *m.Label) (*m.Label, er
 	return label, nil
 }
 
-func (r *SQLLabelRepo) NumImagesWithLabel(ctx context.Context, label *m.Label) (int, error) {
+func (r *SQLAnnotationRepo) NumImagesWithLabel(ctx context.Context, label *m.Label) (int, error) {
 	var nImages int
 	err := r.Db.QueryRow("SELECT COUNT(*) FROM image_label_assoc WHERE label_id = ?",
 		label.Id).Scan(&nImages)
@@ -45,12 +45,17 @@ func (r *SQLLabelRepo) NumImagesWithLabel(ctx context.Context, label *m.Label) (
 
 }
 
-func (r *SQLLabelRepo) Delete(ctx context.Context, label *m.Label) error {
+func (r *SQLAnnotationRepo) DeleteLabel(ctx context.Context, label *m.Label) error {
 	_, err := r.Db.Exec("DELETE FROM labels WHERE id=?", label.Id.String())
 	return err
 }
 
-func (r *SQLLabelRepo) GetOne(ctx context.Context, id string) (*m.Label, error) {
+func (r *SQLAnnotationRepo) DeletePolygon(ctx context.Context, polygon *m.Polygon) error {
+	_, err := r.Db.Exec("DELETE FROM polygons WHERE id=?", polygon.Id.String())
+	return err
+}
+
+func (r *SQLAnnotationRepo) GetOneLabel(ctx context.Context, id string) (*m.Label, error) {
 	label := m.Label{}
 	err := r.Db.Get(&label, "SELECT id,name,description FROM labels WHERE id=?", id)
 
@@ -61,7 +66,7 @@ func (r *SQLLabelRepo) GetOne(ctx context.Context, id string) (*m.Label, error) 
 	return &label, nil
 }
 
-func (r *SQLLabelRepo) getOnePolygon(ctx context.Context, id string) (*m.Polygon, error) {
+func (r *SQLAnnotationRepo) getOnePolygon(ctx context.Context, id string) (*m.Polygon, error) {
 	polygon := m.Polygon{}
 	err := r.Db.Get(&polygon, "SELECT id,type_,min_x,min_y,max_x,max_y,created_at,updated_at FROM polygons WHERE id=?", id)
 	if err != nil {
@@ -83,7 +88,7 @@ func (r *SQLLabelRepo) getOnePolygon(ctx context.Context, id string) (*m.Polygon
 		return nil, &e.ErrNotFound{Entity: "label", Criteria: "id", Value: id, Err: err}
 	}
 
-	label, err := r.GetOne(ctx, labelId)
+	label, err := r.GetOneLabel(ctx, labelId)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +97,7 @@ func (r *SQLLabelRepo) getOnePolygon(ctx context.Context, id string) (*m.Polygon
 	return &polygon, nil
 }
 
-func (r *SQLLabelRepo) GetLabelsOfImage(ctx context.Context, image *m.Image) ([]*m.Label, error) {
+func (r *SQLAnnotationRepo) GetLabelsOfImage(ctx context.Context, image *m.Image) ([]*m.Label, error) {
 	var labelIds []string
 	var labels []*m.Label
 
@@ -103,7 +108,7 @@ func (r *SQLLabelRepo) GetLabelsOfImage(ctx context.Context, image *m.Image) ([]
 	}
 
 	for _, id := range labelIds {
-		l, err := r.GetOne(ctx, id)
+		l, err := r.GetOneLabel(ctx, id)
 		if err != nil {
 			return nil, err
 		}
@@ -115,7 +120,7 @@ func (r *SQLLabelRepo) GetLabelsOfImage(ctx context.Context, image *m.Image) ([]
 
 }
 
-func (r *SQLLabelRepo) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) error {
+func (r *SQLAnnotationRepo) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) error {
 	now := time.Now().String()
 	query := "INSERT INTO image_label_assoc (image_id, label_id, created_at) VALUES (?, ?, ?)"
 	_, err := r.Db.Exec(query, image.Id, label.Id, now)
@@ -127,7 +132,7 @@ func (r *SQLLabelRepo) ApplyLabelToImage(ctx context.Context, label *m.Label, im
 	return nil
 }
 
-func (r *SQLLabelRepo) ApplyPolygonToImage(ctx context.Context, polygon *m.Polygon, image *m.Image) error {
+func (r *SQLAnnotationRepo) ApplyPolygonToImage(ctx context.Context, polygon *m.Polygon, image *m.Image) error {
 	now := time.Now().String()
 
 	points, err := json.Marshal(polygon.Points)
@@ -135,9 +140,18 @@ func (r *SQLLabelRepo) ApplyPolygonToImage(ctx context.Context, polygon *m.Polyg
 		return err
 	}
 
-	query := "INSERT INTO polygons (id,image_id,label_id,type_,min_x,min_y,max_x,max_y,points,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-	_, err = r.Db.Exec(query, polygon.Id, image.Id, polygon.Label.Id,
+	query := "INSERT INTO polygons (id,image_id,type_,min_x,min_y,max_x,max_y,points,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)"
+	_, err = r.Db.Exec(query, polygon.Id, image.Id,
 		polygon.Type, polygon.MinX, polygon.MinY, polygon.MaxX, polygon.MaxY, string(points), now, now)
+
+	if err != nil {
+		return err
+	}
+
+	if polygon.Label != nil {
+		query := "UPDATE polygons SET label_id=? WHERE id=?"
+		_, err = r.Db.Exec(query, polygon.Label.Id, polygon.Id)
+	}
 
 	if err != nil {
 		return err
@@ -146,7 +160,7 @@ func (r *SQLLabelRepo) ApplyPolygonToImage(ctx context.Context, polygon *m.Polyg
 	return nil
 }
 
-func (r *SQLLabelRepo) GetPolygonsOfImage(ctx context.Context, image *m.Image) ([]*m.Polygon, error) {
+func (r *SQLAnnotationRepo) GetPolygonsOfImage(ctx context.Context, image *m.Image) ([]*m.Polygon, error) {
 
 	var polygonIds []string
 	var polygons []*m.Polygon
@@ -169,13 +183,13 @@ func (r *SQLLabelRepo) GetPolygonsOfImage(ctx context.Context, image *m.Image) (
 	return polygons, nil
 }
 
-func (r *SQLLabelRepo) Nums() (int64, error) {
+func (r *SQLAnnotationRepo) Nums() (int64, error) {
 
 	return 0, nil
 
 }
 
-func (r *SQLLabelRepo) Slice(offset, length int, data interface{}) error {
+func (r *SQLAnnotationRepo) Slice(offset, length int, data interface{}) error {
 
 	return nil
 }

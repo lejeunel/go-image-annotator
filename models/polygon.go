@@ -43,12 +43,6 @@ func validateBoundingBoxPoints(bbox *Polygon) error {
 
 }
 
-func (p *Polygon) SetLabel(label *Label) error {
-	p.Label = label
-
-	return nil
-}
-
 func NewBoundingBox(x0, y0, x1, y1 int) (*Polygon, error) {
 	p := &Polygon{Id: uuid.New(), Type: "rectangle",
 		MinX: x0, MinY: y0, MaxX: x1, MaxY: y1,

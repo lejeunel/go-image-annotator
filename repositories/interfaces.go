@@ -13,15 +13,19 @@ type ImageRepo interface {
 	Slice(offset, length int, data interface{}) error
 }
 
-type LabelRepo interface {
-	Create(c.Context, *m.Label) (*m.Label, error)
-	Delete(c.Context, *m.Label) error
-	GetOne(c.Context, string) (*m.Label, error)
+type AnnotationRepo interface {
+	CreateLabel(c.Context, *m.Label) (*m.Label, error)
+	DeleteLabel(c.Context, *m.Label) error
+	GetOneLabel(c.Context, string) (*m.Label, error)
+
 	GetLabelsOfImage(c.Context, *m.Image) ([]*m.Label, error)
-	GetPolygonsOfImage(c.Context, *m.Image) ([]*m.Polygon, error)
 	ApplyLabelToImage(c.Context, *m.Label, *m.Image) error
-	ApplyPolygonToImage(c.Context, *m.Polygon, *m.Image) error
 	NumImagesWithLabel(c.Context, *m.Label) (int, error)
+
+	ApplyPolygonToImage(c.Context, *m.Polygon, *m.Image) error
+	GetPolygonsOfImage(c.Context, *m.Image) ([]*m.Polygon, error)
+	DeletePolygon(c.Context, *m.Polygon) error
+
 	Nums() (int64, error)
 	Slice(offset, length int, data interface{}) error
 }

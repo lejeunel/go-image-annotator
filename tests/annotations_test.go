@@ -119,7 +119,7 @@ func TestApplyingPolygonToImage(t *testing.T) {
 
 	polygon, err := m.NewBoundingBox(10, 10, 30, 30)
 	AssertNoError(t, err)
-	polygon.SetLabel(label)
+	polygon.Label = label
 
 	image, err = s.Annotations.ApplyPolygonToImage(ctx, polygon, image)
 	AssertNoError(t, err)
@@ -163,4 +163,25 @@ func TestInvalidBoundingBoxesShouldFail(t *testing.T) {
 			AssertError(t, err)
 		})
 	}
+}
+
+func TestDeletePolygon(t *testing.T) {
+	s, ctx := NewTestComponents(t)
+
+	image := &m.Image{Data: testImage}
+	image, err := s.Images.Save(ctx, image)
+
+	polygon, err := m.NewBoundingBox(10, 10, 30, 30)
+
+	image, err = s.Annotations.ApplyPolygonToImage(ctx, polygon, image)
+
+	err = s.Annotations.DeletePolygon(ctx, polygon)
+	AssertNoError(t, err)
+	image, _ = s.Images.GetOne(ctx, image.Id.String())
+
+	nPolygons := len(image.Polygons)
+	if nPolygons != 0 {
+		t.Fatalf("expected to retrieve image without polygons, but got %v.", nPolygons)
+	}
+
 }
