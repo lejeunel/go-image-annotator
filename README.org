@@ -1,3 +1,4 @@
 #+title: Readme
 
 * TODO Implement pagination
+* TODO Implement name constraint validation on set name

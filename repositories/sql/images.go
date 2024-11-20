@@ -3,15 +3,24 @@ package repositories
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
+	pag "github.com/vcraescu/go-paginator/v2"
 	e "go-image-annotator/errors"
+	g "go-image-annotator/generic"
 	m "go-image-annotator/models"
+	"strings"
 	"time"
 )
 
 type SQLImageRepo struct {
 	Db *sqlx.DB
+}
+
+type PaginableSQLImageRepo struct {
+	Repo    *SQLImageRepo
+	Filters *g.ImageFilterArgs
 }
 
 func NewSQLImageRepo(db *sqlx.DB) *SQLImageRepo {
@@ -50,13 +59,81 @@ func (r *SQLImageRepo) Delete(ctx context.Context, image *m.Image) error {
 	return errors.Join(err_image, err_assoc)
 }
 
-func (r *SQLImageRepo) Nums() (int64, error) {
-
-	return 0, nil
+func (r *SQLImageRepo) Paginate(pageSize int, filters *g.ImageFilterArgs) pag.Paginator {
+	paginable := &PaginableSQLImageRepo{Repo: r, Filters: filters}
+	return pag.New(paginable, pageSize)
 
 }
 
-func (r *SQLImageRepo) Slice(offset, length int, data interface{}) error {
+func (r *PaginableSQLImageRepo) buildFilteringWhereClause() (string, error) {
+	var parts []string
+	if r.Filters.SetId != "" {
+		parts = append(parts, fmt.Sprintf("id in (SELECT image_id FROM image_set_assoc WHERE set_id=\"%v\")", r.Filters.SetId))
+	}
+
+	if r.Filters.SetName != "" {
+		set := m.Set{}
+		err := r.Repo.Db.Get(&set, "SELECT id FROM imagesets WHERE name=?", r.Filters.SetName)
+		if err != nil {
+			return "", err
+		}
+
+		parts = append(parts, fmt.Sprintf("id in (SELECT image_id FROM image_set_assoc WHERE set_id=\"%v\")", set.Id.String()))
+	}
+
+	clause := ""
+	if len(parts) > 0 {
+		clause = "WHERE " + strings.Join(parts, " ")
+	}
+
+	return clause, nil
+
+}
+
+func (r *PaginableSQLImageRepo) Nums() (int64, error) {
+	var count int64
+
+	filteringWhereClause, err := r.buildFilteringWhereClause()
+	if err != nil {
+		return 0, err
+	}
+
+	query := "SELECT COUNT(*) FROM images " + filteringWhereClause
+	err = r.Repo.Db.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+
+}
+
+func (r *PaginableSQLImageRepo) Slice(offset, length int, data interface{}) error {
+	filteringWhereClause, err := r.buildFilteringWhereClause()
+	if err != nil {
+		return err
+	}
+
+	baseQuery := "SELECT id,uri,created_at,updated_at,sha256,width,height,mimetype FROM images "
+	query := baseQuery + filteringWhereClause + " LIMIT $1 OFFSET $2"
+	rows, err := r.Repo.Db.Queryx(query, length, offset)
+
+	if err != nil {
+		return err
+	}
+
+	s := data.(*[]m.Image)
+
+	for rows.Next() {
+		var b m.Image
+		err := rows.StructScan(&b)
+
+		if err != nil {
+			return err
+		}
+
+		*s = append(*s, b)
+	}
 
 	return nil
 }

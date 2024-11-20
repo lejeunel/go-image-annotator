@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"github.com/google/uuid"
 	e "go-image-annotator/errors"
+	g "go-image-annotator/generic"
 	m "go-image-annotator/models"
 	r "go-image-annotator/repositories"
 	i "image"
@@ -80,7 +81,7 @@ func (s *ImageService) Save(ctx context.Context, image *m.Image) (*m.Image, erro
 
 }
 
-func (s *ImageService) GetOne(ctx context.Context, id string) (*m.Image, error) {
+func (s *ImageService) GetOne(ctx context.Context, id string, withData bool) (*m.Image, error) {
 
 	image, err := s.ImageRepo.GetOne(ctx, id)
 	if err != nil {
@@ -99,13 +100,39 @@ func (s *ImageService) GetOne(ctx context.Context, id string) (*m.Image, error) 
 	}
 	image.Polygons = polygons
 
-	data, err := s.KeyValueStoreClient.Download(ctx, image.Uri)
+	if withData {
+		data, err := s.KeyValueStoreClient.Download(ctx, image.Uri)
 
-	if err != nil {
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
+		image.Data = data
 	}
 
-	image.Data = data
-
 	return image, nil
+}
+
+func (s *ImageService) GetPage(
+	ctx context.Context,
+	pagination g.PaginationParams,
+	filters *g.ImageFilterArgs,
+	withData bool) ([]m.Image, *g.PaginationMeta, error) {
+
+	if pagination.PageSize > s.MaxPageSize {
+		pagination.PageSize = s.MaxPageSize
+	}
+
+	p := s.ImageRepo.Paginate(pagination.PageSize, filters)
+	p.SetPage(int(pagination.Page))
+
+	var images []m.Image
+	err := p.Results(&images)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	paginationMeta := g.NewPaginationMeta(p)
+	return images, &paginationMeta, nil
+
 }

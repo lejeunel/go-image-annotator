@@ -17,6 +17,7 @@ var testImage []byte
 type Services struct {
 	Images      *s.ImageService
 	Annotations *s.AnnotationService
+	Sets        *s.SetService
 }
 
 type MockKVStoreClient struct {
@@ -45,7 +46,7 @@ func (s *MockKVStoreClient) Download(ctx context.Context, uri string) ([]byte, e
 	return data, nil
 }
 
-func NewTestComponents(t *testing.T) (Services, context.Context) {
+func NewTestComponents(t *testing.T, maxPageSize int) (Services, context.Context) {
 	db := a.NewSQLiteConnection(":memory:")
 	goose.SetLogger(goose.NopLogger())
 	goose.SetDialect(string(goose.DialectSQLite3))
@@ -55,15 +56,18 @@ func NewTestComponents(t *testing.T) (Services, context.Context) {
 	}
 	imageRepo := r.NewSQLImageRepo(db)
 	labelRepo := r.NewSQLLabelRepo(db)
+	setRepo := r.NewSQLSetRepo(db)
 	KVStore := NewMockKVStoreClient()
 
 	imageService := s.ImageService{KeyValueStoreClient: KVStore, ImageRepo: imageRepo,
-		LabelRepo: labelRepo, MaxPageSize: 2,
-		DefaultPageSize: 2, RemoteScheme: "scheme", RemoteBucketName: "mybucket"}
-	labelService := s.AnnotationService{LabelRepo: labelRepo, ImageRepo: imageRepo, MaxPageSize: 2,
-		DefaultPageSize: 2}
+		LabelRepo: labelRepo, MaxPageSize: maxPageSize,
+		DefaultPageSize: maxPageSize, RemoteScheme: "scheme", RemoteBucketName: "mybucket"}
+	annotationService := s.AnnotationService{LabelRepo: labelRepo, ImageRepo: imageRepo, MaxPageSize: maxPageSize,
+		DefaultPageSize: maxPageSize}
+	SetService := s.SetService{SetRepo: setRepo, ImageRepo: imageRepo, MaxPageSize: maxPageSize, DefaultPageSize: maxPageSize}
 
-	return Services{Images: &imageService, Annotations: &labelService}, context.Background()
+	return Services{Images: &imageService, Annotations: &annotationService,
+		Sets: &SetService}, context.Background()
 
 }
 

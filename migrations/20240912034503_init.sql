@@ -46,8 +46,27 @@ CREATE TABLE IF NOT EXISTS polygons (
     FOREIGN KEY (label_id) REFERENCES labels(id)
 );
 
+CREATE TABLE IF NOT EXISTS imagesets (
+    id varchar(16) PRIMARY KEY,
+    name text,
+    created_at text,
+    updated_at text
+);
+
+CREATE TABLE IF NOT EXISTS image_set_assoc (
+    id varchar(16) PRIMARY KEY,
+    image_id varchar(16),
+    set_id varchar(16),
+    created_at text,
+    FOREIGN KEY (image_id) REFERENCES images(id),
+    FOREIGN KEY (set_id) REFERENCES imagesets(id)
+);
+
 -- +goose Down
 
 DROP TABLE images;
 DROP TABLE labels;
 DROP TABLE image_label_assoc;
+DROP TABLE polygons;
+DROP TABLE imagesets;
+DROP TABLE image_set_assoc;
