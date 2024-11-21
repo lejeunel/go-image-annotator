@@ -141,11 +141,10 @@ func TestApplyingPolygonToImage(t *testing.T) {
 
 func TestInvalidBoundingBoxesShouldFail(t *testing.T) {
 	tests := map[string]struct {
-		type_ string
-		x0    int
-		y0    int
-		x1    int
-		y1    int
+		x0 int
+		y0 int
+		x1 int
+		y1 int
 	}{
 		"negative values":   {x0: -2, y0: 4, x1: 5, y1: 9},
 		"inverted x values": {x0: 5, y0: 2, x1: 0, y1: 4},
