@@ -28,6 +28,33 @@ func TestCreateSet(t *testing.T) {
 		t.Fatalf("expected to retrieve identical names. Wanted %v, got %v",
 			set.Name, retrievedSet.Name)
 	}
+}
+
+func TestValidationSetName(t *testing.T) {
+	tests := map[string]struct {
+		name    string
+		isValid bool
+	}{
+		"spaces should fail":             {name: "my set", isValid: false},
+		"uppercase should fail":          {name: "MySet", isValid: false},
+		"special characters should fail": {name: "my&^set", isValid: false},
+		"spaces and special characters":  {name: "my &*set", isValid: false},
+		"dash should succeed":            {name: "my-set", isValid: true},
+		"underscore should succeed":      {name: "my_set", isValid: true},
+	}
+
+	for name, tc := range tests {
+		s, ctx := NewTestComponents(t, 2)
+		t.Run(name, func(t *testing.T) {
+			set := &m.Set{Name: tc.name}
+			set, err := s.Sets.Create(ctx, set)
+			if tc.isValid {
+				AssertNoError(t, err)
+			} else {
+				AssertError(t, err)
+			}
+		})
+	}
 
 }
 

@@ -17,6 +17,10 @@ type SetService struct {
 }
 
 func (s *SetService) Create(ctx context.Context, set *m.Set) (*m.Set, error) {
+	if err := set.Validate(); err != nil {
+		return nil, err
+	}
+
 	set.Id = uuid.New()
 	set, err := s.SetRepo.Create(ctx, set)
 	if err != nil {
