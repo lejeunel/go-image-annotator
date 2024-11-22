@@ -87,7 +87,7 @@ func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Labe
 }
 func (s *AnnotationService) ApplyPolygonToImage(ctx context.Context, polygon *m.Polygon, image *m.Image) (*m.Image, error) {
 	if err := CheckAuthorization(ctx, "annotation-contrib"); err != nil {
-		return nil, err
+		return image, err
 	}
 	image.Polygons = append(image.Polygons, polygon)
 

@@ -51,7 +51,7 @@ type ErrPermission struct {
 }
 
 func (e ErrPermission) Error() string {
-	return fmt.Sprintf("Cannot perform %s. One of %v roles is needed, but you have %v",
+	return fmt.Sprintf("Cannot perform %s. You must be assigned role %v, but you have %v",
 		e.Operation, e.NeededRole, e.UserRoles)
 }
 

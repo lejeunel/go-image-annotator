@@ -46,7 +46,7 @@ func TestDeletingImagesRequiresPermission(t *testing.T) {
 	AssertError(t, err)
 }
 
-func TestCreatingAnnotationRequiresPermission(t *testing.T) {
+func TestCreatingLabelRequiresPermission(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	ctx = context.WithValue(ctx, "user_roles", "viewer")
@@ -56,23 +56,23 @@ func TestCreatingAnnotationRequiresPermission(t *testing.T) {
 	AssertError(t, err)
 }
 
-func TestApplyingAnnotationRequiresPermission(t *testing.T) {
+func TestApplyingPolygonRequiresPermission(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	ctx = context.WithValue(ctx, "user_roles", "admin")
 
 	image := &m.Image{Data: testImage}
 	image, err := s.Images.Save(ctx, image)
-	AssertNoError(t, err)
-
 	label := &m.Label{Name: "mylabel"}
 	label, err = s.Annotations.Create(ctx, label)
-	AssertNoError(t, err)
 
 	polyg := &m.Polygon{Label: label}
-
-	ctx = context.WithValue(ctx, "user_roles", "im-contrib")
+	ctx = context.WithValue(ctx, "user_roles", "viewer")
 	image, err = s.Annotations.ApplyPolygonToImage(ctx, polyg, image)
 	AssertError(t, err)
+
+	ctx = context.WithValue(ctx, "user_roles", "annotation-contrib")
+	image, err = s.Annotations.ApplyPolygonToImage(ctx, polyg, image)
+	AssertNoError(t, err)
 
 }
