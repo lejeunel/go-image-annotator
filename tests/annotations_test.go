@@ -124,12 +124,8 @@ func TestRemovingLabelFromImage(t *testing.T) {
 func TestApplyingPolygonToImage(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 
-	image := &m.Image{Data: testImage}
-	label := &m.Label{Name: "mylabel"}
-
-	image, _ = s.Images.Save(ctx, image)
-	label, _ = s.Annotations.Create(ctx, label)
-
+	image, _ := s.Images.Save(ctx, &m.Image{Data: testImage})
+	label, _ := s.Annotations.Create(ctx, &m.Label{Name: "mylabel"})
 	polygon, err := m.NewBoundingBox(10, 10, 30, 30)
 	AssertNoError(t, err)
 	polygon.Label = label
@@ -137,17 +133,12 @@ func TestApplyingPolygonToImage(t *testing.T) {
 	image, err = s.Annotations.ApplyPolygonToImage(ctx, polygon, image)
 	AssertNoError(t, err)
 
-	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), false)
+	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), true)
 	AssertNoError(t, err)
 
-	polygons := retrievedImage.Polygons
-	if len(polygons) != 1 {
-		t.Fatalf("expected to retrieve image with 1 polygon, but got %v.", len(polygons))
-	}
-
-	polygonLabel := polygons[0].Label.Name
-	if polygonLabel != "mylabel" {
-		t.Fatalf("expected to retrieve polygon with label mylabel, but got %v.", polygonLabel)
+	diff := deep.Equal(image, retrievedImage)
+	if diff != nil {
+		t.Fatalf(fmt.Sprintf("expected to retrieve identical image structs, but got different fields: %v", diff))
 	}
 
 }

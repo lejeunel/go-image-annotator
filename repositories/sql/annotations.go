@@ -163,6 +163,8 @@ func (r *SQLAnnotationRepo) RemoveAnnotationFromImage(ctx context.Context, annot
 
 func (r *SQLAnnotationRepo) ApplyPolygonToImage(ctx context.Context, polygon *m.Polygon, image *m.Image) error {
 	now := time.Now().String()
+	polygon.CreatedAt = now
+	polygon.UpdatedAt = now
 
 	points, err := json.Marshal(polygon.Points)
 	if err != nil {
