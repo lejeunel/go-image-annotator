@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS image_label_assoc (
     id varchar(16) PRIMARY KEY,
     image_id varchar(16),
     label_id varchar(16),
+    author_email varchar(40),
     created_at text,
     FOREIGN KEY (image_id) REFERENCES images(id),
     FOREIGN KEY (label_id) REFERENCES labels(id)

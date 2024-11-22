@@ -5,17 +5,17 @@ import (
 )
 
 type Image struct {
-	Id        uuid.UUID `db:"id"`
-	Uri       string    `db:"uri"`
-	SHA256    string    `db:"sha256"`
-	MIMEType  string    `db:"mimetype"`
-	Width     int       `db:"width"`
-	Height    int       `db:"height"`
-	CreatedAt string    `db:"created_at"`
-	UpdatedAt string    `db:"updated_at"`
-	Data      []byte
-	Labels    []*Label
-	Polygons  []*Polygon
+	Id          uuid.UUID `db:"id"`
+	Uri         string    `db:"uri"`
+	SHA256      string    `db:"sha256"`
+	MIMEType    string    `db:"mimetype"`
+	Width       int       `db:"width"`
+	Height      int       `db:"height"`
+	CreatedAt   string    `db:"created_at"`
+	UpdatedAt   string    `db:"updated_at"`
+	Data        []byte
+	Annotations []*ImageAnnotation
+	Polygons    []*Polygon
 }
 
 // func (im Image) Validate() error {

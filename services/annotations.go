@@ -4,8 +4,10 @@ import (
 	"context"
 	"github.com/google/uuid"
 	e "go-image-annotator/errors"
+	g "go-image-annotator/generic"
 	m "go-image-annotator/models"
 	r "go-image-annotator/repositories"
+	"slices"
 )
 
 type AnnotationService struct {
@@ -16,7 +18,7 @@ type AnnotationService struct {
 }
 
 func (s *AnnotationService) Create(ctx context.Context, label *m.Label) (*m.Label, error) {
-	if err := CheckAuthorization(ctx, "annotation-contrib"); err != nil {
+	if err := g.CheckAuthorization(ctx, "annotation-contrib"); err != nil {
 		return nil, err
 	}
 
@@ -67,7 +69,7 @@ func (s *AnnotationService) DeletePolygon(ctx context.Context, polygon *m.Polygo
 
 func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) (*m.Image, error) {
 
-	if err := CheckAuthorization(ctx, "annotation-contrib"); err != nil {
+	if err := g.CheckAuthorization(ctx, "annotation-contrib"); err != nil {
 		return nil, err
 	}
 
@@ -75,18 +77,42 @@ func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Labe
 		return nil, err
 	}
 
-	labels, err := s.LabelRepo.GetLabelsOfImage(ctx, image)
+	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image)
 	if err != nil {
 		return nil, err
 	}
 
-	image.Labels = labels
+	image.Annotations = annotations
 
 	return image, nil
-
 }
+
+func (s *AnnotationService) RemoveAnnotationFromImage(ctx context.Context, annotation *m.ImageAnnotation, image *m.Image) (*m.Image, error) {
+	user, err := m.GetUserFromContext(ctx)
+	if err != nil {
+		return image, err
+	}
+	isAuthorizedToDelete := (slices.Contains(user.Roles, "admin") || (user.Email == annotation.AuthorEmail))
+	if !isAuthorizedToDelete {
+		return image, e.ErrOwnershipPermission{Operation: "removing annotation from image", Details: "Only author of annotation can delete this."}
+	}
+
+	if err := s.LabelRepo.RemoveAnnotationFromImage(ctx, annotation); err != nil {
+		return image, err
+	}
+
+	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image)
+	if err != nil {
+		return image, err
+	}
+
+	image.Annotations = annotations
+
+	return image, nil
+}
+
 func (s *AnnotationService) ApplyPolygonToImage(ctx context.Context, polygon *m.Polygon, image *m.Image) (*m.Image, error) {
-	if err := CheckAuthorization(ctx, "annotation-contrib"); err != nil {
+	if err := g.CheckAuthorization(ctx, "annotation-contrib"); err != nil {
 		return image, err
 	}
 	image.Polygons = append(image.Polygons, polygon)

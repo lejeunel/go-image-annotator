@@ -48,7 +48,7 @@ func (s *ImageService) setURI(image *m.Image) {
 }
 
 func (s *ImageService) Delete(ctx context.Context, image *m.Image) error {
-	if err := CheckAuthorization(ctx, "admin"); err != nil {
+	if err := g.CheckAuthorization(ctx, "admin"); err != nil {
 		return err
 	}
 	return s.ImageRepo.Delete(ctx, image)
@@ -56,7 +56,7 @@ func (s *ImageService) Delete(ctx context.Context, image *m.Image) error {
 
 func (s *ImageService) Save(ctx context.Context, image *m.Image) (*m.Image, error) {
 
-	if err := CheckAuthorization(ctx, "im-contrib"); err != nil {
+	if err := g.CheckAuthorization(ctx, "im-contrib"); err != nil {
 		return nil, err
 	}
 
@@ -95,11 +95,11 @@ func (s *ImageService) GetOne(ctx context.Context, id string, withData bool) (*m
 		return nil, err
 	}
 
-	labels, err := s.LabelRepo.GetLabelsOfImage(ctx, image)
+	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image)
 	if err != nil {
 		return nil, err
 	}
-	image.Labels = labels
+	image.Annotations = annotations
 
 	polygons, err := s.LabelRepo.GetPolygonsOfImage(ctx, image)
 	if err != nil {

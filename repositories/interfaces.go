@@ -18,9 +18,11 @@ type AnnotationRepo interface {
 	CreateLabel(c.Context, *m.Label) (*m.Label, error)
 	DeleteLabel(c.Context, *m.Label) error
 	GetOneLabel(c.Context, string) (*m.Label, error)
+	GetOneAnnotation(c.Context, string) (*m.ImageAnnotation, error)
 
-	GetLabelsOfImage(c.Context, *m.Image) ([]*m.Label, error)
+	GetAnnotationsOfImage(c.Context, *m.Image) ([]*m.ImageAnnotation, error)
 	ApplyLabelToImage(c.Context, *m.Label, *m.Image) error
+	RemoveAnnotationFromImage(c.Context, *m.ImageAnnotation) error
 	NumImagesWithLabel(c.Context, *m.Label) (int, error)
 
 	ApplyPolygonToImage(c.Context, *m.Polygon, *m.Image) error

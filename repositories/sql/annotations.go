@@ -3,11 +3,13 @@ package repositories
 import (
 	"context"
 	"encoding/json"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/google/uuid"
 	e "go-image-annotator/errors"
 	m "go-image-annotator/models"
 	"time"
+
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type SQLAnnotationRepo struct {
@@ -66,6 +68,17 @@ func (r *SQLAnnotationRepo) GetOneLabel(ctx context.Context, id string) (*m.Labe
 	return &label, nil
 }
 
+func (r *SQLAnnotationRepo) GetOneAnnotation(ctx context.Context, id string) (*m.ImageAnnotation, error) {
+	annotation := m.ImageAnnotation{}
+	err := r.Db.Get(&annotation, "SELECT id,label_id,image_id,author_email FROM image_label_assoc WHERE id=?", id)
+
+	if err != nil {
+		return nil, &e.ErrNotFound{Entity: "annotation", Criteria: "id", Value: id, Err: err}
+	}
+
+	return &annotation, nil
+}
+
 func (r *SQLAnnotationRepo) getOnePolygon(ctx context.Context, id string) (*m.Polygon, error) {
 	polygon := m.Polygon{}
 	err := r.Db.Get(&polygon, "SELECT id,type_,min_x,min_y,max_x,max_y,created_at,updated_at FROM polygons WHERE id=?", id)
@@ -97,39 +110,55 @@ func (r *SQLAnnotationRepo) getOnePolygon(ctx context.Context, id string) (*m.Po
 	return &polygon, nil
 }
 
-func (r *SQLAnnotationRepo) GetLabelsOfImage(ctx context.Context, image *m.Image) ([]*m.Label, error) {
-	var labelIds []string
-	var labels []*m.Label
+func (r *SQLAnnotationRepo) GetAnnotationsOfImage(ctx context.Context, image *m.Image) ([]*m.ImageAnnotation, error) {
+	var annotationsIds []string
+	var annotations []*m.ImageAnnotation
 
-	err := r.Db.Select(&labelIds, "SELECT label_id FROM image_label_assoc WHERE image_id = ?", image.Id)
+	err := r.Db.Select(&annotationsIds, "SELECT id FROM image_label_assoc WHERE image_id = ?", image.Id)
 
 	if err != nil {
 		return nil, &e.ErrNotFound{Entity: "image", Criteria: "id", Value: image.Id.String(), Err: err}
 	}
 
-	for _, id := range labelIds {
-		l, err := r.GetOneLabel(ctx, id)
+	for _, id := range annotationsIds {
+		a, err := r.GetOneAnnotation(ctx, id)
 		if err != nil {
 			return nil, err
 		}
-		labels = append(labels, l)
+		annotations = append(annotations, a)
 
 	}
 
-	return labels, nil
+	return annotations, nil
 
 }
 
 func (r *SQLAnnotationRepo) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) error {
 	now := time.Now().String()
-	query := "INSERT INTO image_label_assoc (image_id, label_id, created_at) VALUES (?, ?, ?)"
-	_, err := r.Db.Exec(query, image.Id, label.Id, now)
+	query := "INSERT INTO image_label_assoc (id,image_id,label_id,author_email,created_at) VALUES (?,?,?,?,?)"
+
+	user, err := m.GetUserFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.Db.Exec(query, uuid.New(), image.Id, label.Id, user.Email, now)
 
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (r *SQLAnnotationRepo) RemoveAnnotationFromImage(ctx context.Context, annotation *m.ImageAnnotation) error {
+
+	_, err := r.Db.Exec("DELETE FROM image_label_assoc WHERE id=?", annotation.Id.String())
+	if err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func (r *SQLAnnotationRepo) ApplyPolygonToImage(ctx context.Context, polygon *m.Polygon, image *m.Image) error {

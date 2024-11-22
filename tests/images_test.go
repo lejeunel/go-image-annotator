@@ -23,6 +23,7 @@ func TestSaveAndRetrieveImage(t *testing.T) {
 	AssertNoError(t, err)
 
 	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), true)
+	AssertNoError(t, err)
 
 	diff := deep.Equal(image, retrievedImage)
 	if diff != nil {

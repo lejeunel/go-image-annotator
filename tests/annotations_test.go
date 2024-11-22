@@ -92,22 +92,31 @@ func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 func TestApplyingLabelToImage(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 
-	image := &m.Image{Data: testImage}
-	label := &m.Label{Name: "mylabel"}
-
-	image, err := s.Images.Save(ctx, image)
-	AssertNoError(t, err)
-	label, err = s.Annotations.Create(ctx, label)
-	AssertNoError(t, err)
-
+	image, err := s.Images.Save(ctx, &m.Image{Data: testImage})
+	label, err := s.Annotations.Create(ctx, &m.Label{Name: "mylabel"})
 	image, err = s.Annotations.ApplyLabelToImage(ctx, label, image)
 	AssertNoError(t, err)
 
 	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), false)
 	AssertNoError(t, err)
-	nLabels := len(retrievedImage.Labels)
-	if len(retrievedImage.Labels) != 1 {
+	nLabels := len(retrievedImage.Annotations)
+	if len(retrievedImage.Annotations) != 1 {
 		t.Fatalf("expected to retrieve image with 1 label, but got %v.", nLabels)
+	}
+
+}
+
+func TestRemovingLabelFromImage(t *testing.T) {
+	s, ctx := NewTestApp(t, 2)
+
+	image, err := s.Images.Save(ctx, &m.Image{Data: testImage})
+	label, err := s.Annotations.Create(ctx, &m.Label{Name: "mylabel"})
+	image, err = s.Annotations.ApplyLabelToImage(ctx, label, image)
+	image, err = s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
+	AssertNoError(t, err)
+
+	if len(image.Annotations) != 0 {
+		t.Fatalf("expected to retrieve image with 0 label, but got %v", len(image.Annotations))
 	}
 
 }

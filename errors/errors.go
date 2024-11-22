@@ -44,17 +44,31 @@ func (e *ErrForbiddenDeletingDependency) GetStatus() int {
 	return 403
 }
 
-type ErrPermission struct {
+type ErrRolePermission struct {
 	Operation  string
 	NeededRole string
 	UserRoles  []string
 }
 
-func (e ErrPermission) Error() string {
+func (e ErrRolePermission) Error() string {
 	return fmt.Sprintf("Cannot perform %s. You must be assigned role %v, but you have %v",
 		e.Operation, e.NeededRole, e.UserRoles)
 }
 
-func (e *ErrPermission) GetStatus() int {
+func (e *ErrRolePermission) GetStatus() int {
+	return 403
+}
+
+type ErrOwnershipPermission struct {
+	Operation string
+	Details   string
+}
+
+func (e ErrOwnershipPermission) Error() string {
+	return fmt.Sprintf("Cannot perform %s. Details: %v",
+		e.Operation, e.Details)
+}
+
+func (e *ErrOwnershipPermission) GetStatus() int {
 	return 403
 }

@@ -1,4 +1,4 @@
-package services
+package generic
 
 import (
 	"context"
@@ -13,7 +13,7 @@ func CheckAuthorization(ctx context.Context, authorizedRole string) error {
 		return err
 	}
 	if !(slices.Contains(user.Roles, "admin") || slices.Contains(user.Roles, authorizedRole)) {
-		return e.ErrPermission{Operation: "Contribute image", NeededRole: authorizedRole, UserRoles: user.Roles}
+		return e.ErrRolePermission{Operation: "Contribute image", NeededRole: authorizedRole, UserRoles: user.Roles}
 	}
 
 	return nil

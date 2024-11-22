@@ -49,11 +49,16 @@ func TestDeletingImagesRequiresPermission(t *testing.T) {
 func TestCreatingLabelRequiresPermission(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
-	ctx = context.WithValue(ctx, "user_roles", "viewer")
 
 	label := &m.Label{Name: "mylabel"}
+	ctx = context.WithValue(ctx, "user_roles", "annotation-contrib")
 	label, err := s.Annotations.Create(ctx, label)
+	AssertNoError(t, err)
+
+	ctx = context.WithValue(ctx, "user_roles", "viewer")
+	label, err = s.Annotations.Create(ctx, label)
 	AssertError(t, err)
+
 }
 
 func TestApplyingPolygonRequiresPermission(t *testing.T) {
@@ -73,6 +78,29 @@ func TestApplyingPolygonRequiresPermission(t *testing.T) {
 
 	ctx = context.WithValue(ctx, "user_roles", "annotation-contrib")
 	image, err = s.Annotations.ApplyPolygonToImage(ctx, polyg, image)
+	AssertNoError(t, err)
+
+}
+
+func TestDeletingAnnotationOnImageDoneByAnotherUserShouldFail(t *testing.T) {
+
+	s, ctx := NewTestApp(t, 2)
+	ctx = context.WithValue(ctx, "user_roles", "im-contrib,annotation-contrib")
+	ctx = context.WithValue(ctx, "user_email", "bob@mail.com")
+
+	label, _ := s.Annotations.Create(ctx, &m.Label{Name: "mylabel"})
+	image, _ := s.Images.Save(ctx, &m.Image{Data: testImage})
+	image, _ = s.Annotations.ApplyLabelToImage(ctx, label, image)
+
+	ctx = context.WithValue(ctx, "user_email", "not-bob@mail.com")
+	image, err := s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
+	AssertError(t, err)
+	if len(image.Annotations) < 1 {
+		t.Fatal("expected that label is not deleted, but it is.")
+	}
+
+	ctx = context.WithValue(ctx, "user_roles", "admin")
+	image, err = s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
 	AssertNoError(t, err)
 
 }
