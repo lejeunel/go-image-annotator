@@ -55,7 +55,7 @@ func (s *AnnotationService) Delete(ctx context.Context, label *m.Label) error {
 	}
 
 	if numImages > 0 {
-		return e.ErrForbiddenDeletingDependency{ParentEntity: "image", ParentId: label.Id.String(), ChildEntity: "label"}
+		return e.ErrForbiddenDeletingDependency{ParentEntity: "label", ParentId: label.Id.String(), ChildEntity: "image"}
 	}
 
 	return s.LabelRepo.DeleteLabel(ctx, label)
