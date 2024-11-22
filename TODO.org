@@ -2,4 +2,5 @@
 
 * DONE Implement pagination
 * DONE Implement name constraint validation on set name
-* TODO Check for annotation author. Only admin or author should be authorized to delete/modify an existing annotation
+* DONE Check for annotation author. Only admin or author should be authorized to delete/modify an existing annotation
+* TODO Change cobra to [[https://github.com/urfave/cli][urfave/cli]]
