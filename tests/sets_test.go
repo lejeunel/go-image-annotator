@@ -14,7 +14,7 @@ func chunkBy[T any](items []T, chunkSize int) (chunks [][]T) {
 }
 
 func TestCreateSet(t *testing.T) {
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 
 	set := &m.Set{Name: "myimageset"}
 	set, err := s.Sets.Create(ctx, set)
@@ -35,16 +35,18 @@ func TestValidationSetName(t *testing.T) {
 		name    string
 		isValid bool
 	}{
-		"spaces should fail":             {name: "my set", isValid: false},
-		"uppercase should fail":          {name: "MySet", isValid: false},
-		"special characters should fail": {name: "my&^set", isValid: false},
-		"spaces and special characters":  {name: "my &*set", isValid: false},
-		"dash should succeed":            {name: "my-set", isValid: true},
-		"underscore should succeed":      {name: "my_set", isValid: true},
+		"empty should fail":               {name: "", isValid: false},
+		"spaces should fail":              {name: "my set", isValid: false},
+		"uppercase should fail":           {name: "MySet", isValid: false},
+		"specials should fail":            {name: "my&^/set", isValid: false},
+		"spaces and specials should fail": {name: "my &*set", isValid: false},
+		"dash should succeed":             {name: "my-set", isValid: true},
+		"underscore should succeed":       {name: "my_set", isValid: true},
 	}
 
 	for name, tc := range tests {
-		s, ctx := NewTestComponents(t, 2)
+
+		s, ctx := NewTestApp(t, 2)
 		t.Run(name, func(t *testing.T) {
 			set := &m.Set{Name: tc.name}
 			set, err := s.Sets.Create(ctx, set)
@@ -60,7 +62,7 @@ func TestValidationSetName(t *testing.T) {
 
 func TestRetrieveImagesOfSet(t *testing.T) {
 
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 	setName := "myset"
 	set, err := s.Sets.Create(ctx, &m.Set{Name: setName})
 	AssertNoError(t, err)

@@ -1,2 +1,5 @@
 #+title: Readme
 
+* Resources
+- [[https://dave.cheney.net/2019/05/07/prefer-table-driven-tests][Table driven test]]
+- [[https://quii.gitbook.io/learn-go-with-tests][Learn Go with tests]]

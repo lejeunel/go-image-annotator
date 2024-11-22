@@ -48,10 +48,17 @@ func (s *ImageService) setURI(image *m.Image) {
 }
 
 func (s *ImageService) Delete(ctx context.Context, image *m.Image) error {
+	if err := CheckAuthorization(ctx, "admin"); err != nil {
+		return err
+	}
 	return s.ImageRepo.Delete(ctx, image)
 }
 
 func (s *ImageService) Save(ctx context.Context, image *m.Image) (*m.Image, error) {
+
+	if err := CheckAuthorization(ctx, "im-contrib"); err != nil {
+		return nil, err
+	}
 
 	if err := s.checkSHA256(image); err != nil {
 		return nil, err

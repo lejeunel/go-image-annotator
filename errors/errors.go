@@ -43,3 +43,18 @@ func (e ErrForbiddenDeletingDependency) Error() string {
 func (e *ErrForbiddenDeletingDependency) GetStatus() int {
 	return 403
 }
+
+type ErrPermission struct {
+	Operation  string
+	NeededRole string
+	UserRoles  []string
+}
+
+func (e ErrPermission) Error() string {
+	return fmt.Sprintf("Cannot perform %s. One of %v roles is needed, but you have %v",
+		e.Operation, e.NeededRole, e.UserRoles)
+}
+
+func (e *ErrPermission) GetStatus() int {
+	return 403
+}

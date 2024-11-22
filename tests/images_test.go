@@ -8,7 +8,7 @@ import (
 )
 
 func TestSaveAndRetrieveImage(t *testing.T) {
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 
 	image := &m.Image{Data: testImage}
 
@@ -29,7 +29,7 @@ func TestSaveAndRetrieveImage(t *testing.T) {
 }
 
 func TestSavingImageWithSHA256(t *testing.T) {
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 
 	testImageSHA256 := "cff295b60ef32bcd2e9a3c38eaf35dfdf78ffaf8bc95e655b682dd268329cfa1"
 	image := &m.Image{Data: testImage, SHA256: testImageSHA256}
@@ -40,7 +40,7 @@ func TestSavingImageWithSHA256(t *testing.T) {
 }
 
 func TestSavingCorruptedImageWithSHA256ShouldFail(t *testing.T) {
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 
 	corruptSHA256 := "dff295b60ef32bcd2e9a3c38eaf35dfdf78ffaf8bc95e655b682dd268329cfa1"
 	image := &m.Image{Data: testImage, SHA256: corruptSHA256}
@@ -65,7 +65,7 @@ func TestPaginateImages(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			s, ctx := NewTestComponents(t, tc.maxPageSize)
+			s, ctx := NewTestApp(t, tc.maxPageSize)
 			for i := 0; i < tc.nImages; i++ {
 				_, err := s.Images.Save(ctx, &m.Image{Data: testImage})
 				AssertNoError(t, err)

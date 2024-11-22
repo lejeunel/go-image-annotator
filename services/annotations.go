@@ -16,6 +16,9 @@ type AnnotationService struct {
 }
 
 func (s *AnnotationService) Create(ctx context.Context, label *m.Label) (*m.Label, error) {
+	if err := CheckAuthorization(ctx, "annotation-contrib"); err != nil {
+		return nil, err
+	}
 
 	if err := label.Validate(); err != nil {
 		return nil, err
@@ -63,6 +66,11 @@ func (s *AnnotationService) DeletePolygon(ctx context.Context, polygon *m.Polygo
 }
 
 func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) (*m.Image, error) {
+
+	if err := CheckAuthorization(ctx, "annotation-contrib"); err != nil {
+		return nil, err
+	}
+
 	if err := s.LabelRepo.ApplyLabelToImage(ctx, label, image); err != nil {
 		return nil, err
 	}
@@ -78,6 +86,9 @@ func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Labe
 
 }
 func (s *AnnotationService) ApplyPolygonToImage(ctx context.Context, polygon *m.Polygon, image *m.Image) (*m.Image, error) {
+	if err := CheckAuthorization(ctx, "annotation-contrib"); err != nil {
+		return nil, err
+	}
 	image.Polygons = append(image.Polygons, polygon)
 
 	if err := s.LabelRepo.ApplyPolygonToImage(ctx, polygon, image); err != nil {

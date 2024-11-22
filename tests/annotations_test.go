@@ -16,7 +16,7 @@ func TestCreatingInvalidLabelShouldFail(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			s, ctx := NewTestComponents(t, 2)
+			s, ctx := NewTestApp(t, 2)
 			label := &m.Label{Name: tc.name}
 			label, err := s.Annotations.Create(ctx, label)
 			AssertError(t, err)
@@ -25,7 +25,7 @@ func TestCreatingInvalidLabelShouldFail(t *testing.T) {
 }
 
 func TestCreateAndRetrieveLabel(t *testing.T) {
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 	label := &m.Label{Name: "thelabel",
 		Description: "the description"}
 
@@ -45,7 +45,7 @@ func TestCreateAndRetrieveLabel(t *testing.T) {
 }
 
 func TestDeleteLabel(t *testing.T) {
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 	label := &m.Label{Name: "thelabel"}
 
 	label, err := s.Annotations.Create(ctx, label)
@@ -59,21 +59,22 @@ func TestDeleteLabel(t *testing.T) {
 }
 
 func TestDeletingUsedLabelShouldFail(t *testing.T) {
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 	label := &m.Label{Name: "thelabel"}
 
-	label, _ = s.Annotations.Create(ctx, label)
+	label, err := s.Annotations.Create(ctx, label)
+	AssertNoError(t, err)
 	image := &m.Image{Data: testImage}
-	image, _ = s.Annotations.ApplyLabelToImage(ctx, label, image)
+	image, err = s.Annotations.ApplyLabelToImage(ctx, label, image)
+	AssertNoError(t, err)
 
-	err := s.Annotations.Delete(ctx, label)
-
+	err = s.Annotations.Delete(ctx, label)
 	AssertError(t, err)
 
 }
 
 func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 	label := &m.Label{Name: "thelabel"}
 	label, _ = s.Annotations.Create(ctx, label)
 	image := &m.Image{Data: testImage}
@@ -90,17 +91,21 @@ func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 }
 
 func TestApplyingLabelToImage(t *testing.T) {
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 
 	image := &m.Image{Data: testImage}
 	label := &m.Label{Name: "mylabel"}
 
-	image, _ = s.Images.Save(ctx, image)
-	label, _ = s.Annotations.Create(ctx, label)
+	image, err := s.Images.Save(ctx, image)
+	AssertNoError(t, err)
+	label, err = s.Annotations.Create(ctx, label)
+	AssertNoError(t, err)
 
-	image, _ = s.Annotations.ApplyLabelToImage(ctx, label, image)
+	image, err = s.Annotations.ApplyLabelToImage(ctx, label, image)
+	AssertNoError(t, err)
 
-	retrievedImage, _ := s.Images.GetOne(ctx, image.Id.String(), false)
+	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), false)
+	AssertNoError(t, err)
 	nLabels := len(retrievedImage.Labels)
 	if len(retrievedImage.Labels) != 1 {
 		t.Fatalf("expected to retrieve image with 1 label, but got %v.", nLabels)
@@ -109,7 +114,7 @@ func TestApplyingLabelToImage(t *testing.T) {
 }
 
 func TestApplyingPolygonToImage(t *testing.T) {
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 
 	image := &m.Image{Data: testImage}
 	label := &m.Label{Name: "mylabel"}
@@ -153,7 +158,7 @@ func TestInvalidBoundingBoxesShouldFail(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			s, ctx := NewTestComponents(t, 2)
+			s, ctx := NewTestApp(t, 2)
 			image := &m.Image{Data: testImage}
 
 			image, _ = s.Images.Save(ctx, image)
@@ -165,7 +170,7 @@ func TestInvalidBoundingBoxesShouldFail(t *testing.T) {
 }
 
 func TestDeletePolygon(t *testing.T) {
-	s, ctx := NewTestComponents(t, 2)
+	s, ctx := NewTestApp(t, 2)
 
 	image := &m.Image{Data: testImage}
 	image, err := s.Images.Save(ctx, image)

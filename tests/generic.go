@@ -46,7 +46,7 @@ func (s *MockKVStoreClient) Download(ctx context.Context, uri string) ([]byte, e
 	return data, nil
 }
 
-func NewTestComponents(t *testing.T, maxPageSize int) (Services, context.Context) {
+func NewTestApp(t *testing.T, maxPageSize int) (Services, context.Context) {
 	db := a.NewSQLiteConnection(":memory:")
 	goose.SetLogger(goose.NopLogger())
 	goose.SetDialect(string(goose.DialectSQLite3))
@@ -66,8 +66,12 @@ func NewTestComponents(t *testing.T, maxPageSize int) (Services, context.Context
 		DefaultPageSize: maxPageSize}
 	SetService := s.SetService{SetRepo: setRepo, ImageRepo: imageRepo, MaxPageSize: maxPageSize, DefaultPageSize: maxPageSize}
 
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "user_roles", "admin")
+	ctx = context.WithValue(ctx, "user_email", "user@email.com")
+
 	return Services{Images: &imageService, Annotations: &annotationService,
-		Sets: &SetService}, context.Background()
+		Sets: &SetService}, ctx
 
 }
 

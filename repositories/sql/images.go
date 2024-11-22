@@ -66,9 +66,10 @@ func (r *SQLImageRepo) Paginate(pageSize int, filters *g.ImageFilterArgs) pag.Pa
 }
 
 func (r *PaginableSQLImageRepo) buildFilteringWhereClause() (string, error) {
+	bySetIdPart := "id in (SELECT image_id FROM image_set_assoc WHERE set_id=\"%v\")"
 	var parts []string
 	if r.Filters.SetId != "" {
-		parts = append(parts, fmt.Sprintf("id in (SELECT image_id FROM image_set_assoc WHERE set_id=\"%v\")", r.Filters.SetId))
+		parts = append(parts, fmt.Sprintf(bySetIdPart, r.Filters.SetId))
 	}
 
 	if r.Filters.SetName != "" {
@@ -78,7 +79,7 @@ func (r *PaginableSQLImageRepo) buildFilteringWhereClause() (string, error) {
 			return "", err
 		}
 
-		parts = append(parts, fmt.Sprintf("id in (SELECT image_id FROM image_set_assoc WHERE set_id=\"%v\")", set.Id.String()))
+		parts = append(parts, fmt.Sprintf(bySetIdPart, set.Id.String()))
 	}
 
 	clause := ""
