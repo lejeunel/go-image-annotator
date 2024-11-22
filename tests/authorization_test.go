@@ -104,3 +104,28 @@ func TestDeletingAnnotationOnImageDoneByAnotherUserShouldFail(t *testing.T) {
 	AssertNoError(t, err)
 
 }
+
+func TestDeletingPolygonDoneByAnotherUserShouldFail(t *testing.T) {
+
+	s, ctx := NewTestApp(t, 2)
+	ctx = context.WithValue(ctx, "user_roles", "im-contrib,annotation-contrib")
+	ctx = context.WithValue(ctx, "user_email", "bob@mail.com")
+
+	label, _ := s.Annotations.Create(ctx, &m.Label{Name: "mylabel"})
+	image, _ := s.Images.Save(ctx, &m.Image{Data: testImage})
+
+	polygon, err := m.NewBoundingBox(10, 10, 30, 30)
+	polygon.Label = label
+	image, err = s.Annotations.ApplyPolygonToImage(ctx, polygon, image)
+
+	ctx = context.WithValue(ctx, "user_email", "not-bob@mail.com")
+	image, err = s.Annotations.DeletePolygonFromImage(ctx, image.Polygons[0], image)
+	AssertError(t, err)
+	if len(image.Polygons) < 1 {
+		t.Fatal("expected that label is not deleted, but it is.")
+	}
+	ctx = context.WithValue(ctx, "user_roles", "admin")
+	image, err = s.Annotations.DeletePolygonFromImage(ctx, image.Polygons[0], image)
+	AssertNoError(t, err)
+
+}

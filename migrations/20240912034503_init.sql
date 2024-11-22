@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS polygons (
     id varchar(16) PRIMARY KEY,
     image_id varchar(16),
     label_id varchar(16),
+    author_email varchar(40),
     created_at text,
     updated_at text,
     type_ varchar(16),

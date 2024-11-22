@@ -21,7 +21,7 @@ type AnnotationRepo interface {
 	GetOneAnnotation(c.Context, string) (*m.ImageAnnotation, error)
 
 	GetAnnotationsOfImage(c.Context, *m.Image) ([]*m.ImageAnnotation, error)
-	ApplyLabelToImage(c.Context, *m.Label, *m.Image) error
+	ApplyLabelToImage(c.Context, *m.Label, *m.Image, string) error
 	RemoveAnnotationFromImage(c.Context, *m.ImageAnnotation) error
 	NumImagesWithLabel(c.Context, *m.Label) (int, error)
 

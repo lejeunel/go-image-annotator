@@ -81,7 +81,7 @@ func (r *SQLAnnotationRepo) GetOneAnnotation(ctx context.Context, id string) (*m
 
 func (r *SQLAnnotationRepo) getOnePolygon(ctx context.Context, id string) (*m.Polygon, error) {
 	polygon := m.Polygon{}
-	err := r.Db.Get(&polygon, "SELECT id,type_,min_x,min_y,max_x,max_y,created_at,updated_at FROM polygons WHERE id=?", id)
+	err := r.Db.Get(&polygon, "SELECT id,type_,min_x,min_y,max_x,max_y,author_email,created_at,updated_at FROM polygons WHERE id=?", id)
 	if err != nil {
 		return nil, &e.ErrNotFound{Entity: "polygon", Criteria: "id", Value: id, Err: err}
 	}
@@ -133,16 +133,11 @@ func (r *SQLAnnotationRepo) GetAnnotationsOfImage(ctx context.Context, image *m.
 
 }
 
-func (r *SQLAnnotationRepo) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) error {
+func (r *SQLAnnotationRepo) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image, authorEmail string) error {
 	now := time.Now().String()
 	query := "INSERT INTO image_label_assoc (id,image_id,label_id,author_email,created_at) VALUES (?,?,?,?,?)"
 
-	user, err := m.GetUserFromContext(ctx)
-	if err != nil {
-		return err
-	}
-
-	_, err = r.Db.Exec(query, uuid.New(), image.Id, label.Id, user.Email, now)
+	_, err := r.Db.Exec(query, uuid.New(), image.Id, label.Id, authorEmail, now)
 
 	if err != nil {
 		return err
@@ -162,18 +157,16 @@ func (r *SQLAnnotationRepo) RemoveAnnotationFromImage(ctx context.Context, annot
 }
 
 func (r *SQLAnnotationRepo) ApplyPolygonToImage(ctx context.Context, polygon *m.Polygon, image *m.Image) error {
-	now := time.Now().String()
-	polygon.CreatedAt = now
-	polygon.UpdatedAt = now
 
 	points, err := json.Marshal(polygon.Points)
 	if err != nil {
 		return err
 	}
 
-	query := "INSERT INTO polygons (id,image_id,type_,min_x,min_y,max_x,max_y,points,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)"
+	query := "INSERT INTO polygons (id,image_id,type_,min_x,min_y,max_x,max_y,points,author_email,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
 	_, err = r.Db.Exec(query, polygon.Id, image.Id,
-		polygon.Type, polygon.MinX, polygon.MinY, polygon.MaxX, polygon.MaxY, string(points), now, now)
+		polygon.Type, polygon.MinX, polygon.MinY, polygon.MaxX, polygon.MaxY, string(points),
+		polygon.AuthorEmail, polygon.CreatedAt, polygon.UpdatedAt)
 
 	if err != nil {
 		return err

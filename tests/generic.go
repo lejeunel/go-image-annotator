@@ -62,7 +62,7 @@ func NewTestApp(t *testing.T, maxPageSize int) (Services, context.Context) {
 	imageService := s.ImageService{KeyValueStoreClient: KVStore, ImageRepo: imageRepo,
 		LabelRepo: labelRepo, MaxPageSize: maxPageSize,
 		DefaultPageSize: maxPageSize, RemoteScheme: "scheme", RemoteBucketName: "mybucket"}
-	annotationService := s.AnnotationService{LabelRepo: labelRepo, ImageRepo: imageRepo, MaxPageSize: maxPageSize,
+	annotationService := s.AnnotationService{LabelRepo: labelRepo, MaxPageSize: maxPageSize,
 		DefaultPageSize: maxPageSize}
 	SetService := s.SetService{SetRepo: setRepo, ImageRepo: imageRepo, MaxPageSize: maxPageSize, DefaultPageSize: maxPageSize}
 

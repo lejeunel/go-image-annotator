@@ -8,16 +8,18 @@ import (
 )
 
 type Polygon struct {
-	Id        uuid.UUID `db:"id"`
-	Type      string    `db:"type_"`
-	MinX      int       `db:"min_x"`
-	MinY      int       `db:"min_y"`
-	MaxX      int       `db:"max_x"`
-	MaxY      int       `db:"max_y"`
-	CreatedAt string    `db:"created_at"`
-	UpdatedAt string    `db:"updated_at"`
-	Points    [][]int
-	Label     *Label
+	Id          uuid.UUID `db:"id"`
+	ImageId     uuid.UUID `db:"image_id"`
+	Type        string    `db:"type_"`
+	MinX        int       `db:"min_x"`
+	MinY        int       `db:"min_y"`
+	MaxX        int       `db:"max_x"`
+	MaxY        int       `db:"max_y"`
+	CreatedAt   string    `db:"created_at"`
+	UpdatedAt   string    `db:"updated_at"`
+	AuthorEmail string    `db:"author_email"`
+	Points      [][]int
+	Label       *Label
 }
 
 func (p *Polygon) Validate() error {
