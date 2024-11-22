@@ -22,6 +22,10 @@ func TestApplyingPolygonToImage(t *testing.T) {
 	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), true)
 	AssertNoError(t, err)
 
+	if len(retrievedImage.Polygons) != 1 {
+		t.Fatalf("expected to retrieve an image with one polygon, but got none.")
+	}
+
 	diff := deep.Equal(image, retrievedImage)
 	if diff != nil {
 		t.Fatalf(fmt.Sprintf("expected to retrieve identical image structs, but got different fields: %v", diff))

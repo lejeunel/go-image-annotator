@@ -19,8 +19,7 @@ func TestCreatingInvalidLabelShouldFail(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			s, ctx := NewTestApp(t, 2)
-			label := &m.Label{Name: tc.name}
-			label, err := s.Annotations.Create(ctx, label)
+			_, err := s.Annotations.Create(ctx, &m.Label{Name: tc.name})
 			AssertError(t, err)
 		})
 	}
@@ -63,7 +62,7 @@ func TestDeletingUsedLabelShouldFail(t *testing.T) {
 
 	label, err := s.Annotations.Create(ctx, label)
 	AssertNoError(t, err)
-	image := &m.Image{Data: testImage}
+	image, err := s.Images.Save(ctx, &m.Image{Data: testImage})
 	image, err = s.Annotations.ApplyLabelToImage(ctx, label, image)
 	AssertNoError(t, err)
 
@@ -76,7 +75,7 @@ func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 	label := &m.Label{Name: "thelabel"}
 	label, _ = s.Annotations.Create(ctx, label)
-	image := &m.Image{Data: testImage}
+	image, _ := s.Images.Save(ctx, &m.Image{Data: testImage})
 	image, _ = s.Annotations.ApplyLabelToImage(ctx, label, image)
 
 	s.Annotations.Delete(ctx, label)

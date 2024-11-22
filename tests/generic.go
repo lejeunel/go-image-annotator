@@ -47,7 +47,7 @@ func (s *MockKVStoreClient) Download(ctx context.Context, uri string) ([]byte, e
 }
 
 func NewTestApp(t *testing.T, maxPageSize int) (Services, context.Context) {
-	db := a.NewSQLiteConnection(":memory:")
+	db := a.NewSQLiteConnection(":memory:?_foreign_keys=on")
 	goose.SetLogger(goose.NopLogger())
 	goose.SetDialect(string(goose.DialectSQLite3))
 	err := goose.Up(db.DB, "../migrations")
