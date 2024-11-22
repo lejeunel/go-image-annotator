@@ -1,11 +1,18 @@
 package tests
 
 import (
-	"bytes"
+	"fmt"
+	"github.com/go-test/deep"
 	g "go-image-annotator/generic"
 	m "go-image-annotator/models"
 	"testing"
 )
+
+func clearDateTime(image *m.Image) *m.Image {
+	image.CreatedAt = ""
+	image.UpdatedAt = ""
+	return image
+}
 
 func TestSaveAndRetrieveImage(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
@@ -17,13 +24,9 @@ func TestSaveAndRetrieveImage(t *testing.T) {
 
 	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), true)
 
-	if image.Width != retrievedImage.Width {
-		t.Fatalf("expected to retrieve identical widths. Wanted %v, got %v",
-			image.Width, retrievedImage.Width)
-	}
-
-	if !bytes.Equal(testImage, retrievedImage.Data) {
-		t.Fatalf("expected to retrieve identical data, but they are different. Wanted %v, got %v", testImage, retrievedImage.Data)
+	diff := deep.Equal(image, retrievedImage)
+	if diff != nil {
+		t.Fatalf(fmt.Sprintf("expected to retrieve identical image structs, but got different fields: %v", diff))
 	}
 
 }

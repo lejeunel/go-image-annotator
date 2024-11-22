@@ -1,6 +1,8 @@
 package tests
 
 import (
+	"fmt"
+	"github.com/go-test/deep"
 	m "go-image-annotator/models"
 	"testing"
 )
@@ -34,12 +36,9 @@ func TestCreateAndRetrieveLabel(t *testing.T) {
 
 	retrievedLabel, err := s.Annotations.GetOne(ctx, label.Id.String())
 
-	if label.Name != retrievedLabel.Name {
-		t.Fatalf("expected to retrieve identical label names. Wanted %v, got %v", label.Name, retrievedLabel.Name)
-	}
-
-	if label.Description != retrievedLabel.Description {
-		t.Fatalf("expected to retrieve identical label descriptions. Wanted %v, got %v", label.Description, retrievedLabel.Description)
+	diff := deep.Equal(label, retrievedLabel)
+	if diff != nil {
+		t.Fatalf(fmt.Sprintf("expected to retrieve identical image structs, but got different fields: %v", diff))
 	}
 
 }
