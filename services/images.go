@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+
 	"github.com/google/uuid"
 	e "go-image-annotator/errors"
 	g "go-image-annotator/generic"
@@ -51,22 +52,30 @@ func (s *ImageService) Delete(ctx context.Context, image *m.Image) error {
 	if err := g.CheckAuthorization(ctx, "admin"); err != nil {
 		return err
 	}
+	for _, a := range image.Annotations {
+		err := s.LabelRepo.DeleteAnnotation(ctx, a)
+		if err != nil {
+			return err
+		}
+
+	}
+
 	return s.ImageRepo.Delete(ctx, image)
 }
 
-func (s *ImageService) Save(ctx context.Context, image *m.Image) (*m.Image, error) {
+func (s *ImageService) Save(ctx context.Context, image *m.Image) error {
 
 	if err := g.CheckAuthorization(ctx, "im-contrib"); err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := s.checkSHA256(image); err != nil {
-		return nil, err
+		return err
 	}
 	im, format, err := i.Decode(bytes.NewBuffer(image.Data))
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	image.Id = uuid.New()
@@ -77,14 +86,14 @@ func (s *ImageService) Save(ctx context.Context, image *m.Image) (*m.Image, erro
 
 	image, err = s.ImageRepo.Create(ctx, image)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err = s.KeyValueStoreClient.Upload(ctx, image.Uri, image.Data, image.SHA256); err != nil {
-		return nil, err
+		return err
 	}
 
-	return image, nil
+	return nil
 
 }
 
@@ -96,16 +105,17 @@ func (s *ImageService) GetOne(ctx context.Context, id string, withData bool) (*m
 	}
 
 	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image)
+
 	if err != nil {
 		return nil, err
 	}
 	image.Annotations = annotations
 
-	polygons, err := s.LabelRepo.GetPolygonsOfImage(ctx, image)
+	bboxes, err := s.LabelRepo.GetBoundingBoxesOfImage(ctx, image)
 	if err != nil {
 		return nil, err
 	}
-	image.Polygons = polygons
+	image.BoundingBoxes = bboxes
 
 	if withData {
 		data, err := s.KeyValueStoreClient.Download(ctx, image.Uri)

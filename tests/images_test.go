@@ -19,7 +19,7 @@ func TestSaveAndRetrieveImage(t *testing.T) {
 
 	image := &m.Image{Data: testImage}
 
-	image, err := s.Images.Save(ctx, image)
+	err := s.Images.Save(ctx, image)
 	AssertNoError(t, err)
 
 	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), true)
@@ -38,7 +38,7 @@ func TestSavingImageWithSHA256(t *testing.T) {
 	testImageSHA256 := "cff295b60ef32bcd2e9a3c38eaf35dfdf78ffaf8bc95e655b682dd268329cfa1"
 	image := &m.Image{Data: testImage, SHA256: testImageSHA256}
 
-	_, err := s.Images.Save(ctx, image)
+	err := s.Images.Save(ctx, image)
 	AssertNoError(t, err)
 
 }
@@ -49,7 +49,7 @@ func TestSavingCorruptedImageWithSHA256ShouldFail(t *testing.T) {
 	corruptSHA256 := "dff295b60ef32bcd2e9a3c38eaf35dfdf78ffaf8bc95e655b682dd268329cfa1"
 	image := &m.Image{Data: testImage, SHA256: corruptSHA256}
 
-	_, err := s.Images.Save(ctx, image)
+	err := s.Images.Save(ctx, image)
 	AssertError(t, err)
 
 }
@@ -71,7 +71,7 @@ func TestPaginateImages(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			s, ctx := NewTestApp(t, tc.maxPageSize)
 			for i := 0; i < tc.nImages; i++ {
-				_, err := s.Images.Save(ctx, &m.Image{Data: testImage})
+				err := s.Images.Save(ctx, &m.Image{Data: testImage})
 				AssertNoError(t, err)
 			}
 			page, pageMeta, err := s.Images.GetPage(ctx, g.PaginationParams{Page: tc.page, PageSize: tc.pageSize}, &g.ImageFilterArgs{}, false)

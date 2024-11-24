@@ -57,7 +57,7 @@ func (r *SQLImageRepo) GetOne(ctx context.Context, id string) (*m.Image, error) 
 
 func (r *SQLImageRepo) Delete(ctx context.Context, image *m.Image) error {
 	_, err_image := r.Db.Exec("DELETE FROM images WHERE id=?", image.Id.String())
-	_, err_assoc := r.Db.Exec("DELETE FROM image_label_assoc WHERE image_id=?", image.Id.String())
+	_, err_assoc := r.Db.Exec("DELETE FROM annotations WHERE image_id=?", image.Id.String())
 	return errors.Join(err_image, err_assoc)
 }
 

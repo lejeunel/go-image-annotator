@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+
 	"github.com/google/uuid"
 	e "go-image-annotator/errors"
 	g "go-image-annotator/generic"
@@ -17,27 +18,27 @@ type AnnotationService struct {
 	DefaultPageSize int
 }
 
-func (s *AnnotationService) Create(ctx context.Context, label *m.Label) (*m.Label, error) {
+func (s *AnnotationService) CreateLabel(ctx context.Context, label *m.Label) error {
 	if err := g.CheckAuthorization(ctx, "annotation-contrib"); err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := label.Validate(); err != nil {
-		return nil, err
+		return err
 	}
 
 	label.Id = uuid.New()
 
 	label, err := s.LabelRepo.CreateLabel(ctx, label)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return label, nil
+	return nil
 
 }
 
-func (s *AnnotationService) GetOne(ctx context.Context, id string) (*m.Label, error) {
+func (s *AnnotationService) GetLabelById(ctx context.Context, id string) (*m.Label, error) {
 
 	label, err := s.LabelRepo.GetOneLabel(ctx, id)
 	if err != nil {
@@ -47,112 +48,87 @@ func (s *AnnotationService) GetOne(ctx context.Context, id string) (*m.Label, er
 
 }
 
-func (s *AnnotationService) Delete(ctx context.Context, label *m.Label) error {
-
-	numImages, err := s.LabelRepo.NumImagesWithLabel(ctx, label)
-	if err != nil {
+func (s *AnnotationService) DeleteLabel(ctx context.Context, label *m.Label) error {
+	if err := g.CheckAuthorization(ctx, "annotation-contrib"); err != nil {
 		return err
-	}
-
-	if numImages > 0 {
-		return e.ErrForbiddenDeletingDependency{ParentEntity: "label", ParentId: label.Id.String(), ChildEntity: "image"}
 	}
 
 	return s.LabelRepo.DeleteLabel(ctx, label)
 
 }
 
-func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) (*m.Image, error) {
+func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) error {
 
 	if err := g.CheckAuthorization(ctx, "annotation-contrib"); err != nil {
-		return nil, err
+		return err
 	}
 
 	user, err := m.GetUserFromContext(ctx)
 	if err != nil {
-		return image, err
+		return err
 	}
 
 	if err := s.LabelRepo.ApplyLabelToImage(ctx, label, image, user.Email); err != nil {
-		return nil, err
+		return err
 	}
 
 	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	image.Annotations = annotations
 
-	return image, nil
+	return nil
 }
 
-func (s *AnnotationService) RemoveAnnotationFromImage(ctx context.Context, annotation *m.ImageAnnotation, image *m.Image) (*m.Image, error) {
+func (s *AnnotationService) RemoveAnnotationFromImage(ctx context.Context, annotation *m.Annotation, image *m.Image) error {
 	user, err := m.GetUserFromContext(ctx)
 	if err != nil {
-		return image, err
+		return err
 	}
 	isAuthorizedToDelete := (slices.Contains(user.Roles, "admin") || (user.Email == annotation.AuthorEmail))
 	if !isAuthorizedToDelete {
-		return image, e.ErrOwnershipPermission{Operation: "removing annotation from image", Details: "Only author of annotation can delete this."}
+		return e.ErrOwnershipPermission{Operation: "removing annotation from image", Details: "Only author of annotation can delete this."}
 	}
 
-	if err := s.LabelRepo.RemoveAnnotationFromImage(ctx, annotation); err != nil {
-		return image, err
+	if err := s.LabelRepo.DeleteAnnotation(ctx, annotation); err != nil {
+		return err
 	}
 
 	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image)
 	if err != nil {
-		return image, err
+		return err
 	}
 
 	image.Annotations = annotations
 
-	return image, nil
+	return nil
 }
 
-func (s *AnnotationService) ApplyPolygonToImage(ctx context.Context, polygon *m.Polygon, image *m.Image) (*m.Image, error) {
+func (s *AnnotationService) ApplyBoundingBoxToImage(ctx context.Context, bbox *m.BoundingBox, image *m.Image) error {
 	if err := g.CheckAuthorization(ctx, "annotation-contrib"); err != nil {
-		return image, err
+		return err
 	}
 
 	user, err := m.GetUserFromContext(ctx)
 	if err != nil {
-		return image, err
+		return err
 	}
-	polygon.AuthorEmail = user.Email
+	if err := bbox.Validate(image); err != nil {
+		return err
+	}
+
+	bbox.Id = uuid.New()
+	bbox.ImageId = image.Id
+	bbox.AuthorEmail = user.Email
 	now := time.Now().String()
-	polygon.CreatedAt = now
-	polygon.UpdatedAt = now
-	image.Polygons = append(image.Polygons, polygon)
+	bbox.CreatedAt = now
+	bbox.UpdatedAt = now
+	image.BoundingBoxes = append(image.BoundingBoxes, bbox)
 
-	if err := s.LabelRepo.ApplyPolygonToImage(ctx, polygon, image); err != nil {
-		return nil, err
+	if err := s.LabelRepo.ApplyBoundingBoxToImage(ctx, bbox, image); err != nil {
+		return err
 	}
-	return image, nil
-}
-
-func (s *AnnotationService) DeletePolygonFromImage(ctx context.Context, polygon *m.Polygon, image *m.Image) (*m.Image, error) {
-
-	user, err := m.GetUserFromContext(ctx)
-	if err != nil {
-		return image, err
-	}
-	isAuthorizedToDelete := (slices.Contains(user.Roles, "admin") || (user.Email == polygon.AuthorEmail))
-	if !isAuthorizedToDelete {
-		return image, e.ErrOwnershipPermission{Operation: "removing polygon from image", Details: "Only author of polygon can delete this."}
-	}
-
-	if err := s.LabelRepo.DeletePolygon(ctx, polygon); err != nil {
-		return image, err
-	}
-
-	polygons, err := s.LabelRepo.GetPolygonsOfImage(ctx, image)
-	if err != nil {
-		return image, err
-	}
-
-	image.Polygons = polygons
-
-	return image, nil
+	return nil
 }

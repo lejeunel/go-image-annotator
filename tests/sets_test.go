@@ -66,7 +66,8 @@ func TestRetrieveImagesOfSet(t *testing.T) {
 	setName := "myset"
 	set, err := s.Sets.Create(ctx, &m.Set{Name: setName})
 	AssertNoError(t, err)
-	image_in_set, _ := s.Images.Save(ctx, &m.Image{Data: testImage})
+	image_in_set := &m.Image{Data: testImage}
+	s.Images.Save(ctx, image_in_set)
 	s.Sets.AppendImageToSet(ctx, image_in_set, set)
 
 	s.Images.Save(ctx, &m.Image{Data: testImage})

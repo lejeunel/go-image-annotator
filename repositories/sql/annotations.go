@@ -1,8 +1,7 @@
 package repositories
 
 import (
-	"context"
-	"encoding/json"
+	c "context"
 	"github.com/google/uuid"
 	e "go-image-annotator/errors"
 	m "go-image-annotator/models"
@@ -22,7 +21,7 @@ func NewSQLLabelRepo(db *sqlx.DB) *SQLAnnotationRepo {
 
 }
 
-func (r *SQLAnnotationRepo) CreateLabel(ctx context.Context, label *m.Label) (*m.Label, error) {
+func (r *SQLAnnotationRepo) CreateLabel(ctx c.Context, label *m.Label) (*m.Label, error) {
 	now := time.Now().String()
 	query := "INSERT INTO labels (id, name, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
 	_, err := r.Db.Exec(query, label.Id, label.Name, label.Description, now,
@@ -35,29 +34,12 @@ func (r *SQLAnnotationRepo) CreateLabel(ctx context.Context, label *m.Label) (*m
 	return label, nil
 }
 
-func (r *SQLAnnotationRepo) NumImagesWithLabel(ctx context.Context, label *m.Label) (int, error) {
-	var nImages int
-	err := r.Db.QueryRow("SELECT COUNT(*) FROM image_label_assoc WHERE label_id = ?",
-		label.Id).Scan(&nImages)
-	if err != nil {
-		return 0, err
-	}
-
-	return nImages, nil
-
-}
-
-func (r *SQLAnnotationRepo) DeleteLabel(ctx context.Context, label *m.Label) error {
+func (r *SQLAnnotationRepo) DeleteLabel(ctx c.Context, label *m.Label) error {
 	_, err := r.Db.Exec("DELETE FROM labels WHERE id=?", label.Id.String())
 	return err
 }
 
-func (r *SQLAnnotationRepo) DeletePolygon(ctx context.Context, polygon *m.Polygon) error {
-	_, err := r.Db.Exec("DELETE FROM polygons WHERE id=?", polygon.Id.String())
-	return err
-}
-
-func (r *SQLAnnotationRepo) GetOneLabel(ctx context.Context, id string) (*m.Label, error) {
+func (r *SQLAnnotationRepo) GetOneLabel(ctx c.Context, id string) (*m.Label, error) {
 	label := m.Label{}
 	err := r.Db.Get(&label, "SELECT id,name,description FROM labels WHERE id=?", id)
 
@@ -68,9 +50,9 @@ func (r *SQLAnnotationRepo) GetOneLabel(ctx context.Context, id string) (*m.Labe
 	return &label, nil
 }
 
-func (r *SQLAnnotationRepo) GetOneAnnotation(ctx context.Context, id string) (*m.ImageAnnotation, error) {
-	annotation := m.ImageAnnotation{}
-	err := r.Db.Get(&annotation, "SELECT id,label_id,image_id,author_email FROM image_label_assoc WHERE id=?", id)
+func (r *SQLAnnotationRepo) getAnnotationById(ctx c.Context, id string) (*m.Annotation, error) {
+	annotation := m.Annotation{}
+	err := r.Db.Get(&annotation, "SELECT id,label_id,image_id,author_email FROM annotations WHERE id=?", id)
 
 	if err != nil {
 		return nil, &e.ErrNotFound{Entity: "annotation", Criteria: "id", Value: id, Err: err}
@@ -79,51 +61,40 @@ func (r *SQLAnnotationRepo) GetOneAnnotation(ctx context.Context, id string) (*m
 	return &annotation, nil
 }
 
-func (r *SQLAnnotationRepo) getOnePolygon(ctx context.Context, id string) (*m.Polygon, error) {
-	polygon := m.Polygon{}
-	err := r.Db.Get(&polygon, "SELECT id,type_,min_x,min_y,max_x,max_y,author_email,created_at,updated_at FROM polygons WHERE id=?", id)
+func (r *SQLAnnotationRepo) getShapeFromId(ctx c.Context, id string) (string, error) {
+
+	var data string
+	err := r.Db.Get(&data, "SELECT shape_data FROM annotations WHERE id=?", id)
 	if err != nil {
-		return nil, &e.ErrNotFound{Entity: "polygon", Criteria: "id", Value: id, Err: err}
+		return "", err
 	}
 
-	var pointsStr string
-	_ = r.Db.Get(&pointsStr, "SELECT points FROM polygons WHERE id=?", id)
-	var points [][]int
-	if err = json.Unmarshal([]byte(pointsStr), &points); err != nil {
-		return nil, err
-	}
+	return data, nil
 
-	polygon.Points = points
-
-	var labelId string
-	err = r.Db.Get(&labelId, "SELECT label_id FROM polygons WHERE id=?", id)
-	if err != nil {
-		return nil, &e.ErrNotFound{Entity: "label", Criteria: "id", Value: id, Err: err}
-	}
-
-	label, err := r.GetOneLabel(ctx, labelId)
-	if err != nil {
-		return nil, err
-	}
-	polygon.Label = label
-
-	return &polygon, nil
 }
 
-func (r *SQLAnnotationRepo) GetAnnotationsOfImage(ctx context.Context, image *m.Image) ([]*m.ImageAnnotation, error) {
+func (r *SQLAnnotationRepo) GetAnnotationsOfImage(ctx c.Context, image *m.Image) ([]*m.Annotation, error) {
 	var annotationsIds []string
-	var annotations []*m.ImageAnnotation
+	var annotations []*m.Annotation
 
-	err := r.Db.Select(&annotationsIds, "SELECT id FROM image_label_assoc WHERE image_id = ?", image.Id)
+	err := r.Db.Select(&annotationsIds, "SELECT id FROM annotations WHERE image_id = ? AND shape_type=''", image.Id)
 
 	if err != nil {
 		return nil, &e.ErrNotFound{Entity: "image", Criteria: "id", Value: image.Id.String(), Err: err}
 	}
 
 	for _, id := range annotationsIds {
-		a, err := r.GetOneAnnotation(ctx, id)
+		a, err := r.getAnnotationById(ctx, id)
 		if err != nil {
 			return nil, err
+		}
+		if a.LabelId != uuid.Nil {
+			label, err := r.GetOneLabel(ctx, a.LabelId.String())
+			if err != nil {
+				return nil, err
+			}
+			a.Label = label
+
 		}
 		annotations = append(annotations, a)
 
@@ -133,49 +104,11 @@ func (r *SQLAnnotationRepo) GetAnnotationsOfImage(ctx context.Context, image *m.
 
 }
 
-func (r *SQLAnnotationRepo) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image, authorEmail string) error {
+func (r *SQLAnnotationRepo) ApplyLabelToImage(ctx c.Context, label *m.Label, image *m.Image, authorEmail string) error {
 	now := time.Now().String()
-	query := "INSERT INTO image_label_assoc (id,image_id,label_id,author_email,created_at) VALUES (?,?,?,?,?)"
+	query := "INSERT INTO annotations (id,image_id,label_id,author_email,created_at,shape_type,shape_data) VALUES (?,?,?,?,?,?,?)"
 
-	_, err := r.Db.Exec(query, uuid.New(), image.Id, label.Id, authorEmail, now)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *SQLAnnotationRepo) RemoveAnnotationFromImage(ctx context.Context, annotation *m.ImageAnnotation) error {
-
-	_, err := r.Db.Exec("DELETE FROM image_label_assoc WHERE id=?", annotation.Id.String())
-	if err != nil {
-		return err
-	}
-	return nil
-
-}
-
-func (r *SQLAnnotationRepo) ApplyPolygonToImage(ctx context.Context, polygon *m.Polygon, image *m.Image) error {
-
-	points, err := json.Marshal(polygon.Points)
-	if err != nil {
-		return err
-	}
-
-	query := "INSERT INTO polygons (id,image_id,type_,min_x,min_y,max_x,max_y,points,author_email,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-	_, err = r.Db.Exec(query, polygon.Id, image.Id,
-		polygon.Type, polygon.MinX, polygon.MinY, polygon.MaxX, polygon.MaxY, string(points),
-		polygon.AuthorEmail, polygon.CreatedAt, polygon.UpdatedAt)
-
-	if err != nil {
-		return err
-	}
-
-	if polygon.Label != nil {
-		query := "UPDATE polygons SET label_id=? WHERE id=?"
-		_, err = r.Db.Exec(query, polygon.Label.Id, polygon.Id)
-	}
+	_, err := r.Db.Exec(query, uuid.New(), image.Id, label.Id, authorEmail, now, "", "")
 
 	if err != nil {
 		return err
@@ -184,27 +117,90 @@ func (r *SQLAnnotationRepo) ApplyPolygonToImage(ctx context.Context, polygon *m.
 	return nil
 }
 
-func (r *SQLAnnotationRepo) GetPolygonsOfImage(ctx context.Context, image *m.Image) ([]*m.Polygon, error) {
+func (r *SQLAnnotationRepo) DeleteAnnotation(ctx c.Context, annotation *m.Annotation) error {
 
-	var polygonIds []string
-	var polygons []*m.Polygon
+	_, err := r.Db.Exec("DELETE FROM annotations WHERE id=?", annotation.Id.String())
+	if err != nil {
+		return err
+	}
+	return nil
 
-	err := r.Db.Select(&polygonIds, "SELECT id FROM polygons WHERE image_id = ?", image.Id)
+}
+
+func (r *SQLAnnotationRepo) applyAnnotatedShapeToImage(ctx c.Context, annotation *m.AnnotatedShape,
+	shapeData string, shapeType string, image *m.Image) error {
+
+	annotation.Id = uuid.New()
+
+	query := "INSERT INTO annotations (id,image_id,label_id,shape_type,shape_data,author_email,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?)"
+	_, err := r.Db.Exec(query, annotation.Id, image.Id, annotation.LabelId,
+		shapeType, shapeData,
+		annotation.AuthorEmail, annotation.CreatedAt, annotation.UpdatedAt)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *SQLAnnotationRepo) getAnnotatedShapeFromId(ctx c.Context, id string) (*m.AnnotatedShape, error) {
+	shape := m.AnnotatedShape{}
+
+	err := r.Db.Get(&shape, "SELECT id,image_id,label_id,author_email,created_at,updated_at FROM annotations WHERE id = ?", id)
+	if err != nil {
+		return nil, err
+	}
+
+	label, err := r.GetOneLabel(ctx, shape.LabelId.String())
+	if err != nil {
+		return nil, err
+	}
+	shape.Label = label
+
+	return &shape, nil
+
+}
+
+func (r *SQLAnnotationRepo) GetBoundingBoxesOfImage(ctx c.Context, image *m.Image) ([]*m.BoundingBox, error) {
+
+	var ids []string
+	var bboxes []*m.BoundingBox
+
+	err := r.Db.Select(&ids, "SELECT id FROM annotations WHERE image_id = ? AND shape_type=\"bounding_box\"", image.Id)
 
 	if err != nil {
 		return nil, &e.ErrNotFound{Entity: "image", Criteria: "id", Value: image.Id.String(), Err: err}
 	}
 
-	for _, id := range polygonIds {
-		p, err := r.getOnePolygon(ctx, id)
+	for _, id := range ids {
+		shapeStr, err := r.getShapeFromId(ctx, id)
 		if err != nil {
 			return nil, err
 		}
-		polygons = append(polygons, p)
+		annotation, err := r.getAnnotatedShapeFromId(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+
+		bbox, err := m.NewBoundingBoxFromJSONShape(shapeStr)
+		if err != nil {
+			return nil, err
+		}
+		bbox.AnnotatedShape = *annotation
+		bboxes = append(bboxes, bbox)
 
 	}
 
-	return polygons, nil
+	return bboxes, nil
+}
+
+func (r *SQLAnnotationRepo) ApplyBoundingBoxToImage(ctx c.Context, bbox *m.BoundingBox, image *m.Image) error {
+	shapeData, err := bbox.MarshalCoordsToJSON()
+	if err != nil {
+		return err
+	}
+	return r.applyAnnotatedShapeToImage(ctx, &bbox.AnnotatedShape, string(shapeData), "bounding_box", image)
 }
 
 func (r *SQLAnnotationRepo) Nums() (int64, error) {

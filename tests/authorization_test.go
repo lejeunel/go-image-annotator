@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+
 	m "go-image-annotator/models"
 	"testing"
 )
@@ -22,8 +23,7 @@ func TestContributingImagesRequiresPermission(t *testing.T) {
 			s, ctx := NewTestApp(t, 2)
 			ctx = context.WithValue(ctx, "user_roles", tc.roles)
 			image := &m.Image{Data: testImage}
-
-			image, err := s.Images.Save(ctx, image)
+			err := s.Images.Save(ctx, image)
 
 			if tc.wantError {
 				AssertError(t, err)
@@ -41,7 +41,7 @@ func TestDeletingImagesRequiresPermission(t *testing.T) {
 	ctx = context.WithValue(ctx, "user_roles", "im-contrib")
 	image := &m.Image{Data: testImage}
 
-	image, err := s.Images.Save(ctx, image)
+	err := s.Images.Save(ctx, image)
 	err = s.Images.Delete(ctx, image)
 	AssertError(t, err)
 }
@@ -52,32 +52,50 @@ func TestCreatingLabelRequiresPermission(t *testing.T) {
 
 	label := &m.Label{Name: "mylabel"}
 	ctx = context.WithValue(ctx, "user_roles", "annotation-contrib")
-	label, err := s.Annotations.Create(ctx, label)
+	err := s.Annotations.CreateLabel(ctx, label)
 	AssertNoError(t, err)
 
 	ctx = context.WithValue(ctx, "user_roles", "viewer")
-	label, err = s.Annotations.Create(ctx, label)
+	err = s.Annotations.CreateLabel(ctx, label)
 	AssertError(t, err)
 
 }
+func TestDeletingLabelRequiresPermission(t *testing.T) {
 
-func TestApplyingPolygonRequiresPermission(t *testing.T) {
+	s, ctx := NewTestApp(t, 2)
+
+	label := &m.Label{Name: "mylabel"}
+	ctx = context.WithValue(ctx, "user_roles", "annotation-contrib")
+	err := s.Annotations.CreateLabel(ctx, label)
+
+	ctx = context.WithValue(ctx, "user_roles", "viewer")
+	err = s.Annotations.DeleteLabel(ctx, label)
+	AssertError(t, err)
+
+	ctx = context.WithValue(ctx, "user_roles", "annotation-contrib")
+	err = s.Annotations.DeleteLabel(ctx, label)
+	AssertNoError(t, err)
+
+}
+
+func TestApplyingBBoxRequiresPermission(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	ctx = context.WithValue(ctx, "user_roles", "admin")
 
 	image := &m.Image{Data: testImage}
-	image, err := s.Images.Save(ctx, image)
+	err := s.Images.Save(ctx, image)
 	label := &m.Label{Name: "mylabel"}
-	label, err = s.Annotations.Create(ctx, label)
+	err = s.Annotations.CreateLabel(ctx, label)
 
-	polyg := &m.Polygon{Label: label}
 	ctx = context.WithValue(ctx, "user_roles", "viewer")
-	image, err = s.Annotations.ApplyPolygonToImage(ctx, polyg, image)
+	bbox := &m.BoundingBox{Xc: 10, Yc: 10, Height: 11, Width: 15}
+	bbox.Annotate(label)
+	err = s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image)
 	AssertError(t, err)
 
 	ctx = context.WithValue(ctx, "user_roles", "annotation-contrib")
-	image, err = s.Annotations.ApplyPolygonToImage(ctx, polyg, image)
+	err = s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image)
 	AssertNoError(t, err)
 
 }
@@ -88,44 +106,46 @@ func TestDeletingAnnotationOnImageDoneByAnotherUserShouldFail(t *testing.T) {
 	ctx = context.WithValue(ctx, "user_roles", "im-contrib,annotation-contrib")
 	ctx = context.WithValue(ctx, "user_email", "bob@mail.com")
 
-	label, _ := s.Annotations.Create(ctx, &m.Label{Name: "mylabel"})
-	image, _ := s.Images.Save(ctx, &m.Image{Data: testImage})
-	image, _ = s.Annotations.ApplyLabelToImage(ctx, label, image)
+	image := &m.Image{Data: testImage}
+	label := &m.Label{Name: "mylabel"}
+	s.Annotations.CreateLabel(ctx, label)
+	s.Images.Save(ctx, image)
+	s.Annotations.ApplyLabelToImage(ctx, label, image)
 
 	ctx = context.WithValue(ctx, "user_email", "not-bob@mail.com")
-	image, err := s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
+	err := s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
 	AssertError(t, err)
 	if len(image.Annotations) < 1 {
 		t.Fatal("expected that label is not deleted, but it is.")
 	}
 
 	ctx = context.WithValue(ctx, "user_roles", "admin")
-	image, err = s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
+	err = s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
 	AssertNoError(t, err)
 
 }
 
-func TestDeletingPolygonDoneByAnotherUserShouldFail(t *testing.T) {
+func TestDeletingBBoxDoneByAnotherUserShouldFail(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	ctx = context.WithValue(ctx, "user_roles", "im-contrib,annotation-contrib")
 	ctx = context.WithValue(ctx, "user_email", "bob@mail.com")
 
-	label, _ := s.Annotations.Create(ctx, &m.Label{Name: "mylabel"})
-	image, _ := s.Images.Save(ctx, &m.Image{Data: testImage})
+	label := &m.Label{Name: "mylabel"}
+	image := &m.Image{Data: testImage}
+	s.Annotations.CreateLabel(ctx, label)
+	s.Images.Save(ctx, image)
 
-	polygon, err := m.NewBoundingBox(10, 10, 30, 30)
-	polygon.Label = label
-	image, err = s.Annotations.ApplyPolygonToImage(ctx, polygon, image)
-
+	bbox := &m.BoundingBox{Xc: 10, Yc: 10, Height: 11, Width: 15}
+	err := s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image)
 	ctx = context.WithValue(ctx, "user_email", "not-bob@mail.com")
-	image, err = s.Annotations.DeletePolygonFromImage(ctx, image.Polygons[0], image)
+	err = s.Annotations.RemoveAnnotationFromImage(ctx, &image.BoundingBoxes[0].Annotation, image)
 	AssertError(t, err)
-	if len(image.Polygons) < 1 {
+	if len(image.BoundingBoxes) < 1 {
 		t.Fatal("expected that label is not deleted, but it is.")
 	}
 	ctx = context.WithValue(ctx, "user_roles", "admin")
-	image, err = s.Annotations.DeletePolygonFromImage(ctx, image.Polygons[0], image)
+	err = s.Annotations.RemoveAnnotationFromImage(ctx, &image.BoundingBoxes[0].Annotation, image)
 	AssertNoError(t, err)
 
 }

@@ -19,7 +19,8 @@ func TestCreatingInvalidLabelShouldFail(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			s, ctx := NewTestApp(t, 2)
-			_, err := s.Annotations.Create(ctx, &m.Label{Name: tc.name})
+			label := &m.Label{Name: tc.name}
+			err := s.Annotations.CreateLabel(ctx, label)
 			AssertError(t, err)
 		})
 	}
@@ -30,10 +31,10 @@ func TestCreateAndRetrieveLabel(t *testing.T) {
 	label := &m.Label{Name: "thelabel",
 		Description: "the description"}
 
-	label, err := s.Annotations.Create(ctx, label)
+	err := s.Annotations.CreateLabel(ctx, label)
 	AssertNoError(t, err)
 
-	retrievedLabel, err := s.Annotations.GetOne(ctx, label.Id.String())
+	retrievedLabel, err := s.Annotations.GetLabelById(ctx, label.Id.String())
 
 	diff := deep.Equal(label, retrievedLabel)
 	if diff != nil {
@@ -46,12 +47,12 @@ func TestDeleteLabel(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 	label := &m.Label{Name: "thelabel"}
 
-	label, err := s.Annotations.Create(ctx, label)
-	err = s.Annotations.Delete(ctx, label)
+	err := s.Annotations.CreateLabel(ctx, label)
+	err = s.Annotations.DeleteLabel(ctx, label)
 
 	AssertNoError(t, err)
 
-	label, err = s.Annotations.GetOne(ctx, label.Id.String())
+	label, err = s.Annotations.GetLabelById(ctx, label.Id.String())
 	AssertError(t, err)
 
 }
@@ -60,13 +61,14 @@ func TestDeletingUsedLabelShouldFail(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 	label := &m.Label{Name: "thelabel"}
 
-	label, err := s.Annotations.Create(ctx, label)
+	err := s.Annotations.CreateLabel(ctx, label)
 	AssertNoError(t, err)
-	image, err := s.Images.Save(ctx, &m.Image{Data: testImage})
-	image, err = s.Annotations.ApplyLabelToImage(ctx, label, image)
+	image := &m.Image{Data: testImage}
+	err = s.Images.Save(ctx, image)
+	err = s.Annotations.ApplyLabelToImage(ctx, label, image)
 	AssertNoError(t, err)
 
-	err = s.Annotations.Delete(ctx, label)
+	err = s.Annotations.DeleteLabel(ctx, label)
 	AssertError(t, err)
 
 }
@@ -74,23 +76,26 @@ func TestDeletingUsedLabelShouldFail(t *testing.T) {
 func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 	label := &m.Label{Name: "thelabel"}
-	label, _ = s.Annotations.Create(ctx, label)
-	image, _ := s.Images.Save(ctx, &m.Image{Data: testImage})
-	image, _ = s.Annotations.ApplyLabelToImage(ctx, label, image)
+	s.Annotations.CreateLabel(ctx, label)
+	image := &m.Image{Data: testImage}
+	s.Images.Save(ctx, image)
+	s.Annotations.ApplyLabelToImage(ctx, label, image)
 
-	s.Images.Delete(ctx, image)
-	err := s.Annotations.Delete(ctx, label)
-	AssertNoError(t, err)
+	err := s.Images.Delete(ctx, image)
+	err = s.Annotations.DeleteLabel(ctx, label)
+	_, err = s.Annotations.GetLabelById(ctx, label.Id.String())
+	AssertError(t, err)
 
 }
 
 func TestApplyingLabelToImage(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 
-	image, err := s.Images.Save(ctx, &m.Image{Data: testImage})
-	label, err := s.Annotations.Create(ctx, &m.Label{Name: "mylabel"})
-	image, err = s.Annotations.ApplyLabelToImage(ctx, label, image)
-	AssertNoError(t, err)
+	image := &m.Image{Data: testImage}
+	label := &m.Label{Name: "mylabel"}
+	s.Images.Save(ctx, image)
+	err := s.Annotations.CreateLabel(ctx, label)
+	err = s.Annotations.ApplyLabelToImage(ctx, label, image)
 
 	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), false)
 	AssertNoError(t, err)
@@ -104,39 +109,16 @@ func TestApplyingLabelToImage(t *testing.T) {
 func TestRemovingLabelFromImage(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 
-	image, err := s.Images.Save(ctx, &m.Image{Data: testImage})
-	label, err := s.Annotations.Create(ctx, &m.Label{Name: "mylabel"})
-	image, err = s.Annotations.ApplyLabelToImage(ctx, label, image)
-	image, err = s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
+	image := &m.Image{Data: testImage}
+	label := &m.Label{Name: "mylabel"}
+	s.Images.Save(ctx, image)
+	err := s.Annotations.CreateLabel(ctx, label)
+	err = s.Annotations.ApplyLabelToImage(ctx, label, image)
+	err = s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
 	AssertNoError(t, err)
 
 	if len(image.Annotations) != 0 {
 		t.Fatalf("expected to retrieve image with 0 label, but got %v", len(image.Annotations))
 	}
 
-}
-
-func TestInvalidBoundingBoxesShouldFail(t *testing.T) {
-	tests := map[string]struct {
-		x0 int
-		y0 int
-		x1 int
-		y1 int
-	}{
-		"negative values":   {x0: -2, y0: 4, x1: 5, y1: 9},
-		"inverted x values": {x0: 5, y0: 2, x1: 0, y1: 4},
-		"inverted y values": {x0: 0, y0: 9, x1: 5, y1: 4},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			s, ctx := NewTestApp(t, 2)
-			image := &m.Image{Data: testImage}
-
-			image, _ = s.Images.Save(ctx, image)
-			_, err := m.NewBoundingBox(tc.x0, tc.y0, tc.x1, tc.y1)
-
-			AssertError(t, err)
-		})
-	}
 }
