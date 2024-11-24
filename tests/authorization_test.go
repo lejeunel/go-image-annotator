@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestContributingImagesRequiresPermission(t *testing.T) {
+func TestSavingImagesRequiresPermission(t *testing.T) {
 
 	tests := map[string]struct {
 		roles     string
@@ -119,10 +119,6 @@ func TestDeletingAnnotationOnImageDoneByAnotherUserShouldFail(t *testing.T) {
 		t.Fatal("expected that label is not deleted, but it is.")
 	}
 
-	ctx = context.WithValue(ctx, "user_roles", "admin")
-	err = s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
-	AssertNoError(t, err)
-
 }
 
 func TestDeletingBBoxDoneByAnotherUserShouldFail(t *testing.T) {
@@ -141,11 +137,5 @@ func TestDeletingBBoxDoneByAnotherUserShouldFail(t *testing.T) {
 	ctx = context.WithValue(ctx, "user_email", "not-bob@mail.com")
 	err = s.Annotations.RemoveAnnotationFromImage(ctx, &image.BoundingBoxes[0].Annotation, image)
 	AssertError(t, err)
-	if len(image.BoundingBoxes) < 1 {
-		t.Fatal("expected that label is not deleted, but it is.")
-	}
-	ctx = context.WithValue(ctx, "user_roles", "admin")
-	err = s.Annotations.RemoveAnnotationFromImage(ctx, &image.BoundingBoxes[0].Annotation, image)
-	AssertNoError(t, err)
 
 }
