@@ -73,7 +73,7 @@ func (r *SQLAnnotationRepo) getShapeFromId(ctx c.Context, id string) (string, er
 
 }
 
-func (r *SQLAnnotationRepo) GetAnnotationsOfImage(ctx c.Context, image *m.Image) ([]*m.Annotation, error) {
+func (r *SQLAnnotationRepo) GetAnnotationsOfImage(ctx c.Context, image *m.Image, collection *m.Collection) ([]*m.Annotation, error) {
 	var annotationsIds []string
 	var annotations []*m.Annotation
 
@@ -104,11 +104,11 @@ func (r *SQLAnnotationRepo) GetAnnotationsOfImage(ctx c.Context, image *m.Image)
 
 }
 
-func (r *SQLAnnotationRepo) ApplyLabelToImage(ctx c.Context, label *m.Label, image *m.Image, authorEmail string) error {
+func (r *SQLAnnotationRepo) ApplyLabelToImage(ctx c.Context, label *m.Label, image *m.Image, collection *m.Collection, authorEmail string) error {
 	now := time.Now().String()
-	query := "INSERT INTO annotations (id,image_id,label_id,author_email,created_at,shape_type,shape_data) VALUES (?,?,?,?,?,?,?)"
+	query := "INSERT INTO annotations (id,image_id,label_id,collection_id,author_email,created_at,shape_type,shape_data) VALUES (?,?,?,?,?,?,?,?)"
 
-	_, err := r.Db.Exec(query, uuid.New(), image.Id, label.Id, authorEmail, now, "", "")
+	_, err := r.Db.Exec(query, uuid.New(), image.Id, label.Id, collection.Id, authorEmail, now, "", "")
 
 	if err != nil {
 		return err

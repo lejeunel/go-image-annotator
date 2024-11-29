@@ -42,7 +42,7 @@ func (r *SQLCollectionRepo) GetOne(ctx context.Context, id string) (*m.Collectio
 	return &set, nil
 }
 
-func (r *SQLCollectionRepo) AssignImageToSet(ctx context.Context, image *m.Image, set *m.Collection) error {
+func (r *SQLCollectionRepo) AssignImageToCollection(ctx context.Context, image *m.Image, set *m.Collection) error {
 	now := time.Now().String()
 	query := "INSERT INTO image_set_assoc (id, image_id, set_id, created_at) VALUES (?, ?, ?, ?)"
 	_, err := r.Db.Exec(query, set.Id, image.Id, set.Id, now)

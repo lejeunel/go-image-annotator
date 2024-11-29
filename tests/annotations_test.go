@@ -64,8 +64,10 @@ func TestDeletingUsedLabelShouldFail(t *testing.T) {
 	err := s.Annotations.CreateLabel(ctx, label)
 	AssertNoError(t, err)
 	image := &m.Image{Data: testImage}
+	collection := &m.Collection{Name: "mycollection"}
 	err = s.Images.Save(ctx, image)
-	err = s.Annotations.ApplyLabelToImage(ctx, label, image)
+	collection, err = s.Collections.Create(ctx, collection)
+	err = s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
 	AssertNoError(t, err)
 
 	err = s.Annotations.DeleteLabel(ctx, label)
@@ -76,10 +78,13 @@ func TestDeletingUsedLabelShouldFail(t *testing.T) {
 func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 	label := &m.Label{Name: "thelabel"}
-	s.Annotations.CreateLabel(ctx, label)
 	image := &m.Image{Data: testImage}
+	collection := &m.Collection{Name: "mycollection"}
+
+	s.Annotations.CreateLabel(ctx, label)
+	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image)
-	s.Annotations.ApplyLabelToImage(ctx, label, image)
+	s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
 
 	err := s.Images.Delete(ctx, image)
 	err = s.Annotations.DeleteLabel(ctx, label)
@@ -88,20 +93,36 @@ func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 
 }
 
-func TestApplyingLabelToImage(t *testing.T) {
+func TestApplyingLabelToImagesOfDifferentCollections(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 
 	image := &m.Image{Data: testImage}
 	label := &m.Label{Name: "mylabel"}
 	s.Images.Save(ctx, image)
 	err := s.Annotations.CreateLabel(ctx, label)
-	err = s.Annotations.ApplyLabelToImage(ctx, label, image)
 
-	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), false)
+	firstCollection := &m.Collection{Name: "myfirstcollection"}
+	secondCollection := &m.Collection{Name: "mysecondcollection"}
+	s.Collections.Create(ctx, firstCollection)
+	s.Collections.Create(ctx, secondCollection)
+
+	s.Collections.AppendImageToCollection(ctx, image, firstCollection)
+	s.Collections.AppendImageToCollection(ctx, image, secondCollection)
+
+	err = s.Annotations.ApplyLabelToImage(ctx, label, image, firstCollection)
+
+	retrievedImageOfFirstCollection, err := s.Images.GetOneWithAnnotations(ctx, image.Id.String(), false, firstCollection.Id.String())
+	retrievedImageOfSecondCollection, err := s.Images.GetOneWithAnnotations(ctx, image.Id.String(), false, secondCollection.Id.String())
 	AssertNoError(t, err)
-	nLabels := len(retrievedImage.Annotations)
-	if len(retrievedImage.Annotations) != 1 {
-		t.Fatalf("expected to retrieve image with 1 label, but got %v.", nLabels)
+
+	nLabelsFirst := len(retrievedImageOfFirstCollection.Annotations)
+	nLabelsSecond := len(retrievedImageOfSecondCollection.Annotations)
+	if nLabelsFirst != 1 {
+		t.Fatalf("expected to retrieve image with 1 label, but got %v.", nLabelsFirst)
+	}
+
+	if nLabelsSecond != 0 {
+		t.Fatalf("expected to retrieve image with 0 label, but got %v.", nLabelsSecond)
 	}
 
 }
@@ -111,10 +132,13 @@ func TestRemovingLabelFromImage(t *testing.T) {
 
 	image := &m.Image{Data: testImage}
 	label := &m.Label{Name: "mylabel"}
+	collection := &m.Collection{Name: "myimageset"}
 	s.Images.Save(ctx, image)
 	err := s.Annotations.CreateLabel(ctx, label)
-	err = s.Annotations.ApplyLabelToImage(ctx, label, image)
-	err = s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
+	s.Collections.Create(ctx, collection)
+
+	err = s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
+	err = s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image, collection)
 	AssertNoError(t, err)
 
 	if len(image.Annotations) != 0 {

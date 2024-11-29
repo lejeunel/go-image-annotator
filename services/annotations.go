@@ -57,7 +57,8 @@ func (s *AnnotationService) DeleteLabel(ctx context.Context, label *m.Label) err
 
 }
 
-func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image) error {
+func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Label, image *m.Image,
+	collection *m.Collection) error {
 
 	if err := g.CheckAuthorization(ctx, "annotation-contrib"); err != nil {
 		return err
@@ -68,11 +69,11 @@ func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Labe
 		return err
 	}
 
-	if err := s.LabelRepo.ApplyLabelToImage(ctx, label, image, user.Email); err != nil {
+	if err := s.LabelRepo.ApplyLabelToImage(ctx, label, image, collection, user.Email); err != nil {
 		return err
 	}
 
-	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image)
+	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image, collection)
 	if err != nil {
 		return err
 	}
@@ -82,7 +83,7 @@ func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Labe
 	return nil
 }
 
-func (s *AnnotationService) RemoveAnnotationFromImage(ctx context.Context, annotation *m.Annotation, image *m.Image) error {
+func (s *AnnotationService) RemoveAnnotationFromImage(ctx context.Context, annotation *m.Annotation, image *m.Image, collection *m.Collection) error {
 	user, err := m.GetUserFromContext(ctx)
 	if err != nil {
 		return err
@@ -96,7 +97,7 @@ func (s *AnnotationService) RemoveAnnotationFromImage(ctx context.Context, annot
 		return err
 	}
 
-	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image)
+	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image, collection)
 	if err != nil {
 		return err
 	}
@@ -106,7 +107,7 @@ func (s *AnnotationService) RemoveAnnotationFromImage(ctx context.Context, annot
 	return nil
 }
 
-func (s *AnnotationService) ApplyBoundingBoxToImage(ctx context.Context, bbox *m.BoundingBox, image *m.Image) error {
+func (s *AnnotationService) ApplyBoundingBoxToImage(ctx context.Context, bbox *m.BoundingBox, image *m.Image, collection *m.Collection) error {
 	if err := g.CheckAuthorization(ctx, "annotation-contrib"); err != nil {
 		return err
 	}

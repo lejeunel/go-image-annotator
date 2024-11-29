@@ -25,7 +25,7 @@ func TestSaveAndRetrieveImage(t *testing.T) {
 	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), true)
 	AssertNoError(t, err)
 
-	diff := deep.Equal(image, retrievedImage)
+	diff := deep.Equal(retrievedImage, image)
 	if diff != nil {
 		t.Fatalf(fmt.Sprintf("expected to retrieve identical image structs, but got different fields: %v", diff))
 	}

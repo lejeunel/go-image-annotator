@@ -19,6 +19,7 @@ type ImageService struct {
 	KeyValueStoreClient KeyValueStoreClient
 	ImageRepo           r.ImageRepo
 	LabelRepo           r.AnnotationRepo
+	CollectionRepo      r.CollectionRepo
 	MaxPageSize         int
 	DefaultPageSize     int
 	RemoteScheme        string
@@ -97,14 +98,18 @@ func (s *ImageService) Save(ctx context.Context, image *m.Image) error {
 
 }
 
-func (s *ImageService) GetOne(ctx context.Context, id string, withData bool) (*m.Image, error) {
-
-	image, err := s.ImageRepo.GetOne(ctx, id)
+func (s *ImageService) GetOneWithAnnotations(ctx context.Context, image_id string, withData bool, collection_id string) (*m.Image, error) {
+	image, err := s.GetOne(ctx, image_id, withData)
 	if err != nil {
 		return nil, err
 	}
 
-	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image)
+	collection, err := s.CollectionRepo.GetOne(ctx, collection_id)
+	if err != nil {
+		return nil, err
+	}
+
+	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image, collection)
 
 	if err != nil {
 		return nil, err
@@ -116,6 +121,18 @@ func (s *ImageService) GetOne(ctx context.Context, id string, withData bool) (*m
 		return nil, err
 	}
 	image.BoundingBoxes = bboxes
+
+	return image, nil
+
+}
+
+func (s *ImageService) GetOne(ctx context.Context, id string, withData bool) (*m.Image, error) {
+
+	image, err := s.ImageRepo.GetOne(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
 
 	if withData {
 		data, err := s.KeyValueStoreClient.Download(ctx, image.Uri)

@@ -37,8 +37,8 @@ func (s *CollectionService) GetOne(ctx context.Context, id string) (*m.Collectio
 	return set, nil
 }
 
-func (s *CollectionService) AppendImageToSet(ctx context.Context, image *m.Image, set *m.Collection) error {
-	err := s.CollectionRepo.AssignImageToSet(ctx, image, set)
+func (s *CollectionService) AppendImageToCollection(ctx context.Context, image *m.Image, collection *m.Collection) error {
+	err := s.CollectionRepo.AssignImageToCollection(ctx, image, collection)
 	if err != nil {
 		return err
 	}

@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS annotations (
     id varchar(16) PRIMARY KEY,
     image_id varchar(16),
     label_id varchar(16),
+    annotation_id varchar(16),
     author_email varchar(40),
     created_at varchar(30),
     updated_at varchar(30),

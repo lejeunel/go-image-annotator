@@ -16,17 +16,17 @@ func chunkBy[T any](items []T, chunkSize int) (chunks [][]T) {
 func TestCreateCollection(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 
-	set := &m.Collection{Name: "myimageset"}
-	set, err := s.Collections.Create(ctx, set)
+	clc := &m.Collection{Name: "myimageset"}
+	clc, err := s.Collections.Create(ctx, clc)
 
 	AssertNoError(t, err)
 	AssertNoError(t, err)
-	retrievedSet, err := s.Collections.GetOne(ctx, set.Id.String())
+	retrievedSet, err := s.Collections.GetOne(ctx, clc.Id.String())
 	AssertNoError(t, err)
 
-	if retrievedSet.Name != set.Name {
+	if retrievedSet.Name != clc.Name {
 		t.Fatalf("expected to retrieve identical names. Wanted %v, got %v",
-			set.Name, retrievedSet.Name)
+			clc.Name, retrievedSet.Name)
 	}
 }
 
@@ -63,12 +63,12 @@ func TestValidationCollectionName(t *testing.T) {
 func TestRetrieveImagesOfCollection(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
-	setName := "myset"
-	set, err := s.Collections.Create(ctx, &m.Collection{Name: setName})
+	collectionName := "myset"
+	set, err := s.Collections.Create(ctx, &m.Collection{Name: collectionName})
 	AssertNoError(t, err)
 	image_in_set := &m.Image{Data: testImage}
 	s.Images.Save(ctx, image_in_set)
-	s.Collections.AppendImageToSet(ctx, image_in_set, set)
+	s.Collections.AppendImageToCollection(ctx, image_in_set, set)
 
 	s.Images.Save(ctx, &m.Image{Data: testImage})
 
@@ -77,11 +77,11 @@ func TestRetrieveImagesOfCollection(t *testing.T) {
 	AssertNoError(t, err)
 
 	if len(page) != 1 {
-		t.Fatalf("expected to retrieve 1 image in set %v, but got %v", setName, len(page))
+		t.Fatalf("expected to retrieve 1 image in set %v, but got %v", collectionName, len(page))
 	}
 
 	if page[0].Id != image_in_set.Id {
-		t.Fatalf("expected to retrieve image appended in set %v, but got another one", setName)
+		t.Fatalf("expected to retrieve image appended in collection %v, but got another one", collectionName)
 	}
 
 }

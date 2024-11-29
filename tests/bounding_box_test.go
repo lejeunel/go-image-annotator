@@ -24,12 +24,14 @@ func TestApplyingInvalidBoundingBoxesToImageShoudFail(t *testing.T) {
 
 			image := &m.Image{Data: testImage}
 			label := &m.Label{Name: "mylabel"}
+			collection := &m.Collection{Name: "mylabel"}
 			s.Images.Save(ctx, image)
 			s.Annotations.CreateLabel(ctx, label)
+			s.Collections.AppendImageToCollection(ctx, image, collection)
 			bbox := m.NewBoundingBox(tc.xc, tc.yc, tc.h, tc.w)
 			bbox.Annotate(label)
 
-			err := s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image)
+			err := s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collection)
 			AssertError(t, err)
 
 		})
@@ -42,15 +44,18 @@ func TestApplyingValidBoundingBoxesToImageShoudSucceed(t *testing.T) {
 
 	image := &m.Image{Data: testImage}
 	label := &m.Label{Name: "mylabel"}
+	collection := &m.Collection{Name: "mycollection"}
 	s.Images.Save(ctx, image)
 	s.Annotations.CreateLabel(ctx, label)
+	s.Collections.Create(ctx, collection)
 	bbox := m.NewBoundingBox(5, 6, 10, 10)
 	bbox.Annotate(label)
 
-	err := s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image)
+	s.Collections.AppendImageToCollection(ctx, image, collection)
+	err := s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collection)
 	AssertNoError(t, err)
 
-	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), true)
+	retrievedImage, err := s.Images.GetOneWithAnnotations(ctx, image.Id.String(), true, collection.Id.String())
 	AssertNoError(t, err)
 
 	diff := deep.Equal(image, retrievedImage)

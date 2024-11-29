@@ -91,11 +91,15 @@ func TestApplyingBBoxRequiresPermission(t *testing.T) {
 	ctx = context.WithValue(ctx, "user_roles", "viewer")
 	bbox := &m.BoundingBox{Xc: 10, Yc: 10, Height: 11, Width: 15}
 	bbox.Annotate(label)
-	err = s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image)
+	collection := &m.Collection{Name: "myimageset"}
+	s.Collections.Create(ctx, collection)
+	err = s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collection)
 	AssertError(t, err)
 
+	s.Collections.AppendImageToCollection(ctx, image, collection)
+
 	ctx = context.WithValue(ctx, "user_roles", "annotation-contrib")
-	err = s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image)
+	err = s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collection)
 	AssertNoError(t, err)
 
 }
@@ -108,12 +112,17 @@ func TestDeletingAnnotationOnImageDoneByAnotherUserShouldFail(t *testing.T) {
 
 	image := &m.Image{Data: testImage}
 	label := &m.Label{Name: "mylabel"}
+	collection := &m.Collection{Name: "myimageset"}
 	s.Annotations.CreateLabel(ctx, label)
 	s.Images.Save(ctx, image)
-	s.Annotations.ApplyLabelToImage(ctx, label, image)
+	s.Collections.Create(ctx, collection)
+
+	s.Collections.AppendImageToCollection(ctx, image, collection)
+
+	s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
 
 	ctx = context.WithValue(ctx, "user_email", "not-bob@mail.com")
-	err := s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image)
+	err := s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image, collection)
 	AssertError(t, err)
 	if len(image.Annotations) < 1 {
 		t.Fatal("expected that label is not deleted, but it is.")
@@ -129,13 +138,16 @@ func TestDeletingBBoxDoneByAnotherUserShouldFail(t *testing.T) {
 
 	label := &m.Label{Name: "mylabel"}
 	image := &m.Image{Data: testImage}
+	collection := &m.Collection{Name: "mycollection"}
 	s.Annotations.CreateLabel(ctx, label)
 	s.Images.Save(ctx, image)
+	s.Collections.Create(ctx, collection)
+	s.Collections.AppendImageToCollection(ctx, image, collection)
 
 	bbox := &m.BoundingBox{Xc: 10, Yc: 10, Height: 11, Width: 15}
-	err := s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image)
+	err := s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collection)
 	ctx = context.WithValue(ctx, "user_email", "not-bob@mail.com")
-	err = s.Annotations.RemoveAnnotationFromImage(ctx, &image.BoundingBoxes[0].Annotation, image)
+	err = s.Annotations.RemoveAnnotationFromImage(ctx, &image.BoundingBoxes[0].Annotation, image, collection)
 	AssertError(t, err)
 
 }
