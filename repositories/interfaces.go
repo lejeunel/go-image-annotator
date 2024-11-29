@@ -32,7 +32,7 @@ type AnnotationRepo interface {
 
 type CollectionRepo interface {
 	Create(c.Context, *m.Collection) (*m.Collection, error)
-	GetOne(c.Context, string) (*m.Collection, error)
+	Get(c.Context, string) (*m.Collection, error)
 	AssignImageToCollection(c.Context, *m.Image, *m.Collection) error
 	Nums() (int64, error)
 	Slice(offset, length int, data interface{}) error

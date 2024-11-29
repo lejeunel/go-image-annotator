@@ -25,9 +25,9 @@ func TestApplyingInvalidBoundingBoxesToImageShoudFail(t *testing.T) {
 			image := &m.Image{Data: testImage}
 			label := &m.Label{Name: "mylabel"}
 			collection := &m.Collection{Name: "mylabel"}
-			s.Images.Save(ctx, image)
+			s.Collections.Create(ctx, collection)
+			s.Images.Save(ctx, image, collection)
 			s.Annotations.CreateLabel(ctx, label)
-			s.Collections.AppendImageToCollection(ctx, image, collection)
 			bbox := m.NewBoundingBox(tc.xc, tc.yc, tc.h, tc.w)
 			bbox.Annotate(label)
 
@@ -45,17 +45,16 @@ func TestApplyingValidBoundingBoxesToImageShoudSucceed(t *testing.T) {
 	image := &m.Image{Data: testImage}
 	label := &m.Label{Name: "mylabel"}
 	collection := &m.Collection{Name: "mycollection"}
-	s.Images.Save(ctx, image)
 	s.Annotations.CreateLabel(ctx, label)
 	s.Collections.Create(ctx, collection)
+	s.Images.Save(ctx, image, collection)
 	bbox := m.NewBoundingBox(5, 6, 10, 10)
 	bbox.Annotate(label)
 
-	s.Collections.AppendImageToCollection(ctx, image, collection)
 	err := s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collection)
 	AssertNoError(t, err)
 
-	retrievedImage, err := s.Images.GetOneWithAnnotations(ctx, image.Id.String(), true, collection.Id.String())
+	retrievedImage, err := s.Images.Get(ctx, collection.Id.String(), image.Id.String(), true)
 	AssertNoError(t, err)
 
 	diff := deep.Equal(image, retrievedImage)
@@ -64,23 +63,3 @@ func TestApplyingValidBoundingBoxesToImageShoudSucceed(t *testing.T) {
 	}
 
 }
-
-// func TestDeletePolygon(t *testing.T) {
-// 	s, ctx := NewTestApp(t, 2)
-
-// 	image := &m.Image{Data: testImage}
-// 	err := s.Images.Save(ctx, image)
-
-// 	polygon, err := m.NewBoundingBox(10, 10, 30, 30)
-
-// 	err = s.Annotations.ApplyPolygonToImage(ctx, polygon, image)
-// 	err = s.Annotations.DeletePolygonFromImage(ctx, polygon, image)
-// 	AssertNoError(t, err)
-// 	image, _ = s.Images.GetOne(ctx, image.Id.String(), false)
-
-// 	nPolygons := len(image.Polygons)
-// 	if nPolygons != 0 {
-// 		t.Fatalf("expected to retrieve image without polygons, but got %v.", nPolygons)
-// 	}
-
-// }

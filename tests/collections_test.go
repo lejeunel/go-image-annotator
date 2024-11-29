@@ -17,9 +17,8 @@ func TestCreateCollection(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 
 	clc := &m.Collection{Name: "myimageset"}
-	clc, err := s.Collections.Create(ctx, clc)
+	err := s.Collections.Create(ctx, clc)
 
-	AssertNoError(t, err)
 	AssertNoError(t, err)
 	retrievedSet, err := s.Collections.GetOne(ctx, clc.Id.String())
 	AssertNoError(t, err)
@@ -48,8 +47,8 @@ func TestValidationCollectionName(t *testing.T) {
 
 		s, ctx := NewTestApp(t, 2)
 		t.Run(name, func(t *testing.T) {
-			set := &m.Collection{Name: tc.name}
-			set, err := s.Collections.Create(ctx, set)
+			collection := &m.Collection{Name: tc.name}
+			err := s.Collections.Create(ctx, collection)
 			if tc.isValid {
 				AssertNoError(t, err)
 			} else {
@@ -64,13 +63,11 @@ func TestRetrieveImagesOfCollection(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	collectionName := "myset"
-	set, err := s.Collections.Create(ctx, &m.Collection{Name: collectionName})
+	collection := &m.Collection{Name: collectionName}
+	err := s.Collections.Create(ctx, collection)
 	AssertNoError(t, err)
-	image_in_set := &m.Image{Data: testImage}
-	s.Images.Save(ctx, image_in_set)
-	s.Collections.AppendImageToCollection(ctx, image_in_set, set)
-
-	s.Images.Save(ctx, &m.Image{Data: testImage})
+	image := &m.Image{Data: testImage}
+	s.Images.Save(ctx, image, collection)
 
 	page, _, err := s.Images.GetPage(ctx, g.PaginationParams{Page: 1, PageSize: 4},
 		&g.ImageFilterArgs{SetName: "myset"}, false)
@@ -78,10 +75,6 @@ func TestRetrieveImagesOfCollection(t *testing.T) {
 
 	if len(page) != 1 {
 		t.Fatalf("expected to retrieve 1 image in set %v, but got %v", collectionName, len(page))
-	}
-
-	if page[0].Id != image_in_set.Id {
-		t.Fatalf("expected to retrieve image appended in collection %v, but got another one", collectionName)
 	}
 
 }

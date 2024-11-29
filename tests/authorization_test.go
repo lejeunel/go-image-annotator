@@ -23,7 +23,9 @@ func TestSavingImagesRequiresPermission(t *testing.T) {
 			s, ctx := NewTestApp(t, 2)
 			ctx = context.WithValue(ctx, "user_roles", tc.roles)
 			image := &m.Image{Data: testImage}
-			err := s.Images.Save(ctx, image)
+			collection := &m.Collection{Name: "myimageset"}
+			s.Collections.Create(ctx, collection)
+			err := s.Images.Save(ctx, image, collection)
 
 			if tc.wantError {
 				AssertError(t, err)
@@ -40,8 +42,10 @@ func TestDeletingImagesRequiresPermission(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 	ctx = context.WithValue(ctx, "user_roles", "im-contrib")
 	image := &m.Image{Data: testImage}
+	collection := &m.Collection{Name: "myimageset"}
+	s.Collections.Create(ctx, collection)
 
-	err := s.Images.Save(ctx, image)
+	err := s.Images.Save(ctx, image, collection)
 	err = s.Images.Delete(ctx, image)
 	AssertError(t, err)
 }
@@ -84,19 +88,17 @@ func TestApplyingBBoxRequiresPermission(t *testing.T) {
 	ctx = context.WithValue(ctx, "user_roles", "admin")
 
 	image := &m.Image{Data: testImage}
-	err := s.Images.Save(ctx, image)
 	label := &m.Label{Name: "mylabel"}
-	err = s.Annotations.CreateLabel(ctx, label)
+	s.Annotations.CreateLabel(ctx, label)
+	collection := &m.Collection{Name: "myimageset"}
+	s.Collections.Create(ctx, collection)
+	err := s.Images.Save(ctx, image, collection)
 
 	ctx = context.WithValue(ctx, "user_roles", "viewer")
 	bbox := &m.BoundingBox{Xc: 10, Yc: 10, Height: 11, Width: 15}
 	bbox.Annotate(label)
-	collection := &m.Collection{Name: "myimageset"}
-	s.Collections.Create(ctx, collection)
 	err = s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collection)
 	AssertError(t, err)
-
-	s.Collections.AppendImageToCollection(ctx, image, collection)
 
 	ctx = context.WithValue(ctx, "user_roles", "annotation-contrib")
 	err = s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collection)
@@ -113,11 +115,9 @@ func TestDeletingAnnotationOnImageDoneByAnotherUserShouldFail(t *testing.T) {
 	image := &m.Image{Data: testImage}
 	label := &m.Label{Name: "mylabel"}
 	collection := &m.Collection{Name: "myimageset"}
-	s.Annotations.CreateLabel(ctx, label)
-	s.Images.Save(ctx, image)
 	s.Collections.Create(ctx, collection)
-
-	s.Collections.AppendImageToCollection(ctx, image, collection)
+	s.Annotations.CreateLabel(ctx, label)
+	s.Images.Save(ctx, image, collection)
 
 	s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
 
@@ -140,9 +140,9 @@ func TestDeletingBBoxDoneByAnotherUserShouldFail(t *testing.T) {
 	image := &m.Image{Data: testImage}
 	collection := &m.Collection{Name: "mycollection"}
 	s.Annotations.CreateLabel(ctx, label)
-	s.Images.Save(ctx, image)
 	s.Collections.Create(ctx, collection)
-	s.Collections.AppendImageToCollection(ctx, image, collection)
+
+	s.Images.Save(ctx, image, collection)
 
 	bbox := &m.BoundingBox{Xc: 10, Yc: 10, Height: 11, Width: 15}
 	err := s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collection)

@@ -64,7 +64,19 @@ func (s *ImageService) Delete(ctx context.Context, image *m.Image) error {
 	return s.ImageRepo.Delete(ctx, image)
 }
 
-func (s *ImageService) Save(ctx context.Context, image *m.Image) error {
+func (s *ImageService) Save(ctx context.Context, image *m.Image, collection *m.Collection) error {
+	if err := s.saveImage(ctx, image); err != nil {
+		return err
+	}
+	err := s.CollectionRepo.AssignImageToCollection(ctx, image, collection)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (s *ImageService) saveImage(ctx context.Context, image *m.Image) error {
 
 	if err := g.CheckAuthorization(ctx, "im-contrib"); err != nil {
 		return err
@@ -98,13 +110,13 @@ func (s *ImageService) Save(ctx context.Context, image *m.Image) error {
 
 }
 
-func (s *ImageService) GetOneWithAnnotations(ctx context.Context, image_id string, withData bool, collection_id string) (*m.Image, error) {
-	image, err := s.GetOne(ctx, image_id, withData)
+func (s *ImageService) Get(ctx context.Context, collection_id string, image_id string, withData bool) (*m.Image, error) {
+	image, err := s.getBase(ctx, image_id, withData)
 	if err != nil {
 		return nil, err
 	}
 
-	collection, err := s.CollectionRepo.GetOne(ctx, collection_id)
+	collection, err := s.CollectionRepo.Get(ctx, collection_id)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +138,7 @@ func (s *ImageService) GetOneWithAnnotations(ctx context.Context, image_id strin
 
 }
 
-func (s *ImageService) GetOne(ctx context.Context, id string, withData bool) (*m.Image, error) {
+func (s *ImageService) getBase(ctx context.Context, id string, withData bool) (*m.Image, error) {
 
 	image, err := s.ImageRepo.GetOne(ctx, id)
 

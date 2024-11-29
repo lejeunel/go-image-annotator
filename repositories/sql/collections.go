@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	e "go-image-annotator/errors"
@@ -31,7 +32,7 @@ func (r *SQLCollectionRepo) Create(ctx context.Context, set *m.Collection) (*m.C
 	return set, nil
 }
 
-func (r *SQLCollectionRepo) GetOne(ctx context.Context, id string) (*m.Collection, error) {
+func (r *SQLCollectionRepo) Get(ctx context.Context, id string) (*m.Collection, error) {
 	set := m.Collection{}
 	err := r.Db.Get(&set, "SELECT id,name,created_at,updated_at FROM imagesets WHERE id=?", id)
 
@@ -45,7 +46,7 @@ func (r *SQLCollectionRepo) GetOne(ctx context.Context, id string) (*m.Collectio
 func (r *SQLCollectionRepo) AssignImageToCollection(ctx context.Context, image *m.Image, set *m.Collection) error {
 	now := time.Now().String()
 	query := "INSERT INTO image_set_assoc (id, image_id, set_id, created_at) VALUES (?, ?, ?, ?)"
-	_, err := r.Db.Exec(query, set.Id, image.Id, set.Id, now)
+	_, err := r.Db.Exec(query, uuid.New(), image.Id, set.Id, now)
 
 	if err != nil {
 		return err

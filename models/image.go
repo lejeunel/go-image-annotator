@@ -17,11 +17,3 @@ type Image struct {
 	Annotations   []*Annotation
 	BoundingBoxes []*BoundingBox
 }
-
-// func (im Image) Validate() error {
-// 	return validation.ValidateStruct(&a,
-// 		validation.Field(&a.FirstName, validation.Required),
-// 		validation.Field(&a.LastName, validation.Required),
-// 		validation.Field(&a.DateOfBirth, validation.Date("2006-01-02")),
-// 	)
-// }

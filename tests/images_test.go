@@ -14,32 +14,21 @@ func clearDateTime(image *m.Image) *m.Image {
 	return image
 }
 
-func TestSaveAndRetrieveImage(t *testing.T) {
-	s, ctx := NewTestApp(t, 2)
-
-	image := &m.Image{Data: testImage}
-
-	err := s.Images.Save(ctx, image)
-	AssertNoError(t, err)
-
-	retrievedImage, err := s.Images.GetOne(ctx, image.Id.String(), true)
-	AssertNoError(t, err)
-
-	diff := deep.Equal(retrievedImage, image)
-	if diff != nil {
-		t.Fatalf(fmt.Sprintf("expected to retrieve identical image structs, but got different fields: %v", diff))
-	}
-
-}
-
 func TestSavingImageWithSHA256(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 
 	testImageSHA256 := "cff295b60ef32bcd2e9a3c38eaf35dfdf78ffaf8bc95e655b682dd268329cfa1"
 	image := &m.Image{Data: testImage, SHA256: testImageSHA256}
+	collection := &m.Collection{Name: "thename"}
+	s.Collections.Create(ctx, collection)
+	s.Images.Save(ctx, image, collection)
 
-	err := s.Images.Save(ctx, image)
-	AssertNoError(t, err)
+	retrievedImage, _ := s.Images.Get(ctx, collection.Id.String(), image.Id.String(), true)
+
+	diff := deep.Equal(image, retrievedImage)
+	if diff != nil {
+		t.Fatalf(fmt.Sprintf("expected to retrieve identical image structs, but got different fields: %v", diff))
+	}
 
 }
 
@@ -48,8 +37,10 @@ func TestSavingCorruptedImageWithSHA256ShouldFail(t *testing.T) {
 
 	corruptSHA256 := "dff295b60ef32bcd2e9a3c38eaf35dfdf78ffaf8bc95e655b682dd268329cfa1"
 	image := &m.Image{Data: testImage, SHA256: corruptSHA256}
+	collection := &m.Collection{}
+	s.Collections.Create(ctx, collection)
 
-	err := s.Images.Save(ctx, image)
+	err := s.Images.Save(ctx, image, collection)
 	AssertError(t, err)
 
 }
@@ -70,8 +61,12 @@ func TestPaginateImages(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			s, ctx := NewTestApp(t, tc.maxPageSize)
+
+			collection := &m.Collection{Name: "thename"}
+			s.Collections.Create(ctx, collection)
 			for i := 0; i < tc.nImages; i++ {
-				err := s.Images.Save(ctx, &m.Image{Data: testImage})
+				image := &m.Image{Data: testImage}
+				err := s.Images.Save(ctx, image, collection)
 				AssertNoError(t, err)
 			}
 			page, pageMeta, err := s.Images.GetPage(ctx, g.PaginationParams{Page: tc.page, PageSize: tc.pageSize}, &g.ImageFilterArgs{}, false)
