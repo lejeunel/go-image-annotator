@@ -6,14 +6,14 @@ import (
 	"regexp"
 )
 
-type Set struct {
+type Collection struct {
 	Id        uuid.UUID `db:"id"`
 	Name      string    `db:"name"`
 	CreatedAt string    `db:"created_at"`
 	UpdatedAt string    `db:"updated_at"`
 }
 
-func (s Set) Validate() error {
+func (s Collection) Validate() error {
 	return validation.ValidateStruct(&s,
 		validation.Field(&s.Name, validation.Required),
 		validation.Field(&s.Name, validation.Match(regexp.MustCompile("^[a-z\\-_]*$"))),

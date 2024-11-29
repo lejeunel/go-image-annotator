@@ -13,15 +13,15 @@ func chunkBy[T any](items []T, chunkSize int) (chunks [][]T) {
 	return append(chunks, items)
 }
 
-func TestCreateSet(t *testing.T) {
+func TestCreateCollection(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 
-	set := &m.Set{Name: "myimageset"}
-	set, err := s.Sets.Create(ctx, set)
+	set := &m.Collection{Name: "myimageset"}
+	set, err := s.Collections.Create(ctx, set)
 
 	AssertNoError(t, err)
 	AssertNoError(t, err)
-	retrievedSet, err := s.Sets.GetOne(ctx, set.Id.String())
+	retrievedSet, err := s.Collections.GetOne(ctx, set.Id.String())
 	AssertNoError(t, err)
 
 	if retrievedSet.Name != set.Name {
@@ -30,7 +30,7 @@ func TestCreateSet(t *testing.T) {
 	}
 }
 
-func TestValidationSetName(t *testing.T) {
+func TestValidationCollectionName(t *testing.T) {
 	tests := map[string]struct {
 		name    string
 		isValid bool
@@ -48,8 +48,8 @@ func TestValidationSetName(t *testing.T) {
 
 		s, ctx := NewTestApp(t, 2)
 		t.Run(name, func(t *testing.T) {
-			set := &m.Set{Name: tc.name}
-			set, err := s.Sets.Create(ctx, set)
+			set := &m.Collection{Name: tc.name}
+			set, err := s.Collections.Create(ctx, set)
 			if tc.isValid {
 				AssertNoError(t, err)
 			} else {
@@ -60,15 +60,15 @@ func TestValidationSetName(t *testing.T) {
 
 }
 
-func TestRetrieveImagesOfSet(t *testing.T) {
+func TestRetrieveImagesOfCollection(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	setName := "myset"
-	set, err := s.Sets.Create(ctx, &m.Set{Name: setName})
+	set, err := s.Collections.Create(ctx, &m.Collection{Name: setName})
 	AssertNoError(t, err)
 	image_in_set := &m.Image{Data: testImage}
 	s.Images.Save(ctx, image_in_set)
-	s.Sets.AppendImageToSet(ctx, image_in_set, set)
+	s.Collections.AppendImageToSet(ctx, image_in_set, set)
 
 	s.Images.Save(ctx, &m.Image{Data: testImage})
 

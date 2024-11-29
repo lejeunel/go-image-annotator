@@ -75,7 +75,7 @@ func (r *PaginableSQLImageRepo) buildFilteringWhereClause() (string, error) {
 	}
 
 	if r.Filters.SetName != "" {
-		set := m.Set{}
+		set := m.Collection{}
 		err := r.Repo.Db.Get(&set, "SELECT id FROM imagesets WHERE name=?", r.Filters.SetName)
 		if err != nil {
 			return "", err

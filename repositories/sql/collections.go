@@ -9,17 +9,17 @@ import (
 	"time"
 )
 
-type SQLSetRepo struct {
+type SQLCollectionRepo struct {
 	Db *sqlx.DB
 }
 
-func NewSQLSetRepo(db *sqlx.DB) *SQLSetRepo {
+func NewSQLSetRepo(db *sqlx.DB) *SQLCollectionRepo {
 
-	return &SQLSetRepo{Db: db}
+	return &SQLCollectionRepo{Db: db}
 
 }
 
-func (r *SQLSetRepo) Create(ctx context.Context, set *m.Set) (*m.Set, error) {
+func (r *SQLCollectionRepo) Create(ctx context.Context, set *m.Collection) (*m.Collection, error) {
 	now := time.Now().String()
 	query := "INSERT INTO imagesets (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)"
 	_, err := r.Db.Exec(query, set.Id, set.Name, now, now)
@@ -31,8 +31,8 @@ func (r *SQLSetRepo) Create(ctx context.Context, set *m.Set) (*m.Set, error) {
 	return set, nil
 }
 
-func (r *SQLSetRepo) GetOne(ctx context.Context, id string) (*m.Set, error) {
-	set := m.Set{}
+func (r *SQLCollectionRepo) GetOne(ctx context.Context, id string) (*m.Collection, error) {
+	set := m.Collection{}
 	err := r.Db.Get(&set, "SELECT id,name,created_at,updated_at FROM imagesets WHERE id=?", id)
 
 	if err != nil {
@@ -42,7 +42,7 @@ func (r *SQLSetRepo) GetOne(ctx context.Context, id string) (*m.Set, error) {
 	return &set, nil
 }
 
-func (r *SQLSetRepo) AssignImageToSet(ctx context.Context, image *m.Image, set *m.Set) error {
+func (r *SQLCollectionRepo) AssignImageToSet(ctx context.Context, image *m.Image, set *m.Collection) error {
 	now := time.Now().String()
 	query := "INSERT INTO image_set_assoc (id, image_id, set_id, created_at) VALUES (?, ?, ?, ?)"
 	_, err := r.Db.Exec(query, set.Id, image.Id, set.Id, now)
@@ -55,13 +55,13 @@ func (r *SQLSetRepo) AssignImageToSet(ctx context.Context, image *m.Image, set *
 
 }
 
-func (r *SQLSetRepo) Nums() (int64, error) {
+func (r *SQLCollectionRepo) Nums() (int64, error) {
 
 	return 0, nil
 
 }
 
-func (r *SQLSetRepo) Slice(offset, length int, data interface{}) error {
+func (r *SQLCollectionRepo) Slice(offset, length int, data interface{}) error {
 
 	return nil
 }

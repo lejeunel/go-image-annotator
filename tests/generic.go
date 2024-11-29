@@ -17,7 +17,7 @@ var testImage []byte
 type Services struct {
 	Images      *s.ImageService
 	Annotations *s.AnnotationService
-	Sets        *s.SetService
+	Collections *s.CollectionService
 }
 
 type MockKVStoreClient struct {
@@ -56,7 +56,7 @@ func NewTestApp(t *testing.T, maxPageSize int) (Services, context.Context) {
 	}
 	imageRepo := r.NewSQLImageRepo(db)
 	labelRepo := r.NewSQLLabelRepo(db)
-	setRepo := r.NewSQLSetRepo(db)
+	collectionRepo := r.NewSQLSetRepo(db)
 	KVStore := NewMockKVStoreClient()
 
 	imageService := s.ImageService{KeyValueStoreClient: KVStore, ImageRepo: imageRepo,
@@ -64,14 +64,15 @@ func NewTestApp(t *testing.T, maxPageSize int) (Services, context.Context) {
 		DefaultPageSize: maxPageSize, RemoteScheme: "scheme", RemoteBucketName: "mybucket"}
 	annotationService := s.AnnotationService{LabelRepo: labelRepo, MaxPageSize: maxPageSize,
 		DefaultPageSize: maxPageSize}
-	SetService := s.SetService{SetRepo: setRepo, ImageRepo: imageRepo, MaxPageSize: maxPageSize, DefaultPageSize: maxPageSize}
+	CollectionService := s.CollectionService{CollectionRepo: collectionRepo,
+		ImageRepo: imageRepo, MaxPageSize: maxPageSize, DefaultPageSize: maxPageSize}
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "user_roles", "admin")
 	ctx = context.WithValue(ctx, "user_email", "user@email.com")
 
 	return Services{Images: &imageService, Annotations: &annotationService,
-		Sets: &SetService}, ctx
+		Collections: &CollectionService}, ctx
 
 }
 

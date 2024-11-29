@@ -30,10 +30,10 @@ type AnnotationRepo interface {
 	Slice(offset, length int, data interface{}) error
 }
 
-type SetRepo interface {
-	Create(c.Context, *m.Set) (*m.Set, error)
-	GetOne(c.Context, string) (*m.Set, error)
-	AssignImageToSet(c.Context, *m.Image, *m.Set) error
+type CollectionRepo interface {
+	Create(c.Context, *m.Collection) (*m.Collection, error)
+	GetOne(c.Context, string) (*m.Collection, error)
+	AssignImageToSet(c.Context, *m.Image, *m.Collection) error
 	Nums() (int64, error)
 	Slice(offset, length int, data interface{}) error
 }
