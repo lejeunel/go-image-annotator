@@ -72,7 +72,8 @@ func TestRetrieveImagesOfSet(t *testing.T) {
 
 	s.Images.Save(ctx, &m.Image{Data: testImage})
 
-	page, _, err := s.Images.GetPage(ctx, g.PaginationParams{Page: 1, PageSize: 4}, &g.ImageFilterArgs{SetName: "myset"}, false)
+	page, _, err := s.Images.GetPage(ctx, g.PaginationParams{Page: 1, PageSize: 4},
+		&g.ImageFilterArgs{SetName: "myset"}, false)
 	AssertNoError(t, err)
 
 	if len(page) != 1 {
