@@ -13,6 +13,7 @@ annotations without modifying the older ones. This is useful for tracability.
 * DONE Check unicity of collection name
 * DONE Check unicity of label name
 * DONE Cloning collection should also clone all annotations of linked images
+* DONE Merging collection should also copy all annotations of linked images
 * TODO Allow to select deep or shallow operation for clone and merge
 - Shallow: Copy references to images
 - Deep: Shallow + Copy annotations

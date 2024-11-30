@@ -232,3 +232,37 @@ func TestMergingCollectionsShouldSkipDuplicateImages(t *testing.T) {
 	}
 
 }
+
+func TestMergingCollectionsShouldAlsoCopyAnnotations(t *testing.T) {
+
+	s, ctx := NewTestApp(t, 2)
+	collectionName := "mycollection"
+	labelName := "mylabel"
+
+	collection := &m.Collection{Name: collectionName}
+	s.Collections.Create(ctx, collection)
+	collectionToMerge := &m.Collection{Name: "mycollectiontomerge"}
+	s.Collections.Create(ctx, collectionToMerge)
+
+	image := &m.Image{Data: testImage}
+	label := &m.Label{Name: labelName}
+	s.Images.Save(ctx, image, collectionToMerge)
+	s.Annotations.CreateLabel(ctx, label)
+	s.Annotations.ApplyLabelToImage(ctx, label, image, collectionToMerge)
+	bbox := m.NewBoundingBox(5, 6, 10, 10)
+	bbox.Annotate(label)
+	s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collectionToMerge)
+
+	s.Collections.Merge(ctx, collectionToMerge, collection)
+	destinationImages, _, _ := s.Images.GetPage(ctx, collection.Id.String(), g.PaginationParams{},
+		false)
+
+	if destinationImages[0].Annotations == nil {
+		t.Fatal("expected to retrieve image annotations, but got none")
+	}
+
+	if destinationImages[0].BoundingBoxes == nil {
+		t.Fatal("expected to retrieve image with bounding boxes, but got none")
+	}
+
+}

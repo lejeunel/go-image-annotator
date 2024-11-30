@@ -102,6 +102,7 @@ func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, des
 	for hasNextPage {
 		images, pageMeta, err := s.ImageService.GetPage(ctx, source.Id.String(), g.PaginationParams{Page: int64(page), PageSize: 1},
 			false)
+		image := &images[0]
 		if err != nil {
 			return err
 		}
@@ -112,6 +113,19 @@ func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, des
 		if !imageFoundInDestination {
 			s.CollectionRepo.AssignImageToCollection(ctx, &images[0], destination)
 		}
+		if image.Annotations != nil {
+			for _, a := range image.Annotations {
+				s.AnnotationService.ApplyLabelToImage(ctx, a.Label, image, destination)
+
+			}
+		}
+		if image.BoundingBoxes != nil {
+			for _, bbox := range image.BoundingBoxes {
+				s.AnnotationService.ApplyBoundingBoxToImage(ctx, bbox, image, destination)
+
+			}
+		}
+
 		if page == pageMeta.TotalPages {
 			break
 		}
