@@ -1,17 +1,12 @@
 package tests
 
 import (
+	"fmt"
+	"github.com/go-test/deep"
 	g "go-image-annotator/generic"
 	m "go-image-annotator/models"
 	"testing"
 )
-
-func chunkBy[T any](items []T, chunkSize int) (chunks [][]T) {
-	for chunkSize < len(items) {
-		items, chunks = items[chunkSize:], append(chunks, items[0:chunkSize:chunkSize])
-	}
-	return append(chunks, items)
-}
 
 func TestCreateCollection(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
@@ -80,8 +75,8 @@ func TestRetrieveImagesOfCollection(t *testing.T) {
 	image := &m.Image{Data: testImage}
 	s.Images.Save(ctx, image, collection)
 
-	page, _, err := s.Images.GetPage(ctx, g.PaginationParams{Page: 1, PageSize: 4},
-		&g.ImageFilterArgs{CollectionName: "myset"}, false)
+	page, _, err := s.Images.GetPage(ctx, collection.Id.String(), g.PaginationParams{Page: 1, PageSize: 4},
+		false)
 	AssertNoError(t, err)
 
 	if len(page) != 1 {
@@ -101,9 +96,69 @@ func TestOrphanImagesShouldBeDeleted(t *testing.T) {
 
 	s.Collections.Delete(ctx, collection)
 
-	images, _, _ := s.Images.GetPage(ctx, g.PaginationParams{}, &g.ImageFilterArgs{}, false)
+	images, _, _ := s.Images.GetPage(ctx, collection.Id.String(), g.PaginationParams{}, false)
 	if len(images) > 0 {
 		t.Fatal("expected to retrieve 0 images, but found some")
+	}
+
+}
+
+func TestAnnotationsShouldApplyToSpecifiedCollection(t *testing.T) {
+	s, ctx := NewTestApp(t, 2)
+	collectionName := "mycollection"
+	labelName := "mylabel"
+	collection := &m.Collection{Name: collectionName}
+	s.Collections.Create(ctx, collection)
+
+	image := &m.Image{Data: testImage}
+	label := &m.Label{Name: labelName}
+	s.Images.Save(ctx, image, collection)
+	s.Annotations.CreateLabel(ctx, label)
+	s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
+
+	notAnnotatedCollection := &m.Collection{Name: "not-annotated-collection"}
+	s.Collections.Create(ctx, notAnnotatedCollection)
+	s.Collections.CollectionRepo.AssignImageToCollection(ctx, image, notAnnotatedCollection)
+
+	notAnnotatedImages, _, _ := s.Images.GetPage(ctx, notAnnotatedCollection.Id.String(), g.PaginationParams{}, false)
+	if notAnnotatedImages[0].Annotations != nil {
+		t.Fatal("expected to retrieve not annotated image")
+	}
+
+}
+
+func TestCloningCollectionsShouldAlsoCloneAnnotations(t *testing.T) {
+
+	s, ctx := NewTestApp(t, 2)
+	collectionName := "mycollection"
+	cloneName := "theclone"
+	labelName := "mylabel"
+	collection := &m.Collection{Name: collectionName}
+	s.Collections.Create(ctx, collection)
+
+	image := &m.Image{Data: testImage}
+	label := &m.Label{Name: labelName}
+	s.Images.Save(ctx, image, collection)
+	s.Annotations.CreateLabel(ctx, label)
+	s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
+	bbox := m.NewBoundingBox(5, 6, 10, 10)
+	bbox.Annotate(label)
+
+	s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collection)
+
+	clone := &m.Collection{Name: cloneName}
+	s.Collections.Clone(ctx, collection, clone)
+	cloneImages, _, _ := s.Images.GetPage(ctx, clone.Id.String(), g.PaginationParams{},
+		false)
+
+	diff := deep.Equal(image.Annotations, cloneImages[0].Annotations)
+	if diff != nil {
+		t.Fatalf(fmt.Sprintf("expected to retrieve identical image annotations, but got different fields: %v", diff))
+	}
+
+	diff = deep.Equal(image.BoundingBoxes, cloneImages[0].BoundingBoxes)
+	if diff != nil {
+		t.Fatalf(fmt.Sprintf("expected to retrieve identical image bounding boxes, but got different fields: %v", diff))
 	}
 
 }
@@ -117,21 +172,21 @@ func TestCloningCollectionsShouldNotDuplicateImages(t *testing.T) {
 	image := &m.Image{Data: testImage}
 	s.Images.Save(ctx, image, collection)
 
-	s.Collections.Clone(ctx, collection, &m.Collection{Name: "theclone"})
-	imagesOfClone, _, _ := s.Images.GetPage(ctx, g.PaginationParams{},
-		&g.ImageFilterArgs{CollectionName: "theclone"}, false)
+	clonedCollection := &m.Collection{Name: "theclone"}
 
-	images, _, _ := s.Images.GetPage(ctx, g.PaginationParams{}, &g.ImageFilterArgs{}, false)
-	if len(images) != 1 {
-		t.Fatalf("expected to get 1 image accross all collections, but found %v", len(images))
-	}
+	s.Collections.Clone(ctx, collection, clonedCollection)
+	imagesOfClone, _, _ := s.Images.GetPage(ctx, clonedCollection.Id.String(),
+		g.PaginationParams{}, false)
+	imagesOrigin, _, _ := s.Images.GetPage(ctx, collection.Id.String(),
+		g.PaginationParams{}, false)
 
 	if len(imagesOfClone) != 1 {
 		t.Fatalf("expected to retrieve 1 image in cloned collection, but found %v", len(imagesOfClone))
 	}
 
-	if imagesOfClone[0].Id != images[0].Id {
-		t.Fatalf("expected to retrieve images in cloned collection with identical id, but it is different: %v", imagesOfClone[0].Id)
+	if imagesOfClone[0].Id != imagesOrigin[0].Id {
+		t.Fatalf("expected to retrieve images in cloned collection with identical id, but it is different: %v VS %v",
+			imagesOfClone[0].Id, imagesOrigin[0].Id)
 	}
 
 }
@@ -148,8 +203,8 @@ func TestMergingCollections(t *testing.T) {
 	s.Images.Save(ctx, image, secondCollection)
 
 	s.Collections.Merge(ctx, secondCollection, firstCollection)
-	imagesInMerged, _, _ := s.Images.GetPage(ctx, g.PaginationParams{Page: 1, PageSize: 4},
-		&g.ImageFilterArgs{CollectionName: "first"}, false)
+	imagesInMerged, _, _ := s.Images.GetPage(ctx, firstCollection.Id.String(),
+		g.PaginationParams{Page: 1, PageSize: 4}, false)
 
 	if len(imagesInMerged) != 2 {
 		t.Fatalf("expected to retrieve 2 images in merging destination collection, got %v",
@@ -171,8 +226,9 @@ func TestMergingCollectionsShouldSkipDuplicateImages(t *testing.T) {
 	s.Collections.CollectionRepo.AssignImageToCollection(ctx, commonImage, newCollection)
 
 	s.Collections.Merge(ctx, collection, newCollection)
-	imagesInMerged, _, _ := s.Images.GetPage(ctx, g.PaginationParams{Page: 1, PageSize: 4},
-		&g.ImageFilterArgs{CollectionName: "new-collection"}, false)
+	imagesInMerged, _, _ := s.Images.GetPage(ctx, newCollection.Id.String(),
+		g.PaginationParams{Page: 1, PageSize: 4},
+		false)
 
 	if len(imagesInMerged) != 1 {
 		t.Fatalf("expected to retrieve 1 image in merged collection, got %v",

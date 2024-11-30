@@ -69,7 +69,10 @@ func TestPaginateImages(t *testing.T) {
 				err := s.Images.Save(ctx, image, collection)
 				AssertNoError(t, err)
 			}
-			page, pageMeta, err := s.Images.GetPage(ctx, g.PaginationParams{Page: tc.page, PageSize: tc.pageSize}, &g.ImageFilterArgs{}, false)
+			page, pageMeta, err := s.Images.GetPage(ctx,
+				collection.Id.String(),
+				g.PaginationParams{Page: tc.page, PageSize: tc.pageSize},
+				false)
 			AssertNoError(t, err)
 
 			if len(page) != tc.pageSize {

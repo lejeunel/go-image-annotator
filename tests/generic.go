@@ -56,7 +56,7 @@ func NewTestApp(t *testing.T, maxPageSize int) (Services, context.Context) {
 	}
 	imageRepo := r.NewSQLImageRepo(db)
 	labelRepo := r.NewSQLLabelRepo(db)
-	collectionRepo := r.NewSQLSetRepo(db)
+	collectionRepo := r.NewSQLCollectionRepo(db)
 	KVStore := NewMockKVStoreClient()
 
 	imageService := s.ImageService{KeyValueStoreClient: KVStore, ImageRepo: imageRepo,
@@ -64,7 +64,9 @@ func NewTestApp(t *testing.T, maxPageSize int) (Services, context.Context) {
 		DefaultPageSize: maxPageSize, RemoteScheme: "scheme", RemoteBucketName: "mybucket"}
 	annotationService := s.AnnotationService{LabelRepo: labelRepo, MaxPageSize: maxPageSize,
 		DefaultPageSize: maxPageSize}
-	CollectionService := s.CollectionService{ImageService: imageService, CollectionRepo: collectionRepo, ImageRepo: imageRepo,
+	CollectionService := s.CollectionService{ImageService: imageService,
+		AnnotationService: annotationService,
+		CollectionRepo:    collectionRepo, ImageRepo: imageRepo,
 		MaxPageSize: maxPageSize, DefaultPageSize: maxPageSize}
 
 	ctx := context.Background()

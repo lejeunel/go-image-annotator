@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/uuid"
 	g "go-image-annotator/generic"
 	m "go-image-annotator/models"
@@ -10,11 +9,12 @@ import (
 )
 
 type CollectionService struct {
-	ImageService    ImageService
-	CollectionRepo  r.CollectionRepo
-	ImageRepo       r.ImageRepo
-	MaxPageSize     int
-	DefaultPageSize int
+	ImageService      ImageService
+	AnnotationService AnnotationService
+	CollectionRepo    r.CollectionRepo
+	ImageRepo         r.ImageRepo
+	MaxPageSize       int
+	DefaultPageSize   int
 }
 
 func (s *CollectionService) Create(ctx context.Context, collection *m.Collection) error {
@@ -56,16 +56,20 @@ func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection,
 
 	s.Create(ctx, newCollection)
 
-	filters := &g.ImageFilterArgs{}
 	page := 1
 	hasNextPage := true
 	for hasNextPage {
-		images, pageMeta, err := s.ImageService.GetPage(ctx, g.PaginationParams{Page: int64(page), PageSize: 1},
-			filters, false)
+		images, pageMeta, err := s.ImageService.GetPage(ctx, collection.Id.String(),
+			g.PaginationParams{Page: int64(page), PageSize: 1},
+			false)
 		if err != nil {
 			return err
 		}
-		s.CollectionRepo.AssignImageToCollection(ctx, &images[0], newCollection)
+		err = s.CollectionRepo.AssignImageToCollection(ctx, &images[0], newCollection)
+		if err != nil {
+			return err
+		}
+
 		if page == pageMeta.TotalPages {
 			break
 		}
@@ -79,12 +83,11 @@ func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection,
 
 func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, destination *m.Collection) error {
 
-	filters := &g.ImageFilterArgs{CollectionId: source.Id.String()}
 	page := 1
 	hasNextPage := true
 	for hasNextPage {
-		images, pageMeta, err := s.ImageService.GetPage(ctx, g.PaginationParams{Page: int64(page), PageSize: 1},
-			filters, false)
+		images, pageMeta, err := s.ImageService.GetPage(ctx, source.Id.String(), g.PaginationParams{Page: int64(page), PageSize: 1},
+			false)
 		if err != nil {
 			return err
 		}
@@ -93,7 +96,6 @@ func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, des
 			return err
 		}
 		if !imageFoundInDestination {
-			fmt.Println("merging new image")
 			s.CollectionRepo.AssignImageToCollection(ctx, &images[0], destination)
 		}
 		if page == pageMeta.TotalPages {

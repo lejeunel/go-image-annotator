@@ -117,6 +117,16 @@ func (s *ImageService) Get(ctx context.Context, collection_id string, image_id s
 		return nil, err
 	}
 
+	image, err = s.prependAuxiliaryFields(ctx, image, collection_id)
+	if err != nil {
+		return nil, err
+	}
+
+	return image, nil
+
+}
+
+func (s *ImageService) prependAuxiliaryFields(ctx context.Context, image *m.Image, collection_id string) (*m.Image, error) {
 	collection, err := s.CollectionRepo.Get(ctx, collection_id)
 	if err != nil {
 		return nil, err
@@ -161,25 +171,32 @@ func (s *ImageService) getBase(ctx context.Context, id string, withData bool) (*
 
 func (s *ImageService) GetPage(
 	ctx context.Context,
+	collection_id string,
 	pagination g.PaginationParams,
-	filters *g.ImageFilterArgs,
 	withData bool) ([]m.Image, *g.PaginationMeta, error) {
 
-	if pagination.PageSize > s.MaxPageSize {
-		pagination.PageSize = s.MaxPageSize
-	}
-
-	p := s.ImageRepo.Paginate(pagination.PageSize, filters)
+	p := s.ImageRepo.Paginate(pagination.PageSize, &g.ImageFilterArgs{CollectionId: collection_id})
 	p.SetPage(int(pagination.Page))
 
 	var images []m.Image
+	var augmentedImages []m.Image
 	err := p.Results(&images)
+
+	// augment objects with annotations
+	for _, image := range images {
+		image, err := s.Get(ctx, collection_id, image.Id.String(), withData)
+		if err != nil {
+			return nil, nil, err
+		}
+		augmentedImages = append(augmentedImages, *image)
+
+	}
 
 	if err != nil {
 		return nil, nil, err
 	}
 
 	paginationMeta := g.NewPaginationMeta(p)
-	return images, &paginationMeta, nil
+	return augmentedImages, &paginationMeta, nil
 
 }

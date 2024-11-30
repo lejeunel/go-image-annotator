@@ -14,22 +14,23 @@ type SQLCollectionRepo struct {
 	Db *sqlx.DB
 }
 
-func NewSQLSetRepo(db *sqlx.DB) *SQLCollectionRepo {
+func NewSQLCollectionRepo(db *sqlx.DB) *SQLCollectionRepo {
 
 	return &SQLCollectionRepo{Db: db}
 
 }
 
-func (r *SQLCollectionRepo) Create(ctx context.Context, set *m.Collection) (*m.Collection, error) {
+func (r *SQLCollectionRepo) Create(ctx context.Context, collection *m.Collection) (*m.Collection, error) {
 	now := time.Now().String()
+
 	query := "INSERT INTO collections (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)"
-	_, err := r.Db.Exec(query, set.Id, set.Name, now, now)
+	_, err := r.Db.Exec(query, collection.Id, collection.Name, now, now)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return set, nil
+	return collection, nil
 }
 
 func (r *SQLCollectionRepo) Get(ctx context.Context, id string) (*m.Collection, error) {
