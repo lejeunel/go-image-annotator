@@ -49,7 +49,7 @@ func (s *CollectionService) Delete(ctx context.Context, collection *m.Collection
 	return s.CollectionRepo.Delete(ctx, collection)
 }
 
-func (s *CollectionService) appendImage(ctx context.Context, image *m.Image, collection *m.Collection, deep bool) error {
+func (s *CollectionService) appendAnnotationsToImage(ctx context.Context, image *m.Image, collection *m.Collection) error {
 	if image.Annotations != nil {
 		for _, a := range image.Annotations {
 			if err := s.AnnotationService.ApplyLabelToImage(ctx, a.Label, image, collection); err != nil {
@@ -71,7 +71,7 @@ func (s *CollectionService) appendImage(ctx context.Context, image *m.Image, col
 
 }
 
-func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection, newCollection *m.Collection) error {
+func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection, newCollection *m.Collection, deep bool) error {
 	if err := g.CheckAuthorization(ctx, "admin"); err != nil {
 		return err
 	}
@@ -93,8 +93,11 @@ func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection,
 			return err
 		}
 
-		if err := s.appendImage(ctx, image, newCollection, true); err != nil {
-			return err
+		if deep {
+			if err := s.appendAnnotationsToImage(ctx, image, newCollection); err != nil {
+				return err
+			}
+
 		}
 
 		if page == pageMeta.TotalPages {
@@ -108,7 +111,7 @@ func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection,
 
 }
 
-func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, destination *m.Collection) error {
+func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, destination *m.Collection, deep bool) error {
 
 	page := 1
 	hasNextPage := true
@@ -126,8 +129,11 @@ func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, des
 		if !imageFoundInDestination {
 			s.CollectionRepo.AssignImageToCollection(ctx, &images[0], destination)
 		}
-		if err := s.appendImage(ctx, image, destination, true); err != nil {
-			return err
+		if deep {
+			if err := s.appendAnnotationsToImage(ctx, image, destination); err != nil {
+				return err
+			}
+
 		}
 
 		if page == pageMeta.TotalPages {

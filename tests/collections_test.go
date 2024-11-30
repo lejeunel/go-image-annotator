@@ -125,7 +125,7 @@ func TestAnnotationsShouldApplyToSpecifiedCollection(t *testing.T) {
 
 }
 
-func TestCloningCollectionsShouldAlsoCloneAnnotations(t *testing.T) {
+func TestDeepCloneShouldAlsoCloneAnnotations(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	collectionName := "mycollection"
@@ -145,7 +145,7 @@ func TestCloningCollectionsShouldAlsoCloneAnnotations(t *testing.T) {
 	s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collection)
 
 	clone := &m.Collection{Name: cloneName}
-	s.Collections.Clone(ctx, collection, clone)
+	s.Collections.Clone(ctx, collection, clone, true)
 	cloneImages, _, _ := s.Images.GetPage(ctx, clone.Id.String(), g.PaginationParams{},
 		false)
 
@@ -159,7 +159,7 @@ func TestCloningCollectionsShouldAlsoCloneAnnotations(t *testing.T) {
 
 }
 
-func TestCloningCollectionsShouldNotDuplicateImages(t *testing.T) {
+func TestCloneShouldNotDuplicateImages(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	collectionName := "mycollection"
@@ -170,7 +170,7 @@ func TestCloningCollectionsShouldNotDuplicateImages(t *testing.T) {
 
 	clonedCollection := &m.Collection{Name: "theclone"}
 
-	s.Collections.Clone(ctx, collection, clonedCollection)
+	s.Collections.Clone(ctx, collection, clonedCollection, false)
 	imagesOfClone, _, _ := s.Images.GetPage(ctx, clonedCollection.Id.String(),
 		g.PaginationParams{}, false)
 	imagesOrigin, _, _ := s.Images.GetPage(ctx, collection.Id.String(),
@@ -187,7 +187,7 @@ func TestCloningCollectionsShouldNotDuplicateImages(t *testing.T) {
 
 }
 
-func TestMergingCollections(t *testing.T) {
+func TestMergeCollections(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	firstCollection := &m.Collection{Name: "first"}
@@ -198,7 +198,7 @@ func TestMergingCollections(t *testing.T) {
 	s.Images.Save(ctx, image, firstCollection)
 	s.Images.Save(ctx, image, secondCollection)
 
-	s.Collections.Merge(ctx, secondCollection, firstCollection)
+	s.Collections.Merge(ctx, secondCollection, firstCollection, false)
 	imagesInMerged, _, _ := s.Images.GetPage(ctx, firstCollection.Id.String(),
 		g.PaginationParams{Page: 1, PageSize: 4}, false)
 
@@ -208,7 +208,7 @@ func TestMergingCollections(t *testing.T) {
 	}
 }
 
-func TestMergingCollectionsShouldSkipDuplicateImages(t *testing.T) {
+func TestMergeShouldSkipDuplicateImages(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	collectionName := "mycollection"
@@ -221,7 +221,7 @@ func TestMergingCollectionsShouldSkipDuplicateImages(t *testing.T) {
 	s.Collections.Create(ctx, newCollection)
 	s.Collections.CollectionRepo.AssignImageToCollection(ctx, commonImage, newCollection)
 
-	s.Collections.Merge(ctx, collection, newCollection)
+	s.Collections.Merge(ctx, collection, newCollection, false)
 	imagesInMerged, _, _ := s.Images.GetPage(ctx, newCollection.Id.String(),
 		g.PaginationParams{Page: 1, PageSize: 4},
 		false)
@@ -233,7 +233,7 @@ func TestMergingCollectionsShouldSkipDuplicateImages(t *testing.T) {
 
 }
 
-func TestMergingCollectionsShouldAlsoCopyAnnotations(t *testing.T) {
+func TestDeepMergeShouldAlsoCopyAnnotations(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	collectionName := "mycollection"
@@ -253,7 +253,7 @@ func TestMergingCollectionsShouldAlsoCopyAnnotations(t *testing.T) {
 	bbox.Annotate(label)
 	s.Annotations.ApplyBoundingBoxToImage(ctx, bbox, image, collectionToMerge)
 
-	s.Collections.Merge(ctx, collectionToMerge, collection)
+	s.Collections.Merge(ctx, collectionToMerge, collection, true)
 	destinationImages, _, _ := s.Images.GetPage(ctx, collection.Id.String(), g.PaginationParams{},
 		false)
 
