@@ -46,10 +46,9 @@ func TestCreateAndRetrieveLabel(t *testing.T) {
 	err := s.Annotations.CreateLabel(ctx, label)
 	AssertNoError(t, err)
 
-	labels, meta, err := s.Annotations.GetPage(ctx,
+	labels, _, err := s.Annotations.GetPage(ctx,
 		g.PaginationParams{Page: 1, PageSize: 4})
 	AssertNoError(t, err)
-	fmt.Printf("%+v", meta)
 	if len(labels) != 1 {
 		t.Fatalf("expected to retrieve 1 label, but got %v", len(labels))
 	}

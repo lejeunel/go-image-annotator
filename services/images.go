@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"time"
 
 	"github.com/google/uuid"
 	e "go-image-annotator/errors"
@@ -96,6 +97,7 @@ func (s *ImageService) saveImage(ctx context.Context, image *m.Image) error {
 	image.Width = im.Bounds().Dx()
 	image.Height = im.Bounds().Dy()
 	image.MIMEType = "image/" + format
+	image.CreatedAt = time.Now()
 	s.setURI(image)
 
 	image, err = s.ImageRepo.Create(ctx, image)

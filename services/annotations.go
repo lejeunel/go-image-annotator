@@ -113,7 +113,7 @@ func (s *AnnotationService) ApplyBoundingBoxToImage(ctx context.Context, bbox *m
 	bbox.Id = uuid.New()
 	bbox.ImageId = image.Id
 	bbox.AuthorEmail = user.Email
-	now := time.Now().String()
+	now := time.Now()
 	bbox.CreatedAt = now
 	bbox.UpdatedAt = now
 	image.BoundingBoxes = append(image.BoundingBoxes, bbox)

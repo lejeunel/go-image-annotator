@@ -27,7 +27,7 @@ func NewSQLLabelRepo(db *sqlx.DB) *SQLAnnotationRepo {
 }
 
 func (r *SQLAnnotationRepo) CreateLabel(ctx c.Context, label *m.Label) (*m.Label, error) {
-	now := time.Now().String()
+	now := time.Now()
 
 	query := "INSERT INTO labels (id, name, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
 	_, err := r.Db.Exec(query, label.Id, label.Name, label.Description, now,
@@ -112,7 +112,7 @@ func (r *SQLAnnotationRepo) GetAnnotationsOfImage(ctx c.Context, image *m.Image,
 }
 
 func (r *SQLAnnotationRepo) ApplyLabelToImage(ctx c.Context, label *m.Label, image *m.Image, collection *m.Collection, authorEmail string) error {
-	now := time.Now().String()
+	now := time.Now()
 	query := "INSERT INTO annotations (id,image_id,label_id,collection_id,author_email,created_at,shape_type,shape_data) VALUES (?,?,?,?,?,?,?,?)"
 
 	_, err := r.Db.Exec(query, uuid.New(), image.Id, label.Id, collection.Id, authorEmail, now, "", "")

@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/google/uuid"
+	"time"
 )
 
 type Annotation struct {
@@ -9,8 +10,8 @@ type Annotation struct {
 	ImageId     uuid.UUID `db:"image_id"`
 	LabelId     uuid.UUID `db:"label_id"`
 	AuthorEmail string    `db:"author_email"`
-	CreatedAt   string    `db:"created_at"`
-	UpdatedAt   string    `db:"updated_at"`
+	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
 	Label       *Label
 }
 

@@ -30,7 +30,7 @@ func NewSQLImageRepo(db *sqlx.DB) *SQLImageRepo {
 }
 
 func (r *SQLImageRepo) Create(ctx context.Context, image *m.Image) (*m.Image, error) {
-	now := time.Now().String()
+	now := time.Now()
 	query := "INSERT INTO images (id,uri,created_at,updated_at,sha256,width,height,mimetype) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 	_, err := r.Db.Exec(query, image.Id, image.Uri, now,
 		now, image.SHA256, image.Width, image.Height, image.MIMEType)

@@ -26,7 +26,7 @@ func NewSQLCollectionRepo(db *sqlx.DB) *SQLCollectionRepo {
 }
 
 func (r *SQLCollectionRepo) Create(ctx context.Context, collection *m.Collection) (*m.Collection, error) {
-	now := time.Now().String()
+	now := time.Now()
 
 	query := "INSERT INTO collections (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)"
 	_, err := r.Db.Exec(query, collection.Id, collection.Name, now, now)
@@ -61,7 +61,7 @@ func (r *SQLCollectionRepo) Delete(ctx context.Context, collection *m.Collection
 }
 
 func (r *SQLCollectionRepo) AssignImageToCollection(ctx context.Context, image *m.Image, collection *m.Collection) error {
-	now := time.Now().String()
+	now := time.Now()
 	query := "INSERT INTO image_collection_assoc (id, image_id, collection_id, created_at) VALUES (?, ?, ?, ?)"
 	_, err := r.Db.Exec(query, uuid.New(), image.Id, collection.Id, now)
 

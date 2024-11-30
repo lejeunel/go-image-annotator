@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/google/uuid"
+	"time"
 )
 
 type Image struct {
@@ -11,8 +12,8 @@ type Image struct {
 	MIMEType      string    `db:"mimetype"`
 	Width         int       `db:"width"`
 	Height        int       `db:"height"`
-	CreatedAt     string    `db:"created_at"`
-	UpdatedAt     string    `db:"updated_at"`
+	CreatedAt     time.Time `db:"created_at"`
+	UpdatedAt     time.Time `db:"updated_at"`
 	Data          []byte
 	Annotations   []*Annotation
 	BoundingBoxes []*BoundingBox

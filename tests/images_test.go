@@ -8,12 +8,6 @@ import (
 	"testing"
 )
 
-func clearDateTime(image *m.Image) *m.Image {
-	image.CreatedAt = ""
-	image.UpdatedAt = ""
-	return image
-}
-
 func TestSavingImageWithSHA256(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 
