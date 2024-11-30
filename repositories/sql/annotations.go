@@ -230,7 +230,7 @@ func (r *PaginableSQLAnnotationRepo) Nums() (int64, error) {
 
 func (r *PaginableSQLAnnotationRepo) Slice(offset, length int, data interface{}) error {
 
-	baseQuery := "SELECT id,uri,created_at,updated_at,sha256,width,height,mimetype FROM images "
+	baseQuery := "SELECT id,name,description FROM labels "
 	query := baseQuery + " LIMIT $1 OFFSET $2"
 	rows, err := r.Repo.Db.Queryx(query, length, offset)
 

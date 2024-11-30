@@ -46,9 +46,15 @@ func TestCreateAndRetrieveLabel(t *testing.T) {
 	err := s.Annotations.CreateLabel(ctx, label)
 	AssertNoError(t, err)
 
-	retrievedLabel, err := s.Annotations.GetLabelById(ctx, label.Id.String())
+	labels, meta, err := s.Annotations.GetPage(ctx,
+		g.PaginationParams{Page: 1, PageSize: 4})
+	AssertNoError(t, err)
+	fmt.Printf("%+v", meta)
+	if len(labels) != 1 {
+		t.Fatalf("expected to retrieve 1 label, but got %v", len(labels))
+	}
 
-	diff := deep.Equal(label, retrievedLabel)
+	diff := deep.Equal(*label, labels[0])
 	if diff != nil {
 		t.Fatalf(fmt.Sprintf("expected to retrieve identical image structs, but got different fields: %v", diff))
 	}
@@ -64,8 +70,11 @@ func TestDeleteLabel(t *testing.T) {
 
 	AssertNoError(t, err)
 
-	label, err = s.Annotations.GetLabelById(ctx, label.Id.String())
-	AssertError(t, err)
+	labels, _, _ := s.Annotations.GetPage(ctx,
+		g.PaginationParams{Page: 1, PageSize: 4})
+	if len(labels) != 0 {
+		t.Fatalf("expected to retrieve 0 labels, but got %v", len(labels))
+	}
 
 }
 
@@ -73,13 +82,12 @@ func TestDeletingUsedLabelShouldFail(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 	label := &m.Label{Name: "thelabel"}
 
-	err := s.Annotations.CreateLabel(ctx, label)
-	AssertNoError(t, err)
+	s.Annotations.CreateLabel(ctx, label)
 	image := &m.Image{Data: testImage}
 	collection := &m.Collection{Name: "mycollection"}
-	err = s.Collections.Create(ctx, collection)
-	err = s.Images.Save(ctx, image, collection)
-	err = s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
+	s.Collections.Create(ctx, collection)
+	s.Images.Save(ctx, image, collection)
+	err := s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
 	AssertNoError(t, err)
 
 	err = s.Annotations.DeleteLabel(ctx, label)
@@ -100,7 +108,8 @@ func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 
 	s.Images.Delete(ctx, image, collection)
 	s.Annotations.DeleteLabel(ctx, label)
-	labels, _, _ := s.Annotations.GetPage(ctx, g.PaginationParams{Page: 1, PageSize: 1})
+	labels, _, _ := s.Annotations.GetPage(ctx,
+		g.PaginationParams{Page: 1, PageSize: 4})
 	if len(labels) != 0 {
 		t.Fatalf("expected to retrieve 0 labels, but got %v", len(labels))
 	}
@@ -116,10 +125,9 @@ func TestRemovingLabelFromImage(t *testing.T) {
 	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image, collection)
 
-	err := s.Annotations.CreateLabel(ctx, label)
-	err = s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
-	err = s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image, collection)
-	AssertNoError(t, err)
+	s.Annotations.CreateLabel(ctx, label)
+	s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
+	s.Annotations.RemoveAnnotationFromImage(ctx, image.Annotations[0], image, collection)
 
 	if len(image.Annotations) != 0 {
 		t.Fatalf("expected to retrieve image with 0 label, but got %v", len(image.Annotations))

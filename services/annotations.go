@@ -38,16 +38,6 @@ func (s *AnnotationService) CreateLabel(ctx context.Context, label *m.Label) err
 
 }
 
-func (s *AnnotationService) GetLabelById(ctx context.Context, id string) (*m.Label, error) {
-
-	label, err := s.AnnotationRepo.GetOneLabel(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return label, nil
-
-}
-
 func (s *AnnotationService) DeleteLabel(ctx context.Context, label *m.Label) error {
 	if err := g.CheckAuthorization(ctx, "annotation-contrib"); err != nil {
 		return err
