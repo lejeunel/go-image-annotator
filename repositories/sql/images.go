@@ -71,7 +71,6 @@ func (r *SQLImageRepo) DeleteImagesInCollection(ctx context.Context, collection 
 func (r *SQLImageRepo) Paginate(pageSize int, filters *g.ImageFilterArgs) pag.Paginator {
 	paginable := &PaginableSQLImageRepo{Repo: r, Filters: filters}
 	return pag.New(paginable, pageSize)
-
 }
 
 func (r *PaginableSQLImageRepo) buildFilteringWhereClause() (string, error) {

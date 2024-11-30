@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
+	pag "github.com/vcraescu/go-paginator/v2"
 	e "go-image-annotator/errors"
 	m "go-image-annotator/models"
 	"time"
@@ -12,6 +13,10 @@ import (
 
 type SQLCollectionRepo struct {
 	Db *sqlx.DB
+}
+
+type PaginableSQLCollectionRepo struct {
+	Repo *SQLCollectionRepo
 }
 
 func NewSQLCollectionRepo(db *sqlx.DB) *SQLCollectionRepo {
@@ -94,13 +99,47 @@ func (r *SQLCollectionRepo) RemoveImage(ctx context.Context, image *m.Image, col
 
 }
 
-func (r *SQLCollectionRepo) Nums() (int64, error) {
-
-	return 0, nil
+func (r *SQLCollectionRepo) Paginate(pageSize int) pag.Paginator {
+	paginable := &PaginableSQLCollectionRepo{Repo: r}
+	return pag.New(paginable, pageSize)
 
 }
 
-func (r *SQLCollectionRepo) Slice(offset, length int, data interface{}) error {
+func (r *PaginableSQLCollectionRepo) Nums() (int64, error) {
+
+	var count int64
+
+	query := "SELECT COUNT(*) FROM images"
+	err := r.Repo.Db.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+
+}
+
+func (r *PaginableSQLCollectionRepo) Slice(offset, length int, data interface{}) error {
+
+	query := "SELECT id,name,created_at,updated_at FROM collections " + " LIMIT $1 OFFSET $2"
+	rows, err := r.Repo.Db.Queryx(query, length, offset)
+
+	if err != nil {
+		return err
+	}
+
+	s := data.(*[]m.Collection)
+
+	for rows.Next() {
+		var c m.Collection
+		err := rows.StructScan(&c)
+
+		if err != nil {
+			return err
+		}
+
+		*s = append(*s, c)
+	}
 
 	return nil
 }

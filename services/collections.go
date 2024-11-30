@@ -149,3 +149,22 @@ func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, des
 func (s *CollectionService) RemoveImage(ctx context.Context, image *m.Image, collection *m.Collection) error {
 	return s.CollectionRepo.RemoveImage(ctx, image, collection)
 }
+
+func (s *CollectionService) GetPage(
+	ctx context.Context,
+	pagination g.PaginationParams) ([]m.Collection, *g.PaginationMeta, error) {
+
+	p := s.CollectionRepo.Paginate(pagination.PageSize)
+	p.SetPage(int(pagination.Page))
+
+	var collections []m.Collection
+	err := p.Results(&collections)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	paginationMeta := g.NewPaginationMeta(p)
+	return collections, &paginationMeta, nil
+
+}

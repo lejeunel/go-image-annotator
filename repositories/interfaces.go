@@ -19,6 +19,7 @@ type AnnotationRepo interface {
 	CreateLabel(c.Context, *m.Label) (*m.Label, error)
 	DeleteLabel(c.Context, *m.Label) error
 	GetOneLabel(c.Context, string) (*m.Label, error)
+	Paginate(pageSize int) pag.Paginator
 
 	GetAnnotationsOfImage(c.Context, *m.Image, *m.Collection) ([]*m.Annotation, error)
 	ApplyLabelToImage(c.Context, *m.Label, *m.Image, *m.Collection, string) error
@@ -26,9 +27,6 @@ type AnnotationRepo interface {
 
 	ApplyBoundingBoxToImage(c.Context, *m.BoundingBox, *m.Image) error
 	GetBoundingBoxesOfImage(c.Context, *m.Image) ([]*m.BoundingBox, error)
-
-	Nums() (int64, error)
-	Slice(offset, length int, data interface{}) error
 }
 
 type CollectionRepo interface {
@@ -38,6 +36,5 @@ type CollectionRepo interface {
 	AssignImageToCollection(c.Context, *m.Image, *m.Collection) error
 	RemoveImage(c.Context, *m.Image, *m.Collection) error
 	ImageIsInCollection(c.Context, *m.Image, *m.Collection) (bool, error)
-	Nums() (int64, error)
-	Slice(offset, length int, data interface{}) error
+	Paginate(pageSize int) pag.Paginator
 }

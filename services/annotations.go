@@ -13,7 +13,7 @@ import (
 )
 
 type AnnotationService struct {
-	LabelRepo       r.AnnotationRepo
+	AnnotationRepo  r.AnnotationRepo
 	MaxPageSize     int
 	DefaultPageSize int
 }
@@ -29,7 +29,7 @@ func (s *AnnotationService) CreateLabel(ctx context.Context, label *m.Label) err
 
 	label.Id = uuid.New()
 
-	label, err := s.LabelRepo.CreateLabel(ctx, label)
+	label, err := s.AnnotationRepo.CreateLabel(ctx, label)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func (s *AnnotationService) CreateLabel(ctx context.Context, label *m.Label) err
 
 func (s *AnnotationService) GetLabelById(ctx context.Context, id string) (*m.Label, error) {
 
-	label, err := s.LabelRepo.GetOneLabel(ctx, id)
+	label, err := s.AnnotationRepo.GetOneLabel(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (s *AnnotationService) DeleteLabel(ctx context.Context, label *m.Label) err
 		return err
 	}
 
-	return s.LabelRepo.DeleteLabel(ctx, label)
+	return s.AnnotationRepo.DeleteLabel(ctx, label)
 
 }
 
@@ -69,11 +69,11 @@ func (s *AnnotationService) ApplyLabelToImage(ctx context.Context, label *m.Labe
 		return err
 	}
 
-	if err := s.LabelRepo.ApplyLabelToImage(ctx, label, image, collection, user.Email); err != nil {
+	if err := s.AnnotationRepo.ApplyLabelToImage(ctx, label, image, collection, user.Email); err != nil {
 		return err
 	}
 
-	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image, collection)
+	annotations, err := s.AnnotationRepo.GetAnnotationsOfImage(ctx, image, collection)
 	if err != nil {
 		return err
 	}
@@ -93,11 +93,11 @@ func (s *AnnotationService) RemoveAnnotationFromImage(ctx context.Context, annot
 		return e.ErrOwnershipPermission{Operation: "removing annotation from image", Details: "Only author of annotation can delete this."}
 	}
 
-	if err := s.LabelRepo.DeleteAnnotation(ctx, annotation); err != nil {
+	if err := s.AnnotationRepo.DeleteAnnotation(ctx, annotation); err != nil {
 		return err
 	}
 
-	annotations, err := s.LabelRepo.GetAnnotationsOfImage(ctx, image, collection)
+	annotations, err := s.AnnotationRepo.GetAnnotationsOfImage(ctx, image, collection)
 	if err != nil {
 		return err
 	}
@@ -128,8 +128,27 @@ func (s *AnnotationService) ApplyBoundingBoxToImage(ctx context.Context, bbox *m
 	bbox.UpdatedAt = now
 	image.BoundingBoxes = append(image.BoundingBoxes, bbox)
 
-	if err := s.LabelRepo.ApplyBoundingBoxToImage(ctx, bbox, image); err != nil {
+	if err := s.AnnotationRepo.ApplyBoundingBoxToImage(ctx, bbox, image); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (s *AnnotationService) GetPage(
+	ctx context.Context,
+	pagination g.PaginationParams) ([]m.Label, *g.PaginationMeta, error) {
+
+	p := s.AnnotationRepo.Paginate(pagination.PageSize)
+	p.SetPage(int(pagination.Page))
+
+	var labels []m.Label
+	err := p.Results(&labels)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	paginationMeta := g.NewPaginationMeta(p)
+	return labels, &paginationMeta, nil
+
 }

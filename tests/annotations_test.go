@@ -3,6 +3,7 @@ package tests
 import (
 	"fmt"
 	"github.com/go-test/deep"
+	g "go-image-annotator/generic"
 	m "go-image-annotator/models"
 	"testing"
 )
@@ -99,9 +100,9 @@ func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 
 	s.Images.Delete(ctx, image, collection)
 	s.Annotations.DeleteLabel(ctx, label)
-	nLabels, _ := s.Annotations.LabelRepo.Nums()
-	if nLabels != 0 {
-		t.Fatalf("expected to retrieve 0 labels, but got %v", nLabels)
+	labels, _, _ := s.Annotations.GetPage(ctx, g.PaginationParams{Page: 1, PageSize: 1})
+	if len(labels) != 0 {
+		t.Fatalf("expected to retrieve 0 labels, but got %v", len(labels))
 	}
 
 }

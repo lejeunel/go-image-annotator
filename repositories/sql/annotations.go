@@ -3,6 +3,7 @@ package repositories
 import (
 	c "context"
 	"github.com/google/uuid"
+	pag "github.com/vcraescu/go-paginator/v2"
 	e "go-image-annotator/errors"
 	m "go-image-annotator/models"
 	"time"
@@ -13,6 +14,10 @@ import (
 
 type SQLAnnotationRepo struct {
 	Db *sqlx.DB
+}
+
+type PaginableSQLAnnotationRepo struct {
+	Repo *SQLAnnotationRepo
 }
 
 func NewSQLLabelRepo(db *sqlx.DB) *SQLAnnotationRepo {
@@ -205,13 +210,46 @@ func (r *SQLAnnotationRepo) ApplyBoundingBoxToImage(ctx c.Context, bbox *m.Bound
 	return r.applyAnnotatedShapeToImage(ctx, &bbox.AnnotatedShape, string(shapeData), "bounding_box", image)
 }
 
-func (r *SQLAnnotationRepo) Nums() (int64, error) {
+func (r *SQLAnnotationRepo) Paginate(pageSize int) pag.Paginator {
+	paginable := &PaginableSQLAnnotationRepo{Repo: r}
+	return pag.New(paginable, pageSize)
+}
 
-	return 0, nil
+func (r *PaginableSQLAnnotationRepo) Nums() (int64, error) {
+	var count int64
+
+	query := "SELECT COUNT(*) FROM labels "
+	err := r.Repo.Db.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 
 }
 
-func (r *SQLAnnotationRepo) Slice(offset, length int, data interface{}) error {
+func (r *PaginableSQLAnnotationRepo) Slice(offset, length int, data interface{}) error {
+
+	baseQuery := "SELECT id,uri,created_at,updated_at,sha256,width,height,mimetype FROM images "
+	query := baseQuery + " LIMIT $1 OFFSET $2"
+	rows, err := r.Repo.Db.Queryx(query, length, offset)
+
+	if err != nil {
+		return err
+	}
+
+	s := data.(*[]m.Label)
+
+	for rows.Next() {
+		var l m.Label
+		err := rows.StructScan(&l)
+
+		if err != nil {
+			return err
+		}
+
+		*s = append(*s, l)
+	}
 
 	return nil
 }
