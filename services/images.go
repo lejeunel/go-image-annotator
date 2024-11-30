@@ -189,7 +189,6 @@ func (s *ImageService) GetPage(
 			return nil, nil, err
 		}
 		augmentedImages = append(augmentedImages, *image)
-
 	}
 
 	if err != nil {

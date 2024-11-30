@@ -49,6 +49,28 @@ func (s *CollectionService) Delete(ctx context.Context, collection *m.Collection
 	return s.CollectionRepo.Delete(ctx, collection)
 }
 
+func (s *CollectionService) appendImage(ctx context.Context, image *m.Image, collection *m.Collection, deep bool) error {
+	if image.Annotations != nil {
+		for _, a := range image.Annotations {
+			if err := s.AnnotationService.ApplyLabelToImage(ctx, a.Label, image, collection); err != nil {
+				return err
+			}
+
+		}
+	}
+	if image.BoundingBoxes != nil {
+		for _, bbox := range image.BoundingBoxes {
+
+			if err := s.AnnotationService.ApplyBoundingBoxToImage(ctx, bbox, image, collection); err != nil {
+				return err
+			}
+
+		}
+	}
+	return nil
+
+}
+
 func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection, newCollection *m.Collection) error {
 	if err := g.CheckAuthorization(ctx, "admin"); err != nil {
 		return err
@@ -71,17 +93,8 @@ func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection,
 			return err
 		}
 
-		if image.Annotations != nil {
-			for _, a := range image.Annotations {
-				s.AnnotationService.ApplyLabelToImage(ctx, a.Label, image, newCollection)
-
-			}
-		}
-		if image.BoundingBoxes != nil {
-			for _, bbox := range image.BoundingBoxes {
-				s.AnnotationService.ApplyBoundingBoxToImage(ctx, bbox, image, newCollection)
-
-			}
+		if err := s.appendImage(ctx, image, newCollection, true); err != nil {
+			return err
 		}
 
 		if page == pageMeta.TotalPages {
@@ -113,17 +126,8 @@ func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, des
 		if !imageFoundInDestination {
 			s.CollectionRepo.AssignImageToCollection(ctx, &images[0], destination)
 		}
-		if image.Annotations != nil {
-			for _, a := range image.Annotations {
-				s.AnnotationService.ApplyLabelToImage(ctx, a.Label, image, destination)
-
-			}
-		}
-		if image.BoundingBoxes != nil {
-			for _, bbox := range image.BoundingBoxes {
-				s.AnnotationService.ApplyBoundingBoxToImage(ctx, bbox, image, destination)
-
-			}
+		if err := s.appendImage(ctx, image, destination, true); err != nil {
+			return err
 		}
 
 		if page == pageMeta.TotalPages {
