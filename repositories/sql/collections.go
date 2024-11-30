@@ -54,16 +54,28 @@ func (r *SQLCollectionRepo) Delete(ctx context.Context, collection *m.Collection
 	return nil
 }
 
-func (r *SQLCollectionRepo) AssignImageToCollection(ctx context.Context, image *m.Image, set *m.Collection) error {
+func (r *SQLCollectionRepo) AssignImageToCollection(ctx context.Context, image *m.Image, collection *m.Collection) error {
 	now := time.Now().String()
 	query := "INSERT INTO image_collection_assoc (id, image_id, collection_id, created_at) VALUES (?, ?, ?, ?)"
-	_, err := r.Db.Exec(query, uuid.New(), image.Id, set.Id, now)
+	_, err := r.Db.Exec(query, uuid.New(), image.Id, collection.Id, now)
 
 	if err != nil {
 		return err
 	}
 
 	return nil
+
+}
+
+func (r *SQLCollectionRepo) ImageIsInCollection(ctx context.Context, image *m.Image, collection *m.Collection) (bool, error) {
+	var count int64
+	query := "SELECT COUNT(*) FROM image_collection_assoc WHERE image_id=? AND collection_id=?"
+	err := r.Db.QueryRow(query, image.Id, collection.Id).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
 
 }
 

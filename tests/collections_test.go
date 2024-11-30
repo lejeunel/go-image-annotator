@@ -107,12 +107,12 @@ func TestCloningCollectionsShouldNotDuplicateImages(t *testing.T) {
 	s.Images.Save(ctx, image, collection)
 
 	s.Collections.Clone(ctx, collection, &m.Collection{Name: "theclone"})
-	imagesOfClone, _, _ := s.Images.GetPage(ctx, g.PaginationParams{}, &g.ImageFilterArgs{CollectionName: "theclone"},
-		false)
+	imagesOfClone, _, _ := s.Images.GetPage(ctx, g.PaginationParams{},
+		&g.ImageFilterArgs{CollectionName: "theclone"}, false)
 
 	images, _, _ := s.Images.GetPage(ctx, g.PaginationParams{}, &g.ImageFilterArgs{}, false)
 	if len(images) != 1 {
-		t.Fatalf("expected to retrieve 1 image, but found %v", len(images))
+		t.Fatalf("expected to get 1 image accross all collections, but found %v", len(images))
 	}
 
 	if len(imagesOfClone) != 1 {
@@ -120,7 +120,52 @@ func TestCloningCollectionsShouldNotDuplicateImages(t *testing.T) {
 	}
 
 	if imagesOfClone[0].Id != images[0].Id {
-		t.Fatalf("expected to retrieve images in cloned collection with identical, but it is different: %v", imagesOfClone[0].Id)
+		t.Fatalf("expected to retrieve images in cloned collection with identical id, but it is different: %v", imagesOfClone[0].Id)
+	}
+
+}
+
+func TestMergingCollections(t *testing.T) {
+
+	s, ctx := NewTestApp(t, 2)
+	firstCollection := &m.Collection{Name: "first"}
+	secondCollection := &m.Collection{Name: "second"}
+	s.Collections.Create(ctx, firstCollection)
+	s.Collections.Create(ctx, secondCollection)
+	image := &m.Image{Data: testImage}
+	s.Images.Save(ctx, image, firstCollection)
+	s.Images.Save(ctx, image, secondCollection)
+
+	s.Collections.Merge(ctx, secondCollection, firstCollection)
+	imagesInMerged, _, _ := s.Images.GetPage(ctx, g.PaginationParams{Page: 1, PageSize: 4},
+		&g.ImageFilterArgs{CollectionName: "first"}, false)
+
+	if len(imagesInMerged) != 2 {
+		t.Fatalf("expected to retrieve 2 images in merging destination collection, got %v",
+			len(imagesInMerged))
+	}
+}
+
+func TestMergingCollectionsShouldSkipDuplicateImages(t *testing.T) {
+
+	s, ctx := NewTestApp(t, 2)
+	collectionName := "mycollection"
+	collection := &m.Collection{Name: collectionName}
+	s.Collections.Create(ctx, collection)
+	commonImage := &m.Image{Data: testImage}
+	s.Images.Save(ctx, commonImage, collection)
+
+	newCollection := &m.Collection{Name: "new-collection"}
+	s.Collections.Create(ctx, newCollection)
+	s.Collections.CollectionRepo.AssignImageToCollection(ctx, commonImage, newCollection)
+
+	s.Collections.Merge(ctx, collection, newCollection)
+	imagesInMerged, _, _ := s.Images.GetPage(ctx, g.PaginationParams{Page: 1, PageSize: 4},
+		&g.ImageFilterArgs{CollectionName: "new-collection"}, false)
+
+	if len(imagesInMerged) != 1 {
+		t.Fatalf("expected to retrieve 1 image in merged collection, got %v",
+			len(imagesInMerged))
 	}
 
 }

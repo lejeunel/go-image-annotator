@@ -36,6 +36,7 @@ type CollectionRepo interface {
 	Get(c.Context, string) (*m.Collection, error)
 	Delete(c.Context, *m.Collection) error
 	AssignImageToCollection(c.Context, *m.Image, *m.Collection) error
+	ImageIsInCollection(c.Context, *m.Image, *m.Collection) (bool, error)
 	Nums() (int64, error)
 	Slice(offset, length int, data interface{}) error
 }
