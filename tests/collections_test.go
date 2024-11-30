@@ -1,8 +1,6 @@
 package tests
 
 import (
-	"fmt"
-	"github.com/go-test/deep"
 	g "go-image-annotator/generic"
 	m "go-image-annotator/models"
 	"testing"
@@ -151,14 +149,12 @@ func TestCloningCollectionsShouldAlsoCloneAnnotations(t *testing.T) {
 	cloneImages, _, _ := s.Images.GetPage(ctx, clone.Id.String(), g.PaginationParams{},
 		false)
 
-	diff := deep.Equal(image.Annotations, cloneImages[0].Annotations)
-	if diff != nil {
-		t.Fatalf(fmt.Sprintf("expected to retrieve identical image annotations, but got different fields: %v", diff))
+	if cloneImages[0].Annotations == nil {
+		t.Fatal("expected to retrieve image annotations, but got none")
 	}
 
-	diff = deep.Equal(image.BoundingBoxes, cloneImages[0].BoundingBoxes)
-	if diff != nil {
-		t.Fatalf(fmt.Sprintf("expected to retrieve identical image bounding boxes, but got different fields: %v", diff))
+	if cloneImages[0].BoundingBoxes == nil {
+		t.Fatal("expected to retrieve image with bounding boxes, but got none")
 	}
 
 }

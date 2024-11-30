@@ -62,12 +62,26 @@ func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection,
 		images, pageMeta, err := s.ImageService.GetPage(ctx, collection.Id.String(),
 			g.PaginationParams{Page: int64(page), PageSize: 1},
 			false)
+		image := &images[0]
 		if err != nil {
 			return err
 		}
-		err = s.CollectionRepo.AssignImageToCollection(ctx, &images[0], newCollection)
+		err = s.CollectionRepo.AssignImageToCollection(ctx, image, newCollection)
 		if err != nil {
 			return err
+		}
+
+		if image.Annotations != nil {
+			for _, a := range image.Annotations {
+				s.AnnotationService.ApplyLabelToImage(ctx, a.Label, image, newCollection)
+
+			}
+		}
+		if image.BoundingBoxes != nil {
+			for _, bbox := range image.BoundingBoxes {
+				s.AnnotationService.ApplyBoundingBoxToImage(ctx, bbox, image, newCollection)
+
+			}
 		}
 
 		if page == pageMeta.TotalPages {
