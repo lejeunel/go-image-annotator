@@ -36,20 +36,20 @@ CREATE TABLE IF NOT EXISTS annotations (
 );
 
 
-CREATE TABLE IF NOT EXISTS imagesets (
+CREATE TABLE IF NOT EXISTS collections (
     id varchar(16) PRIMARY KEY,
     name text,
     created_at varchar(30),
     updated_at varchar(30)
 );
 
-CREATE TABLE IF NOT EXISTS image_set_assoc (
+CREATE TABLE IF NOT EXISTS image_collection_assoc (
     id varchar(16) PRIMARY KEY,
     image_id varchar(16),
-    set_id varchar(16),
+    collection_id varchar(16),
     created_at varchar(30),
-    FOREIGN KEY (image_id) REFERENCES images(id),
-    FOREIGN KEY (set_id) REFERENCES imagesets(id)
+    FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE,
+    FOREIGN KEY (collection_id) REFERENCES collections(id)
 );
 
 -- +goose Down
@@ -58,5 +58,5 @@ DROP TABLE images;
 DROP TABLE labels;
 DROP TABLE annotations;
 DROP TABLE polygons;
-DROP TABLE imagesets;
-DROP TABLE image_set_assoc;
+DROP TABLE collections;
+DROP TABLE image_collection_assoc;

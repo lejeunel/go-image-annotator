@@ -10,6 +10,7 @@ import (
 type ImageRepo interface {
 	Create(c.Context, *m.Image) (*m.Image, error)
 	Delete(c.Context, *m.Image) error
+	DeleteImagesInCollection(c.Context, *m.Collection) error
 	GetOne(c.Context, string) (*m.Image, error)
 	Paginate(pageSize int, filters *g.ImageFilterArgs) pag.Paginator
 }
@@ -33,6 +34,7 @@ type AnnotationRepo interface {
 type CollectionRepo interface {
 	Create(c.Context, *m.Collection) (*m.Collection, error)
 	Get(c.Context, string) (*m.Collection, error)
+	Delete(c.Context, *m.Collection) error
 	AssignImageToCollection(c.Context, *m.Image, *m.Collection) error
 	Nums() (int64, error)
 	Slice(offset, length int, data interface{}) error

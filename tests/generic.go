@@ -64,8 +64,8 @@ func NewTestApp(t *testing.T, maxPageSize int) (Services, context.Context) {
 		DefaultPageSize: maxPageSize, RemoteScheme: "scheme", RemoteBucketName: "mybucket"}
 	annotationService := s.AnnotationService{LabelRepo: labelRepo, MaxPageSize: maxPageSize,
 		DefaultPageSize: maxPageSize}
-	CollectionService := s.CollectionService{CollectionRepo: collectionRepo,
-		ImageRepo: imageRepo, MaxPageSize: maxPageSize, DefaultPageSize: maxPageSize}
+	CollectionService := s.CollectionService{CollectionRepo: collectionRepo, ImageRepo: imageRepo,
+		MaxPageSize: maxPageSize, DefaultPageSize: maxPageSize}
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "user_roles", "admin")

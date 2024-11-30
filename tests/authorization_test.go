@@ -46,7 +46,7 @@ func TestDeletingImagesRequiresPermission(t *testing.T) {
 	s.Collections.Create(ctx, collection)
 
 	err := s.Images.Save(ctx, image, collection)
-	err = s.Images.Delete(ctx, image)
+	err = s.Images.Delete(ctx, image, collection)
 	AssertError(t, err)
 }
 

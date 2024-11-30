@@ -37,7 +37,7 @@ func TestSavingCorruptedImageWithSHA256ShouldFail(t *testing.T) {
 
 	corruptSHA256 := "dff295b60ef32bcd2e9a3c38eaf35dfdf78ffaf8bc95e655b682dd268329cfa1"
 	image := &m.Image{Data: testImage, SHA256: corruptSHA256}
-	collection := &m.Collection{}
+	collection := &m.Collection{Name: "thename"}
 	s.Collections.Create(ctx, collection)
 
 	err := s.Images.Save(ctx, image, collection)

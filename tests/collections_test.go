@@ -20,7 +20,7 @@ func TestCreateCollection(t *testing.T) {
 	err := s.Collections.Create(ctx, clc)
 
 	AssertNoError(t, err)
-	retrievedSet, err := s.Collections.GetOne(ctx, clc.Id.String())
+	retrievedSet, err := s.Collections.Get(ctx, clc.Id.String())
 	AssertNoError(t, err)
 
 	if retrievedSet.Name != clc.Name {
@@ -75,6 +75,46 @@ func TestRetrieveImagesOfCollection(t *testing.T) {
 
 	if len(page) != 1 {
 		t.Fatalf("expected to retrieve 1 image in set %v, but got %v", collectionName, len(page))
+	}
+
+}
+
+func TestOrphanImagesShouldBeDeleted(t *testing.T) {
+
+	s, ctx := NewTestApp(t, 2)
+	collectionName := "mycollection"
+	collection := &m.Collection{Name: collectionName}
+	s.Collections.Create(ctx, collection)
+	image := &m.Image{Data: testImage}
+	s.Images.Save(ctx, image, collection)
+
+	s.Collections.Delete(ctx, collection)
+
+	images, _, _ := s.Images.GetPage(ctx, g.PaginationParams{}, &g.ImageFilterArgs{}, false)
+	if len(images) > 0 {
+		t.Fatal("expected to retrieve 0 images, but found some")
+	}
+
+}
+
+func TestNotOrphanImagesShouldNotBeDeleted(t *testing.T) {
+
+	s, ctx := NewTestApp(t, 2)
+	collectionName := "mycollection"
+	first_collection := &m.Collection{Name: collectionName}
+	second_collection := &m.Collection{Name: collectionName}
+	image := &m.Image{Data: testImage}
+
+	s.Collections.Create(ctx, first_collection)
+	s.Images.Save(ctx, image, first_collection)
+	s.Images.Save(ctx, image, second_collection)
+
+	err := s.Collections.Delete(ctx, first_collection)
+	AssertNoError(t, err)
+
+	images, _, _ := s.Images.GetPage(ctx, g.PaginationParams{}, &g.ImageFilterArgs{}, false)
+	if len(images) != 1 {
+		t.Fatalf("expected to retrieve 1 image, but got %v", len(images))
 	}
 
 }

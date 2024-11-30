@@ -86,10 +86,12 @@ func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 	s.Images.Save(ctx, image, collection)
 	s.Annotations.ApplyLabelToImage(ctx, label, image, collection)
 
-	err := s.Images.Delete(ctx, image)
-	err = s.Annotations.DeleteLabel(ctx, label)
-	_, err = s.Annotations.GetLabelById(ctx, label.Id.String())
-	AssertError(t, err)
+	s.Images.Delete(ctx, image, collection)
+	s.Annotations.DeleteLabel(ctx, label)
+	nLabels, _ := s.Annotations.LabelRepo.Nums()
+	if nLabels != 0 {
+		t.Fatalf("expected to retrieve 0 labels, but got %v", nLabels)
+	}
 
 }
 

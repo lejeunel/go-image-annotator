@@ -61,6 +61,13 @@ func (r *SQLImageRepo) Delete(ctx context.Context, image *m.Image) error {
 	return errors.Join(err_image, err_assoc)
 }
 
+func (r *SQLImageRepo) DeleteImagesInCollection(ctx context.Context, collection *m.Collection) error {
+	_, err_image := r.Db.Exec("DELETE FROM images WHERE id IN (SELECT image_id FROM image_collection_assoc WHERE collection_id=?)",
+		collection.Id.String())
+	_, err_assoc := r.Db.Exec("DELETE FROM image_collection_assoc WHERE collection_id=?", collection.Id.String())
+	return errors.Join(err_image, err_assoc)
+}
+
 func (r *SQLImageRepo) Paginate(pageSize int, filters *g.ImageFilterArgs) pag.Paginator {
 	paginable := &PaginableSQLImageRepo{Repo: r, Filters: filters}
 	return pag.New(paginable, pageSize)
@@ -68,7 +75,7 @@ func (r *SQLImageRepo) Paginate(pageSize int, filters *g.ImageFilterArgs) pag.Pa
 }
 
 func (r *PaginableSQLImageRepo) buildFilteringWhereClause() (string, error) {
-	bySetIdPart := "id in (SELECT image_id FROM image_set_assoc WHERE set_id=\"%v\")"
+	bySetIdPart := "id in (SELECT image_id FROM image_collection_assoc WHERE collection_id=\"%v\")"
 	var parts []string
 	if r.Filters.SetId != "" {
 		parts = append(parts, fmt.Sprintf(bySetIdPart, r.Filters.SetId))
@@ -76,7 +83,7 @@ func (r *PaginableSQLImageRepo) buildFilteringWhereClause() (string, error) {
 
 	if r.Filters.SetName != "" {
 		set := m.Collection{}
-		err := r.Repo.Db.Get(&set, "SELECT id FROM imagesets WHERE name=?", r.Filters.SetName)
+		err := r.Repo.Db.Get(&set, "SELECT id FROM collections WHERE name=?", r.Filters.SetName)
 		if err != nil {
 			return "", err
 		}

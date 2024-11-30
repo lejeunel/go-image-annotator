@@ -49,7 +49,7 @@ func (s *ImageService) setURI(image *m.Image) {
 	image.Uri = s.RemoteScheme + "://" + s.RemoteBucketName + "/" + image.Id.String() + ".png"
 }
 
-func (s *ImageService) Delete(ctx context.Context, image *m.Image) error {
+func (s *ImageService) Delete(ctx context.Context, image *m.Image, collection *m.Collection) error {
 	if err := g.CheckAuthorization(ctx, "admin"); err != nil {
 		return err
 	}
