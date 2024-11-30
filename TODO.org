@@ -9,7 +9,8 @@
 * DONE Annotations should apply to images via collections
 We need to be able to "deep clone" a given collection, i.e. have a copy on which we can change
 annotations without modifying the older ones. This is useful for tracability.
-* TODO Check unicity of collection name
+* DONE Merging two collection should skip common images
+* DONE Check unicity of collection name
 * TODO Add Camera entity (CRUD) and methods to link them to images
 * TODO Add Site entity (CRUD), denoting geographical location where images were taken, and methods to link them to images
 * TODO Change cobra to [[https://github.com/urfave/cli][urfave/cli]]

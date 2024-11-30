@@ -25,7 +25,7 @@ func (s *CollectionService) Create(ctx context.Context, collection *m.Collection
 	collection.Id = uuid.New()
 	collection, err := s.CollectionRepo.Create(ctx, collection)
 	if err != nil {
-		return nil
+		return err
 	}
 	return nil
 }

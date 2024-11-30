@@ -29,6 +29,17 @@ func TestCreateCollection(t *testing.T) {
 	}
 }
 
+func TestCollectionDuplicateNameShouldFail(t *testing.T) {
+	s, ctx := NewTestApp(t, 2)
+
+	clc := &m.Collection{Name: "myimageset"}
+	newClc := &m.Collection{Name: "myimageset"}
+	s.Collections.Create(ctx, clc)
+	err := s.Collections.Create(ctx, newClc)
+
+	AssertError(t, err)
+}
+
 func TestValidationCollectionName(t *testing.T) {
 	tests := map[string]struct {
 		name    string

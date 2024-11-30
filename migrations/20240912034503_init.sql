@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS annotations (
 
 CREATE TABLE IF NOT EXISTS collections (
     id varchar(16) PRIMARY KEY,
-    name text,
+    name text UNIQUE,
     created_at varchar(30),
     updated_at varchar(30)
 );
