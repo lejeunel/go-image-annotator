@@ -70,7 +70,7 @@ func TestRetrieveImagesOfCollection(t *testing.T) {
 	s.Images.Save(ctx, image, collection)
 
 	page, _, err := s.Images.GetPage(ctx, g.PaginationParams{Page: 1, PageSize: 4},
-		&g.ImageFilterArgs{SetName: "myset"}, false)
+		&g.ImageFilterArgs{CollectionName: "myset"}, false)
 	AssertNoError(t, err)
 
 	if len(page) != 1 {
@@ -97,24 +97,30 @@ func TestOrphanImagesShouldBeDeleted(t *testing.T) {
 
 }
 
-func TestNotOrphanImagesShouldNotBeDeleted(t *testing.T) {
+func TestCloningCollectionsShouldNotDuplicateImages(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	collectionName := "mycollection"
-	first_collection := &m.Collection{Name: collectionName}
-	second_collection := &m.Collection{Name: collectionName}
+	collection := &m.Collection{Name: collectionName}
+	s.Collections.Create(ctx, collection)
 	image := &m.Image{Data: testImage}
+	s.Images.Save(ctx, image, collection)
 
-	s.Collections.Create(ctx, first_collection)
-	s.Images.Save(ctx, image, first_collection)
-	s.Images.Save(ctx, image, second_collection)
-
-	err := s.Collections.Delete(ctx, first_collection)
-	AssertNoError(t, err)
+	s.Collections.Clone(ctx, collection, &m.Collection{Name: "theclone"})
+	imagesOfClone, _, _ := s.Images.GetPage(ctx, g.PaginationParams{}, &g.ImageFilterArgs{CollectionName: "theclone"},
+		false)
 
 	images, _, _ := s.Images.GetPage(ctx, g.PaginationParams{}, &g.ImageFilterArgs{}, false)
 	if len(images) != 1 {
-		t.Fatalf("expected to retrieve 1 image, but got %v", len(images))
+		t.Fatalf("expected to retrieve 1 image, but found %v", len(images))
+	}
+
+	if len(imagesOfClone) != 1 {
+		t.Fatalf("expected to retrieve 1 image in cloned collection, but found %v", len(imagesOfClone))
+	}
+
+	if imagesOfClone[0].Id != images[0].Id {
+		t.Fatalf("expected to retrieve images in cloned collection with identical, but it is different: %v", imagesOfClone[0].Id)
 	}
 
 }

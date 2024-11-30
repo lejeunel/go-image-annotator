@@ -9,6 +9,7 @@ import (
 )
 
 type CollectionService struct {
+	ImageService    ImageService
 	CollectionRepo  r.CollectionRepo
 	ImageRepo       r.ImageRepo
 	MaxPageSize     int
@@ -45,4 +46,32 @@ func (s *CollectionService) Delete(ctx context.Context, collection *m.Collection
 		return err
 	}
 	return s.CollectionRepo.Delete(ctx, collection)
+}
+
+func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection, newCollection *m.Collection) error {
+	if err := g.CheckAuthorization(ctx, "admin"); err != nil {
+		return err
+	}
+
+	s.Create(ctx, newCollection)
+
+	filters := &g.ImageFilterArgs{}
+	page := 1
+	hasNextPage := true
+	for hasNextPage {
+		images, pageMeta, err := s.ImageService.GetPage(ctx, g.PaginationParams{Page: int64(page), PageSize: 1},
+			filters, false)
+		if err != nil {
+			return err
+		}
+		s.CollectionRepo.AssignImageToCollection(ctx, &images[0], newCollection)
+		if page == pageMeta.TotalPages {
+			break
+		}
+		page += 1
+
+	}
+
+	return nil
+
 }

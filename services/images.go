@@ -72,6 +72,7 @@ func (s *ImageService) Save(ctx context.Context, image *m.Image, collection *m.C
 	if err != nil {
 		return err
 	}
+
 	return nil
 
 }
