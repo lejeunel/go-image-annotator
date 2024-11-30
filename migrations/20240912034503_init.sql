@@ -57,6 +57,5 @@ CREATE TABLE IF NOT EXISTS image_collection_assoc (
 DROP TABLE images;
 DROP TABLE labels;
 DROP TABLE annotations;
-DROP TABLE polygons;
 DROP TABLE collections;
 DROP TABLE image_collection_assoc;
