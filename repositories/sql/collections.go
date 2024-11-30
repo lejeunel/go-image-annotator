@@ -80,6 +80,20 @@ func (r *SQLCollectionRepo) ImageIsInCollection(ctx context.Context, image *m.Im
 
 }
 
+func (r *SQLCollectionRepo) RemoveImage(ctx context.Context, image *m.Image, collection *m.Collection) error {
+	collection_id := collection.Id.String()
+	image_id := image.Id.String()
+	_, err := r.Db.Exec("DELETE FROM image_collection_assoc WHERE image_id=? AND collection_id=?",
+		image_id, collection_id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
 func (r *SQLCollectionRepo) Nums() (int64, error) {
 
 	return 0, nil

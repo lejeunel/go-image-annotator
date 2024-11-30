@@ -17,6 +17,7 @@ annotations without modifying the older ones. This is useful for tracability.
 * DONE Allow to select deep or shallow operation for clone and merge
 - Shallow: Copy references to images
 - Deep: Shallow + Copy annotations
+* DONE Delete image from collection
 * TODO Add Camera entity (CRUD) and methods to link them to images
 * TODO Add Site entity (CRUD), denoting geographical location where images were taken, and methods to link them to images
 * TODO Change cobra to [[https://github.com/urfave/cli][urfave/cli]]

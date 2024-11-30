@@ -83,7 +83,7 @@ func TestRetrieveImagesOfCollection(t *testing.T) {
 
 }
 
-func TestOrphanImagesShouldBeDeleted(t *testing.T) {
+func TestDeleteOrphanImagesShouldBeDeletedAsWell(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	collectionName := "mycollection"
@@ -93,6 +93,25 @@ func TestOrphanImagesShouldBeDeleted(t *testing.T) {
 	s.Images.Save(ctx, image, collection)
 
 	s.Collections.Delete(ctx, collection)
+
+	images, _, _ := s.Images.GetPage(ctx, collection.Id.String(), g.PaginationParams{}, false)
+	if len(images) > 0 {
+		t.Fatal("expected to retrieve 0 images, but found some")
+	}
+
+}
+
+func TestDeleteImageFromCollection(t *testing.T) {
+
+	s, ctx := NewTestApp(t, 2)
+	collectionName := "mycollection"
+	collection := &m.Collection{Name: collectionName}
+	s.Collections.Create(ctx, collection)
+	image := &m.Image{Data: testImage}
+	s.Images.Save(ctx, image, collection)
+
+	err := s.Collections.RemoveImage(ctx, image, collection)
+	AssertNoError(t, err)
 
 	images, _, _ := s.Images.GetPage(ctx, collection.Id.String(), g.PaginationParams{}, false)
 	if len(images) > 0 {
@@ -159,7 +178,7 @@ func TestDeepCloneShouldAlsoCloneAnnotations(t *testing.T) {
 
 }
 
-func TestCloneShouldNotDuplicateImages(t *testing.T) {
+func TestCloneShouldSkipDuplicateImages(t *testing.T) {
 
 	s, ctx := NewTestApp(t, 2)
 	collectionName := "mycollection"

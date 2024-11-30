@@ -145,3 +145,7 @@ func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, des
 
 	return nil
 }
+
+func (s *CollectionService) RemoveImage(ctx context.Context, image *m.Image, collection *m.Collection) error {
+	return s.CollectionRepo.RemoveImage(ctx, image, collection)
+}
