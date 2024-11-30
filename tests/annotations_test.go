@@ -26,6 +26,17 @@ func TestCreatingInvalidLabelShouldFail(t *testing.T) {
 	}
 }
 
+func TestLabelDuplicateNameShouldFail(t *testing.T) {
+	s, ctx := NewTestApp(t, 2)
+
+	label := &m.Label{Name: "mylabel"}
+	newLabel := &m.Label{Name: "mylabel"}
+	s.Annotations.CreateLabel(ctx, label)
+	err := s.Annotations.CreateLabel(ctx, newLabel)
+
+	AssertError(t, err)
+}
+
 func TestCreateAndRetrieveLabel(t *testing.T) {
 	s, ctx := NewTestApp(t, 2)
 	label := &m.Label{Name: "thelabel",

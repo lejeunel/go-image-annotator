@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS images (
 
 CREATE TABLE IF NOT EXISTS labels (
     id varchar(16),
-    name text,
+    name text UNIQUE,
     description text,
     created_at varchar(30),
     updated_at varchar(30),
