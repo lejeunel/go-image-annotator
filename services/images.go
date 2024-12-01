@@ -5,6 +5,8 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -169,6 +171,20 @@ func (s *ImageService) getBase(ctx context.Context, id string, withData bool) (*
 	}
 
 	return image, nil
+}
+
+func (s *ImageService) GetOrdinal(ctx context.Context, collection_id string, index int, withData bool) (*m.Image, error) {
+	images, _, err := s.GetPage(ctx,
+		collection_id,
+		g.PaginationParams{Page: int64(index) + 1, PageSize: 1}, withData)
+	if err != nil {
+		return nil, err
+	}
+
+	if images == nil {
+		return nil, &e.ErrNotFound{Entity: "image", Err: errors.New(fmt.Sprintf("Could not find image at ordinal index %v", index))}
+	}
+	return &images[0], nil
 }
 
 func (s *ImageService) GetPage(

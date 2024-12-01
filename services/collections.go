@@ -70,6 +70,9 @@ func (s *CollectionService) appendAnnotationsToImage(ctx context.Context, image 
 	return nil
 
 }
+func (s *CollectionService) AssignImageToCollection(ctx context.Context, image *m.Image, collection *m.Collection) error {
+	return s.CollectionRepo.AssignImageToCollection(ctx, image, collection)
+}
 
 func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection, newCollection *m.Collection, deep bool) error {
 	if err := g.CheckAuthorization(ctx, "admin"); err != nil {
@@ -88,8 +91,7 @@ func (s *CollectionService) Clone(ctx context.Context, collection *m.Collection,
 		if err != nil {
 			return err
 		}
-		err = s.CollectionRepo.AssignImageToCollection(ctx, image, newCollection)
-		if err != nil {
+		if err := s.AssignImageToCollection(ctx, image, newCollection); err != nil {
 			return err
 		}
 
@@ -127,7 +129,9 @@ func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, des
 			return err
 		}
 		if !imageFoundInDestination {
-			s.CollectionRepo.AssignImageToCollection(ctx, &images[0], destination)
+			if err := s.CollectionRepo.AssignImageToCollection(ctx, &images[0], destination); err != nil {
+				return err
+			}
 		}
 		if deep {
 			if err := s.appendAnnotationsToImage(ctx, image, destination); err != nil {
@@ -148,6 +152,16 @@ func (s *CollectionService) Merge(ctx context.Context, source *m.Collection, des
 
 func (s *CollectionService) RemoveImage(ctx context.Context, image *m.Image, collection *m.Collection) error {
 	return s.CollectionRepo.RemoveImage(ctx, image, collection)
+}
+
+func (s *CollectionService) GetOrdinal(ctx context.Context, index int) (*m.Collection, error) {
+	collections, _, err := s.GetPage(ctx,
+		g.PaginationParams{Page: int64(index), PageSize: 1})
+	if err != nil {
+		return nil, err
+	}
+	return &collections[0], nil
+
 }
 
 func (s *CollectionService) GetPage(

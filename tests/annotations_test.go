@@ -3,7 +3,6 @@ package tests
 import (
 	"fmt"
 	"github.com/go-test/deep"
-	g "go-image-annotator/generic"
 	m "go-image-annotator/models"
 	"testing"
 )
@@ -46,16 +45,15 @@ func TestCreateAndRetrieveLabel(t *testing.T) {
 	err := s.Annotations.CreateLabel(ctx, label)
 	AssertNoError(t, err)
 
-	labels, _, err := s.Annotations.GetPage(ctx,
-		g.PaginationParams{Page: 1, PageSize: 4})
+	retrievedLabel, err := s.Annotations.GetOrdinal(ctx, 0)
 	AssertNoError(t, err)
-	if len(labels) != 1 {
-		t.Fatalf("expected to retrieve 1 label, but got %v", len(labels))
+	if retrievedLabel == nil {
+		t.Fatal("expected to retrieve 1 label, but got none")
 	}
 
-	diff := deep.Equal(*label, labels[0])
+	diff := deep.Equal(*label, *retrievedLabel)
 	if diff != nil {
-		t.Fatalf(fmt.Sprintf("expected to retrieve identical image structs, but got different fields: %v", diff))
+		t.Fatalf(fmt.Sprintf("expected to retrieve identical label structs, but got different fields: %v", diff))
 	}
 
 }
@@ -69,10 +67,9 @@ func TestDeleteLabel(t *testing.T) {
 
 	AssertNoError(t, err)
 
-	labels, _, _ := s.Annotations.GetPage(ctx,
-		g.PaginationParams{Page: 1, PageSize: 4})
-	if len(labels) != 0 {
-		t.Fatalf("expected to retrieve 0 labels, but got %v", len(labels))
+	retrievedLabel, _ := s.Annotations.GetOrdinal(ctx, 0)
+	if retrievedLabel != nil {
+		t.Fatal("expected to retrieve 0 labels, but got one")
 	}
 
 }
@@ -107,10 +104,9 @@ func TestDeleteLabeledImageAndItsAssociatedLabel(t *testing.T) {
 
 	s.Images.Delete(ctx, image, collection)
 	s.Annotations.DeleteLabel(ctx, label)
-	labels, _, _ := s.Annotations.GetPage(ctx,
-		g.PaginationParams{Page: 1, PageSize: 4})
-	if len(labels) != 0 {
-		t.Fatalf("expected to retrieve 0 labels, but got %v", len(labels))
+	retrievedLabel, _ := s.Annotations.GetOrdinal(ctx, 0)
+	if retrievedLabel != nil {
+		t.Fatal("expected to retrieve 0 labels, but got one")
 	}
 
 }

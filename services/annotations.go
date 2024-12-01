@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	e "go-image-annotator/errors"
@@ -122,6 +124,19 @@ func (s *AnnotationService) ApplyBoundingBoxToImage(ctx context.Context, bbox *m
 		return err
 	}
 	return nil
+}
+
+func (s *AnnotationService) GetOrdinal(ctx context.Context, index int) (*m.Label, error) {
+	labels, _, err := s.GetPage(ctx,
+		g.PaginationParams{Page: int64(index) + 1, PageSize: 1})
+	if err != nil {
+		return nil, err
+	}
+
+	if labels == nil {
+		return nil, &e.ErrNotFound{Entity: "label", Err: errors.New(fmt.Sprintf("Could not find label at ordinal index %v", index))}
+	}
+	return &labels[0], nil
 }
 
 func (s *AnnotationService) GetPage(

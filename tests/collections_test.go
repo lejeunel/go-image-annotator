@@ -94,8 +94,8 @@ func TestDeleteOrphanImagesShouldBeDeletedAsWell(t *testing.T) {
 
 	s.Collections.Delete(ctx, collection)
 
-	images, _, _ := s.Images.GetPage(ctx, collection.Id.String(), g.PaginationParams{}, false)
-	if len(images) > 0 {
+	images, _ := s.Images.GetOrdinal(ctx, collection.Id.String(), 0, false)
+	if images != nil {
 		t.Fatal("expected to retrieve 0 images, but found some")
 	}
 
@@ -113,8 +113,8 @@ func TestDeleteImageFromCollection(t *testing.T) {
 	err := s.Collections.RemoveImage(ctx, image, collection)
 	AssertNoError(t, err)
 
-	images, _, _ := s.Images.GetPage(ctx, collection.Id.String(), g.PaginationParams{}, false)
-	if len(images) > 0 {
+	images, _ := s.Images.GetOrdinal(ctx, collection.Id.String(), 0, false)
+	if images != nil {
 		t.Fatal("expected to retrieve 0 images, but found some")
 	}
 
@@ -137,8 +137,8 @@ func TestAnnotationsShouldApplyToSpecifiedCollection(t *testing.T) {
 	s.Collections.Create(ctx, notAnnotatedCollection)
 	s.Collections.CollectionRepo.AssignImageToCollection(ctx, image, notAnnotatedCollection)
 
-	notAnnotatedImages, _, _ := s.Images.GetPage(ctx, notAnnotatedCollection.Id.String(), g.PaginationParams{}, false)
-	if notAnnotatedImages[0].Annotations != nil {
+	notAnnotatedImage, _ := s.Images.GetOrdinal(ctx, notAnnotatedCollection.Id.String(), 0, false)
+	if notAnnotatedImage.Annotations != nil {
 		t.Fatal("expected to retrieve not annotated image")
 	}
 
@@ -165,14 +165,14 @@ func TestDeepCloneShouldAlsoCloneAnnotations(t *testing.T) {
 
 	clone := &m.Collection{Name: cloneName}
 	s.Collections.Clone(ctx, collection, clone, true)
-	cloneImages, _, _ := s.Images.GetPage(ctx, clone.Id.String(), g.PaginationParams{},
+	cloneImage, _ := s.Images.GetOrdinal(ctx, clone.Id.String(), 0,
 		false)
 
-	if cloneImages[0].Annotations == nil {
+	if cloneImage.Annotations == nil {
 		t.Fatal("expected to retrieve image annotations, but got none")
 	}
 
-	if cloneImages[0].BoundingBoxes == nil {
+	if cloneImage.BoundingBoxes == nil {
 		t.Fatal("expected to retrieve image with bounding boxes, but got none")
 	}
 
@@ -190,18 +190,16 @@ func TestCloneShouldSkipDuplicateImages(t *testing.T) {
 	clonedCollection := &m.Collection{Name: "theclone"}
 
 	s.Collections.Clone(ctx, collection, clonedCollection, false)
-	imagesOfClone, _, _ := s.Images.GetPage(ctx, clonedCollection.Id.String(),
-		g.PaginationParams{}, false)
-	imagesOrigin, _, _ := s.Images.GetPage(ctx, collection.Id.String(),
-		g.PaginationParams{}, false)
+	imageOfClone, _ := s.Images.GetOrdinal(ctx, clonedCollection.Id.String(), 0, false)
+	imageOrigin, _ := s.Images.GetOrdinal(ctx, collection.Id.String(), 0, false)
 
-	if len(imagesOfClone) != 1 {
-		t.Fatalf("expected to retrieve 1 image in cloned collection, but found %v", len(imagesOfClone))
+	if imageOfClone == nil {
+		t.Fatal("expected to retrieve 1 image in cloned collection, but found none")
 	}
 
-	if imagesOfClone[0].Id != imagesOrigin[0].Id {
+	if imageOfClone.Id != imageOrigin.Id {
 		t.Fatalf("expected to retrieve images in cloned collection with identical id, but it is different: %v VS %v",
-			imagesOfClone[0].Id, imagesOrigin[0].Id)
+			imageOfClone.Id, imageOrigin.Id)
 	}
 
 }
