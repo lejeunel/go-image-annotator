@@ -18,7 +18,7 @@ var migrateCmd = &cobra.Command{
 
 func applyMigrationConfig() {
 	myCfg := c.NewConfig()
-	dbCfg := migrationCfg.ConfigT{DBConnection: migrationCfg.DBConnectionT{DSN: myCfg.Path,
+	dbCfg := migrationCfg.ConfigT{DBConnection: migrationCfg.DBConnectionT{DSN: myCfg.DbPath,
 		Driver: "sqlite3"}, DBMigration: migrationCfg.DBMigrationT{Dir: "migrations"}}
 	migrationCmd.SetConfig(dbCfg)
 

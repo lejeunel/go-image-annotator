@@ -15,18 +15,22 @@ import (
 	"time"
 )
 
-var serveCmd = &cobra.Command{
-	Use:   "serve",
-	Short: "Run server",
-	Run: func(cmd *cobra.Command, args []string) {
-		serve()
-	},
+var (
+	port     int
+	serveCmd = &cobra.Command{
+		Use:   "serve",
+		Short: "Run server",
+		Run: func(cmd *cobra.Command, args []string) {
+			serve(port)
+		},
+	}
+)
+
+func init() {
+	serveCmd.Flags().IntVarP(&port, "port", "p", 80, "port to serve on")
 }
 
-func serve() {
-
-	port := "8080"
-
+func serve(port int) {
 	mux := http.NewServeMux()
 
 	items := []string{"Super", "Duper", "Nice"}
@@ -34,14 +38,14 @@ func serve() {
 		return tplt.HomePage(items), nil
 	}))
 
-	server := &http.Server{Addr: fmt.Sprintf(":%s", port), Handler: mux}
+	server := &http.Server{Addr: fmt.Sprintf(":%v", port), Handler: mux}
 
 	go func() {
 		log.Fatal(server.ListenAndServe())
 	}()
 
-	log.Printf("Starting server on port %s...\n", port)
-	log.Printf("API docs URL: <root>:%s/docs\n", port)
+	log.Printf("Starting server on port %v...\n", port)
+	log.Printf("API docs URL: <root>:%v/docs\n", port)
 
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
