@@ -1,5 +1,3 @@
-#+title: DataHub
-
 * Development dependencies
 As a bare minimal setup, we will need to install the [[https://go.dev/doc/install][Golang]] binary
 to build and test.
