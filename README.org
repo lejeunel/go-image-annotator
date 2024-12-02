@@ -1,4 +1,17 @@
-#+title: Readme
+#+title: DataHub
+
+* Development dependencies
+As a bare minimal setup, we will need to install the [[https://go.dev/doc/install][Golang]] binary
+to build and test.
+
+Other convenient utilities (LSP server, ...) are given as example in ~flake.nix~.
+
+* Running tests
+
+#+begin_src shell
+go test -v ./tests
+#+end_src
+
 
 * Resources
 - [[https://dave.cheney.net/2019/05/07/prefer-table-driven-tests][Table driven test]]

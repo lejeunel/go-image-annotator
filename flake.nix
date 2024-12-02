@@ -14,7 +14,16 @@
       devShells = forEachSupportedSystem ({ pkgs }: {
         default = pkgs.mkShell {
 
-          packages = with pkgs; [ templ ];
+          packages = with pkgs; [
+            go
+            gopls
+            gotools
+            gomodifytags
+            gocode-gomod
+            gotestsum
+            gotest
+
+          ];
         };
       });
     };
