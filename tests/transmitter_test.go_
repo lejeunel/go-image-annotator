@@ -1,0 +1,23 @@
+package test
+
+import (
+	a "datahub/app"
+	tr "datahub/transmitter"
+)
+
+func TestCreateTransmitter(t *testing.T) {
+
+	s,_, ctx := a.NewTestApp(t, true)
+	transmitter, err := tr.New("my-transmitter")
+	AssertNoError(t, err)
+
+	s.Transmitters.Create(ctx, transmitter)
+
+	res, err := s.Transmitters.Find(ctx, transmitter.Id)
+	AssertNoError(t, err)
+
+	if res.Id != transmitter.Id {
+		t.Fatalf("expected retrieved transmitter id %v, but got %v",
+			transmitter.Id, res.Id)
+	}
+}

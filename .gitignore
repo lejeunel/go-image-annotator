@@ -1,0 +1,14 @@
+/.envrc
+/.direnv/
+/datahub
+/node_modules/
+/site/docs/archetypes/
+/site/docs/public/
+/site/docs/resources/
+/site/docs/.hugo_build.lock
+/main
+/docker-compose.yml
+/public/
+/db.sqlite
+/.dir-locals.el
+/result

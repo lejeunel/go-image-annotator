@@ -1,0 +1,3 @@
+#+title: DataHub
+
+Documentation can be found [[https://hub-eragon/docs][here]].

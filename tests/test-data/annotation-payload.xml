@@ -1,0 +1,29 @@
+<annotation>
+<?xml version="1.0"?>
+  <date>
+    <creation>01/01/2023</creation>
+    <ingestion>01/01/2023</ingestion>
+  </date>
+  <site>my-site</site>
+  <camera>my-camera</camera>
+  <folder>thefolder</folder>
+  <filename>FoxCamFile_00001_29Jun18_23h50m41s932.jpg</filename>
+  <path relative="True">datalake/raw/anomaly/FoxCamFile_00001_29Jun18_23h50m41s932.jpg</path>
+  <source>
+    <database>Unknown</database>
+  </source>
+  <size>
+    <width>320</width>
+    <height>256</height>
+    <depth>3</depth>
+  </size>
+  <object>
+    <name>anomaly</name>
+    <bndbox>
+      <xmin>138</xmin>
+      <ymin>50</ymin>
+      <xmax>161</xmax>
+      <ymax>75</ymax>
+    </bndbox>
+  </object>
+</annotation>
