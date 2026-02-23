@@ -87,31 +87,21 @@ func (p *LocationPicker) populateAvailableSites(ctx context.Context, state *Loca
 	return nil
 }
 
-func (p *LocationPicker) setCurrentSite(ctx context.Context, image *im.Image, state *LocationPickerState) error {
+func (p *LocationPicker) setCurrentSite(image *im.BaseImage, state *LocationPickerState) error {
 	if image.Camera != nil {
-		siteId := loc.NewSiteIdFromUUID(image.Camera.Site.Id.UUID)
-		site, err := p.Locations.FindSite(ctx, *siteId)
-		if err != nil {
-			return fmt.Errorf("making location picker state: %w", err)
-		}
-		state.Site = site
+		state.Site = image.Camera.Site
 	}
 	return nil
 }
 
-func (p *LocationPicker) setCurrentCamera(ctx context.Context, image *im.Image, state *LocationPickerState) error {
-	if image.CameraId != nil {
-		cameraId := loc.NewCameraIdFromUUID(image.CameraId.UUID)
-		camera, err := p.Locations.FindCamera(ctx, *cameraId)
-		if err != nil {
-			return fmt.Errorf("making location picker state: %w", err)
-		}
-		state.Camera = camera
+func (p *LocationPicker) setCurrentCamera(image *im.BaseImage, state *LocationPickerState) error {
+	if image.Camera != nil {
+		state.Camera = image.Camera
 	}
 	return nil
 }
 
-func (p *LocationPicker) Init(ctx context.Context, image *im.Image) (*LocationPickerState, error) {
+func (p *LocationPicker) Init(ctx context.Context, image *im.BaseImage) (*LocationPickerState, error) {
 
 	canChangeLocation := false
 	if err := p.Authorizer.WantToContributeLocation(ctx, image.Group); err == nil {
@@ -123,10 +113,10 @@ func (p *LocationPicker) Init(ctx context.Context, image *im.Image) (*LocationPi
 		Group:             image.Group,
 		CanChangeLocation: canChangeLocation,
 	}
-	if err := p.setCurrentSite(ctx, image, state); err != nil {
+	if err := p.setCurrentSite(image, state); err != nil {
 		return nil, fmt.Errorf("making location picker state: setting current site: %w", err)
 	}
-	if err := p.setCurrentCamera(ctx, image, state); err != nil {
+	if err := p.setCurrentCamera(image, state); err != nil {
 		return nil, fmt.Errorf("making location picker state: setting current camera: %w", err)
 	}
 
@@ -140,7 +130,7 @@ func (p *LocationPicker) Init(ctx context.Context, image *im.Image) (*LocationPi
 
 }
 
-func (p *LocationPicker) SelectSite(ctx context.Context, site *loc.Site, image *im.Image) (*LocationPickerState, error) {
+func (p *LocationPicker) SelectSite(ctx context.Context, site *loc.Site, image *im.BaseImage) (*LocationPickerState, error) {
 	state, err := p.Init(ctx, image)
 
 	if image.Camera != nil {
@@ -161,7 +151,7 @@ func (p *LocationPicker) SelectSite(ctx context.Context, site *loc.Site, image *
 	return state, nil
 }
 
-func (p *LocationPicker) SelectCamera(ctx context.Context, camera *loc.Camera, image *im.Image) (*LocationPickerState, error) {
+func (p *LocationPicker) SelectCamera(ctx context.Context, camera *loc.Camera, image *im.BaseImage) (*LocationPickerState, error) {
 	state, err := p.Init(ctx, image)
 	state.Camera = camera
 	state.Site = camera.Site

@@ -11,15 +11,16 @@ import (
 	"testing"
 )
 
-func InitializeLocationsTests(t *testing.T) (*a.App, context.Context, *clc.Collection, *im.Image) {
+func InitializeLocationsTests(t *testing.T) (*a.App, context.Context, *clc.Collection, *im.BaseImage) {
 	s, _, ctx := a.NewTestApp(t, true)
 
 	image, _ := im.New(testJPGImage)
 	collection, _ := clc.New("thename", "", "")
 	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image, collection)
+	base, _ := s.Images.GetBase(ctx, image.Id, im.FetchMetaOnly)
 
-	return &s, ctx, collection, image
+	return &s, ctx, collection, base
 
 }
 
@@ -174,14 +175,14 @@ func TestRetrieveImageWithTransmitter(t *testing.T) {
 	s.Locations.SaveSite(ctx, site)
 	camera, _ := loc.NewCamera(cameraName, site, transmitterName)
 	s.Locations.SaveCamera(ctx, camera)
-	s.Images.AssignCamera(ctx, camera, image)
+	s.Images.AssignCamera(ctx, camera.Id, image.Id)
 
 	retrievedImage, _ := s.Images.Find(ctx, image.Id, collection.Id,
 		im.FetchMetaOnly)
 
-	if retrievedImage.Camera.Transmitter != transmitterName {
+	if retrievedImage.GetTransmitter() != transmitterName {
 		t.Fatalf("expected to retrieve transmitter %v, but got %v",
-			transmitterName, retrievedImage.Camera.Transmitter)
+			transmitterName, retrievedImage.GetTransmitter())
 	}
 
 }
@@ -257,7 +258,7 @@ func TestAssignNonExistingCameraToImageShouldFail(t *testing.T) {
 
 	nonExistingCamera, _ := loc.NewCamera("thecamera", site, "")
 
-	err := s.Images.AssignCamera(ctx, nonExistingCamera, image)
+	err := s.Images.AssignCamera(ctx, nonExistingCamera.Id, image.Id)
 	AssertErrorIs(t, err, e.ErrNotFound)
 
 }
@@ -272,7 +273,7 @@ func TestCreateCameraWithNonExistingSiteToImageShouldFail(t *testing.T) {
 }
 
 func TestAssignCameraToImageShouldAlsoAddSite(t *testing.T) {
-	s, ctx, _, image := InitializeLocationsTests(t)
+	s, ctx, collection, image := InitializeLocationsTests(t)
 
 	site, _ := loc.NewSite("thelocation", "thegroup")
 	camera, _ := loc.NewCamera("thecamera", site, "")
@@ -280,13 +281,15 @@ func TestAssignCameraToImageShouldAlsoAddSite(t *testing.T) {
 
 	s.Locations.SaveCamera(ctx, camera)
 
-	err := s.Images.AssignCamera(ctx, camera, image)
+	err := s.Images.AssignCamera(ctx, camera.Id, image.Id)
 	AssertNoError(t, err)
 
-	if image.GetSiteName() == "" {
+	retr, _ := s.Images.Find(ctx, image.Id, collection.Id, im.FetchMetaOnly)
+
+	if retr.GetSiteName() == "" {
 		t.Fatal("expected that image gets assigned a site, but it is empty")
 	}
-	if image.GetCameraName() == "" {
+	if retr.GetCameraName() == "" {
 		t.Fatal("expected that image gets assigned a camera, but it is empty")
 	}
 
@@ -317,7 +320,7 @@ func TestDeleteCamera(t *testing.T) {
 }
 
 func TestUpdateSiteOfCameraShouldReassign(t *testing.T) {
-	s, ctx, _, _ := InitializeLocationsTests(t)
+	s, ctx, _, image := InitializeLocationsTests(t)
 
 	firstSite, _ := loc.NewSite("thelocation", "thegroup")
 	secondSite, _ := loc.NewSite("thesecondlocation", "thegroup")
@@ -329,11 +332,7 @@ func TestUpdateSiteOfCameraShouldReassign(t *testing.T) {
 		loc.CameraUpdatables{Name: "newname", SiteName: "thesecondlocation"})
 	AssertNoError(t, err)
 
-	image, _ := im.New(testJPGImage)
-	collection, _ := clc.New("thecollection", "", "")
-	s.Collections.Create(ctx, collection)
-	s.Images.Save(ctx, image, collection)
-	s.Images.AssignCamera(ctx, camera, image)
+	s.Images.AssignCamera(ctx, camera.Id, image.Id)
 
 	if updatedCamera.Site.Name != "thesecondlocation" {
 		t.Fatalf("expected to update site of camera to %v, but got %v",
@@ -342,7 +341,7 @@ func TestUpdateSiteOfCameraShouldReassign(t *testing.T) {
 
 	retrievedImages, _, _ := s.Images.List(ctx, *im.NewImageFilter(im.WithCameraId(camera.Id)),
 		im.OrderingArgs{}, g.PaginationParams{Page: 1, PageSize: 2}, im.FetchMetaOnly)
-	if retrievedImages[0].Camera.Site.Id != secondSite.Id {
+	if retrievedImages[0].GetSiteName() != secondSite.Name {
 		t.Fatal("expected to update site of image but did not")
 	}
 }
@@ -437,10 +436,10 @@ func TestListImageOfCamera(t *testing.T) {
 	s.Collections.Create(ctx, collection)
 
 	s.Images.Save(ctx, firstImage, collection)
-	s.Images.AssignCamera(ctx, firstCamera, firstImage)
+	s.Images.AssignCamera(ctx, firstCamera.Id, firstImage.Id)
 
 	s.Images.Save(ctx, secondImage, collection)
-	s.Images.AssignCamera(ctx, secondCamera, secondImage)
+	s.Images.AssignCamera(ctx, secondCamera.Id, secondImage.Id)
 
 	retrieved, _, _ := s.Images.List(ctx, im.FilterArgs{CameraId: &secondCamera.Id},
 		*im.NewImageDefaultOrderingArgs(), g.PaginationParams{Page: 1, PageSize: 2},
@@ -449,11 +448,8 @@ func TestListImageOfCamera(t *testing.T) {
 	if len(retrieved) != 1 {
 		t.Fatalf("expected to retrieve 1 image, but got %v", len(retrieved))
 	}
-	if retrieved[0].CameraId == nil {
-		t.Fatal("expected to retrieve image with valid camera id, but did not")
-	}
-	if *retrieved[0].CameraId != secondCamera.Id {
-		t.Fatalf("expected to retrieve image with camera id: %v, but got %v", secondCamera.Id, *retrieved[0].CameraId)
+	if retrieved[0].GetCameraName() != "secondcamera" {
+		t.Fatalf("expected to retrieve image with camera %v , got %v", "secondcamera", retrieved[0].GetCameraName())
 	}
 
 }
@@ -468,7 +464,7 @@ func InitCollection(t *testing.T, a *a.App, ctx context.Context,
 	camera, _ := loc.NewCamera(cameraName, site, "")
 	a.Locations.SaveSite(ctx, site)
 	a.Locations.SaveCamera(ctx, camera)
-	a.Images.AssignCamera(ctx, camera, image)
+	a.Images.AssignCamera(ctx, camera.Id, image.Id)
 
 }
 
@@ -567,7 +563,7 @@ func TestPatchCamera(t *testing.T) {
 		s.Locations.SaveSite(ctx, site)
 		s.Locations.SaveSite(ctx, newSite)
 		s.Locations.SaveCamera(ctx, camera)
-		s.Images.AssignCamera(ctx, camera, image)
+		s.Images.AssignCamera(ctx, camera.Id, image.Id)
 
 		patches := []g.JSONPatch{}
 		if tc.updateName {
@@ -628,7 +624,7 @@ func TestClearCameraFromImage(t *testing.T) {
 	s.Locations.SaveSite(ctx, site)
 	camera, _ := loc.NewCamera(cameraName, site, "")
 	s.Locations.SaveCamera(ctx, camera)
-	s.Images.AssignCamera(ctx, camera, image)
+	s.Images.AssignCamera(ctx, camera.Id, image.Id)
 
 	err := s.Images.UnassignCamera(ctx, image.Id)
 	AssertNoError(t, err)

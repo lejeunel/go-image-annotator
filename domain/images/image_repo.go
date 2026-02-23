@@ -10,18 +10,18 @@ import (
 type ImageRepo interface {
 	Create(*Image) (*Image, error)
 	Delete(*Image) error
-	Update(*Image, string, time.Time) error
+	Update(ImageId, string, time.Time) error
 	DeleteImagesInCollection(*clc.Collection) error
-	GetBase(ImageId) (*Image, error)
-	GetAdjacent(*Image, FilterArgs, OrderingArgs, bool) (*Image, error)
+	GetBase(ImageId) (*BaseImage, error)
+	GetAdjacent(*Image, FilterArgs, OrderingArgs, bool) (*BaseImage, error)
 	Count(FilterArgs) (int64, error)
-	List(FilterArgs, OrderingArgs, g.PaginationParams) ([]Image, *g.PaginationMeta, error)
-	ListWithChecksum(string) ([]Image, error)
+	List(FilterArgs, OrderingArgs, g.PaginationParams) ([]BaseImage, *g.PaginationMeta, error)
+	ListWithChecksum(string) ([]BaseImage, error)
 
 	AssignToCollection(*Image, *clc.Collection) error
 	RemoveImageFromCollection(*Image) error
 	ImageIsInCollection(*Image, *clc.Collection) (bool, error)
 
-	AssignCamera(*loc.Camera, *Image) error
+	AssignCamera(loc.CameraId, ImageId) error
 	UnassignCamera(ImageId) error
 }

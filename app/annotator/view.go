@@ -366,7 +366,7 @@ func (a *AnnotatorViewer) makeNextPrevPanel(prevImage *im.Image, nextImage *im.I
 
 	if nextImage != nil {
 		nextRequest := r
-		nextRequest.CollectionId = nextImage.CollectionId
+		nextRequest.CollectionId = nextImage.Collection.Id
 		nextRequest.ImageId = nextImage.Id
 		nextButton = gh.A(gh.Href(nextRequest.String("image")+"#image-annotation-panel"),
 			gh.Class(PrimaryButtonStyle),
@@ -379,7 +379,7 @@ func (a *AnnotatorViewer) makeNextPrevPanel(prevImage *im.Image, nextImage *im.I
 
 	if prevImage != nil {
 		prevRequest := r
-		prevRequest.CollectionId = prevImage.CollectionId
+		prevRequest.CollectionId = prevImage.Collection.Id
 		prevRequest.ImageId = prevImage.Id
 		prevButton = gh.A(gh.Href(prevRequest.String("image")+"#image-annotation-panel"),
 			gh.Class(PrimaryButtonStyle),

@@ -15,7 +15,7 @@ type AnnotatorLocationController struct {
 	Logger    *slog.Logger
 }
 
-func (a *AnnotatorLocationController) initLocationHandlers(r *http.Request) (*locpck.LocationPicker, *im.Image, error) {
+func (a *AnnotatorLocationController) initLocationHandlers(r *http.Request) (*locpck.LocationPicker, *im.BaseImage, error) {
 	locPicker := locpck.NewLocationPicker(a.Annotator.Images,
 		a.Annotator.Locations, a.Annotator.Authorizer,
 		a.Logger)
@@ -130,7 +130,7 @@ func (a *AnnotatorLocationController) submitLocationHandler(w http.ResponseWrite
 		return
 	}
 
-	if err := a.Annotator.Images.AssignCamera(r.Context(), camera, image); err != nil {
+	if err := a.Annotator.Images.AssignCamera(r.Context(), camera.Id, image.Id); err != nil {
 		g.LogAndWriteError(a.Logger, err, &w)
 		return
 	}

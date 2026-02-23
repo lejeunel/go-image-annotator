@@ -104,24 +104,24 @@ func TestUpdateImage(t *testing.T) {
 		s.Locations.SaveSite(ctx, otherSite)
 		s.Locations.SaveCamera(ctx, otherCamera)
 
-		image, err := s.Images.Update(ctx, image.Id, im.ImageUpdatables{Site: tc.site, Camera: tc.camera, CapturedAt: tc.capturedAt,
+		updated_image, err := s.Images.Update(ctx, image.Id, im.ImageUpdatables{Site: tc.site, Camera: tc.camera, CapturedAt: tc.capturedAt,
 			Type_: tc.type_})
 		if tc.success {
 			if err != nil {
 				t.Error(fmt.Printf("%s: expected no error but got %v", tc.testName, err))
 			}
 			wantT, _ := time.Parse(timeLayout, tc.capturedAt)
-			if image.CapturedAt != wantT {
-				t.Fatalf("%v: expected captured_at to be %v, but got %v", tc.testName, wantT, image.CapturedAt)
+			if updated_image.CapturedAt != wantT {
+				t.Fatalf("%v: expected captured_at to be %v, but got %v", tc.testName, wantT, updated_image.CapturedAt)
 			}
-			if image.GetSiteName() != tc.site {
-				t.Fatalf("expected site to be %v, but got %v", tc.site, image.GetSiteName())
+			if updated_image.GetSiteName() != tc.site {
+				t.Fatalf("expected site to be %v, but got %v", tc.site, updated_image.GetSiteName())
 			}
-			if image.GetCameraName() != tc.camera {
-				t.Fatalf("expected camera to be %v, but got %v", tc.camera, image.GetCameraName())
+			if updated_image.GetCameraName() != tc.camera {
+				t.Fatalf("expected camera to be %v, but got %v", tc.camera, updated_image.GetCameraName())
 			}
-			if image.Type != tc.type_ {
-				t.Fatalf("expected type to be %v, but got %v", tc.type_, image.Type)
+			if updated_image.Type != tc.type_ {
+				t.Fatalf("expected type to be %v, but got %v", tc.type_, updated_image.Type)
 			}
 
 		} else {
@@ -134,7 +134,7 @@ func TestUpdateImage(t *testing.T) {
 
 }
 
-func InitPatchTests(t *testing.T) (a.App, *im.Image, *loc.Site, *loc.Camera, *clk.FakeClock, context.Context) {
+func InitPatchTests(t *testing.T) (a.App, *im.BaseImage, *loc.Site, *loc.Camera, *clk.FakeClock, context.Context) {
 	s, clock, ctx := a.NewTestApp(t, true)
 
 	image, _ := im.New(testJPGImage)
@@ -148,9 +148,11 @@ func InitPatchTests(t *testing.T) (a.App, *im.Image, *loc.Site, *loc.Camera, *cl
 	s.Locations.SaveSite(ctx, site)
 	s.Locations.SaveCamera(ctx, camera)
 	s.Locations.SaveCamera(ctx, secondCamera)
-	s.Images.AssignCamera(ctx, camera, image)
+	s.Images.AssignCamera(ctx, camera.Id, image.Id)
 
-	return s, image, site, camera, clock, ctx
+	base, _ := s.Images.GetBase(ctx, image.Id, im.FetchMetaOnly)
+
+	return s, base, site, camera, clock, ctx
 
 }
 

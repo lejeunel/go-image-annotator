@@ -44,10 +44,10 @@ func TestCreateBoundingBox(t *testing.T) {
 	ctx, _, annotator, image, _, label := InitializeAnnotatorTests(t)
 	bboxPayload := &an.BoundingBox{Xc: 10, Yc: 10, Height: 4, Width: 3,
 		Label: label.Name}
-	err := annotator.UpsertBoundingBox(ctx, image.Id, image.CollectionId, bboxPayload)
+	err := annotator.UpsertBoundingBox(ctx, image.Id, image.Collection.Id, bboxPayload)
 	AssertNoError(t, err)
 	state, err := annotator.MakeState(ctx,
-		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.CollectionId})
+		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.Collection.Id})
 	AssertNoError(t, err)
 	if len(state.BoundingBoxes) != 1 {
 		t.Fatalf("expected to retrieve one bounding box, but got %v", len(state.BoundingBoxes))
@@ -59,17 +59,17 @@ func TestUpdateBoundingBoxCoords(t *testing.T) {
 	ctx, _, annotator, image, _, label := InitializeAnnotatorTests(t)
 	bboxPayload := &an.BoundingBox{Xc: 10, Yc: 10, Height: 4, Width: 3,
 		Label: label.Name}
-	annotator.UpsertBoundingBox(ctx, image.Id, image.CollectionId, bboxPayload)
+	annotator.UpsertBoundingBox(ctx, image.Id, image.Collection.Id, bboxPayload)
 	state, _ := annotator.MakeState(ctx,
-		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.CollectionId})
+		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.Collection.Id})
 
 	newXValue := bboxPayload.Xc + 1
 	bboxPayload.Xc = newXValue
 	bboxPayload.Id = state.BoundingBoxes[0].Id
-	err := annotator.UpsertBoundingBox(ctx, image.Id, image.CollectionId, bboxPayload)
+	err := annotator.UpsertBoundingBox(ctx, image.Id, image.Collection.Id, bboxPayload)
 	AssertNoError(t, err)
 	state, _ = annotator.MakeState(ctx,
-		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.CollectionId})
+		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.Collection.Id})
 
 	got := state.BoundingBoxes[0].Xc
 	if math.Abs(got-newXValue) > 0.001 {
@@ -83,7 +83,7 @@ func TestImageResizerResizesWithTargetWidth(t *testing.T) {
 	origWidth := float64(image.Width)
 
 	state, _ := annotator.MakeState(ctx,
-		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.CollectionId})
+		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.Collection.Id})
 	transformedImage, _, _ := goim.Decode(bytes.NewReader(state.ImageData))
 
 	expectedWidth := float64(annotator.Rescaler.TargetWidth)
@@ -105,7 +105,7 @@ func TestImageResizerTransformsBBoxCoordinates(t *testing.T) {
 	inputBBox := &an.BoundingBox{Xc: transformedWidth / 2, Yc: transformedHeight / 2,
 		Height: transformedHeight, Width: transformedWidth,
 		Label: label.Name}
-	annotator.UpsertBoundingBox(ctx, image.Id, image.CollectionId, inputBBox)
+	annotator.UpsertBoundingBox(ctx, image.Id, image.Collection.Id, inputBBox)
 
 	retrievedImage, _ := annotator.Images.Find(ctx, image.Id, collection.Id, im.FetchMetaOnly)
 	retrievedBBox := retrievedImage.BoundingBoxes[0]
@@ -165,12 +165,12 @@ func TestBoundingBoxAreColorized(t *testing.T) {
 	ctx, _, annotator, image, _, label := InitializeAnnotatorTests(t)
 	first := &an.BoundingBox{Xc: 10, Yc: 10, Height: 4, Width: 3,
 		Label: label.Name}
-	annotator.UpsertBoundingBox(ctx, image.Id, image.CollectionId, first)
+	annotator.UpsertBoundingBox(ctx, image.Id, image.Collection.Id, first)
 	second := &an.BoundingBox{Xc: 11, Yc: 11, Height: 5, Width: 4,
 		Label: label.Name}
-	annotator.UpsertBoundingBox(ctx, image.Id, image.CollectionId, second)
+	annotator.UpsertBoundingBox(ctx, image.Id, image.Collection.Id, second)
 	state, _ := annotator.MakeState(ctx,
-		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.CollectionId})
+		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.Collection.Id})
 
 	firstColor := state.BoundingBoxes[0].Color
 	secondColor := state.BoundingBoxes[1].Color

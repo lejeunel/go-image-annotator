@@ -192,7 +192,7 @@ func TestBoundingBoxesAreReturnedInAntiChronologicalOrder(t *testing.T) {
 	secondBbox.Annotate(label)
 	s.Images.Annotations.UpsertBoundingBox(ctx, secondBbox, image)
 
-	image, _ = s.Images.Find(ctx, image.Id, image.CollectionId, im.FetchMetaOnly)
+	image, _ = s.Images.Find(ctx, image.Id, image.Collection.Id, im.FetchMetaOnly)
 	if len(image.BoundingBoxes) != 2 {
 		t.Fatalf("expected to retrieve 2 bounding boxes but got %v", len(image.BoundingBoxes))
 	} else {

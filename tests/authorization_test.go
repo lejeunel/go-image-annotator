@@ -226,7 +226,7 @@ func TestGeneratingAnnotatorStateDoesNotRequirePermission(t *testing.T) {
 
 	ctx = context.WithValue(ctx, "entitlements", "")
 	_, err := annotator.MakeState(ctx,
-		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.CollectionId})
+		an.AnnotatorRequest{ImageId: image.Id, CollectionId: image.Collection.Id})
 	AssertNoError(t, err)
 
 }

@@ -134,7 +134,7 @@ type ImageGetResponse struct {
 	Body ImagesResponse
 }
 
-func NewImageBaseResponse(image *Image) *ImageBaseResponse {
+func NewImageBaseResponse(image *BaseImage) *ImageBaseResponse {
 	return &ImageBaseResponse{Body: ImageBaseResponseBody{Site: image.GetSiteName(),
 		Camera: image.GetCameraName(), CapturedAt: image.CapturedAt.Format("2006-01-02T15:04:05.000Z"),
 		Type: image.Type, Transmitter: image.GetTransmitter()}}

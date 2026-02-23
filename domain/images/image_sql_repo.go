@@ -51,8 +51,8 @@ type ImageRecord struct {
 	Group          string           `db:"group_name"`
 }
 
-func FromRecord(record ImageRecord) Image {
-	return Image{
+func FromRecord(record ImageRecord) BaseImage {
+	return BaseImage{
 		Id:           record.Id,
 		FileName:     record.FileName,
 		CameraId:     record.CameraId,
@@ -88,7 +88,7 @@ func (r *SQLImageRepo) Create(image *Image) (*Image, error) {
 
 	return image, nil
 }
-func (r *SQLImageRepo) ListWithChecksum(sha256 string) ([]Image, error) {
+func (r *SQLImageRepo) ListWithChecksum(sha256 string) ([]BaseImage, error) {
 	query := NewBaseImageQuery()
 	query = query.Where("i.sha256=?", sha256)
 	query = query.Limit(1)
@@ -103,7 +103,7 @@ func (r *SQLImageRepo) ListWithChecksum(sha256 string) ([]Image, error) {
 	}
 
 	if len(records) > 0 {
-		images := []Image{}
+		images := []BaseImage{}
 		for _, record := range records {
 			image := FromRecord(record)
 			images = append(images, image)
@@ -114,7 +114,7 @@ func (r *SQLImageRepo) ListWithChecksum(sha256 string) ([]Image, error) {
 
 }
 
-func (r *SQLImageRepo) GetBase(imageId ImageId) (*Image, error) {
+func (r *SQLImageRepo) GetBase(imageId ImageId) (*BaseImage, error) {
 	record := ImageRecord{}
 	query := NewBaseImageQuery().Where("i.id=?", imageId.String())
 	sql, args, err := query.ToSql()
@@ -142,9 +142,9 @@ func (r *SQLImageRepo) Delete(image *Image) error {
 	return nil
 }
 
-func (r *SQLImageRepo) Update(image *Image, type_ string, capturedAt time.Time) error {
+func (r *SQLImageRepo) Update(image_id ImageId, type_ string, capturedAt time.Time) error {
 	_, err := r.Db.Exec("UPDATE images SET image_type=$1, captured_at=$2 WHERE id=$3",
-		type_, capturedAt, image.Id)
+		type_, capturedAt, image_id)
 
 	if err != nil {
 		return e.ErrDB
@@ -153,7 +153,7 @@ func (r *SQLImageRepo) Update(image *Image, type_ string, capturedAt time.Time) 
 	return nil
 }
 
-func (r *SQLImageRepo) GetAdjacent(currentImage *Image, filters FilterArgs, ordering OrderingArgs, previous bool) (*Image, error) {
+func (r *SQLImageRepo) GetAdjacent(currentImage *Image, filters FilterArgs, ordering OrderingArgs, previous bool) (*BaseImage, error) {
 	temporalFilter := TemporalFilter{ReferenceImageId: currentImage.Id}
 	if ordering.CreatedAt != nil {
 		temporalFilter.Field = "created_at"
@@ -182,7 +182,7 @@ func (r *SQLImageRepo) GetAdjacent(currentImage *Image, filters FilterArgs, orde
 		return nil, e.ErrNotFound
 	}
 
-	images := []Image{}
+	images := []BaseImage{}
 	for _, record := range records {
 		image := FromRecord(record)
 		images = append(images, image)
@@ -217,7 +217,7 @@ func (r *SQLImageRepo) Count(filters FilterArgs) (int64, error) {
 
 }
 
-func (r *SQLImageRepo) List(filters FilterArgs, orderings OrderingArgs, pagination g.PaginationParams) ([]Image, *g.PaginationMeta, error) {
+func (r *SQLImageRepo) List(filters FilterArgs, orderings OrderingArgs, pagination g.PaginationParams) ([]BaseImage, *g.PaginationMeta, error) {
 
 	query := NewBaseImageQuery()
 	query = orderings.Apply(query)
@@ -234,7 +234,7 @@ func (r *SQLImageRepo) List(filters FilterArgs, orderings OrderingArgs, paginati
 		return nil, nil, fmt.Errorf("selecting data: %w", e.ErrDB)
 	}
 
-	images := []Image{}
+	images := []BaseImage{}
 	for _, record := range records {
 		image := FromRecord(record)
 		images = append(images, image)
@@ -278,7 +278,7 @@ func (r *SQLImageRepo) ImageIsInCollection(image *Image, collection *clc.Collect
 
 func (r *SQLImageRepo) RemoveImageFromCollection(image *Image) error {
 	_, err := r.Db.Exec("DELETE FROM image_collection_assoc WHERE image_id=$1 AND collection_id=$2",
-		image.Id, image.CollectionId)
+		image.Id, image.Collection.Id)
 
 	if err != nil {
 		return err
@@ -288,9 +288,9 @@ func (r *SQLImageRepo) RemoveImageFromCollection(image *Image) error {
 
 }
 
-func (r *SQLImageRepo) AssignCamera(camera *loc.Camera, image *Image) error {
+func (r *SQLImageRepo) AssignCamera(camera_id loc.CameraId, image_id ImageId) error {
 	query := "UPDATE images SET camera_id=$1 WHERE id=$2"
-	_, err := r.Db.Exec(query, camera.Id, image.Id)
+	_, err := r.Db.Exec(query, camera_id, image_id)
 
 	if err != nil {
 		return err

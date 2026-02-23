@@ -218,14 +218,13 @@ func (a *AnnotatorController) mainHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	image, err := a.Model.Images.Find(r.Context(), stateRequest.ImageId, stateRequest.CollectionId,
-		im.FetchMetaOnly)
+	base, err := a.Model.Images.GetBase(r.Context(), stateRequest.ImageId, im.FetchMetaOnly)
 	if err != nil {
 		g.LogAndWriteError(a.Logger, err, &w)
 		return
 	}
 
-	locationPickerState, err := locPicker.Init(r.Context(), image)
+	locationPickerState, err := locPicker.Init(r.Context(), base)
 	if err != nil {
 		g.LogAndWriteError(a.Logger, err, &w)
 		return

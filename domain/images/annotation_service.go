@@ -42,7 +42,7 @@ func (s *AnnotationService) GetAnnotations(ctx context.Context, image *Image) ([
 	annotationsIds, err := s.AnnotationRepo.GetAnnotationIdsOfImage(image)
 	if err != nil {
 		return nil, fmt.Errorf("appending annotations to image %v of collection %v: fetching annotations: %w",
-			image.Id, image.CollectionId, err)
+			image.Id, image.Collection.Id, err)
 	}
 
 	var annotations []*Annotation
@@ -84,7 +84,7 @@ func (s *AnnotationService) AppendAnnotations(ctx context.Context, image *Image)
 	}
 	if err != nil {
 		return fmt.Errorf("appending annotations to image %v of collection %v: fetching bounding boxes: %w",
-			image.Id, image.CollectionId, err)
+			image.Id, image.Collection.Id, err)
 	}
 	image.BoundingBoxes = bboxes
 
@@ -149,7 +149,7 @@ func (s *AnnotationService) applyBoundingBox(ctx context.Context, bbox *Bounding
 		return err
 	}
 
-	collection, err := s.Collections.Find(ctx, image.CollectionId)
+	collection, err := s.Collections.Find(ctx, image.Collection.Id)
 	if err != nil {
 		return fmt.Errorf("apply bounding box: fetching collection: %w", err)
 	}
@@ -175,7 +175,7 @@ func (s *AnnotationService) updateBoundingBox(ctx context.Context, bbox *Boundin
 	if err := s.AnnotationRepo.UpdateBoundingBox(bbox, image); err != nil {
 		return fmt.Errorf("%v updating bounding-box: %w", baseErrMsg, err)
 	}
-	collection, err := s.Collections.Find(ctx, image.CollectionId)
+	collection, err := s.Collections.Find(ctx, image.Collection.Id)
 	if err != nil {
 		return fmt.Errorf("%v: fetching collection: %w", baseErrMsg, err)
 	}
@@ -195,7 +195,7 @@ func (s *AnnotationService) UpsertBoundingBox(ctx context.Context, bbox *Boundin
 		return fmt.Errorf("%v: has no assigned label: %w", errCtx, e.ErrValidation)
 	}
 
-	collection, err := s.Collections.Find(ctx, image.CollectionId)
+	collection, err := s.Collections.Find(ctx, image.Collection.Id)
 	if err != nil {
 		return fmt.Errorf("%v: %w", errCtx, err)
 	}
@@ -216,7 +216,7 @@ func (s *AnnotationService) UpsertBoundingBox(ctx context.Context, bbox *Boundin
 
 	bbox.Annotation.ImageId = image.Id
 	bbox.Annotation.AuthorEmail = email
-	bbox.Annotation.CollectionId = image.CollectionId
+	bbox.Annotation.CollectionId = image.Collection.Id
 
 	if s.imageHasBoundingBoxWithId(image, bbox.Annotation.Id) {
 		if err := s.updateBoundingBox(ctx, bbox, image); err != nil {

@@ -90,7 +90,7 @@ func (s *Service) DeleteCollection(ctx context.Context, collection *clc.Collecti
 	return nil
 }
 
-func (s *Service) Patch(ctx context.Context, imageId ImageId, patches g.JSONPatches) (*Image, error) {
+func (s *Service) Patch(ctx context.Context, imageId ImageId, patches g.JSONPatches) (*BaseImage, error) {
 	baseErrMsg := "patching image"
 	image, err := s.GetBase(ctx, imageId, FetchImageOptions{IncludeRawData: false})
 	if err != nil {
@@ -124,19 +124,19 @@ func (s *Service) Patch(ctx context.Context, imageId ImageId, patches g.JSONPatc
 }
 
 func (s *Service) Update(ctx context.Context, imageId ImageId,
-	payload ImageUpdatables) (*Image, error) {
+	payload ImageUpdatables) (*BaseImage, error) {
 
 	baseErrMsg := "updating image"
 
-	image, err := s.GetBase(ctx, imageId, FetchImageOptions{IncludeRawData: false})
+	base, err := s.GetBase(ctx, imageId, FetchImageOptions{IncludeRawData: false})
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
-	if err := s.appendCamera(ctx, image); err != nil {
+	if err := s.appendCamera(ctx, base); err != nil {
 		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
 
-	err = s.Authorizer.WantToContributeImages(ctx, image.Group)
+	err = s.Authorizer.WantToContributeImages(ctx, base.Group)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
@@ -146,21 +146,20 @@ func (s *Service) Update(ctx context.Context, imageId ImageId,
 	if err != nil {
 		return nil, fmt.Errorf("%v: parsing captured_at %v: %w", baseErrMsg, payload.CapturedAt, err)
 	}
-	if err := s.updateTypeAndTime(image, payload.Type_, parsedCapturedAt); err != nil {
+	if err := s.updateTypeAndTime(base, payload.Type_, parsedCapturedAt); err != nil {
 		return nil, err
 	}
 
-	if err := s.AssignLocation(ctx, image, payload.Site, payload.Camera); err != nil {
+	if err := s.AssignLocation(ctx, base.Id, payload.Site, payload.Camera); err != nil {
 		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
 
-	image, _ = s.GetBase(ctx, image.Id, FetchImageOptions{IncludeRawData: false})
-
-	if err := s.appendAggregateResources(ctx, image, image.CollectionId, FetchImageOptions{IncludeRawData: false}); err != nil {
+	base, err = s.GetBase(ctx, base.Id, FetchMetaOnly)
+	if err != nil {
 		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
 
-	return image, nil
+	return base, nil
 }
 
 func (s *Service) AssignToCollection(ctx context.Context, image *Image, collection *clc.Collection) error {
@@ -168,7 +167,7 @@ func (s *Service) AssignToCollection(ctx context.Context, image *Image, collecti
 	if err != nil {
 		return err
 	}
-	image.CollectionId = collection.Id
+	image.Collection.Id = collection.Id
 	image.Group = collection.Group
 
 	s.CollectionService.Touch(ctx, collection)
@@ -234,19 +233,20 @@ func (s *Service) ChecksumAlreadyExists(sha256 string) error {
 
 func (s *Service) Find(ctx context.Context, imageId ImageId, collectionId clc.CollectionId, opts FetchImageOptions) (*Image, error) {
 	baseErrMsg := "getting image by id and collection id"
-	image, err := s.GetBase(ctx, imageId, opts)
+	base, err := s.GetBase(ctx, imageId, opts)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
 
-	if err := s.appendAggregateResources(ctx, image, collectionId, opts); err != nil {
+	image, err := s.appendAggregateResources(ctx, base, collectionId, opts)
+	if err != nil {
 		return nil, err
 	}
 
 	return image, nil
 
 }
-func (s *Service) appendCamera(ctx context.Context, image *Image) error {
+func (s *Service) appendCamera(ctx context.Context, image *BaseImage) error {
 	if image.CameraId != nil {
 		camera, err := s.Locations.FindCamera(ctx, *image.CameraId)
 		if err != nil {
@@ -258,37 +258,47 @@ func (s *Service) appendCamera(ctx context.Context, image *Image) error {
 
 }
 
-func (s *Service) appendAggregateResources(ctx context.Context, image *Image, collectionId clc.CollectionId, opts FetchImageOptions) error {
+func (s *Service) appendAggregateResources(ctx context.Context, base *BaseImage, collectionId clc.CollectionId, opts FetchImageOptions) (*Image, error) {
 
-	uri := makeURI(image.Id,
+	uri := makeURI(base.Id,
 		s.KeyValueStoreClient.Scheme(),
 		s.KeyValueStoreClient.Root(),
-		strings.Split(image.MIMEType, "/")[1])
+		strings.Split(base.MIMEType, "/")[1])
 
-	image.Uri = uri
+	base.Uri = uri
 
 	baseErrMsg := "appending aggregate resources"
-	if err := s.appendCamera(ctx, image); err != nil {
-		return fmt.Errorf("%v: %w", baseErrMsg, err)
+	if err := s.appendCamera(ctx, base); err != nil {
+		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
 	collection, err := s.CollectionService.Find(ctx, collectionId)
 	if err != nil {
-		return fmt.Errorf("%v: %w", baseErrMsg, err)
+		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
-	image.Collection = collection
-	image.CollectionId = collectionId
+
+	image := &Image{Id: base.Id, FileName: base.FileName, CapturedAt: base.CapturedAt, CreatedAt: base.CreatedAt, UpdatedAt: base.UpdatedAt,
+		SHA256: base.SHA256, MIMEType: base.MIMEType, Width: base.Width, Height: base.Height, Type: base.Type, Collection: collection, Camera: base.Camera,
+		Uri: base.Uri, Group: base.Group}
 
 	if err := s.appendDataAndAnnotations(ctx, image, opts); err != nil {
-		return fmt.Errorf("%v: %w", baseErrMsg, err)
+		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
-	return nil
+	return image, nil
 
 }
-func (s *Service) GetBase(ctx context.Context, imageId ImageId, opts FetchImageOptions) (*Image, error) {
+func (s *Service) GetBase(ctx context.Context, imageId ImageId, opts FetchImageOptions) (*BaseImage, error) {
 
+	errCtx := "fetching image by id"
 	image, err := s.Repo.GetBase(imageId)
 	if err != nil {
-		return nil, fmt.Errorf("fetching image by id %v: %w", imageId, err)
+		return nil, fmt.Errorf("%v: %v: %w", errCtx, imageId, err)
+	}
+	if image.CameraId != nil {
+		camera, err := s.Locations.FindCamera(ctx, *image.CameraId)
+		if err != nil {
+			return nil, fmt.Errorf("%v: %v: %w", errCtx, imageId, err)
+		}
+		image.Camera = camera
 	}
 
 	return image, nil
@@ -297,12 +307,12 @@ func (s *Service) GetBase(ctx context.Context, imageId ImageId, opts FetchImageO
 func (s *Service) GetRaw(ctx context.Context, imageId *ImageId) (*RawImage, error) {
 
 	baseErrMsg := fmt.Sprintf("fetching raw image data by id %v", imageId)
-	image, err := s.Repo.GetBase(*imageId)
+	base, err := s.Repo.GetBase(*imageId)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
 
-	data, err := s.getImageData(ctx, image)
+	data, err := s.getImageData(ctx, base.FileName)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
@@ -310,7 +320,7 @@ func (s *Service) GetRaw(ctx context.Context, imageId *ImageId) (*RawImage, erro
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
-	return &RawImage{Data: data, MIMEType: image.MIMEType}, nil
+	return &RawImage{Data: data, MIMEType: base.MIMEType}, nil
 
 }
 
@@ -321,14 +331,13 @@ func (s *Service) NumImages(ctx context.Context, filters FilterArgs) (int64, err
 
 func (s *Service) GetAdjacent(ctx context.Context, currentImage *Image, filters FilterArgs,
 	ordering OrderingArgs, previous bool, opts FetchImageOptions) (*Image, error) {
-	image, err := s.Repo.GetAdjacent(currentImage, filters, ordering, previous)
+	base, err := s.Repo.GetAdjacent(currentImage, filters, ordering, previous)
 	if err != nil {
-		return nil, fmt.Errorf("getting next image: %w", err)
+		return nil, fmt.Errorf("getting adjacent image: %w", err)
 	}
-	if opts.IncludeRawData == true {
-		if err := s.appendImageData(ctx, image); err != nil {
-			return nil, fmt.Errorf("getting next image: %w", err)
-		}
+	image, err := s.appendAggregateResources(ctx, base, currentImage.Collection.Id, opts)
+	if err != nil {
+		return nil, fmt.Errorf("getting adjacent image: %w", err)
 	}
 	return image, nil
 }
@@ -346,19 +355,22 @@ func (s *Service) List(
 			s.MaxPageSize, baseErrMsg, err)
 	}
 
-	imageList, paginationMeta, err := s.Repo.List(filters, orderings, pagination)
+	imageBaseList, paginationMeta, err := s.Repo.List(filters, orderings, pagination)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%v: listing images: %w", baseErrMsg, err)
 	}
 
-	for i := 0; i < len(imageList); i++ {
-		image := &imageList[i]
-		if err := s.appendAggregateResources(ctx, image, image.CollectionId, opts); err != nil {
+	images := []Image{}
+	for i := 0; i < len(imageBaseList); i++ {
+		base := &imageBaseList[i]
+		image, err := s.appendAggregateResources(ctx, base, base.CollectionId, opts)
+		images = append(images, *image)
+		if err != nil {
 			return nil, nil, err
 		}
 	}
 
-	return imageList, paginationMeta, nil
+	return images, paginationMeta, nil
 
 }
 
@@ -366,7 +378,7 @@ func (s *Service) ImportImage(ctx context.Context, sourceImage *Image,
 	destinationCollectionId clc.CollectionId, opts ImportImageOptions) error {
 
 	baseErrMsg := fmt.Sprintf("importing image %v from collection %v to collection %v",
-		sourceImage.Id, sourceImage.CollectionId, destinationCollectionId)
+		sourceImage.Id, sourceImage.Collection.Id, destinationCollectionId)
 
 	destinationCollection, err := s.CollectionService.Find(ctx, destinationCollectionId)
 	if err != nil {
@@ -403,7 +415,7 @@ func (s *Service) ImportImage(ctx context.Context, sourceImage *Image,
 
 func (s *Service) RemoveFromCollection(ctx context.Context, image *Image) error {
 
-	baseErrMsg := fmt.Sprintf("removing image %v from collection %v", image.Id, image.CollectionId)
+	baseErrMsg := fmt.Sprintf("removing image %v from collection %v", image.Id, image.Collection.Id)
 	if err := s.Authorizer.WantToDeleteCollectionOrItsContent(ctx, image.Group); err != nil {
 		return fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
@@ -432,15 +444,15 @@ func (s *Service) appendDataAndAnnotations(ctx context.Context, image *Image, op
 
 }
 
-func (s *Service) getImageData(ctx context.Context, image *Image) ([]byte, error) {
+func (s *Service) getImageData(ctx context.Context, filename string) ([]byte, error) {
 	uri := url.URL{Scheme: s.KeyValueStoreClient.Scheme(), Path: strings.Join([]string{s.KeyValueStoreClient.Root(),
-		image.FileName}, "/")}
+		filename}, "/")}
 	return s.KeyValueStoreClient.Download(ctx, uri.String())
 
 }
 
 func (s *Service) appendImageData(ctx context.Context, image *Image) error {
-	data, err := s.getImageData(ctx, image)
+	data, err := s.getImageData(ctx, image.FileName)
 
 	if err != nil {
 		return fmt.Errorf("appending image data: %w", err)
@@ -467,21 +479,21 @@ func (s *Service) saveImage(ctx context.Context, image *Image) error {
 
 }
 
-func (s *Service) updateTypeAndTime(image *Image, type_ string, capturedAt time.Time) error {
+func (s *Service) updateTypeAndTime(image *BaseImage, type_ string, capturedAt time.Time) error {
 	if type_ != "" {
 		if !slices.Contains(s.AllowedTypes, type_) {
 			return fmt.Errorf("updating image: image type %v not allowed. Allowed values are %v", type_, s.AllowedTypes)
 		}
 	}
 
-	if err := s.Repo.Update(image, type_, capturedAt); err != nil {
+	if err := s.Repo.Update(image.Id, type_, capturedAt); err != nil {
 		return fmt.Errorf("updating image fields: %w", err)
 	}
 	return nil
 }
 
-func (s *Service) AssignLocation(ctx context.Context, image *Image, siteName, cameraName string) error {
-	baseErrMsg := fmt.Sprintf("assigning location on image %v with site '%v' and camera '%v'", image.Id, siteName, cameraName)
+func (s *Service) AssignLocation(ctx context.Context, image_id ImageId, siteName, cameraName string) error {
+	baseErrMsg := fmt.Sprintf("assigning location on image %v with site '%v' and camera '%v'", image_id, siteName, cameraName)
 	site, err := s.Locations.FindSiteByName(ctx, siteName)
 	if err != nil {
 		return fmt.Errorf("%v: fetching site by name: %w", baseErrMsg, err)
@@ -490,7 +502,7 @@ func (s *Service) AssignLocation(ctx context.Context, image *Image, siteName, ca
 	if err != nil {
 		return fmt.Errorf("%v: fetching camera by name: %w", baseErrMsg, err)
 	}
-	if err := s.AssignCamera(ctx, camera, image); err != nil {
+	if err := s.AssignCamera(ctx, camera.Id, image_id); err != nil {
 		return fmt.Errorf("%v: assigning camera: %w", baseErrMsg, err)
 
 	}
@@ -498,18 +510,16 @@ func (s *Service) AssignLocation(ctx context.Context, image *Image, siteName, ca
 
 }
 
-func (s *Service) AssignCamera(ctx context.Context, camera *loc.Camera, image *Image) error {
-	camera, err := s.Locations.FindCamera(ctx, camera.Id)
+func (s *Service) AssignCamera(ctx context.Context, camera_id loc.CameraId, image_id ImageId) error {
+	_, err := s.Locations.FindCamera(ctx, camera_id)
 	if err != nil {
 		return fmt.Errorf("assigning camera to site: %w", err)
 	}
 
-	if err := s.Repo.AssignCamera(camera, image); err != nil {
+	if err := s.Repo.AssignCamera(camera_id, image_id); err != nil {
 		return err
 	}
 
-	image.CameraId = &camera.Id
-	image.Camera = camera
 	return nil
 }
 

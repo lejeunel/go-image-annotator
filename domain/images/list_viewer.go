@@ -63,7 +63,7 @@ func (v *ImagesListViewer) RenderPaginatedList(ctx context.Context, images []Ima
 
 		rows = append(rows, g.TableRow{[]gp.Node{
 			gh.A(gh.Href(fmt.Sprintf("/image?collection_id=%v&image_id=%v&origin_entity=%v&origin_id=%v&ordering=%v&descending=%v",
-				im.CollectionId, im.Id.String(), originEntity, originId, "captured_at", "false",
+				im.Collection.Id, im.Id.String(), originEntity, originId, "captured_at", "false",
 			)),
 				gh.Class(g.UrlClass),
 				gh.Span(gp.Text(im.Id.String()))),

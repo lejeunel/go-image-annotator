@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func InitializeLocationPickerTests(t *testing.T) (context.Context, *a.App, *locpck.LocationPicker, *im.Image, *loc.Site, []*loc.Camera) {
+func InitializeLocationPickerTests(t *testing.T) (context.Context, *a.App, *locpck.LocationPicker, *im.BaseImage, *loc.Site, []*loc.Camera) {
 	s, _, ctx := a.NewTestApp(t, true)
 	label, _ := lbl.New("thelabel", "")
 	s.Labels.Create(ctx, label)
@@ -35,12 +35,15 @@ func InitializeLocationPickerTests(t *testing.T) (context.Context, *a.App, *locp
 
 	cameras := []*loc.Camera{cam_a, cam_b}
 
-	return ctx, &s, picker, image, site, cameras
+	base, _ := s.Images.GetBase(ctx, image.Id, im.FetchMetaOnly)
+
+	return ctx, &s, picker, base, site, cameras
 }
 
 func TestInitialSiteAndCamera(t *testing.T) {
 	ctx, s, picker, image, _, cameras := InitializeLocationPickerTests(t)
-	s.Images.AssignCamera(ctx, cameras[0], image)
+	s.Images.AssignCamera(ctx, cameras[0].Id, image.Id)
+	image, _ = s.Images.GetBase(ctx, image.Id, im.FetchMetaOnly)
 
 	state, _ := picker.Init(ctx, image)
 
@@ -105,7 +108,8 @@ func TestFirstCameraShouldBePreSelectedOnSiteSelection(t *testing.T) {
 func TestReselectingSiteShouldNotResetCamera(t *testing.T) {
 	ctx, s, picker, image, site, cameras := InitializeLocationPickerTests(t)
 
-	s.Images.AssignCamera(ctx, cameras[1], image)
+	s.Images.AssignCamera(ctx, cameras[1].Id, image.Id)
+	image, _ = s.Images.GetBase(ctx, image.Id, im.FetchMetaOnly)
 	state, _ := picker.SelectSite(ctx, site, image)
 
 	if state.Camera.Id != cameras[1].Id {

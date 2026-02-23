@@ -55,6 +55,44 @@ type ImageUpdatables struct {
 	Type_      string `json:"type"`
 }
 
+type BaseImage struct {
+	Id           ImageId
+	FileName     string
+	CameraId     *loc.CameraId
+	CapturedAt   time.Time
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	SHA256       string
+	MIMEType     string
+	Width        int
+	Height       int
+	Type         string
+	CollectionId clc.CollectionId
+	Group        string
+	Uri          url.URL
+	Camera       *loc.Camera
+}
+
+func (im *BaseImage) GetSiteName() string {
+	if im.Camera == nil {
+		return ""
+	}
+	return im.Camera.Site.Name
+}
+func (im *BaseImage) GetCameraName() string {
+	if im.Camera == nil {
+		return ""
+	}
+	return im.Camera.Name
+}
+
+func (im *BaseImage) GetTransmitter() string {
+	if im.Camera == nil {
+		return ""
+	}
+	return im.Camera.Transmitter
+}
+
 type Image struct {
 	Id            ImageId
 	FileName      string
@@ -67,7 +105,6 @@ type Image struct {
 	Width         int
 	Height        int
 	Type          string
-	CollectionId  clc.CollectionId
 	Group         string
 	Data          []byte
 	Annotations   []*Annotation

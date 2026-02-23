@@ -111,7 +111,7 @@ func (s *Service) Ingest(ctx context.Context, collectionName string, p ImageInge
 		return nil, err
 	}
 	if (p.Site != nil) && (p.Camera != nil) {
-		if err := s.Images.AssignLocation(ctx, image, *p.Site, *p.Camera); err != nil {
+		if err := s.Images.AssignLocation(ctx, image.Id, *p.Site, *p.Camera); err != nil {
 			return nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 		}
 

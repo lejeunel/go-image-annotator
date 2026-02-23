@@ -78,33 +78,34 @@ func (a *Annotator) DeleteAnnotation(ctx context.Context, id string) error {
 }
 
 func (a *Annotator) UpsertBoundingBox(ctx context.Context, imageId im.ImageId, collectionId clc.CollectionId, b *BoundingBox) error {
+	errCtx := "upserting bounding box"
 	label, err := a.Labels.FindByName(ctx, b.Label)
 	if err != nil {
-		return fmt.Errorf("upserting bounding box with label %v: %w", b.Label, err)
+		return fmt.Errorf("%v: fetching label %v: %w", errCtx, b.Label, err)
 	}
 
 	image, err := a.Images.Find(ctx, imageId, collectionId, im.FetchWithRawData)
 	if err != nil {
-		return fmt.Errorf("upserting bounding box: %w", err)
+		return fmt.Errorf("%v: %w", errCtx, err)
 	}
 
 	a.Rescaler.BackwardTransformBoundingBoxCoords(float64(image.Width), b)
 	bbox, err := im.NewBoundingBox(b.Xc, b.Yc, b.Height, b.Width)
 	if err != nil {
-		return fmt.Errorf("upserting bounding: %w", err)
+		return fmt.Errorf("%v: %w", errCtx, err)
 	}
 	bbox.Annotate(label)
 
 	if b.Id != "" {
 		id, err := uuid.Parse(b.Id)
 		if err != nil {
-			return fmt.Errorf("upserting bounding box with non-null id %v: %w", b.Id, err)
+			return fmt.Errorf("%v: got non-null id %v: %w", errCtx, b.Id, err)
 		}
 		bbox.Annotation.Id = id
 	}
 
 	if err := a.Images.Annotations.UpsertBoundingBox(ctx, bbox, image); err != nil {
-		return fmt.Errorf("upserting bounding: %w", err)
+		return fmt.Errorf("%v: %w", errCtx, err)
 	}
 	b.Id = bbox.Annotation.Id.String()
 
@@ -227,7 +228,7 @@ func (a *Annotator) MakeState(ctx context.Context, input AnnotatorRequest) (*Ann
 		ImageCapturedAt:  image.CapturedAt,
 		ImageCreatedAt:   image.CreatedAt,
 		ImageData:        transformedImageBuf.Bytes(),
-		CollectionId:     image.CollectionId,
+		CollectionId:     image.Collection.Id,
 		CollectionName:   image.Collection.Name,
 		Group:            image.Group,
 		BoundingBoxes:    boxes,

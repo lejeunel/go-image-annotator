@@ -74,7 +74,7 @@ func (r *SQLAnnotationRepo) getShapeDataFromId(id string) (string, error) {
 func (r *SQLAnnotationRepo) isLabelAlreadyAppliedToImage(label *lbl.Label, image *Image, authorEmail string) (bool, error) {
 	var count int64
 	query := "SELECT COUNT(*) FROM annotations WHERE label_id=$1 AND image_id=$2 AND collection_id=$3 AND author_email=$4"
-	if err := r.Db.QueryRow(query, label.Id, image.Id, image.CollectionId, authorEmail).Scan(&count); err != nil {
+	if err := r.Db.QueryRow(query, label.Id, image.Id, image.Collection.Id, authorEmail).Scan(&count); err != nil {
 		return false, e.ErrDB
 	}
 
@@ -96,7 +96,7 @@ func (r *SQLAnnotationRepo) ApplyLabelToImage(label *lbl.Label, image *Image, au
 	now := time.Now()
 	query := "INSERT INTO annotations (id,image_id,label_id,collection_id,author_email,created_at,updated_at,shape_type,shape_data) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)"
 
-	_, err = r.Db.Exec(query, uuid.New(), image.Id.String(), label.Id, image.CollectionId, authorEmail, now, now, "", "")
+	_, err = r.Db.Exec(query, uuid.New(), image.Id.String(), label.Id, image.Collection.Id, authorEmail, now, now, "", "")
 	if err != nil {
 		return e.ErrDB
 	}
@@ -160,7 +160,7 @@ func (r *SQLAnnotationRepo) GetBoundingBoxesOfImage(image *Image) ([]*BoundingBo
 	var bboxes []*BoundingBox
 
 	err := r.Db.Select(&ids, "SELECT id FROM annotations WHERE image_id = $1 AND shape_type='bounding_box' AND collection_id=$2 ORDER BY created_at DESC",
-		image.Id, image.CollectionId)
+		image.Id, image.Collection.Id)
 
 	if err != nil {
 		return nil, e.ErrNotFound
