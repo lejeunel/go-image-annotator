@@ -27,13 +27,6 @@ func NewSQLiteImageRepo(db *sqlx.DB, logger *slog.Logger) *SQLImageRepo {
 
 }
 
-func NewPostgreSQLImageRepo(db *sqlx.DB, logger *slog.Logger) *SQLImageRepo {
-
-	return &SQLImageRepo{Db: db, ErrorConverter: &e.PostgreSQLErrorConverter{},
-		Logger: logger}
-
-}
-
 type ImageRecord struct {
 	Id             ImageId          `db:"id"`
 	FileName       string           `db:"filename"`

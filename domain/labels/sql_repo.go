@@ -22,11 +22,6 @@ func NewSQLiteLabelRepo(db *sqlx.DB) *SQLLabelRepo {
 
 }
 
-func NewPostgreSQLLabelRepo(db *sqlx.DB) *SQLLabelRepo {
-
-	return &SQLLabelRepo{Db: db, ErrorConverter: &e.PostgreSQLErrorConverter{}}
-}
-
 func FromRecord(record LabelRecord) Label {
 	return Label{
 		Id:          record.Id,

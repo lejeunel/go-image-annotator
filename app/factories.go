@@ -90,26 +90,13 @@ type Repos struct {
 }
 
 func buildRepos(cfg *c.Config, db *sqlx.DB, logger *slog.Logger) Repos {
-	useSQLite := cfg.Mode == "test" || cfg.Mode == "dev"
-
-	if useSQLite {
-		return Repos{
-			ImageRepo:             im.NewSQLiteImageRepo(db, logger),
-			AnnotationRepo:        im.NewSQLiteAnnotationRepo(db),
-			AnnotationProfileRepo: pro.NewSQLiteAnnotationProfileRepo(db),
-			LabelRepo:             lbl.NewSQLiteLabelRepo(db),
-			CollectionRepo:        clc.NewSQLiteCollectionRepo(db),
-			LocationRepo:          loc.NewSQLiteLocationRepo(db),
-		}
-	}
-
 	return Repos{
-		ImageRepo:             im.NewPostgreSQLImageRepo(db, logger),
-		AnnotationRepo:        im.NewPostgreSQLAnnotationRepo(db),
-		AnnotationProfileRepo: pro.NewPostgreSQLAnnotationProfileRepo(db),
-		LabelRepo:             lbl.NewPostgreSQLLabelRepo(db),
-		CollectionRepo:        clc.NewPostgreSQLCollectionRepo(db),
-		LocationRepo:          loc.NewPostgreSQLLocationRepo(db),
+		ImageRepo:             im.NewSQLiteImageRepo(db, logger),
+		AnnotationRepo:        im.NewSQLiteAnnotationRepo(db),
+		AnnotationProfileRepo: pro.NewSQLiteAnnotationProfileRepo(db),
+		LabelRepo:             lbl.NewSQLiteLabelRepo(db),
+		CollectionRepo:        clc.NewSQLiteCollectionRepo(db),
+		LocationRepo:          loc.NewSQLiteLocationRepo(db),
 	}
 }
 

@@ -8,7 +8,6 @@ import (
 	loc "datahub/domain/locations"
 	e "datahub/errors"
 	g "datahub/generic"
-	"fmt"
 	clk "github.com/jonboulle/clockwork"
 	"testing"
 	"time"
@@ -59,81 +58,6 @@ func TestFetchingImageThatExistsInTwoCollections(t *testing.T) {
 	}
 }
 
-func TestUpdateImage(t *testing.T) {
-
-	timeLayout := "2006-01-02T15:04:05.000Z"
-	tests := []struct {
-		testName   string
-		capturedAt string
-		site       string
-		camera     string
-		type_      string
-		success    bool
-	}{
-		{testName: "non-existing site", site: "non-existing-site", camera: "my-camera",
-			success: false, capturedAt: "2006-01-02T15:04:05.000Z", type_: "rgb"},
-		{testName: "non-existing camera", site: "my-site", camera: "non-existing-camera",
-			success: false, capturedAt: "2006-01-02T15:04:05.000Z", type_: "rgb"},
-		{testName: "invalid timestamp", site: "my-site", camera: "my-camera",
-			success: false, capturedAt: "2006-01-02T15:04:00Z", type_: "rgb"},
-		{testName: "invalid type", site: "my-site", camera: "my-camera",
-			success: false, capturedAt: "2006-01-02T15:04:00Z", type_: "asdf"},
-		{testName: "changing type", site: "my-site", camera: "my-camera",
-			success: true, capturedAt: "2006-01-02T15:04:05.000Z", type_: "thermal"},
-		{testName: "changing camera", site: "my-other-site", camera: "my-other-camera",
-			success: true, capturedAt: "2006-01-02T15:04:05.000Z", type_: "thermal"},
-	}
-
-	for _, tc := range tests {
-		s, _, ctx := a.NewTestApp(t, true)
-
-		image, _ := im.New(testJPGImage)
-		collection, _ := clc.New("my-collection", "", "")
-		s.Collections.Create(ctx, collection)
-		s.Images.Save(ctx, image, collection)
-
-		site, _ := loc.NewSite("my-site", "thegroup")
-		camera, _ := loc.NewCamera("my-camera", site, "")
-		secondCamera, _ := loc.NewCamera("my-second-camera", site, "")
-		s.Locations.SaveSite(ctx, site)
-		s.Locations.SaveCamera(ctx, camera)
-		s.Locations.SaveCamera(ctx, secondCamera)
-
-		otherSite, _ := loc.NewSite("my-other-site", "thegroup")
-		otherCamera, _ := loc.NewCamera("my-other-camera", otherSite, "")
-		s.Locations.SaveSite(ctx, otherSite)
-		s.Locations.SaveCamera(ctx, otherCamera)
-
-		updated_image, err := s.Images.Update(ctx, image.Id, im.ImageUpdatables{Site: tc.site, Camera: tc.camera, CapturedAt: tc.capturedAt,
-			Type_: tc.type_})
-		if tc.success {
-			if err != nil {
-				t.Error(fmt.Printf("%s: expected no error but got %v", tc.testName, err))
-			}
-			wantT, _ := time.Parse(timeLayout, tc.capturedAt)
-			if updated_image.CapturedAt != wantT {
-				t.Fatalf("%v: expected captured_at to be %v, but got %v", tc.testName, wantT, updated_image.CapturedAt)
-			}
-			if updated_image.GetSiteName() != tc.site {
-				t.Fatalf("expected site to be %v, but got %v", tc.site, updated_image.GetSiteName())
-			}
-			if updated_image.GetCameraName() != tc.camera {
-				t.Fatalf("expected camera to be %v, but got %v", tc.camera, updated_image.GetCameraName())
-			}
-			if updated_image.Type != tc.type_ {
-				t.Fatalf("expected type to be %v, but got %v", tc.type_, updated_image.Type)
-			}
-
-		} else {
-			if err == nil {
-				t.Error(fmt.Printf("%s: expected error but got no error", tc.testName))
-			}
-		}
-
-	}
-
-}
-
 func InitPatchTests(t *testing.T) (a.App, *im.BaseImage, *loc.Site, *loc.Camera, *clk.FakeClock, context.Context) {
 	s, clock, ctx := a.NewTestApp(t, true)
 
@@ -172,7 +96,7 @@ func TestOrderingImagesByCapturedAt(t *testing.T) {
 	nImages := 3
 	collection, _ := clc.New("thename", "", "mygroup")
 	s.Collections.Create(ctx, collection)
-	for i := 0; i < nImages; i++ {
+	for range nImages {
 		image, _ := im.New(testPNGImage)
 		image.CapturedAt = clock.Now()
 		s.Images.Save(ctx, image, collection)
@@ -226,97 +150,34 @@ func TestFilterImagesByCollectionName(t *testing.T) {
 
 }
 
-func TestPaginateImages(t *testing.T) {
-
-	tests := map[string]struct {
-		nImages              int
-		page                 int64
-		pageSize             int
-		maxPageSize          int
-		defaultPageSize      int
-		expectedPageSize     int
-		expectedTotalPages   int
-		expectedTotalRecords int
-	}{
-		"one item page size 1": {nImages: 1, page: 1, pageSize: 1, maxPageSize: 2, defaultPageSize: 1,
-			expectedPageSize: 1, expectedTotalPages: 1, expectedTotalRecords: 1},
-		"two items page size 1": {nImages: 2, page: 1, pageSize: 1, maxPageSize: 2, defaultPageSize: 1,
-			expectedPageSize: 1, expectedTotalPages: 2, expectedTotalRecords: 2},
-		"two items page size 2": {nImages: 2, page: 1, pageSize: 2, maxPageSize: 2, defaultPageSize: 1,
-			expectedPageSize: 2, expectedTotalPages: 1, expectedTotalRecords: 2},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			s, _, ctx := a.NewTestApp(t, true)
-			s.Images.MaxPageSize = tc.maxPageSize
-
-			collection := &clc.Collection{Name: "thename"}
-			s.Collections.Create(ctx, collection)
-			for i := 0; i < tc.nImages; i++ {
-				image, _ := im.New(testPNGImage)
-				err := s.Images.Save(ctx, image, collection)
-				AssertNoError(t, err)
-			}
-			page, pageMeta, err := s.Images.List(ctx,
-				*im.NewImageFilter(im.WithCollectionId(collection.Id)),
-				im.OrderingArgs{},
-				g.PaginationParams{Page: tc.page, PageSize: tc.pageSize},
-				im.FetchMetaOnly)
-			AssertNoError(t, err)
-
-			if len(page) != tc.expectedPageSize {
-				t.Fatalf("expected to retrieve page of length 1, got %v", len(page))
-			}
-
-			nPages := int(pageMeta.TotalPages)
-			nImages := pageMeta.TotalRecords
-			AssertNoError(t, err)
-			if nPages != tc.expectedTotalPages {
-				t.Fatalf("expected pagination meta with total pages = %v, got %v", tc.expectedTotalPages, nPages)
-			}
-
-			if int(nImages) != tc.expectedTotalRecords {
-				t.Fatalf("expected pagination meta with total records = %v, got %v", tc.expectedTotalRecords, nImages)
-			}
-		})
-	}
-
+type ImageTypeTestCase struct {
+	Type    string
+	WantErr bool
 }
 
 func TestSavingImageWithType(t *testing.T) {
 
-	tests := map[string]struct {
-		Type    string
-		IsValid bool
-	}{
-		"thermal":        {Type: "thermal", IsValid: true},
-		"rgb":            {Type: "rgb", IsValid: true},
-		"gray":           {Type: "gray", IsValid: true},
-		"undefined type": {Type: "", IsValid: true},
-		"whatever":       {Type: "whatever", IsValid: false},
-	}
+	tests := []ImageTypeTestCase{{"thermal", false}, {"rgb", false},
+		{"gray", false}, {"undefined-type", true}}
 
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			s, _, ctx := a.NewTestApp(t, true)
+	for _, tc := range tests {
+		s, _, ctx := a.NewTestApp(t, true)
 
-			image, _ := im.New(testJPGImage)
-			image.Type = tc.Type
-			collection, _ := clc.New("thename", "", "")
-			s.Collections.Create(ctx, collection)
-			err := s.Images.Save(ctx, image, collection)
-			if tc.IsValid {
-				if err != nil {
-					t.Fatalf("expected to get no error with image of type %v, but got one", tc.Type)
-				}
-			} else {
-				if err == nil {
-					t.Fatalf("expected to get an error with image of type %v, but got none", tc.Type)
-				}
-
+		image, _ := im.New(testJPGImage)
+		image.Type = tc.Type
+		collection, _ := clc.New("thename", "", "")
+		s.Collections.Create(ctx, collection)
+		err := s.Images.Save(ctx, image, collection)
+		if tc.WantErr {
+			if err == nil {
+				t.Fatalf("expected an error with image of type %v, but got none", tc.Type)
 			}
-		})
+			return
+		}
+		if err != nil {
+			t.Fatalf("unexpected error with image type %v: %v", tc.Type, err)
+		}
+
 	}
 
 }

@@ -5,8 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/jackc/pgx/v5/pgconn"
-	msqlite "modernc.org/sqlite"
+	"modernc.org/sqlite"
 	"net/http"
 )
 
@@ -43,7 +42,7 @@ func (c *SQLiteErrorConverter) Convert(err error) error {
 	if errors.Is(err, sql.ErrNoRows) {
 		return ErrNotFound
 	}
-	var sqliteErr *msqlite.Error
+	var sqliteErr *sqlite.Error
 	var errorCode int
 	if errors.As(err, &sqliteErr) {
 		errorCode = sqliteErr.Code()
@@ -57,39 +56,6 @@ func (c *SQLiteErrorConverter) Convert(err error) error {
 		case 787: //SQLITE_CONSTRAINT_TRIGGER
 			return ErrDBForeignKeyConstraint
 		}
-	}
-	return fmt.Errorf("%w: %w", ErrDB, err)
-}
-
-type PostgreSQLErrorConverter struct{}
-
-func (c *PostgreSQLErrorConverter) errorCode(err error) (string, bool) {
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) {
-		return pgErr.Code, true
-	}
-	return "", false
-
-}
-
-func (c *PostgreSQLErrorConverter) Convert(err error) error {
-	if err == nil {
-		return nil
-	}
-
-	if errors.Is(err, sql.ErrNoRows) {
-		return ErrNotFound
-	}
-
-	code, isPg := c.errorCode(err)
-	if !isPg {
-		return fmt.Errorf("%w: %w", ErrDB, err)
-	}
-	switch code {
-	case "23505":
-		return ErrDBUniqueConstraint
-	case "23503":
-		return ErrDBForeignKeyConstraint
 	}
 	return fmt.Errorf("%w: %w", ErrDB, err)
 }

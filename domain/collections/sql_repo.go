@@ -32,12 +32,6 @@ func NewSQLiteCollectionRepo(db *sqlx.DB) *SQLCollectionRepo {
 
 }
 
-func NewPostgreSQLCollectionRepo(db *sqlx.DB) *SQLCollectionRepo {
-
-	return &SQLCollectionRepo{Db: db, ErrorConverter: &e.PostgreSQLErrorConverter{}}
-
-}
-
 func (r *SQLCollectionRepo) Create(collection *Collection) error {
 
 	query := "INSERT INTO collections (id,name,description,group_name,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6)"

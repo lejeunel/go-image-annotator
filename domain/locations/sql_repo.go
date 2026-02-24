@@ -42,13 +42,6 @@ func NewSQLiteLocationRepo(db *sqlx.DB) *SQLLocationRepo {
 
 }
 
-func NewPostgreSQLLocationRepo(db *sqlx.DB) *SQLLocationRepo {
-
-	return &SQLLocationRepo{Db: db,
-		ErrorConverter: &e.PostgreSQLErrorConverter{}}
-
-}
-
 func CameraFromRecord(record CameraRecord) Camera {
 	return Camera{Id: record.Id,
 		Name:        record.Name,

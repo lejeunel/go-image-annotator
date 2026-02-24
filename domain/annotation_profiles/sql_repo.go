@@ -22,12 +22,6 @@ func NewSQLiteAnnotationProfileRepo(db *sqlx.DB) *SQLAnnotationProfileRepo {
 
 }
 
-func NewPostgreSQLAnnotationProfileRepo(db *sqlx.DB) *SQLAnnotationProfileRepo {
-
-	return &SQLAnnotationProfileRepo{Db: db, ErrorConverter: &e.PostgreSQLErrorConverter{}}
-
-}
-
 func (r *SQLAnnotationProfileRepo) Save(profile *AnnotationProfile) error {
 	query := "INSERT INTO annotation_profiles (id,name) VALUES ($1,$2)"
 

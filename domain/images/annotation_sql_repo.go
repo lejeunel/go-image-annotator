@@ -22,12 +22,6 @@ func NewSQLiteAnnotationRepo(db *sqlx.DB) *SQLAnnotationRepo {
 
 }
 
-func NewPostgreSQLAnnotationRepo(db *sqlx.DB) *SQLAnnotationRepo {
-
-	return &SQLAnnotationRepo{Db: db, ErrorConverter: &e.PostgreSQLErrorConverter{}}
-
-}
-
 func (r *SQLAnnotationRepo) GetAnnotationIdsOfImage(image *Image) ([]string, error) {
 	var annotationsIds []string
 	err := r.Db.Select(&annotationsIds, "SELECT id FROM annotations WHERE image_id = $1 AND collection_id=$2 AND shape_type=''",
