@@ -63,7 +63,7 @@ func (s *Service) Touch(ctx context.Context, collection *Collection) error {
 
 func (s *Service) Update(ctx context.Context, name string, collectionFields CollectionUpdatables) (*Collection, error) {
 
-	_, err := New(collectionFields.Name, collectionFields.Description, collectionFields.Group)
+	_, err := New(collectionFields.Name, WithGroup(collectionFields.Group), WithDescription(collectionFields.Description))
 	if err != nil {
 		return nil, fmt.Errorf("validating collection fields: %w", err)
 	}

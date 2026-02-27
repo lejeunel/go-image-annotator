@@ -17,7 +17,7 @@ func InitializeLocationPickerTests(t *testing.T) (context.Context, *a.App, *locp
 	label, _ := lbl.New("thelabel", "")
 	s.Labels.Create(ctx, label)
 	image, _ := im.New(testJPGImage)
-	collection, _ := clc.New("thecollection", "", "mygroup")
+	collection, _ := clc.New("thecollection", clc.WithGroup("mygroup"))
 	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image, collection)
 
@@ -26,9 +26,9 @@ func InitializeLocationPickerTests(t *testing.T) (context.Context, *a.App, *locp
 	picker := locpck.NewLocationPicker(s.Images,
 		s.Locations, s.Authorizer, s.Logger)
 
-	site, _ := loc.NewSite("site-a", "thegroup")
-	cam_a, _ := loc.NewCamera("cam-a", site, "")
-	cam_b, _ := loc.NewCamera("cam-b", site, "")
+	site, _ := loc.NewSite("site-a")
+	cam_a, _ := loc.NewCamera("cam-a", site)
+	cam_b, _ := loc.NewCamera("cam-b", site)
 	s.Locations.SaveSite(ctx, site)
 	s.Locations.SaveCamera(ctx, cam_a)
 	s.Locations.SaveCamera(ctx, cam_b)

@@ -132,7 +132,7 @@ func (h *CollectionHTTPController) Delete(ctx context.Context, input *Collection
 
 func (h *CollectionHTTPController) Create(ctx context.Context, input *CollectionCreateRequest) (*CollectionResponse, error) {
 
-	collection, err := New(input.Body.Name, input.Body.Description, input.Body.Group)
+	collection, err := New(input.Body.Name, WithGroup(input.Body.Group), WithDescription(input.Body.Description))
 	if err != nil {
 		return nil, e.ToHumaStatusError(err)
 	}

@@ -20,9 +20,9 @@ func InitializeIngestionTest(t *testing.T) (*app.App, *clc.Collection, *loc.Site
 	ctx = context.WithValue(ctx, "groups", "my-group")
 	ctx = context.WithValue(ctx, "entitlements", "im-contrib|annotation-contrib")
 
-	collection, _ := clc.New("my-collection", "collection-description", "my-group")
-	site, _ := loc.NewSite("my-site", "my-group")
-	camera, _ := loc.NewCamera("my-camera", site, "")
+	collection, _ := clc.New("my-collection", clc.WithGroup("my-group"))
+	site, _ := loc.NewSite("my-site", loc.WithGroupOption("my-group"))
+	camera, _ := loc.NewCamera("my-camera", site)
 	label, _ := lbl.New("my-label", "")
 	a.Collections.Create(ctx, collection)
 	a.Locations.SaveSite(ctx, site)

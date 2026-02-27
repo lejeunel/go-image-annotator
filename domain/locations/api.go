@@ -139,7 +139,7 @@ func (h *LocationHTTPController) DeleteSite(ctx context.Context, input *PathId) 
 
 func (h *LocationHTTPController) CreateSite(ctx context.Context, input *SiteInputCreate) (*SiteResponse, error) {
 
-	site, err := NewSite(input.Body.Name, input.Body.Group)
+	site, err := NewSite(input.Body.Name, WithGroupOption(input.Body.Group))
 	if err != nil {
 		return nil, huma.Error400BadRequest(err.Error(), err)
 	}
@@ -183,7 +183,7 @@ func (h *LocationHTTPController) AddCamera(ctx context.Context, input *CameraCre
 		return nil, fmt.Errorf("adding camera: fetching site by name (%v): %w", input.Body.SiteName, err)
 	}
 
-	camera, err := NewCamera(input.Body.Name, site, input.Body.Transmitter)
+	camera, err := NewCamera(input.Body.Name, site, WithTransmitter(input.Body.Transmitter))
 	if err = h.LocationService.SaveCamera(ctx, camera); err != nil {
 		return nil, fmt.Errorf("adding camera: %w", err)
 	}

@@ -19,7 +19,7 @@ func NewImagePaginationTestEnv(t *testing.T, maxPageSize int, nImages int) *Imag
 	s, _, ctx := a.NewTestApp(t, true)
 	s.Images.MaxPageSize = maxPageSize
 
-	collection, _ := clc.New("thename", "", "")
+	collection, _ := clc.New("thename")
 	s.Collections.Create(ctx, collection)
 	for range nImages {
 		image, _ := im.New(testPNGImage)

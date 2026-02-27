@@ -1,6 +1,6 @@
 ---
-title: Introduction
-type: docs
+Title: Introduction
+Weight: 0
 ---
 
 # Introduction

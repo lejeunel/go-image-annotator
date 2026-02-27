@@ -43,10 +43,26 @@ type Collection struct {
 	Profile *pro.AnnotationProfile
 }
 
-func New(name, description, group string) (*Collection, error) {
+type CollectionOption func(*Collection)
+
+func WithDescription(desc string) CollectionOption {
+	return func(c *Collection) {
+		c.Description = desc
+	}
+}
+
+func WithGroup(group string) CollectionOption {
+	return func(c *Collection) {
+		c.Group = group
+	}
+}
+
+func New(name string, opts ...CollectionOption) (*Collection, error) {
 	id := NewCollectionId()
-	collection := &Collection{Id: *id, Name: name, Description: description,
-		Group: group}
+	collection := &Collection{Id: *id, Name: name}
+	for _, opt := range opts {
+		opt(collection)
+	}
 	if err := collection.Validate(); err != nil {
 		return nil, err
 	}

@@ -29,4 +29,5 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 	rootCmd.AddCommand(migrateCmd)
 	rootCmd.AddCommand(cleanCmd)
+	rootCmd.AddCommand(documentationCmd)
 }

@@ -25,19 +25,19 @@ func NewUpdateImageTestEnv(t *testing.T) *UpdateImageTestEnv {
 	s, _, ctx := a.NewTestApp(t, true)
 
 	image, _ := im.New(testJPGImage)
-	collection, _ := clc.New("my-collection", "", "")
+	collection, _ := clc.New("my-collection")
 	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image, collection)
 
-	site, _ := loc.NewSite("my-site", "thegroup")
-	camera, _ := loc.NewCamera("my-camera", site, "")
-	secondCamera, _ := loc.NewCamera("my-second-camera", site, "")
+	site, _ := loc.NewSite("my-site")
+	camera, _ := loc.NewCamera("my-camera", site)
+	secondCamera, _ := loc.NewCamera("my-second-camera", site)
 	s.Locations.SaveSite(ctx, site)
 	s.Locations.SaveCamera(ctx, camera)
 	s.Locations.SaveCamera(ctx, secondCamera)
 
-	otherSite, _ := loc.NewSite("my-other-site", "thegroup")
-	otherCamera, _ := loc.NewCamera("my-other-camera", otherSite, "")
+	otherSite, _ := loc.NewSite("my-other-site")
+	otherCamera, _ := loc.NewCamera("my-other-camera", otherSite)
 	s.Locations.SaveSite(ctx, otherSite)
 	s.Locations.SaveCamera(ctx, otherCamera)
 

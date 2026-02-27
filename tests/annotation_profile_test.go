@@ -18,7 +18,7 @@ func InitializeAnnotationProfileTests(t *testing.T) (*a.App, *clc.Collection, *i
 	ctx = context.WithValue(ctx, "entitlements", "admin")
 	ctx = context.WithValue(ctx, "groups", "mygroup")
 	image, _ := im.New(testPNGImage)
-	collection, _ := clc.New("myimageset", "", "mygroup")
+	collection, _ := clc.New("myimageset", clc.WithGroup("mygroup"))
 	label, _ := lbl.New("my-label", "mydescription")
 	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image, collection)

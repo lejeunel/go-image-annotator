@@ -40,12 +40,22 @@ func NewCameraIdFromString(s string) (*CameraId, error) {
 
 }
 
-func NewCamera(name string, site *Site, transmitter string) (*Camera, error) {
+type CameraOption func(*Camera)
+
+func WithTransmitter(transmitter string) CameraOption {
+	return func(c *Camera) {
+		c.Transmitter = transmitter
+	}
+}
+func NewCamera(name string, site *Site, opts ...CameraOption) (*Camera, error) {
 	cam := &Camera{Id: *NewCameraId(),
-		Name:        name,
-		Site:        site,
-		Group:       site.Group,
-		Transmitter: transmitter}
+		Name:  name,
+		Site:  site,
+		Group: site.Group}
+
+	for _, opt := range opts {
+		opt(cam)
+	}
 	if err := cam.Validate(); err != nil {
 		return nil, err
 	}

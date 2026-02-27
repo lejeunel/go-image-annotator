@@ -18,8 +18,8 @@ func InitializeAuthTestsWithAdminEntitlement(t *testing.T) (*a.App, *loc.Site, *
 	ctx = context.WithValue(ctx, "entitlements", "admin")
 	ctx = context.WithValue(ctx, "groups", "mygroup")
 	image, _ := im.New(testPNGImage)
-	collection, _ := clc.New("mycollection", "", "mygroup")
-	site, _ := loc.NewSite("thesite", "mygroup")
+	collection, _ := clc.New("mycollection", clc.WithGroup("mygroup"))
+	site, _ := loc.NewSite("thesite")
 	label, _ := lbl.New("mylabel", "")
 	s.Locations.SaveSite(ctx, site)
 	s.Collections.Create(ctx, collection)
@@ -35,7 +35,7 @@ func TestCreatingSiteRequiresGroupMembership(t *testing.T) {
 
 	ctx = context.WithValue(ctx, "entitlements", "im-contrib")
 
-	site, _ := loc.NewSite("another-site", "another-group")
+	site, _ := loc.NewSite("another-site")
 	err := s.Locations.SaveSite(ctx, site)
 	AssertErrorIs(t, err, e.ErrGroupOwnership)
 
@@ -58,7 +58,7 @@ func TestCreatingCollectionRequiresPermission(t *testing.T) {
 			s, _, _, _, _, ctx := InitializeAuthTestsWithAdminEntitlement(t)
 			ctx = context.WithValue(ctx, "entitlements", tc.roles)
 
-			newCollection, _ := clc.New("my-new-collection", "", "")
+			newCollection, _ := clc.New("my-new-collection")
 			err := s.Collections.Create(ctx, newCollection)
 
 			switch {

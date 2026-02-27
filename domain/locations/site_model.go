@@ -11,6 +11,14 @@ import (
 
 type SiteId struct{ g.UUIDWrapper[SiteId] }
 
+type SiteOption func(*Site)
+
+func WithGroupOption(group string) SiteOption {
+	return func(s *Site) {
+		s.Group = group
+	}
+}
+
 func NewSiteId() *SiteId {
 	id := uuid.New()
 	return &SiteId{g.UUIDWrapper[SiteId]{UUID: id}}
@@ -48,8 +56,12 @@ type Site struct {
 	UpdatedAt time.Time
 }
 
-func NewSite(name string, group string) (*Site, error) {
-	site := &Site{Id: *NewSiteId(), Name: name, Group: group}
+func NewSite(name string, opts ...SiteOption) (*Site, error) {
+	site := &Site{Id: *NewSiteId(), Name: name}
+
+	for _, opt := range opts {
+		opt(site)
+	}
 	if err := site.Validate(); err != nil {
 		return nil, err
 	}

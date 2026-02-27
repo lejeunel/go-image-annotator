@@ -21,7 +21,7 @@ func InitializeAnnotatorTests(t *testing.T) (context.Context, *a.App, *an.Annota
 	label, _ := lbl.New("thelabel", "")
 	s.Labels.Create(ctx, label)
 	image, _ := im.New(testJPGImage)
-	collection, _ := clc.New("thecollection", "", "mygroup")
+	collection, _ := clc.New("thecollection", clc.WithGroup("mygroup"))
 	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image, collection)
 
@@ -30,8 +30,8 @@ func InitializeAnnotatorTests(t *testing.T) (context.Context, *a.App, *an.Annota
 	annotator := an.NewAnnotator(s.Labels, s.Images,
 		s.Collections, s.Locations, s.Authorizer, s.Logger, 640)
 
-	site, _ := loc.NewSite("mysite", "thegroup")
-	camera, _ := loc.NewCamera("mycamera", site, "")
+	site, _ := loc.NewSite("mysite")
+	camera, _ := loc.NewCamera("mycamera", site)
 	annotator.Locations.SaveSite(ctx, site)
 	annotator.Locations.SaveCamera(ctx, camera)
 
@@ -123,7 +123,7 @@ func TestScrollImages(t *testing.T) {
 	label, _ := lbl.New("thelabel", "")
 	s.Labels.Create(ctx, label)
 	image, _ := im.New(testJPGImage)
-	collection, _ := clc.New("thecollection", "", "mygroup")
+	collection, _ := clc.New("thecollection", clc.WithGroup("mygroup"))
 	s.Collections.Create(ctx, collection)
 
 	ctx = context.WithValue(ctx, "groups", "mygroup")

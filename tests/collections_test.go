@@ -19,7 +19,7 @@ func InitializeCollectionTests(t *testing.T) (*a.App, *clc.Collection, *im.Image
 	s, clock, ctx := a.NewTestApp(t, false)
 	ctx = context.WithValue(ctx, "entitlements", "admin")
 	ctx = context.WithValue(ctx, "groups", "mygroup")
-	collection, _ := clc.New("mycollection", "", "mygroup")
+	collection, _ := clc.New("mycollection", clc.WithGroup("mygroup"))
 	s.Collections.Create(ctx, collection)
 	image, _ := im.New(testPNGImage)
 	s.Images.Save(ctx, image, collection)
@@ -31,7 +31,7 @@ func InitializeCollectionTests(t *testing.T) (*a.App, *clc.Collection, *im.Image
 func TestCreateCollection(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
-	clc, _ := clc.New("new-collection", "thedescription", "mygroup")
+	clc, _ := clc.New("new-collection", clc.WithGroup("mygroup"))
 	err := s.Collections.Create(ctx, clc)
 	AssertNoError(t, err)
 
@@ -44,7 +44,7 @@ func TestCreateCollection(t *testing.T) {
 func TestRetrieveCollectionByName(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
-	clc, _ := clc.New("new-collection", "thedescription", "mygroup")
+	clc, _ := clc.New("new-collection", clc.WithGroup("mygroup"))
 	err := s.Collections.Create(ctx, clc)
 	AssertNoError(t, err)
 
@@ -58,7 +58,7 @@ func TestUpdateCollection(t *testing.T) {
 	s, clock, ctx := a.NewTestApp(t, true)
 	ctx = context.WithValue(ctx, "groups", "mygroup|myothergroup")
 
-	collection, _ := clc.New("mycollection", "thedescription", "mygroup")
+	collection, _ := clc.New("mycollection", clc.WithGroup("mygroup"))
 	s.Collections.Create(ctx, collection)
 
 	clock.Advance(1 * time.Hour)
@@ -93,8 +93,8 @@ func TestUpdateCollection(t *testing.T) {
 func TestCollectionDuplicateNameShouldFail(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
-	collection, _ := clc.New("mycollection", "", "")
-	newCollection, _ := clc.New("mycollection", "", "")
+	collection, _ := clc.New("mycollection")
+	newCollection, _ := clc.New("mycollection")
 	s.Collections.Create(ctx, collection)
 	err := s.Collections.Create(ctx, newCollection)
 
@@ -118,7 +118,7 @@ func TestValidationCollectionName(t *testing.T) {
 	for name, tc := range tests {
 
 		t.Run(name, func(t *testing.T) {
-			_, err := clc.New(tc.name, "", "mygroup")
+			_, err := clc.New(tc.name, clc.WithGroup("mygroup"))
 			if tc.isValid {
 				AssertNoError(t, err)
 			} else {
@@ -161,7 +161,7 @@ func TestRetrieveImagesOfCollectionById(t *testing.T) {
 
 	s, _, ctx := a.NewTestApp(t, true)
 	collectionName := "myset"
-	collection, _ := clc.New(collectionName, "", "mygroup")
+	collection, _ := clc.New(collectionName, clc.WithGroup("mygroup"))
 	err := s.Collections.Create(ctx, collection)
 	AssertNoError(t, err)
 	image, _ := im.New(testPNGImage)
@@ -245,9 +245,9 @@ func TestAnnotationsShouldApplyToSpecifiedCollection(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 	collectionName := "mycollection"
 	labelName := "mylabel"
-	collection, _ := clc.New(collectionName, "", "")
+	collection, _ := clc.New(collectionName)
 
-	notAnnotatedCollection, _ := clc.New("not-annotated-collection", "", "")
+	notAnnotatedCollection, _ := clc.New("not-annotated-collection")
 	image, _ := im.New(testPNGImage)
 	label, _ := lbl.New(labelName, "")
 
@@ -277,8 +277,8 @@ func InitImportImageTests(t *testing.T) (*a.App, context.Context, *im.Image, *cl
 	destinationCollectionName := "my-destination-collection"
 	labelName := "mylabel"
 
-	sourceCollection, _ := clc.New(sourceCollectionName, "", "")
-	destinationCollection, _ := clc.New(destinationCollectionName, "", "")
+	sourceCollection, _ := clc.New(sourceCollectionName)
+	destinationCollection, _ := clc.New(destinationCollectionName)
 	image, _ := im.New(testPNGImage)
 	label, _ := lbl.New(labelName, "")
 
@@ -362,7 +362,7 @@ func TestPaginateCollections(t *testing.T) {
 			s.Collections.MaxPageSize = tc.maxPageSize
 
 			for i := 0; i < tc.nCollections; i++ {
-				clc, _ := clc.New(fmt.Sprintf("thename-%v", i+1), "", "")
+				clc, _ := clc.New(fmt.Sprintf("thename-%v", i+1))
 				err := s.Collections.Create(ctx, clc)
 				AssertNoError(t, err)
 			}
@@ -462,7 +462,7 @@ func TestCollectionsAreReturnedInAlphabeticalOrder(t *testing.T) {
 	ctx = context.WithValue(ctx, "entitlements", "admin")
 	nonOrderedNames := []string{"c", "b", "a"}
 	for _, name := range nonOrderedNames {
-		collection, _ := clc.New(name, "", "mygroup")
+		collection, _ := clc.New(name, clc.WithGroup("mygroup"))
 		err := s.Collections.Create(ctx, collection)
 		AssertNoError(t, err)
 	}

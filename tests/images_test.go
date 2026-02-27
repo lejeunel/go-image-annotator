@@ -18,7 +18,7 @@ func TestCreateImage(t *testing.T) {
 
 	image, err := im.New(testJPGImage)
 	AssertNoError(t, err)
-	collection, _ := clc.New("mycollection", "mydescription", "mygroup")
+	collection, _ := clc.New("mycollection", clc.WithGroup("mygroup"))
 	s.Collections.Create(ctx, collection)
 	err = s.Images.Save(ctx, image, collection)
 	AssertNoError(t, err)
@@ -32,7 +32,7 @@ func TestFetchingNonExistingImageShouldFail(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
 	image, _ := im.New(testJPGImage)
-	collection, _ := clc.New("mycollection", "mydescription", "mygroup")
+	collection, _ := clc.New("mycollection", clc.WithGroup("mygroup"))
 	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image, collection)
 
@@ -44,8 +44,8 @@ func TestFetchingImageThatExistsInTwoCollections(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
 	image, _ := im.New(testJPGImage)
-	firstCollection, _ := clc.New("mycollection", "mydescription", "mygroup")
-	secondCollection, _ := clc.New("mysecondcollection", "mydescription", "mygroup")
+	firstCollection, _ := clc.New("mycollection", clc.WithGroup("mygroup"))
+	secondCollection, _ := clc.New("mysecondcollection", clc.WithGroup("mygroup"))
 	s.Collections.Create(ctx, firstCollection)
 	s.Collections.Create(ctx, secondCollection)
 	s.Images.Save(ctx, image, firstCollection)
@@ -62,13 +62,13 @@ func InitPatchTests(t *testing.T) (a.App, *im.BaseImage, *loc.Site, *loc.Camera,
 	s, clock, ctx := a.NewTestApp(t, true)
 
 	image, _ := im.New(testJPGImage)
-	collection, _ := clc.New("my-collection", "", "")
+	collection, _ := clc.New("my-collection")
 	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image, collection)
 
-	site, _ := loc.NewSite("my-site", "thegroup")
-	camera, _ := loc.NewCamera("my-camera", site, "")
-	secondCamera, _ := loc.NewCamera("my-second-camera", site, "")
+	site, _ := loc.NewSite("my-site")
+	camera, _ := loc.NewCamera("my-camera", site)
+	secondCamera, _ := loc.NewCamera("my-second-camera", site)
 	s.Locations.SaveSite(ctx, site)
 	s.Locations.SaveCamera(ctx, camera)
 	s.Locations.SaveCamera(ctx, secondCamera)
@@ -94,7 +94,7 @@ func TestPatchCameraOnImage(t *testing.T) {
 func TestOrderingImagesByCapturedAt(t *testing.T) {
 	s, clock, ctx := a.NewTestApp(t, true)
 	nImages := 3
-	collection, _ := clc.New("thename", "", "mygroup")
+	collection, _ := clc.New("thename", clc.WithGroup("mygroup"))
 	s.Collections.Create(ctx, collection)
 	for range nImages {
 		image, _ := im.New(testPNGImage)
@@ -128,8 +128,8 @@ func TestOrderingImagesByCapturedAt(t *testing.T) {
 func TestFilterImagesByCollectionName(t *testing.T) {
 
 	s, _, ctx := a.NewTestApp(t, true)
-	firstCollection, _ := clc.New("first-collection", "", "")
-	secondCollection, _ := clc.New("second-collection", "", "")
+	firstCollection, _ := clc.New("first-collection")
+	secondCollection, _ := clc.New("second-collection")
 	s.Collections.Create(ctx, firstCollection)
 	s.Collections.Create(ctx, secondCollection)
 
@@ -165,7 +165,7 @@ func TestSavingImageWithType(t *testing.T) {
 
 		image, _ := im.New(testJPGImage)
 		image.Type = tc.Type
-		collection, _ := clc.New("thename", "", "")
+		collection, _ := clc.New("thename")
 		s.Collections.Create(ctx, collection)
 		err := s.Images.Save(ctx, image, collection)
 		if tc.WantErr {
@@ -186,7 +186,7 @@ func TestRawImageURL(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
 	image, _ := im.New(testJPGImage)
-	collection, _ := clc.New("mycollection", "mydescription", "mygroup")
+	collection, _ := clc.New("mycollection", clc.WithGroup("mygroup"))
 	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image, collection)
 

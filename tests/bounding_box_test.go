@@ -18,7 +18,7 @@ func InitializeBoundingBoxTests(t *testing.T) (context.Context, *a.App, *im.Imag
 	label, _ := lbl.New("thelabel", "")
 	s.Labels.Create(ctx, label)
 	image, _ := im.New(testJPGImage)
-	collection, _ := clc.New("thecollection", "", "mygroup")
+	collection, _ := clc.New("thecollection", clc.WithGroup("mygroup"))
 	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image, collection)
 

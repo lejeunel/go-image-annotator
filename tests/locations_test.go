@@ -15,7 +15,7 @@ func InitializeLocationsTests(t *testing.T) (*a.App, context.Context, *clc.Colle
 	s, _, ctx := a.NewTestApp(t, true)
 
 	image, _ := im.New(testJPGImage)
-	collection, _ := clc.New("thename", "", "")
+	collection, _ := clc.New("thename")
 	s.Collections.Create(ctx, collection)
 	s.Images.Save(ctx, image, collection)
 	base, _ := s.Images.GetBase(ctx, image.Id, im.FetchMetaOnly)
@@ -27,7 +27,7 @@ func InitializeLocationsTests(t *testing.T) (*a.App, context.Context, *clc.Colle
 func TestCreateAndRetrieveSite(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
-	site, _ := loc.NewSite("thelocation", "thegroup")
+	site, _ := loc.NewSite("thelocation")
 	err := s.Locations.SaveSite(ctx, site)
 	AssertNoError(t, err)
 
@@ -42,7 +42,7 @@ func TestCreateAndRetrieveSite(t *testing.T) {
 func TestUpdateSiteName(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
-	site, _ := loc.NewSite("mysite", "thegroup")
+	site, _ := loc.NewSite("mysite")
 	s.Locations.SaveSite(ctx, site)
 
 	site.Name = "newname"
@@ -57,7 +57,7 @@ func TestUpdateSiteName(t *testing.T) {
 func TestUpdateSiteGroup(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
-	site, _ := loc.NewSite("mysite", "thegroup")
+	site, _ := loc.NewSite("mysite")
 	s.Locations.SaveSite(ctx, site)
 
 	site.Group = "anothergroup"
@@ -74,8 +74,8 @@ func TestCreateAndRetrieveSiteByName(t *testing.T) {
 
 	siteName := "thesite"
 	otherSiteName := "theothersite"
-	site, _ := loc.NewSite(siteName, "thegroup")
-	otherSite, _ := loc.NewSite(otherSiteName, "thegroup")
+	site, _ := loc.NewSite(siteName)
+	otherSite, _ := loc.NewSite(otherSiteName)
 	s.Locations.SaveSite(ctx, site)
 	s.Locations.SaveSite(ctx, otherSite)
 
@@ -88,8 +88,8 @@ func TestAssignCameraToSite(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
 	cameraName := "thecamera"
-	site, _ := loc.NewSite("thelocation", "thegroup")
-	camera, _ := loc.NewCamera(cameraName, site, "")
+	site, _ := loc.NewSite("thelocation")
+	camera, _ := loc.NewCamera(cameraName, site)
 	s.Locations.SaveSite(ctx, site)
 	err := s.Locations.SaveCamera(ctx, camera)
 	AssertNoError(t, err)
@@ -102,9 +102,9 @@ func TestRetrieveCameraById(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
 	cameraName := "thecamera"
-	site, _ := loc.NewSite("thelocation", "thegroup")
+	site, _ := loc.NewSite("thelocation")
 	s.Locations.SaveSite(ctx, site)
-	camera, _ := loc.NewCamera(cameraName, site, "")
+	camera, _ := loc.NewCamera(cameraName, site)
 	err := s.Locations.SaveCamera(ctx, camera)
 
 	retrievedCamera, err := s.Locations.FindCamera(ctx, camera.Id)
@@ -115,11 +115,11 @@ func TestRetrieveCameraById(t *testing.T) {
 func TestRetrieveCameraByName(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
-	site, _ := loc.NewSite("thelocation", "thegroup")
+	site, _ := loc.NewSite("thelocation")
 	s.Locations.SaveSite(ctx, site)
-	firstCamera, _ := loc.NewCamera("first-camera", site, "")
+	firstCamera, _ := loc.NewCamera("first-camera", site)
 	s.Locations.SaveCamera(ctx, firstCamera)
-	secondCamera, _ := loc.NewCamera("second-camera", site, "")
+	secondCamera, _ := loc.NewCamera("second-camera", site)
 	s.Locations.SaveCamera(ctx, secondCamera)
 
 	retrievedCamera, err := s.Locations.FindCameraByName(ctx,
@@ -135,9 +135,9 @@ func TestCreateCamera(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
 	cameraName := "thecamera"
-	site, _ := loc.NewSite("thelocation", "thegroup")
+	site, _ := loc.NewSite("thelocation")
 	s.Locations.SaveSite(ctx, site)
-	camera, _ := loc.NewCamera(cameraName, site, "thetransmitter")
+	camera, _ := loc.NewCamera(cameraName, site, loc.WithTransmitter("thetransmitter"))
 	err := s.Locations.SaveCamera(ctx, camera)
 
 	retrievedCamera, err := s.Locations.FindCamera(ctx,
@@ -155,9 +155,9 @@ func TestCameraInheritsGroupFieldFromSite(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
 	cameraName := "thecamera"
-	site, _ := loc.NewSite("thelocation", "thegroup")
+	site, _ := loc.NewSite("thelocation")
 	s.Locations.SaveSite(ctx, site)
-	camera, _ := loc.NewCamera(cameraName, site, "thetransmitter")
+	camera, _ := loc.NewCamera(cameraName, site)
 	s.Locations.SaveCamera(ctx, camera)
 	retrievedCamera, _ := s.Locations.FindCamera(ctx,
 		camera.Id)
@@ -171,9 +171,9 @@ func TestRetrieveImageWithTransmitter(t *testing.T) {
 	s, ctx, collection, image := InitializeLocationsTests(t)
 	cameraName := "thecamera"
 	transmitterName := "thetransmitter"
-	site, _ := loc.NewSite("thelocation", "thegroup")
+	site, _ := loc.NewSite("thelocation")
 	s.Locations.SaveSite(ctx, site)
-	camera, _ := loc.NewCamera(cameraName, site, transmitterName)
+	camera, _ := loc.NewCamera(cameraName, site, loc.WithTransmitter(transmitterName))
 	s.Locations.SaveCamera(ctx, camera)
 	s.Images.AssignCamera(ctx, camera.Id, image.Id)
 
@@ -198,7 +198,7 @@ func TestCreatingInvalidSiteNameShouldFail(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			_, err := loc.NewSite(tc.name, "thegroup")
+			_, err := loc.NewSite(tc.name)
 			AssertErrorIs(t, err, e.ErrResourceName)
 		})
 	}
@@ -216,10 +216,10 @@ func TestCreatingInvalidCameraNameShouldFail(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			s, _, ctx := a.NewTestApp(t, true)
-			site, _ := loc.NewSite("thesite", "thegroup")
+			site, _ := loc.NewSite("thesite")
 			s.Locations.SaveSite(ctx, site)
 
-			_, err := loc.NewCamera(tc.name, site, "")
+			_, err := loc.NewCamera(tc.name, site)
 			AssertErrorIs(t, err, e.ErrResourceName)
 		})
 	}
@@ -228,8 +228,8 @@ func TestCreatingInvalidCameraNameShouldFail(t *testing.T) {
 func TestSiteDuplicateNameShouldFail(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
-	site, _ := loc.NewSite("my-site", "thegroup")
-	newSite, _ := loc.NewSite("my-site", "thegroup")
+	site, _ := loc.NewSite("my-site")
+	newSite, _ := loc.NewSite("my-site")
 	s.Locations.SaveSite(ctx, site)
 	err := s.Locations.SaveSite(ctx, newSite)
 
@@ -239,8 +239,8 @@ func TestSiteDuplicateNameShouldFail(t *testing.T) {
 func TestCameraDuplicateNameShouldFail(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, true)
 
-	site, _ := loc.NewSite("my-site", "thegroup")
-	camera, _ := loc.NewCamera("my-camera", site, "")
+	site, _ := loc.NewSite("my-site")
+	camera, _ := loc.NewCamera("my-camera", site)
 	s.Locations.SaveSite(ctx, site)
 	err := s.Locations.SaveCamera(ctx, camera)
 	AssertNoError(t, err)
@@ -253,10 +253,10 @@ func TestCameraDuplicateNameShouldFail(t *testing.T) {
 func TestAssignNonExistingCameraToImageShouldFail(t *testing.T) {
 	s, ctx, _, image := InitializeLocationsTests(t)
 
-	site, _ := loc.NewSite("thelocation", "thegroup")
+	site, _ := loc.NewSite("thelocation")
 	s.Locations.SaveSite(ctx, site)
 
-	nonExistingCamera, _ := loc.NewCamera("thecamera", site, "")
+	nonExistingCamera, _ := loc.NewCamera("thecamera", site)
 
 	err := s.Images.AssignCamera(ctx, nonExistingCamera.Id, image.Id)
 	AssertErrorIs(t, err, e.ErrNotFound)
@@ -266,8 +266,8 @@ func TestAssignNonExistingCameraToImageShouldFail(t *testing.T) {
 func TestCreateCameraWithNonExistingSiteToImageShouldFail(t *testing.T) {
 	s, ctx, _, _ := InitializeLocationsTests(t)
 
-	nonExistingSite, _ := loc.NewSite("thelocation", "thegroup")
-	camera, _ := loc.NewCamera("thecamera", nonExistingSite, "")
+	nonExistingSite, _ := loc.NewSite("thelocation")
+	camera, _ := loc.NewCamera("thecamera", nonExistingSite)
 	err := s.Locations.SaveCamera(ctx, camera)
 	AssertErrorIs(t, err, e.ErrDependency)
 }
@@ -275,8 +275,8 @@ func TestCreateCameraWithNonExistingSiteToImageShouldFail(t *testing.T) {
 func TestAssignCameraToImageShouldAlsoAddSite(t *testing.T) {
 	s, ctx, collection, image := InitializeLocationsTests(t)
 
-	site, _ := loc.NewSite("thelocation", "thegroup")
-	camera, _ := loc.NewCamera("thecamera", site, "")
+	site, _ := loc.NewSite("thelocation")
+	camera, _ := loc.NewCamera("thecamera", site)
 	s.Locations.SaveSite(ctx, site)
 
 	s.Locations.SaveCamera(ctx, camera)
@@ -298,7 +298,7 @@ func TestAssignCameraToImageShouldAlsoAddSite(t *testing.T) {
 func TestDeleteSite(t *testing.T) {
 	s, ctx, _, _ := InitializeLocationsTests(t)
 
-	site, _ := loc.NewSite("thelocation", "thegroup")
+	site, _ := loc.NewSite("thelocation")
 	s.Locations.SaveSite(ctx, site)
 	err := s.Locations.DeleteSite(ctx, site.Id)
 	AssertNoError(t, err)
@@ -309,8 +309,8 @@ func TestDeleteSite(t *testing.T) {
 func TestDeleteCamera(t *testing.T) {
 	s, ctx, _, _ := InitializeLocationsTests(t)
 
-	site, _ := loc.NewSite("thelocation", "thegroup")
-	camera, _ := loc.NewCamera("thecamera", site, "")
+	site, _ := loc.NewSite("thelocation")
+	camera, _ := loc.NewCamera("thecamera", site)
 	s.Locations.SaveSite(ctx, site)
 	s.Locations.SaveCamera(ctx, camera)
 	s.Locations.DeleteCamera(ctx, camera.Id)
@@ -322,9 +322,9 @@ func TestDeleteCamera(t *testing.T) {
 func TestUpdateSiteOfCameraShouldReassign(t *testing.T) {
 	s, ctx, _, image := InitializeLocationsTests(t)
 
-	firstSite, _ := loc.NewSite("thelocation", "thegroup")
-	secondSite, _ := loc.NewSite("thesecondlocation", "thegroup")
-	camera, _ := loc.NewCamera("thecamera", firstSite, "")
+	firstSite, _ := loc.NewSite("thelocation")
+	secondSite, _ := loc.NewSite("thesecondlocation")
+	camera, _ := loc.NewCamera("thecamera", firstSite)
 	s.Locations.SaveSite(ctx, firstSite)
 	s.Locations.SaveSite(ctx, secondSite)
 	s.Locations.SaveCamera(ctx, camera)
@@ -349,8 +349,8 @@ func TestUpdateSiteOfCameraShouldReassign(t *testing.T) {
 func TestUpdateCameraName(t *testing.T) {
 	s, ctx, _, _ := InitializeLocationsTests(t)
 
-	site, _ := loc.NewSite("thelocation", "thegroup")
-	camera, _ := loc.NewCamera("thecamera", site, "")
+	site, _ := loc.NewSite("thelocation")
+	camera, _ := loc.NewCamera("thecamera", site)
 	s.Locations.SaveSite(ctx, site)
 	s.Locations.SaveCamera(ctx, camera)
 	updatedCamera, err := s.Locations.UpdateCamera(ctx, camera.Id,
@@ -366,8 +366,8 @@ func TestUpdateCameraName(t *testing.T) {
 func TestUpdateCameraTransmitter(t *testing.T) {
 	s, ctx, _, _ := InitializeLocationsTests(t)
 
-	site, _ := loc.NewSite("thelocation", "thegroup")
-	camera, _ := loc.NewCamera("thecamera", site, "thetransmitter")
+	site, _ := loc.NewSite("thelocation")
+	camera, _ := loc.NewCamera("thecamera", site, loc.WithTransmitter("thetransmitter"))
 	s.Locations.SaveSite(ctx, site)
 	s.Locations.SaveCamera(ctx, camera)
 	newTransmitterName := "thenewtransmitter"
@@ -385,10 +385,10 @@ func TestUpdateCameraTransmitter(t *testing.T) {
 func TestReassignCameraToAnotherSite(t *testing.T) {
 	s, ctx, _, _ := InitializeLocationsTests(t)
 
-	firstSite, _ := loc.NewSite("firstsite", "thegroup")
-	secondSite, _ := loc.NewSite("secondsite", "thegroup")
+	firstSite, _ := loc.NewSite("firstsite")
+	secondSite, _ := loc.NewSite("secondsite")
 	s.Locations.SaveSite(ctx, firstSite)
-	camera, _ := loc.NewCamera("thecamera", firstSite, "")
+	camera, _ := loc.NewCamera("thecamera", firstSite)
 	s.Locations.SaveSite(ctx, secondSite)
 	s.Locations.SaveCamera(ctx, camera)
 	updatedCamera, err := s.Locations.UpdateCamera(ctx, camera.Id,
@@ -404,12 +404,12 @@ func TestReassignCameraToAnotherSite(t *testing.T) {
 func TestReassigningCameraToSiteWithAlreadyExistingNameShouldFail(t *testing.T) {
 	s, ctx, _, _ := InitializeLocationsTests(t)
 
-	firstSite, _ := loc.NewSite("firstsite", "thegroup")
-	secondSite, _ := loc.NewSite("secondsite", "thegroup")
+	firstSite, _ := loc.NewSite("firstsite")
+	secondSite, _ := loc.NewSite("secondsite")
 	s.Locations.SaveSite(ctx, firstSite)
 	s.Locations.SaveSite(ctx, secondSite)
-	firstCamera, _ := loc.NewCamera("thecamera", firstSite, "")
-	secondCamera, _ := loc.NewCamera("thecamera", secondSite, "")
+	firstCamera, _ := loc.NewCamera("thecamera", firstSite)
+	secondCamera, _ := loc.NewCamera("thecamera", secondSite)
 	s.Locations.SaveCamera(ctx, firstCamera)
 	s.Locations.SaveCamera(ctx, secondCamera)
 	_, err := s.Locations.UpdateCamera(ctx, secondCamera.Id,
@@ -421,10 +421,10 @@ func TestReassigningCameraToSiteWithAlreadyExistingNameShouldFail(t *testing.T) 
 func TestListImageOfCamera(t *testing.T) {
 	s, ctx, _, _ := InitializeLocationsTests(t)
 
-	firstSite, _ := loc.NewSite("firstsite", "thegroup")
-	firstCamera, _ := loc.NewCamera("firstcamera", firstSite, "")
-	secondSite, _ := loc.NewSite("secondsite", "thegroup")
-	secondCamera, _ := loc.NewCamera("secondcamera", secondSite, "")
+	firstSite, _ := loc.NewSite("firstsite")
+	firstCamera, _ := loc.NewCamera("firstcamera", firstSite)
+	secondSite, _ := loc.NewSite("secondsite")
+	secondCamera, _ := loc.NewCamera("secondcamera", secondSite)
 	s.Locations.SaveSite(ctx, firstSite)
 	s.Locations.SaveSite(ctx, secondSite)
 	s.Locations.SaveCamera(ctx, firstCamera)
@@ -432,7 +432,7 @@ func TestListImageOfCamera(t *testing.T) {
 
 	firstImage, _ := im.New(testJPGImage)
 	secondImage, _ := im.New(testJPGImage)
-	collection, _ := clc.New("thecollection", "", "")
+	collection, _ := clc.New("thecollection")
 	s.Collections.Create(ctx, collection)
 
 	s.Images.Save(ctx, firstImage, collection)
@@ -457,11 +457,11 @@ func TestListImageOfCamera(t *testing.T) {
 func InitCollection(t *testing.T, a *a.App, ctx context.Context,
 	image *im.Image, collectionName, siteName, cameraName string) {
 
-	collection, _ := clc.New(collectionName, "", "a-group")
+	collection, _ := clc.New(collectionName, clc.WithGroup("a-group"))
 	a.Collections.Create(ctx, collection)
 	a.Images.Save(ctx, image, collection)
-	site, _ := loc.NewSite(siteName, "a-group")
-	camera, _ := loc.NewCamera(cameraName, site, "")
+	site, _ := loc.NewSite(siteName, loc.WithGroupOption("a-group"))
+	camera, _ := loc.NewCamera(cameraName, site)
 	a.Locations.SaveSite(ctx, site)
 	a.Locations.SaveCamera(ctx, camera)
 	a.Images.AssignCamera(ctx, camera.Id, image.Id)
@@ -496,9 +496,9 @@ func TestFilterSitesByGroup(t *testing.T) {
 	ctx = context.WithValue(ctx, "entitlements", "im-contrib")
 	ctx = context.WithValue(ctx, "groups", "a-group")
 
-	site, _ := loc.NewSite("my-site", "a-group")
+	site, _ := loc.NewSite("my-site", loc.WithGroupOption("a-group"))
 	s.Locations.SaveSite(ctx, site)
-	otherSite, _ := loc.NewSite("my-other-site", "another-group")
+	otherSite, _ := loc.NewSite("my-other-site")
 	s.Locations.SaveSite(ctx, otherSite)
 
 	retrieved, _, err := s.Locations.List(ctx, *loc.NewSiteFilter(loc.WithGroup("a-group")), loc.SiteAlphabeticalOrdering, g.OneItemPaginationParams)
@@ -519,7 +519,7 @@ func TestSitesAreReturnedInAlphabeticalOrder(t *testing.T) {
 	ctx = context.WithValue(ctx, "groups", "thegroup")
 	nonOrderedNames := []string{"c", "b", "a"}
 	for _, name := range nonOrderedNames {
-		site, _ := loc.NewSite(name, "thegroup")
+		site, _ := loc.NewSite(name, loc.WithGroupOption("thegroup"))
 		err := s.Locations.SaveSite(ctx, site)
 		AssertNoError(t, err)
 	}
@@ -553,13 +553,13 @@ func TestPatchCamera(t *testing.T) {
 		s, _, ctx := a.NewTestApp(t, true)
 
 		image, _ := im.New(testJPGImage)
-		collection, _ := clc.New("my-collection", "", "")
+		collection, _ := clc.New("my-collection")
 		s.Collections.Create(ctx, collection)
 		s.Images.Save(ctx, image, collection)
 
-		site, _ := loc.NewSite("my-site", "thegroup")
-		newSite, _ := loc.NewSite("my-new-site", "thegroup")
-		camera, _ := loc.NewCamera("my-camera", site, "")
+		site, _ := loc.NewSite("my-site")
+		newSite, _ := loc.NewSite("my-new-site")
+		camera, _ := loc.NewCamera("my-camera", site)
 		s.Locations.SaveSite(ctx, site)
 		s.Locations.SaveSite(ctx, newSite)
 		s.Locations.SaveCamera(ctx, camera)
@@ -597,8 +597,8 @@ func TestListSitesByGroup(t *testing.T) {
 	s, _, ctx := a.NewTestApp(t, false)
 	ctx = context.WithValue(ctx, "entitlements", "im-contrib")
 	ctx = context.WithValue(ctx, "groups", "first-group|second-group")
-	firstSite, _ := loc.NewSite("first-site", "first-group")
-	secondSite, _ := loc.NewSite("second-site", "second-group")
+	firstSite, _ := loc.NewSite("first-site", loc.WithGroupOption("first-group"))
+	secondSite, _ := loc.NewSite("second-site", loc.WithGroupOption("second-group"))
 	s.Locations.SaveSite(ctx, firstSite)
 	s.Locations.SaveSite(ctx, secondSite)
 
@@ -620,9 +620,9 @@ func TestListSitesByGroup(t *testing.T) {
 func TestClearCameraFromImage(t *testing.T) {
 	s, ctx, collection, image := InitializeLocationsTests(t)
 	cameraName := "thecamera"
-	site, _ := loc.NewSite("thelocation", "thegroup")
+	site, _ := loc.NewSite("thelocation")
 	s.Locations.SaveSite(ctx, site)
-	camera, _ := loc.NewCamera(cameraName, site, "")
+	camera, _ := loc.NewCamera(cameraName, site)
 	s.Locations.SaveCamera(ctx, camera)
 	s.Images.AssignCamera(ctx, camera.Id, image.Id)
 

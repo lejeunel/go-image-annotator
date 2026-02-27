@@ -28,24 +28,21 @@ import (
 //go:embed static
 var staticFiles embed.FS
 
-//go:embed docs/public
-var docsFiles embed.FS
+// func MakeDocsMux() (*http.ServeMux, error) {
 
-func MakeHugoDocsMux() (*http.ServeMux, error) {
+// 	docsFileSystem := fs.FS(docsFiles)
+// 	docsSubFileSystem, err := fs.Sub(docsFileSystem, "docs/public")
+// 	if err != nil {
+// 		log.Fatal("Error building docs filesystem")
+// 		return nil, err
+// 	}
+// 	httpDocsFileServer := http.FileServer(http.FS(docsSubFileSystem))
+// 	docsMux := http.NewServeMux()
+// 	docsMux.Handle("/", httpDocsFileServer)
 
-	docsFileSystem := fs.FS(docsFiles)
-	docsSubFileSystem, err := fs.Sub(docsFileSystem, "docs/public")
-	if err != nil {
-		log.Fatal("Error building docs filesystem")
-		return nil, err
-	}
-	httpDocsFileServer := http.FileServer(http.FS(docsSubFileSystem))
-	docsMux := http.NewServeMux()
-	docsMux.Handle("/", httpDocsFileServer)
+// 	return docsMux, nil
 
-	return docsMux, nil
-
-}
+// }
 
 func MakeStaticMux() (*http.ServeMux, error) {
 	staticFileSystem := fs.FS(staticFiles)
@@ -135,17 +132,17 @@ func Serve(port int, migrate bool) error {
 
 	a.RegisterAPIRoutes(&app, mainMux, "v1")
 
-	docsMux, err := MakeHugoDocsMux()
-	if err != nil {
-		return err
-	}
+	// docsMux, err := MakeDocsMux()
+	// if err != nil {
+	// 	return err
+	// }
 
 	staticMux, err := MakeStaticMux()
 	if err != nil {
 		return err
 	}
 
-	mainMux.Handle("/docs/", http.StripPrefix("/docs", docsMux))
+	// mainMux.Handle("/docs/", http.StripPrefix("/docs", docsMux))
 	mainMux.Handle("/static/", http.StripPrefix("/static", staticMux))
 	RegisterViewsHandlers(&app, mainMux)
 
