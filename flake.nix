@@ -17,6 +17,82 @@
       in
       {
         packages = rec {
+          docxp = pkgs.buildGoModule {
+            name = "doc-export";
+            src = ./doc-export;
+            vendorHash = "sha256-R6vXs+Tkws1Oj1DcH945mUG/mm0gE0JzSVbltxVXSL4=";
+            buildInputs = with pkgs; [
+              go
+            ];
+            env.CGO_ENABLED = 0;
+            trimPath = true;
+            ldflags = [
+              "-s" # Omit symbol table
+              "-w" # Omit DWARF symbols
+            ];
+          };
+          default = pkgs.buildGoModule {
+            name = "datahub";
+            src = ./service;
+            vendorHash = "sha256-dhNo4P2xKs5tKpwgFTX96sN8d1T+JWYOiqhOrci4qnM=";
+            buildInputs = with pkgs; [
+              git
+              go
+              gnugrep
+            ];
+            env.CGO_ENABLED = 0;
+            trimPath = true;
+            ldflags = [
+              "-s" # Omit symbol table
+              "-w" # Omit DWARF symbols
+            ];
+
+            preBuild =
+              let
+                docxp = self.packages.${system}.docxp;
+              in
+              ''
+                echo "Building documentation"
+                ${docxp}/bin/docexport compile ./assets/docs ./site/docs
+
+                echo "Installing tailwind plugins"
+                mkdir -p tmp/node_modules
+                npm install --prefix tmp @tailwindcss/typography
+
+                echo "Generating CSS"
+                ${pkgs.tailwindcss}/bin/tailwindcss \
+                    -i app/app.css \
+                    -o site/static/styles.css \
+                    -c tailwind.config.js
+              '';
+
+            buildPhase = ''
+              echo "Building datahub..."
+              go build -o $out/bin/datahub -ldflags "-s -w" ./cmd
+            '';
+          };
+          dockerImage =
+            let
+              datahub = self.packages.${system}.default;
+            in
+            pkgs.dockerTools.buildImage {
+              name = "datahub";
+              tag = "latest";
+              created = "now";
+
+              # Use Nix's built-in minimal environment
+              copyToRoot = pkgs.buildEnv {
+                name = "minimal-root";
+                paths = [
+                  datahub
+                  pkgs.bashInteractive
+                  pkgs.cacert
+                ];
+                pathsToLink = [ "/bin" ];
+                extraOutputsToInstall = [ "out" ]; # Only runtime files
+              };
+              config.Cmd = [ "/bin/datahub" ];
+            };
           builder-nix-cache-sync = pkgs.writeShellApplication {
             name = "builder-nix-cache-sync";
             runtimeInputs = [
@@ -108,58 +184,11 @@
               ];
             };
           };
-          default = pkgs.buildGoModule rec {
-            name = "datahub";
-            src = ./.;
-            vendorHash = "sha256-6aJbnAp4+KJ/Fz/CghxNtt6duS+3qIwJ8Z0xyztPUxc=";
-            buildInputs = with pkgs; [
-              git
-              hugo
-              go
-              gnugrep
-            ];
-            env.CGO_ENABLED = 0;
-            trimPath = true;
-            ldflags = [
-              "-s" # Omit symbol table
-              "-w" # Omit DWARF symbols
-            ];
-
-            preBuild = ''
-              echo "=== Building documentation with Hugo ==="
-              cd site/docs
-              ${pkgs.hugo}/bin/hugo build
-              cd ../..
-            '';
-          };
-          dockerImage =
-            let
-              datahub = self.packages.${system}.default;
-            in
-            pkgs.dockerTools.buildImage {
-              name = "datahub";
-              tag = "latest";
-              created = "now";
-
-              # Use Nix's built-in minimal environment
-              copyToRoot = pkgs.buildEnv {
-                name = "minimal-root";
-                paths = [
-                  datahub
-                  pkgs.bashInteractive
-                  pkgs.cacert
-                ];
-                pathsToLink = [ "/bin" ];
-                extraOutputsToInstall = [ "out" ]; # Only runtime files
-              };
-              config.Cmd = [ "/bin/datahub" ];
-            };
 
         };
         devShells = {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              hugo
               nodejs
               gopls
               gotools
