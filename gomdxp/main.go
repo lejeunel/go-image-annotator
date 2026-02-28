@@ -18,8 +18,8 @@ func Execute() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "docs",
-	Short: "Documentation compilation",
+	Use:   "gomdxp",
+	Short: "Markdown Exporter",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()
@@ -29,11 +29,11 @@ var rootCmd = &cobra.Command{
 }
 
 var compileCmd = &cobra.Command{
-	Use:   "compile",
-	Short: "Compile documentation",
-	Long:  "Compile MarkDown Documentation from <input-path> into HTML files at <output-path>",
+	Use:   "export",
+	Short: "Export pages",
+	Long:  "Export MarkDown pages from <input-path> to <output-path>",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return CompileDocs(args)
+		return Compile(args)
 	},
 }
 

@@ -17,9 +17,9 @@
       in
       {
         packages = rec {
-          docxp = pkgs.buildGoModule {
-            name = "doc-export";
-            src = ./doc-export;
+          gomdxp = pkgs.buildGoModule {
+            name = "gomdxp";
+            src = ./gomdxp;
             vendorHash = "sha256-R6vXs+Tkws1Oj1DcH945mUG/mm0gE0JzSVbltxVXSL4=";
             buildInputs = with pkgs; [
               go
@@ -49,11 +49,11 @@
 
             preBuild =
               let
-                docxp = self.packages.${system}.docxp;
+                mdxp = self.packages.${system}.mdxp;
               in
               ''
                 echo "Building documentation"
-                ${docxp}/bin/docexport compile ./assets/docs ./site/docs
+                ${mdxp}/bin/docexport compile ./assets/docs ./site/docs
 
                 echo "Installing tailwind plugins"
                 mkdir -p tmp/node_modules
@@ -188,17 +188,24 @@
         };
         devShells = {
           default = pkgs.mkShell {
-            buildInputs = with pkgs; [
-              nodejs
-              gopls
-              gotools
-              gomodifytags
-              gocode-gomod
-              gotest
-              age
-              sqlite
-              tailwindcss
-            ];
+            buildInputs =
+              let
+                gomdxp = self.packages.${system}.gomdxp;
+              in
+
+              with pkgs;
+              [
+                gomdxp
+                nodejs
+                gopls
+                gotools
+                gomodifytags
+                gocode-gomod
+                gotest
+                age
+                sqlite
+                tailwindcss
+              ];
           };
         };
       }

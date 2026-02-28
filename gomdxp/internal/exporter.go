@@ -38,7 +38,6 @@ func ParseMarkDownToHTML(builder *Builder, inputFS fs.FS) error {
 		return err
 	}
 	return nil
-
 }
 
 func ExportPagesToHTML(builder *Builder, outputPath string) error {

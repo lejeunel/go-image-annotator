@@ -1,12 +1,12 @@
 package main
 
 import (
-	docs "docexport/internal"
 	"fmt"
+	mdxp "gomdxp/internal"
 	"os"
 )
 
-func CompileDocs(args []string) error {
+func Compile(args []string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("requires exactly 2 arguments: source and destination")
 	}
@@ -15,16 +15,15 @@ func CompileDocs(args []string) error {
 		return fmt.Errorf("invalid source path: %w", err)
 	}
 
-	builder := docs.NewBuilder(docs.NewGoldMarkParser())
-	if err := docs.ParseMarkDownToHTML(builder, os.DirFS(args[0])); err != nil {
+	builder := mdxp.NewBuilder(mdxp.NewGoldMarkParser())
+	if err := mdxp.ParseMarkDownToHTML(builder, os.DirFS(args[0])); err != nil {
 		return fmt.Errorf("parsing markdown pages: %w", err)
 	}
 	fmt.Println("Successfully parsed MarkDown pages.")
 
-	if err := docs.ExportPagesToHTML(builder, args[1]); err != nil {
+	if err := mdxp.ExportPagesToHTML(builder, args[1]); err != nil {
 		return fmt.Errorf("exporting pages to HTML: %w", err)
 	}
-
 	fmt.Printf("Successfully exported pages to HTML at %v\n", args[1])
 
 	return nil

@@ -1,4 +1,4 @@
-module docexport
+module gomdxp
 
 go 1.25.4
 
