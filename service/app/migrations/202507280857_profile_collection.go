@@ -3,32 +3,9 @@ package migrations
 import (
 	"context"
 	"database/sql"
-	"fmt"
 )
 
-func Up202507300832_pgsql(ctx context.Context, tx *sql.Tx) error {
-
-	if _, err := tx.Exec(`
-			ALTER TABLE collections
-			ADD COLUMN profile_id VARCHAR(36);
-		`); err != nil {
-		return fmt.Errorf("adding column: %w", err)
-	}
-
-	if _, err := tx.Exec(`
-			ALTER TABLE collections
-			ADD CONSTRAINT fk_collections_profile
-			FOREIGN KEY (profile_id)
-			REFERENCES annotation_profiles(id)
-			ON DELETE SET NULL;
-		`); err != nil {
-		return fmt.Errorf("adding foreign key: %w", err)
-	}
-
-	return nil
-}
-
-func Up202507300832_sqlite(ctx context.Context, tx *sql.Tx) error {
+func Up202507300832(ctx context.Context, tx *sql.Tx) error {
 
 	if _, err := tx.Exec(`PRAGMA foreign_keys=off;`); err != nil {
 		return err
@@ -71,19 +48,7 @@ func Up202507300832_sqlite(ctx context.Context, tx *sql.Tx) error {
 	return nil
 }
 
-func Down202507300832_pgsql(ctx context.Context, tx *sql.Tx) error {
-
-	if _, err := tx.Exec(`ALTER TABLE collections DROP CONSTRAINT fk_collections_profile;`); err != nil {
-		return err
-	}
-	if _, err := tx.Exec(`ALTER TABLE collections DROP COLUMN profile_id;`); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func Down202507300832_sqlite(ctx context.Context, tx *sql.Tx) error {
+func Down202507300832(ctx context.Context, tx *sql.Tx) error {
 
 	if _, err := tx.Exec(`PRAGMA foreign_keys=off;`); err != nil {
 		return err

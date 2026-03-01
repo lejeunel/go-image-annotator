@@ -51,7 +51,7 @@ func NewApp(cfg *c.Config, clock clk.Clock, verbose int) (App, *sql.DB, *goose.P
 		os.Exit(1)
 	}
 
-	repos := buildRepos(cfg, db, logger)
+	repos := buildRepos(db, logger)
 	auth := buildAuthorizer(cfg, logger)
 	kvStore := buildKVStore(cfg, logger)
 

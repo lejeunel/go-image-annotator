@@ -2,7 +2,6 @@ package app
 
 import (
 	"database/sql"
-	c "datahub/config"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"log"
@@ -37,17 +36,5 @@ func NewSQLiteConnection(path string, logger *slog.Logger) *sqlx.DB {
 	setPragma(db.DB, "journal_size_limit", "1000000", logger)
 	setPragma(db.DB, "mmap_size", "30000000000", logger)
 	setPragma(db.DB, "cache_size", "-2000", logger)
-	return db
-}
-
-func NewPostgresConnection(cfg *c.Config, logger *slog.Logger) *sqlx.DB {
-
-	logger.Info("Opening connection to PostgreSQL database",
-		"host", cfg.PostGreSqlHost,
-		"port", cfg.PostGreSqlPort)
-	db, err := sqlx.Open("pgx", c.NewConfig().DBDataSourceName())
-	if err != nil {
-		log.Fatalln(err)
-	}
 	return db
 }

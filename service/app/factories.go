@@ -21,33 +21,17 @@ import (
 )
 
 // here we inject SQL migration routines written in Go
-// that are specific to each dialect (sqlite and postgreSQL)
-func buildMigrationProvider(db *sql.DB, mode string) (*goose.Provider, error) {
-	var gooseDialect goose.Dialect
-	switch mode {
-	case "test", "dev":
-		gooseDialect = goose.DialectSQLite3
-	case "prod":
-		gooseDialect = goose.DialectPostgres
-	}
+func buildMigrationProvider(db *sql.DB) (*goose.Provider, error) {
 
-	var collectionProfileMigration *goose.Migration
-	switch mode {
-	case "test", "dev":
-		collectionProfileMigration = goose.NewGoMigration(202507300832,
-			&goose.GoFunc{RunTx: m.Up202507300832_sqlite},
-			&goose.GoFunc{RunTx: m.Down202507300832_sqlite})
-	case "prod":
-		collectionProfileMigration = goose.NewGoMigration(202507300832,
-			&goose.GoFunc{RunTx: m.Up202507300832_pgsql},
-			&goose.GoFunc{RunTx: m.Down202507300832_pgsql})
-	}
+	collectionProfileMigration := goose.NewGoMigration(202507300832,
+		&goose.GoFunc{RunTx: m.Up202507300832},
+		&goose.GoFunc{RunTx: m.Down202507300832})
 
 	migrationsFSsub, err := fs.Sub(assets.MigrationsFS, "migrations")
 	if err != nil {
 		return nil, err
 	}
-	provider, err := goose.NewProvider(gooseDialect, db, migrationsFSsub,
+	provider, err := goose.NewProvider(goose.DialectSQLite3, db, migrationsFSsub,
 		goose.WithGoMigrations(collectionProfileMigration))
 	if err != nil {
 		return nil, err
@@ -65,14 +49,12 @@ func buildDbAndMigrations(cfg *c.Config, logger *slog.Logger) (*sqlx.DB, *goose.
 	switch cfg.Mode {
 	case "test":
 		db = NewSQLiteConnection(":memory:", logger)
-	case "dev":
+	case "dev", "prod":
 		db = NewSQLiteConnection(cfg.LocalPath+"/db.sqlite", logger)
-	case "prod":
-		db = NewPostgresConnection(cfg, logger)
 	default:
 		return nil, nil, fmt.Errorf("%v: mode: %v", baseErrMsg, cfg.Mode)
 	}
-	provider, err := buildMigrationProvider(db.DB, cfg.Mode)
+	provider, err := buildMigrationProvider(db.DB)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%v: %w", baseErrMsg, err)
 	}
@@ -89,7 +71,7 @@ type Repos struct {
 	LocationRepo          loc.LocationRepo
 }
 
-func buildRepos(cfg *c.Config, db *sqlx.DB, logger *slog.Logger) Repos {
+func buildRepos(db *sqlx.DB, logger *slog.Logger) Repos {
 	return Repos{
 		ImageRepo:             im.NewSQLiteImageRepo(db, logger),
 		AnnotationRepo:        im.NewSQLiteAnnotationRepo(db),
