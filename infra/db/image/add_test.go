@@ -13,7 +13,7 @@ func TestAddMIMEType(t *testing.T) {
 	repos := NewImageTestRepos()
 	id := im.NewImageId()
 	mimetype := "the-mimetype"
-	repos.Image.AddImage(id, "the-hash", mimetype)
+	repos.Image.AddImage(id, nil, mimetype)
 	r, err := repos.Image.MIMEType(id)
 	if err != nil {
 		t.Fatalf("expected no error when retrieving mimetype, got %v", err)

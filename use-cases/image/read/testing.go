@@ -6,12 +6,12 @@ import (
 )
 
 type FakePresenter struct {
-	Got        *im.Image
+	Got        im.Image
 	GotSuccess bool
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(r *im.Image) {
+func (p *FakePresenter) SuccessReadImage(r im.Image) {
 	p.GotSuccess = true
 	p.Got = r
 }

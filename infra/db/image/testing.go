@@ -22,7 +22,7 @@ func AddToCollection(repos ImageTestingRepos, collectionName string, hash string
 	collectionId := clc.NewCollectionId()
 	repos.Collection.Create(*clc.NewCollection(collectionId, collectionName))
 	imageId := im.NewImageId()
-	repos.Image.AddImage(imageId, "the-hash", "the-mimetype")
+	repos.Image.AddImage(imageId, nil, "the-mimetype")
 
 	return &imageId, &collectionId, repos.Image.AddToCollection(imageId, collectionId)
 }

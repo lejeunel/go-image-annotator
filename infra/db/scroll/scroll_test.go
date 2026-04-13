@@ -48,7 +48,7 @@ func TestShouldFailWhenImageDoesNotExist(t *testing.T) {
 func TestImageMustExist(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	id := im.NewImageId()
-	repos.Image.AddImage(id, "", "")
+	repos.Image.AddImage(id, nil, "")
 	err := repos.Scroller.ImageMustExist(id)
 	if err != nil {
 		t.Fatalf("expected no error got %v", err)
@@ -75,7 +75,7 @@ func TestShouldFailWhenNoImage(t *testing.T) {
 func TestGettingAdjacentImageWhenSingleImageShouldFail(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	id, _ := im.NewImageIdFromString("00000000-0000-0000-0000-000000000000")
-	repos.Image.AddImage(id, "hash0", "")
+	repos.Image.AddImage(id, nil, "")
 	_, err := repos.Scroller.GetAdjacent(id, scroller.NewCriteria(), scroller.ScrollPrevious)
 	if !errors.Is(err, e.ErrNotFound) {
 		t.Fatalf("expected not found err got  %v", err)

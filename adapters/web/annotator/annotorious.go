@@ -2,7 +2,6 @@ package annotator
 
 import (
 	"bytes"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 	"text/template"
@@ -19,13 +18,13 @@ type AnnotatorState struct {
 	Descending       bool
 }
 
-func MakeAnnotoriousScript(imageId im.ImageId, collection string) (*Node, error) {
+func MakeAnnotoriousScript(imageId string, collection string) (*Node, error) {
 	tAnnot, err := template.New("annotator").ParseFS(templatesFiles, "templates/annotator.js")
 	if err != nil {
 		return nil, err
 	}
 	buf := bytes.NewBufferString("")
-	data := AnnotatorState{ImageId: imageId.String(),
+	data := AnnotatorState{ImageId: imageId,
 		Collection: collection, Annotations: "[]",
 		EnableAnnotation: true}
 

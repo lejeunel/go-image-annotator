@@ -2,8 +2,7 @@ package annotator
 
 import (
 	"fmt"
-	scr "github.com/lejeunel/go-image-annotator-v2/application/scroller"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
 	myhtml "github.com/lejeunel/go-image-annotator-v2/shared/html"
 
 	. "maragu.dev/gomponents"
@@ -13,20 +12,20 @@ import (
 type ScrollerView struct {
 }
 
-func MakeLink(image im.BaseImage) string {
+func MakeLink(imageId, collection string) string {
 	return fmt.Sprintf("image?id=%v&collection=%v",
-		image.ImageId, image.Collection)
+		imageId, collection)
 
 }
 
-func (p *ScrollerView) Render(s scr.ScrollerState) Node {
+func (p *ScrollerView) Render(buttons a.ScrollerButtons) Node {
 	prevButton := myhtml.MakePreviousButton("#", false)
 	nextButton := myhtml.MakeNextButton("#", false)
-	if s.Previous != nil {
-		prevButton = myhtml.MakePreviousButton(MakeLink(*s.Previous), true)
+	if buttons.Prev.IsActive {
+		prevButton = myhtml.MakePreviousButton(MakeLink(buttons.Prev.ImageId, buttons.Prev.Collection), true)
 	}
-	if s.Next != nil {
-		nextButton = myhtml.MakeNextButton(MakeLink(*s.Next), true)
+	if buttons.Next.IsActive {
+		prevButton = myhtml.MakeNextButton(MakeLink(buttons.Next.ImageId, buttons.Next.Collection), true)
 	}
 	return Table(Tr(
 		Td(prevButton),

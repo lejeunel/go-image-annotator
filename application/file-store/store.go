@@ -25,9 +25,16 @@ func (r *FileStore) filePath(id im.ImageId) string {
 	return filepath.Join(r.baseDir, fmt.Sprintf("%s", id.String()))
 }
 
-func (r *FileStore) Store(id im.ImageId, data []byte) error {
+func (r *FileStore) Store(id im.ImageId, reader io.Reader) error {
 	path := r.filePath(id)
-	return os.WriteFile(path, data, 0644)
+
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	_, err = io.Copy(f, reader)
+	return err
 }
 
 func (r *FileStore) Delete(id im.ImageId) error {

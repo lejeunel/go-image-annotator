@@ -18,7 +18,7 @@ func (p List) Success(r list.Response) {
 	}
 
 	for _, image := range r.Images {
-		response.Images = append(response.Images, BuildImageResponse(&image))
+		response.Images = append(response.Images, BuildImageResponse(image))
 	}
 
 	json.WriteJSON(p.Writer, 200, response)

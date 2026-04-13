@@ -8,6 +8,10 @@ import (
 	"log/slog"
 )
 
+type Interface interface {
+	Execute(Request, OutputPort)
+}
+
 type Interactor struct {
 	store  imstore.Interface
 	logger *slog.Logger
@@ -25,7 +29,7 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 		return
 	}
 
-	out.Success(image)
+	out.SuccessReadImage(*image)
 }
 
 func (i *Interactor) handleError(err error, out OutputPort) {

@@ -2,6 +2,7 @@ package ingest
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 
 	ast "github.com/lejeunel/go-image-annotator-v2/application/file-store"
@@ -28,12 +29,26 @@ func NewTestingInteractor() *Interactor {
 }
 
 type FakeHasher struct {
-	Hash_ string
+	sum []byte
 }
 
-func (h *FakeHasher) Hash([]byte) string {
-	return h.Hash_
+func (f *FakeHasher) Write(p []byte) (int, error) {
+	return len(p), nil
+}
 
+func (f *FakeHasher) Sum(b []byte) []byte {
+	fmt.Println(f.sum)
+	return append(b, f.sum...)
+}
+
+func (f *FakeHasher) Reset() {}
+
+func (f *FakeHasher) Size() int {
+	return len(f.sum)
+}
+
+func (f *FakeHasher) BlockSize() int {
+	return 1
 }
 
 type FakePresenter struct {
@@ -70,7 +85,7 @@ type FakeAnnotationRepo struct {
 type FakeImageRepo struct {
 	Err                  error
 	GotImage             bool
-	GotHash              string
+	GotHash              []byte
 	GotMIMEType          string
 	ErrOnAddToCollection bool
 	ErrOnAddImage        bool
@@ -101,7 +116,7 @@ func (r *FakeLabelRepo) FindLabelByName(name string) (*lbl.Label, error) {
 	return lbl.NewLabel(lbl.NewLabelId(), name), nil
 }
 
-func (r *FakeImageRepo) FindImageIdByHash(hash string) (*im.ImageId, error) {
+func (r *FakeImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	if r.ErrOnFindHash {
 		return nil, r.Err
 	}
@@ -143,7 +158,7 @@ func (r *FakeImageRepo) AddToCollection(im.ImageId, clc.CollectionId) error {
 	return nil
 }
 
-func (r *FakeImageRepo) AddImage(imageId im.ImageId, hash, mimetype string) error {
+func (r *FakeImageRepo) AddImage(imageId im.ImageId, hash []byte, mimetype string) error {
 	if r.ErrOnAddImage {
 		return r.Err
 	}

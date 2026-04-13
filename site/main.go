@@ -5,6 +5,7 @@ import (
 	api "github.com/lejeunel/go-image-annotator-v2/adapters/api/server"
 	web "github.com/lejeunel/go-image-annotator-v2/adapters/web"
 	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
+	scr "github.com/lejeunel/go-image-annotator-v2/application/scroller"
 
 	"github.com/lejeunel/go-image-annotator-v2/config"
 	"github.com/lejeunel/go-image-annotator-v2/infra"
@@ -29,7 +30,9 @@ func Serve(port int) {
 
 	infra := infra.NewSQLiteInfra(cfg.DBPath, cfg.ArtefactDir)
 	interactors := i.NewSQLiteInteractors(infra, cfg.DefaultPageSize, cfg.AllowedImageFormats)
-	annotator := a.NewAnnotator(infra.ScrollerRepo, infra.ImageStore)
+	scroller := scr.New(infra.ScrollerRepo)
+	annotator := a.NewAnnotator(scroller, &interactors.Image.Read,
+		&interactors.Annotation.AddBox, &interactors.Annotation.UpdateBox, &interactors.Annotation.Delete)
 	RegisterHandlers(mux,
 		*api.NewServer(interactors),
 		*web.NewServer(interactors, annotator),

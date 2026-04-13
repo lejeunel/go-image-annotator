@@ -2,6 +2,7 @@ package image
 
 import (
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
@@ -117,18 +118,18 @@ func (r *SQLiteImageRepo) MIMEType(imageId im.ImageId) (*string, error) {
 	return &mimetype, nil
 }
 
-func (r *SQLiteImageRepo) AddImage(imageId im.ImageId, hash, format string) error {
+func (r *SQLiteImageRepo) AddImage(imageId im.ImageId, hash []byte, format string) error {
 	query := "INSERT INTO images (id, hash, mimetype) VALUES ($1,$2,$3)"
-	_, err := r.Db.Exec(query, imageId.String(), hash, format)
+	_, err := r.Db.Exec(query, imageId.String(), hex.EncodeToString(hash), format)
 	if err != nil {
 		return fmt.Errorf("inserting image record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 }
-func (r *SQLiteImageRepo) FindImageIdByHash(hash string) (*im.ImageId, error) {
+func (r *SQLiteImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	errCtx := "finding image record by hash"
 	var imageId im.ImageId
-	err := r.Db.Get(&imageId, "SELECT id FROM images WHERE hash = $1", hash)
+	err := r.Db.Get(&imageId, "SELECT id FROM images WHERE hash = $1", hex.EncodeToString(hash))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("%v: %v: %w", errCtx, err, e.ErrNotFound)

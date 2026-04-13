@@ -12,7 +12,7 @@ type ImageInfosView struct {
 
 func (p *ImageInfosView) Render(info a.ImageInfo) Node {
 	table := html.SpecTable{}
-	table.Rows = append(table.Rows, html.SpecTableRow{Name: "id", Value: info.Id.String()})
+	table.Rows = append(table.Rows, html.SpecTableRow{Name: "id", Value: info.Id})
 	table.Rows = append(table.Rows, html.SpecTableRow{Name: "collection", Value: info.Collection})
 	return table.Render()
 

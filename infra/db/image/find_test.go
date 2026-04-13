@@ -11,7 +11,7 @@ import (
 func TestRetrieveImageIdByHash(t *testing.T) {
 	repo := NewTestSQLiteImageRepo()
 	imageId := im.NewImageId()
-	hash := "the-hash"
+	hash := []byte("the-hash")
 	err := repo.AddImage(imageId, hash, "")
 	if err != nil {
 		t.Fatalf("expected no error on adding image, got %v", err)
@@ -29,19 +29,18 @@ func TestRetrieveImageIdByHash(t *testing.T) {
 func TestRetrieveImageIdByNonExistingHashShouldFail(t *testing.T) {
 	repo := NewTestSQLiteImageRepo()
 	imageId := im.NewImageId()
-	hash := "the-hash"
-	repo.AddImage(imageId, hash, "")
-	_, err := repo.FindImageIdByHash("non-existing-hash")
+	repo.AddImage(imageId, nil, "")
+	_, err := repo.FindImageIdByHash([]byte("non-existing-hash"))
 
 	if !errors.Is(err, e.ErrNotFound) {
 		t.Fatalf("expected not found error, got %v", err)
 	}
 }
 
-func TestRetrieveImageIdByInternalErrShouldFail(t *testing.T) {
+func TestRetrieveImageIdByHashInternalErrShouldFail(t *testing.T) {
 	repo := NewTestSQLiteImageRepo()
 	repo.Db.Close()
-	_, err := repo.FindImageIdByHash("")
+	_, err := repo.FindImageIdByHash(nil)
 	if !errors.Is(err, e.ErrInternal) {
 		t.Fatalf("expected internal error, got %v", err)
 	}

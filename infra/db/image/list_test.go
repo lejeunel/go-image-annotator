@@ -21,7 +21,7 @@ func CreateSingleImageCollection(repos ImageListingTestingRepos, collectionName 
 	repos.Collection.Create(*collection)
 	imageId := im.NewImageId()
 	image := im.NewImage(imageId, *collection)
-	repos.Image.AddImage(image.Id, "the-hash", "the-mimetype")
+	repos.Image.AddImage(image.Id, nil, "the-mimetype")
 	repos.Image.AddToCollection(image.Id, collection.Id)
 	return *image, *collection
 }
@@ -48,7 +48,7 @@ func TestListOneImage(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	repos.Collection.Create(*collection)
 	image := im.NewImage(im.NewImageId(), *collection)
-	repos.Image.AddImage(image.Id, "", "")
+	repos.Image.AddImage(image.Id, nil, "")
 	repos.Image.AddToCollection(image.Id, collection.Id)
 
 	r, _ := repos.Image.List(ist.FilteringParams{PageSize: 2, Page: 1})
@@ -79,7 +79,7 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 func CreateImageInCollectionFromString(repo SQLiteImageRepo, collection *clc.Collection, imageId string) *im.Image {
 	id, _ := im.NewImageIdFromString(imageId)
 	image := im.NewImage(id, *collection)
-	repo.AddImage(image.Id, imageId, "")
+	repo.AddImage(image.Id, []byte(image.Id.String()), "")
 	repo.AddToCollection(image.Id, collection.Id)
 	return image
 

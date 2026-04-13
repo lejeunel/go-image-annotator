@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	aw "github.com/lejeunel/go-image-annotator-v2/adapters/web/annotator"
+	an "github.com/lejeunel/go-image-annotator-v2/application/annotator"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 	"github.com/lejeunel/go-image-annotator-v2/shared/html"
@@ -46,6 +47,7 @@ func (s *Server) ViewImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	view := aw.NewAnnotationView()
-	s.annotator.Init(req.ImageId, req.Collection, view)
+	presenter := an.NewAnnotatorPresenter(view)
+	s.annotator.Start(req.ImageId, req.Collection, *presenter)
 	view.Render(w)
 }

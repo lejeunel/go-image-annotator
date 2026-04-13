@@ -11,7 +11,7 @@ type ReadMeta struct {
 	json.ErrorPresenter
 }
 
-func (p ReadMeta) Success(image *im.Image) {
+func (p ReadMeta) SuccessReadImage(image im.Image) {
 	response := BuildImageResponse(image)
 	json.WriteJSON(p.Writer, 200, response)
 

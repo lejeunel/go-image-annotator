@@ -6,7 +6,7 @@ import (
 )
 
 type Interface interface {
-	Store(im.ImageId, []byte) error
+	Store(im.ImageId, io.Reader) error
 	Delete(im.ImageId) error
 	Get(im.ImageId) (io.Reader, error)
 }

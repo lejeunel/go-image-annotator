@@ -15,11 +15,12 @@ type FakeStore struct {
 	GotData          []byte
 }
 
-func (r *FakeStore) Store(id im.ImageId, data []byte) error {
+func (r *FakeStore) Store(id im.ImageId, reader io.Reader) error {
 	if r.Err != nil {
 		return r.Err
 	}
 	r.GotArtefact = true
+	data, _ := io.ReadAll(reader)
 	r.GotData = data
 	return nil
 }

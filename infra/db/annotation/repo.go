@@ -14,6 +14,7 @@ import (
 
 type SQLiteAnnotationRepo struct {
 	Db *sqlx.DB
+	sl.SQLiteLabelRepo
 }
 
 type AnnotationRow struct {
@@ -171,5 +172,5 @@ func (r *SQLiteAnnotationRepo) UpdateBoundingBox(id a.AnnotationId, u a.Bounding
 }
 
 func NewSQLiteAnnotationRepo(db *sqlx.DB) *SQLiteAnnotationRepo {
-	return &SQLiteAnnotationRepo{Db: db}
+	return &SQLiteAnnotationRepo{Db: db, SQLiteLabelRepo: *sl.NewSQLiteLabelRepo(db)}
 }

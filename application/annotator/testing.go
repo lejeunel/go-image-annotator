@@ -2,11 +2,11 @@ package annotator
 
 import (
 	scr "github.com/lejeunel/go-image-annotator-v2/application/scroller"
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	addbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
 	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
+	imread "github.com/lejeunel/go-image-annotator-v2/use-cases/image/read"
 )
 
 type FakeScroller struct {
@@ -23,50 +23,41 @@ func (s *FakeScroller) Init(imageId im.ImageId, opts ...scr.Option) (*scr.Scroll
 	return &scr.ScrollerState{}, nil
 }
 
-type FakeView struct {
-	DrewScroller    bool
-	DrewImage       *im.Image
-	DrewImageInfo   *ImageInfo
-	DrewAnnotations []a.Annotation
+type FakePresenter struct {
+	UpdatedScroller bool
+	PresentedImage  *im.Image
+	AddedBox        *addbox.Response
+	UpdatedBox      *updbox.Response
+	DeletedBox      *del.Response
 	GotErr          error
 }
 
-func (v *FakeView) Error(err error) {
+func (v *FakePresenter) Error(err error) {
 	v.GotErr = err
 }
-
-func (v *FakeView) DrawScroller(s scr.ScrollerState) {
-	v.DrewScroller = true
-}
-func (v *FakeView) DrawAnnotationList(annotations []a.Annotation) {
-	v.DrewAnnotations = annotations
+func (v *FakePresenter) UpdateScroller(s scr.ScrollerState) {
+	v.UpdatedScroller = true
 }
 
-func (v *FakeView) DrawImage(image im.Image) {
-	v.DrewImage = &image
+func (v *FakePresenter) SuccessReadImage(i im.Image) {
+	v.PresentedImage = &i
 }
-func (v *FakeView) DrawImageInfo(info ImageInfo) {
-	v.DrewImageInfo = &info
+func (v *FakePresenter) SuccessAddBox(r addbox.Response) {
+	v.AddedBox = &r
 }
-
-func (v *FakeView) SuccessAddBox(r addbox.Response) {
+func (v *FakePresenter) SuccessUpdateBox(r updbox.Response) {
 }
-func (v *FakeView) SuccessUpdateBox(r updbox.Response) {
-}
-func (v *FakeView) SuccessDeleteAnnotation(r del.Response) {
+func (v *FakePresenter) SuccessDeleteAnnotation(r del.Response) {
 }
 
-type FakeStore struct {
-	Return    im.Image
-	ErrOnFind bool
-	Err       error
+type FakeImageReader struct {
+	Got    imread.Request
+	Return *im.Image
 }
 
-func (s *FakeStore) Find(im.BaseImage) (*im.Image, error) {
-	if s.ErrOnFind {
-		return nil, s.Err
-	}
-	return &s.Return, nil
+func (b *FakeImageReader) Execute(r imread.Request, o imread.OutputPort) {
+	o.SuccessReadImage(*b.Return)
+	b.Got = r
 }
 
 type FakeBoxAdder struct {
@@ -85,10 +76,29 @@ func (b *FakeBoxUpdater) Execute(r updbox.Request, o updbox.OutputPort) {
 	b.Got = r
 }
 
-type FakeBoxDeleter struct {
+type FakeAnnotationDeleter struct {
 	Got del.Request
 }
 
-func (b *FakeBoxDeleter) Execute(r del.Request, o del.OutputPort) {
+func (b *FakeAnnotationDeleter) Execute(r del.Request, o del.OutputPort) {
 	b.Got = r
 }
+
+type FakeView struct {
+	GotScrollerButtons ScrollerButtons
+	GotErr             error
+	GotImage           Image
+	GotImageInfo       ImageInfo
+}
+
+func (s *FakeView) DrawScroller(buttons ScrollerButtons) {
+	s.GotScrollerButtons = buttons
+}
+func (s *FakeView) Error(error)     {}
+func (s *FakeView) DrawImage(Image) {}
+func (s *FakeView) DrawImageInfo(i ImageInfo) {
+	s.GotImageInfo = i
+}
+func (s *FakeView) AddBox(addbox.Response)        {}
+func (s *FakeView) UpdateBox(updbox.Response)     {}
+func (s *FakeView) DeleteAnnotation(del.Response) {}

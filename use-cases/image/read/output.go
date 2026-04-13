@@ -5,6 +5,6 @@ import (
 )
 
 type OutputPort interface {
-	Success(*im.Image)
+	SuccessReadImage(im.Image)
 	Error(error)
 }

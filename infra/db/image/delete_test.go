@@ -19,7 +19,7 @@ func TestHandleInternalErrOnDeleteImage(t *testing.T) {
 func TestDeleteImage(t *testing.T) {
 	repo := NewTestSQLiteImageRepo()
 	id := im.NewImageId()
-	repo.AddImage(id, "", "")
+	repo.AddImage(id, nil, "")
 	err := repo.Delete(id)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)

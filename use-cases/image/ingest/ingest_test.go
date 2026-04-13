@@ -188,24 +188,15 @@ func TestInternalErrOnAddImageShouldFail(t *testing.T) {
 	}
 }
 
-func TestValidationErrOnImageDecodingShouldFail(t *testing.T) {
-	p := &FakePresenter{}
-	itr := NewTestingInteractor()
-	itr.Execute(Request{Labels: []string{"a-label"}, Reader: &FakeImageReader{Err: e.ErrValidation}}, p)
-	if !p.GotValidationErr || p.GotSuccess {
-		t.Fatal("expected internal error")
-	}
-}
-
 func TestAddImageWithHash(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
-	hash := "the-hash"
-	itr.Hasher = &FakeHasher{Hash_: hash}
+	hash := []byte("the-hash")
+	itr.Hasher = &FakeHasher{sum: hash}
 	imageRepo := &FakeImageRepo{}
 	itr.ImageRepo = imageRepo
 	itr.Execute(Request{Reader: &FakeImageReader{}}, p)
-	if !p.GotSuccess || imageRepo.GotHash != hash {
+	if !p.GotSuccess || !bytes.Equal(imageRepo.GotHash, hash) {
 		t.Fatalf("expected to store image hash %v, got %v", hash, imageRepo.GotHash)
 	}
 }

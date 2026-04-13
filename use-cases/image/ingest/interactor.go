@@ -7,6 +7,8 @@ import (
 
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 
+	"log/slog"
+
 	ast "github.com/lejeunel/go-image-annotator-v2/application/file-store"
 	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
@@ -14,7 +16,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
 	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
-	"log/slog"
+	"hash"
 )
 
 type IImageMIMETypeDetector interface {
@@ -22,7 +24,7 @@ type IImageMIMETypeDetector interface {
 }
 
 type Interactor struct {
-	Hasher                Hasher
+	Hasher                hash.Hash
 	ImageRepo             ImageRepo
 	CollectionRepo        CollectionRepo
 	AnnotationRepo        AnnotationRepo
@@ -34,7 +36,7 @@ type Interactor struct {
 
 func NewInteractor(imageRepo ImageRepo, collectionRepo CollectionRepo,
 	labelRepo LabelRepo, annotationRepo AnnotationRepo,
-	fileStore ast.Interface, hasher Hasher, mimetypeDetector IImageMIMETypeDetector) *Interactor {
+	fileStore ast.Interface, hasher hash.Hash, mimetypeDetector IImageMIMETypeDetector) *Interactor {
 	return &Interactor{ImageRepo: imageRepo, CollectionRepo: collectionRepo,
 		AnnotationRepo: annotationRepo, LabelRepo: labelRepo,
 		ArtefactRepo: fileStore, Hasher: hasher,
@@ -64,19 +66,13 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 
 	}
 
-	data, err := io.ReadAll(reader)
+	hash, err := i.ingestRawData(imageId, reader)
 	if err != nil {
 		i.handleError(err, out)
 		return
 	}
 
-	hash := i.Hasher.Hash(data)
-	if err := i.ingestRawData(imageId, data, hash); err != nil {
-		i.handleError(err, out)
-		return
-	}
-
-	if err := i.ingestImage(image, hash, *format); err != nil {
+	if err := i.ingestImage(image, *hash, *format); err != nil {
 		i.handleError(err, out)
 		i.ImageRepo.Delete(image.Id)
 		i.ArtefactRepo.Delete(image.Id)
@@ -93,17 +89,20 @@ func (i *Interactor) handleError(err error, out OutputPort) {
 	i.Logger.Error(errCtx, "error", err)
 	out.Error(err)
 }
-func (i *Interactor) ingestRawData(id im.ImageId, data []byte, hash string) error {
+func (i *Interactor) ingestRawData(id im.ImageId, reader io.Reader) (*[]byte, error) {
+
+	tee := io.TeeReader(reader, i.Hasher)
+	hash := i.Hasher.Sum(nil)
 
 	if err := i.ensureDuplicateImageDoesNotExists(hash); err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := i.ArtefactRepo.Store(id, data); err != nil {
-		return err
+	if err := i.ArtefactRepo.Store(id, tee); err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &hash, nil
 
 }
 
@@ -152,7 +151,7 @@ func (i Interactor) appendBoundingBoxes(image *im.Image, bboxes []BoundingBoxReq
 
 }
 
-func (i Interactor) ingestImage(image *im.Image, hash, format string) error {
+func (i Interactor) ingestImage(image *im.Image, hash []byte, format string) error {
 
 	if err := i.ImageRepo.AddImage(image.Id, hash, format); err != nil {
 		return fmt.Errorf("adding image: %w", err)
@@ -197,7 +196,7 @@ func (i Interactor) findLabelByName(name string) (*lbl.Label, error) {
 
 }
 
-func (i Interactor) ensureDuplicateImageDoesNotExists(hash string) error {
+func (i Interactor) ensureDuplicateImageDoesNotExists(hash []byte) error {
 
 	baseErr := fmt.Errorf("ensuring that duplicate image does not exist using hash")
 	duplicateId, err := i.ImageRepo.FindImageIdByHash(hash)

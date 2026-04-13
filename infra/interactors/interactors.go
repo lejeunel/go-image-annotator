@@ -11,5 +11,6 @@ func NewSQLiteInteractors(repos *infra.SQLiteInfra, pageSize int, allowedImageFo
 		Label:      NewSQLiteLabelInteractors(repos.LabelRepo, pageSize),
 		Collection: NewSQLiteCollectionInteractors(repos.CollectionRepo, pageSize),
 		Image:      NewSQLiteImageInteractors(repos, allowedImageFormats),
+		Annotation: NewSQLiteAnnotationInteractors(repos),
 	}
 }
