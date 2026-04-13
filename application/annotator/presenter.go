@@ -25,11 +25,13 @@ func (p AnnotatorPresenter) UpdateScroller(s scr.ScrollerState) {
 	buttons := ScrollerButtons{}
 	if s.Next != nil {
 		buttons.Next = ScrollerButton{IsActive: true,
+			Text:       "Next",
 			ImageId:    s.Next.ImageId.String(),
 			Collection: s.Next.Collection}
 	}
 	if s.Previous != nil {
 		buttons.Prev = ScrollerButton{IsActive: true,
+			Text:       "Previous",
 			ImageId:    s.Previous.ImageId.String(),
 			Collection: s.Previous.Collection}
 	}

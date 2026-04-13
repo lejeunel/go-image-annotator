@@ -44,9 +44,6 @@
   @import "./spotlight.css";
 }
 
-@source "./navbar.go";
-@source "./components.go";
-@source "../shared/html/table.go";
-@source "../shared/html/buttons.go";
-@source "../shared/html/spec_table.go";
-@source "../adapters/web/view_image.go"
+@source "../shared/html/**/.go";
+@source "../adapters/web/**/.go"
+@source "../adapters/web/annotator/templates/**/.html"

@@ -20,6 +20,7 @@ type Image struct {
 
 type ScrollerButton struct {
 	IsActive   bool
+	Text       string
 	ImageId    string
 	Collection string
 }

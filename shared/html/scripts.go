@@ -6,10 +6,17 @@ import (
 )
 
 func BaseLibs() []Node {
-	return []Node{Script(
-		Src("/static/alpine.js"),
-		Defer(),
-	)}
+	return []Node{
+		Raw("<style>[x-cloak] { display: none !important; }</style>"),
+		Script(
+			Src("/static/alpine-focus.js"),
+			Defer(),
+		),
+		Script(
+			Src("/static/alpine.js"),
+			Defer(),
+		),
+	}
 }
 
 func APIDocsLib() Node {
