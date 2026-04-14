@@ -1,10 +1,20 @@
 package add_bbox
 
 import (
+	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 )
 
-type Response struct{}
+type Response struct {
+	AnnotationId an.AnnotationId
+	ImageId      im.ImageId
+	Collection   string
+	Label        string
+	Xc           float32
+	Yc           float32
+	Width        float32
+	Height       float32
+}
 
 type Request struct {
 	ImageId    im.ImageId

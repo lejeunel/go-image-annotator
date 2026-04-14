@@ -48,7 +48,7 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 		return
 	}
 
-	out.SuccessAddBox(Response{})
+	out.SuccessAddBox(*box)
 
 }
 func (i *Interactor) handleError(err error, out OutputPort) {

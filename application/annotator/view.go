@@ -1,7 +1,7 @@
 package annotator
 
 import (
-	addbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
+	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
 )
@@ -11,7 +11,7 @@ type AnnotatorView interface {
 	Error(error)
 	DrawImage(Image)
 	DrawImageInfo(ImageInfo)
-	AddBox(addbox.Response)
+	AddBox(a.BoundingBox)
 	SetAvailableLabels([]string)
 	UpdateBox(updbox.Response)
 	DeleteAnnotation(del.Response)

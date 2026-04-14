@@ -43,7 +43,6 @@ func (b *PageBuilder) Build() Node {
 					darkMode: false,
 
 					init() {
-console.log("init")
 						this.darkMode = localStorage.getItem('dark') === 'true'
 						document.documentElement.classList.toggle('dark', this.darkMode)
 					},

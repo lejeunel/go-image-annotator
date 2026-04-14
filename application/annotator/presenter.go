@@ -2,8 +2,8 @@ package annotator
 
 import (
 	scr "github.com/lejeunel/go-image-annotator-v2/application/scroller"
+	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	addbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
 	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
 	fetchlbl "github.com/lejeunel/go-image-annotator-v2/use-cases/label/fetch-all"
@@ -12,7 +12,7 @@ import (
 type IAnnotatorPresenter interface {
 	UpdateScroller(scr.ScrollerState)
 	SuccessReadImage(im.Image)
-	SuccessAddBox(r addbox.Response)
+	SuccessAddBox(b a.BoundingBox)
 	SuccessUpdateBox(r updbox.Response)
 	SuccessDeleteAnnotation(r del.Response)
 	SuccessFetchLabels(r fetchlbl.Response)
@@ -46,7 +46,8 @@ func (p AnnotatorPresenter) SuccessReadImage(im im.Image) {
 func (p AnnotatorPresenter) SuccessFetchLabels(r fetchlbl.Response) {
 	p.view.SetAvailableLabels(r.Labels)
 }
-func (p AnnotatorPresenter) SuccessAddBox(box addbox.Response) {
+func (p AnnotatorPresenter) SuccessAddBox(b a.BoundingBox) {
+	p.view.AddBox(b)
 }
 func (p AnnotatorPresenter) SuccessUpdateBox(box updbox.Response) {
 }

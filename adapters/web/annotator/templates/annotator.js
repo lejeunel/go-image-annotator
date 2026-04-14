@@ -104,7 +104,7 @@ function upsertAnnotation(label, annotation) {
             "Content-type": "application/json; charset=UTF-8"
     };
 
-    fetch("/ui/submit-annotation?image_id={{.ImageId}}&collection={{.Collection}}&origin_entity={{.OriginType}}&origin_id={{.OriginId}}&ordering={{.Ordering}}&descending={{.Descending}}", {
+    fetch("/ui/submit-box", {
         method: "POST",
         body: JSON.stringify(body),
         headers: {
