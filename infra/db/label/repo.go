@@ -92,6 +92,19 @@ func (r *SQLiteLabelRepo) List(m list.Request) ([]*lbl.Label, error) {
 
 	return objects, nil
 }
+func (r *SQLiteLabelRepo) FetchAll() ([]string, error) {
+	q := sq.StatementBuilder.Select("name").From("labels")
+	sql, args, err := q.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
+	}
+	names := []string{}
+	if err := r.Db.Select(&names, sql, args...); err != nil {
+		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
+	}
+
+	return names, nil
+}
 
 func (r *SQLiteLabelRepo) Update(m update.Model) error {
 	query := "UPDATE labels SET name=$1,description=$2 WHERE name=$3"

@@ -12,6 +12,7 @@ type AnnotatorView interface {
 	DrawImage(Image)
 	DrawImageInfo(ImageInfo)
 	AddBox(addbox.Response)
+	SetAvailableLabels([]string)
 	UpdateBox(updbox.Response)
 	DeleteAnnotation(del.Response)
 }

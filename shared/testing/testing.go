@@ -12,11 +12,11 @@ type TestingErrPresenter struct {
 	GotInternalErr    bool
 	GotNotFoundErr    bool
 	GotDependencyErr  bool
-	GotErr            bool
+	GotErr            error
 }
 
 func (p *TestingErrPresenter) Error(err error) {
-	p.GotErr = true
+	p.GotErr = err
 	switch {
 	case errors.Is(err, e.ErrDuplicate):
 		p.GotDuplicationErr = true

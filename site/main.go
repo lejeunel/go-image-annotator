@@ -32,7 +32,8 @@ func Serve(port int) {
 	interactors := i.NewSQLiteInteractors(infra, cfg.DefaultPageSize, cfg.AllowedImageFormats)
 	scroller := scr.New(infra.ScrollerRepo)
 	annotator := a.NewAnnotator(scroller, &interactors.Image.Read,
-		&interactors.Annotation.AddBox, &interactors.Annotation.UpdateBox, &interactors.Annotation.Delete)
+		&interactors.Annotation.AddBox, &interactors.Annotation.UpdateBox, &interactors.Annotation.Delete,
+		&interactors.Label.FetchAll)
 	RegisterHandlers(mux,
 		*api.NewServer(interactors),
 		*web.NewServer(interactors, annotator),

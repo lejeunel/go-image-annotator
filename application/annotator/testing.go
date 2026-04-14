@@ -7,6 +7,7 @@ import (
 	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
 	imread "github.com/lejeunel/go-image-annotator-v2/use-cases/image/read"
+	fetchlbl "github.com/lejeunel/go-image-annotator-v2/use-cases/label/fetch-all"
 )
 
 type FakeScroller struct {
@@ -23,8 +24,15 @@ func (s *FakeScroller) Init(imageId im.ImageId, opts ...scr.Option) (*scr.Scroll
 	return &scr.ScrollerState{}, nil
 }
 
+type FakeLabelFetcher struct{}
+
+func (f *FakeLabelFetcher) Execute(o fetchlbl.OutputPort) {
+	o.SuccessFetchLabels(fetchlbl.Response{Labels: []string{"a-label"}})
+}
+
 type FakePresenter struct {
 	UpdatedScroller bool
+	PresentedLabels bool
 	PresentedImage  *im.Image
 	AddedBox        *addbox.Response
 	UpdatedBox      *updbox.Response
@@ -48,6 +56,9 @@ func (v *FakePresenter) SuccessAddBox(r addbox.Response) {
 func (v *FakePresenter) SuccessUpdateBox(r updbox.Response) {
 }
 func (v *FakePresenter) SuccessDeleteAnnotation(r del.Response) {
+}
+func (v *FakePresenter) SuccessFetchLabels(r fetchlbl.Response) {
+	v.PresentedLabels = true
 }
 
 type FakeImageReader struct {
@@ -102,3 +113,4 @@ func (s *FakeView) DrawImageInfo(i ImageInfo) {
 func (s *FakeView) AddBox(addbox.Response)        {}
 func (s *FakeView) UpdateBox(updbox.Response)     {}
 func (s *FakeView) DeleteAnnotation(del.Response) {}
+func (s *FakeView) SetAvailableLabels([]string)   {}

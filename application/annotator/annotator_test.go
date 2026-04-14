@@ -22,7 +22,8 @@ func createAnnotator() (*Annotator, *im.Image, *FakePresenter, *FakeScroller) {
 	box := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, *label)
 	image.AddBoundingBox(*box)
 	annotator := &Annotator{imageReader: &FakeImageReader{Return: image},
-		scroller: scroller}
+		labelFetcher: &FakeLabelFetcher{},
+		scroller:     scroller}
 	return annotator, image, presenter, scroller
 
 }
@@ -32,6 +33,14 @@ func TestInitializeScrollerOnStart(t *testing.T) {
 	a.Start(image.Id, "a-collection", p)
 	if !scroller.IsInit {
 		t.Fatal("expected to initialize scroller")
+	}
+}
+
+func TestFetchAllLabelsOnStart(t *testing.T) {
+	a, image, p, _ := createAnnotator()
+	a.Start(image.Id, "a-collection", p)
+	if !p.PresentedLabels {
+		t.Fatal("expected to fetch label list")
 	}
 }
 

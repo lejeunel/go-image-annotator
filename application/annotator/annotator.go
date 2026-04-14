@@ -7,6 +7,7 @@ import (
 	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
 	imread "github.com/lejeunel/go-image-annotator-v2/use-cases/image/read"
+	fetchlbl "github.com/lejeunel/go-image-annotator-v2/use-cases/label/fetch-all"
 )
 
 type Annotator struct {
@@ -15,6 +16,7 @@ type Annotator struct {
 	boxAdder          addbox.Interface
 	boxUpdater        updbox.Interface
 	annotationDeleter del.Interface
+	labelFetcher      fetchlbl.Interface
 }
 
 func (a *Annotator) DeleteAnnotation(r del.Request, p IAnnotatorPresenter) {
@@ -36,15 +38,18 @@ func (a *Annotator) Start(imageId im.ImageId, collection string, p IAnnotatorPre
 	}
 	p.UpdateScroller(*scrollerState)
 	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection}, p)
-
+	a.labelFetcher.Execute(p)
 }
 
 func NewAnnotator(scroller scroller.Interface, imageMetaReader imread.Interface,
-	boxAdder addbox.Interface, boxUpdater updbox.Interface, annotationDeleter del.Interface) *Annotator {
+	boxAdder addbox.Interface, boxUpdater updbox.Interface, annotationDeleter del.Interface,
+	labelFetcher fetchlbl.Interface) *Annotator {
 	return &Annotator{
 		scroller:          scroller,
 		imageReader:       imageMetaReader,
 		boxAdder:          boxAdder,
 		boxUpdater:        boxUpdater,
-		annotationDeleter: annotationDeleter}
+		annotationDeleter: annotationDeleter,
+		labelFetcher:      labelFetcher,
+	}
 }

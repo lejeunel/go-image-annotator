@@ -27,6 +27,7 @@ type AnnotationView struct {
 	ScrollerView    ScrollerView
 	image           *a.Image
 	imageInfo       *a.ImageInfo
+	availableLabels []string
 	scrollerButtons a.ScrollerButtons
 	err             error
 }
@@ -42,7 +43,10 @@ func (v *AnnotationView) DrawImage(image a.Image) {
 func (v *AnnotationView) DrawImageInfo(info a.ImageInfo) {
 	v.imageInfo = &info
 }
+func (v *AnnotationView) SetAvailableLabels(labels []string) {
+	v.availableLabels = labels
 
+}
 func (v *AnnotationView) AddBox(r addbox.Response) {
 }
 func (v *AnnotationView) UpdateBox(r updbox.Response) {
@@ -86,12 +90,7 @@ func (v *AnnotationView) Render(w io.Writer) {
 		b.SetError(err).Render(w)
 		return
 	}
-	labelModal, err := v.makeLabelModal([]string{
-		"first-label",
-		"second-label",
-		"third-label",
-		"fourth-label",
-		"fifth-label"})
+	labelModal, err := v.makeLabelModal(v.availableLabels)
 	if err != nil {
 		b.SetError(fmt.Errorf("building label model: %w", err)).Render(w)
 		return
