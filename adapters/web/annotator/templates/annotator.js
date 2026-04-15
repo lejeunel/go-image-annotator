@@ -1,4 +1,3 @@
-
 {{define "annotator"}}
 
 document.addEventListener('alpine:init', () => {
@@ -37,16 +36,22 @@ function myStyler(annotation, state) {
 
 function newAnnotator (){
     annotator = Annotorious.createImageAnnotator('image',
-                    {userSelectAction: 'SELECT',
+                    {userSelectAction: 'EDIT',
                     drawingEnabled: {{if .EnableAnnotation}} true {{else}} false {{end}}});
 
     annotator.on('createAnnotation', (annotation) => {
         Alpine.store("annotator").lastCreatedAnnotation = annotation
         openLabelModal();
     });
-    // annotator.on('updateAnnotation', ((updated, previous) => void) => {
-    //     Alpine.store("annotator").lastUpdatedAnnotation = updated
-    // });
+    annotator.on('updateAnnotation', (updated, previous) => {
+        console.log("updated");
+        console.log(updated);
+    });
+
+    // When the user de-selects an annotation, the event will be fired with an empty array.
+    annotator.on('selectionChanged', (annotations) => {
+        console.log('Selected annotations', annotations);
+    });
 
     Alpine.store("annotator").annotator = annotator
 
@@ -59,6 +64,10 @@ function newAnnotator (){
 window.onload = function() {
     var annotator = newAnnotator();
     Alpine.store("annotator").annotator = annotator
+}
+function abortAnnotation(){
+    Alpine.store("labelModal").close();
+    drawAnnotations();
 }
 
 function closeLabelModal(){
