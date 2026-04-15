@@ -1,154 +1,177 @@
 {{define "annotator"}}
 
 document.addEventListener('alpine:init', () => {
+
     Alpine.store('labelModal', {
-        show:false,
+        show: false,
         selectedItem: "",
-        isOpen() {
-            return this.show;
-        },
-        open(){
-            this.show=true;
-        },
-        close(){
-            this.show =false;
-        },
-    })
-    Alpine.store('annotator', {lastCreatedAnnotation: null,
-                              })
-})
+        open() { this.show = true },
+        close() { this.show = false },
+        isOpen() { return this.show }
+    });
 
-function myStyler(annotation, state) {
-    if (annotation.hasOwnProperty('properties')) {
-        if(annotation.properties.hasOwnProperty('color')) {
-            var style = {
-                fill: '#ffff',
-                fillOpacity: 0.1,
-                stroke: annotation.properties.color,
-                strokeOpacity: 1,
-                strokeWidth: 2
-            }
-            return style
+    Alpine.store('annotator', {
+        instance: null,
+        lastCreatedAnnotation: null,
 
+        setInstance(annotator) {
+            this.instance = annotator;
+        },
+
+        setLastCreated(annotation) {
+            this.lastCreatedAnnotation = annotation;
         }
-    }
-}
-
-function newAnnotator (){
-    annotator = Annotorious.createImageAnnotator('image',
-                    {userSelectAction: 'EDIT',
-                    drawingEnabled: {{if .EnableAnnotation}} true {{else}} false {{end}}});
-
-    annotator.on('createAnnotation', (annotation) => {
-        Alpine.store("annotator").lastCreatedAnnotation = annotation
-        openLabelModal();
-    });
-    annotator.on('updateAnnotation', (updated, previous) => {
-        console.log("updated");
-        console.log(updated);
     });
 
-    // When the user de-selects an annotation, the event will be fired with an empty array.
-    annotator.on('selectionChanged', (annotations) => {
-        console.log('Selected annotations', annotations);
-    });
+    const AnnotationAPI = {
+        async fetchAll() {
+            const res = await fetch(`/ui/annotations?id={{.ImageId}}&collection={{.Collection}}`);
+            if (!res.ok) throw new Error('Could not fetch annotations');
+            return res.json();
+        },
 
-    Alpine.store("annotator").annotator = annotator
+        async submit(label, annotation) {
+            const res = await fetch("/ui/submit-box", {
+                method: "POST",
+                headers: { "Content-type": "application/json; charset=UTF-8" },
+                body: JSON.stringify({
+                    image_id: "{{.ImageId}}",
+                    collection: "{{.Collection}}",
+                    label,
+                    annotation
+                })
+            });
 
-    annotator.setStyle(myStyler);
-    drawAnnotations()
+            if (!res.ok) throw new Error('Could not submit annotation');
+        },
 
-    return annotator;
-}
+        async remove(id) {
+            const res = await fetch(`/ui/remove-annotation?id=${id}`);
+            if (!res.ok) throw new Error('Could not remove annotation');
+        },
 
-window.onload = function() {
-    var annotator = newAnnotator();
-    Alpine.store("annotator").annotator = annotator
-}
-function abortAnnotation(){
-    Alpine.store("labelModal").close();
-    drawAnnotations();
-}
-
-function closeLabelModal(){
-    Alpine.store("labelModal").close();
-}
-
-function openLabelModal(){
-    Alpine.store("labelModal").open();
-}
-
-function submitNewAnnotation(label) {
-    lastAnnotation = Alpine.store("annotator").lastCreatedAnnotation
-    var body = {"image_id": "{{.ImageId}}",
-                "collection": "{{.Collection}}",
-                "label": label,
-                "annotation": lastAnnotation};
-    var headers = {
-            "Content-type": "application/json; charset=UTF-8"
+        async update_box(annotation) {
+            const res = await fetch("/ui/update-box", {
+                method: "POST",
+                headers: { "Content-type": "application/json; charset=UTF-8" },
+                body: JSON.stringify(annotation),
+            });
+            if (!res.ok) throw new Error('Could not update annotation');
+        }
     };
 
-    fetch("/ui/submit-box", {
-        method: "POST",
-        body: JSON.stringify(body),
-        headers: {
-            "Content-type": "application/json; charset=UTF-8"
-        }
-    })
-    .then(response => {
-            closeLabelModal();
-            if (!response.ok) {
-                throw new Error('Could not submit annotation')
+    function styler(annotation) {
+        const color = annotation?.properties?.color;
+        if (!color) return;
+
+        return {
+            fill: '#ffff',
+            fillOpacity: 0.1,
+            stroke: color,
+            strokeOpacity: 1,
+            strokeWidth: 2
+        };
+    }
+
+    const AnnotatorModule = {
+
+        init() {
+            const annotator = Annotorious.createImageAnnotator('image', {
+                userSelectAction: 'EDIT',
+                drawingEnabled: {{if .EnableAnnotation}} true {{else}} false {{end}}
+            });
+
+            annotator.setStyle(styler);
+
+            this.registerEvents(annotator);
+            Alpine.store("annotator").setInstance(annotator);
+
+            this.draw();
+
+            return annotator;
+        },
+
+        registerEvents(annotator) {
+            annotator.on('createAnnotation', (annotation) => {
+                Alpine.store("annotator").setLastCreated(annotation);
+                Alpine.store("labelModal").open();
+            });
+
+            annotator.on('updateAnnotation', (updated) => {
+                AnnotationAPI.update_box(updated)
+            });
+
+            annotator.on('selectionChanged', (annotations) => {
+                console.log("Selected annotations", annotations);
+            });
+            annotator.on('mouseEnterAnnotation', (annotation) => {
+            console.log('Mouse entered: ' + annotation.id);
+            });
+            annotator.on('mouseLeaveAnnotation', (annotation) => {
+            console.log('Mouse left: ' + annotation.id);
+            });
+        },
+
+        async draw() {
+            try {
+                const data = await AnnotationAPI.fetchAll();
+                const annotator = Alpine.store("annotator").instance;
+                annotator.setAnnotations(data, true);
+            } catch (err) {
+                console.error(err);
             }
-    })
-    .then(() => {
-        refreshAnnotationList();
-    })
-    .then(() => {
-        drawAnnotations();
-    })
-    .catch(error => {
-        console.error(error);
-    });
-}
+        },
 
-function refreshAnnotationList(){
-    htmx.ajax('GET',
-            '/ui/annotation-panel?id={{.ImageId}}&collection={{.Collection}}',
-            '#annotation-list')
-}
-function drawAnnotations(){
-    fetch("/ui/annotations?id={{.ImageId}}&collection={{.Collection}}", {
-        method: "GET",
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Could not fetch annotations')
-        } 
-        return response.json()
-    })
-    .then( data => {
-        Alpine.store("annotator").annotator.setAnnotations(data, replace=true)
-    })
-    .catch(error => {
-        console.error(error);
-    });
-}
+        async submit(label) {
+            try {
+                const store = Alpine.store("annotator");
+                await AnnotationAPI.submit(label, store.lastCreatedAnnotation);
 
-function removeAnnotation(id) {
-    fetch("/ui/remove-annotation?id="+id, {
-        method: "GET",
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Could not remove annotation')
-        } 
-    })
-    .catch(error => {
-        console.error(error);
-    });
-    refreshAnnotationList()
-    drawAnnotations()
-}
+                Alpine.store("labelModal").close();
+
+                await this.refreshUI();
+
+            } catch (err) {
+                console.error(err);
+                alert(err.message);
+            }
+        },
+
+        async remove(id) {
+            try {
+                await AnnotationAPI.remove(id);
+                await this.refreshUI();
+            } catch (err) {
+                console.error(err);
+                alert(err.message);
+            }
+        },
+
+        async refreshUI() {
+            this.refreshList();
+            await this.draw();
+        },
+
+        refreshList() {
+            htmx.ajax(
+                'GET',
+                `/ui/annotation-panel?id={{.ImageId}}&collection={{.Collection}}`,
+                '#annotation-list'
+            );
+        },
+
+        abort() {
+            Alpine.store("labelModal").close();
+            this.draw();
+        }
+    };
+
+    window.AnnotatorModule = AnnotatorModule;
+
+});
+
+window.addEventListener('load', () => {
+    window.AnnotatorModule.init();
+});
 
 {{end}}

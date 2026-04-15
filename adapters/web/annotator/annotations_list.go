@@ -26,7 +26,7 @@ func (v *AnnotationsListView) Build(boxes []*a.BoundingBox) Node {
 </svg>`, a.Palette[i])),
 				Text(shortId),
 				Text(b.Label),
-				Raw(fmt.Sprintf(`<a href="#" onclick="removeAnnotation('%v')"> %v </a>`, b.Id, TrashIcon))}})
+				Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, b.Id, TrashIcon))}})
 	}
 	return table.Build()
 }

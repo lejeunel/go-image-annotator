@@ -4,7 +4,14 @@ import (
 	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 )
 
-type Response struct{}
+type Response struct {
+	AnnotationId a.AnnotationId
+	Label        string
+	Xc           float32
+	Yc           float32
+	Width        float32
+	Height       float32
+}
 
 type Request struct {
 	AnnotationId a.AnnotationId

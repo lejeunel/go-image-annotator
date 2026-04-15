@@ -52,11 +52,13 @@ func (b *FakeBoxAdder) Execute(r addbox.Request, o addbox.OutputPort) {
 }
 
 type FakeBoxUpdater struct {
-	Got updbox.Request
+	Got     updbox.Request
+	Returns *updbox.Response
 }
 
 func (b *FakeBoxUpdater) Execute(r updbox.Request, o updbox.OutputPort) {
 	b.Got = r
+	o.SuccessUpdateBox(*b.Returns)
 }
 
 type FakeAnnotationDeleter struct {
@@ -77,6 +79,7 @@ type FakeView struct {
 	GotImageInfo        *ImageInfo
 	GotLabels           *[]string
 	RemovedAnnotationId *an.AnnotationId
+	UpdatedBoxId        *an.AnnotationId
 }
 
 func (s *FakeView) DrawScroller(buttons ScrollerButtons) {
@@ -93,7 +96,9 @@ func (s *FakeView) DrawAnnotationList([]*BoundingBox) {}
 func (s *FakeView) AddBox(box BoundingBox) {
 	s.GotBox = &box
 }
-func (s *FakeView) UpdateBox(updbox.Response) {}
+func (s *FakeView) UpdateBox(r updbox.Response) {
+	s.UpdatedBoxId = &r.AnnotationId
+}
 func (s *FakeView) DeleteAnnotation(r del.Response) {
 	s.RemovedAnnotationId = &r.Id
 }

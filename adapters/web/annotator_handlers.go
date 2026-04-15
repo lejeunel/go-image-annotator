@@ -70,7 +70,7 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req, err := aw.ConvertFromAnnotorious(boxreq)
+	req, err := aw.ToAddBoxRequest(boxreq)
 	if err != nil {
 		http.Error(w, fmt.Errorf("submit box: converting box: %w", err).Error(), http.StatusBadRequest)
 		return
@@ -87,7 +87,6 @@ func (s *Server) MakeHTMLAnnotationPanel(w http.ResponseWriter, r *http.Request)
 	s.annotator.Init(req.ImageId, req.Collection, view)
 	view.RenderAnnotationList(w)
 }
-
 func (s *Server) GetAnnotationsAsJSON(w http.ResponseWriter, r *http.Request) {
 	req, err := ParseImageIdAndCollectionFromURL(r.URL)
 	if err != nil {
@@ -98,7 +97,6 @@ func (s *Server) GetAnnotationsAsJSON(w http.ResponseWriter, r *http.Request) {
 	s.annotator.Init(req.ImageId, req.Collection, view)
 	view.RenderAnnotations(w)
 }
-
 func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
 	id, err := ParseAnnotationIdFromURL(r.URL)
 	if err != nil {
@@ -106,4 +104,22 @@ func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.annotator.DeleteAnnotation(remove.Request{Id: *id}, aw.NewAnnotationView())
+}
+
+func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
+	bodyBytes, _ := io.ReadAll(r.Body)
+
+	var boxreq aw.AnnotoriousBoxModel
+	err := json.Unmarshal(bodyBytes, &boxreq)
+	if err != nil {
+		http.Error(w, fmt.Errorf("submit box: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
+		return
+	}
+
+	req, err := aw.ToUpdateBoxRequest(boxreq)
+	if err != nil {
+		http.Error(w, fmt.Errorf("submit box: converting box: %w", err).Error(), http.StatusBadRequest)
+		return
+	}
+	s.annotator.UpdateBox(*req, aw.NewAnnotationView())
 }

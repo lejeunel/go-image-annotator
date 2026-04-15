@@ -90,3 +90,12 @@ func (p RemoveAnnotationPresenter) SuccessDeleteAnnotation(r del.Response) {
 	p.view.DeleteAnnotation(r)
 }
 func (p RemoveAnnotationPresenter) Error(err error) {}
+
+type UpdateBoxPresenter struct {
+	view View
+}
+
+func (p UpdateBoxPresenter) SuccessUpdateBox(r updbox.Response) {
+	p.view.UpdateBox(r)
+}
+func (p UpdateBoxPresenter) Error(err error) {}

@@ -8,6 +8,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
 	add "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
+	upd "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
 )
 
@@ -23,6 +24,7 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
 		imageReader:  &FakeImageReader{Return: image},
 		labelFetcher: &FakeLabelFetcher{},
 		boxAdder:     &FakeBoxAdder{Returns: *box},
+		boxUpdater:   &FakeBoxUpdater{Returns: &upd.Response{AnnotationId: box.Id}},
 		deleter:      &FakeAnnotationDeleter{Returns: del.Response{Id: box.Id}},
 		scroller:     scroller}
 	return annotator, image, scroller, view
@@ -78,5 +80,14 @@ func TestRemoveBox(t *testing.T) {
 	got := view.RemovedAnnotationId
 	if got == nil {
 		t.Fatal("expected to remove annotation")
+	}
+}
+
+func TestUpdateBox(t *testing.T) {
+	a, _, _, view := createAnnotator()
+	a.UpdateBox(upd.Request{}, view)
+	got := view.UpdatedBoxId
+	if got == nil {
+		t.Fatal("expected to update annotation")
 	}
 }
