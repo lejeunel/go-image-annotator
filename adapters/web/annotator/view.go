@@ -1,13 +1,11 @@
 package annotator
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
-	"io"
+	"net/http"
 
 	"embed"
-
-	"text/template"
 
 	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
 	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
@@ -22,92 +20,90 @@ import (
 var templatesFiles embed.FS
 
 type AnnotationView struct {
-	ImageView       ImageView
-	ImageInfosView  ImageInfosView
-	ScrollerView    ScrollerView
+	ImageView
+	ImageInfosView
+	AnnotationsListView
+	ScrollerView
 	image           *a.Image
+	boxes           []*an.BoundingBox
 	imageInfo       *a.ImageInfo
 	availableLabels []string
 	scrollerButtons a.ScrollerButtons
 	doDrawImage     bool
-	doAddBox        bool
-	addedBox        an.BoundingBox
+	addedBox        *an.BoundingBox
 	err             error
 }
 
 func (v *AnnotationView) DrawScroller(buttons a.ScrollerButtons) {
 	v.scrollerButtons = buttons
 }
-
 func (v *AnnotationView) DrawImage(image a.Image) {
 	v.image = &image
 	v.doDrawImage = true
 }
-
 func (v *AnnotationView) DrawImageInfo(info a.ImageInfo) {
 	v.imageInfo = &info
+}
+func (v *AnnotationView) DrawAnnotationList(boxes []*an.BoundingBox) {
+	v.boxes = boxes
 }
 func (v *AnnotationView) SetAvailableLabels(labels []string) {
 	v.availableLabels = labels
 
 }
 func (v *AnnotationView) AddBox(b an.BoundingBox) {
-	v.doAddBox = true
-	v.addedBox = b
+	v.addedBox = &b
 }
 func (v *AnnotationView) UpdateBox(r updbox.Response) {
 }
 func (v *AnnotationView) DeleteAnnotation(r del.Response) {
 }
-
 func (v *AnnotationView) Error(err error) {
 	v.err = err
 }
-func (v *AnnotationView) makeLabelModal(labels []string) (string, error) {
-	tLabelModal, err := template.New("labelModal").ParseFS(templatesFiles,
-		"templates/label_selector.html")
-	if err != nil {
-		return "", err
-	}
-
-	var buf bytes.Buffer
-	data := struct {
-		Labels []string
-	}{labels}
-	err = tLabelModal.ExecuteTemplate(&buf, "labelModal",
-		data)
-
-	if err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
+func (v *AnnotationView) RenderAnnotationList(w http.ResponseWriter) {
+	v.AnnotationsListView.Build(v.boxes).Render(w)
 }
-
-func (v *AnnotationView) Render(w io.Writer) {
+func (v *AnnotationView) RenderAll(w http.ResponseWriter) {
 
 	if v.err != nil {
-		html.NewPageBuilder().SetError(v.err).Render(w)
+		http.Error(w, v.err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	if v.doDrawImage {
 		v.renderImage(w)
 	}
 
-	if v.doAddBox {
-		fmt.Println("in view: added box: ", v.addedBox)
+}
+func (v *AnnotationView) RenderAnnotations(w http.ResponseWriter) {
+	if v.err != nil {
+		http.Error(w, v.err.Error(), http.StatusBadRequest)
+		return
+	}
+	boxes := ConvertToAnnotorious(v.boxes)
+	data, err := json.Marshal(boxes)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 }
-
-func (v *AnnotationView) renderImage(w io.Writer) {
+func (v *AnnotationView) renderImage(w http.ResponseWriter) {
 	b := html.NewTitledPageBuilder("Image")
 	script, err := MakeAnnotoriousScript(v.image.Id, v.image.Collection)
 	if err != nil {
 		b.SetError(err).Render(w)
 		return
 	}
-	labelModal, err := v.makeLabelModal(v.availableLabels)
+	labelModal, err := makeLabelModal(v.availableLabels)
 	if err != nil {
 		b.SetError(fmt.Errorf("building label model: %w", err)).Render(w)
 		return
@@ -120,8 +116,11 @@ func (v *AnnotationView) renderImage(w io.Writer) {
 		Table(
 			Tr(Td(v.ScrollerView.Render(v.scrollerButtons))),
 			Tr(Td(Table(
-				Tr(Td(v.ImageView.Render(*v.image)),
-					Td(Class("align-top pl-2"), v.ImageInfosView.Render(*v.imageInfo)))),
+				Tr(Td(Class("align-top"), v.ImageView.Build(*v.image)),
+					Td(Class("align-top pl-2"),
+						Div(Class("pb-2"), v.ImageInfosView.Build(*v.imageInfo)),
+						Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes)))),
+			),
 			))))
 	b.Render(w)
 }

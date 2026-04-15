@@ -9,8 +9,7 @@ import (
 	fetchlbl "github.com/lejeunel/go-image-annotator-v2/use-cases/label/fetch-all"
 )
 
-type IAnnotatorPresenter interface {
-	UpdateScroller(scr.ScrollerState)
+type Presenter interface {
 	SuccessReadImage(im.Image)
 	SuccessAddBox(b a.BoundingBox)
 	SuccessUpdateBox(r updbox.Response)
@@ -20,10 +19,10 @@ type IAnnotatorPresenter interface {
 }
 
 type AnnotatorPresenter struct {
-	view AnnotatorView
+	view View
 }
 
-func (p AnnotatorPresenter) UpdateScroller(s scr.ScrollerState) {
+func MakeScrollerButtons(s scr.ScrollerState) ScrollerButtons {
 	buttons := ScrollerButtons{}
 	if s.Next != nil {
 		buttons.Next = ScrollerButton{IsActive: true,
@@ -37,25 +36,37 @@ func (p AnnotatorPresenter) UpdateScroller(s scr.ScrollerState) {
 			ImageId:    s.Previous.ImageId.String(),
 			Collection: s.Previous.Collection}
 	}
-	p.view.DrawScroller(buttons)
-}
-func (p AnnotatorPresenter) SuccessReadImage(im im.Image) {
-	p.view.DrawImageInfo(NewImageInfo(im.Id, im.Collection.Name))
-	p.view.DrawImage(NewImage(im.Id, im.Reader, im.Collection.Name, im.MIMEType))
-}
-func (p AnnotatorPresenter) SuccessFetchLabels(r fetchlbl.Response) {
-	p.view.SetAvailableLabels(r.Labels)
-}
-func (p AnnotatorPresenter) SuccessAddBox(b a.BoundingBox) {
-	p.view.AddBox(b)
-}
-func (p AnnotatorPresenter) SuccessUpdateBox(box updbox.Response) {
-}
-func (p AnnotatorPresenter) SuccessDeleteAnnotation(a del.Response) {
-}
-func (p AnnotatorPresenter) Error(err error) {
+	return buttons
 }
 
-func NewAnnotatorPresenter(view AnnotatorView) *AnnotatorPresenter {
-	return &AnnotatorPresenter{view}
+type StartPresenter struct {
+	view View
 }
+
+func (p StartPresenter) SuccessReadImage(im im.Image) {
+	p.view.DrawImageInfo(NewImageInfo(im.Id, im.Collection.Name))
+	p.view.DrawImage(NewImage(im.Id, im.Reader, im.Collection.Name, im.MIMEType))
+	p.view.DrawAnnotationList(im.BoundingBoxes)
+}
+func (p StartPresenter) SuccessFetchLabels(r fetchlbl.Response) {
+	p.view.SetAvailableLabels(r.Labels)
+}
+func (p StartPresenter) Error(err error) {}
+
+type AddBoxPresenter struct {
+	view View
+}
+
+func (p AddBoxPresenter) SuccessAddBox(b a.BoundingBox) {
+	p.view.AddBox(b)
+}
+func (p AddBoxPresenter) Error(err error) {}
+
+type RemoveAnnotationPresenter struct {
+	view View
+}
+
+func (p RemoveAnnotationPresenter) SuccessDeleteAnnotation(r del.Response) {
+	p.view.DeleteAnnotation(r)
+}
+func (p RemoveAnnotationPresenter) Error(err error) {}

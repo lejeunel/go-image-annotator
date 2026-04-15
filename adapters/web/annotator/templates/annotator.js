@@ -15,7 +15,8 @@ document.addEventListener('alpine:init', () => {
             this.show =false;
         },
     })
-    Alpine.store('annotator', {annotations: {{.Annotations}}})
+    Alpine.store('annotator', {lastCreatedAnnotation: null,
+                              })
 })
 
 function myStyler(annotation, state) {
@@ -39,46 +40,20 @@ function newAnnotator (){
                     {userSelectAction: 'SELECT',
                     drawingEnabled: {{if .EnableAnnotation}} true {{else}} false {{end}}});
 
-    annotator.on('selectionChanged', (annotations) => {
-        if (annotations.length == 0) {
-            modifyAnnotation(Alpine.store("annotator").lastSelectedId)
-        }
+    annotator.on('createAnnotation', (annotation) => {
+        Alpine.store("annotator").lastCreatedAnnotation = annotation
+        openLabelModal();
     });
+    // annotator.on('updateAnnotation', ((updated, previous) => void) => {
+    //     Alpine.store("annotator").lastUpdatedAnnotation = updated
+    // });
+
     Alpine.store("annotator").annotator = annotator
 
     annotator.setStyle(myStyler);
     setAnnotations()
 
-    registerEventsOnAnnotator();
-
     return annotator;
-}
-
-function registerEventsOnAnnotator() {
-    annotator = Alpine.store("annotator").annotator
-    annotator.on('createAnnotation', (annotation) => {
-        openLabelModal();
-    });
-
-}
-
-function setAnnotations() {
-    annotations = Alpine.store("annotator").annotations
-    annotator = Alpine.store("annotator").annotator
-    if (annotator.getAnnotations().length > 0) {
-        annotator.clearAnnotations();
-    }
-
-    if(annotations !== null){
-        annotator.setAnnotations(annotations, replace=true);
-    }
-}
-
-function editAnnotation(annotationId){
-    annotator = Alpine.store("annotator").annotator
-    Alpine.store("annotator").lastSelectedId = annotationId
-    annotator.setSelected(annotationId, true);
-
 }
 
 window.onload = function() {
@@ -88,18 +63,18 @@ window.onload = function() {
 
 function closeLabelModal(){
     Alpine.store("labelModal").close();
-    setAnnotations()
 }
 
 function openLabelModal(){
     Alpine.store("labelModal").open();
 }
 
-function upsertAnnotation(label, annotation) {
+function submitAnnotation(label) {
+    lastAnnotation = Alpine.store("annotator").lastCreatedAnnotation
     var body = {"image_id": "{{.ImageId}}",
                 "collection": "{{.Collection}}",
                 "label": label,
-                "annotation": annotation};
+                "annotation": lastAnnotation};
     var headers = {
             "Content-type": "application/json; charset=UTF-8"
     };
@@ -110,81 +85,61 @@ function upsertAnnotation(label, annotation) {
         headers: {
             "Content-type": "application/json; charset=UTF-8"
         }
-    }).then(response => {
-            if (response.ok) {
-                return response.json()
+    })
+    .then(response => {
+            closeLabelModal();
+            if (!response.ok) {
+                throw new Error('Could not submit annotation')
             }
-            throw new Error('Could not upsert annotation')
-        })
-    .then(data =>{
-        Alpine.store("annotator").annotations = data
+    })
+    .then(() => {
+        refreshAnnotationList();
+    })
+    .then(() => {
         setAnnotations();
     })
-    .then(() => {
-        closeLabelModal();
-    })
-    .then(() => {
-        redrawAnnotationList();
-    })
-    .catch((error) => {
-        console.log(error)
-
+    .catch(error => {
+        console.error(error);
     });
-
 }
 
-function submitNewAnnotation(label){
-    const annotator = Alpine.store("annotator").annotator
-    const currentAnnotations = annotator.getAnnotations()
-    const lastDrawnAnnotation = currentAnnotations[currentAnnotations.length - 1]
-
-    upsertAnnotation(label, lastDrawnAnnotation.target);
-}
-
-function modifyAnnotation(annotationId) {
-    const annotator = Alpine.store("annotator").annotator
-    const annotations = annotator.getAnnotations()
-    annotations.forEach((a) => {
-        if (a.id == annotationId) {
-            upsertAnnotation(a.properties.label, a.target)
-        }
-    })
-
-}
-
-function redrawAnnotationList(){
+function refreshAnnotationList(){
     htmx.ajax('GET',
-            '/ui/annotation-panel?image_id={{.ImageId}}&collection={{.Collection}}&origin_entity={{.OriginType}}&origin_id={{.OriginId}}&ordering={{.Ordering}}&descending={{.Descending}}',
-            '#annotation-panel')
-    location.hash = "#image-annotation-panel";
-
+            '/ui/annotation-panel?id={{.ImageId}}&collection={{.Collection}}',
+            '#annotation-list')
+}
+function setAnnotations(){
+    fetch("/ui/annotations?id={{.ImageId}}&collection={{.Collection}}", {
+        method: "GET",
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Could not fetch annotations')
+        } 
+        return response.json()
+    })
+    .then( data => {
+        Alpine.store("annotator").annotator.setAnnotations(data, replace=true)
+    })
+    .catch(error => {
+        console.error(error);
+    });
 }
 
-function deleteAnnotation(annotationId){
-    var url = "/ui/delete-annotation?image_id={{.ImageId}}&collection={{.Collection}}&origin_entity={{.OriginType}}&origin_id={{.OriginId}}&ordering={{.Ordering}}&descending={{.Descending}}&annotation_id=" + annotationId
-    const annotator = Alpine.store("annotator").annotator
-
-    fetch(url,
-          {method: "DELETE"})
+function removeAnnotation(id) {
+    fetch("/ui/remove-annotation?id="+id, {
+        method: "GET",
+    })
     .then(response => {
-            if (response.ok) {
-                return response.json()
-            }
-            throw new Error('Could not delete annotation')
+        if (!response.ok) {
+            throw new Error('Could not remove annotation')
+        } 
     })
-    .then(data =>{
-        annotator.clearAnnotations();
-        Alpine.store("annotator").annotations = [];
-        if (data !== null) {
-            annotator.setAnnotations(data);
-        }
-    })
-    .then(() => {
-        redrawAnnotationList();
-    })
-    .catch((error) => {
-        console.log(error)
+    .catch(error => {
+        console.error(error);
     });
+    refreshAnnotationList()
+    setAnnotations()
 }
 
 {{end}}

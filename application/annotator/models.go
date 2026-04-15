@@ -3,6 +3,7 @@ package annotator
 import (
 	"io"
 
+	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 )
 
@@ -12,10 +13,15 @@ type ImageInfo struct {
 }
 
 type Image struct {
-	Reader     io.Reader
-	Id         string
-	Collection string
-	MIMEType   string
+	Reader      io.Reader
+	Id          string
+	Collection  string
+	MIMEType    string
+	Annotations Annotations
+}
+
+type Annotations struct {
+	BoundingBoxes []an.BoundingBox
 }
 
 type ScrollerButton struct {
@@ -34,6 +40,7 @@ func NewImageInfo(imageId im.ImageId, collection string) ImageInfo {
 	return ImageInfo{Id: imageId.String(), Collection: collection}
 }
 
-func NewImage(id im.ImageId, reader io.Reader, collection string, mimetype string) Image {
+func NewImage(id im.ImageId, reader io.Reader, collection string, mimetype string,
+) Image {
 	return Image{Id: id.String(), Collection: collection, Reader: reader, MIMEType: mimetype}
 }

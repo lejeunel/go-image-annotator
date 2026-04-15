@@ -15,10 +15,10 @@ type ListLabelsPresenter struct {
 }
 
 func (p ListLabelsPresenter) Success(r list.Response) {
-	table := html.MyTable{Fields: []string{"name", "description"}}
+	table := html.PaginationTable{Fields: []string{"name", "description"}}
 	for _, l := range r.Labels {
 		table.Rows = append(table.Rows,
-			html.TableRow{Values: []Node{Text(l.Name), Raw(l.Description)}})
+			html.PaginationTableRow{Values: []Node{Text(l.Name), Raw(l.Description)}})
 	}
 	p.RenderSuccess(table, r.Pagination)
 }

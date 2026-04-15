@@ -11,45 +11,46 @@ import (
 )
 
 type Annotator struct {
-	scroller          scroller.Interface
-	imageReader       imread.Interface
-	boxAdder          addbox.Interface
-	boxUpdater        updbox.Interface
-	annotationDeleter del.Interface
-	labelFetcher      fetchlbl.Interface
+	scroller     scroller.Interface
+	imageReader  imread.Interface
+	boxAdder     addbox.Interface
+	boxUpdater   updbox.Interface
+	deleter      del.Interface
+	labelFetcher fetchlbl.Interface
 }
 
-func (a *Annotator) DeleteAnnotation(r del.Request, p IAnnotatorPresenter) {
-	a.annotationDeleter.Execute(r, p)
+func (a *Annotator) DeleteAnnotation(r del.Request, view View) {
+	a.deleter.Execute(r, RemoveAnnotationPresenter{view})
 }
-
-func (a *Annotator) UpdateBox(r updbox.Request, p IAnnotatorPresenter) {
-	a.boxUpdater.Execute(r, p)
+func (a *Annotator) UpdateBox(r updbox.Request) {
+	// a.boxUpdater.Execute(r, p)
 }
-
-func (a *Annotator) AddBox(r addbox.Request, p IAnnotatorPresenter) {
-	a.boxAdder.Execute(r, p)
+func (a *Annotator) AddBox(r addbox.Request, view View) {
+	a.boxAdder.Execute(r, AddBoxPresenter{view})
 }
-func (a *Annotator) Start(imageId im.ImageId, collection string, p IAnnotatorPresenter) {
+func (a *Annotator) Init(imageId im.ImageId, collection string, view View) {
 	scrollerState, err := a.scroller.Init(imageId, scroller.WithCollection(collection))
 	if err != nil {
-		p.Error(err)
+		view.Error(err)
 		return
 	}
-	p.UpdateScroller(*scrollerState)
-	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection}, p)
-	a.labelFetcher.Execute(p)
+	view.DrawScroller(MakeScrollerButtons(*scrollerState))
+
+	presenter := StartPresenter{view}
+	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection},
+		presenter)
+	a.labelFetcher.Execute(presenter)
 }
 
 func NewAnnotator(scroller scroller.Interface, imageMetaReader imread.Interface,
 	boxAdder addbox.Interface, boxUpdater updbox.Interface, annotationDeleter del.Interface,
 	labelFetcher fetchlbl.Interface) *Annotator {
 	return &Annotator{
-		scroller:          scroller,
-		imageReader:       imageMetaReader,
-		boxAdder:          boxAdder,
-		boxUpdater:        boxUpdater,
-		annotationDeleter: annotationDeleter,
-		labelFetcher:      labelFetcher,
+		scroller:     scroller,
+		imageReader:  imageMetaReader,
+		boxAdder:     boxAdder,
+		boxUpdater:   boxUpdater,
+		deleter:      annotationDeleter,
+		labelFetcher: labelFetcher,
 	}
 }

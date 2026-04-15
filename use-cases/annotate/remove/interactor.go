@@ -28,6 +28,6 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 		return
 	}
 
-	out.SuccessDeleteAnnotation(Response{})
+	out.SuccessDeleteAnnotation(Response{Id: r.Id})
 
 }

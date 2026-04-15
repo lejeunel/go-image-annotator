@@ -15,10 +15,10 @@ type ListCollectionsPresenter struct {
 }
 
 func (p ListCollectionsPresenter) Success(r list.Response) {
-	table := html.MyTable{Fields: []string{"name", "description", "created"}}
+	table := html.PaginationTable{Fields: []string{"name", "description", "created"}}
 	for _, c := range r.Collections {
 		table.Rows = append(table.Rows,
-			html.TableRow{Values: []Node{html.MakeTextLink("/images?collection="+c.Name, c.Name),
+			html.PaginationTableRow{Values: []Node{html.MakeTextLink("/images?collection="+c.Name, c.Name),
 				Raw(c.Description), Raw(DateTimeToStr(c.CreatedAt))}})
 	}
 	p.RenderSuccess(table, r.Pagination)

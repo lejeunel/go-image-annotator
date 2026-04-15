@@ -10,8 +10,9 @@ type SpecTable struct {
 }
 
 func (t *SpecTable) Render() gp.Node {
-	return gh.Div(gh.Class("inline-block overflow-hidden overflow-x-auto rounded-radius border border-outline dark:border-outline-dark"),
-		gh.Table(gh.Class("table-auto text-left text-sm text-on-surface dark:text-on-surface-dark"),
+	// return gh.Div(gh.Class("inline-block overflow-hidden overflow-x-auto rounded-radius border border-outline dark:border-outline-dark"),
+	return gh.Div(gh.Class("rounded-radius border border-outline dark:border-outline-dark"),
+		gh.Table(gh.Class("text-left text-sm text-on-surface dark:text-on-surface-dark"),
 			gp.Map(t.Rows, func(r SpecTableRow) gp.Node {
 				return r.Render()
 			}),

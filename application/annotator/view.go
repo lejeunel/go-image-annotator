@@ -6,11 +6,12 @@ import (
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
 )
 
-type AnnotatorView interface {
+type View interface {
 	DrawScroller(ScrollerButtons)
 	Error(error)
 	DrawImage(Image)
 	DrawImageInfo(ImageInfo)
+	DrawAnnotationList([]*a.BoundingBox)
 	AddBox(a.BoundingBox)
 	SetAvailableLabels([]string)
 	UpdateBox(updbox.Response)

@@ -18,11 +18,11 @@ type ListImagesPresenter struct {
 }
 
 func (p ListImagesPresenter) Success(r list.Response) {
-	table := html.MyTable{Fields: []string{"id", "collection"}}
+	table := html.PaginationTable{Fields: []string{"id", "collection"}}
 	for _, im := range r.Images {
 		link := fmt.Sprintf("/image?id=%v&collection=%v", im.Id.String(), im.Collection.Name)
 		table.Rows = append(table.Rows,
-			html.TableRow{Values: []Node{html.MakeTextLink(link, im.Id.String()),
+			html.PaginationTableRow{Values: []Node{html.MakeTextLink(link, im.Id.String()),
 				Text(im.Collection.Name)}})
 	}
 	p.RenderSuccess(table, r.Pagination)
