@@ -2,7 +2,7 @@ package annotator
 
 import (
 	"fmt"
-	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
+	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
 	html "github.com/lejeunel/go-image-annotator-v2/shared/html"
 	. "maragu.dev/gomponents"
 )
@@ -15,13 +15,18 @@ var TrashIcon = `
 
 type AnnotationsListView struct{}
 
-func (v *AnnotationsListView) Build(boxes []*an.BoundingBox) Node {
-	table := html.PaginationTable{Fields: []string{"id", "label", "actions"}}
-	for _, b := range boxes {
-		shortId := b.Id.String()[:8]
+func (v *AnnotationsListView) Build(boxes []*a.BoundingBox) Node {
+	table := html.PaginationTable{Fields: []string{"", "id", "label", "actions"}}
+	for i, b := range boxes {
+		shortId := b.Id[:8]
 		table.Rows = append(table.Rows,
-			html.PaginationTableRow{Values: []Node{Text(shortId),
-				Text(b.Label.Name), Raw(fmt.Sprintf(`<a href="#" onclick="removeAnnotation('%v')"> %v </a>`, b.Id, TrashIcon))}})
+			html.PaginationTableRow{Values: []Node{
+				Raw(fmt.Sprintf(`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="80" height="80" rx="10" ry="10" fill="%v" />
+</svg>`, a.Palette[i])),
+				Text(shortId),
+				Text(b.Label),
+				Raw(fmt.Sprintf(`<a href="#" onclick="removeAnnotation('%v')"> %v </a>`, b.Id, TrashIcon))}})
 	}
 	return table.Build()
 }

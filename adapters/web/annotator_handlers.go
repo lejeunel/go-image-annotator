@@ -77,7 +77,7 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 	}
 	s.annotator.AddBox(*req, aw.NewAnnotationView())
 }
-func (s *Server) AnnotationPanel(w http.ResponseWriter, r *http.Request) {
+func (s *Server) MakeHTMLAnnotationPanel(w http.ResponseWriter, r *http.Request) {
 	req, err := ParseImageIdAndCollectionFromURL(r.URL)
 	if err != nil {
 		html.NewPageBuilder().SetError(err).Render(w)
@@ -88,7 +88,7 @@ func (s *Server) AnnotationPanel(w http.ResponseWriter, r *http.Request) {
 	view.RenderAnnotationList(w)
 }
 
-func (s *Server) Annotations(w http.ResponseWriter, r *http.Request) {
+func (s *Server) GetAnnotationsAsJSON(w http.ResponseWriter, r *http.Request) {
 	req, err := ParseImageIdAndCollectionFromURL(r.URL)
 	if err != nil {
 		html.NewPageBuilder().SetError(err).Render(w)
@@ -105,6 +105,5 @@ func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
 		html.NewPageBuilder().SetError(err).Render(w)
 		return
 	}
-	view := aw.NewAnnotationView()
-	s.annotator.DeleteAnnotation(remove.Request{Id: *id}, view)
+	s.annotator.DeleteAnnotation(remove.Request{Id: *id}, aw.NewAnnotationView())
 }

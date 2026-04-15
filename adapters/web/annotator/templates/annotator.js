@@ -51,7 +51,7 @@ function newAnnotator (){
     Alpine.store("annotator").annotator = annotator
 
     annotator.setStyle(myStyler);
-    setAnnotations()
+    drawAnnotations()
 
     return annotator;
 }
@@ -69,7 +69,7 @@ function openLabelModal(){
     Alpine.store("labelModal").open();
 }
 
-function submitAnnotation(label) {
+function submitNewAnnotation(label) {
     lastAnnotation = Alpine.store("annotator").lastCreatedAnnotation
     var body = {"image_id": "{{.ImageId}}",
                 "collection": "{{.Collection}}",
@@ -96,7 +96,7 @@ function submitAnnotation(label) {
         refreshAnnotationList();
     })
     .then(() => {
-        setAnnotations();
+        drawAnnotations();
     })
     .catch(error => {
         console.error(error);
@@ -108,7 +108,7 @@ function refreshAnnotationList(){
             '/ui/annotation-panel?id={{.ImageId}}&collection={{.Collection}}',
             '#annotation-list')
 }
-function setAnnotations(){
+function drawAnnotations(){
     fetch("/ui/annotations?id={{.ImageId}}&collection={{.Collection}}", {
         method: "GET",
     })
@@ -139,7 +139,7 @@ function removeAnnotation(id) {
         console.error(error);
     });
     refreshAnnotationList()
-    setAnnotations()
+    drawAnnotations()
 }
 
 {{end}}

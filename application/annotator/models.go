@@ -36,6 +36,16 @@ type ScrollerButtons struct {
 	Prev ScrollerButton
 }
 
+type BoundingBox struct {
+	Id     string
+	Label  string
+	Color  string
+	Xc     float32
+	Yc     float32
+	Width  float32
+	Height float32
+}
+
 func NewImageInfo(imageId im.ImageId, collection string) ImageInfo {
 	return ImageInfo{Id: imageId.String(), Collection: collection}
 }

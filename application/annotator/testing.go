@@ -2,7 +2,6 @@ package annotator
 
 import (
 	scr "github.com/lejeunel/go-image-annotator-v2/application/scroller"
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	addbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
@@ -73,7 +72,7 @@ func (b *FakeAnnotationDeleter) Execute(r del.Request, o del.OutputPort) {
 type FakeView struct {
 	GotScrollerButtons  *ScrollerButtons
 	GotErr              error
-	GotBox              *a.BoundingBox
+	GotBox              *BoundingBox
 	GotImage            *Image
 	GotImageInfo        *ImageInfo
 	GotLabels           *[]string
@@ -90,8 +89,8 @@ func (s *FakeView) DrawImage(i Image) {
 func (s *FakeView) DrawImageInfo(i ImageInfo) {
 	s.GotImageInfo = &i
 }
-func (s *FakeView) DrawAnnotationList([]*a.BoundingBox) {}
-func (s *FakeView) AddBox(box an.BoundingBox) {
+func (s *FakeView) DrawAnnotationList([]*BoundingBox) {}
+func (s *FakeView) AddBox(box BoundingBox) {
 	s.GotBox = &box
 }
 func (s *FakeView) UpdateBox(updbox.Response) {}

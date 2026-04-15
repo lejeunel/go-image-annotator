@@ -3,7 +3,7 @@ package annotator
 import (
 	"fmt"
 
-	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
+	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	addbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
 )
@@ -33,8 +33,9 @@ type BoxTarget struct {
 }
 
 type AnnotoriousBoxModel struct {
-	AnnotationId string    `json:"id"`
-	Target       BoxTarget `json:"target"`
+	AnnotationId string     `json:"id"`
+	Properties   Properties `json:"properties"`
+	Target       BoxTarget  `json:"target"`
 }
 
 type Properties struct {
@@ -70,23 +71,26 @@ func ConvertFromAnnotorious(r AnnotoriousBoxRequest) (*addbox.Request, error) {
 
 }
 
-func ConvertToAnnotorious(boxes []*an.BoundingBox) []AnnotoriousBoxModel {
+func ConvertToAnnotorious(boxes []*a.BoundingBox) []AnnotoriousBoxModel {
 	result := []AnnotoriousBoxModel{}
 	for _, b := range boxes {
 		xtopleft := float64(b.Xc - b.Width/2)
 		ytopleft := float64(b.Yc - b.Height/2)
 		width := float64(b.Width)
 		height := float64(b.Height)
-		result = append(result, AnnotoriousBoxModel{AnnotationId: b.Id.String(),
-			Target: BoxTarget{BoxSelector{Type: "RECTANGLE",
-				Geometry: BoxGeometry{XTopLeft: xtopleft,
-					YTopLeft: ytopleft,
-					W:        width,
-					H:        height,
-					Bounds: Bounds{MinX: xtopleft,
-						MinY: ytopleft,
-						MaxX: xtopleft + width,
-						MaxY: ytopleft + height}}}}})
+		result = append(result,
+			AnnotoriousBoxModel{
+				AnnotationId: b.Id,
+				Properties:   Properties{Color: b.Color},
+				Target: BoxTarget{BoxSelector{Type: "RECTANGLE",
+					Geometry: BoxGeometry{XTopLeft: xtopleft,
+						YTopLeft: ytopleft,
+						W:        width,
+						H:        height,
+						Bounds: Bounds{MinX: xtopleft,
+							MinY: ytopleft,
+							MaxX: xtopleft + width,
+							MaxY: ytopleft + height}}}}})
 
 	}
 	return result

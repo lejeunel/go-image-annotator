@@ -66,9 +66,9 @@ func TestAddBoxShouldDraw(t *testing.T) {
 	a, image, _, view := createAnnotator()
 	a.AddBox(add.Request{}, view)
 	box := image.BoundingBoxes[0]
-	if view.GotBox.Label.Name != box.Label.Name {
+	if view.GotBox.Label != box.Label.Name {
 		t.Fatalf("expected to draw bbox with label %v, got %v",
-			box.Label.Name, view.GotBox.Label.Name)
+			box.Label.Name, view.GotBox.Label)
 	}
 }
 

@@ -8,7 +8,6 @@ import (
 	"embed"
 
 	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
-	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	html "github.com/lejeunel/go-image-annotator-v2/shared/html"
 	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
@@ -25,12 +24,12 @@ type AnnotationView struct {
 	AnnotationsListView
 	ScrollerView
 	image           *a.Image
-	boxes           []*an.BoundingBox
+	boxes           []*a.BoundingBox
 	imageInfo       *a.ImageInfo
 	availableLabels []string
 	scrollerButtons a.ScrollerButtons
 	doDrawImage     bool
-	addedBox        *an.BoundingBox
+	addedBox        *a.BoundingBox
 	err             error
 }
 
@@ -44,14 +43,14 @@ func (v *AnnotationView) DrawImage(image a.Image) {
 func (v *AnnotationView) DrawImageInfo(info a.ImageInfo) {
 	v.imageInfo = &info
 }
-func (v *AnnotationView) DrawAnnotationList(boxes []*an.BoundingBox) {
+func (v *AnnotationView) DrawAnnotationList(boxes []*a.BoundingBox) {
 	v.boxes = boxes
 }
 func (v *AnnotationView) SetAvailableLabels(labels []string) {
 	v.availableLabels = labels
 
 }
-func (v *AnnotationView) AddBox(b an.BoundingBox) {
+func (v *AnnotationView) AddBox(b a.BoundingBox) {
 	v.addedBox = &b
 }
 func (v *AnnotationView) UpdateBox(r updbox.Response) {
