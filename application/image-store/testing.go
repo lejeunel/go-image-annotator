@@ -10,8 +10,8 @@ import (
 type FakeRepo struct {
 	Err                    error
 	ErrOnExists            bool
-	ErrOnMIMEType          bool
-	MIMEType_              string
+	Specs                  im.ImageSpecs
+	ErrOnSpecs             bool
 	ErrOnFindImageLabel    bool
 	ErrOnFindBoundingBoxes bool
 	MissingCollection      bool
@@ -27,11 +27,11 @@ func (r *FakeRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc.
 	}
 	return true, nil
 }
-func (r *FakeRepo) MIMEType(imageId im.ImageId) (*string, error) {
-	if r.ErrOnMIMEType {
+func (r *FakeRepo) GetSpecs(imageId im.ImageId) (*im.ImageSpecs, error) {
+	if r.ErrOnSpecs {
 		return nil, r.Err
 	}
-	return &r.MIMEType_, nil
+	return &r.Specs, nil
 }
 
 func (r *FakeRepo) FindBoundingBoxes(imageId im.ImageId, collectionId clc.CollectionId) ([]*a.BoundingBox, error) {

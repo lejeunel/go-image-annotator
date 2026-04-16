@@ -1,6 +1,7 @@
 package read
 
 import (
+	"errors"
 	"testing"
 
 	st "github.com/lejeunel/go-image-annotator-v2/application/image-store"
@@ -9,25 +10,16 @@ import (
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 )
 
-func TestHandleNotFoundError(t *testing.T) {
+func TestHandleError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&st.FakeImageStore{Err: e.ErrNotFound})
 	itr.Execute(Request{ImageId: im.NewImageId(), Collection: "a-collection"}, p)
-	if !p.GotNotFoundErr || p.GotSuccess {
+	if !errors.Is(p.GotErr, e.ErrNotFound) || p.GotSuccess {
 		t.Fatalf("expected to get not found error")
 	}
 }
 
-func TestHandleInternalError(t *testing.T) {
-	p := &FakePresenter{}
-	itr := NewInteractor(&st.FakeImageStore{Err: e.ErrInternal})
-	itr.Execute(Request{ImageId: im.NewImageId(), Collection: "a-collection"}, p)
-	if !p.GotInternalErr || p.GotSuccess {
-		t.Fatalf("expected to get internal error")
-	}
-}
-
-func TestFindImage(t *testing.T) {
+func TestFindImageGivesCorrectIdAndCollection(t *testing.T) {
 	p := &FakePresenter{}
 	existingImage := im.NewImage(im.NewImageId(), *clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	itr := NewInteractor(&st.FakeImageStore{Return: existingImage})

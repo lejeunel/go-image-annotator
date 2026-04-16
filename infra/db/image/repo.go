@@ -23,6 +23,12 @@ type Row struct {
 	CollectionId clc.CollectionId `db:"collection_id"`
 }
 
+type SpecsRow struct {
+	MIMEType string `db:"mimetype"`
+	Width    int    `db:"width"`
+	Height   int    `db:"height"`
+}
+
 func (r *SQLiteImageRepo) AddToCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
 	query := "INSERT INTO images_collections (image_id, collection_id) VALUES ($1,$2)"
 	_, err := r.Db.Exec(query, imageId.String(), collectionId.String())
@@ -103,10 +109,10 @@ func (r *SQLiteImageRepo) ImageExists(imageId im.ImageId) (bool, error) {
 
 	return count > 0, nil
 }
-func (r *SQLiteImageRepo) MIMEType(imageId im.ImageId) (*string, error) {
-	errCtx := "finding image MIMEType"
-	var mimetype string
-	err := r.Db.Get(&mimetype, "SELECT mimetype FROM images WHERE id = $1", imageId)
+func (r *SQLiteImageRepo) GetSpecs(imageId im.ImageId) (*im.ImageSpecs, error) {
+	errCtx := "finding image specification"
+	var row SpecsRow
+	err := r.Db.Get(&row, "SELECT mimetype,width,height FROM images WHERE id = $1", imageId)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -115,12 +121,13 @@ func (r *SQLiteImageRepo) MIMEType(imageId im.ImageId) (*string, error) {
 			return nil, fmt.Errorf("%v: %v: %w", errCtx, err, e.ErrInternal)
 		}
 	}
-	return &mimetype, nil
+	return &im.ImageSpecs{MIMEType: row.MIMEType, Width: row.Width, Height: row.Height}, nil
 }
 
-func (r *SQLiteImageRepo) AddImage(imageId im.ImageId, hash []byte, format string) error {
-	query := "INSERT INTO images (id, hash, mimetype) VALUES ($1,$2,$3)"
-	_, err := r.Db.Exec(query, imageId.String(), hex.EncodeToString(hash), format)
+func (r *SQLiteImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.ImageSpecs) error {
+	query := "INSERT INTO images (id, hash, mimetype, width, height) VALUES ($1,$2,$3,$4,$5)"
+	_, err := r.Db.Exec(query, imageId.String(), hex.EncodeToString(hash), specs.MIMEType,
+		specs.Width, specs.Height)
 	if err != nil {
 		return fmt.Errorf("inserting image record: %v: %w", err, e.ErrInternal)
 	}

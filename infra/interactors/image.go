@@ -14,7 +14,7 @@ func NewSQLiteImageInteractors(repos *infra.SQLiteInfra, allowedImageFormats []s
 	return &im.Interactors{
 		Ingest: *ingest.NewInteractor(repos.ImageRepo, repos.CollectionRepo,
 			repos.LabelRepo, repos.AnnotationRepo,
-			repos.FileStore, sha256.New(), rea.ImageMIMETypeDetector{}),
+			repos.FileStore, sha256.New(), rea.ImageSpecsDetector{}),
 		Read:                *read.NewInteractor(*repos.ImageStore),
 		List:                *list.NewInteractor(repos.ImageRepo, repos.ImageStore),
 		AllowedImageFormats: allowedImageFormats,

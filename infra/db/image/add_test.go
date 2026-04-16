@@ -9,17 +9,18 @@ import (
 	"testing"
 )
 
-func TestAddMIMEType(t *testing.T) {
+func TestAddSpecs(t *testing.T) {
 	repos := NewImageTestRepos()
 	id := im.NewImageId()
-	mimetype := "the-mimetype"
-	repos.Image.AddImage(id, nil, mimetype)
-	r, err := repos.Image.MIMEType(id)
+
+	specs := im.ImageSpecs{MIMEType: "the-mimetype", Width: 15, Height: 10}
+	repos.Image.AddImage(id, nil, specs)
+	r, err := repos.Image.GetSpecs(id)
 	if err != nil {
-		t.Fatalf("expected no error when retrieving mimetype, got %v", err)
+		t.Fatalf("expected no error when retrieving specs, got %v", err)
 	}
-	if *r != mimetype {
-		t.Fatalf("expected to retrieve mimetype %v, got %v", mimetype, *r)
+	if r.MIMEType != specs.MIMEType {
+		t.Fatalf("expected to retrieve mimetype %v, got %v", specs.MIMEType, r.MIMEType)
 	}
 }
 

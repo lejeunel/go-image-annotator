@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	ast "github.com/lejeunel/go-image-annotator-v2/application/file-store"
+	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 )
 
@@ -216,7 +217,7 @@ func TestAddImageWithTwoLabels(t *testing.T) {
 func TestValidationErrOnImageMIMETypeInferShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
-	itr.ImageMIMETypeDetector = &FakeMIMETypeDetector{Err: e.ErrValidation}
+	itr.ImageSpecsDetector = &FakeSpecsDetector{Err: e.ErrValidation}
 	itr.Execute(Request{Reader: &FakeImageReader{}}, p)
 	if !p.GotValidationErr || p.GotSuccess {
 		t.Fatal("expected validation error")
@@ -226,13 +227,13 @@ func TestValidationErrOnImageMIMETypeInferShouldFail(t *testing.T) {
 func TestAddImageShouldAddMIMEType(t *testing.T) {
 	p := &FakePresenter{}
 	imageRepo := &FakeImageRepo{}
-	mimetype := "image/jpeg"
 	itr := NewTestingInteractor()
 	itr.ImageRepo = imageRepo
-	itr.ImageMIMETypeDetector = &FakeMIMETypeDetector{MIMEType: mimetype}
+	specs := im.ImageSpecs{MIMEType: "image/jpeg"}
+	itr.ImageSpecsDetector = &FakeSpecsDetector{Return: specs}
 	itr.Execute(Request{Reader: &FakeImageReader{}}, p)
-	if imageRepo.GotMIMEType != mimetype {
-		t.Fatalf("expected to set MIMEType to %v, got %v", mimetype, imageRepo.GotMIMEType)
+	if imageRepo.GotSpecs.MIMEType != specs.MIMEType {
+		t.Fatalf("expected to set MIMEType to %v, got %v", specs.MIMEType, imageRepo.GotSpecs.MIMEType)
 	}
 }
 

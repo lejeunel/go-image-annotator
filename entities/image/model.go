@@ -24,6 +24,7 @@ type BaseImage struct {
 type Image struct {
 	Id            ImageId
 	Collection    clc.Collection
+	Specs         ImageSpecs
 	Labels        []*an.ImageLabel
 	BoundingBoxes []*an.BoundingBox
 	Reader        io.Reader

@@ -8,6 +8,7 @@ import (
 	_ "image/png"
 	"io"
 
+	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 )
 
@@ -26,14 +27,14 @@ func formatToMIME(format string) string {
 	}
 }
 
-type ImageMIMETypeDetector struct{}
+type ImageSpecsDetector struct{}
 
-func (d ImageMIMETypeDetector) Detect(r io.Reader) (*string, io.Reader, error) {
+func (d ImageSpecsDetector) Detect(r io.Reader) (*im.ImageSpecs, io.Reader, error) {
 	// Read a small prefix (DecodeConfig does not need the full file)
 	var buf bytes.Buffer
 	tee := io.TeeReader(r, &buf)
 
-	_, format, err := image.DecodeConfig(tee)
+	cfg, format, err := image.DecodeConfig(tee)
 	if err != nil {
 		return nil, nil, fmt.Errorf("decoding image: %w: %w", err, e.ErrValidation)
 	}
@@ -42,6 +43,7 @@ func (d ImageMIMETypeDetector) Detect(r io.Reader) (*string, io.Reader, error) {
 	// first the consumed bytes, then the remaining original reader
 	newReader := io.MultiReader(&buf, r)
 
-	mimetype := formatToMIME(format)
-	return &mimetype, newReader, nil
+	return &im.ImageSpecs{
+		MIMEType: formatToMIME(format),
+		Width:    cfg.Width, Height: cfg.Height}, newReader, nil
 }

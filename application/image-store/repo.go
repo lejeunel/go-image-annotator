@@ -11,5 +11,5 @@ type Repo interface {
 	FindImageLabels(im.ImageId, clc.CollectionId) ([]*a.ImageLabel, error)
 	FindBoundingBoxes(im.ImageId, clc.CollectionId) ([]*a.BoundingBox, error)
 	ImageExistsInCollection(im.ImageId, clc.CollectionId) (bool, error)
-	MIMEType(im.ImageId) (*string, error)
+	GetSpecs(im.ImageId) (*im.ImageSpecs, error)
 }

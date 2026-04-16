@@ -13,12 +13,16 @@ var TrashIcon = `
 </svg>
 `
 
+func ShortenUUID(id string) string {
+	return id[:8]
+}
+
 type AnnotationsListView struct{}
 
 func (v *AnnotationsListView) Build(boxes []*a.BoundingBox) Node {
 	table := html.PaginationTable{Fields: []string{"", "id", "label", "actions"}}
 	for i, b := range boxes {
-		shortId := b.Id[:8]
+		shortId := ShortenUUID(b.Id)
 		table.Rows = append(table.Rows,
 			html.PaginationTableRow{Values: []Node{
 				Raw(fmt.Sprintf(`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">

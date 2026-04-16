@@ -10,6 +10,7 @@ import (
 type ImageInfo struct {
 	Id         string
 	Collection string
+	Specs      im.ImageSpecs
 }
 
 type Image struct {
@@ -46,8 +47,8 @@ type BoundingBox struct {
 	Height float32
 }
 
-func NewImageInfo(imageId im.ImageId, collection string) ImageInfo {
-	return ImageInfo{Id: imageId.String(), Collection: collection}
+func NewImageInfo(imageId im.ImageId, collection string, specs im.ImageSpecs) ImageInfo {
+	return ImageInfo{Id: imageId.String(), Collection: collection, Specs: specs}
 }
 
 func NewImage(id im.ImageId, reader io.Reader, collection string, mimetype string,

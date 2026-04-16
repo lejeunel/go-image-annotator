@@ -19,29 +19,29 @@ import (
 	"hash"
 )
 
-type IImageMIMETypeDetector interface {
-	Detect(io.Reader) (*string, io.Reader, error)
+type IImageSpecsDetector interface {
+	Detect(io.Reader) (*im.ImageSpecs, io.Reader, error)
 }
 
 type Interactor struct {
-	Hasher                hash.Hash
-	ImageRepo             ImageRepo
-	CollectionRepo        CollectionRepo
-	AnnotationRepo        AnnotationRepo
-	LabelRepo             LabelRepo
-	ArtefactRepo          ast.Interface
-	Logger                *slog.Logger
-	ImageMIMETypeDetector IImageMIMETypeDetector
+	Hasher             hash.Hash
+	ImageRepo          ImageRepo
+	CollectionRepo     CollectionRepo
+	AnnotationRepo     AnnotationRepo
+	LabelRepo          LabelRepo
+	ArtefactRepo       ast.Interface
+	Logger             *slog.Logger
+	ImageSpecsDetector IImageSpecsDetector
 }
 
 func NewInteractor(imageRepo ImageRepo, collectionRepo CollectionRepo,
 	labelRepo LabelRepo, annotationRepo AnnotationRepo,
-	fileStore ast.Interface, hasher hash.Hash, mimetypeDetector IImageMIMETypeDetector) *Interactor {
+	fileStore ast.Interface, hasher hash.Hash, specsDetector IImageSpecsDetector) *Interactor {
 	return &Interactor{ImageRepo: imageRepo, CollectionRepo: collectionRepo,
 		AnnotationRepo: annotationRepo, LabelRepo: labelRepo,
 		ArtefactRepo: fileStore, Hasher: hasher,
-		ImageMIMETypeDetector: mimetypeDetector,
-		Logger:                logging.NewNoOpLogger(),
+		ImageSpecsDetector: specsDetector,
+		Logger:             logging.NewNoOpLogger(),
 	}
 }
 
@@ -59,7 +59,7 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 		return
 	}
 
-	format, reader, err := i.ImageMIMETypeDetector.Detect(r.Reader)
+	specs, reader, err := i.ImageSpecsDetector.Detect(r.Reader)
 	if err != nil {
 		i.handleError(err, out)
 		return
@@ -72,7 +72,7 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.ingestImage(image, *hash, *format); err != nil {
+	if err := i.ingestImage(image, *hash, *specs); err != nil {
 		i.handleError(err, out)
 		i.ImageRepo.Delete(image.Id)
 		i.ArtefactRepo.Delete(image.Id)
@@ -151,9 +151,9 @@ func (i Interactor) appendBoundingBoxes(image *im.Image, bboxes []BoundingBoxReq
 
 }
 
-func (i Interactor) ingestImage(image *im.Image, hash []byte, format string) error {
+func (i Interactor) ingestImage(image *im.Image, hash []byte, specs im.ImageSpecs) error {
 
-	if err := i.ImageRepo.AddImage(image.Id, hash, format); err != nil {
+	if err := i.ImageRepo.AddImage(image.Id, hash, specs); err != nil {
 		return fmt.Errorf("adding image: %w", err)
 	}
 

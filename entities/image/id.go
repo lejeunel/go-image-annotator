@@ -6,6 +6,12 @@ import (
 	uuidw "github.com/lejeunel/go-image-annotator-v2/shared/uuid"
 )
 
+type ImageSpecs struct {
+	MIMEType string
+	Width    int
+	Height   int
+}
+
 type ImageId struct {
 	uuidw.UUIDWrapper[ImageId]
 }

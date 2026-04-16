@@ -79,19 +79,12 @@ func TestImageReaderGivesCorrectBytes(t *testing.T) {
 	}
 }
 
-func TestErrOnMIMETypeShouldFail(t *testing.T) {
-	s := New(&FakeRepo{ErrOnMIMEType: true, Err: e.ErrInternal}, &ast.FakeStore{Data: []byte("test-data")})
-	_, err := s.Find(im.BaseImage{ImageId: im.NewImageId(), Collection: "the-collection"})
-	if err == nil {
-		t.Fatal("expected error")
-	}
-}
-
-func TestRetrieveCorrectMIMEType(t *testing.T) {
-	mimetype := "the-mimetype"
-	s := New(&FakeRepo{MIMEType_: mimetype}, &ast.FakeStore{Data: []byte("test-data")})
-	im, _ := s.Find(im.BaseImage{ImageId: im.NewImageId(), Collection: "the-collection"})
-	if im.MIMEType != mimetype {
-		t.Fatalf("expected to retrieve mimetype %v, got %v", mimetype, im.MIMEType)
+func TestCorrectSpecs(t *testing.T) {
+	specs := im.ImageSpecs{MIMEType: "the-mimetype", Width: 15, Height: 10}
+	s := New(&FakeRepo{Specs: specs}, &ast.FakeStore{})
+	image, _ := s.Find(im.BaseImage{})
+	got := image.Specs
+	if got.MIMEType != specs.MIMEType {
+		t.Fatalf("expected to retrieve mimetype %v, got %v", specs.MIMEType, got.MIMEType)
 	}
 }

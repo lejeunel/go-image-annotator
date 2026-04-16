@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS images (
     id varchar(36),
     hash varchar(128),
     mimetype TEXT,
+    width INTEGER,
+    height INTEGER,
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX idx_images_hash ON images(hash);

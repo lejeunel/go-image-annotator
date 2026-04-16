@@ -2,7 +2,6 @@ package ingest
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 
 	ast "github.com/lejeunel/go-image-annotator-v2/application/file-store"
@@ -17,14 +16,14 @@ import (
 
 func NewTestingInteractor() *Interactor {
 	return &Interactor{
-		ImageRepo:             &FakeImageRepo{},
-		CollectionRepo:        &FakeCollectionRepo{},
-		LabelRepo:             &FakeLabelRepo{},
-		AnnotationRepo:        &FakeAnnotationRepo{},
-		ArtefactRepo:          &ast.FakeStore{},
-		Hasher:                &FakeHasher{},
-		Logger:                logging.NewNoOpLogger(),
-		ImageMIMETypeDetector: &FakeMIMETypeDetector{},
+		ImageRepo:          &FakeImageRepo{},
+		CollectionRepo:     &FakeCollectionRepo{},
+		LabelRepo:          &FakeLabelRepo{},
+		AnnotationRepo:     &FakeAnnotationRepo{},
+		ArtefactRepo:       &ast.FakeStore{},
+		Hasher:             &FakeHasher{},
+		Logger:             logging.NewNoOpLogger(),
+		ImageSpecsDetector: &FakeSpecsDetector{},
 	}
 }
 
@@ -37,7 +36,6 @@ func (f *FakeHasher) Write(p []byte) (int, error) {
 }
 
 func (f *FakeHasher) Sum(b []byte) []byte {
-	fmt.Println(f.sum)
 	return append(b, f.sum...)
 }
 
@@ -86,7 +84,7 @@ type FakeImageRepo struct {
 	Err                  error
 	GotImage             bool
 	GotHash              []byte
-	GotMIMEType          string
+	GotSpecs             im.ImageSpecs
 	ErrOnAddToCollection bool
 	ErrOnAddImage        bool
 	ErrOnFindHash        bool
@@ -158,12 +156,12 @@ func (r *FakeImageRepo) AddToCollection(im.ImageId, clc.CollectionId) error {
 	return nil
 }
 
-func (r *FakeImageRepo) AddImage(imageId im.ImageId, hash []byte, mimetype string) error {
+func (r *FakeImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.ImageSpecs) error {
 	if r.ErrOnAddImage {
 		return r.Err
 	}
 	r.GotHash = hash
-	r.GotMIMEType = mimetype
+	r.GotSpecs = specs
 	return nil
 }
 
@@ -180,15 +178,15 @@ func (d *FakeImageReader) Read(b []byte) (int, error) {
 
 }
 
-type FakeMIMETypeDetector struct {
-	Err      error
-	MIMEType string
+type FakeSpecsDetector struct {
+	Err    error
+	Return im.ImageSpecs
 }
 
-func (d *FakeMIMETypeDetector) Detect(r io.Reader) (*string, io.Reader, error) {
+func (d *FakeSpecsDetector) Detect(r io.Reader) (*im.ImageSpecs, io.Reader, error) {
 	if d.Err != nil {
 		return nil, nil, d.Err
 	}
-	return &d.MIMEType, r, nil
+	return &d.Return, r, nil
 
 }

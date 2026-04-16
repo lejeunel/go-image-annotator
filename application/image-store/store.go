@@ -40,9 +40,9 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 		return nil, fmt.Errorf("fetching bounding boxes: %w", err)
 	}
 
-	mimetype, err := s.repo.MIMEType(base.ImageId)
+	specs, err := s.repo.GetSpecs(base.ImageId)
 	if err != nil {
-		return nil, fmt.Errorf("fetching MIMEType: %w", err)
+		return nil, fmt.Errorf("fetching image specs: %w", err)
 	}
 
 	reader, err := s.fileStore.Get(base.ImageId)
@@ -51,7 +51,7 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 	}
 	return &im.Image{Id: base.ImageId, Collection: *collection, Labels: labels,
 		BoundingBoxes: boxes,
-		MIMEType:      *mimetype,
+		Specs:         *specs,
 		Reader:        reader}, nil
 
 }

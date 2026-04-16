@@ -54,6 +54,15 @@ func MakeBoundingBox(b *a.BoundingBox, colorIndex int) *BoundingBox {
 		Height: b.Height,
 	}
 }
+func (p StartPresenter) SuccessReadImage(im im.Image) {
+	p.view.DrawImageInfo(NewImageInfo(im.Id, im.Collection.Name, im.Specs))
+	p.view.DrawImage(NewImage(im.Id, im.Reader, im.Collection.Name, im.MIMEType))
+	p.view.DrawAnnotationList(MakeBoundingBoxes(im.BoundingBoxes))
+}
+func (p StartPresenter) SuccessFetchLabels(r fetchlbl.Response) {
+	p.view.SetAvailableLabels(r.Labels)
+}
+func (p StartPresenter) Error(err error) {}
 
 func MakeBoundingBoxes(boxes []*a.BoundingBox) []*BoundingBox {
 	result := []*BoundingBox{}
@@ -62,16 +71,6 @@ func MakeBoundingBoxes(boxes []*a.BoundingBox) []*BoundingBox {
 	}
 	return result
 }
-
-func (p StartPresenter) SuccessReadImage(im im.Image) {
-	p.view.DrawImageInfo(NewImageInfo(im.Id, im.Collection.Name))
-	p.view.DrawImage(NewImage(im.Id, im.Reader, im.Collection.Name, im.MIMEType))
-	p.view.DrawAnnotationList(MakeBoundingBoxes(im.BoundingBoxes))
-}
-func (p StartPresenter) SuccessFetchLabels(r fetchlbl.Response) {
-	p.view.SetAvailableLabels(r.Labels)
-}
-func (p StartPresenter) Error(err error) {}
 
 type AddBoxPresenter struct {
 	view View
