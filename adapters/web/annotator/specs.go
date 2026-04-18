@@ -2,7 +2,7 @@ package annotator
 
 import (
 	"fmt"
-	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
+	"github.com/lejeunel/go-image-annotator-v2/application/annotator/view"
 	html "github.com/lejeunel/go-image-annotator-v2/shared/html"
 	. "maragu.dev/gomponents"
 )
@@ -11,9 +11,9 @@ type ImageInfosView struct {
 	result Node
 }
 
-func (p *ImageInfosView) Build(info a.ImageInfo) Node {
+func (p *ImageInfosView) Build(info view.ImageInfo) Node {
 	table := html.SpecTable{}
-	table.Rows = append(table.Rows, html.SpecTableRow{Name: "image_id", Value: ShortenUUID(info.Id)})
+	table.Rows = append(table.Rows, html.SpecTableRow{Name: "id", Value: ShortenUUID(info.Id)})
 	table.Rows = append(table.Rows, html.SpecTableRow{Name: "collection", Value: info.Collection})
 	table.Rows = append(table.Rows, html.SpecTableRow{Name: "mimetype", Value: info.Specs.MIMEType})
 	table.Rows = append(table.Rows, html.SpecTableRow{Name: "dimensions",

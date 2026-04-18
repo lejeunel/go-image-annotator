@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
+	"github.com/lejeunel/go-image-annotator-v2/application/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -14,7 +14,7 @@ type ImageView struct {
 	result Node
 }
 
-func (p *ImageView) Build(image a.Image) Node {
+func (p *ImageView) Build(image view.Image) Node {
 	if image.Reader == nil {
 		return Text("presenting image: got no reader")
 

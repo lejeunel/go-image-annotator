@@ -7,7 +7,7 @@ import (
 
 	"embed"
 
-	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
+	v "github.com/lejeunel/go-image-annotator-v2/application/annotator/view"
 	html "github.com/lejeunel/go-image-annotator-v2/shared/html"
 	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
@@ -23,34 +23,36 @@ type AnnotationView struct {
 	ImageInfosView
 	AnnotationsListView
 	ScrollerView
-	image           *a.Image
-	boxes           []*a.BoundingBox
-	imageInfo       *a.ImageInfo
+	image           *v.Image
+	boxes           []*v.BoundingBox
+	imageLabels     []*v.ImageLabel
+	imageInfo       *v.ImageInfo
 	availableLabels []string
-	scrollerButtons a.ScrollerButtons
+	scrollerButtons v.ScrollerButtons
 	doDrawImage     bool
-	addedBox        *a.BoundingBox
+	addedBox        *v.BoundingBox
 	err             error
 }
 
-func (v *AnnotationView) DrawScroller(buttons a.ScrollerButtons) {
+func (v *AnnotationView) DrawScroller(buttons v.ScrollerButtons) {
 	v.scrollerButtons = buttons
 }
-func (v *AnnotationView) DrawImage(image a.Image) {
+func (v *AnnotationView) DrawImage(image v.Image) {
 	v.image = &image
 	v.doDrawImage = true
 }
-func (v *AnnotationView) DrawImageInfo(info a.ImageInfo) {
+func (v *AnnotationView) DrawImageInfo(info v.ImageInfo) {
 	v.imageInfo = &info
 }
-func (v *AnnotationView) DrawAnnotationList(boxes []*a.BoundingBox) {
+func (v *AnnotationView) DrawAnnotationList(boxes []*v.BoundingBox, imageLabels []*v.ImageLabel) {
 	v.boxes = boxes
+	v.imageLabels = imageLabels
 }
 func (v *AnnotationView) SetAvailableLabels(labels []string) {
 	v.availableLabels = labels
 
 }
-func (v *AnnotationView) AddBox(b a.BoundingBox) {
+func (v *AnnotationView) AddBox(b v.BoundingBox) {
 	v.addedBox = &b
 }
 func (v *AnnotationView) UpdateBox(r updbox.Response) {
@@ -61,7 +63,7 @@ func (v *AnnotationView) Error(err error) {
 	v.err = err
 }
 func (v *AnnotationView) RenderAnnotationList(w http.ResponseWriter) {
-	v.AnnotationsListView.Build(v.boxes).Render(w)
+	v.AnnotationsListView.Build(v.boxes, v.imageLabels).Render(w)
 }
 func (v *AnnotationView) RenderAll(w http.ResponseWriter) {
 
@@ -118,7 +120,7 @@ func (v *AnnotationView) renderImage(w http.ResponseWriter) {
 				Tr(Td(Class("align-top"), v.ImageView.Build(*v.image)),
 					Td(Class("align-top pl-2"),
 						Div(Class("pb-2"), v.ImageInfosView.Build(*v.imageInfo)),
-						Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes)))),
+						Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes, v.imageLabels)))),
 			),
 			))))
 	b.Render(w)

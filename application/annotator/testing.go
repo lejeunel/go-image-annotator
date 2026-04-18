@@ -1,6 +1,7 @@
 package annotator
 
 import (
+	v "github.com/lejeunel/go-image-annotator-v2/application/annotator/view"
 	scr "github.com/lejeunel/go-image-annotator-v2/application/scroller"
 	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
@@ -72,28 +73,28 @@ func (b *FakeAnnotationDeleter) Execute(r del.Request, o del.OutputPort) {
 }
 
 type FakeView struct {
-	GotScrollerButtons  *ScrollerButtons
+	GotScrollerButtons  *v.ScrollerButtons
 	GotErr              error
-	GotBox              *BoundingBox
-	GotImage            *Image
-	GotImageInfo        *ImageInfo
+	GotBox              *v.BoundingBox
+	GotImage            *v.Image
+	GotImageInfo        *v.ImageInfo
 	GotLabels           *[]string
 	RemovedAnnotationId *an.AnnotationId
 	UpdatedBoxId        *an.AnnotationId
 }
 
-func (s *FakeView) DrawScroller(buttons ScrollerButtons) {
+func (s *FakeView) DrawScroller(buttons v.ScrollerButtons) {
 	s.GotScrollerButtons = &buttons
 }
 func (s *FakeView) Error(error) {}
-func (s *FakeView) DrawImage(i Image) {
+func (s *FakeView) DrawImage(i v.Image) {
 	s.GotImage = &i
 }
-func (s *FakeView) DrawImageInfo(i ImageInfo) {
+func (s *FakeView) DrawImageInfo(i v.ImageInfo) {
 	s.GotImageInfo = &i
 }
-func (s *FakeView) DrawAnnotationList([]*BoundingBox) {}
-func (s *FakeView) AddBox(box BoundingBox) {
+func (s *FakeView) DrawAnnotationList([]*v.BoundingBox, []*v.ImageLabel) {}
+func (s *FakeView) AddBox(box v.BoundingBox) {
 	s.GotBox = &box
 }
 func (s *FakeView) UpdateBox(r updbox.Response) {

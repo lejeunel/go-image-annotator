@@ -21,6 +21,12 @@ type BaseImage struct {
 	Collection string
 }
 
+type ImageSpecs struct {
+	MIMEType string
+	Width    int
+	Height   int
+}
+
 type Image struct {
 	Id            ImageId
 	Collection    clc.Collection

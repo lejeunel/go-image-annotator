@@ -3,7 +3,7 @@ package annotator
 import (
 	"fmt"
 
-	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
+	"github.com/lejeunel/go-image-annotator-v2/application/annotator/view"
 	"github.com/lejeunel/go-image-annotator-v2/application/scroller"
 	myhtml "github.com/lejeunel/go-image-annotator-v2/shared/html"
 
@@ -20,7 +20,7 @@ func MakeLink(imageId, collection string) string {
 
 }
 
-func (p *ScrollerView) Render(buttons a.ScrollerButtons) Node {
+func (p *ScrollerView) Render(buttons view.ScrollerButtons) Node {
 	prevURL, nextURL := "#", "#"
 	if buttons.Prev.IsActive {
 		prevURL = MakeLink(buttons.Prev.ImageId, buttons.Prev.Collection)

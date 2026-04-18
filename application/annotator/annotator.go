@@ -1,6 +1,8 @@
 package annotator
 
 import (
+	p "github.com/lejeunel/go-image-annotator-v2/application/annotator/presenters"
+	v "github.com/lejeunel/go-image-annotator-v2/application/annotator/view"
 	"github.com/lejeunel/go-image-annotator-v2/application/scroller"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	addbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
@@ -19,24 +21,24 @@ type Annotator struct {
 	labelFetcher fetchlbl.Interface
 }
 
-func (a *Annotator) DeleteAnnotation(r del.Request, view View) {
-	a.deleter.Execute(r, RemoveAnnotationPresenter{view})
+func (a *Annotator) DeleteAnnotation(r del.Request, view v.View) {
+	a.deleter.Execute(r, p.RemoveAnnotationPresenter{View: view})
 }
-func (a *Annotator) UpdateBox(r updbox.Request, view View) {
-	a.boxUpdater.Execute(r, UpdateBoxPresenter{view})
+func (a *Annotator) UpdateBox(r updbox.Request, view v.View) {
+	a.boxUpdater.Execute(r, p.UpdateBoxPresenter{View: view})
 }
-func (a *Annotator) AddBox(r addbox.Request, view View) {
-	a.boxAdder.Execute(r, AddBoxPresenter{view})
+func (a *Annotator) AddBox(r addbox.Request, view v.View) {
+	a.boxAdder.Execute(r, p.AddBoxPresenter{View: view})
 }
-func (a *Annotator) Init(imageId im.ImageId, collection string, view View) {
+func (a *Annotator) Init(imageId im.ImageId, collection string, view v.View) {
 	scrollerState, err := a.scroller.Init(imageId, scroller.WithCollection(collection))
 	if err != nil {
 		view.Error(err)
 		return
 	}
-	view.DrawScroller(MakeScrollerButtons(*scrollerState))
+	view.DrawScroller(p.MakeScrollerButtons(*scrollerState))
 
-	presenter := StartPresenter{view}
+	presenter := p.InitPresenter{View: view}
 	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection},
 		presenter)
 	a.labelFetcher.Execute(presenter)

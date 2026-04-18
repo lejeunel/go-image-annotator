@@ -6,6 +6,13 @@ import (
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 )
 
+type AnnotationKind int
+
+const (
+	BoundingBoxAnnotation AnnotationKind = iota
+	ImageLabelAnnotation
+)
+
 type ImageLabel struct {
 	Id    AnnotationId
 	Label lbl.Label

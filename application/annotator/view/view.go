@@ -1,4 +1,4 @@
-package annotator
+package view
 
 import (
 	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
@@ -10,7 +10,7 @@ type View interface {
 	Error(error)
 	DrawImage(Image)
 	DrawImageInfo(ImageInfo)
-	DrawAnnotationList([]*BoundingBox)
+	DrawAnnotationList([]*BoundingBox, []*ImageLabel)
 	AddBox(BoundingBox)
 	SetAvailableLabels([]string)
 	UpdateBox(updbox.Response)
