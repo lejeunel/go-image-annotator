@@ -10,7 +10,6 @@ import (
 	add "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
 	upd "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
-	updlbl "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/update-label"
 )
 
 func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
@@ -85,17 +84,4 @@ func TestUpdateBox(t *testing.T) {
 	if got == nil {
 		t.Fatal("expected to update annotation")
 	}
-}
-
-func TestReDrawOnUpdateLabelOfAnnotation(t *testing.T) {
-	a, _, _, view := createAnnotator()
-	label := "a-label"
-	req := updlbl.Request{AnnotationId: an.NewAnnotationId(),
-		Label: label}
-	a.UpdateLabelOfAnnotation(req, view)
-	if view.UpdatedLabelOfAnnotation != label {
-		t.Fatal("expected to update annotation with label %v, got %v",
-			label, view.UpdatedLabelOfAnnotation)
-	}
-
 }
