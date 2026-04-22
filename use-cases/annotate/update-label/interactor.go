@@ -1,9 +1,8 @@
-package read
+package update_label
 
 import (
 	"fmt"
-	imstore "github.com/lejeunel/go-image-annotator-v2/app/image-store"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+
 	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
 	"log/slog"
 )
@@ -13,27 +12,33 @@ type Interface interface {
 }
 
 type Interactor struct {
-	store  imstore.Interface
+	repo   Repo
 	logger *slog.Logger
 }
 
-func NewInteractor(store imstore.Interface) *Interactor {
-	return &Interactor{store: store, logger: logging.NewNoOpLogger()}
+func NewInteractor(repo Repo) *Interactor {
+	return &Interactor{repo: repo, logger: logging.NewNoOpLogger()}
 }
 
 func (i *Interactor) Execute(r Request, out OutputPort) {
-
-	image, err := i.store.Find(im.BaseImage{ImageId: r.ImageId, Collection: r.Collection})
+	label, err := i.repo.FindLabelByName(r.Label)
 	if err != nil {
 		i.handleError(err, out)
 		return
 	}
 
-	out.SuccessReadImage(*image)
+	err = i.repo.UpdateLabelOfAnnotation(r.AnnotationId, label.Id)
+	if err != nil {
+		i.handleError(err, out)
+		return
+	}
+
+	out.SuccessUpdateLabel(Response{})
+
 }
 
 func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "reading image meta-data"
+	errCtx := "updating bounding box properties"
 	err = fmt.Errorf("%v: %w", errCtx, err)
 	i.logger.Error(errCtx, "error", err)
 	out.Error(err)

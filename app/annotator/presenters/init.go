@@ -1,8 +1,8 @@
 package presenters
 
 import (
-	"github.com/lejeunel/go-image-annotator-v2/application/annotator/view"
-	v "github.com/lejeunel/go-image-annotator-v2/application/annotator/view"
+	"github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
+	v "github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	fetchlbl "github.com/lejeunel/go-image-annotator-v2/use-cases/label/fetch-all"
 )

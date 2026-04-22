@@ -4,8 +4,8 @@ import (
 	"fmt"
 	api "github.com/lejeunel/go-image-annotator-v2/adapters/api/server"
 	web "github.com/lejeunel/go-image-annotator-v2/adapters/web"
-	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
-	scr "github.com/lejeunel/go-image-annotator-v2/application/scroller"
+	a "github.com/lejeunel/go-image-annotator-v2/app/annotator"
+	scr "github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
 
 	"github.com/lejeunel/go-image-annotator-v2/config"
 	"github.com/lejeunel/go-image-annotator-v2/infra"
@@ -33,7 +33,7 @@ func Serve(port int) {
 	scroller := scr.New(infra.ScrollerRepo)
 	annotator := a.NewAnnotator(scroller, &interactors.Image.Read,
 		&interactors.Annotation.AddBox, &interactors.Annotation.UpdateBox, &interactors.Annotation.Delete,
-		&interactors.Label.FetchAll)
+		&interactors.Label.FetchAll, &interactors.Annotation.UpdateLabel)
 	RegisterHandlers(mux,
 		*api.NewServer(interactors),
 		*web.NewServer(interactors, annotator),

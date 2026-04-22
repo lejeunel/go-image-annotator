@@ -7,7 +7,7 @@ import (
 
 	"embed"
 
-	v "github.com/lejeunel/go-image-annotator-v2/application/annotator/view"
+	v "github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
 	html "github.com/lejeunel/go-image-annotator-v2/shared/html"
 	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"

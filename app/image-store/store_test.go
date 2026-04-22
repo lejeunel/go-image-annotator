@@ -6,7 +6,7 @@ import (
 	"io"
 	"testing"
 
-	ast "github.com/lejeunel/go-image-annotator-v2/application/file-store"
+	ast "github.com/lejeunel/go-image-annotator-v2/app/file-store"
 	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"

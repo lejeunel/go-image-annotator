@@ -3,7 +3,7 @@ package read_raw
 import (
 	"fmt"
 
-	ast "github.com/lejeunel/go-image-annotator-v2/application/file-store"
+	ast "github.com/lejeunel/go-image-annotator-v2/app/file-store"
 	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
 	"log/slog"
 )

@@ -7,7 +7,7 @@ import (
 	"errors"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	"github.com/lejeunel/go-image-annotator-v2/application/scroller"
+	"github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
 	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"

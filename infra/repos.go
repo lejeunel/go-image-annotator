@@ -1,8 +1,8 @@
 package infra
 
 import (
-	af_store "github.com/lejeunel/go-image-annotator-v2/application/file-store"
-	im_store "github.com/lejeunel/go-image-annotator-v2/application/image-store"
+	af_store "github.com/lejeunel/go-image-annotator-v2/app/file-store"
+	im_store "github.com/lejeunel/go-image-annotator-v2/app/image-store"
 	db "github.com/lejeunel/go-image-annotator-v2/infra/db"
 	an "github.com/lejeunel/go-image-annotator-v2/infra/db/annotation"
 	clc "github.com/lejeunel/go-image-annotator-v2/infra/db/collection"

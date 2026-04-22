@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"io"
 
-	ast "github.com/lejeunel/go-image-annotator-v2/application/file-store"
+	ast "github.com/lejeunel/go-image-annotator-v2/app/file-store"
 	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"

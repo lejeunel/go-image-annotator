@@ -3,7 +3,7 @@ package assign_label
 import (
 	"fmt"
 
-	st "github.com/lejeunel/go-image-annotator-v2/application/image-store"
+	st "github.com/lejeunel/go-image-annotator-v2/app/image-store"
 	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"

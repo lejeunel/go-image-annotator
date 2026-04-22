@@ -2,7 +2,7 @@ package annotator
 
 import (
 	"fmt"
-	"github.com/lejeunel/go-image-annotator-v2/application/annotator/view"
+	"github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
 	html "github.com/lejeunel/go-image-annotator-v2/shared/html"
 	. "maragu.dev/gomponents"
 )

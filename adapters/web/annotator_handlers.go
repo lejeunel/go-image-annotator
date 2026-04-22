@@ -105,7 +105,6 @@ func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
 	}
 	s.annotator.DeleteAnnotation(remove.Request{Id: *id}, aw.NewAnnotationView())
 }
-
 func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
 

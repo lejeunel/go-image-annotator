@@ -3,7 +3,7 @@ package image_store
 import (
 	"fmt"
 
-	fs "github.com/lejeunel/go-image-annotator-v2/application/file-store"
+	fs "github.com/lejeunel/go-image-annotator-v2/app/file-store"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 )

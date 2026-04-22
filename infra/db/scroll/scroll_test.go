@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/lejeunel/go-image-annotator-v2/application/scroller"
+	scr "github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
 	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
@@ -31,7 +31,7 @@ func TestInternalErrOnCollectionMustExist(t *testing.T) {
 func TestInternalErrOnGetAdjacent(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	repos.Scroller.Db.Close()
-	_, err := repos.Scroller.GetAdjacent(im.NewImageId(), scroller.NewCriteria(), scroller.ScrollNext)
+	_, err := repos.Scroller.GetAdjacent(im.NewImageId(), scr.NewCriteria(), scr.ScrollNext)
 	if !errors.Is(err, e.ErrInternal) {
 		t.Fatalf("expected internal error, got %v", err)
 	}
@@ -66,7 +66,7 @@ func TestShouldFailWhenCollectionDoesNotExist(t *testing.T) {
 func TestShouldFailWhenNoImage(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	id := im.NewImageId()
-	_, err := repos.Scroller.GetAdjacent(id, scroller.NewCriteria(), scroller.ScrollNext)
+	_, err := repos.Scroller.GetAdjacent(id, scr.NewCriteria(), scr.ScrollNext)
 	if !errors.Is(err, e.ErrNotFound) {
 		t.Fatalf("expected not found error got %v", err)
 	}
@@ -76,7 +76,7 @@ func TestGettingAdjacentImageWhenSingleImageShouldFail(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	id, _ := im.NewImageIdFromString("00000000-0000-0000-0000-000000000000")
 	repos.Image.AddImage(id, nil, im.ImageSpecs{})
-	_, err := repos.Scroller.GetAdjacent(id, scroller.NewCriteria(), scroller.ScrollPrevious)
+	_, err := repos.Scroller.GetAdjacent(id, scr.NewCriteria(), scr.ScrollPrevious)
 	if !errors.Is(err, e.ErrNotFound) {
 		t.Fatalf("expected not found err got  %v", err)
 	}
@@ -85,7 +85,7 @@ func TestGettingAdjacentImageWhenSingleImageShouldFail(t *testing.T) {
 func TestGettingNextImage(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	ids := CreateImagesWithOrderedIds(repos.Image, 3)
-	r, _ := repos.Scroller.GetAdjacent(ids[1], scroller.NewCriteria(), scroller.ScrollNext)
+	r, _ := repos.Scroller.GetAdjacent(ids[1], scr.NewCriteria(), scr.ScrollNext)
 	if r.ImageId != ids[2] {
 		t.Fatalf("expected to retrieve next image with id %v got %v", ids[2], r.ImageId)
 	}
@@ -94,7 +94,7 @@ func TestGettingNextImage(t *testing.T) {
 func TestGettingPrevImage(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	ids := CreateImagesWithOrderedIds(repos.Image, 3)
-	r, _ := repos.Scroller.GetAdjacent(ids[2], scroller.NewCriteria(), scroller.ScrollPrevious)
+	r, _ := repos.Scroller.GetAdjacent(ids[2], scr.NewCriteria(), scr.ScrollPrevious)
 	if r.ImageId != ids[1] {
 		t.Fatalf("expected to retrieve next image with id %v got %v", ids[1], r.ImageId)
 	}
@@ -108,8 +108,8 @@ func TestScrollWithCollectionCriteria(t *testing.T) {
 		im.NewImageId(), "second-collection")
 
 	_, err := repos.Scroller.GetAdjacent(firstImage.Id,
-		scroller.NewCriteria(scroller.WithCollection("first-collection")),
-		scroller.ScrollPrevious)
+		scr.NewCriteria(scr.WithCollection("first-collection")),
+		scr.ScrollPrevious)
 
 	if !errors.Is(err, e.ErrNotFound) {
 		t.Fatalf("expected not found err got  %v", err)
@@ -125,8 +125,8 @@ func TestGettingNextImageInCollection(t *testing.T) {
 	repos.Image.AddToCollection(ids[1], collection.Id)
 
 	r, _ := repos.Scroller.GetAdjacent(ids[0],
-		scroller.NewCriteria(scroller.WithCollection(collection.Name)),
-		scroller.ScrollNext)
+		scr.NewCriteria(scr.WithCollection(collection.Name)),
+		scr.ScrollNext)
 	if r.Collection != collection.Name {
 		t.Fatalf("expected to retrieve next image in collection %v got %v",
 			collection.Name, r.Collection)

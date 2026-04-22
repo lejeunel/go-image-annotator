@@ -3,7 +3,7 @@ package unassign_label
 import (
 	"fmt"
 
-	st "github.com/lejeunel/go-image-annotator-v2/application/image-store"
+	st "github.com/lejeunel/go-image-annotator-v2/app/image-store"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 	"github.com/lejeunel/go-image-annotator-v2/shared/logging"

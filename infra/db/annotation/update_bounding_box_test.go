@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 )
 
@@ -21,27 +20,6 @@ func TestInternalErrOnUpdateBoundingBoxShouldFail(t *testing.T) {
 
 	if !errors.Is(err, e.ErrInternal) {
 		t.Fatalf("expected internal error, got %v", err)
-	}
-}
-
-func TestUpdateBoundingBoxLabel(t *testing.T) {
-	repos := NewAnnotationTestRepos()
-	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
-	annotationId := a.NewAnnotationId()
-	bbox := a.NewBoundingBox(annotationId, 1, 1, 1, 1, label)
-	repos.Annotation.AddBoundingBox(image.Id, collection.Id, *bbox)
-
-	newLabelName := "new-label"
-	newLabel := lbl.NewLabel(lbl.NewLabelId(), newLabelName)
-	repos.Label.Create(*newLabel)
-	err := repos.Annotation.UpdateBoundingBox(annotationId,
-		a.BoundingBoxUpdatables{LabelId: newLabel.Id, Xc: bbox.Xc, Yc: bbox.Yc, Width: bbox.Width, Height: bbox.Height})
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-	boxes, _ := repos.Annotation.FindBoundingBoxes(image.Id, collection.Id)
-	if boxes[0].Label.Name != newLabelName {
-		t.Fatalf("expected to modify label to %v, got %v", newLabel, boxes[0].Label.Name)
 	}
 }
 

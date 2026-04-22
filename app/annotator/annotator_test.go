@@ -10,6 +10,7 @@ import (
 	add "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
 	upd "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
+	updlbl "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/update-label"
 )
 
 func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
@@ -37,7 +38,6 @@ func TestInitializeScrollerOnStart(t *testing.T) {
 		t.Fatal("expected to initialize scroller")
 	}
 }
-
 func TestDrawScrollerOnStart(t *testing.T) {
 	a, image, _, view := createAnnotator()
 	a.Init(image.Id, "a-collection", view)
@@ -46,7 +46,6 @@ func TestDrawScrollerOnStart(t *testing.T) {
 	}
 
 }
-
 func TestFetchAllLabelsOnStart(t *testing.T) {
 	a, image, _, view := createAnnotator()
 	a.Init(image.Id, "a-collection", view)
@@ -54,7 +53,6 @@ func TestFetchAllLabelsOnStart(t *testing.T) {
 		t.Fatal("expected to draw label list")
 	}
 }
-
 func TestDrawImageOnStart(t *testing.T) {
 	a, image, _, view := createAnnotator()
 	a.Init(image.Id, "a-collection", view)
@@ -63,7 +61,6 @@ func TestDrawImageOnStart(t *testing.T) {
 			image.Id, view.GotImage.Id)
 	}
 }
-
 func TestAddBoxShouldDraw(t *testing.T) {
 	a, image, _, view := createAnnotator()
 	a.AddBox(add.Request{}, view)
@@ -73,7 +70,6 @@ func TestAddBoxShouldDraw(t *testing.T) {
 			box.Label.Name, view.GotBox.Label)
 	}
 }
-
 func TestRemoveBox(t *testing.T) {
 	a, _, _, view := createAnnotator()
 	a.DeleteAnnotation(del.Request{}, view)
@@ -82,7 +78,6 @@ func TestRemoveBox(t *testing.T) {
 		t.Fatal("expected to remove annotation")
 	}
 }
-
 func TestUpdateBox(t *testing.T) {
 	a, _, _, view := createAnnotator()
 	a.UpdateBox(upd.Request{}, view)
@@ -90,4 +85,17 @@ func TestUpdateBox(t *testing.T) {
 	if got == nil {
 		t.Fatal("expected to update annotation")
 	}
+}
+
+func TestReDrawOnUpdateLabelOfAnnotation(t *testing.T) {
+	a, _, _, view := createAnnotator()
+	label := "a-label"
+	req := updlbl.Request{AnnotationId: an.NewAnnotationId(),
+		Label: label}
+	a.UpdateLabelOfAnnotation(req, view)
+	if view.UpdatedLabelOfAnnotation != label {
+		t.Fatal("expected to update annotation with label %v, got %v",
+			label, view.UpdatedLabelOfAnnotation)
+	}
+
 }

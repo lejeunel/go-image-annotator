@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	ast "github.com/lejeunel/go-image-annotator-v2/application/file-store"
+	ast "github.com/lejeunel/go-image-annotator-v2/app/file-store"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 )

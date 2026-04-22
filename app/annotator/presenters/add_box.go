@@ -1,7 +1,7 @@
 package presenters
 
 import (
-	v "github.com/lejeunel/go-image-annotator-v2/application/annotator/view"
+	v "github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
 	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
 )
 

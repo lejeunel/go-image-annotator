@@ -1,7 +1,7 @@
 package web
 
 import (
-	a "github.com/lejeunel/go-image-annotator-v2/application/annotator"
+	a "github.com/lejeunel/go-image-annotator-v2/app/annotator"
 	u "github.com/lejeunel/go-image-annotator-v2/use-cases"
 )
 
