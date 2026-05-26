@@ -14,7 +14,6 @@ import (
 )
 
 func (s *Server) FindCollectionByName(w http.ResponseWriter, r *http.Request, name string) {
-
 	s.Collection.Find.Execute(read.Request{Name: name}, presenter.NewFindPresenter(w))
 }
 func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {

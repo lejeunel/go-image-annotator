@@ -18,7 +18,7 @@ type FakeScroller struct {
 	IsInit    bool
 }
 
-func (s *FakeScroller) Init(imageId im.ImageId, opts ...scr.Option) (*scr.ScrollerState, error) {
+func (s *FakeScroller) Init(imageId string, opts ...scr.Option) (*scr.ScrollerState, error) {
 	if s.ErrOnInit {
 		return nil, s.Err
 	}

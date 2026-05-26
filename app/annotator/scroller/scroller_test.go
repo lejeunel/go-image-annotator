@@ -8,9 +8,17 @@ import (
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 )
 
+func TestErrOnInvalidImageId(t *testing.T) {
+	s := New(&FakeRepo{})
+	_, err := s.Init("invalid-image-id")
+	if !errors.Is(err, e.ErrValidation) {
+		t.Fatalf("expected validation error, got %v", err)
+	}
+}
+
 func TestErrOnCurrentImageShouldFail(t *testing.T) {
 	s := New(&FakeRepo{ErrOnImageExists: true, Err: e.ErrNotFound})
-	_, err := s.Init(im.NewImageId())
+	_, err := s.Init(im.NewImageId().String())
 	if !errors.Is(err, e.ErrNotFound) {
 		t.Fatalf("expected not found error, got %v", err)
 	}
@@ -18,7 +26,7 @@ func TestErrOnCurrentImageShouldFail(t *testing.T) {
 
 func TestNonExistingCollectionShouldFail(t *testing.T) {
 	s := New(&FakeRepo{ErrOnCollectionExists: true, Err: e.ErrNotFound})
-	_, err := s.Init(im.NewImageId(), WithCollection("non-existing-collection"))
+	_, err := s.Init(im.NewImageId().String(), WithCollection("non-existing-collection"))
 	if !errors.Is(err, e.ErrNotFound) {
 		t.Fatalf("expected not found error, got %v", err)
 	}
@@ -26,7 +34,7 @@ func TestNonExistingCollectionShouldFail(t *testing.T) {
 
 func TestSingleImageHasNoNextImage(t *testing.T) {
 	s := New(&FakeRepo{})
-	state, _ := s.Init(im.NewImageId())
+	state, _ := s.Init(im.NewImageId().String())
 	if state.Next != nil {
 		t.Fatal("expected no next image")
 	}
@@ -34,7 +42,7 @@ func TestSingleImageHasNoNextImage(t *testing.T) {
 
 func TestSingleImageHasNoPreviousImage(t *testing.T) {
 	s := New(&FakeRepo{})
-	state, _ := s.Init(im.NewImageId())
+	state, _ := s.Init(im.NewImageId().String())
 	if state.Previous != nil {
 		t.Fatal("expected no next image")
 	}
@@ -43,7 +51,7 @@ func TestSingleImageHasNoPreviousImage(t *testing.T) {
 func TestNextImage(t *testing.T) {
 	next := &im.BaseImage{ImageId: im.NewImageId()}
 	s := New(&FakeRepo{NextImage: next})
-	state, _ := s.Init(im.NewImageId())
+	state, _ := s.Init(im.NewImageId().String())
 	if state.Next == nil {
 		t.Fatal("expected to get one next image")
 	}
@@ -55,7 +63,7 @@ func TestNextImage(t *testing.T) {
 func TestPreviousImage(t *testing.T) {
 	prev := &im.BaseImage{ImageId: im.NewImageId()}
 	s := New(&FakeRepo{PreviousImage: prev})
-	state, _ := s.Init(im.NewImageId())
+	state, _ := s.Init(im.NewImageId().String())
 	if state.Previous == nil {
 		t.Fatal("expected to get one previous image")
 	}

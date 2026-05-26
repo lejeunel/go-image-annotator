@@ -10,10 +10,19 @@ import (
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 )
 
-func TestHandleError(t *testing.T) {
+func TestHandleErrorOnImageIdParsing(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&st.FakeImageStore{Err: e.ErrNotFound})
-	itr.Execute(Request{ImageId: im.NewImageId(), Collection: "a-collection"}, p)
+	itr.Execute(Request{ImageId: "invalid-image-id", Collection: "a-collection"}, p)
+	if !errors.Is(p.GotErr, e.ErrValidation) || p.GotSuccess {
+		t.Fatalf("expected to get validation error")
+	}
+}
+
+func TestHandleErrorOnFind(t *testing.T) {
+	p := &FakePresenter{}
+	itr := NewInteractor(&st.FakeImageStore{Err: e.ErrNotFound})
+	itr.Execute(Request{ImageId: im.NewImageId().String(), Collection: "a-collection"}, p)
 	if !errors.Is(p.GotErr, e.ErrNotFound) || p.GotSuccess {
 		t.Fatalf("expected to get not found error")
 	}
@@ -23,7 +32,8 @@ func TestFindImageGivesCorrectIdAndCollection(t *testing.T) {
 	p := &FakePresenter{}
 	existingImage := im.NewImage(im.NewImageId(), *clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	itr := NewInteractor(&st.FakeImageStore{Return: existingImage})
-	itr.Execute(Request{ImageId: existingImage.Id, Collection: existingImage.Collection.Name}, p)
+	itr.Execute(Request{ImageId: existingImage.Id.String(),
+		Collection: existingImage.Collection.Name}, p)
 	got := p.Got
 	if !p.GotSuccess {
 		t.Fatalf("expected to get success")

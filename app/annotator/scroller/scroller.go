@@ -9,7 +9,7 @@ import (
 )
 
 type Interface interface {
-	Init(im.ImageId, ...Option) (*ScrollerState, error)
+	Init(string, ...Option) (*ScrollerState, error)
 }
 
 type Scroller struct {
@@ -21,7 +21,11 @@ type ScrollerState struct {
 	Previous *im.BaseImage
 }
 
-func (s Scroller) Init(imageId im.ImageId, opts ...Option) (*ScrollerState, error) {
+func (s Scroller) Init(imageIdStr string, opts ...Option) (*ScrollerState, error) {
+	imageId, err := im.NewImageIdFromString(imageIdStr)
+	if err != nil {
+		return nil, err
+	}
 	criteria := NewCriteria(opts...)
 	if err := checkCriteria(s.repo, imageId, criteria); err != nil {
 		return nil, err

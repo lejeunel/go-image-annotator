@@ -1,41 +1,76 @@
-#+title: Readme
+#+title: Go Image Annotation Tool
 
-* TODO Image domain object
-** TODO Add bounding box: check for range constraints
-* DONE Image listing
-* DONE Add bounding box
-* DONE Remove bounding box
-* DONE Update bounding box
-* DONE Import existing image into collection (without annotations)
-** DONE use-case
-* TODO Import image into collection with annotations (needs source collection)
-* DONE SQLite repositories
-** DONE Labels
-*** DONE create
-*** DONE find
-*** DONE delete
-**** DONE exists
-**** DONE IsUsed
-**** DONE delete
-*** DONE update
-*** DONE list
-** DONE Collections
-*** DONE create
-*** DONE find
-*** DONE delete
-**** DONE IsPopulated
-*** DONE update
-** DONE Images
-*** DONE AddToCollection(im.ImageId, clc.CollectionId) error
-*** DONE ImageExistsInCollection(ImageId, string) (bool, error)
-*** DONE FindImageIdByHash(string) (*im.Image, error)
-*** DONE Delete(im.ImageId) error
-*** DONE RemoveImageFromCollection
-*** DONE ImageExists(im.ImageId) (bool, error)
-** DONE Annotations
-*** DONE AddImageLabel(im.ImageId, clc.CollectionId, lbl.LabelId) error
-*** DONE FindImageLabels(ImageId, clc.CollectionId) ([]*a.ImageLabel, error)
-*** DONE RemoveAnnotation(a.AnnotationId) error
-*** DONE AddBoundingBox(im.ImageId, clc.CollectionId, a.BoundingBox) error
-*** DONE FindBoundingBoxes(ImageId, clc.CollectionId) ([]*a.BoundingBox, error)
-*** DONE UpdateBoundingBox(Updatables) error
+* Introduction
+
+We make available a simple web application
+to annotate images using bounding boxes.
+
+In its current state, this is minimal in terms of features,
+and could be of use as a simple starter's kit for more elaborate
+needs.
+
+* Requirements
+This application has been tested to build
+with ~go~ version ~>= 1.26~.
+
+To (re)-generate the HTTP endpoints, you will need
+~oapi-codegen~ version ~>=2.5.1~.
+
+Last, CSS must be generated using ~tailwindcss~ version ~4~.
+
+All other dependencies are bundled in this repository
+as javascript files.
+
+Optionally, we provide a [[https://nixos.wiki/wiki/Flakes][Nix Flake]]
+that provides a development environment (dev-shell)
+with all requirements included.
+
+* Usage
+
+To build the binary, run
+#+begin_src sh
+go build .
+#+end_src
+
+You may then launch the web server on port ~8001~ with:
+#+begin_src sh
+./go-image-annotator serve -p 8001
+#+end_src
+
+
+
+* Tech Stack
+This application is developed in [[https://go.dev/][Go]], which is a
+great candidate for web applications.
+
+** Frontend
+We try to keep this project lightweight, by avoiding
+heavy frontend framework. Instead, we make the choice to
+generate most content on the server-side, and let
+the client be a "thin viewer". In particular,
+we rely on [[https://htmx.org/][HTMX]].
+
+For the annotation client-side widget, we use [[https://annotorious.dev/][Annotatorious]],
+which allows to draw and update different kinds of shapes.
+
+Last, we style our pages using [[https://tailwindcss.com/][tailwindcss]].
+
+** Database
+
+For the repository-layer we provide adapters based on [[https://sqlite.org/][SQLite]], which
+we choose for its simplicity and speed.
+
+** REST API
+This application exposes a number of HTTP endpoints to handle
+requests through json payloads. We auto-generate
+HTTP controller methods from OpenAPI specs using [[https://github.com/oapi-codegen/oapi-codegen][oapi-codegen]].
+
+* Design Principles
+This application is built following the [[https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html][Clean Architecture]],
+where use-cases are placed at the center, while dependencies
+are places on the outside. In a nutshell, this ensures
+clear separation of concern and testability, and
+should make this project easy to extend and modify.
+
+Furthermore, we strive to provide an extensive test suite.
+

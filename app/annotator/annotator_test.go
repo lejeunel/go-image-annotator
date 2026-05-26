@@ -32,14 +32,14 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
 }
 func TestInitializeScrollerOnStart(t *testing.T) {
 	a, image, scroller, view := createAnnotator()
-	a.Init(image.Id, "a-collection", view)
+	a.Init(image.Id.String(), "a-collection", view)
 	if !scroller.IsInit {
 		t.Fatal("expected to initialize scroller")
 	}
 }
 func TestDrawScrollerOnStart(t *testing.T) {
 	a, image, _, view := createAnnotator()
-	a.Init(image.Id, "a-collection", view)
+	a.Init(image.Id.String(), "a-collection", view)
 	if view.GotScrollerButtons == nil {
 		t.Fatal("expected to draw scroller buttons on start")
 	}
@@ -47,14 +47,14 @@ func TestDrawScrollerOnStart(t *testing.T) {
 }
 func TestFetchAllLabelsOnStart(t *testing.T) {
 	a, image, _, view := createAnnotator()
-	a.Init(image.Id, "a-collection", view)
+	a.Init(image.Id.String(), "a-collection", view)
 	if view.GotLabels == nil {
 		t.Fatal("expected to draw label list")
 	}
 }
 func TestDrawImageOnStart(t *testing.T) {
 	a, image, _, view := createAnnotator()
-	a.Init(image.Id, "a-collection", view)
+	a.Init(image.Id.String(), "a-collection", view)
 	if view.GotImage.Id != image.Id.String() {
 		t.Fatalf("expected to present image with id %v, got %v",
 			image.Id, view.GotImage.Id)

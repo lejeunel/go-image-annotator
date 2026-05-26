@@ -9,7 +9,6 @@ import (
 
 	aw "github.com/lejeunel/go-image-annotator-v2/adapters/web/annotator"
 	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 	"github.com/lejeunel/go-image-annotator-v2/shared/html"
 	"github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
@@ -35,11 +34,7 @@ func ParseImageIdAndCollectionFromURL(u *url.URL) (*aw.Request, error) {
 	if imageIdStr == "" {
 		return nil, fmt.Errorf("%v: extracting id: %w", baseErr, e.ErrURLParsing)
 	}
-	imageId, err := im.NewImageIdFromString(imageIdStr)
-	if err != nil {
-		return nil, fmt.Errorf("%v: validating id (%v): %w", baseErr, imageIdStr, e.ErrValidation)
-	}
-	req.ImageId = imageId
+	req.ImageId = imageIdStr
 
 	collection := u.Query().Get("collection")
 	if collection == "" {

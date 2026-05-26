@@ -20,7 +20,6 @@ func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-
 	s.Label.Create.Execute(create.Request{Name: body.Name, Description: *body.Description},
 		&presenter.Create{Writer: w})
 }
@@ -36,5 +35,4 @@ func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request, params ListL
 		req.PageSize = *p
 	}
 	s.Label.List.Execute(req, presenter.NewListPresenter(w))
-
 }

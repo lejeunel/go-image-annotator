@@ -4,7 +4,6 @@ import (
 	p "github.com/lejeunel/go-image-annotator-v2/app/annotator/presenters"
 	scr "github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
 	v "github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	addbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
 	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
@@ -35,7 +34,7 @@ func (a *Annotator) UpdateBox(r updbox.Request, view v.View) {
 func (a *Annotator) AddBox(r addbox.Request, view v.View) {
 	a.boxAdder.Execute(r, p.AddBoxPresenter{View: view})
 }
-func (a *Annotator) Init(imageId im.ImageId, collection string, view v.View) {
+func (a *Annotator) Init(imageId string, collection string, view v.View) {
 	scrollerState, err := a.scroller.Init(imageId, scr.WithCollection(collection))
 	if err != nil {
 		view.Error(err)

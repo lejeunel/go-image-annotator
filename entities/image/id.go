@@ -2,7 +2,9 @@ package image
 
 import (
 	"fmt"
+
 	"github.com/google/uuid"
+	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 	uuidw "github.com/lejeunel/go-image-annotator-v2/shared/uuid"
 )
 
@@ -17,7 +19,7 @@ func NewImageId() ImageId {
 func NewImageIdFromString(s string) (ImageId, error) {
 	id, err := uuid.Parse(s)
 	if err != nil {
-		return ImageId{}, fmt.Errorf("invalid ImageId: %w", err)
+		return ImageId{}, fmt.Errorf("invalid ImageId: %w: %w", err, e.ErrValidation)
 	}
 
 	return ImageId{
