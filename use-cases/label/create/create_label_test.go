@@ -10,7 +10,7 @@ import (
 func TestCreateLabelWithDuplicateNameShouldFail(t *testing.T) {
 	name := "my-label"
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Names: []string{name}}, &v.FakeNameValidator{})
+	itr := NewInteractor(&FakeRepo{Names: []string{name}})
 	itr.Execute(Request{Name: name}, p)
 	if !p.GotDuplicationErr {
 		t.Fatal("expected duplication error, but go none")
@@ -22,8 +22,8 @@ func TestCreateLabelWithDuplicateNameShouldFail(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal}, &v.FakeNameValidator{})
-	itr.Execute(Request{}, p)
+	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
+	itr.Execute(Request{Name: "a-name"}, p)
 	if !p.GotInternalErr {
 		t.Fatal("expected internal error, but got none")
 	}
@@ -31,7 +31,7 @@ func TestHandleInternalError(t *testing.T) {
 
 func TestCreateLabelWithInvalidNameShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{}, &v.FakeNameValidator{Err: e.ErrValidation})
+	itr := NewInteractor(&FakeRepo{}, WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
 	itr.Execute(Request{Name: "invalid-name"}, p)
 	if !p.GotValidationErr {
 		t.Fatal("expected validation error, but go none")
@@ -41,15 +41,13 @@ func TestCreateLabelWithInvalidNameShouldFail(t *testing.T) {
 func TestCreateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{}
-	itr := NewInteractor(repo, &v.FakeNameValidator{})
-	name := "a-name"
-	desc := "a-description"
-	req := Request{Name: name, Description: desc}
+	itr := NewInteractor(repo)
+	req := Request{Name: "a-name", Description: "a-description"}
 	itr.Execute(req, p)
 
-	st.AssertEqual(t, "name", p.Got.Name, name)
-	st.AssertEqual(t, "description", p.Got.Description, desc)
-	st.AssertEqual(t, "name", repo.Got.Name, name)
-	st.AssertEqual(t, "description", repo.Got.Description, desc)
+	st.AssertEqual(t, "name", p.Got.Name, req.Name)
+	st.AssertEqual(t, "description", p.Got.Description, req.Description)
+	st.AssertEqual(t, "name", repo.Got.Name, req.Name)
+	st.AssertEqual(t, "description", repo.Got.Description, req.Description)
 	st.AssertEqual(t, "id", repo.Got.Id.IsNil(), false)
 }

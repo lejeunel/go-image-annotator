@@ -74,11 +74,10 @@ func TestInternalErrOnImportShouldFail(t *testing.T) {
 func TestImportImageInCollection(t *testing.T) {
 	p := &FakePresenter{}
 	imageId := im.NewImageId()
-	collectionName := "a-destination-collection"
-	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-destination-collection")
 	repo := &FakeRepo{DestinationCollection: *collection}
 	itr := NewInteractor(repo)
-	itr.Execute(Request{ImageId: imageId, Collection: collectionName}, p)
+	itr.Execute(Request{ImageId: imageId, Collection: collection.Name}, p)
 	if !p.GotSuccess {
 		t.Fatalf("expected success")
 	}

@@ -2,6 +2,7 @@ package list
 
 import (
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	st "github.com/lejeunel/go-image-annotator-v2/shared/testing"
 	"testing"
 )
 
@@ -45,20 +46,9 @@ func TestListCollection(t *testing.T) {
 	itr := NewInteractor(repo)
 	req := Request{PageSize: pageSize, Page: page}
 	itr.Execute(req, p)
-	got := p.Got
-	if len(got.Collections) != pageSize {
-		t.Fatalf("expected to retrieve %v collections, got %v", pageSize, len(got.Collections))
-	}
-	if got.Pagination.TotalRecords != count {
-		t.Fatalf("expected to retrieve count of %v, got %v", count, got.Pagination.TotalRecords)
-	}
-	if int(got.Pagination.TotalPages) != 2 {
-		t.Fatalf("expected to retrieve total pages %v, got %v", 2, got.Pagination.TotalPages)
-	}
-	if got.Pagination.Page != page {
-		t.Fatalf("expected to retrieve page %v, got %v", page, got.Pagination.Page)
-	}
-	if int(got.Pagination.PageSize) != pageSize {
-		t.Fatalf("expected to retrieve page %v, got %v", pageSize, got.Pagination.Page)
-	}
+	st.AssertEqual(t, "page size", len(p.Got.Collections), pageSize)
+	st.AssertEqual(t, "total records", p.Got.Pagination.TotalRecords, count)
+	st.AssertEqual(t, "total pages", int(p.Got.Pagination.TotalPages), 2)
+	st.AssertEqual(t, "page", p.Got.Pagination.Page, page)
+	st.AssertEqual(t, "page size", p.Got.Pagination.PageSize, pageSize)
 }

@@ -7,6 +7,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	stest "github.com/lejeunel/go-image-annotator-v2/shared/testing"
 )
 
 func TestNonExistingImageStoreResourceShouldFail(t *testing.T) {
@@ -78,40 +79,22 @@ func TestInternalErrOnAddBoxShouldFail(t *testing.T) {
 func TestAddBoundingBox(t *testing.T) {
 	p := &FakePresenter{}
 	repo := FakeRepo{}
-	imageId := im.NewImageId()
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
-	image := im.NewImage(imageId, *collection)
-	label := "a-label"
-	x := float32(1.0)
-	y := float32(1.0)
-	width := float32(3.0)
-	height := float32(3.0)
+	image := im.NewImage(im.NewImageId(), *collection)
+	req := Request{ImageId: image.Id, Collection: collection.Name,
+		Label: "a-label", Xc: float32(1.0), Yc: float32(1.0), Width: float32(3.0),
+		Height: float32(3.0)}
 	itr := NewInteractor(&st.FakeImageStore{Return: image}, &repo)
-	itr.Execute(Request{ImageId: imageId, Collection: "a-collection", Label: label,
-		Xc: x, Yc: y, Width: width, Height: height}, p)
+	itr.Execute(req, p)
 	if !p.GotSuccess {
 		t.Fatalf("expected success")
 	}
-	if repo.GotImageId != imageId {
-		t.Fatalf("expected to store box on image %v, got %v", imageId.String(), repo.GotImageId.String())
-	}
-	if repo.GotCollectionId != collection.Id {
-		t.Fatalf("expected to store box on collection %v, got %v", collection.Id.String(), repo.GotCollectionId.String())
-	}
-	if repo.GotBox.Label.Name != label {
-		t.Fatalf("expected to store box with label %v, got %v", label, repo.GotBox.Label.Name)
-	}
-	if repo.GotBox.Xc != x {
-		t.Fatalf("expected to store box with x %v, got %v", x, repo.GotBox.Xc)
-	}
-	if repo.GotBox.Yc != y {
-		t.Fatalf("expected to store box with y %v, got %v", x, repo.GotBox.Yc)
-	}
-	if repo.GotBox.Width != width {
-		t.Fatalf("expected to store box with width %v, got %v", width, repo.GotBox.Width)
-	}
-	if repo.GotBox.Height != height {
-		t.Fatalf("expected to store box with height %v, got %v", height, repo.GotBox.Height)
-	}
+	stest.AssertEqual(t, "image id", repo.GotImageId, req.ImageId)
+	stest.AssertEqual(t, "collection id", repo.GotCollectionId, collection.Id)
+	stest.AssertEqual(t, "label name", repo.GotBox.Label.Name, req.Label)
+	stest.AssertEqual(t, "xc", repo.GotBox.Xc, req.Xc)
+	stest.AssertEqual(t, "yc", repo.GotBox.Yc, req.Yc)
+	stest.AssertEqual(t, "width", repo.GotBox.Width, req.Width)
+	stest.AssertEqual(t, "height", repo.GotBox.Height, req.Height)
 
 }

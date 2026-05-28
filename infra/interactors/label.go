@@ -2,7 +2,6 @@ package interactors
 
 import (
 	infra "github.com/lejeunel/go-image-annotator-v2/infra/db/label"
-	"github.com/lejeunel/go-image-annotator-v2/shared/validation"
 	lbl "github.com/lejeunel/go-image-annotator-v2/use-cases/label"
 	"github.com/lejeunel/go-image-annotator-v2/use-cases/label/create"
 	"github.com/lejeunel/go-image-annotator-v2/use-cases/label/delete"
@@ -14,7 +13,7 @@ import (
 func NewSQLiteLabelInteractors(repo *infra.SQLiteLabelRepo, pageSize int) *lbl.Interactors {
 	return &lbl.Interactors{
 		Find:            *read.NewInteractor(repo),
-		Create:          *create.NewInteractor(repo, validation.NewNameValidator()),
+		Create:          *create.NewInteractor(repo),
 		Delete:          *delete.NewInteractor(repo),
 		List:            *list.NewInteractor(repo),
 		FetchAll:        *fetchall.NewInteractor(repo),

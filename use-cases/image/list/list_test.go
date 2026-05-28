@@ -5,6 +5,7 @@ import (
 
 	st "github.com/lejeunel/go-image-annotator-v2/app/image-store"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	stest "github.com/lejeunel/go-image-annotator-v2/shared/testing"
 )
 
 func TestHandleNotFoundErrOnList(t *testing.T) {
@@ -63,21 +64,19 @@ func TestPaginationMetaData(t *testing.T) {
 	r := Request{Page: 1, PageSize: 2}
 	itr.Execute(r, p)
 	pg := p.Got.Pagination
-	if !(pg.Page == r.Page) || !(pg.PageSize == r.PageSize) || !(pg.TotalRecords == 10) || !(pg.TotalPages == 5) {
-		t.Fatalf("expected pagination meta-data with page 1, page size 2, total 1, and total pages 5, got %+v", pg)
-	}
+	stest.AssertEqual(t, "page", pg.Page, r.Page)
+	stest.AssertEqual(t, "page size", pg.PageSize, r.PageSize)
+	stest.AssertEqual(t, "total records", int(pg.TotalRecords), 10)
+	stest.AssertEqual(t, "total pages", int(pg.TotalPages), 5)
 }
 
-func TestQueryCorrectPagination(t *testing.T) {
+func TestQueryCorrectPaginationWithFilters(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{Count_: 10}
 	itr := NewInteractor(repo, &st.FakeImageStore{})
 	r := Request{Page: 1, PageSize: 2}
 	itr.Execute(r, p)
 	f := repo.GotFilters
-	if !(f.Page == r.Page) || !(f.PageSize == r.PageSize) {
-		t.Fatalf("expected to query repo with page %v and page size %v, got %v and %v",
-			r.Page, r.PageSize, repo.GotFilters.Page, repo.GotFilters.PageSize)
-
-	}
+	stest.AssertEqual(t, "page", int(f.Page), int(r.Page))
+	stest.AssertEqual(t, "page size", f.PageSize, r.PageSize)
 }

@@ -8,6 +8,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	stest "github.com/lejeunel/go-image-annotator-v2/shared/testing"
 )
 
 func TestHandleErrorOnImageIdParsing(t *testing.T) {
@@ -34,14 +35,9 @@ func TestFindImageGivesCorrectIdAndCollection(t *testing.T) {
 	itr := NewInteractor(&st.FakeImageStore{Return: existingImage})
 	itr.Execute(Request{ImageId: existingImage.Id.String(),
 		Collection: existingImage.Collection.Name}, p)
-	got := p.Got
 	if !p.GotSuccess {
 		t.Fatalf("expected to get success")
 	}
-	if !(got.Id == existingImage.Id) || !(got.Collection.Name == existingImage.Collection.Name) {
-		t.Fatalf("expected to get image id: %v, collection %v, got %v, %v",
-			existingImage.Id, existingImage.Collection.Name,
-			got.Id, got.Collection)
-
-	}
+	stest.AssertEqual(t, "id", p.Got.Id, existingImage.Id)
+	stest.AssertEqual(t, "collection name", p.Got.Collection.Name, existingImage.Collection.Name)
 }

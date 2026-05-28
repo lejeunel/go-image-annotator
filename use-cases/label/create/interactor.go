@@ -52,6 +52,20 @@ func (i *Interactor) checkDuplicate(name string) error {
 	return nil
 }
 
-func NewInteractor(r Repo, v v.Validator) *Interactor {
-	return &Interactor{repo: r, validator: v, logger: logging.NewNoOpLogger()}
+type Option func(*Interactor)
+
+func WithNameValidator(v v.Validator) Option {
+	return func(i *Interactor) {
+		i.validator = v
+	}
+}
+
+func NewInteractor(r Repo, opts ...Option) *Interactor {
+	i := &Interactor{repo: r, validator: v.NewNameValidator(),
+		logger: logging.NewNoOpLogger()}
+
+	for _, opt := range opts {
+		opt(i)
+	}
+	return i
 }

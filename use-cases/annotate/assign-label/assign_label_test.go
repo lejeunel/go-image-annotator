@@ -8,6 +8,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	stest "github.com/lejeunel/go-image-annotator-v2/shared/testing"
 )
 
 func TestHandleNotFoundErrOnImageRetrieval(t *testing.T) {
@@ -55,12 +56,10 @@ func TestAssignLabelToImage(t *testing.T) {
 	itr := NewInteractor(repo, &st.FakeImageStore{Return: image})
 	itr.Execute(req, p)
 	resp := p.Got
-	if !p.GotSuccess || !(resp.Label == req.Label) || !(resp.Collection == req.Collection) || !(resp.ImageId == req.ImageId) {
-		t.Fatalf("expected response does not match, got request %+v and response %+v", req, resp)
-	}
-	if (repo.AddedLabelId != label.Id) || (repo.AddedOnImageId != image.Id) || (repo.AddedOnCollectionId != collection.Id) {
-		t.Fatalf("expected to add label %v on image %v and collection %v, got %v, %v, %v",
-			label, image.Id, image.Collection.Id,
-			repo.AddedLabelId, repo.AddedOnImageId, repo.AddedOnCollectionId)
-	}
+	stest.AssertEqual(t, "label", resp.Label, req.Label)
+	stest.AssertEqual(t, "collection", resp.Collection, req.Collection)
+	stest.AssertEqual(t, "image id", resp.ImageId, req.ImageId)
+	stest.AssertEqual(t, "added label id", repo.AddedLabelId, label.Id)
+	stest.AssertEqual(t, "added on image id", repo.AddedOnImageId, image.Id)
+	stest.AssertEqual(t, "added on collection id", repo.AddedOnCollectionId, collection.Id)
 }
