@@ -74,11 +74,27 @@ func (i *Interactor) handleError(err error, out OutputPort) {
 	out.Error(err)
 }
 
-func NewInteractor(r Repo, v v.Validator, clock clockwork.Clock) *Interactor {
-	return &Interactor{repo: r, validator: v, logger: logging.NewNoOpLogger(),
-		clock: clock}
+type Option func(*Interactor)
+
+func WithNameValidator(v v.Validator) Option {
+	return func(i *Interactor) {
+		i.validator = v
+	}
 }
 
-func NewDefaultInteractor(repo Repo) *Interactor {
-	return NewInteractor(repo, v.NewNameValidator(), clockwork.NewRealClock())
+func WithClock(c clockwork.Clock) Option {
+	return func(i *Interactor) {
+		i.clock = c
+	}
+}
+
+func NewInteractor(r Repo, opts ...Option) *Interactor {
+	i := &Interactor{repo: r, validator: v.NewNameValidator(),
+		logger: logging.NewNoOpLogger(),
+		clock:  clockwork.NewRealClock()}
+
+	for _, opt := range opts {
+		opt(i)
+	}
+	return i
 }

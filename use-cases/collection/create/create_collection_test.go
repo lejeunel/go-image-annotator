@@ -6,13 +6,14 @@ import (
 
 	"github.com/jonboulle/clockwork"
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	st "github.com/lejeunel/go-image-annotator-v2/shared/testing"
 	v "github.com/lejeunel/go-image-annotator-v2/shared/validation"
 )
 
 func TestCreateCollectionWithDuplicateNameShouldFail(t *testing.T) {
 	name := "my-collection"
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Names: []string{name}}, &v.FakeNameValidator{}, clockwork.NewFakeClock())
+	itr := NewInteractor(&FakeRepo{Names: []string{name}})
 	itr.Execute(Request{Name: name}, p)
 	if !p.GotDuplicationErr {
 		t.Fatal("expected duplication error, but go none")
@@ -24,7 +25,8 @@ func TestCreateCollectionWithDuplicateNameShouldFail(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal}, &v.FakeNameValidator{}, clockwork.NewFakeClock())
+	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal},
+		WithNameValidator(&v.FakeNameValidator{}))
 	itr.Execute(Request{}, p)
 	if !p.GotInternalErr {
 		t.Fatal("expected internal error, but got none")
@@ -34,8 +36,8 @@ func TestHandleInternalError(t *testing.T) {
 func TestCreateCollectionWithInvalidNameShouldFail(t *testing.T) {
 	name := "my-collection%/"
 	p := &FakePresenter{}
-	validator := &v.FakeNameValidator{Err: e.ErrValidation}
-	itr := NewInteractor(&FakeRepo{Names: []string{name}}, validator, clockwork.NewFakeClock())
+	itr := NewInteractor(&FakeRepo{Names: []string{name}},
+		WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
 	itr.Execute(Request{Name: name}, p)
 	if !p.GotValidationErr {
 		t.Fatal("expected validation error, but go none")
@@ -46,15 +48,11 @@ func TestCreateCollection(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{}
 	now := time.Now()
-	itr := NewInteractor(repo, &v.FakeNameValidator{}, clockwork.NewFakeClockAt(now))
-	name := "a-name"
-	desc := "a-description"
-	req := Request{Name: name, Description: desc}
+	itr := NewInteractor(repo, WithClock(clockwork.NewFakeClockAt(now)))
+	req := Request{Name: "a-name", Description: "a-descriptin"}
 	itr.Execute(req, p)
-	got := repo.Got
-	if got.Name != name || got.Description != desc || got.Id.IsNil() || got.CreatedAt != now {
-		t.Fatalf("expected to create collection with name %v, description %v, non-nil id, and created at %v got %v, %v, %v, %v",
-			name, desc, now, got.Name, got.Description, got.Id, got.CreatedAt)
-
-	}
+	st.AssertEqual(t, "name", repo.Got.Name, req.Name)
+	st.AssertEqual(t, "description", repo.Got.Description, req.Description)
+	st.AssertEqual(t, "creation date", repo.Got.CreatedAt, now)
+	st.AssertEqual(t, "id", repo.Got.Id.IsNil(), false)
 }

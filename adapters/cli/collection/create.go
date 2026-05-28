@@ -23,7 +23,7 @@ func (p CreatePresenter) Error(err error) {
 func Create(name, description string) {
 	cfg := config.Parse()
 	app := infra.NewSQLiteInfra(cfg.DBPath, cfg.ArtefactDir)
-	itr := clc.NewDefaultInteractor(app.CollectionRepo)
+	itr := clc.NewInteractor(app.CollectionRepo)
 	itr.Execute(clc.Request{Name: name, Description: description}, CreatePresenter{})
 
 }
