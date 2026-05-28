@@ -2,6 +2,7 @@ package create
 
 import (
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	st "github.com/lejeunel/go-image-annotator-v2/shared/testing"
 	v "github.com/lejeunel/go-image-annotator-v2/shared/validation"
 	"testing"
 )
@@ -44,14 +45,11 @@ func TestCreateLabel(t *testing.T) {
 	name := "a-name"
 	desc := "a-description"
 	req := Request{Name: name, Description: desc}
-	wantp := Response{Name: name, Description: desc}
 	itr.Execute(req, p)
-	if p.Got != wantp {
-		t.Fatalf("expected %v, got %v", wantp, p.Got)
-	}
-	if repo.Got.Name != name || repo.Got.Description != desc || repo.Got.Id.IsNil() {
-		t.Fatalf("expected to create label with name %v, description %v, and non-nil id, got %v, %v, %v",
-			name, desc, repo.Got.Name, repo.Got.Description, repo.Got.Id)
 
-	}
+	st.AssertEqual(t, "name", p.Got.Name, name)
+	st.AssertEqual(t, "description", p.Got.Description, desc)
+	st.AssertEqual(t, "name", repo.Got.Name, name)
+	st.AssertEqual(t, "description", repo.Got.Description, desc)
+	st.AssertEqual(t, "id", repo.Got.Id.IsNil(), false)
 }

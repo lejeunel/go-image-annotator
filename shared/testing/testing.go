@@ -2,6 +2,7 @@ package testing
 
 import (
 	"errors"
+	"testing"
 
 	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
 )
@@ -29,5 +30,12 @@ func (p *TestingErrPresenter) Error(err error) {
 
 	default:
 		p.GotInternalErr = true
+	}
+}
+
+func AssertEqual(t *testing.T, prefixMsg string, got any, want any) {
+	if got != want {
+		t.Fatalf("%v: got %v, want %v",
+			prefixMsg, got, want)
 	}
 }
