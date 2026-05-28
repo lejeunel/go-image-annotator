@@ -236,6 +236,3 @@ func TestAddImageShouldAddMIMEType(t *testing.T) {
 		t.Fatalf("expected to set MIMEType to %v, got %v", specs.MIMEType, imageRepo.GotSpecs.MIMEType)
 	}
 }
-
-func TestAddImageWithMetaData(t *testing.T) {
-}
