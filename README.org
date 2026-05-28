@@ -9,7 +9,7 @@ In its current state, this is minimal in terms of features,
 and could be of use as a simple starter's kit for more elaborate
 needs.
 
-* Requirements
+* Development dependencies
 This application has been tested to build
 with ~go~ version ~>= 1.26~.
 
@@ -37,8 +37,6 @@ You may then launch the web server on port ~8001~ with:
 ./go-image-annotator serve -p 8001
 #+end_src
 
-
-
 * Tech Stack
 This application is developed in [[https://go.dev/][Go]], which is a
 great candidate for web applications.
@@ -48,7 +46,9 @@ We try to keep this project lightweight, by avoiding
 heavy frontend framework. Instead, we make the choice to
 generate most content on the server-side, and let
 the client be a "thin viewer". In particular,
-we rely on [[https://htmx.org/][HTMX]].
+we rely on [[https://htmx.org/][HTMX]] to generate views on the server and update
+the client, and [[https://alpinejs.dev/][Alpine.js]]
+for client-side interactivity.
 
 For the annotation client-side widget, we use [[https://annotorious.dev/][Annotatorious]],
 which allows to draw and update different kinds of shapes.
