@@ -56,7 +56,7 @@ func TestInternalErrOnUpdateShouldFail(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	p := &FakePresenter{}
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
-	repo := &FakeRepo{Label: *label}
+	repo := &FakeRepo{Label: label}
 	itr := NewInteractor(repo)
 	annotationId := a.NewAnnotationId()
 	r := Request{AnnotationId: annotationId, Xc: 1, Yc: 1, Width: 1, Height: 1}

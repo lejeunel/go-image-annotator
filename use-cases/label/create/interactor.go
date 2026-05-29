@@ -27,7 +27,7 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 	}
 
 	label := lbl.NewLabel(lbl.NewLabelId(), r.Name, lbl.WithDescription(r.Description))
-	if err := i.repo.Create(*label); err != nil {
+	if err := i.repo.Create(label); err != nil {
 		i.handleError(err, out)
 		return
 	}

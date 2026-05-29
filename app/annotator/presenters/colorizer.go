@@ -9,8 +9,8 @@ type CyclicColorizer struct {
 	ColorMap map[string]string
 }
 
-func NewCyclicColorizer() CyclicColorizer {
-	return CyclicColorizer{Palette: Palette, ColorMap: make(map[string]string)}
+func NewCyclicColorizer(palette []string) CyclicColorizer {
+	return CyclicColorizer{Palette: palette, ColorMap: make(map[string]string)}
 }
 
 func (c CyclicColorizer) Colorize(key string) string {

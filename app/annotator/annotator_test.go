@@ -20,14 +20,14 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
 	view := &FakeView{}
 	scroller := &FakeScroller{}
 	image := im.NewImage(im.NewImageId(),
-		*clc.NewCollection(clc.NewCollectionId(), "name"))
+		clc.NewCollection(clc.NewCollectionId(), "name"))
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
-	box := an.NewBoundingBox(an.NewAnnotationId(), 1, 1, 1, 1, *label)
+	box := an.NewBoundingBox(an.NewAnnotationId(), 1, 1, 1, 1, label)
 	image.AddBoundingBox(*box)
 	image.AddLabel(label)
 	annotator := NewAnnotator(
 		scroller,
-		&FakeImageReader{Return: image},
+		&FakeImageReader{Return: &image},
 		&FakeBoxAdder{Returns: *box},
 		&FakeBoxUpdater{Returns: &updbox.Response{AnnotationId: box.Id}},
 		&FakeAnnotationDeleter{Returns: del.Response{Id: box.Id}},
@@ -35,7 +35,7 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
 		&FakeLabelUpdater{},
 		&FakeLabelAdder{Returns: addlbl.Response{ImageId: image.Id, Collection: image.Collection.Name, Label: label.Name}},
 		presenters.NewPresenter())
-	return annotator, image, scroller, view
+	return annotator, &image, scroller, view
 
 }
 func TestInitializeScrollerOnStart(t *testing.T) {

@@ -9,9 +9,9 @@ import (
 func CreateCollection(repo *SQLiteCollectionRepo, name string) (*clc.Collection, error) {
 	c := clc.NewCollection(clc.NewCollectionId(), name,
 		clc.WithDescription("a-description"), clc.WithCreatedAt(time.Now()))
-	if err := repo.Create(*c); err != nil {
+	if err := repo.Create(c); err != nil {
 		return nil, err
 	}
-	return c, nil
+	return &c, nil
 
 }

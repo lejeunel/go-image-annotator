@@ -37,7 +37,7 @@ func (i *Interactor) create(r Request) error {
 	collection := clc.NewCollection(clc.NewCollectionId(), r.Name,
 		clc.WithDescription(r.Description),
 		clc.WithCreatedAt(i.clock.Now()))
-	if err := i.repo.Create(*collection); err != nil {
+	if err := i.repo.Create(collection); err != nil {
 		return err
 	}
 	return nil

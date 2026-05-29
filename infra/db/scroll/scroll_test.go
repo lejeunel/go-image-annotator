@@ -120,7 +120,7 @@ func TestGettingNextImageInCollection(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
 	ids := CreateImagesWithOrderedIds(repos.Image, 2)
-	repos.Collection.Create(*collection)
+	repos.Collection.Create(collection)
 	repos.Image.AddToCollection(ids[0], collection.Id)
 	repos.Image.AddToCollection(ids[1], collection.Id)
 

@@ -31,8 +31,8 @@ func TestHandleInternalErr(t *testing.T) {
 func TestUnassignLabelNotAssignedToImageShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{}
-	image := im.NewImage(im.NewImageId(), *clc.NewCollection(clc.NewCollectionId(), "a-collection"))
-	itr := NewInteractor(repo, &st.FakeImageStore{Return: image})
+	image := im.NewImage(im.NewImageId(), clc.NewCollection(clc.NewCollectionId(), "a-collection"))
+	itr := NewInteractor(repo, &st.FakeImageStore{Return: &image})
 	itr.Execute(Request{Label: "label-not-assigned-to-image"}, p)
 	if !p.GotNotFoundErr || p.GotSuccess {
 		t.Fatal("expected not found error")
@@ -41,10 +41,10 @@ func TestUnassignLabelNotAssignedToImageShouldFail(t *testing.T) {
 
 func TestHandleInternalErrOnRemoveLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	image := im.NewImage(im.NewImageId(), *clc.NewCollection(clc.NewCollectionId(), "a-collection"))
+	image := im.NewImage(im.NewImageId(), clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	image.AddLabel(lbl.NewLabel(lbl.NewLabelId(), "a-label"))
 	repo := &FakeRepo{ErrOnRemoveLabel: true, Err: e.ErrInternal}
-	itr := NewInteractor(repo, &st.FakeImageStore{Return: image})
+	itr := NewInteractor(repo, &st.FakeImageStore{Return: &image})
 	itr.Execute(Request{Label: "a-label"}, p)
 	if p.GotSuccess || !p.GotInternalErr {
 		t.Fatal("expected internal error")

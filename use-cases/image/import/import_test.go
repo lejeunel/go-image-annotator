@@ -75,7 +75,7 @@ func TestImportImageInCollection(t *testing.T) {
 	p := &FakePresenter{}
 	imageId := im.NewImageId()
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-destination-collection")
-	repo := &FakeRepo{DestinationCollection: *collection}
+	repo := &FakeRepo{DestinationCollection: collection}
 	itr := NewInteractor(repo)
 	itr.Execute(Request{ImageId: imageId, Collection: collection.Name}, p)
 	if !p.GotSuccess {

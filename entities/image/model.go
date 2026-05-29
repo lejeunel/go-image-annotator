@@ -38,13 +38,13 @@ type Image struct {
 	MIMEType      string
 }
 
-func (i *Image) AddLabel(l *lbl.Label) error {
+func (i *Image) AddLabel(l lbl.Label) error {
 	for _, label := range i.Labels {
 		if l.Name == label.Label.Name {
 			return fmt.Errorf("adding label %v to image: found duplicate: %w", label.Label.Name, e.ErrValidation)
 		}
 	}
-	i.Labels = append(i.Labels, an.NewImageLabel(*l))
+	i.Labels = append(i.Labels, an.NewImageLabel(l))
 	return nil
 }
 
@@ -73,6 +73,6 @@ func (i *Image) BoundingBoxSummary() []an.BoundingBoxResponse {
 	return summary
 }
 
-func NewImage(id ImageId, collection clc.Collection) *Image {
-	return &Image{Id: id, Collection: collection}
+func NewImage(id ImageId, collection clc.Collection) Image {
+	return Image{Id: id, Collection: collection}
 }

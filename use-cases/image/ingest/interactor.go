@@ -110,15 +110,15 @@ func (i *Interactor) buildImage(id im.ImageId, collection clc.Collection, labelN
 	bboxes []BoundingBoxRequest) (*im.Image, error) {
 	image := im.NewImage(id, collection)
 
-	if err := i.appendLabels(image, labelNames); err != nil {
+	if err := i.appendLabels(&image, labelNames); err != nil {
 		return nil, err
 	}
 
-	if err := i.appendBoundingBoxes(image, bboxes); err != nil {
+	if err := i.appendBoundingBoxes(&image, bboxes); err != nil {
 		return nil, err
 	}
 
-	return image, nil
+	return &image, nil
 
 }
 
@@ -128,7 +128,7 @@ func (i Interactor) appendLabels(image *im.Image, labelNames []string) error {
 		if err != nil {
 			return err
 		}
-		if err := image.AddLabel(label); err != nil {
+		if err := image.AddLabel(*label); err != nil {
 			return err
 		}
 	}

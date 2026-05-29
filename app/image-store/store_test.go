@@ -48,11 +48,11 @@ func TestErrOnExistsShouldFail(t *testing.T) {
 
 func TestFindImageGivesCorrectAnnotations(t *testing.T) {
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
-	labels := []*a.ImageLabel{{Id: a.NewAnnotationId(), Label: *label}}
-	bboxes := []*a.BoundingBox{{Id: a.NewAnnotationId(), Label: *label}}
+	labels := []*a.ImageLabel{{Id: a.NewAnnotationId(), Label: label}}
+	bboxes := []*a.BoundingBox{{Id: a.NewAnnotationId(), Label: label}}
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 
-	s := New(&FakeRepo{Collection: *collection, Labels: labels,
+	s := New(&FakeRepo{Collection: collection, Labels: labels,
 		BoundingBoxes: bboxes}, &ast.FakeStore{Data: []byte("test-data")})
 	image, _ := s.Find(im.BaseImage{ImageId: im.NewImageId(), Collection: collection.Name})
 	if !(image.Collection.Id == collection.Id) {

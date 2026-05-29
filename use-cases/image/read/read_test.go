@@ -31,8 +31,8 @@ func TestHandleErrorOnFind(t *testing.T) {
 
 func TestFindImageGivesCorrectIdAndCollection(t *testing.T) {
 	p := &FakePresenter{}
-	existingImage := im.NewImage(im.NewImageId(), *clc.NewCollection(clc.NewCollectionId(), "a-collection"))
-	itr := NewInteractor(&st.FakeImageStore{Return: existingImage})
+	existingImage := im.NewImage(im.NewImageId(), clc.NewCollection(clc.NewCollectionId(), "a-collection"))
+	itr := NewInteractor(&st.FakeImageStore{Return: &existingImage})
 	itr.Execute(Request{ImageId: existingImage.Id.String(),
 		Collection: existingImage.Collection.Name}, p)
 	if !p.GotSuccess {

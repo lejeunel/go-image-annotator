@@ -23,7 +23,7 @@ func TestHandleErrOnFindLabel(t *testing.T) {
 func TestHandleErrOnUpdateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
-	itr := NewInteractor(&FakeRepo{Returns: label, Err: e.ErrNotFound, ErrOnUpdate: true})
+	itr := NewInteractor(&FakeRepo{Returns: &label, Err: e.ErrNotFound, ErrOnUpdate: true})
 	itr.Execute(Request{}, p)
 	if !p.GotNotFoundErr || p.GotSuccess {
 		t.Fatalf("expected to get error %v, got %v, with success %v",
@@ -34,7 +34,7 @@ func TestHandleErrOnUpdateLabel(t *testing.T) {
 func TestFetchLabelFromName(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
-	repo := &FakeRepo{Returns: newLabel}
+	repo := &FakeRepo{Returns: &newLabel}
 	itr := NewInteractor(repo)
 	itr.Execute(Request{AnnotationId: a.NewAnnotationId(), Label: newLabel.Name}, p)
 	stest.AssertEqual(t, "label name", repo.FetchedLabelWithName, newLabel.Name)
@@ -43,7 +43,7 @@ func TestFetchLabelFromName(t *testing.T) {
 func TestUpdateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
-	repo := &FakeRepo{Returns: newLabel}
+	repo := &FakeRepo{Returns: &newLabel}
 	itr := NewInteractor(repo)
 	annotationId := a.NewAnnotationId()
 	itr.Execute(Request{AnnotationId: annotationId, Label: newLabel.Name}, p)

@@ -80,11 +80,11 @@ func TestAddBoundingBox(t *testing.T) {
 	p := &FakePresenter{}
 	repo := FakeRepo{}
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
-	image := im.NewImage(im.NewImageId(), *collection)
+	image := im.NewImage(im.NewImageId(), collection)
 	req := Request{ImageId: image.Id, Collection: collection.Name,
 		Label: "a-label", Xc: float32(1.0), Yc: float32(1.0), Width: float32(3.0),
 		Height: float32(3.0)}
-	itr := NewInteractor(&st.FakeImageStore{Return: image}, &repo)
+	itr := NewInteractor(&st.FakeImageStore{Return: &image}, &repo)
 	itr.Execute(req, p)
 	if !p.GotSuccess {
 		t.Fatalf("expected success")

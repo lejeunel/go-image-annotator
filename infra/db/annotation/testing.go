@@ -29,12 +29,12 @@ func NewAnnotationTestRepos() AnnotationTestingRepos {
 func CreateAnnotableImage(repos AnnotationTestingRepos, collectionName string, labelName string) (im.Image, clc.Collection, lbl.Label) {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	label := lbl.NewLabel(lbl.NewLabelId(), labelName)
-	repos.Label.Create(*label)
-	repos.Collection.Create(*collection)
-	image := im.NewImage(im.NewImageId(), *collection)
+	repos.Label.Create(label)
+	repos.Collection.Create(collection)
+	image := im.NewImage(im.NewImageId(), collection)
 	repos.Image.AddImage(image.Id, nil, im.ImageSpecs{})
 	repos.Image.AddToCollection(image.Id, collection.Id)
 
-	return *image, *collection, *label
+	return image, collection, label
 
 }

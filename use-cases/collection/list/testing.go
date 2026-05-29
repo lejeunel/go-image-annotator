@@ -27,7 +27,8 @@ func (r *FakeRepo) List(req Request) ([]*clc.Collection, error) {
 
 	result := []*clc.Collection{}
 	for range req.PageSize {
-		result = append(result, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
+		c := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+		result = append(result, &c)
 	}
 	return result, nil
 }

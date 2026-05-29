@@ -49,9 +49,9 @@ func CreateImagesWithOrderedIds(repo *imsql.SQLiteImageRepo, num int) []im.Image
 func CreateImageInCollection(imRepo *imsql.SQLiteImageRepo, clcRepo *clcsql.SQLiteCollectionRepo,
 	imageId im.ImageId, collectionName string) im.Image {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
-	clcRepo.Create(*collection)
-	image := im.NewImage(im.NewImageId(), *collection)
+	clcRepo.Create(collection)
+	image := im.NewImage(im.NewImageId(), collection)
 	imRepo.AddImage(image.Id, []byte(image.Id.String()), im.ImageSpecs{})
 	imRepo.AddToCollection(image.Id, image.Collection.Id)
-	return *image
+	return image
 }

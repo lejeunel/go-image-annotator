@@ -32,7 +32,7 @@ func TestRetrieve(t *testing.T) {
 	repo := NewTestSQLiteCollectionRepo()
 	c := clc.NewCollection(clc.NewCollectionId(), "a-collection",
 		clc.WithDescription("a-description"), clc.WithCreatedAt(time.Now()))
-	repo.Create(*c)
+	repo.Create(c)
 	r, err := repo.FindCollectionByName("a-collection")
 	if err != nil {
 		t.Fatalf("expected no error on find, got %v", err)

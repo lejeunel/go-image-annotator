@@ -60,7 +60,7 @@ func TestRetrieveImageWithBoxesAndImageLabels(t *testing.T) {
 
 	newLabelName := "new-label"
 	newLabel := l.NewLabel(l.NewLabelId(), newLabelName)
-	repos.Label.Create(*newLabel)
+	repos.Label.Create(newLabel)
 	repos.Annotation.AddImageLabel(a.NewAnnotationId(), image.Id, collection.Id, newLabel.Id)
 
 	box := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, label)

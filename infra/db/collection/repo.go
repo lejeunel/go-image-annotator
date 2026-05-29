@@ -42,7 +42,7 @@ func (r *SQLiteCollectionRepo) rowToEntity(row Row) clc.Collection {
 	if row.CreatedAt.Valid {
 		c.CreatedAt = row.CreatedAt.Time
 	}
-	return *c
+	return c
 
 }
 

@@ -40,5 +40,6 @@ func (r *FakeRepo) FindLabelByName(name string) (*lbl.Label, error) {
 	if r.ErrOnFindLabel {
 		return nil, r.Err
 	}
-	return lbl.NewLabel(lbl.NewLabelId(), name), nil
+	l := lbl.NewLabel(lbl.NewLabelId(), name)
+	return &l, nil
 }

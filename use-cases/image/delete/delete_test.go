@@ -32,9 +32,10 @@ func TestHandleInternalErr(t *testing.T) {
 func TestDeleteNonExistingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	id := im.NewImageId()
-	image := im.NewImage(id, *clc.NewCollection(clc.NewCollectionId(), "a-collection"))
+	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	image.AddLabel(lbl.NewLabel(lbl.NewLabelId(), "a-label"))
-	itr := NewInteractor(&st.FakeImageStore{Return: image}, &FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrNotFound})
+	itr := NewInteractor(&st.FakeImageStore{Return: &image},
+		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrNotFound})
 	itr.Execute(Request{}, p)
 	if p.GotSuccess || !(p.GotNotFoundErr) {
 		t.Fatalf("expected not found error")
@@ -44,9 +45,10 @@ func TestDeleteNonExistingLabelShouldFail(t *testing.T) {
 func TestHandleInternalErrOnRemoveLabel(t *testing.T) {
 	p := &FakePresenter{}
 	id := im.NewImageId()
-	image := im.NewImage(id, *clc.NewCollection(clc.NewCollectionId(), "a-collection"))
+	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	image.AddLabel(lbl.NewLabel(lbl.NewLabelId(), "a-label"))
-	itr := NewInteractor(&st.FakeImageStore{Return: image}, &FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrInternal})
+	itr := NewInteractor(&st.FakeImageStore{Return: &image},
+		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrInternal})
 	itr.Execute(Request{}, p)
 	if p.GotSuccess || !(p.GotInternalErr) {
 		t.Fatalf("expected internal error")
@@ -56,11 +58,12 @@ func TestHandleInternalErrOnRemoveLabel(t *testing.T) {
 func TestDeleteNonExistingBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	id := im.NewImageId()
-	image := im.NewImage(id, *clc.NewCollection(clc.NewCollectionId(), "a-collection"))
+	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	box := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1,
-		*lbl.NewLabel(lbl.NewLabelId(), "a-label"))
+		lbl.NewLabel(lbl.NewLabelId(), "a-label"))
 	image.AddBoundingBox(*box)
-	itr := NewInteractor(&st.FakeImageStore{Return: image}, &FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrNotFound})
+	itr := NewInteractor(&st.FakeImageStore{Return: &image},
+		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrNotFound})
 	itr.Execute(Request{}, p)
 	if p.GotSuccess || !(p.GotNotFoundErr) {
 		t.Fatalf("expected not found error")
@@ -70,10 +73,11 @@ func TestDeleteNonExistingBoxShouldFail(t *testing.T) {
 func TestHandleInternalErrOnDeleteBoxes(t *testing.T) {
 	p := &FakePresenter{}
 	id := im.NewImageId()
-	image := im.NewImage(id, *clc.NewCollection(clc.NewCollectionId(), "a-collection"))
-	box := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, *lbl.NewLabel(lbl.NewLabelId(), "a-label"))
+	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
+	box := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, lbl.NewLabel(lbl.NewLabelId(), "a-label"))
 	image.AddBoundingBox(*box)
-	itr := NewInteractor(&st.FakeImageStore{Return: image}, &FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrInternal})
+	itr := NewInteractor(&st.FakeImageStore{Return: &image},
+		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrInternal})
 	itr.Execute(Request{}, p)
 	if p.GotSuccess || !(p.GotInternalErr) {
 		t.Fatalf("expected internal error")
@@ -83,8 +87,9 @@ func TestHandleInternalErrOnDeleteBoxes(t *testing.T) {
 func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	id := im.NewImageId()
-	image := im.NewImage(id, *clc.NewCollection(clc.NewCollectionId(), "a-collection"))
-	itr := NewInteractor(&st.FakeImageStore{Return: image}, &FakeRepo{ErrOnRemoveImage: true, Err: e.ErrInternal})
+	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
+	itr := NewInteractor(&st.FakeImageStore{Return: &image},
+		&FakeRepo{ErrOnRemoveImage: true, Err: e.ErrInternal})
 	itr.Execute(Request{}, p)
 	if p.GotSuccess || !(p.GotInternalErr) {
 		t.Fatalf("expected internal error")
@@ -94,8 +99,9 @@ func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
 func TestRemoveImageFromCollection(t *testing.T) {
 	p := &FakePresenter{}
 	id := im.NewImageId()
-	image := im.NewImage(id, *clc.NewCollection(clc.NewCollectionId(), "a-collection"))
-	itr := NewInteractor(&st.FakeImageStore{Return: image}, &FakeRepo{})
+	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
+	itr := NewInteractor(&st.FakeImageStore{Return: &image},
+		&FakeRepo{})
 	itr.Execute(Request{}, p)
 	if !p.GotSuccess {
 		t.Fatalf("expected success")

@@ -18,12 +18,12 @@ type ImageListingTestingRepos struct {
 
 func CreateSingleImageCollection(repos ImageListingTestingRepos, collectionName string) (im.Image, clc.Collection) {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
-	repos.Collection.Create(*collection)
+	repos.Collection.Create(collection)
 	imageId := im.NewImageId()
-	image := im.NewImage(imageId, *collection)
+	image := im.NewImage(imageId, collection)
 	repos.Image.AddImage(image.Id, nil, im.ImageSpecs{})
 	repos.Image.AddToCollection(image.Id, collection.Id)
-	return *image, *collection
+	return image, collection
 }
 
 func NewImageListingTestRepos() ImageListingTestingRepos {
@@ -46,8 +46,8 @@ func TestListOneImage(t *testing.T) {
 	repos := NewImageListingTestRepos()
 	collectionName := "a-collection"
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
-	repos.Collection.Create(*collection)
-	image := im.NewImage(im.NewImageId(), *collection)
+	repos.Collection.Create(collection)
+	image := im.NewImage(im.NewImageId(), collection)
 	repos.Image.AddImage(image.Id, nil, im.ImageSpecs{})
 	repos.Image.AddToCollection(image.Id, collection.Id)
 
@@ -76,9 +76,9 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 	}
 }
 
-func CreateImageInCollectionFromString(repo SQLiteImageRepo, collection *clc.Collection, imageId string) *im.Image {
+func CreateImageInCollectionFromString(repo SQLiteImageRepo, collection clc.Collection, imageId string) im.Image {
 	id, _ := im.NewImageIdFromString(imageId)
-	image := im.NewImage(id, *collection)
+	image := im.NewImage(id, collection)
 	repo.AddImage(image.Id, []byte(image.Id.String()), im.ImageSpecs{})
 	repo.AddToCollection(image.Id, collection.Id)
 	return image
@@ -89,7 +89,7 @@ func TestListImagesShouldBeOrderedById(t *testing.T) {
 	repos := NewImageListingTestRepos()
 	collectionName := "a-collection"
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
-	repos.Collection.Create(*collection)
+	repos.Collection.Create(collection)
 	CreateImageInCollectionFromString(repos.Image, collection, "11111111-1111-1111-1111-111111111111")
 	image0 := CreateImageInCollectionFromString(repos.Image, collection, "00000000-0000-0000-0000-000000000000")
 

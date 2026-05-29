@@ -9,12 +9,12 @@ type Collection struct {
 	CreatedAt   time.Time
 }
 
-func NewCollection(id CollectionId, name string, opts ...Option) *Collection {
+func NewCollection(id CollectionId, name string, opts ...Option) Collection {
 	c := &Collection{Id: id, Name: name}
 	for _, opt := range opts {
 		opt(c)
 	}
-	return c
+	return *c
 }
 
 type Option func(*Collection)

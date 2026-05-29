@@ -87,7 +87,7 @@ func (r *FakeCollectionRepo) FindCollectionByName(name string) (*clc.Collection,
 		return nil, e.ErrNotFound
 	}
 	c := clc.NewCollection(clc.NewCollectionId(), "a-collection")
-	return c, nil
+	return &c, nil
 }
 
 func (r *FakeLabelRepo) FindLabelByName(name string) (*lbl.Label, error) {
@@ -97,7 +97,8 @@ func (r *FakeLabelRepo) FindLabelByName(name string) (*lbl.Label, error) {
 	if r.MissingLabel {
 		return nil, e.ErrNotFound
 	}
-	return lbl.NewLabel(lbl.NewLabelId(), name), nil
+	l := lbl.NewLabel(lbl.NewLabelId(), name)
+	return &l, nil
 }
 
 func (r *FakeImageRepo) FindImageByHash(hash string) (*im.Image, error) {
@@ -105,7 +106,8 @@ func (r *FakeImageRepo) FindImageByHash(hash string) (*im.Image, error) {
 		return nil, r.Err
 	}
 	if r.HashAlreadyExists {
-		return im.NewImage(im.NewImageId(), *clc.NewCollection(clc.NewCollectionId(), "a-collection")), nil
+		r := im.NewImage(im.NewImageId(), clc.NewCollection(clc.NewCollectionId(), "a-collection"))
+		return &r, nil
 	}
 	return nil, e.ErrNotFound
 }

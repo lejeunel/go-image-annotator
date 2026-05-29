@@ -17,7 +17,7 @@ type Presenter struct {
 }
 
 func NewPresenter() Presenter {
-	return Presenter{Colorizer: NewCyclicColorizer()}
+	return Presenter{Colorizer: NewCyclicColorizer(Palette)}
 }
 
 func (p *Presenter) SetView(view v.View) *Presenter {

@@ -49,11 +49,11 @@ func TestInternalErrOnFindLabelShouldFail(t *testing.T) {
 func TestAssignLabelToImage(t *testing.T) {
 	p := &FakePresenter{}
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
-	image := im.NewImage(im.NewImageId(), *collection)
+	image := im.NewImage(im.NewImageId(), collection)
 	label := lbl.NewLabel(lbl.NewLabelId(), "al-label")
 	req := Request{ImageId: image.Id, Collection: collection.Name, Label: label.Name}
-	repo := &FakeRepo{ReturnLabel: *label}
-	itr := NewInteractor(repo, &st.FakeImageStore{Return: image})
+	repo := &FakeRepo{ReturnLabel: label}
+	itr := NewInteractor(repo, &st.FakeImageStore{Return: &image})
 	itr.Execute(req, p)
 	resp := p.Got
 	stest.AssertEqual(t, "label", resp.Label, req.Label)

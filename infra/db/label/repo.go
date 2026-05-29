@@ -50,7 +50,8 @@ func (r *SQLiteLabelRepo) FindLabelByName(name string) (*lbl.Label, error) {
 
 	}
 
-	return lbl.NewLabel(record.Id, record.Name, lbl.WithDescription(record.Description)), nil
+	l := lbl.NewLabel(record.Id, record.Name, lbl.WithDescription(record.Description))
+	return &l, nil
 }
 
 func (r *SQLiteLabelRepo) Delete(name string) error {

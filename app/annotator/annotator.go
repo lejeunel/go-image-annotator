@@ -1,7 +1,6 @@
 package annotator
 
 import (
-	"fmt"
 	p "github.com/lejeunel/go-image-annotator/app/annotator/presenters"
 	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
 	v "github.com/lejeunel/go-image-annotator/app/annotator/view"
@@ -51,7 +50,6 @@ func (a *Annotator) Init(imageId string, collection string, view v.View) {
 	view.DrawScroller(p.MakeScrollerButtons(*scrollerState))
 
 	a.presenter.SetView(view)
-	fmt.Println(a.presenter.View)
 	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection},
 		a.presenter)
 	a.labelFetcher.Execute(a.presenter)
