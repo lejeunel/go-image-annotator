@@ -5,7 +5,7 @@ import (
 
 	st "github.com/lejeunel/go-image-annotator/app/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	stest "github.com/lejeunel/go-image-annotator/shared/testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleNotFoundErrOnList(t *testing.T) {
@@ -64,10 +64,10 @@ func TestPaginationMetaData(t *testing.T) {
 	r := Request{Page: 1, PageSize: 2}
 	itr.Execute(r, p)
 	pg := p.Got.Pagination
-	stest.AssertEqual(t, "page", pg.Page, r.Page)
-	stest.AssertEqual(t, "page size", pg.PageSize, r.PageSize)
-	stest.AssertEqual(t, "total records", int(pg.TotalRecords), 10)
-	stest.AssertEqual(t, "total pages", int(pg.TotalPages), 5)
+	assert.Equal(t, pg.Page, r.Page, "page")
+	assert.Equal(t, pg.PageSize, r.PageSize, "page size")
+	assert.Equal(t, int(pg.TotalRecords), 10, "total records")
+	assert.Equal(t, int(pg.TotalPages), 5, "total pages")
 }
 
 func TestQueryCorrectPaginationWithFilters(t *testing.T) {
@@ -77,6 +77,6 @@ func TestQueryCorrectPaginationWithFilters(t *testing.T) {
 	r := Request{Page: 1, PageSize: 2}
 	itr.Execute(r, p)
 	f := repo.GotFilters
-	stest.AssertEqual(t, "page", int(f.Page), int(r.Page))
-	stest.AssertEqual(t, "page size", f.PageSize, r.PageSize)
+	assert.Equal(t, int(f.Page), int(r.Page), "page")
+	assert.Equal(t, f.PageSize, r.PageSize, "page size")
 }

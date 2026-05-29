@@ -3,6 +3,7 @@ package update_label
 import (
 	"fmt"
 
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
 )
@@ -27,7 +28,12 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 		return
 	}
 
-	err = i.repo.UpdateLabelOfAnnotation(r.AnnotationId, label.Id)
+	id, err := a.NewAnnotationIdFromString(r.AnnotationId)
+	if err != nil {
+		i.handleError(err, out)
+	}
+
+	err = i.repo.UpdateLabelOfAnnotation(*id, label.Id)
 	if err != nil {
 		i.handleError(err, out)
 		return

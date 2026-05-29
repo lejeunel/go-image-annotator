@@ -29,6 +29,10 @@ document.addEventListener('alpine:init', () => {
             if (!res.ok) throw new Error('Could not fetch annotations');
             return res.json();
         },
+        async setLabel(id, label) {
+            const res = await fetch(`/ui/set-label?id=${id}&label=${label}`);
+            if (!res.ok) throw new Error('Could not relabel');
+        },
 
         async submit(label, annotation) {
             const res = await fetch("/ui/submit-box", {
@@ -102,7 +106,7 @@ document.addEventListener('alpine:init', () => {
             });
 
             annotator.on('selectionChanged', (annotations) => {
-                console.log("Selected annotations", annotations);
+                // console.log("Selected annotations", annotations);
             });
             annotator.on('mouseEnterAnnotation', (annotation) => {
             console.log('Mouse entered: ' + annotation.id);
@@ -126,14 +130,21 @@ document.addEventListener('alpine:init', () => {
             try {
                 const store = Alpine.store("annotator");
                 await AnnotationAPI.submit(label, store.lastCreatedAnnotation);
-
                 Alpine.store("labelModal").close();
-
                 await this.refreshUI();
 
             } catch (err) {
                 console.error(err);
                 alert(err.message);
+            }
+        },
+
+        async relabel(id, label) {
+            try {
+                await AnnotationAPI.setLabel(id, label)
+            } catch(err) {
+                console.log(err);
+                alert(err.message)
             }
         },
 

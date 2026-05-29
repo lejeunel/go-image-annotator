@@ -2,7 +2,7 @@ package list
 
 import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	st "github.com/lejeunel/go-image-annotator/shared/testing"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -46,9 +46,9 @@ func TestListCollection(t *testing.T) {
 	itr := NewInteractor(repo)
 	req := Request{PageSize: pageSize, Page: page}
 	itr.Execute(req, p)
-	st.AssertEqual(t, "page size", len(p.Got.Collections), pageSize)
-	st.AssertEqual(t, "total records", p.Got.Pagination.TotalRecords, count)
-	st.AssertEqual(t, "total pages", int(p.Got.Pagination.TotalPages), 2)
-	st.AssertEqual(t, "page", p.Got.Pagination.Page, page)
-	st.AssertEqual(t, "page size", p.Got.Pagination.PageSize, pageSize)
+	assert.Equal(t, len(p.Got.Collections), pageSize, "page size")
+	assert.Equal(t, p.Got.Pagination.TotalRecords, count, "total records")
+	assert.Equal(t, int(p.Got.Pagination.TotalPages), 2, "total pages")
+	assert.Equal(t, p.Got.Pagination.Page, page, "page")
+	assert.Equal(t, p.Got.Pagination.PageSize, pageSize, "page size")
 }

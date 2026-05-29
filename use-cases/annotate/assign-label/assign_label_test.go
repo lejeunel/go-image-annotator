@@ -8,7 +8,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	stest "github.com/lejeunel/go-image-annotator/shared/testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleNotFoundErrOnImageRetrieval(t *testing.T) {
@@ -56,10 +56,10 @@ func TestAssignLabelToImage(t *testing.T) {
 	itr := NewInteractor(repo, &st.FakeImageStore{Return: &image})
 	itr.Execute(req, p)
 	resp := p.Got
-	stest.AssertEqual(t, "label", resp.Label, req.Label)
-	stest.AssertEqual(t, "collection", resp.Collection, req.Collection)
-	stest.AssertEqual(t, "image id", resp.ImageId, req.ImageId)
-	stest.AssertEqual(t, "added label id", repo.AddedLabelId, label.Id)
-	stest.AssertEqual(t, "added on image id", repo.AddedOnImageId, image.Id)
-	stest.AssertEqual(t, "added on collection id", repo.AddedOnCollectionId, collection.Id)
+	assert.Equal(t, resp.Label, req.Label, "label")
+	assert.Equal(t, resp.Collection, req.Collection, "collection")
+	assert.Equal(t, resp.ImageId, req.ImageId, "image id")
+	assert.Equal(t, repo.AddedLabelId, label.Id, "added label id")
+	assert.Equal(t, repo.AddedOnImageId, image.Id, "added on image id")
+	assert.Equal(t, repo.AddedOnCollectionId, collection.Id, "added on collection id")
 }

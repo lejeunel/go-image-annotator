@@ -8,7 +8,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	stest "github.com/lejeunel/go-image-annotator/shared/testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleErrorOnImageIdParsing(t *testing.T) {
@@ -38,6 +38,6 @@ func TestFindImageGivesCorrectIdAndCollection(t *testing.T) {
 	if !p.GotSuccess {
 		t.Fatalf("expected to get success")
 	}
-	stest.AssertEqual(t, "id", p.Got.Id, existingImage.Id)
-	stest.AssertEqual(t, "collection name", p.Got.Collection.Name, existingImage.Collection.Name)
+	assert.Equal(t, p.Got.Id, existingImage.Id, "id")
+	assert.Equal(t, p.Got.Collection.Name, existingImage.Collection.Name, "collection name")
 }

@@ -15,4 +15,5 @@ func RegisterWebPages(mux *http.ServeMux, server Server) {
 	mux.HandleFunc("/ui/annotations", server.GetAnnotationsAsJSON)
 	mux.HandleFunc("/ui/remove-annotation", server.DeleteAnnotation)
 	mux.HandleFunc("/ui/update-box", server.UpdateBox)
+	mux.HandleFunc("/ui/set-label", server.SetLabel)
 }

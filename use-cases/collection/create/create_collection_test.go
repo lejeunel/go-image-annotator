@@ -6,8 +6,8 @@ import (
 
 	"github.com/jonboulle/clockwork"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	st "github.com/lejeunel/go-image-annotator/shared/testing"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateCollectionWithDuplicateNameShouldFail(t *testing.T) {
@@ -51,8 +51,8 @@ func TestCreateCollection(t *testing.T) {
 	itr := NewInteractor(repo, WithClock(clockwork.NewFakeClockAt(now)))
 	req := Request{Name: "a-name", Description: "a-descriptin"}
 	itr.Execute(req, p)
-	st.AssertEqual(t, "name", repo.Got.Name, req.Name)
-	st.AssertEqual(t, "description", repo.Got.Description, req.Description)
-	st.AssertEqual(t, "creation date", repo.Got.CreatedAt, now)
-	st.AssertEqual(t, "id", repo.Got.Id.IsNil(), false)
+	assert.Equal(t, repo.Got.Name, req.Name, "name")
+	assert.Equal(t, repo.Got.Description, req.Description, "description")
+	assert.Equal(t, repo.Got.CreatedAt, now, "creation date")
+	assert.Equal(t, repo.Got.Id.IsNil(), false, "id")
 }

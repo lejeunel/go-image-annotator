@@ -67,7 +67,7 @@ func (v *AnnotationView) Error(err error) {
 	v.err = err
 }
 func (v *AnnotationView) RenderAnnotationList(w http.ResponseWriter) {
-	v.AnnotationsListView.Build(v.boxes, v.imageLabels).Render(w)
+	v.AnnotationsListView.Build(v.boxes, v.imageLabels, v.availableLabels).Render(w)
 }
 func (v *AnnotationView) RenderAll(w http.ResponseWriter) {
 
@@ -115,7 +115,7 @@ func (v *AnnotationView) renderImage(w http.ResponseWriter) {
 	}
 	b.AddScripts(html.AnnotoriousLib()...)
 	b.AddScripts(*script)
-	b.AddScripts(Raw(labelModal))
+	b.AddScripts(Raw(*labelModal))
 
 	b.SetContent(
 		Table(
@@ -124,7 +124,7 @@ func (v *AnnotationView) renderImage(w http.ResponseWriter) {
 				Tr(Td(Class("align-top"), v.ImageView.Build(*v.image)),
 					Td(Class("align-top pl-2"),
 						Div(Class("pb-2"), v.ImageInfosView.Build(*v.imageInfo)),
-						Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes, v.imageLabels)))),
+						Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes, v.imageLabels, v.availableLabels)))),
 			),
 			))))
 	b.Render(w)

@@ -5,23 +5,23 @@ import (
 	"text/template"
 )
 
-func makeLabelModal(labels []string) (string, error) {
-	tLabelModal, err := template.New("labelModal").ParseFS(templatesFiles,
-		"templates/label_selector.html")
-	if err != nil {
-		return "", err
-	}
+type NewLabelSelector struct {
+	Labels         []string
+	SelectorIsOpen bool
+	Selected       *string
+}
+
+func makeLabelModal(labels []string) (*string, error) {
+	tModal := template.New("")
+	template.Must(tModal.ParseFS(templatesFiles, "templates/label_modal_combobox.html"))
+	template.Must(tModal.ParseFS(templatesFiles, "templates/label_modal.html"))
 
 	var buf bytes.Buffer
-	data := struct {
-		Labels []string
-	}{labels}
-	err = tLabelModal.ExecuteTemplate(&buf, "labelModal",
-		data)
-
-	if err != nil {
-		return "", err
+	if err := tModal.ExecuteTemplate(&buf, "label_modal",
+		NewLabelSelector{labels, true, nil}); err != nil {
+		return nil, err
 	}
 
-	return buf.String(), nil
+	str := buf.String()
+	return &str, nil
 }

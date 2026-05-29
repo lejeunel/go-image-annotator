@@ -12,10 +12,11 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/html"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
+	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
 func ParseAnnotationIdFromURL(u *url.URL) (*an.AnnotationId, error) {
-	baseErr := "parsing url"
+	baseErr := "parsing url for annotation id"
 	idStr := u.Query().Get("id")
 	if idStr == "" {
 		return nil, fmt.Errorf("%v: extracting id: %w", baseErr, e.ErrURLParsing)
@@ -116,4 +117,21 @@ func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.annotator.UpdateBox(*req, aw.NewAnnotationView())
+}
+
+func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
+	baseErr := "setting label"
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		html.NewPageBuilder().SetError(fmt.Errorf("%w: failed parsing url to get annotation id", baseErr)).Render(w)
+		return
+	}
+	label := r.URL.Query().Get("label")
+	if label == "" {
+		html.NewPageBuilder().SetError(fmt.Errorf("%w: failed parsing url to get label field", baseErr)).Render(w)
+		return
+	}
+
+	s.annotator.UpdateLabel(updlbl.Request{AnnotationId: id, Label: label},
+		aw.NewAnnotationView())
 }

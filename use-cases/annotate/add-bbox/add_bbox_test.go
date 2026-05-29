@@ -7,7 +7,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	stest "github.com/lejeunel/go-image-annotator/shared/testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNonExistingImageStoreResourceShouldFail(t *testing.T) {
@@ -89,12 +89,12 @@ func TestAddBoundingBox(t *testing.T) {
 	if !p.GotSuccess {
 		t.Fatalf("expected success")
 	}
-	stest.AssertEqual(t, "image id", repo.GotImageId, req.ImageId)
-	stest.AssertEqual(t, "collection id", repo.GotCollectionId, collection.Id)
-	stest.AssertEqual(t, "label name", repo.GotBox.Label.Name, req.Label)
-	stest.AssertEqual(t, "xc", repo.GotBox.Xc, req.Xc)
-	stest.AssertEqual(t, "yc", repo.GotBox.Yc, req.Yc)
-	stest.AssertEqual(t, "width", repo.GotBox.Width, req.Width)
-	stest.AssertEqual(t, "height", repo.GotBox.Height, req.Height)
+	assert.Equal(t, repo.GotImageId, req.ImageId, "image id")
+	assert.Equal(t, repo.GotCollectionId, collection.Id, "collection id")
+	assert.Equal(t, repo.GotBox.Label.Name, req.Label, "label name")
+	assert.Equal(t, repo.GotBox.Xc, req.Xc, "xc")
+	assert.Equal(t, repo.GotBox.Yc, req.Yc, "yc")
+	assert.Equal(t, repo.GotBox.Width, req.Width, "width")
+	assert.Equal(t, repo.GotBox.Height, req.Height, "height")
 
 }

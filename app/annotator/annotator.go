@@ -28,7 +28,7 @@ type Annotator struct {
 func (a *Annotator) DeleteAnnotation(r del.Request, view v.View) {
 	a.deleter.Execute(r, a.presenter.SetView(view))
 }
-func (a *Annotator) UpdateLabelOfAnnotation(r updlbl.Request, view v.View) {
+func (a *Annotator) UpdateLabel(r updlbl.Request, view v.View) {
 	a.labelUpdater.Execute(r, a.presenter.SetView(view))
 }
 func (a *Annotator) UpdateBox(r updbox.Request, view v.View) {

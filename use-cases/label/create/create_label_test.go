@@ -2,8 +2,8 @@ package create
 
 import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	st "github.com/lejeunel/go-image-annotator/shared/testing"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -45,9 +45,9 @@ func TestCreateLabel(t *testing.T) {
 	req := Request{Name: "a-name", Description: "a-description"}
 	itr.Execute(req, p)
 
-	st.AssertEqual(t, "name", p.Got.Name, req.Name)
-	st.AssertEqual(t, "description", p.Got.Description, req.Description)
-	st.AssertEqual(t, "name", repo.Got.Name, req.Name)
-	st.AssertEqual(t, "description", repo.Got.Description, req.Description)
-	st.AssertEqual(t, "id", repo.Got.Id.IsNil(), false)
+	assert.Equal(t, p.Got.Name, req.Name, "name")
+	assert.Equal(t, p.Got.Description, req.Description, "description")
+	assert.Equal(t, repo.Got.Name, req.Name, "name")
+	assert.Equal(t, repo.Got.Description, req.Description, "description")
+	assert.Equal(t, repo.Got.Id.IsNil(), false, "id")
 }

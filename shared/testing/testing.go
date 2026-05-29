@@ -2,9 +2,6 @@ package testing
 
 import (
 	"errors"
-	"reflect"
-	"testing"
-
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -31,29 +28,5 @@ func (p *TestingErrPresenter) Error(err error) {
 
 	default:
 		p.GotInternalErr = true
-	}
-}
-
-func AssertEqual(t *testing.T, prefixMsg string, got any, want any) {
-	if got != want {
-		t.Fatalf("%v: got %v, want %v",
-			prefixMsg, got, want)
-	}
-}
-
-func AssertContains[T comparable](t *testing.T, prefixMsg string, got []T, want T) {
-	for _, g := range got {
-		if g == want {
-			return
-		}
-	}
-	t.Fatalf("%v: expected %v, to contain %v",
-		prefixMsg, got, want)
-}
-
-func AssertNonNil(t *testing.T, prefixMsg string, v any) {
-	rv := reflect.ValueOf(v)
-	if (v == nil) || (rv.Kind() == reflect.Pointer && rv.IsNil()) {
-		t.Fatalf("%v: expected non-nil variable", prefixMsg)
 	}
 }

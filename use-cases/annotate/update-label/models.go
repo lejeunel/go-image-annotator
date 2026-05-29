@@ -10,6 +10,6 @@ type Response struct {
 }
 
 type Request struct {
-	AnnotationId a.AnnotationId
+	AnnotationId string
 	Label        string
 }
