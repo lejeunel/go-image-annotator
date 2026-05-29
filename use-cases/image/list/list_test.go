@@ -3,9 +3,9 @@ package list
 import (
 	"testing"
 
-	st "github.com/lejeunel/go-image-annotator-v2/app/image-store"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	stest "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	st "github.com/lejeunel/go-image-annotator/app/image-store"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	stest "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 func TestHandleNotFoundErrOnList(t *testing.T) {

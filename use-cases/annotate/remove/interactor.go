@@ -3,7 +3,7 @@ package remove
 import (
 	"fmt"
 
-	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
+	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
 )
 

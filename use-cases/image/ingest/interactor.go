@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"io"
 
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 
 	"log/slog"
 
-	ast "github.com/lejeunel/go-image-annotator-v2/app/file-store"
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
+	ast "github.com/lejeunel/go-image-annotator/app/file-store"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"hash"
 )
 

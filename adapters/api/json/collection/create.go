@@ -3,9 +3,9 @@ package collection
 import (
 	"net/http"
 
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/json"
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/models"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/collection/create"
+	"github.com/lejeunel/go-image-annotator/adapters/api/json"
+	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
 )
 
 type Create struct {

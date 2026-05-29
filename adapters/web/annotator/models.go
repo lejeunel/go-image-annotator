@@ -3,11 +3,11 @@ package annotator
 import (
 	"fmt"
 
-	"github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
-	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	addbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
-	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
+	"github.com/lejeunel/go-image-annotator/app/annotator/view"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
+	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
 )
 
 type Request struct {

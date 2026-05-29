@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	i "image"
 	_ "image/jpeg"
 	_ "image/png"

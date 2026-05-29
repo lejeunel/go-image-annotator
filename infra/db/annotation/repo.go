@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	c "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	i "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	l "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	sl "github.com/lejeunel/go-image-annotator-v2/infra/db/label"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	c "github.com/lejeunel/go-image-annotator/entities/collection"
+	i "github.com/lejeunel/go-image-annotator/entities/image"
+	l "github.com/lejeunel/go-image-annotator/entities/label"
+	sl "github.com/lejeunel/go-image-annotator/infra/db/label"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type SQLiteAnnotationRepo struct {

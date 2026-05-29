@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
+	"github.com/lejeunel/go-image-annotator/app/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )

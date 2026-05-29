@@ -2,11 +2,11 @@ package collection
 
 import (
 	"fmt"
-	"github.com/lejeunel/go-image-annotator-v2/config"
+	"github.com/lejeunel/go-image-annotator/config"
 
-	cli "github.com/lejeunel/go-image-annotator-v2/adapters/cli"
-	"github.com/lejeunel/go-image-annotator-v2/infra"
-	clc "github.com/lejeunel/go-image-annotator-v2/use-cases/collection/create"
+	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
+	"github.com/lejeunel/go-image-annotator/infra"
+	clc "github.com/lejeunel/go-image-annotator/use-cases/collection/create"
 )
 
 type CreatePresenter struct {

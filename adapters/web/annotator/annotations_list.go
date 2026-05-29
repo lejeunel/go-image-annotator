@@ -2,7 +2,7 @@ package annotator
 
 import (
 	"fmt"
-	"github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
+	"github.com/lejeunel/go-image-annotator/app/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -79,13 +79,13 @@ type AnnotationsListView struct{}
 
 func (v *AnnotationsListView) makeBoxList(boxes []*view.BoundingBox) Node {
 	bboxTable := AnnotationTable{Fields: []string{"", "id", "label", "actions"}}
-	for i, b := range boxes {
+	for _, b := range boxes {
 		shortId := ShortenUUID(b.Id)
 		bboxTable.Rows = append(bboxTable.Rows,
 			AnnotationRow{Values: []Node{
 				Raw(fmt.Sprintf(`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <rect x="10" y="10" width="80" height="80" rx="10" ry="10" fill="%v" />
-</svg>`, view.Palette[i])),
+</svg>`, b.Color)),
 				Text(shortId),
 				Text(b.Label),
 				Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, b.Id, TrashIcon))}})

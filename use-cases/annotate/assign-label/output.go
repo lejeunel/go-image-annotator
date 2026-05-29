@@ -1,6 +1,6 @@
 package assign_label
 
 type OutputPort interface {
-	Success(Response)
+	SuccessAddLabel(Response)
 	Error(error)
 }

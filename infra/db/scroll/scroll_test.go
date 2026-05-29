@@ -4,10 +4,10 @@ import (
 	"errors"
 	"testing"
 
-	scr "github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 func TestInternalErrOnImageMustExist(t *testing.T) {

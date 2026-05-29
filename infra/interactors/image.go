@@ -2,12 +2,12 @@ package interactors
 
 import (
 	"crypto/sha256"
-	rea "github.com/lejeunel/go-image-annotator-v2/app/reader"
-	"github.com/lejeunel/go-image-annotator-v2/infra"
-	im "github.com/lejeunel/go-image-annotator-v2/use-cases/image"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/image/ingest"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/image/list"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/image/read"
+	rea "github.com/lejeunel/go-image-annotator/app/reader"
+	"github.com/lejeunel/go-image-annotator/infra"
+	im "github.com/lejeunel/go-image-annotator/use-cases/image"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/read"
 )
 
 func NewSQLiteImageInteractors(repos *infra.SQLiteInfra, allowedImageFormats []string) *im.Interactors {

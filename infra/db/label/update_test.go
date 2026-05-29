@@ -2,8 +2,8 @@ package label
 
 import (
 	"errors"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	u "github.com/lejeunel/go-image-annotator-v2/use-cases/label/update"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	u "github.com/lejeunel/go-image-annotator/use-cases/label/update"
 	"testing"
 )
 

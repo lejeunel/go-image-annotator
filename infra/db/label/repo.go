@@ -7,11 +7,11 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	s "github.com/lejeunel/go-image-annotator-v2/infra/db"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/label/list"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/label/update"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	s "github.com/lejeunel/go-image-annotator/infra/db"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/label/update"
 )
 
 type SQLiteLabelRepo struct {

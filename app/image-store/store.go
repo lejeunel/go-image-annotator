@@ -3,9 +3,9 @@ package image_store
 import (
 	"fmt"
 
-	fs "github.com/lejeunel/go-image-annotator-v2/app/file-store"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	fs "github.com/lejeunel/go-image-annotator/app/file-store"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type ImageStore struct {

@@ -8,7 +8,7 @@ import (
 	"io"
 	"testing"
 
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 func TestErrOnInvalidDataShouldFail(t *testing.T) {

@@ -1,12 +1,13 @@
 package assign_label
 
 import (
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 )
 
 type Repo interface {
-	AddImageLabel(im.ImageId, clc.CollectionId, lbl.LabelId) error
+	AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel) error
 	FindLabel(string) (*lbl.Label, error)
 }

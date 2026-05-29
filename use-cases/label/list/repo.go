@@ -1,7 +1,7 @@
 package list
 
 import (
-	l "github.com/lejeunel/go-image-annotator-v2/entities/label"
+	l "github.com/lejeunel/go-image-annotator/entities/label"
 )
 
 type Repo interface {

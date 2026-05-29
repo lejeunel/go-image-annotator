@@ -1,7 +1,7 @@
 package main
 
 import (
-	cmd "github.com/lejeunel/go-image-annotator-v2/cmd"
+	cmd "github.com/lejeunel/go-image-annotator/cmd"
 )
 
 func main() {

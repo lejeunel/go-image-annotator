@@ -3,9 +3,9 @@ package web
 import (
 	"io"
 
-	html "github.com/lejeunel/go-image-annotator-v2/shared/html"
-	n "github.com/lejeunel/go-image-annotator-v2/shared/navigation"
-	"github.com/lejeunel/go-image-annotator-v2/shared/pagination"
+	html "github.com/lejeunel/go-image-annotator/shared/html"
+	n "github.com/lejeunel/go-image-annotator/shared/navigation"
+	"github.com/lejeunel/go-image-annotator/shared/pagination"
 	"net/url"
 )
 

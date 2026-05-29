@@ -2,7 +2,7 @@ package reader
 
 import (
 	_ "embed"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
 //go:embed sample-image.jpg

@@ -1,7 +1,7 @@
 package fetchall
 
 import (
-	t "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakePresenter struct {

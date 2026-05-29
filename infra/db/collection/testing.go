@@ -3,7 +3,7 @@ package collection
 import (
 	"time"
 
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 )
 
 func CreateCollection(repo *SQLiteCollectionRepo, name string) (*clc.Collection, error) {

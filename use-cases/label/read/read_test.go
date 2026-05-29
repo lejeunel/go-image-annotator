@@ -1,8 +1,8 @@
 package read
 
 import (
-	l "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	l "github.com/lejeunel/go-image-annotator/entities/label"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"testing"
 )
 

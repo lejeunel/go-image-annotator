@@ -1,8 +1,8 @@
 package web
 
 import (
-	a "github.com/lejeunel/go-image-annotator-v2/app/annotator"
-	u "github.com/lejeunel/go-image-annotator-v2/use-cases"
+	a "github.com/lejeunel/go-image-annotator/app/annotator"
+	u "github.com/lejeunel/go-image-annotator/use-cases"
 )
 
 type Server struct {

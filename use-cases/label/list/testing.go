@@ -1,8 +1,8 @@
 package list
 
 import (
-	l "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	t "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	l "github.com/lejeunel/go-image-annotator/entities/label"
+	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakePresenter struct {

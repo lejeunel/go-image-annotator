@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 
-	clc "github.com/lejeunel/go-image-annotator-v2/adapters/cli/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/adapters/cli/image"
+	clc "github.com/lejeunel/go-image-annotator/adapters/cli/collection"
+	im "github.com/lejeunel/go-image-annotator/adapters/cli/image"
 )
 
 var (

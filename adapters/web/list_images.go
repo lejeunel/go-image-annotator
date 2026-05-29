@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"net/url"
 
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	html "github.com/lejeunel/go-image-annotator-v2/shared/html"
-	n "github.com/lejeunel/go-image-annotator-v2/shared/navigation"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/image/list"
-	list_im "github.com/lejeunel/go-image-annotator-v2/use-cases/image/list"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	html "github.com/lejeunel/go-image-annotator/shared/html"
+	n "github.com/lejeunel/go-image-annotator/shared/navigation"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
+	list_im "github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	. "maragu.dev/gomponents"
 )
 

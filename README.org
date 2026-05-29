@@ -1,13 +1,62 @@
 #+title: Go Image Annotation Tool
 
-* Introduction
+A simple web application
+to manage, store, and annotate images using bounding boxes
+built in [[https://go.dev/][Go]].
 
-We make available a simple web application
-to annotate images using bounding boxes.
+* Goals
+- Store and organize images in collections
+- Annotate images through a simple web interface
 
-In its current state, this is minimal in terms of features,
-and could be of use as a simple starter's kit for more elaborate
-needs.
+* Features
+- Simple web frontend to add bounding boxes
+- HTTP/REST API to (among other things):
+  - Add new annotation labels
+  - Ingest images into collections
+  - Add bounding box annotations
+    
+* Usage
+** Configuration
+This application stores meta and raw-data on a local mount.
+
+In particular, define a path for the SQLite database, e.g.
+#+begin_src sh
+GOIA_DBPATH=/home/user/.cache/go-image-annotator/db.sqlite
+#+end_src
+
+Next, define a path where images will be stored, e.g.
+#+begin_src sh
+GOIA_ARTEFACTDIR=/home/user/.cache/go-image-annotator/artefacts
+#+end_src
+
+** Building
+To build the binary, run
+#+begin_src sh
+go build .
+#+end_src
+
+** Ingesting images from a local directory
+Aside from the HTTP/REST endpoints, we
+provide basic CLI functions to get started quickly.
+
+First, create a new collection that will hold images:
+
+#+begin_src sh
+./go-image-annotator create-collection my-new-collection
+#+end_src
+
+Next, ingest images by specifying a local directory that contains images you wish to ingest:
+
+#+begin_src sh
+./go-image-annotator ingest-dir <path/to/image/directory> my-new-collection
+#+end_src
+
+** Run web server
+
+You may then launch the web server on port ~8001~ with:
+#+begin_src sh
+./go-image-annotator serve -p 8001
+#+end_src
 
 * Development dependencies
 This application has been tested to build
@@ -25,22 +74,8 @@ Optionally, we provide a [[https://nixos.wiki/wiki/Flakes][Nix Flake]]
 that provides a development environment (dev-shell)
 with all requirements included.
 
-* Usage
-
-To build the binary, run
-#+begin_src sh
-go build .
-#+end_src
-
-You may then launch the web server on port ~8001~ with:
-#+begin_src sh
-./go-image-annotator serve -p 8001
-#+end_src
 
 * Tech Stack
-This application is developed in [[https://go.dev/][Go]], which is a
-great candidate for web applications.
-
 ** Frontend
 We try to keep this project lightweight, by avoiding
 heavy frontend framework. Instead, we make the choice to

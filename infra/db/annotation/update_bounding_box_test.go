@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 func TestInternalErrOnUpdateBoundingBoxShouldFail(t *testing.T) {

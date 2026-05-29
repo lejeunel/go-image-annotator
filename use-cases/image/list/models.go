@@ -1,8 +1,8 @@
 package list
 
 import (
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	"github.com/lejeunel/go-image-annotator-v2/shared/pagination"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	"github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type Request struct {

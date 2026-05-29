@@ -7,6 +7,7 @@
         buildInputs = with pkgs; [
           go
           gopls
+          gocyclo
           gotestsum
           oapi-codegen
           tailwindcss_4

@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type FileStore struct {

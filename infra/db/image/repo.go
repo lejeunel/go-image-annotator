@@ -7,11 +7,11 @@ import (
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	ist "github.com/lejeunel/go-image-annotator-v2/app/image-store"
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	s "github.com/lejeunel/go-image-annotator-v2/infra/db"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	ist "github.com/lejeunel/go-image-annotator/app/image-store"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	s "github.com/lejeunel/go-image-annotator/infra/db"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type SQLiteImageRepo struct {

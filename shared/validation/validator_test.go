@@ -2,7 +2,7 @@ package validation
 
 import (
 	"errors"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"testing"
 )
 

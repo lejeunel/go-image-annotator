@@ -1,5 +1,5 @@
 # ====== CONFIG ======
-MODULE := github.com/lejeunel/go-image-annotator-v2
+MODULE := github.com/lejeunel/go-image-annotator
 
 SPEC := site/openapi.yaml
 OAPI := oapi-codegen

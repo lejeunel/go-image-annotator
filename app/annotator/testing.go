@@ -1,15 +1,17 @@
 package annotator
 
 import (
-	scr "github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
-	v "github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
-	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	addbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/add-bbox"
-	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
-	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
-	imread "github.com/lejeunel/go-image-annotator-v2/use-cases/image/read"
-	fetchlbl "github.com/lejeunel/go-image-annotator-v2/use-cases/label/fetch-all"
+	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
+	v "github.com/lejeunel/go-image-annotator/app/annotator/view"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
+	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
+	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
+	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
+	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
+	imread "github.com/lejeunel/go-image-annotator/use-cases/image/read"
+	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 )
 
 type FakeScroller struct {
@@ -33,56 +35,64 @@ func (f *FakeLabelFetcher) Execute(o fetchlbl.OutputPort) {
 }
 
 type FakeImageReader struct {
-	Got    imread.Request
 	Return *im.Image
 }
 
 func (b *FakeImageReader) Execute(r imread.Request, o imread.OutputPort) {
 	o.SuccessReadImage(*b.Return)
-	b.Got = r
+}
+
+type FakeLabelAdder struct {
+	Returns addlbl.Response
+}
+
+func (b *FakeLabelAdder) Execute(r addlbl.Request, o addlbl.OutputPort) {
+	o.SuccessAddLabel(b.Returns)
 }
 
 type FakeBoxAdder struct {
-	Got     addbox.Request
 	Returns an.BoundingBox
 }
 
 func (b *FakeBoxAdder) Execute(r addbox.Request, o addbox.OutputPort) {
-	b.Got = r
 	o.SuccessAddBox(b.Returns)
 }
 
 type FakeBoxUpdater struct {
-	Got     updbox.Request
 	Returns *updbox.Response
 }
 
 func (b *FakeBoxUpdater) Execute(r updbox.Request, o updbox.OutputPort) {
-	b.Got = r
 	o.SuccessUpdateBox(*b.Returns)
 }
 
+type FakeLabelUpdater struct {
+}
+
+func (b *FakeLabelUpdater) Execute(r updlbl.Request, o updlbl.OutputPort) {
+	o.SuccessUpdateLabel(updlbl.Response{})
+}
+
 type FakeAnnotationDeleter struct {
-	Got     del.Request
 	Returns del.Response
 }
 
 func (b *FakeAnnotationDeleter) Execute(r del.Request, o del.OutputPort) {
-	b.Got = r
 	o.SuccessDeleteAnnotation(b.Returns)
 }
 
 type FakeView struct {
-	GotScrollerButtons         *v.ScrollerButtons
-	GotErr                     error
-	GotBox                     *v.BoundingBox
-	GotImage                   *v.Image
-	GotImageInfo               *v.ImageInfo
-	GotLabels                  *[]string
-	RemovedAnnotationId        *an.AnnotationId
-	UpdatedBoxId               *an.AnnotationId
-	UpdatedLabelOfAnnotationId *an.AnnotationId
-	UpdatedLabelOfAnnotation   string
+	GotScrollerButtons  *v.ScrollerButtons
+	GotErr              error
+	AddedBox            *v.BoundingBox
+	AddedImageLabel     *v.ImageLabel
+	GotImage            *v.Image
+	GotImageInfo        *v.ImageInfo
+	GotAvailableLabels  *[]string
+	GotAnnotationIds    *[]string
+	RemovedAnnotationId *string
+	UpdatedBoxId        *string
+	UpdatedAnnotation   *v.Annotation
 }
 
 func (s *FakeView) DrawScroller(buttons v.ScrollerButtons) {
@@ -95,16 +105,34 @@ func (s *FakeView) DrawImage(i v.Image) {
 func (s *FakeView) DrawImageInfo(i v.ImageInfo) {
 	s.GotImageInfo = &i
 }
-func (s *FakeView) DrawAnnotationList([]*v.BoundingBox, []*v.ImageLabel) {}
+func (s *FakeView) DrawAnnotationList(boxes []*v.BoundingBox, labels []*v.ImageLabel) {
+	ids := []string{}
+	for _, b := range boxes {
+		ids = append(ids, b.Id)
+	}
+	for _, l := range labels {
+		ids = append(ids, l.Id)
+	}
+	s.GotAnnotationIds = &ids
+}
+
 func (s *FakeView) AddBox(box v.BoundingBox) {
-	s.GotBox = &box
+	s.AddedBox = &box
 }
-func (s *FakeView) UpdateBox(r updbox.Response) {
-	s.UpdatedBoxId = &r.AnnotationId
+func (s *FakeView) AddLabel(l v.ImageLabel) {
+	s.AddedImageLabel = &l
 }
-func (s *FakeView) DeleteAnnotation(r del.Response) {
-	s.RemovedAnnotationId = &r.Id
+
+func (s *FakeView) UpdateBox(b v.BoundingBox) {
+	s.UpdatedBoxId = &b.Id
+}
+func (s *FakeView) UpdateLabel(a v.Annotation) {
+	s.UpdatedAnnotation = &a
+}
+
+func (s *FakeView) DeleteAnnotation(id string) {
+	s.RemovedAnnotationId = &id
 }
 func (s *FakeView) SetAvailableLabels(l []string) {
-	s.GotLabels = &l
+	s.GotAvailableLabels = &l
 }

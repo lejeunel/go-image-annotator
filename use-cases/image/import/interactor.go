@@ -3,10 +3,10 @@ package import_image
 import (
 	"fmt"
 
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
 )
 

@@ -1,7 +1,7 @@
 package read
 
 import (
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 )
 
 type Repo interface {

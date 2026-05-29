@@ -3,9 +3,9 @@ package modify_bbox
 import (
 	"fmt"
 
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
 )
 

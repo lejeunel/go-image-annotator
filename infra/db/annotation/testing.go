@@ -1,14 +1,14 @@
 package annotation
 
 import (
-	s "github.com/lejeunel/go-image-annotator-v2/infra/db"
-	sc "github.com/lejeunel/go-image-annotator-v2/infra/db/collection"
-	si "github.com/lejeunel/go-image-annotator-v2/infra/db/image"
-	sl "github.com/lejeunel/go-image-annotator-v2/infra/db/label"
+	s "github.com/lejeunel/go-image-annotator/infra/db"
+	sc "github.com/lejeunel/go-image-annotator/infra/db/collection"
+	si "github.com/lejeunel/go-image-annotator/infra/db/image"
+	sl "github.com/lejeunel/go-image-annotator/infra/db/label"
 
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 )
 
 type AnnotationTestingRepos struct {

@@ -3,13 +3,13 @@ package server
 import (
 	"net/http"
 
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/json"
-	presenter "github.com/lejeunel/go-image-annotator-v2/adapters/api/json/label"
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/models"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/label/create"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/label/delete"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/label/list"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/label/read"
+	"github.com/lejeunel/go-image-annotator/adapters/api/json"
+	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/label"
+	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
+	"github.com/lejeunel/go-image-annotator/use-cases/label/delete"
+	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/label/read"
 )
 
 func (s *Server) FindLabelByName(w http.ResponseWriter, r *http.Request, name string) {

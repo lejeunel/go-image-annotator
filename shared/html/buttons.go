@@ -1,7 +1,7 @@
 package html
 
 import (
-	scr "github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
+	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )

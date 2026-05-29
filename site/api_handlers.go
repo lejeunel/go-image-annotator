@@ -2,7 +2,7 @@ package site
 
 import (
 	_ "embed"
-	api "github.com/lejeunel/go-image-annotator-v2/adapters/api/server"
+	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
 	"net/http"
 )
 

@@ -1,9 +1,9 @@
 package create
 
 import (
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	st "github.com/lejeunel/go-image-annotator-v2/shared/testing"
-	v "github.com/lejeunel/go-image-annotator-v2/shared/validation"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	st "github.com/lejeunel/go-image-annotator/shared/testing"
+	v "github.com/lejeunel/go-image-annotator/shared/validation"
 	"testing"
 )
 

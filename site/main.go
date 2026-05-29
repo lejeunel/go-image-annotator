@@ -2,15 +2,18 @@ package site
 
 import (
 	"fmt"
-	api "github.com/lejeunel/go-image-annotator-v2/adapters/api/server"
-	web "github.com/lejeunel/go-image-annotator-v2/adapters/web"
-	a "github.com/lejeunel/go-image-annotator-v2/app/annotator"
-	scr "github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
 
-	"github.com/lejeunel/go-image-annotator-v2/config"
-	"github.com/lejeunel/go-image-annotator-v2/infra"
-	i "github.com/lejeunel/go-image-annotator-v2/infra/interactors"
+	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
+	web "github.com/lejeunel/go-image-annotator/adapters/web"
+	a "github.com/lejeunel/go-image-annotator/app/annotator"
+	"github.com/lejeunel/go-image-annotator/app/annotator/presenters"
+	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
+
 	"net/http"
+
+	"github.com/lejeunel/go-image-annotator/config"
+	"github.com/lejeunel/go-image-annotator/infra"
+	i "github.com/lejeunel/go-image-annotator/infra/interactors"
 )
 
 type SiteConfig struct {
@@ -33,7 +36,8 @@ func Serve(port int) {
 	scroller := scr.New(infra.ScrollerRepo)
 	annotator := a.NewAnnotator(scroller, &interactors.Image.Read,
 		&interactors.Annotation.AddBox, &interactors.Annotation.UpdateBox, &interactors.Annotation.Delete,
-		&interactors.Label.FetchAll, &interactors.Annotation.UpdateLabel)
+		&interactors.Label.FetchAll, &interactors.Annotation.UpdateLabel, &interactors.Annotation.AddImageLabel,
+		presenters.NewPresenter())
 	RegisterHandlers(mux,
 		*api.NewServer(interactors),
 		*web.NewServer(interactors, annotator),

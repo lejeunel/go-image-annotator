@@ -3,11 +3,11 @@ package add_bbox
 import (
 	"testing"
 
-	st "github.com/lejeunel/go-image-annotator-v2/app/image-store"
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	stest "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	st "github.com/lejeunel/go-image-annotator/app/image-store"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	stest "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 func TestNonExistingImageStoreResourceShouldFail(t *testing.T) {

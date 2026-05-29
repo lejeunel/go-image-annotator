@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"io"
 
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type RawImage struct {

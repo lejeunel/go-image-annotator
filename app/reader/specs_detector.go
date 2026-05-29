@@ -8,8 +8,8 @@ import (
 	_ "image/png"
 	"io"
 
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 func formatToMIME(format string) string {

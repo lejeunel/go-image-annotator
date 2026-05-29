@@ -1,11 +1,12 @@
 package assign_label
 
 import (
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	t "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakeRepo struct {
@@ -31,11 +32,11 @@ func (r *FakeRepo) FindLabel(string) (*lbl.Label, error) {
 	return &r.ReturnLabel, nil
 }
 
-func (r *FakeRepo) AddImageLabel(imageId im.ImageId, collectionId clc.CollectionId, labelId lbl.LabelId) error {
+func (r *FakeRepo) AddImageLabel(imageId im.ImageId, collectionId clc.CollectionId, imageLabel an.ImageLabel) error {
 	if r.ErrOnAddLabel {
 		return r.Err
 	}
-	r.AddedLabelId = labelId
+	r.AddedLabelId = imageLabel.Label.Id
 	r.AddedOnImageId = imageId
 	r.AddedOnCollectionId = collectionId
 	return nil
@@ -48,7 +49,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(r Response) {
+func (p *FakePresenter) SuccessAddLabel(r Response) {
 	p.Got = r
 	p.GotSuccess = true
 }

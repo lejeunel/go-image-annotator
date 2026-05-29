@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"net/url"
 
-	html "github.com/lejeunel/go-image-annotator-v2/shared/html"
-	n "github.com/lejeunel/go-image-annotator-v2/shared/navigation"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/collection/list"
+	html "github.com/lejeunel/go-image-annotator/shared/html"
+	n "github.com/lejeunel/go-image-annotator/shared/navigation"
+	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 	. "maragu.dev/gomponents"
 )
 

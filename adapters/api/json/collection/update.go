@@ -3,8 +3,8 @@ package collection
 import (
 	"net/http"
 
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/json"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/collection/update"
+	"github.com/lejeunel/go-image-annotator/adapters/api/json"
+	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
 )
 
 type Update struct {

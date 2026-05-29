@@ -1,8 +1,8 @@
 package presenters
 
 import (
-	scr "github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
-	v "github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
+	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
+	v "github.com/lejeunel/go-image-annotator/app/annotator/view"
 )
 
 func MakeScrollerButtons(s scr.ScrollerState) v.ScrollerButtons {

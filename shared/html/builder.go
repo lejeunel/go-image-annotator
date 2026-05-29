@@ -1,8 +1,8 @@
 package html
 
 import (
-	s "github.com/lejeunel/go-image-annotator-v2/shared"
-	n "github.com/lejeunel/go-image-annotator-v2/shared/navigation"
+	s "github.com/lejeunel/go-image-annotator/shared"
+	n "github.com/lejeunel/go-image-annotator/shared/navigation"
 	"io"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"

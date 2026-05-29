@@ -1,8 +1,8 @@
 package image
 
 import (
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/models"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
 func BuildImageResponse(image im.Image) models.Image {

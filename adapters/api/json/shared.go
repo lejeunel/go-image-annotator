@@ -3,9 +3,9 @@ package json
 import (
 	"encoding/json"
 	"errors"
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/models"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	"github.com/lejeunel/go-image-annotator-v2/shared/pagination"
+	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/lejeunel/go-image-annotator/shared/pagination"
 	"net/http"
 )
 

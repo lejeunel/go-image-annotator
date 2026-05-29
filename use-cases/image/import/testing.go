@@ -1,9 +1,9 @@
 package import_image
 
 import (
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	t "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakePresenter struct {

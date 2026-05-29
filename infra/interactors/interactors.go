@@ -1,8 +1,8 @@
 package interactors
 
 import (
-	"github.com/lejeunel/go-image-annotator-v2/infra"
-	u "github.com/lejeunel/go-image-annotator-v2/use-cases"
+	"github.com/lejeunel/go-image-annotator/infra"
+	u "github.com/lejeunel/go-image-annotator/use-cases"
 )
 
 func NewSQLiteInteractors(repos *infra.SQLiteInfra, pageSize int, allowedImageFormats []string) *u.Interactors {

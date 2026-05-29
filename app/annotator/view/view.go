@@ -1,10 +1,5 @@
 package view
 
-import (
-	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
-	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
-)
-
 type View interface {
 	DrawScroller(ScrollerButtons)
 	Error(error)
@@ -12,7 +7,9 @@ type View interface {
 	DrawImageInfo(ImageInfo)
 	DrawAnnotationList([]*BoundingBox, []*ImageLabel)
 	AddBox(BoundingBox)
+	AddLabel(ImageLabel)
 	SetAvailableLabels([]string)
-	UpdateBox(updbox.Response)
-	DeleteAnnotation(del.Response)
+	UpdateBox(BoundingBox)
+	UpdateLabel(Annotation)
+	DeleteAnnotation(string)
 }

@@ -1,8 +1,8 @@
 package update_label
 
 import (
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 )
 
 type Repo interface {

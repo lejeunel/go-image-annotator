@@ -2,14 +2,14 @@ package image
 
 import (
 	"fmt"
-	"github.com/lejeunel/go-image-annotator-v2/config"
+	"github.com/lejeunel/go-image-annotator/config"
 	"os"
 	"path/filepath"
 
-	cli "github.com/lejeunel/go-image-annotator-v2/adapters/cli"
-	"github.com/lejeunel/go-image-annotator-v2/infra"
-	itr "github.com/lejeunel/go-image-annotator-v2/infra/interactors"
-	ing "github.com/lejeunel/go-image-annotator-v2/use-cases/image/ingest"
+	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
+	"github.com/lejeunel/go-image-annotator/infra"
+	itr "github.com/lejeunel/go-image-annotator/infra/interactors"
+	ing "github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 )
 
 type IngestPresenter struct {

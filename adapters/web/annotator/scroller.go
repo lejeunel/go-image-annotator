@@ -3,9 +3,9 @@ package annotator
 import (
 	"fmt"
 
-	scr "github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
-	"github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
-	myhtml "github.com/lejeunel/go-image-annotator-v2/shared/html"
+	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
+	"github.com/lejeunel/go-image-annotator/app/annotator/view"
+	myhtml "github.com/lejeunel/go-image-annotator/shared/html"
 
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"

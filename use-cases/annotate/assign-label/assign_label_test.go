@@ -3,12 +3,12 @@ package assign_label
 import (
 	"testing"
 
-	st "github.com/lejeunel/go-image-annotator-v2/app/image-store"
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	stest "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	st "github.com/lejeunel/go-image-annotator/app/image-store"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	stest "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 func TestHandleNotFoundErrOnImageRetrieval(t *testing.T) {

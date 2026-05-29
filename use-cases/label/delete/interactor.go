@@ -3,8 +3,8 @@ package delete
 import (
 	"fmt"
 
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
 )
 

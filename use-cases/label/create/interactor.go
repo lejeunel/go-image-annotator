@@ -3,10 +3,10 @@ package create
 import (
 	"fmt"
 
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
-	v "github.com/lejeunel/go-image-annotator-v2/shared/validation"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/lejeunel/go-image-annotator/shared/logging"
+	v "github.com/lejeunel/go-image-annotator/shared/validation"
 	"log/slog"
 )
 

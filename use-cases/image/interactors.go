@@ -1,9 +1,9 @@
 package image
 
 import (
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/image/ingest"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/image/list"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/image/read"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/read"
 )
 
 type Interactors struct {

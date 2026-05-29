@@ -1,8 +1,8 @@
 package web
 
 import (
-	html "github.com/lejeunel/go-image-annotator-v2/shared/html"
-	n "github.com/lejeunel/go-image-annotator-v2/shared/navigation"
+	html "github.com/lejeunel/go-image-annotator/shared/html"
+	n "github.com/lejeunel/go-image-annotator/shared/navigation"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 	"net/http"

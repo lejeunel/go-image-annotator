@@ -1,7 +1,7 @@
 package file_store
 
 import (
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	"io"
 )
 

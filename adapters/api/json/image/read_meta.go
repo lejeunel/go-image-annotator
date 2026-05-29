@@ -1,8 +1,8 @@
 package image
 
 import (
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/json"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+	"github.com/lejeunel/go-image-annotator/adapters/api/json"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	"net/http"
 )
 

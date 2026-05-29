@@ -1,8 +1,8 @@
 package list
 
 import (
-	ist "github.com/lejeunel/go-image-annotator-v2/app/image-store"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+	ist "github.com/lejeunel/go-image-annotator/app/image-store"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
 type Repo interface {

@@ -3,8 +3,8 @@ package read
 import (
 	"testing"
 
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 func TestReadCollection(t *testing.T) {

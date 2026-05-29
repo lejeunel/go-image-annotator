@@ -1,9 +1,9 @@
 package list
 
 import (
-	ist "github.com/lejeunel/go-image-annotator-v2/app/image-store"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	t "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	ist "github.com/lejeunel/go-image-annotator/app/image-store"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakeRepo struct {

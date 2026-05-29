@@ -1,7 +1,7 @@
 package server
 
 import (
-	u "github.com/lejeunel/go-image-annotator-v2/use-cases"
+	u "github.com/lejeunel/go-image-annotator/use-cases"
 )
 
 type Server struct {

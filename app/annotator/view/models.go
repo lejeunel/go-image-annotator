@@ -1,8 +1,7 @@
 package view
 
 import (
-	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	"io"
 )
 
@@ -27,6 +26,11 @@ type ImageInfo struct {
 	Id         string
 	Collection string
 	Specs      im.ImageSpecs
+}
+
+type Annotation struct {
+	Id    string
+	Label string
 }
 
 type BoundingBox struct {
@@ -58,33 +62,4 @@ func NewImageInfo(imageId im.ImageId, collection string, specs im.ImageSpecs) Im
 func NewImage(id im.ImageId, reader io.Reader, collection string, mimetype string,
 ) Image {
 	return Image{Id: id.String(), Collection: collection, Reader: reader, MIMEType: mimetype}
-}
-
-func MakeBoundingBox(b *an.BoundingBox, colorIndex int) *BoundingBox {
-	return &BoundingBox{
-		Id:     b.Id.String(),
-		Label:  b.Label.Name,
-		Color:  Palette[colorIndex%(len(Palette)-1)],
-		Xc:     b.Xc,
-		Yc:     b.Yc,
-		Width:  b.Width,
-		Height: b.Height,
-	}
-}
-
-func MakeImageLabels(labels []*an.ImageLabel) []*ImageLabel {
-	result := []*ImageLabel{}
-	for _, l := range labels {
-		result = append(result, &ImageLabel{Id: l.Id.String(),
-			Label: l.Label.Name})
-	}
-	return result
-}
-
-func MakeBoundingBoxes(boxes []*an.BoundingBox) []*BoundingBox {
-	result := []*BoundingBox{}
-	for i, b := range boxes {
-		result = append(result, MakeBoundingBox(b, i))
-	}
-	return result
 }

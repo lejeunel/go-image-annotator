@@ -1,9 +1,9 @@
 package modify_bbox
 
 import (
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	t "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakeRepo struct {

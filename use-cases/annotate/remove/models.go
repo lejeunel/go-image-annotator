@@ -1,7 +1,7 @@
 package remove
 
 import (
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 )
 
 type Response struct {

@@ -7,10 +7,8 @@ import (
 
 	"embed"
 
-	v "github.com/lejeunel/go-image-annotator-v2/app/annotator/view"
-	html "github.com/lejeunel/go-image-annotator-v2/shared/html"
-	updbox "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/modify-bbox"
-	del "github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
+	v "github.com/lejeunel/go-image-annotator/app/annotator/view"
+	html "github.com/lejeunel/go-image-annotator/shared/html"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -31,6 +29,7 @@ type AnnotationView struct {
 	scrollerButtons v.ScrollerButtons
 	doDrawImage     bool
 	addedBox        *v.BoundingBox
+	addedLabel      *v.ImageLabel
 	err             error
 }
 
@@ -55,9 +54,14 @@ func (v *AnnotationView) SetAvailableLabels(labels []string) {
 func (v *AnnotationView) AddBox(b v.BoundingBox) {
 	v.addedBox = &b
 }
-func (v *AnnotationView) UpdateBox(r updbox.Response) {
+func (v *AnnotationView) AddLabel(l v.ImageLabel) {
+	v.addedLabel = &l
 }
-func (v *AnnotationView) DeleteAnnotation(r del.Response) {
+func (v *AnnotationView) UpdateBox(b v.BoundingBox) {
+}
+func (v *AnnotationView) UpdateLabel(a v.Annotation) {
+}
+func (v *AnnotationView) DeleteAnnotation(string) {
 }
 func (v *AnnotationView) Error(err error) {
 	v.err = err

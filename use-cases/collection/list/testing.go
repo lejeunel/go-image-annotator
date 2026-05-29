@@ -1,8 +1,8 @@
 package list
 
 import (
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	t "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakeRepo struct {

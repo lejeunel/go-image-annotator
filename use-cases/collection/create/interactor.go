@@ -5,10 +5,10 @@ import (
 	"log/slog"
 
 	"github.com/jonboulle/clockwork"
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
-	v "github.com/lejeunel/go-image-annotator-v2/shared/validation"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/lejeunel/go-image-annotator/shared/logging"
+	v "github.com/lejeunel/go-image-annotator/shared/validation"
 )
 
 type Interactor struct {

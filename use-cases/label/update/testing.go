@@ -1,12 +1,12 @@
 package update
 
 import (
-	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	t "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	t "github.com/lejeunel/go-image-annotator/shared/testing"
 	"slices"
 )
 

@@ -2,10 +2,10 @@ package image
 
 import (
 	"errors"
-	ist "github.com/lejeunel/go-image-annotator-v2/app/image-store"
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	ist "github.com/lejeunel/go-image-annotator/app/image-store"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"testing"
 )
 

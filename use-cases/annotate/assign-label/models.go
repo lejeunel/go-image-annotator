@@ -1,13 +1,15 @@
 package assign_label
 
 import (
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
 type Response struct {
-	ImageId    im.ImageId
-	Collection string
-	Label      string
+	AnnotationId an.AnnotationId
+	ImageId      im.ImageId
+	Collection   string
+	Label        string
 }
 
 type Request struct {

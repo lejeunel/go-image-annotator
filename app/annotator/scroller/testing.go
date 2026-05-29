@@ -1,7 +1,7 @@
 package scroller
 
 import (
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
 type FakeRepo struct {

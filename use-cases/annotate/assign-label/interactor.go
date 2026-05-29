@@ -3,13 +3,18 @@ package assign_label
 import (
 	"fmt"
 
-	st "github.com/lejeunel/go-image-annotator-v2/app/image-store"
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
+	st "github.com/lejeunel/go-image-annotator/app/image-store"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
 )
+
+type Interface interface {
+	Execute(r Request, out OutputPort)
+}
 
 type Interactor struct {
 	repo   Repo
@@ -30,12 +35,13 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.addLabel(image.Id, image.Collection.Id, label.Id); err != nil {
+	imageLabel, err := i.addLabel(image.Id, image.Collection.Id, *label)
+	if err != nil {
 		i.handleError(err, out)
 		return
 	}
 
-	out.Success(Response{ImageId: r.ImageId, Collection: r.Collection, Label: r.Label})
+	out.SuccessAddLabel(Response{ImageId: r.ImageId, Collection: r.Collection, Label: r.Label, AnnotationId: imageLabel.Id})
 }
 func (i *Interactor) handleError(err error, out OutputPort) {
 	errCtx := "assigning label to image"
@@ -60,11 +66,12 @@ func (i *Interactor) findImage(imageId im.ImageId, collection string) (*im.Image
 	return image, nil
 }
 
-func (i *Interactor) addLabel(imageId im.ImageId, collectionId clc.CollectionId, labelId lbl.LabelId) error {
-	if err := i.repo.AddImageLabel(imageId, collectionId, labelId); err != nil {
-		return err
+func (i *Interactor) addLabel(imageId im.ImageId, collectionId clc.CollectionId, label lbl.Label) (*an.ImageLabel, error) {
+	imageLabel := an.NewImageLabel(label)
+	if err := i.repo.AddImageLabel(imageId, collectionId, *imageLabel); err != nil {
+		return nil, err
 	}
-	return nil
+	return imageLabel, nil
 
 }
 

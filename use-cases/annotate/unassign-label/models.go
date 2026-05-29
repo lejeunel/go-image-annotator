@@ -1,7 +1,7 @@
 package unassign_label
 
 import (
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
 type Response struct{}

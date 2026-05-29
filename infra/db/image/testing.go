@@ -1,10 +1,10 @@
 package image
 
 import (
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	s "github.com/lejeunel/go-image-annotator-v2/infra/db"
-	cr "github.com/lejeunel/go-image-annotator-v2/infra/db/collection"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	s "github.com/lejeunel/go-image-annotator/infra/db"
+	cr "github.com/lejeunel/go-image-annotator/infra/db/collection"
 )
 
 type ImageTestingRepos struct {

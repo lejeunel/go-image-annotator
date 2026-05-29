@@ -1,8 +1,8 @@
 package remove
 
 import (
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	t "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakeRepo struct {

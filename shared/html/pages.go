@@ -3,8 +3,8 @@ package html
 import (
 	"net/url"
 
-	n "github.com/lejeunel/go-image-annotator-v2/shared/navigation"
-	"github.com/lejeunel/go-image-annotator-v2/shared/pagination"
+	n "github.com/lejeunel/go-image-annotator/shared/navigation"
+	"github.com/lejeunel/go-image-annotator/shared/pagination"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )

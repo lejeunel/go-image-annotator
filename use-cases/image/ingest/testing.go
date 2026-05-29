@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"io"
 
-	ast "github.com/lejeunel/go-image-annotator-v2/app/file-store"
-	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	clc "github.com/lejeunel/go-image-annotator-v2/entities/collection"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
-	t "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	ast "github.com/lejeunel/go-image-annotator/app/file-store"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/lejeunel/go-image-annotator/shared/logging"
+	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 func NewTestingInteractor() *Interactor {

@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"testing"
 
-	ast "github.com/lejeunel/go-image-annotator-v2/app/file-store"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	ast "github.com/lejeunel/go-image-annotator/app/file-store"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 func TestNonExistingCollectionShouldFail(t *testing.T) {

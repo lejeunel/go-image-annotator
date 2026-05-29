@@ -3,11 +3,11 @@ package add_bbox
 import (
 	"fmt"
 
-	st "github.com/lejeunel/go-image-annotator-v2/app/image-store"
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	"github.com/lejeunel/go-image-annotator-v2/shared/logging"
+	st "github.com/lejeunel/go-image-annotator/app/image-store"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
 )
 

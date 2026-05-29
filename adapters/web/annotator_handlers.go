@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"net/url"
 
-	aw "github.com/lejeunel/go-image-annotator-v2/adapters/web/annotator"
-	an "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	"github.com/lejeunel/go-image-annotator-v2/shared/html"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/annotate/remove"
+	aw "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/lejeunel/go-image-annotator/shared/html"
+	"github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 )
 
 func ParseAnnotationIdFromURL(u *url.URL) (*an.AnnotationId, error) {

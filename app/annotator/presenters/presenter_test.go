@@ -3,8 +3,8 @@ package presenters
 import (
 	"testing"
 
-	scr "github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
+	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
 func TestScrollerButtonsWithNoPrevImage(t *testing.T) {

@@ -1,8 +1,8 @@
 package list
 
 import (
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
-	st "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	st "github.com/lejeunel/go-image-annotator/shared/testing"
 	"testing"
 )
 

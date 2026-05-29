@@ -3,13 +3,13 @@ package server
 import (
 	"net/http"
 
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/json"
-	presenter "github.com/lejeunel/go-image-annotator-v2/adapters/api/json/image"
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/models"
-	rd "github.com/lejeunel/go-image-annotator-v2/app/reader"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/image/ingest"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/image/list"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/image/read"
+	"github.com/lejeunel/go-image-annotator/adapters/api/json"
+	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/image"
+	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	rd "github.com/lejeunel/go-image-annotator/app/reader"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/read"
 )
 
 func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {

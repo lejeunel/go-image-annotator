@@ -1,9 +1,9 @@
 package label
 
 import (
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/json"
-	"github.com/lejeunel/go-image-annotator-v2/adapters/api/models"
-	"github.com/lejeunel/go-image-annotator-v2/use-cases/label/list"
+	"github.com/lejeunel/go-image-annotator/adapters/api/json"
+	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
 	"net/http"
 )
 

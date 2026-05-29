@@ -3,9 +3,9 @@ package modify_bbox
 import (
 	"testing"
 
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
-	lbl "github.com/lejeunel/go-image-annotator-v2/entities/label"
-	e "github.com/lejeunel/go-image-annotator-v2/shared/errors"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 func TestNonExistingLabelShouldFail(t *testing.T) {

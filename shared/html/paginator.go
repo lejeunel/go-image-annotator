@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"strconv"
 
-	scr "github.com/lejeunel/go-image-annotator-v2/app/annotator/scroller"
-	s "github.com/lejeunel/go-image-annotator-v2/shared"
+	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
+	s "github.com/lejeunel/go-image-annotator/shared"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )

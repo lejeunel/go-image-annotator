@@ -1,8 +1,8 @@
 package read
 
 import (
-	im "github.com/lejeunel/go-image-annotator-v2/entities/image"
-	t "github.com/lejeunel/go-image-annotator-v2/shared/testing"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakePresenter struct {

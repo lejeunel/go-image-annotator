@@ -1,10 +1,12 @@
 package update_label
 
 import (
-	a "github.com/lejeunel/go-image-annotator-v2/entities/annotation"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 )
 
 type Response struct {
+	AnnotationId a.AnnotationId
+	Label        string
 }
 
 type Request struct {

@@ -2,7 +2,7 @@ package label
 
 import (
 	"github.com/google/uuid"
-	uuidw "github.com/lejeunel/go-image-annotator-v2/shared/uuid"
+	uuidw "github.com/lejeunel/go-image-annotator/shared/uuid"
 )
 
 type LabelId struct{ uuidw.UUIDWrapper[LabelId] }

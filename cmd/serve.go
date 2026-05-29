@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/lejeunel/go-image-annotator-v2/site"
+	"github.com/lejeunel/go-image-annotator/site"
 	"github.com/spf13/cobra"
 )
 
