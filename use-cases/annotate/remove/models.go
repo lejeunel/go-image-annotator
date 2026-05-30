@@ -9,5 +9,5 @@ type Response struct {
 }
 
 type Request struct {
-	Id a.AnnotationId
+	Id string
 }

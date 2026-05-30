@@ -15,7 +15,7 @@ var TrashIcon = `
 </svg>
 `
 
-var Badge = `<span class="w-fit inline-flex mx-1 my-1 overflow-hidden rounded-radius border border-secondary bg-surface text-xs font-medium text-secondary dark:border-secondary-dark dark:bg-surface-dark dark:text-secondary-dark">
+var BadgeIcon = `<span class="w-fit inline-flex mx-1 my-1 overflow-hidden rounded-radius border border-secondary bg-surface text-xs font-medium text-secondary dark:border-secondary-dark dark:bg-surface-dark dark:text-secondary-dark">
     <span class="flex items-center gap-1 bg-secondary/10 px-2 py-1 dark:bg-secondary-dark/10">
 		<a href="#" onclick="%v">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="1.4" class="size-4">
@@ -26,8 +26,13 @@ var Badge = `<span class="w-fit inline-flex mx-1 my-1 overflow-hidden rounded-ra
     </span>
 </span>`
 
+var AddIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="12" y1="4" x2="12" y2="20"/>
+  <line x1="4" y1="12" x2="20" y2="12"/>
+</svg>`
+
 func MakeImageLabelBadge(label string, id string) Node {
-	return Raw(fmt.Sprintf(Badge, fmt.Sprintf("AnnotatorModule.remove('%v')", id), label))
+	return Raw(fmt.Sprintf(BadgeIcon, fmt.Sprintf("AnnotatorModule.remove('%v')", id), label))
 }
 
 func ShortenUUID(id string) string {
@@ -39,11 +44,10 @@ type AnnotationTable struct {
 	Rows   []AnnotationRow
 }
 
-func (t *AnnotationTable) Build() Node {
+func (t *AnnotationTable) Build(title string) Node {
 	return Div(Class("overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark"),
 		Table(Class("w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
-			TableHeader(t.Fields),
-			TableBody(t.Rows),
+			TableBody(title, t.Rows),
 		))
 }
 
@@ -53,9 +57,8 @@ type AnnotationRow struct {
 
 func (r AnnotationRow) Render() Node {
 	return Tr(
-		Class("even:bg-primary/5 dark:even:bg-primary-dark/10"),
 		Map(r.Values, func(node Node) Node {
-			return Td(Class("p-2"),
+			return Td(Class("p-1"),
 				node)
 		}))
 
@@ -68,8 +71,9 @@ func TableHeader(fields []string) Node {
 		})))
 }
 
-func TableBody(rows []AnnotationRow) Node {
+func TableBody(title string, rows []AnnotationRow) Node {
 	return TBody(Class("divide-y divide-outline dark:divide-outline-dark"),
+		Td(Div(Class("text-left py-2 ps-2 pe-2 text-sm font-bold"), Text(title))),
 		Map(rows, func(r AnnotationRow) Node {
 			return r.Render()
 
@@ -85,7 +89,7 @@ type LabelSelector struct {
 }
 type AnnotationsListView struct{}
 
-func (v *AnnotationsListView) makeBoxList(boxes []*view.BoundingBox, availableLabels []string) Node {
+func (v *AnnotationsListView) makeBoxList(boxes []view.BoundingBox, availableLabels []string) Node {
 	bboxTable := AnnotationTable{Fields: []string{"", "id", "label", "actions"}}
 	for _, b := range boxes {
 		shortId := ShortenUUID(b.Id)
@@ -105,10 +109,10 @@ func (v *AnnotationsListView) makeBoxList(boxes []*view.BoundingBox, availableLa
 				Raw(buf.String()),
 				Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, b.Id, TrashIcon))}})
 	}
-	return bboxTable.Build()
+	return bboxTable.Build("Regions")
 }
 
-func (v *AnnotationsListView) makeImageLabelList(imageLabels []*view.ImageLabel) Node {
+func (v *AnnotationsListView) makeImageLabelList(imageLabels []view.ImageLabel) Node {
 	badges := []Node{}
 	for _, l := range imageLabels {
 		badges = append(badges, MakeImageLabelBadge(l.Label, l.Id))
@@ -116,11 +120,26 @@ func (v *AnnotationsListView) makeImageLabelList(imageLabels []*view.ImageLabel)
 	return Div(Class("w-64 py-4"), Div(badges...))
 }
 
-func (v *AnnotationsListView) Build(boxes []*view.BoundingBox, imageLabels []*view.ImageLabel, availableLabels []string) Node {
+func (v *AnnotationsListView) Build(boxes []view.BoundingBox, imageLabels []view.ImageLabel, availableLabels []string) Node {
 	bboxTable := v.makeBoxList(boxes, availableLabels)
-	imageLabelsTable := v.makeImageLabelList(imageLabels)
+
+	var imageLabelsTable Node
+	if len(imageLabels) > 0 {
+		imageLabelsTable = v.makeImageLabelList(imageLabels)
+	}
+	imageLabelsPicker := Div(Class("pb-2"),
+		Div(Class("rounded-radius border border-outline dark:border-outline-dark"),
+			Table(
+				Tr(
+					Td(Div(Class("text-left py-2 ps-2 pe-4 text-sm font-bold"), Text("Labels"))),
+					Td(Class("text-right"),
+						Raw(fmt.Sprintf(`<a href="#" onclick=""> %v </a>`, AddIcon)),
+					),
+				),
+			)))
 
 	fullTable := Div(
+		imageLabelsPicker,
 		imageLabelsTable,
 		bboxTable)
 	return fullTable

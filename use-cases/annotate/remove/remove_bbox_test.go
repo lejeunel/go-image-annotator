@@ -10,7 +10,7 @@ import (
 func TestNonExistingBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrNotFound})
-	itr.Execute(Request{}, p)
+	itr.Execute(Request{Id: a.NewAnnotationId().String()}, p)
 	if !p.GotNotFoundErr || p.GotSuccess {
 		t.Fatalf("expected to get not found error")
 	}
@@ -30,7 +30,7 @@ func TestRemoveBox(t *testing.T) {
 	repo := &FakeRepo{}
 	itr := NewInteractor(repo)
 	annotationId := a.NewAnnotationId()
-	itr.Execute(Request{Id: annotationId}, p)
+	itr.Execute(Request{Id: annotationId.String()}, p)
 	if !p.GotSuccess || !(repo.Got == annotationId) {
 		t.Fatalf("expected to remove annotation, got success %v and annotation id %v, wanted %v",
 			p.GotSuccess, repo.Got.String(), annotationId.String())

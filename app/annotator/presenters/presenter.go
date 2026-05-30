@@ -29,9 +29,9 @@ func (p Presenter) SuccessDeleteAnnotation(r del.Response) {
 	p.View.DeleteAnnotation(r.Id.String())
 }
 func (p Presenter) SuccessReadImage(im im.Image) {
-	p.View.DrawImageInfo(v.NewImageInfo(im.Id, im.Collection.Name, im.Specs))
-	p.View.DrawImage(v.NewImage(im.Id, im.Reader, im.Collection.Name, im.MIMEType))
-	p.View.DrawAnnotationList(MakeBoundingBoxes(im.BoundingBoxes, p.Colorizer),
+	p.View.SetImageInfo(v.NewImageInfo(im.Id, im.Collection.Name, im.Specs))
+	p.View.SetImage(v.NewImage(im.Id, im.Reader, im.Collection.Name, im.MIMEType))
+	p.View.SetAnnotations(MakeBoundingBoxes(im.BoundingBoxes, p.Colorizer),
 		MakeImageLabels(im.Labels))
 }
 func (p Presenter) SuccessFetchLabels(r fetchlbl.Response) {
@@ -41,7 +41,7 @@ func (p Presenter) SuccessAddLabel(r addlbl.Response) {
 	p.View.AddLabel(v.ImageLabel{Id: r.AnnotationId.String(), Label: r.Label})
 }
 func (p Presenter) SuccessAddBox(b a.BoundingBox) {
-	p.View.AddBox(*MakeBoundingBox(&b, p.Colorizer))
+	p.View.AddBox(MakeBoundingBox(&b, p.Colorizer))
 }
 func (p Presenter) SuccessUpdateBox(r updbox.Response) {
 	p.View.UpdateBox(v.BoundingBox{Id: r.AnnotationId.String(),

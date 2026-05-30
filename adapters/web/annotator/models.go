@@ -44,7 +44,7 @@ func ToUpdateBoxRequest(r AnnotoriousBoxModel) (*updbox.Request, error) {
 
 }
 
-func ConvertToAnnotorious(boxes []*view.BoundingBox) []AnnotoriousBoxModel {
+func ConvertToAnnotorious(boxes []view.BoundingBox) []AnnotoriousBoxModel {
 	result := []AnnotoriousBoxModel{}
 	for _, b := range boxes {
 		xtopleft := b.Xc - b.Width/2

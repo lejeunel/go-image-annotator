@@ -5,55 +5,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 
 	aw "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
-	an "github.com/lejeunel/go-image-annotator/entities/annotation"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/html"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
-func ParseAnnotationIdFromURL(u *url.URL) (*an.AnnotationId, error) {
-	baseErr := "parsing url for annotation id"
-	idStr := u.Query().Get("id")
-	if idStr == "" {
-		return nil, fmt.Errorf("%v: extracting id: %w", baseErr, e.ErrURLParsing)
-	}
-	id, err := an.NewAnnotationIdFromString(idStr)
-	if err != nil {
-		return nil, fmt.Errorf("%v: validating id (%v): %w", baseErr, idStr, e.ErrValidation)
-	}
-	return id, nil
-}
-
-func ParseImageIdAndCollectionFromURL(u *url.URL) (*aw.Request, error) {
-	baseErr := "parsing url"
-	req := aw.Request{}
-	imageIdStr := u.Query().Get("id")
-	if imageIdStr == "" {
-		return nil, fmt.Errorf("%v: extracting id: %w", baseErr, e.ErrURLParsing)
-	}
-	req.ImageId = imageIdStr
-
-	collection := u.Query().Get("collection")
-	if collection == "" {
-		return nil, fmt.Errorf("%v: collection (%v): %w", baseErr, collection, e.ErrURLParsing)
-	}
-	req.Collection = collection
-	return &req, nil
-}
 func (s *Server) ViewImage(w http.ResponseWriter, r *http.Request) {
-
-	req, err := ParseImageIdAndCollectionFromURL(r.URL)
-	if err != nil {
-		html.NewPageBuilder().SetError(err).Render(w)
-		return
-	}
-
 	view := aw.NewAnnotationView()
-	s.annotator.Init(req.ImageId, req.Collection, view)
+	s.annotator.Init(r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
 	view.RenderAll(w)
 }
 func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
@@ -74,32 +35,17 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 	s.annotator.AddBox(*req, aw.NewAnnotationView())
 }
 func (s *Server) MakeHTMLAnnotationPanel(w http.ResponseWriter, r *http.Request) {
-	req, err := ParseImageIdAndCollectionFromURL(r.URL)
-	if err != nil {
-		html.NewPageBuilder().SetError(err).Render(w)
-		return
-	}
 	view := aw.NewAnnotationView()
-	s.annotator.Init(req.ImageId, req.Collection, view)
+	s.annotator.Init(r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
 	view.RenderAnnotationList(w)
 }
 func (s *Server) GetAnnotationsAsJSON(w http.ResponseWriter, r *http.Request) {
-	req, err := ParseImageIdAndCollectionFromURL(r.URL)
-	if err != nil {
-		html.NewPageBuilder().SetError(err).Render(w)
-		return
-	}
 	view := aw.NewAnnotationView()
-	s.annotator.Init(req.ImageId, req.Collection, view)
+	s.annotator.Init(r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
 	view.RenderAnnotations(w)
 }
 func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
-	id, err := ParseAnnotationIdFromURL(r.URL)
-	if err != nil {
-		html.NewPageBuilder().SetError(err).Render(w)
-		return
-	}
-	s.annotator.DeleteAnnotation(remove.Request{Id: *id}, aw.NewAnnotationView())
+	s.annotator.DeleteAnnotation(remove.Request{Id: r.URL.Query().Get("id")}, aw.NewAnnotationView())
 }
 func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
@@ -118,9 +64,8 @@ func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 	}
 	s.annotator.UpdateBox(*req, aw.NewAnnotationView())
 }
-
 func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
-	baseErr := "setting label"
+	baseErr := fmt.Errorf("setting label")
 	id := r.URL.Query().Get("id")
 	if id == "" {
 		html.NewPageBuilder().SetError(fmt.Errorf("%w: failed parsing url to get annotation id", baseErr)).Render(w)

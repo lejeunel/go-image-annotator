@@ -95,17 +95,17 @@ type FakeView struct {
 	UpdatedAnnotation   *v.Annotation
 }
 
-func (s *FakeView) DrawScroller(buttons v.ScrollerButtons) {
+func (s *FakeView) SetScroller(buttons v.ScrollerButtons) {
 	s.GotScrollerButtons = &buttons
 }
 func (s *FakeView) Error(error) {}
-func (s *FakeView) DrawImage(i v.Image) {
+func (s *FakeView) SetImage(i v.Image) {
 	s.GotImage = &i
 }
-func (s *FakeView) DrawImageInfo(i v.ImageInfo) {
+func (s *FakeView) SetImageInfo(i v.ImageInfo) {
 	s.GotImageInfo = &i
 }
-func (s *FakeView) DrawAnnotationList(boxes []*v.BoundingBox, labels []*v.ImageLabel) {
+func (s *FakeView) SetAnnotations(boxes []v.BoundingBox, labels []v.ImageLabel) {
 	ids := []string{}
 	for _, b := range boxes {
 		ids = append(ids, b.Id)

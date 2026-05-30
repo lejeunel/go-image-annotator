@@ -1,14 +1,14 @@
 package view
 
 type View interface {
-	DrawScroller(ScrollerButtons)
+	SetScroller(ScrollerButtons)
 	Error(error)
-	DrawImage(Image)
-	DrawImageInfo(ImageInfo)
-	DrawAnnotationList([]*BoundingBox, []*ImageLabel)
 	AddBox(BoundingBox)
 	AddLabel(ImageLabel)
 	SetAvailableLabels([]string)
+	SetImageInfo(ImageInfo)
+	SetImage(Image)
+	SetAnnotations([]BoundingBox, []ImageLabel)
 	UpdateBox(BoundingBox)
 	UpdateLabel(Annotation)
 	DeleteAnnotation(string)

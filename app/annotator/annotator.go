@@ -47,7 +47,7 @@ func (a *Annotator) Init(imageId string, collection string, view v.View) {
 		view.Error(err)
 		return
 	}
-	view.DrawScroller(p.MakeScrollerButtons(*scrollerState))
+	view.SetScroller(p.MakeScrollerButtons(*scrollerState))
 
 	a.presenter.SetView(view)
 	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection},

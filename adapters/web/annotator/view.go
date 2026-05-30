@@ -22,8 +22,8 @@ type AnnotationView struct {
 	AnnotationsListView
 	ScrollerView
 	image           *v.Image
-	boxes           []*v.BoundingBox
-	imageLabels     []*v.ImageLabel
+	boxes           []v.BoundingBox
+	imageLabels     []v.ImageLabel
 	imageInfo       *v.ImageInfo
 	availableLabels []string
 	scrollerButtons v.ScrollerButtons
@@ -33,23 +33,23 @@ type AnnotationView struct {
 	err             error
 }
 
-func (v *AnnotationView) DrawScroller(buttons v.ScrollerButtons) {
+func (v *AnnotationView) SetScroller(buttons v.ScrollerButtons) {
 	v.scrollerButtons = buttons
 }
-func (v *AnnotationView) DrawImage(image v.Image) {
-	v.image = &image
-	v.doDrawImage = true
-}
-func (v *AnnotationView) DrawImageInfo(info v.ImageInfo) {
-	v.imageInfo = &info
-}
-func (v *AnnotationView) DrawAnnotationList(boxes []*v.BoundingBox, imageLabels []*v.ImageLabel) {
+func (v *AnnotationView) SetAnnotations(boxes []v.BoundingBox, imageLabels []v.ImageLabel) {
 	v.boxes = boxes
 	v.imageLabels = imageLabels
 }
 func (v *AnnotationView) SetAvailableLabels(labels []string) {
 	v.availableLabels = labels
 
+}
+func (v *AnnotationView) SetImageInfo(info v.ImageInfo) {
+	v.imageInfo = &info
+}
+func (v *AnnotationView) SetImage(image v.Image) {
+	v.image = &image
+	v.doDrawImage = true
 }
 func (v *AnnotationView) AddBox(b v.BoundingBox) {
 	v.addedBox = &b

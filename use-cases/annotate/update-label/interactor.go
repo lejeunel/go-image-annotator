@@ -31,6 +31,7 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 	id, err := a.NewAnnotationIdFromString(r.AnnotationId)
 	if err != nil {
 		i.handleError(err, out)
+		return
 	}
 
 	err = i.repo.UpdateLabelOfAnnotation(*id, label.Id)
