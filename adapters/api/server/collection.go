@@ -6,6 +6,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/collection"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	myhttp "github.com/lejeunel/go-image-annotator/adapters/http"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
@@ -22,7 +23,8 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.Collection.Create.Execute(create.Request{Name: body.Name, Description: *body.Description},
+	s.Collection.Create.Execute(myhttp.NewPrincipalProvider(r.Context()),
+		create.Request{Name: body.Name, Description: *body.Description},
 		presenter.NewCreatePresenter(w))
 }
 func (s *Server) DeleteCollectionByName(w http.ResponseWriter, r *http.Request, name string) {

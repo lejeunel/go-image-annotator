@@ -2,6 +2,7 @@ package testing
 
 import (
 	"errors"
+	"github.com/lejeunel/go-image-annotator/entities/principal"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -12,6 +13,7 @@ type TestingErrPresenter struct {
 	GotNotFoundErr    bool
 	GotDependencyErr  bool
 	GotErr            error
+	GotAuthErr        bool
 }
 
 func (p *TestingErrPresenter) Error(err error) {
@@ -25,8 +27,21 @@ func (p *TestingErrPresenter) Error(err error) {
 		p.GotNotFoundErr = true
 	case errors.Is(err, e.ErrDependency):
 		p.GotDependencyErr = true
+	case errors.Is(err, e.ErrAuth):
+		p.GotAuthErr = true
 
 	default:
 		p.GotInternalErr = true
 	}
+}
+
+type FakeAuth struct {
+	Fail bool
+}
+
+type FakeProvider struct {
+}
+
+func (p FakeProvider) Provide() (*principal.Principal, error) {
+	return &principal.Principal{}, nil
 }

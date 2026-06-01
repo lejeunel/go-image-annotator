@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
+	myhttp "github.com/lejeunel/go-image-annotator/adapters/http"
 	web "github.com/lejeunel/go-image-annotator/adapters/web"
 	a "github.com/lejeunel/go-image-annotator/app/annotator"
 	"github.com/lejeunel/go-image-annotator/app/annotator/presenters"
@@ -43,6 +44,8 @@ func Serve(port int) {
 		*web.NewServer(interactors, annotator),
 		SiteConfig{APIDocsPath: "/api/docs", OpenAPISpecsPath: "/api/openapi.yaml"})
 
+	handler := myhttp.DummyAuthMiddleware(mux)
+
 	fmt.Println("serving on port:", port)
-	http.ListenAndServe(fmt.Sprintf(":%v", port), mux)
+	http.ListenAndServe(fmt.Sprintf(":%v", port), handler)
 }

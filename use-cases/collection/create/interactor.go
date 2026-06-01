@@ -6,6 +6,7 @@ import (
 
 	"github.com/jonboulle/clockwork"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	auth "github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
@@ -16,9 +17,15 @@ type Interactor struct {
 	validator v.Validator
 	logger    *slog.Logger
 	clock     clockwork.Clock
+	auth      Auth
 }
 
-func (i *Interactor) Execute(r Request, out OutputPort) {
+func (i *Interactor) Execute(p auth.PrincipalProvider, r Request, out OutputPort) {
+
+	if err := i.auth.CreateCollection(p, r.Group); err != nil {
+		i.handleError(err, out)
+		return
+	}
 
 	if err := i.validate(r.Name); err != nil {
 		i.handleError(err, out)
@@ -88,10 +95,17 @@ func WithClock(c clockwork.Clock) Option {
 	}
 }
 
+func WithAuth(a Auth) Option {
+	return func(i *Interactor) {
+		i.auth = a
+	}
+}
+
 func NewInteractor(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r, validator: v.NewNameValidator(),
 		logger: logging.NewNoOpLogger(),
-		clock:  clockwork.NewRealClock()}
+		clock:  clockwork.NewRealClock(),
+		auth:   auth.PassThroughAuth{}}
 
 	for _, opt := range opts {
 		opt(i)

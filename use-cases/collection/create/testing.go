@@ -4,6 +4,8 @@ import (
 	"slices"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	"github.com/lejeunel/go-image-annotator/shared/auth"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
@@ -38,4 +40,11 @@ type FakePresenter struct {
 func (p *FakePresenter) Success(r Response) {
 	p.GotSuccess = true
 	p.Got = r
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) CreateCollection(p auth.PrincipalProvider, g string) error {
+	return e.ErrAuth
 }
