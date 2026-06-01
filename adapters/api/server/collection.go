@@ -23,12 +23,16 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.Collection.Create.Execute(myhttp.NewPrincipalProvider(r.Context()),
+	s.Collection.Create.Execute(
+		myhttp.NewPrincipalProvider(r.Context()),
 		create.Request{Name: body.Name, Description: *body.Description},
 		presenter.NewCreatePresenter(w))
 }
 func (s *Server) DeleteCollectionByName(w http.ResponseWriter, r *http.Request, name string) {
-	s.Collection.Delete.Execute(delete.Request{Name: name}, presenter.NewDeletePresenter(w))
+	s.Collection.Delete.Execute(
+		myhttp.NewPrincipalProvider(r.Context()),
+		delete.Request{Name: name},
+		presenter.NewDeletePresenter(w))
 
 }
 func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request, params ListCollectionsParams) {

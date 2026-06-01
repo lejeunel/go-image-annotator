@@ -17,9 +17,9 @@ func NewSQLiteCollectionInteractors(repo *infra.SQLiteCollectionRepo, pageSize i
 		Find: *read.NewInteractor(repo),
 		Create: *create.NewInteractor(repo, create.WithNameValidator(validation.NewNameValidator()),
 			create.WithClock(clockwork.NewRealClock())),
-		Delete:          *delete.NewInteractor(repo),
-		List:            *list.NewInteractor(repo),
-		Update:          *update.NewInteractor(repo),
+		Delete:          delete.NewInteractor(repo),
+		List:            list.NewInteractor(repo),
+		Update:          update.NewInteractor(repo),
 		DefaultPageSize: pageSize,
 	}
 }

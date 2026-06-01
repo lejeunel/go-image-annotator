@@ -43,8 +43,8 @@ func (i *Interactor) handleError(err error, out OutputPort) {
 	out.Error(err)
 }
 
-func NewInteractor(r Repo) *Interactor {
-	return &Interactor{repo: r,
+func NewInteractor(r Repo) Interactor {
+	return Interactor{repo: r,
 		logger: logging.NewNoOpLogger(),
 	}
 }

@@ -7,6 +7,7 @@ type Collection struct {
 	Name        string
 	Description string
 	CreatedAt   time.Time
+	Group       string
 }
 
 func NewCollection(id CollectionId, name string, opts ...Option) Collection {
@@ -28,5 +29,11 @@ func WithDescription(d string) Option {
 func WithCreatedAt(t time.Time) Option {
 	return func(c *Collection) {
 		c.CreatedAt = t
+	}
+}
+
+func WithGroup(g string) Option {
+	return func(c *Collection) {
+		c.Group = g
 	}
 }

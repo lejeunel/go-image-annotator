@@ -8,7 +8,8 @@ import (
 
 func CreateCollection(repo *SQLiteCollectionRepo, name string) (*clc.Collection, error) {
 	c := clc.NewCollection(clc.NewCollectionId(), name,
-		clc.WithDescription("a-description"), clc.WithCreatedAt(time.Now()))
+		clc.WithDescription("a-description"), clc.WithCreatedAt(time.Now()),
+		clc.WithGroup("a-group"))
 	if err := repo.Create(c); err != nil {
 		return nil, err
 	}

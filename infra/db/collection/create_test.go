@@ -1,25 +1,21 @@
 package collection
 
 import (
-	"errors"
 	"testing"
 
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInternalErrOnCreateShouldFail(t *testing.T) {
 	repo := NewTestSQLiteCollectionRepo()
 	repo.Db.Close()
 	_, err := CreateCollection(repo, "a-collection")
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal, "expected internal error")
 }
 
 func TestCreate(t *testing.T) {
 	_, err := CreateCollection(NewTestSQLiteCollectionRepo(), "a-collection")
-	if err != nil {
-		t.Fatalf("expected no error on create but got %v", err)
-	}
+	assert.NoError(t, err, "expected no error on create but got")
 
 }

@@ -14,3 +14,6 @@ type PassThroughAuth struct {
 func (a PassThroughAuth) CreateCollection(p PrincipalProvider, group string) error {
 	return nil
 }
+func (a PassThroughAuth) DeleteCollection(p PrincipalProvider, group string) error {
+	return nil
+}

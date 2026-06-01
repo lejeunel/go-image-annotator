@@ -7,6 +7,7 @@ import (
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRetrieveNonExistingShouldFail(t *testing.T) {
@@ -31,17 +32,14 @@ func TestInternalErrOnFindShouldFail(t *testing.T) {
 func TestRetrieve(t *testing.T) {
 	repo := NewTestSQLiteCollectionRepo()
 	c := clc.NewCollection(clc.NewCollectionId(), "a-collection",
-		clc.WithDescription("a-description"), clc.WithCreatedAt(time.Now()))
+		clc.WithDescription("a-description"), clc.WithCreatedAt(time.Now()), clc.WithGroup("a-group"))
 	repo.Create(c)
 	r, err := repo.FindCollectionByName("a-collection")
-	if err != nil {
-		t.Fatalf("expected no error on find, got %v", err)
-	}
-	if (r.Name != c.Name) || (r.Description != c.Description) || (r.Id != c.Id) || !r.CreatedAt.Equal(c.CreatedAt) {
-		t.Fatalf("expected to retrieve name %v, description %v, id %v, created at %v, got %v, %v, %v, %v",
-			c.Name, c.Description, c.Id, c.CreatedAt,
-			r.Name, r.Description, r.Id, r.CreatedAt)
-
-	}
+	assert.NoError(t, err, "expected no error on find")
+	assert.Equal(t, c.Name, r.Name)
+	assert.Equal(t, c.Description, r.Description)
+	assert.Equal(t, c.Id, r.Id)
+	assert.Equal(t, c.Group, r.Group)
+	assert.Equal(t, r.CreatedAt.Equal(c.CreatedAt), true)
 
 }

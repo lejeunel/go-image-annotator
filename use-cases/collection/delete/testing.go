@@ -1,6 +1,8 @@
 package delete
 
 import (
+	auth "github.com/lejeunel/go-image-annotator/shared/auth"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
@@ -9,8 +11,12 @@ type FakeRepo struct {
 	ErrOnDelete  bool
 	Missing      bool
 	IsPopulated_ bool
+	ReturnGroup  string
 }
 
+func (r *FakeRepo) Group(string) (*string, error) {
+	return &r.ReturnGroup, nil
+}
 func (r *FakeRepo) Delete(string) error {
 
 	if r.ErrOnDelete {
@@ -42,4 +48,11 @@ type FakePresenter struct {
 
 func (p *FakePresenter) Success() {
 	p.GotSuccess = true
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) DeleteCollection(p auth.PrincipalProvider, g string) error {
+	return e.ErrAuth
 }

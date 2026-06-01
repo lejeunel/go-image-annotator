@@ -21,7 +21,6 @@ type Interactor struct {
 }
 
 func (i *Interactor) Execute(p auth.PrincipalProvider, r Request, out OutputPort) {
-
 	if err := i.auth.CreateCollection(p, r.Group); err != nil {
 		i.handleError(err, out)
 		return

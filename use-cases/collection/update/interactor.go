@@ -13,8 +13,8 @@ type Interactor struct {
 	logger *slog.Logger
 }
 
-func NewInteractor(r Repo) *Interactor {
-	return &Interactor{repo: r, logger: logging.NewNoOpLogger()}
+func NewInteractor(r Repo) Interactor {
+	return Interactor{repo: r, logger: logging.NewNoOpLogger()}
 }
 
 func (i *Interactor) Execute(r Request, out OutputPort) {
