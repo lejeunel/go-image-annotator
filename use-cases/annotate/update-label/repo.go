@@ -6,6 +6,6 @@ import (
 )
 
 type Repo interface {
-	FindLabelByName(string) (*lbl.Label, error)
+	FindLabel(string) (*lbl.Label, error)
 	UpdateLabelOfAnnotation(a.AnnotationId, lbl.LabelId) error
 }

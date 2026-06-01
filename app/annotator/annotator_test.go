@@ -23,17 +23,17 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
 		clc.NewCollection(clc.NewCollectionId(), "name"))
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	box := an.NewBoundingBox(an.NewAnnotationId(), 1, 1, 1, 1, label)
-	image.AddBoundingBox(*box)
+	image.AddBoundingBox(box)
 	image.AddLabel(label)
 	annotator := NewAnnotator(
 		scroller,
 		&FakeImageReader{Return: &image},
-		&FakeBoxAdder{Returns: *box},
+		&FakeBoxAdder{Returns: box},
 		&FakeBoxUpdater{Returns: &updbox.Response{AnnotationId: box.Id}},
 		&FakeAnnotationDeleter{Returns: del.Response{Id: box.Id}},
 		&FakeLabelFetcher{},
 		&FakeLabelUpdater{},
-		&FakeLabelAdder{Returns: addlbl.Response{ImageId: image.Id, Collection: image.Collection.Name, Label: label.Name}},
+		&FakeLabelAdder{Returns: addlbl.Response{ImageId: image.Id.String(), Collection: image.Collection.Name, Label: label.Name}},
 		presenters.NewPresenter())
 	return annotator, &image, scroller, view
 
@@ -49,11 +49,12 @@ func TestDrawScrollerOnInit(t *testing.T) {
 	assert.NotNil(t, view.GotScrollerButtons, "drawn scroller buttons")
 
 }
-func TestFetchAllLabelsOnInit(t *testing.T) {
+func TestSetAllLabelsForRegions(t *testing.T) {
 	a, image, _, view := createAnnotator()
 	a.Init(image.Id.String(), "a-collection", view)
-	assert.NotNil(t, view.GotAvailableLabels, "drawn label list")
+	assert.NotNil(t, view.GotAvailableRegionLabels, "drawn label list")
 }
+
 func TestDrawImageOnInit(t *testing.T) {
 	a, image, _, view := createAnnotator()
 	a.Init(image.Id.String(), "a-collection", view)

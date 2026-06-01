@@ -10,8 +10,8 @@ import (
 func TestInternalErrOnLabelIsUsedShouldFail(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
-	annotationId := a.NewAnnotationId()
-	repos.Annotation.AddImageLabel(annotationId, image.Id, collection.Id, label.Id)
+	imLabel := a.NewImageLabel(label)
+	repos.Annotation.AddImageLabel(image.Id, collection.Id, imLabel)
 	repos.Annotation.Db.Close()
 	_, err := repos.Label.IsUsed(label.Name)
 	if !errors.Is(err, e.ErrInternal) {
@@ -22,8 +22,8 @@ func TestInternalErrOnLabelIsUsedShouldFail(t *testing.T) {
 func TestLabelIsUsedbyAnnotation(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
-	annotationId := a.NewAnnotationId()
-	repos.Annotation.AddImageLabel(annotationId, image.Id, collection.Id, label.Id)
+	imLabel := a.NewImageLabel(label)
+	repos.Annotation.AddImageLabel(image.Id, collection.Id, imLabel)
 	isUsed, err := repos.Label.IsUsed(label.Name)
 	if err != nil {
 		t.Fatalf("expected no error got %v", err)

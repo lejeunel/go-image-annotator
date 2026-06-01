@@ -24,7 +24,13 @@ type Interactor struct {
 
 func (i *Interactor) Execute(r Request, out OutputPort) {
 
-	image, err := i.findImage(r.ImageId, r.Collection)
+	id, err := im.NewImageIdFromString(r.ImageId)
+	if err != nil {
+		i.handleError(err, out)
+		return
+	}
+
+	image, err := i.findImage(id, r.Collection)
 	if err != nil {
 		i.handleError(err, out)
 		return
@@ -41,7 +47,11 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 		return
 	}
 
-	out.SuccessAddLabel(Response{ImageId: r.ImageId, Collection: r.Collection, Label: r.Label, AnnotationId: imageLabel.Id})
+	out.SuccessAddLabel(Response{
+		ImageId:      r.ImageId,
+		Collection:   r.Collection,
+		Label:        r.Label,
+		AnnotationId: imageLabel.Id.String()})
 }
 func (i *Interactor) handleError(err error, out OutputPort) {
 	errCtx := "assigning label to image"
@@ -68,10 +78,10 @@ func (i *Interactor) findImage(imageId im.ImageId, collection string) (*im.Image
 
 func (i *Interactor) addLabel(imageId im.ImageId, collectionId clc.CollectionId, label lbl.Label) (*an.ImageLabel, error) {
 	imageLabel := an.NewImageLabel(label)
-	if err := i.repo.AddImageLabel(imageId, collectionId, *imageLabel); err != nil {
+	if err := i.repo.AddImageLabel(imageId, collectionId, imageLabel); err != nil {
 		return nil, err
 	}
-	return imageLabel, nil
+	return &imageLabel, nil
 
 }
 

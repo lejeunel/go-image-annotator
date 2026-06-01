@@ -16,7 +16,7 @@ type FakeRepo struct {
 	Returns              *lbl.Label
 }
 
-func (r *FakeRepo) FindLabelByName(name string) (*lbl.Label, error) {
+func (r *FakeRepo) FindLabel(name string) (*lbl.Label, error) {
 	r.FetchedLabelWithName = name
 	if r.ErrOnFindLabel {
 		return nil, r.Err

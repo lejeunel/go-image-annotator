@@ -25,7 +25,7 @@ func TestUpdateLabel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("did not expect error, got %v", err)
 	}
-	r, err := repo.FindLabelByName(newName)
+	r, err := repo.FindLabel(newName)
 	if err != nil {
 		t.Fatalf("expected to retrieve updated, got %v", err)
 	}

@@ -11,7 +11,7 @@ func TestInternalErrOnAddLabelShouldFail(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
 	repos.Annotation.Db.Close()
-	err := repos.Annotation.AddImageLabel(a.NewAnnotationId(), image.Id, collection.Id, label.Id)
+	err := repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label))
 	if !errors.Is(err, e.ErrInternal) {
 		t.Fatalf("expected internal error, got %v", err)
 	}
@@ -30,7 +30,7 @@ func TestInternalErrOnFindImageLabels(t *testing.T) {
 func TestAddAndRetrieveImageLabels(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
-	repos.Annotation.AddImageLabel(a.NewAnnotationId(), image.Id, collection.Id, label.Id)
+	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label))
 	labels, err := repos.Annotation.FindImageLabels(image.Id, collection.Id)
 	if err != nil {
 		t.Fatalf("expected no error on find labels, got %v", err)

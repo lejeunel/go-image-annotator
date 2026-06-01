@@ -11,7 +11,6 @@ import (
 
 	ast "github.com/lejeunel/go-image-annotator/app/file-store"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
-	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
@@ -143,7 +142,7 @@ func (i Interactor) appendBoundingBoxes(image *im.Image, bboxes []BoundingBoxReq
 			return fmt.Errorf("%w: %w", baseErr, err)
 		}
 		box_ := a.NewBoundingBox(a.NewAnnotationId(), bbox.Xc, bbox.Yc, bbox.Width, bbox.Height, *label)
-		if err := image.AddBoundingBox(*box_); err != nil {
+		if err := image.AddBoundingBox(box_); err != nil {
 			return fmt.Errorf("%w: %w", baseErr, err)
 		}
 	}
@@ -162,13 +161,13 @@ func (i Interactor) ingestImage(image *im.Image, hash []byte, specs im.ImageSpec
 	}
 
 	for _, label := range image.Labels {
-		if err := i.AnnotationRepo.AddImageLabel(an.NewAnnotationId(), image.Id, image.Collection.Id, label.Label.Id); err != nil {
+		if err := i.AnnotationRepo.AddImageLabel(image.Id, image.Collection.Id, label); err != nil {
 			return fmt.Errorf("adding image label to collection: %w", err)
 		}
 	}
 
 	for _, box := range image.BoundingBoxes {
-		if err := i.AnnotationRepo.AddBoundingBox(image.Id, image.Collection.Id, *box); err != nil {
+		if err := i.AnnotationRepo.AddBoundingBox(image.Id, image.Collection.Id, box); err != nil {
 			return fmt.Errorf("adding bounding box: %w", err)
 		}
 	}
@@ -188,7 +187,7 @@ func (i Interactor) findCollectionByName(name string) (*clc.Collection, error) {
 
 func (i Interactor) findLabelByName(name string) (*lbl.Label, error) {
 	baseErr := fmt.Errorf("fetching label by name %v", name)
-	label, err := i.LabelRepo.FindLabelByName(name)
+	label, err := i.LabelRepo.FindLabel(name)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", baseErr, err)
 	}

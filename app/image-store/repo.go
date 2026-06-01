@@ -8,8 +8,8 @@ import (
 
 type Repo interface {
 	FindCollectionByName(string) (*clc.Collection, error)
-	FindImageLabels(im.ImageId, clc.CollectionId) ([]*a.ImageLabel, error)
-	FindBoundingBoxes(im.ImageId, clc.CollectionId) ([]*a.BoundingBox, error)
+	FindImageLabels(im.ImageId, clc.CollectionId) ([]a.ImageLabel, error)
+	FindBoundingBoxes(im.ImageId, clc.CollectionId) ([]a.BoundingBox, error)
 	ImageExistsInCollection(im.ImageId, clc.CollectionId) (bool, error)
 	GetSpecs(im.ImageId) (*im.ImageSpecs, error)
 }

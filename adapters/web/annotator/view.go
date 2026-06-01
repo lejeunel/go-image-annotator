@@ -2,7 +2,6 @@ package annotator
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"embed"
@@ -21,16 +20,14 @@ type AnnotationView struct {
 	ImageInfosView
 	AnnotationsListView
 	ScrollerView
-	image           *v.Image
-	boxes           []v.BoundingBox
-	imageLabels     []v.ImageLabel
-	imageInfo       *v.ImageInfo
-	availableLabels []string
-	scrollerButtons v.ScrollerButtons
-	doDrawImage     bool
-	addedBox        *v.BoundingBox
-	addedLabel      *v.ImageLabel
-	err             error
+	image                *v.Image
+	boxes                []v.BoundingBox
+	imageLabels          []v.ImageLabel
+	imageInfo            *v.ImageInfo
+	availableLabels      []string
+	availableImageLabels []string
+	scrollerButtons      v.ScrollerButtons
+	err                  error
 }
 
 func (v *AnnotationView) SetScroller(buttons v.ScrollerButtons) {
@@ -42,27 +39,21 @@ func (v *AnnotationView) SetAnnotations(boxes []v.BoundingBox, imageLabels []v.I
 }
 func (v *AnnotationView) SetAvailableLabels(labels []string) {
 	v.availableLabels = labels
-
+}
+func (v *AnnotationView) SetAvailableImageLabels(labels []string) {
+	v.availableImageLabels = labels
 }
 func (v *AnnotationView) SetImageInfo(info v.ImageInfo) {
 	v.imageInfo = &info
 }
 func (v *AnnotationView) SetImage(image v.Image) {
 	v.image = &image
-	v.doDrawImage = true
 }
-func (v *AnnotationView) AddBox(b v.BoundingBox) {
-	v.addedBox = &b
-}
-func (v *AnnotationView) AddLabel(l v.ImageLabel) {
-	v.addedLabel = &l
-}
-func (v *AnnotationView) UpdateBox(b v.BoundingBox) {
-}
-func (v *AnnotationView) UpdateLabel(a v.Annotation) {
-}
-func (v *AnnotationView) DeleteAnnotation(string) {
-}
+func (v *AnnotationView) AddBox(b v.BoundingBox)     {}
+func (v *AnnotationView) AddLabel(l v.ImageLabel)    {}
+func (v *AnnotationView) UpdateBox(b v.BoundingBox)  {}
+func (v *AnnotationView) UpdateLabel(a v.Annotation) {}
+func (v *AnnotationView) DeleteAnnotation(string)    {}
 func (v *AnnotationView) Error(err error) {
 	v.err = err
 }
@@ -76,8 +67,8 @@ func (v *AnnotationView) RenderAll(w http.ResponseWriter) {
 		return
 	}
 
-	if v.doDrawImage {
-		v.renderImage(w)
+	if v.image != nil {
+		v.render(w)
 	}
 
 }
@@ -101,21 +92,19 @@ func (v *AnnotationView) RenderAnnotations(w http.ResponseWriter) {
 	}
 
 }
-func (v *AnnotationView) renderImage(w http.ResponseWriter) {
+func (v *AnnotationView) render(w http.ResponseWriter) {
 	b := html.NewTitledPageBuilder("Image")
 	script, err := MakeAnnotoriousScript(v.image.Id, v.image.Collection)
 	if err != nil {
 		b.SetError(err).Render(w)
 		return
 	}
-	labelModal, err := makeLabelModal(v.availableLabels)
-	if err != nil {
-		b.SetError(fmt.Errorf("building label model: %w", err)).Render(w)
-		return
-	}
+	regionLabelModal, _ := makeLabelModal(v.availableLabels, RegionLabelModal)
+	imageLabelModal, _ := makeLabelModal(v.availableLabels, ImageLabelModal)
 	b.AddScripts(html.AnnotoriousLib()...)
 	b.AddScripts(*script)
-	b.AddScripts(Raw(*labelModal))
+	b.AddScripts(Raw(*regionLabelModal))
+	b.AddScripts(Raw(*imageLabelModal))
 
 	b.SetContent(
 		Table(

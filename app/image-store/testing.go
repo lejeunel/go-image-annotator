@@ -17,8 +17,8 @@ type FakeRepo struct {
 	MissingCollection      bool
 	ErrOnFindCollection    bool
 	Collection             clc.Collection
-	Labels                 []*a.ImageLabel
-	BoundingBoxes          []*a.BoundingBox
+	Labels                 []a.ImageLabel
+	BoundingBoxes          []a.BoundingBox
 }
 
 func (r *FakeRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc.CollectionId) (bool, error) {
@@ -34,7 +34,7 @@ func (r *FakeRepo) GetSpecs(imageId im.ImageId) (*im.ImageSpecs, error) {
 	return &r.Specs, nil
 }
 
-func (r *FakeRepo) FindBoundingBoxes(imageId im.ImageId, collectionId clc.CollectionId) ([]*a.BoundingBox, error) {
+func (r *FakeRepo) FindBoundingBoxes(imageId im.ImageId, collectionId clc.CollectionId) ([]a.BoundingBox, error) {
 	if r.ErrOnFindBoundingBoxes {
 		return nil, r.Err
 	}
@@ -44,7 +44,7 @@ func (r *FakeRepo) FindBoundingBoxes(imageId im.ImageId, collectionId clc.Collec
 	return nil, nil
 }
 
-func (r *FakeRepo) FindImageLabels(imageId im.ImageId, collectionId clc.CollectionId) ([]*a.ImageLabel, error) {
+func (r *FakeRepo) FindImageLabels(imageId im.ImageId, collectionId clc.CollectionId) ([]a.ImageLabel, error) {
 	if r.ErrOnFindImageLabel {
 		return nil, r.Err
 	}

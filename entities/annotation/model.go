@@ -6,13 +6,6 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-type AnnotationKind int
-
-const (
-	BoundingBoxAnnotation AnnotationKind = iota
-	ImageLabelAnnotation
-)
-
 type ImageLabel struct {
 	Id    AnnotationId
 	Label lbl.Label
@@ -48,8 +41,8 @@ type BoundingBoxUpdatables struct {
 	Height  float32
 }
 
-func NewBoundingBox(id AnnotationId, xc float32, yc float32, width float32, height float32, label lbl.Label) *BoundingBox {
-	return &BoundingBox{Id: id, Xc: xc, Yc: yc, Width: width, Height: height, Label: label}
+func NewBoundingBox(id AnnotationId, xc float32, yc float32, width float32, height float32, label lbl.Label) BoundingBox {
+	return BoundingBox{Id: id, Xc: xc, Yc: yc, Width: width, Height: height, Label: label}
 }
 
 func ValidateBoundingBox(xc float32, yc float32, width float32, height float32) error {
@@ -61,6 +54,6 @@ func ValidateBoundingBox(xc float32, yc float32, width float32, height float32) 
 
 }
 
-func NewImageLabel(label lbl.Label) *ImageLabel {
-	return &ImageLabel{Id: NewAnnotationId(), Label: label}
+func NewImageLabel(label lbl.Label) ImageLabel {
+	return ImageLabel{Id: NewAnnotationId(), Label: label}
 }

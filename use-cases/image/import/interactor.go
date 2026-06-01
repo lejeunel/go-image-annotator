@@ -45,25 +45,25 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 }
 func (i *Interactor) ensureImageDoesNotAlreadyExistInCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
 
-	baseErr := fmt.Errorf("ensuring that source image does not already exist in destination collection")
+	errCtx := fmt.Errorf("ensuring that source image does not already exist in destination collection")
 	alreadyExists, err := i.repo.ImageExistsInCollection(imageId, collectionId)
 	if err != nil {
-		return fmt.Errorf("%w: %w", baseErr, err)
+		return fmt.Errorf("%w: %w", errCtx, err)
 	}
 	if alreadyExists {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrDependency)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrDependency)
 	}
 	return nil
 }
 
 func (i *Interactor) ensureSourceImageExists(id im.ImageId) error {
-	baseErr := fmt.Errorf("ensuring that source image exists")
+	errCtx := fmt.Errorf("ensuring that source image exists")
 	exists, err := i.repo.ImageExists(id)
 	if err != nil {
-		return fmt.Errorf("%w: %w", baseErr, err)
+		return fmt.Errorf("%w: %w", errCtx, err)
 	}
 	if !exists {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrNotFound)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
 	}
 	return nil
 
@@ -71,10 +71,10 @@ func (i *Interactor) ensureSourceImageExists(id im.ImageId) error {
 
 func (i *Interactor) findDestinationCollection(name string) (*clc.Collection, error) {
 
-	baseErr := fmt.Errorf("fetching destination collection")
+	errCtx := fmt.Errorf("fetching destination collection")
 	collection, err := i.repo.FindCollectionByName(name)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", baseErr, err)
+		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}
 	return collection, nil
 

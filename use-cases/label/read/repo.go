@@ -5,5 +5,5 @@ import (
 )
 
 type Repo interface {
-	FindLabelByName(string) (*l.Label, error)
+	FindLabel(string) (*l.Label, error)
 }

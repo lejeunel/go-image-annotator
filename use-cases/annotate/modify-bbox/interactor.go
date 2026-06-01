@@ -68,7 +68,7 @@ func (i *Interactor) validate(xc float32, yc float32, width float32,
 
 func (i *Interactor) findLabel(name string) (*lbl.Label, error) {
 
-	label, err := i.repo.FindLabelByName(name)
+	label, err := i.repo.FindLabel(name)
 	if err != nil {
 		return nil, err
 	}

@@ -26,7 +26,7 @@ func TestUpdateLabelOfAnnotation(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
 	bbox := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, label)
-	repos.Annotation.AddBoundingBox(image.Id, collection.Id, *bbox)
+	repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox)
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
 	repos.Label.Create(newLabel)
 	repos.Annotation.UpdateLabelOfAnnotation(bbox.Id, newLabel.Id)

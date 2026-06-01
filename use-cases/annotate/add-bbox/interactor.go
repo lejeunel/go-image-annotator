@@ -38,17 +38,17 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 	}
 
 	box := a.NewBoundingBox(a.NewAnnotationId(), r.Xc, r.Yc, r.Width, r.Height, *label)
-	if err := i.validateBox(image, *box); err != nil {
+	if err := i.validateBox(image, box); err != nil {
 		i.handleError(err, out)
 		return
 	}
 
-	if err := i.addBox(image, *box); err != nil {
+	if err := i.addBox(image, box); err != nil {
 		i.handleError(err, out)
 		return
 	}
 
-	out.SuccessAddBox(*box)
+	out.SuccessAddBox(box)
 
 }
 func (i *Interactor) handleError(err error, out OutputPort) {
@@ -72,7 +72,7 @@ func (i *Interactor) validateBox(image *im.Image, box a.BoundingBox) error {
 }
 
 func (i *Interactor) findLabel(name string) (*lbl.Label, error) {
-	label, err := i.repo.FindLabelByName(name)
+	label, err := i.repo.FindLabel(name)
 	if err != nil {
 		return nil, err
 	}

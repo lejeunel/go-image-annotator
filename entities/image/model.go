@@ -31,8 +31,8 @@ type Image struct {
 	Id            ImageId
 	Collection    clc.Collection
 	Specs         ImageSpecs
-	Labels        []*an.ImageLabel
-	BoundingBoxes []*an.BoundingBox
+	Labels        []an.ImageLabel
+	BoundingBoxes []an.BoundingBox
 	Reader        io.Reader
 	Hash          string
 	MIMEType      string
@@ -52,7 +52,7 @@ func (i *Image) AddBoundingBox(box a.BoundingBox) error {
 	if err := a.ValidateBoundingBox(box.Xc, box.Yc, box.Width, box.Height); err != nil {
 		return fmt.Errorf("adding bounding box to image: %w", err)
 	}
-	i.BoundingBoxes = append(i.BoundingBoxes, &box)
+	i.BoundingBoxes = append(i.BoundingBoxes, box)
 	return nil
 }
 

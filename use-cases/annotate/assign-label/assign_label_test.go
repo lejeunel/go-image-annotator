@@ -14,7 +14,7 @@ import (
 func TestHandleNotFoundErrOnImageRetrieval(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{}, &st.FakeImageStore{Err: e.ErrNotFound})
-	itr.Execute(Request{}, p)
+	itr.Execute(Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	if !p.GotNotFoundErr || p.GotSuccess {
 		t.Fatal("expected not found error")
 	}
@@ -23,7 +23,7 @@ func TestHandleNotFoundErrOnImageRetrieval(t *testing.T) {
 func TestHandleInternalErrOnImageRetrieval(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{}, &st.FakeImageStore{Err: e.ErrInternal})
-	itr.Execute(Request{}, p)
+	itr.Execute(Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	if !p.GotInternalErr || p.GotSuccess {
 		t.Fatal("expected internal error")
 	}
@@ -31,16 +31,20 @@ func TestHandleInternalErrOnImageRetrieval(t *testing.T) {
 
 func TestAssignNonExistingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{MissingLabel: true}, &st.FakeImageStore{})
-	itr.Execute(Request{}, p)
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	image := im.NewImage(im.NewImageId(), collection)
+	itr := NewInteractor(&FakeRepo{MissingLabel: true}, &st.FakeImageStore{Return: &image})
+	itr.Execute(Request{image.Id.String(), collection.Name, "a-label"}, p)
 	if !p.GotNotFoundErr || p.GotSuccess {
 		t.Fatal("expected not found error")
 	}
 }
 func TestInternalErrOnFindLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnFindLabel: true, Err: e.ErrInternal}, &st.FakeImageStore{})
-	itr.Execute(Request{}, p)
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	image := im.NewImage(im.NewImageId(), collection)
+	itr := NewInteractor(&FakeRepo{ErrOnFindLabel: true, Err: e.ErrInternal}, &st.FakeImageStore{Return: &image})
+	itr.Execute(Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	if !p.GotInternalErr || p.GotSuccess {
 		t.Fatal("expected internal error")
 	}
@@ -51,7 +55,7 @@ func TestAssignLabelToImage(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	image := im.NewImage(im.NewImageId(), collection)
 	label := lbl.NewLabel(lbl.NewLabelId(), "al-label")
-	req := Request{ImageId: image.Id, Collection: collection.Name, Label: label.Name}
+	req := Request{ImageId: image.Id.String(), Collection: collection.Name, Label: label.Name}
 	repo := &FakeRepo{ReturnLabel: label}
 	itr := NewInteractor(repo, &st.FakeImageStore{Return: &image})
 	itr.Execute(req, p)

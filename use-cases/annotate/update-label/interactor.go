@@ -22,7 +22,7 @@ func NewInteractor(repo Repo) *Interactor {
 }
 
 func (i *Interactor) Execute(r Request, out OutputPort) {
-	label, err := i.repo.FindLabelByName(r.Label)
+	label, err := i.repo.FindLabel(r.Label)
 	if err != nil {
 		i.handleError(err, out)
 		return

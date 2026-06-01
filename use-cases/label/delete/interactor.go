@@ -30,25 +30,25 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 	out.Success()
 }
 func (i *Interactor) exists(name string) error {
-	baseErr := fmt.Errorf("checking whether label with name %v exists", name)
+	errCtx := fmt.Errorf("checking whether label with name %v exists", name)
 	exists, err := i.repo.Exists(name)
 	if err != nil {
-		return fmt.Errorf("%w: %v: %w", baseErr, err, e.ErrInternal)
+		return fmt.Errorf("%w: %v: %w", errCtx, err, e.ErrInternal)
 	}
 	if !exists {
-		return fmt.Errorf("%w: %v: %w", baseErr, err, e.ErrNotFound)
+		return fmt.Errorf("%w: %v: %w", errCtx, err, e.ErrNotFound)
 	}
 	return nil
 }
 
 func (i *Interactor) isUsed(name string) error {
-	baseErr := fmt.Errorf("checking whether label with name %v is used", name)
+	errCtx := fmt.Errorf("checking whether label with name %v is used", name)
 	isUsed, err := i.repo.IsUsed(name)
 	if err != nil {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
 	if *isUsed {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrDependency)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrDependency)
 	}
 	return nil
 

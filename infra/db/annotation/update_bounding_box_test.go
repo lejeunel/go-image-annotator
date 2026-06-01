@@ -13,7 +13,7 @@ func TestInternalErrOnUpdateBoundingBoxShouldFail(t *testing.T) {
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
 	annotationId := a.NewAnnotationId()
 	bbox := a.NewBoundingBox(annotationId, 1, 1, 1, 1, label)
-	repos.Annotation.AddBoundingBox(image.Id, collection.Id, *bbox)
+	repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox)
 	repos.Annotation.Db.Close()
 	err := repos.Annotation.UpdateBoundingBox(annotationId,
 		a.BoundingBoxUpdatables{LabelId: label.Id, Xc: 1, Yc: 1, Width: 1, Height: 1})
@@ -28,7 +28,7 @@ func TestUpdateBoundingBoxWithInvalidValuesShouldFail(t *testing.T) {
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
 	annotationId := a.NewAnnotationId()
 	bbox := a.NewBoundingBox(annotationId, 1, 1, 1, 1, label)
-	repos.Annotation.AddBoundingBox(image.Id, collection.Id, *bbox)
+	repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox)
 
 	err := repos.Annotation.UpdateBoundingBox(annotationId,
 		a.BoundingBoxUpdatables{LabelId: label.Id, Xc: 1, Yc: 1, Width: -10, Height: 1})
@@ -42,7 +42,7 @@ func TestUpdateBoundingBox(t *testing.T) {
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
 	annotationId := a.NewAnnotationId()
 	bbox := a.NewBoundingBox(annotationId, 1, 1, 1, 1, label)
-	repos.Annotation.AddBoundingBox(image.Id, collection.Id, *bbox)
+	repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox)
 
 	newWidth := float32(2)
 	err := repos.Annotation.UpdateBoundingBox(annotationId,

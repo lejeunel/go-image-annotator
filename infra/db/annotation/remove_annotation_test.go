@@ -11,7 +11,7 @@ func TestInternalErrOnRemoveAnnotationShouldFail(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
 	annotationId := a.NewAnnotationId()
-	repos.Annotation.AddImageLabel(annotationId, image.Id, collection.Id, label.Id)
+	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label))
 	repos.Annotation.Db.Close()
 	err := repos.Annotation.RemoveAnnotation(annotationId)
 	if !errors.Is(err, e.ErrInternal) {
@@ -23,7 +23,7 @@ func TestRemoveAnnotation(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
 	annotationId := a.NewAnnotationId()
-	repos.Annotation.AddImageLabel(annotationId, image.Id, collection.Id, label.Id)
+	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label))
 	err := repos.Annotation.RemoveAnnotation(annotationId)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
@@ -43,7 +43,7 @@ func TestInternalErrOnRemoveImageLabelShouldFail(t *testing.T) {
 func TestRemoveImageLabel(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
-	repos.Annotation.AddImageLabel(a.NewAnnotationId(), image.Id, collection.Id, label.Id)
+	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label))
 	err := repos.Annotation.RemoveImageLabel(image.Id, collection.Id, label.Id)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)

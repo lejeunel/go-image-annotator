@@ -6,6 +6,7 @@ type View interface {
 	AddBox(BoundingBox)
 	AddLabel(ImageLabel)
 	SetAvailableLabels([]string)
+	SetAvailableImageLabels([]string)
 	SetImageInfo(ImageInfo)
 	SetImage(Image)
 	SetAnnotations([]BoundingBox, []ImageLabel)

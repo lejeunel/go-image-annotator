@@ -22,7 +22,7 @@ func (r *FakeRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingBoxUpdatable
 	return nil
 }
 
-func (r *FakeRepo) FindLabelByName(name string) (*lbl.Label, error) {
+func (r *FakeRepo) FindLabel(name string) (*lbl.Label, error) {
 	if r.ErrOnFindLabel {
 		return nil, r.Err
 	}

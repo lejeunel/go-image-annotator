@@ -9,5 +9,5 @@ import (
 
 type Repo interface {
 	AddBoundingBox(im.ImageId, clc.CollectionId, a.BoundingBox) error
-	FindLabelByName(string) (*lbl.Label, error)
+	FindLabel(string) (*lbl.Label, error)
 }

@@ -12,11 +12,11 @@ type CollectionRepo interface {
 }
 
 type LabelRepo interface {
-	FindLabelByName(string) (*lbl.Label, error)
+	FindLabel(string) (*lbl.Label, error)
 }
 
 type AnnotationRepo interface {
-	AddImageLabel(an.AnnotationId, im.ImageId, clc.CollectionId, lbl.LabelId) error
+	AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel) error
 	AddBoundingBox(im.ImageId, clc.CollectionId, an.BoundingBox) error
 }
 

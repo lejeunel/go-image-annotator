@@ -6,6 +6,6 @@ import (
 )
 
 type Repo interface {
-	FindLabelByName(string) (*lbl.Label, error)
+	FindLabel(string) (*lbl.Label, error)
 	UpdateBoundingBox(a.AnnotationId, a.BoundingBoxUpdatables) error
 }

@@ -90,7 +90,7 @@ func (r *FakeCollectionRepo) FindCollectionByName(name string) (*clc.Collection,
 	return &c, nil
 }
 
-func (r *FakeLabelRepo) FindLabelByName(name string) (*lbl.Label, error) {
+func (r *FakeLabelRepo) FindLabel(name string) (*lbl.Label, error) {
 	if r.ErrOnLabelExists {
 		return nil, r.Err
 	}

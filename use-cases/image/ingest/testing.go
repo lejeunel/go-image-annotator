@@ -104,7 +104,7 @@ func (r *FakeCollectionRepo) FindCollectionByName(name string) (*clc.Collection,
 	return &c, nil
 }
 
-func (r *FakeLabelRepo) FindLabelByName(name string) (*lbl.Label, error) {
+func (r *FakeLabelRepo) FindLabel(name string) (*lbl.Label, error) {
 	if r.ErrOnLabelExists {
 		return nil, r.Err
 	}
@@ -126,7 +126,7 @@ func (r *FakeImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	return nil, e.ErrNotFound
 }
 
-func (r *FakeAnnotationRepo) AddImageLabel(an.AnnotationId, im.ImageId, clc.CollectionId, lbl.LabelId) error {
+func (r *FakeAnnotationRepo) AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel) error {
 	if r.ErrOnAddLabel {
 		return r.Err
 	}

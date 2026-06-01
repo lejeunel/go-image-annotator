@@ -35,7 +35,7 @@ func (r *SQLiteLabelRepo) Create(l lbl.Label) error {
 
 }
 
-func (r *SQLiteLabelRepo) FindLabelByName(name string) (*lbl.Label, error) {
+func (r *SQLiteLabelRepo) FindLabel(name string) (*lbl.Label, error) {
 	record := LabelRecord{}
 	err := r.Db.Get(&record,
 		"SELECT id,name,description FROM labels WHERE name=$1", name)

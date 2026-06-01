@@ -38,23 +38,23 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 }
 func (i *Interactor) ensureNameExists(name string) error {
 	exists, err := i.repo.Exists(name)
-	baseErr := fmt.Errorf("checking that label %v exists", name)
+	errCtx := fmt.Errorf("checking that label %v exists", name)
 	if err != nil {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
 	if !exists {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrNotFound)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
 	}
 	return nil
 }
 func (i *Interactor) ensureNameDoesNotExist(name string) error {
 	exists, err := i.repo.Exists(name)
-	baseErr := fmt.Errorf("checking that label name %v does not exist", name)
+	errCtx := fmt.Errorf("checking that label name %v does not exist", name)
 	if err != nil {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
 	if exists {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrDuplicate)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrDuplicate)
 	}
 	return nil
 }

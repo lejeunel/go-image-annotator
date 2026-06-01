@@ -14,6 +14,7 @@ import (
 type Presenter struct {
 	v.View
 	Colorizer
+	usedImageLabels []string
 }
 
 func NewPresenter() Presenter {
@@ -38,10 +39,10 @@ func (p Presenter) SuccessFetchLabels(r fetchlbl.Response) {
 	p.View.SetAvailableLabels(r.Labels)
 }
 func (p Presenter) SuccessAddLabel(r addlbl.Response) {
-	p.View.AddLabel(v.ImageLabel{Id: r.AnnotationId.String(), Label: r.Label})
+	p.View.AddLabel(v.ImageLabel{Id: r.AnnotationId, Label: r.Label})
 }
 func (p Presenter) SuccessAddBox(b a.BoundingBox) {
-	p.View.AddBox(MakeBoundingBox(&b, p.Colorizer))
+	p.View.AddBox(MakeBoundingBox(b, p.Colorizer))
 }
 func (p Presenter) SuccessUpdateBox(r updbox.Response) {
 	p.View.UpdateBox(v.BoundingBox{Id: r.AnnotationId.String(),

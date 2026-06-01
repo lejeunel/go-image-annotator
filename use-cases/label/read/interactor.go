@@ -13,7 +13,7 @@ type Interactor struct {
 
 func (i *Interactor) Execute(r Request, out OutputPort) {
 	errCtx := "fetching label"
-	found, err := i.repo.FindLabelByName(r.Name)
+	found, err := i.repo.FindLabel(r.Name)
 
 	if err != nil {
 		err = fmt.Errorf("%v: %w", errCtx, err)

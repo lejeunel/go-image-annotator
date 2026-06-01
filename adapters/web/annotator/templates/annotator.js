@@ -1,8 +1,15 @@
 {{define "annotator"}}
 
 document.addEventListener('alpine:init', () => {
+    Alpine.store('imageLabelModal', {
+        show: false,
+        selectedItem: "",
+        open() { this.show = true },
+        close() { this.show = false },
+        isOpen() { return this.show }
+    });
 
-    Alpine.store('labelModal', {
+    Alpine.store('regionLabelModal', {
         show: false,
         selectedItem: "",
         open() { this.show = true },
@@ -33,8 +40,11 @@ document.addEventListener('alpine:init', () => {
             const res = await fetch(`/ui/set-label?id=${id}&label=${label}`);
             if (!res.ok) throw new Error('Could not relabel');
         },
-
-        async submit(label, annotation) {
+        async submit_label(label) {
+            const res = await fetch(`/ui/submit-label?image_id={{.ImageId}}&collection={{.Collection}}&label=${label}`)
+            if (!res.ok) throw new Error('Could not submit annotation');
+        },
+        async submit_region(label, annotation) {
             const res = await fetch("/ui/submit-box", {
                 method: "POST",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
@@ -98,7 +108,7 @@ document.addEventListener('alpine:init', () => {
         registerEvents(annotator) {
             annotator.on('createAnnotation', (annotation) => {
                 Alpine.store("annotator").setLastCreated(annotation);
-                Alpine.store("labelModal").open();
+                Alpine.store("regionLabelModal").open();
             });
 
             annotator.on('updateAnnotation', (updated) => {
@@ -106,7 +116,6 @@ document.addEventListener('alpine:init', () => {
             });
 
             annotator.on('selectionChanged', (annotations) => {
-                // console.log("Selected annotations", annotations);
             });
             annotator.on('mouseEnterAnnotation', (annotation) => {
             console.log('Mouse entered: ' + annotation.id);
@@ -126,11 +135,24 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        async submit(label) {
+        async submit_label(label) {
+            try {
+                await AnnotationAPI.submit_label(label);
+                Alpine.store("imageLabelModal").close();
+                await this.refreshUI();
+
+            } catch (err) {
+                console.error(err);
+                alert(err.message);
+            }
+
+        },
+
+        async submit_region(label) {
             try {
                 const store = Alpine.store("annotator");
-                await AnnotationAPI.submit(label, store.lastCreatedAnnotation);
-                Alpine.store("labelModal").close();
+                await AnnotationAPI.submit_region(label, store.lastCreatedAnnotation);
+                Alpine.store("regionLabelModal").close();
                 await this.refreshUI();
 
             } catch (err) {
@@ -172,7 +194,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         abort() {
-            Alpine.store("labelModal").close();
+            Alpine.store("regionLabelModal").close();
+            Alpine.store("imageLabelModal").close();
             this.draw();
         }
     };

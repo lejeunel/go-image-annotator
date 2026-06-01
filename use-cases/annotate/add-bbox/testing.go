@@ -36,7 +36,7 @@ func (r *FakeRepo) AddBoundingBox(imageId im.ImageId, collectionId clc.Collectio
 	return nil
 }
 
-func (r *FakeRepo) FindLabelByName(name string) (*lbl.Label, error) {
+func (r *FakeRepo) FindLabel(name string) (*lbl.Label, error) {
 	if r.ErrOnFindLabel {
 		return nil, r.Err
 	}

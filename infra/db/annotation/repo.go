@@ -31,9 +31,9 @@ type BoundingBoxSpecs struct {
 	Height float32 `json:"height"`
 }
 
-func (r *SQLiteAnnotationRepo) AddImageLabel(annotationId a.AnnotationId, imageId i.ImageId, collectionId c.CollectionId, labelId l.LabelId) error {
+func (r *SQLiteAnnotationRepo) AddImageLabel(imageId i.ImageId, collectionId c.CollectionId, ann a.ImageLabel) error {
 	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type) VALUES ($1,$2,$3,$4,$5)"
-	_, err := r.Db.Exec(query, annotationId, imageId, collectionId, labelId, "image")
+	_, err := r.Db.Exec(query, ann.Id, imageId, collectionId, ann.Label.Id, "image")
 	if err != nil {
 		return fmt.Errorf("adding image label annotation record: %v: %w", err, e.ErrInternal)
 	}
@@ -51,7 +51,7 @@ func (r *SQLiteAnnotationRepo) findLabelById(labelId l.LabelId) (*l.Label, error
 	return &l.Label{Id: rec.Id, Name: rec.Name, Description: rec.Description}, nil
 
 }
-func (r *SQLiteAnnotationRepo) FindImageLabels(imageId i.ImageId, collectionId c.CollectionId) ([]*a.ImageLabel, error) {
+func (r *SQLiteAnnotationRepo) FindImageLabels(imageId i.ImageId, collectionId c.CollectionId) ([]a.ImageLabel, error) {
 	query := "SELECT id,label_id,type FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='image'"
 
 	errCtx := "querying image annotations"
@@ -60,13 +60,13 @@ func (r *SQLiteAnnotationRepo) FindImageLabels(imageId i.ImageId, collectionId c
 		return nil, fmt.Errorf("%v: applying query: %v: %w", errCtx, err, e.ErrInternal)
 	}
 
-	imageLabels := []*a.ImageLabel{}
+	imageLabels := []a.ImageLabel{}
 	for _, rec := range records {
 		label, err := r.findLabelById(rec.LabelId)
 		if err != nil {
 			return nil, fmt.Errorf("%v: %w", errCtx, err)
 		}
-		imageLabels = append(imageLabels, &a.ImageLabel{Id: rec.Id, Label: *label})
+		imageLabels = append(imageLabels, a.ImageLabel{Id: rec.Id, Label: *label})
 	}
 
 	return imageLabels, nil
@@ -100,7 +100,7 @@ func (r *SQLiteAnnotationRepo) AddBoundingBox(imageId i.ImageId, collectionId c.
 
 	return nil
 }
-func (r *SQLiteAnnotationRepo) FindBoundingBoxes(imageId i.ImageId, collectionId c.CollectionId) ([]*a.BoundingBox, error) {
+func (r *SQLiteAnnotationRepo) FindBoundingBoxes(imageId i.ImageId, collectionId c.CollectionId) ([]a.BoundingBox, error) {
 	query := "SELECT id,label_id,type,coordinates FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='bounding_box'"
 
 	errCtx := "querying image annotations"
@@ -109,7 +109,7 @@ func (r *SQLiteAnnotationRepo) FindBoundingBoxes(imageId i.ImageId, collectionId
 		return nil, fmt.Errorf("%v: applying query: %v: %w", errCtx, err, e.ErrInternal)
 	}
 
-	boxes := []*a.BoundingBox{}
+	boxes := []a.BoundingBox{}
 	for _, rec := range records {
 		var specs BoundingBoxSpecs
 		err := json.Unmarshal([]byte(rec.Coordinates), &specs)

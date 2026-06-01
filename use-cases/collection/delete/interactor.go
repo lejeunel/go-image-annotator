@@ -29,26 +29,26 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 	out.Success()
 }
 func (i *Interactor) ensureDeletable(name string) error {
-	baseErr := fmt.Errorf("ensuring collection with name %v is empty", name)
+	errCtx := fmt.Errorf("ensuring collection with name %v is empty", name)
 	isPopulated, err := i.repo.IsPopulated(name)
 	if err != nil {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
 	if *isPopulated {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrDependency)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrDependency)
 	}
 	return nil
 
 }
 
 func (i *Interactor) ensureExists(name string) error {
-	baseErr := fmt.Errorf("checking whether collection with name %v exists", name)
+	errCtx := fmt.Errorf("checking whether collection with name %v exists", name)
 	exists, err := i.repo.Exists(name)
 	if err != nil {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
 	if !exists {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrNotFound)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
 	}
 	return nil
 }

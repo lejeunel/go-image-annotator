@@ -8,6 +8,7 @@ import (
 
 	aw "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
 	"github.com/lejeunel/go-image-annotator/shared/html"
+	assign_label "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
@@ -16,6 +17,12 @@ func (s *Server) ViewImage(w http.ResponseWriter, r *http.Request) {
 	view := aw.NewAnnotationView()
 	s.annotator.Init(r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
 	view.RenderAll(w)
+}
+func (s *Server) SubmitLabel(w http.ResponseWriter, r *http.Request) {
+	req := assign_label.Request{ImageId: r.URL.Query().Get("image_id"),
+		Collection: r.URL.Query().Get("collection"), Label: r.URL.Query().Get("label")}
+	s.annotator.AddLabel(req,
+		aw.NewAnnotationView())
 }
 func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
@@ -65,15 +72,15 @@ func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 	s.annotator.UpdateBox(*req, aw.NewAnnotationView())
 }
 func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
-	baseErr := fmt.Errorf("setting label")
+	errCtx := fmt.Errorf("setting label")
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		html.NewPageBuilder().SetError(fmt.Errorf("%w: failed parsing url to get annotation id", baseErr)).Render(w)
+		html.NewPageBuilder().SetError(fmt.Errorf("%w: failed parsing url to get annotation id", errCtx)).Render(w)
 		return
 	}
 	label := r.URL.Query().Get("label")
 	if label == "" {
-		html.NewPageBuilder().SetError(fmt.Errorf("%w: failed parsing url to get label field", baseErr)).Render(w)
+		html.NewPageBuilder().SetError(fmt.Errorf("%w: failed parsing url to get label field", errCtx)).Render(w)
 		return
 	}
 

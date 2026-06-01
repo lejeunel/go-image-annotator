@@ -82,17 +82,18 @@ func (b *FakeAnnotationDeleter) Execute(r del.Request, o del.OutputPort) {
 }
 
 type FakeView struct {
-	GotScrollerButtons  *v.ScrollerButtons
-	GotErr              error
-	AddedBox            *v.BoundingBox
-	AddedImageLabel     *v.ImageLabel
-	GotImage            *v.Image
-	GotImageInfo        *v.ImageInfo
-	GotAvailableLabels  *[]string
-	GotAnnotationIds    *[]string
-	RemovedAnnotationId *string
-	UpdatedBoxId        *string
-	UpdatedAnnotation   *v.Annotation
+	GotScrollerButtons       *v.ScrollerButtons
+	GotErr                   error
+	AddedBox                 *v.BoundingBox
+	AddedImageLabel          *v.ImageLabel
+	GotImage                 *v.Image
+	GotImageInfo             *v.ImageInfo
+	GotAvailableRegionLabels *[]string
+	GotAvailableImageLabels  *[]string
+	GotAnnotationIds         *[]string
+	RemovedAnnotationId      *string
+	UpdatedBoxId             *string
+	UpdatedAnnotation        *v.Annotation
 }
 
 func (s *FakeView) SetScroller(buttons v.ScrollerButtons) {
@@ -134,5 +135,9 @@ func (s *FakeView) DeleteAnnotation(id string) {
 	s.RemovedAnnotationId = &id
 }
 func (s *FakeView) SetAvailableLabels(l []string) {
-	s.GotAvailableLabels = &l
+	s.GotAvailableRegionLabels = &l
+}
+
+func (s *FakeView) SetAvailableImageLabels(l []string) {
+	s.GotAvailableImageLabels = &l
 }

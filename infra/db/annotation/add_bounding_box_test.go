@@ -14,7 +14,7 @@ func TestInternalErrOnAddBBoxShouldFail(t *testing.T) {
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
 	bbox := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, label)
 	repos.Annotation.Db.Close()
-	err := repos.Annotation.AddBoundingBox(image.Id, collection.Id, *bbox)
+	err := repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox)
 	if !errors.Is(err, e.ErrInternal) {
 		t.Fatalf("expected internal error, got %v", err)
 	}
@@ -24,7 +24,7 @@ func TestInternalErrOnFindBBoxShouldFail(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
 	bbox := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, label)
-	repos.Annotation.AddBoundingBox(image.Id, collection.Id, *bbox)
+	repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox)
 	repos.Annotation.Db.Close()
 	_, err := repos.Annotation.FindBoundingBoxes(image.Id, collection.Id)
 	if !errors.Is(err, e.ErrInternal) {
@@ -37,7 +37,7 @@ func TestAddBoundingBox(t *testing.T) {
 	labelName := "a-label"
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", labelName)
 	bbox := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, label)
-	err := repos.Annotation.AddBoundingBox(image.Id, collection.Id, *bbox)
+	err := repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox)
 	if err != nil {
 		t.Fatalf("expected no error on adding bbox, got %v", err)
 	}
@@ -60,11 +60,12 @@ func TestRetrieveImageWithBoxesAndImageLabels(t *testing.T) {
 
 	newLabelName := "new-label"
 	newLabel := l.NewLabel(l.NewLabelId(), newLabelName)
+	imLabel := a.NewImageLabel(newLabel)
 	repos.Label.Create(newLabel)
-	repos.Annotation.AddImageLabel(a.NewAnnotationId(), image.Id, collection.Id, newLabel.Id)
+	repos.Annotation.AddImageLabel(image.Id, collection.Id, imLabel)
 
 	box := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, label)
-	repos.Annotation.AddBoundingBox(image.Id, collection.Id, *box)
+	repos.Annotation.AddBoundingBox(image.Id, collection.Id, box)
 
 	boxes, _ := repos.Annotation.FindBoundingBoxes(image.Id, collection.Id)
 	if len(boxes) != 1 {

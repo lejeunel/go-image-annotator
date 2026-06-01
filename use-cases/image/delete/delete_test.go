@@ -61,7 +61,7 @@ func TestDeleteNonExistingBoxShouldFail(t *testing.T) {
 	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	box := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1,
 		lbl.NewLabel(lbl.NewLabelId(), "a-label"))
-	image.AddBoundingBox(*box)
+	image.AddBoundingBox(box)
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrNotFound})
 	itr.Execute(Request{}, p)
@@ -75,7 +75,7 @@ func TestHandleInternalErrOnDeleteBoxes(t *testing.T) {
 	id := im.NewImageId()
 	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	box := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, lbl.NewLabel(lbl.NewLabelId(), "a-label"))
-	image.AddBoundingBox(*box)
+	image.AddBoundingBox(box)
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrInternal})
 	itr.Execute(Request{}, p)

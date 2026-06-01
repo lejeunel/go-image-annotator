@@ -11,7 +11,7 @@ type FakeRepo struct {
 	Err   error
 }
 
-func (r *FakeRepo) FindLabelByName(name string) (*l.Label, error) {
+func (r *FakeRepo) FindLabel(name string) (*l.Label, error) {
 	if r.Err != nil {
 		return nil, r.Err
 	}
