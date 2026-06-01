@@ -3,8 +3,8 @@ package create
 import (
 	"slices"
 
+	"context"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
-	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
@@ -45,6 +45,6 @@ func (p *FakePresenter) Success(r Response) {
 type FailingAuth struct {
 }
 
-func (f FailingAuth) CreateCollection(p auth.PrincipalProvider, g string) error {
+func (f FailingAuth) CreateCollection(ctx context.Context, g string) error {
 	return e.ErrAuth
 }

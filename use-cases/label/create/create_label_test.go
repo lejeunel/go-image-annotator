@@ -12,30 +12,22 @@ func TestCreateLabelWithDuplicateNameShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Names: []string{name}})
 	itr.Execute(Request{Name: name}, p)
-	if !p.GotDuplicationErr {
-		t.Fatal("expected duplication error, but go none")
-	}
-	if p.GotSuccess {
-		t.Fatal("expected no success")
-	}
+	assert.Equal(t, true, p.GotDuplicationErr)
+	assert.Equal(t, false, p.GotSuccess)
 }
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
 	itr.Execute(Request{Name: "a-name"}, p)
-	if !p.GotInternalErr {
-		t.Fatal("expected internal error, but got none")
-	}
+	assert.Equal(t, true, p.GotInternalErr)
 }
 
 func TestCreateLabelWithInvalidNameShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{}, WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
 	itr.Execute(Request{Name: "invalid-name"}, p)
-	if !p.GotValidationErr {
-		t.Fatal("expected validation error, but go none")
-	}
+	assert.Equal(t, true, p.GotValidationErr)
 }
 
 func TestCreateLabel(t *testing.T) {

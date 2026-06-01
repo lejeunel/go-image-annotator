@@ -1,7 +1,7 @@
 package delete
 
 import (
-	auth "github.com/lejeunel/go-image-annotator/shared/auth"
+	"context"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
@@ -53,6 +53,6 @@ func (p *FakePresenter) Success() {
 type FailingAuth struct {
 }
 
-func (f FailingAuth) DeleteCollection(p auth.PrincipalProvider, g string) error {
+func (f FailingAuth) DeleteCollection(ctx context.Context, g string) error {
 	return e.ErrAuth
 }

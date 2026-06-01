@@ -1,39 +1,42 @@
 package list
 
 import (
+	"context"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
+func TestHandleAuthError(t *testing.T) {
+	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
+	p := &FakePresenter{}
+	itr.Execute(context.Background(), Request{}, p)
+	assert.True(t, p.GotAuthErr)
+	assert.False(t, p.GotSuccess)
+}
+
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal})
-	itr.Execute(Request{Page: 1, PageSize: 1}, p)
-	if !p.GotInternalErr || p.GotSuccess {
-		t.Fatal("expected internal error, but got none")
-	}
+	itr.Execute(context.Background(), Request{Page: 1, PageSize: 1}, p)
+	assert.Equal(t, p.GotInternalErr, true)
+	assert.Equal(t, p.GotSuccess, false)
 }
 
 func TestInvalidPageShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{})
-	itr.Execute(Request{Page: -1}, p)
-	if !p.GotValidationErr || p.GotSuccess {
-		t.Fatal("expected validation error")
-	}
+	itr.Execute(context.Background(), Request{Page: -1}, p)
+	assert.Equal(t, p.GotValidationErr, true)
+	assert.Equal(t, p.GotSuccess, false)
 }
 
 func TestHandleInternalErrOnList(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{ErrOnList: true, Err: e.ErrInternal})
-	itr.Execute(Request{Page: 1, PageSize: 1}, p)
-	if !p.GotInternalErr {
-		t.Fatal("expected internal error, but got none")
-	}
-	if p.GotSuccess {
-		t.Fatalf("expected to get no success")
-	}
+	itr.Execute(context.Background(), Request{Page: 1, PageSize: 1}, p)
+	assert.Equal(t, p.GotInternalErr, true)
+	assert.Equal(t, p.GotSuccess, false)
 }
 
 func TestListCollection(t *testing.T) {
@@ -45,7 +48,7 @@ func TestListCollection(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(repo)
 	req := Request{PageSize: pageSize, Page: page}
-	itr.Execute(req, p)
+	itr.Execute(context.Background(), req, p)
 	assert.Equal(t, len(p.Got.Collections), pageSize, "page size")
 	assert.Equal(t, p.Got.Pagination.TotalRecords, count, "total records")
 	assert.Equal(t, int(p.Got.Pagination.TotalPages), 2, "total pages")

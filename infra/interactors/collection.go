@@ -14,7 +14,7 @@ import (
 
 func NewSQLiteCollectionInteractors(repo *infra.SQLiteCollectionRepo, pageSize int) *clc.Interactors {
 	return &clc.Interactors{
-		Find: *read.NewInteractor(repo),
+		Find: read.NewInteractor(repo),
 		Create: *create.NewInteractor(repo, create.WithNameValidator(validation.NewNameValidator()),
 			create.WithClock(clockwork.NewRealClock())),
 		Delete:          delete.NewInteractor(repo),

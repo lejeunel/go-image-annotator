@@ -1,12 +1,12 @@
 package create
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/jonboulle/clockwork"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	st "github.com/lejeunel/go-image-annotator/shared/testing"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,26 +14,26 @@ import (
 func TestHandleAuthError(t *testing.T) {
 	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
-	itr.Execute(st.FakeProvider{}, Request{}, p)
-	assert.Equal(t, true, p.GotAuthErr, "auth error")
-	assert.Equal(t, false, p.GotSuccess)
+	itr.Execute(context.Background(), Request{}, p)
+	assert.True(t, p.GotAuthErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestCreateCollectionWithDuplicateNameShouldFail(t *testing.T) {
 	name := "my-collection"
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Names: []string{name}})
-	itr.Execute(st.FakeProvider{}, Request{Name: name}, p)
-	assert.Equal(t, true, p.GotDuplicationErr, "duplication error")
-	assert.Equal(t, false, p.GotSuccess)
+	itr.Execute(context.Background(), Request{Name: name}, p)
+	assert.True(t, p.GotDuplicationErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal},
 		WithNameValidator(&v.FakeNameValidator{}))
-	itr.Execute(st.FakeProvider{}, Request{}, p)
-	assert.Equal(t, true, p.GotInternalErr)
+	itr.Execute(context.Background(), Request{}, p)
+	assert.True(t, p.GotInternalErr)
 }
 
 func TestCreateCollectionWithInvalidNameShouldFail(t *testing.T) {
@@ -41,8 +41,8 @@ func TestCreateCollectionWithInvalidNameShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Names: []string{name}},
 		WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
-	itr.Execute(st.FakeProvider{}, Request{Name: name}, p)
-	assert.Equal(t, true, p.GotValidationErr, "name validatoin")
+	itr.Execute(context.Background(), Request{Name: name}, p)
+	assert.True(t, p.GotValidationErr)
 }
 
 func TestCreateCollection(t *testing.T) {
@@ -51,9 +51,9 @@ func TestCreateCollection(t *testing.T) {
 	now := time.Now()
 	itr := NewInteractor(repo, WithClock(clockwork.NewFakeClockAt(now)))
 	req := Request{Name: "a-name", Description: "a-descriptin"}
-	itr.Execute(st.FakeProvider{}, req, p)
-	assert.Equal(t, repo.Got.Name, req.Name, "name")
-	assert.Equal(t, repo.Got.Description, req.Description, "description")
-	assert.Equal(t, repo.Got.CreatedAt, now, "creation date")
-	assert.Equal(t, repo.Got.Id.IsNil(), false, "id")
+	itr.Execute(context.Background(), req, p)
+	assert.Equal(t, repo.Got.Name, req.Name)
+	assert.Equal(t, repo.Got.Description, req.Description)
+	assert.Equal(t, repo.Got.CreatedAt, now)
+	assert.False(t, repo.Got.Id.IsNil())
 }

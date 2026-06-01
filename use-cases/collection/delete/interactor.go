@@ -1,6 +1,7 @@
 package delete
 
 import (
+	"context"
 	"fmt"
 	auth "github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -14,8 +15,8 @@ type Interactor struct {
 	auth   Auth
 }
 
-func (i *Interactor) Execute(p auth.PrincipalProvider, r Request, out OutputPort) {
-	if err := i.authorizeDeletion(p, r.Name); err != nil {
+func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	if err := i.authorizeDeletion(ctx, r.Name); err != nil {
 		i.handleError(err, out)
 		return
 	}
@@ -35,13 +36,14 @@ func (i *Interactor) Execute(p auth.PrincipalProvider, r Request, out OutputPort
 	}
 	out.Success()
 }
-func (i *Interactor) authorizeDeletion(p auth.PrincipalProvider, name string) error {
+
+func (i *Interactor) authorizeDeletion(ctx context.Context, name string) error {
 	errCtx := fmt.Errorf("checking group ownership of collection with name %v is empty", name)
 	group, err := i.repo.Group(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
-	if err := i.auth.DeleteCollection(p, *group); err != nil {
+	if err := i.auth.DeleteCollection(ctx, *group); err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrAuth)
 	}
 	return nil

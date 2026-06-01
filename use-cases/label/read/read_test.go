@@ -3,6 +3,7 @@ package read
 import (
 	l "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -12,33 +13,27 @@ func TestReadNonExistingLabelShouldFail(t *testing.T) {
 	itr := NewInteractor(repo)
 	req := Request{Name: "non-existing-label"}
 	itr.Execute(req, p)
-	if !p.GotNotFoundErr {
-		t.Fatal("expected not found error, but got none")
-	}
-	if p.GotSuccess {
-		t.Fatal("expected no success")
-	}
+	assert.True(t, p.GotNotFoundErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
 	itr.Execute(Request{}, p)
-	if !p.GotInternalErr {
-		t.Fatal("expected internal error, but got none")
-	}
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestReadLabel(t *testing.T) {
-	name := "my-label"
-	desc := "a-description"
-	repo := &FakeRepo{Label: l.Label{Name: name, Description: desc}}
+	label := l.NewLabel(l.NewLabelId(),
+		"my-label",
+		l.WithDescription("a-description"))
+	repo := &FakeRepo{Label: label}
 	p := &FakePresenter{}
 	itr := NewInteractor(repo)
-	req := Request{Name: name}
-	want := Response{Name: name, Description: desc}
+	req := Request{Name: label.Name}
+	want := Response{Name: label.Name, Description: label.Description}
 	itr.Execute(req, p)
-	if p.Got != want {
-		t.Fatalf("expected %v, got %v", want, p.Got)
-	}
+	assert.Equal(t, want, p.Got)
 }

@@ -25,7 +25,7 @@ func (p ListCollectionsPresenter) Success(r list.Response) {
 }
 
 func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
-	s.Collection.List.Execute(list.Request{PageSize: s.Collection.DefaultPageSize, Page: int64(GetPageFromRequest(r))},
+	s.Collection.List.Execute(r.Context(), list.Request{PageSize: s.Collection.DefaultPageSize, Page: int64(GetPageFromRequest(r))},
 		NewListCollectionsPresenter(w))
 }
 

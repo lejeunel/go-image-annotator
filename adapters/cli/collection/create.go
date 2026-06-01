@@ -1,6 +1,7 @@
 package collection
 
 import (
+	"context"
 	"fmt"
 
 	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
@@ -24,6 +25,6 @@ func Create(name, description string) {
 	cfg := config.Parse()
 	app := infra.NewSQLiteInfra(cfg.DBPath, cfg.ArtefactDir)
 	itr := clc.NewInteractor(app.CollectionRepo)
-	itr.Execute(&cli.PrincipalProvider{}, clc.Request{Name: name, Description: description}, CreatePresenter{})
+	itr.Execute(context.Background(), clc.Request{Name: name, Description: description}, CreatePresenter{})
 
 }

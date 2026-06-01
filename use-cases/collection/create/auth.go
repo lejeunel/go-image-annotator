@@ -1,9 +1,9 @@
 package create
 
 import (
-	"github.com/lejeunel/go-image-annotator/shared/auth"
+	"context"
 )
 
 type Auth interface {
-	CreateCollection(p auth.PrincipalProvider, group string) error
+	CreateCollection(ctx context.Context, group string) error
 }

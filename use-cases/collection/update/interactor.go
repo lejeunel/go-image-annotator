@@ -1,23 +1,51 @@
 package update
 
 import (
+	"context"
 	"fmt"
 
+	"log/slog"
+
+	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
-	"log/slog"
 )
 
 type Interactor struct {
 	repo   Repo
 	logger *slog.Logger
+	auth   Auth
 }
 
-func NewInteractor(r Repo) Interactor {
-	return Interactor{repo: r, logger: logging.NewNoOpLogger()}
+type Option func(*Interactor)
+
+func WithAuth(a Auth) Option {
+	return func(i *Interactor) {
+		i.auth = a
+	}
 }
 
-func (i *Interactor) Execute(r Request, out OutputPort) {
+func NewInteractor(r Repo, opts ...Option) Interactor {
+	i := &Interactor{repo: r, logger: logging.NewNoOpLogger(),
+		auth: auth.PassThroughAuth{}}
+	for _, opt := range opts {
+		opt(i)
+	}
+	return *i
+}
+
+func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+
+	group, err := i.repo.Group(r.Name)
+	if err != nil {
+		i.handleError(err, out)
+		return
+
+	}
+	if err := i.auth.UpdateCollection(ctx, *group); err != nil {
+		i.handleError(err, out)
+		return
+	}
 
 	if err := i.ensureNameExists(r.Name); err != nil {
 		i.handleError(err, out)

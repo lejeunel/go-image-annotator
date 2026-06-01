@@ -1,6 +1,7 @@
 package update
 
 import (
+	"context"
 	"slices"
 
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -10,9 +11,13 @@ import (
 type FakeRepo struct {
 	Names []string
 	Got   Model
+	Err   error
 }
 
 func (r *FakeRepo) Update(m Model) error {
+	if r.Err != nil {
+		return r.Err
+	}
 	r.Got = m
 	return nil
 }
@@ -22,17 +27,9 @@ func (r *FakeRepo) Exists(n string) (bool, error) {
 	}
 	return false, nil
 }
-
-type FakeErrRepo struct {
-	err error
-}
-
-func (r *FakeErrRepo) Update(m Model) error {
-	return e.ErrInternal
-}
-
-func (r *FakeErrRepo) Exists(n string) (bool, error) {
-	return false, r.err
+func (r *FakeRepo) Group(n string) (*string, error) {
+	group := "my-group"
+	return &group, nil
 }
 
 type FakePresenter struct {
@@ -44,4 +41,11 @@ type FakePresenter struct {
 func (p *FakePresenter) Success(r Response) {
 	p.GotSuccess = true
 	p.Got = r
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) UpdateCollection(ctx context.Context, g string) error {
+	return e.ErrAuth
 }

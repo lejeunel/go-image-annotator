@@ -1,6 +1,7 @@
 package create
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 
@@ -20,8 +21,8 @@ type Interactor struct {
 	auth      Auth
 }
 
-func (i *Interactor) Execute(p auth.PrincipalProvider, r Request, out OutputPort) {
-	if err := i.auth.CreateCollection(p, r.Group); err != nil {
+func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	if err := i.auth.CreateCollection(ctx, r.Group); err != nil {
 		i.handleError(err, out)
 		return
 	}

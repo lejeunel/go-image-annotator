@@ -6,7 +6,6 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/collection"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
-	myhttp "github.com/lejeunel/go-image-annotator/adapters/http"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
@@ -15,7 +14,7 @@ import (
 )
 
 func (s *Server) FindCollectionByName(w http.ResponseWriter, r *http.Request, name string) {
-	s.Collection.Find.Execute(read.Request{Name: name}, presenter.NewFindPresenter(w))
+	s.Collection.Find.Execute(r.Context(), read.Request{Name: name}, presenter.NewFindPresenter(w))
 }
 func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 	body, ok := json.MustDecodeJSON[models.NewCollection](w, r)
@@ -24,13 +23,13 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.Collection.Create.Execute(
-		myhttp.NewPrincipalProvider(r.Context()),
+		r.Context(),
 		create.Request{Name: body.Name, Description: *body.Description},
 		presenter.NewCreatePresenter(w))
 }
 func (s *Server) DeleteCollectionByName(w http.ResponseWriter, r *http.Request, name string) {
 	s.Collection.Delete.Execute(
-		myhttp.NewPrincipalProvider(r.Context()),
+		r.Context(),
 		delete.Request{Name: name},
 		presenter.NewDeletePresenter(w))
 
@@ -43,7 +42,7 @@ func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request, params 
 	if p := params.PageSize; p != nil {
 		req.PageSize = *p
 	}
-	s.Collection.List.Execute(req, presenter.NewListPresenter(w))
+	s.Collection.List.Execute(r.Context(), req, presenter.NewListPresenter(w))
 
 }
 
@@ -53,7 +52,8 @@ func (s *Server) UpdateCollectionByName(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	s.Collection.Update.Execute(update.Request{Name: name, NewName: body.Name, NewDescription: body.Description},
+	s.Collection.Update.Execute(r.Context(),
+		update.Request{Name: name, NewName: body.Name, NewDescription: body.Description},
 		presenter.NewUpdatePresenter(w))
 
 }

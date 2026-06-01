@@ -10,18 +10,16 @@ func TestHandleInternalErrOnList(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{ErrOnList: true, Err: e.ErrInternal})
 	itr.Execute(Request{}, p)
-	if !p.GotInternalErr || p.GotSuccess {
-		t.Fatal("expected internal error, but got none")
-	}
+	assert.False(t, p.GotSuccess)
+	assert.True(t, p.GotInternalErr)
 }
 
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal})
 	itr.Execute(Request{}, p)
-	if !p.GotInternalErr || p.GotSuccess {
-		t.Fatal("expected internal error, but got none")
-	}
+	assert.False(t, p.GotSuccess)
+	assert.True(t, p.GotInternalErr)
 }
 
 func TestListLabel(t *testing.T) {

@@ -1,9 +1,10 @@
 package delete
 
 import (
-	"github.com/lejeunel/go-image-annotator/shared/auth"
+	"context"
 )
 
 type Auth interface {
-	DeleteCollection(p auth.PrincipalProvider, group string) error
+	// delete collection given its group ownership
+	DeleteCollection(ctx context.Context, group string) error
 }
