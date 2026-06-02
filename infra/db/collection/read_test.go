@@ -43,3 +43,14 @@ func TestRetrieve(t *testing.T) {
 	assert.Equal(t, r.CreatedAt.Equal(c.CreatedAt), true)
 
 }
+
+func TestRetriveGroupOfCollection(t *testing.T) {
+	repo := NewTestSQLiteCollectionRepo()
+	c := clc.NewCollection(clc.NewCollectionId(), "a-collection",
+		clc.WithDescription("a-description"), clc.WithCreatedAt(time.Now()), clc.WithGroup("a-group"))
+	repo.Create(c)
+	group, err := repo.Group("a-collection")
+	assert.NoError(t, err, "expected no error on find")
+	assert.Equal(t, c.Group, *group)
+
+}

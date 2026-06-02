@@ -137,7 +137,12 @@ func (r *SQLiteCollectionRepo) List(m list.Request) ([]*clc.Collection, error) {
 	return objects, nil
 }
 func (r *SQLiteCollectionRepo) Group(name string) (*string, error) {
-	group := "the-group"
+	var group string
+	err := r.Db.Get(&group, `SELECT "group" FROM collections WHERE name=$1`, name)
+	if err != nil {
+		return nil, fmt.Errorf("reading group of collection: %v: %w", err, e.ErrInternal)
+	}
+
 	return &group, nil
 }
 
