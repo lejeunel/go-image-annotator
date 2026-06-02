@@ -5,7 +5,6 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/app/annotator/view"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
-	im "github.com/lejeunel/go-image-annotator/entities/image"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
 )
@@ -17,14 +16,9 @@ type Request struct {
 
 func ToAddBoxRequest(r AnnotoriousBoxRequest) (*addbox.Request, error) {
 
-	imageId, err := im.NewImageIdFromString(r.ImageId)
-	if err != nil {
-		return nil, fmt.Errorf("submitting annotation: validating imageId: %w", err)
-	}
-
 	coords := r.Annotation.ExtractCoordinates()
 
-	return &addbox.Request{ImageId: imageId, Collection: r.Collection,
+	return &addbox.Request{ImageId: r.ImageId, Collection: r.Collection,
 		Label: r.Label, Xc: coords.Xc, Yc: coords.Yc, Width: coords.Width, Height: coords.Height}, nil
 
 }

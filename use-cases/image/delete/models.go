@@ -1,11 +1,7 @@
 package delete
 
-import (
-	im "github.com/lejeunel/go-image-annotator/entities/image"
-)
-
 type Request struct {
-	ImageId    im.ImageId
+	ImageId    string
 	Collection string
 }
 

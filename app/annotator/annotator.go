@@ -35,8 +35,8 @@ func (a *Annotator) UpdateLabel(r updlbl.Request, view v.View) {
 func (a *Annotator) UpdateBox(r updbox.Request, view v.View) {
 	a.boxUpdater.Execute(r, a.presenter.SetView(view))
 }
-func (a *Annotator) AddBox(r addbox.Request, view v.View) {
-	a.boxAdder.Execute(r, a.presenter.SetView(view))
+func (a *Annotator) AddBox(ctx context.Context, r addbox.Request, view v.View) {
+	a.boxAdder.Execute(ctx, r, a.presenter.SetView(view))
 }
 func (a *Annotator) AddLabel(r addlbl.Request, view v.View) {
 	a.imageLabelAdder.Execute(r, a.presenter.SetView(view))

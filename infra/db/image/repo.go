@@ -84,7 +84,7 @@ func (r *SQLiteImageRepo) List(f ist.FilteringParams) (*[]im.BaseImage, error) {
 		if err != nil {
 			return nil, fmt.Errorf("fetching collection name from id %v: %v: %w", rec.CollectionId, err, e.ErrInternal)
 		}
-		objects = append(objects, im.BaseImage{ImageId: rec.ImageId, Collection: collectionName})
+		objects = append(objects, im.BaseImage{ImageId: rec.ImageId.String(), Collection: collectionName})
 	}
 
 	return &objects, nil

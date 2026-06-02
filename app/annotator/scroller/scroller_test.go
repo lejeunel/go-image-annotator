@@ -49,7 +49,7 @@ func TestSingleImageHasNoPreviousImage(t *testing.T) {
 }
 
 func TestNextImage(t *testing.T) {
-	next := &im.BaseImage{ImageId: im.NewImageId()}
+	next := &im.BaseImage{ImageId: im.NewImageId().String()}
 	s := New(&FakeRepo{NextImage: next})
 	state, _ := s.Init(im.NewImageId().String())
 	if state.Next == nil {
@@ -61,7 +61,7 @@ func TestNextImage(t *testing.T) {
 }
 
 func TestPreviousImage(t *testing.T) {
-	prev := &im.BaseImage{ImageId: im.NewImageId()}
+	prev := &im.BaseImage{ImageId: im.NewImageId().String()}
 	s := New(&FakeRepo{PreviousImage: prev})
 	state, _ := s.Init(im.NewImageId().String())
 	if state.Previous == nil {

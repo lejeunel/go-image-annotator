@@ -63,7 +63,7 @@ func TestDrawImageOnInit(t *testing.T) {
 }
 func TestAddBox(t *testing.T) {
 	a, image, _, view := createAnnotator()
-	a.AddBox(addbox.Request{}, view)
+	a.AddBox(t.Context(), addbox.Request{}, view)
 	assert.Equal(t, image.BoundingBoxes[0].Label.Name, view.AddedBox.Label, "added box with label")
 }
 func TestUpdateLabel(t *testing.T) {

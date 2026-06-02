@@ -24,13 +24,7 @@ type Interactor struct {
 
 func (i *Interactor) Execute(r Request, out OutputPort) {
 
-	id, err := im.NewImageIdFromString(r.ImageId)
-	if err != nil {
-		i.handleError(err, out)
-		return
-	}
-
-	image, err := i.findImage(id, r.Collection)
+	image, err := i.findImage(r.ImageId, r.Collection)
 	if err != nil {
 		i.handleError(err, out)
 		return
@@ -68,7 +62,7 @@ func (i *Interactor) findLabel(name string) (*lbl.Label, error) {
 	return label, nil
 
 }
-func (i *Interactor) findImage(imageId im.ImageId, collection string) (*im.Image, error) {
+func (i *Interactor) findImage(imageId string, collection string) (*im.Image, error) {
 	image, err := i.store.Find(im.BaseImage{ImageId: imageId, Collection: collection})
 	if err != nil {
 		return nil, err

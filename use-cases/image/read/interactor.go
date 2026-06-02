@@ -22,13 +22,7 @@ func NewInteractor(store imstore.Interface) *Interactor {
 }
 
 func (i *Interactor) Execute(r Request, out OutputPort) {
-	imageId, err := im.NewImageIdFromString(r.ImageId)
-	if err != nil {
-		i.handleError(err, out)
-		return
-	}
-
-	image, err := i.store.Find(im.BaseImage{ImageId: imageId, Collection: r.Collection})
+	image, err := i.store.Find(im.BaseImage{ImageId: r.ImageId, Collection: r.Collection})
 	if err != nil {
 		i.handleError(err, out)
 		return

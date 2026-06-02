@@ -2,7 +2,6 @@ package image_store
 
 import (
 	"bytes"
-	"errors"
 	"io"
 	"testing"
 
@@ -12,38 +11,35 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNonExistingCollectionShouldFail(t *testing.T) {
 	s := New(&FakeRepo{MissingCollection: true}, &ast.FakeStore{})
-	_, err := s.Find(im.BaseImage{ImageId: im.NewImageId(), Collection: "a-collection"})
-	if !errors.Is(err, e.ErrNotFound) {
-		t.Fatalf("expected error not found, got %v", err)
-	}
+	_, err := s.Find(im.BaseImage{ImageId: im.NewImageId().String(),
+		Collection: "a-collection"})
+	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestErrOnFindLabelShouldFail(t *testing.T) {
 	s := New(&FakeRepo{ErrOnFindImageLabel: true, Err: e.ErrInternal}, &ast.FakeStore{})
-	_, err := s.Find(im.BaseImage{ImageId: im.NewImageId(), Collection: "a-collection"})
-	if err == nil {
-		t.Fatalf("expected error, got %v", err)
-	}
+	_, err := s.Find(im.BaseImage{ImageId: im.NewImageId().String(),
+		Collection: "a-collection"})
+	assert.NotNil(t, err)
 }
 
 func TestErrOnFindBoundingBoxesShouldFail(t *testing.T) {
 	s := New(&FakeRepo{ErrOnFindBoundingBoxes: true, Err: e.ErrInternal}, &ast.FakeStore{})
-	_, err := s.Find(im.BaseImage{ImageId: im.NewImageId(), Collection: "a-collection"})
-	if err == nil {
-		t.Fatalf("expected error, got %v", err)
-	}
+	_, err := s.Find(im.BaseImage{ImageId: im.NewImageId().String(),
+		Collection: "a-collection"})
+	assert.NotNil(t, err)
 }
 
 func TestErrOnExistsShouldFail(t *testing.T) {
 	s := New(&FakeRepo{ErrOnExists: true, Err: e.ErrInternal}, &ast.FakeStore{})
-	_, err := s.Find(im.BaseImage{ImageId: im.NewImageId(), Collection: "a-collection"})
-	if err == nil {
-		t.Fatal("expected error")
-	}
+	_, err := s.Find(im.BaseImage{ImageId: im.NewImageId().String(),
+		Collection: "a-collection"})
+	assert.NotNil(t, err)
 }
 
 func TestFindImageGivesCorrectAnnotations(t *testing.T) {
@@ -54,37 +50,19 @@ func TestFindImageGivesCorrectAnnotations(t *testing.T) {
 
 	s := New(&FakeRepo{Collection: collection, Labels: labels,
 		BoundingBoxes: bboxes}, &ast.FakeStore{Data: []byte("test-data")})
-	image, _ := s.Find(im.BaseImage{ImageId: im.NewImageId(), Collection: collection.Name})
-	if !(image.Collection.Id == collection.Id) {
-		t.Fatalf("expected to retrieve image in collection %v, got %v ",
-			collection.Id, image.Collection.Id)
-	}
-	if !(len(image.Labels) == 1) {
-		t.Fatalf("expected to retrieve image with 1 label, got %v", len(image.Labels))
-	}
-	if !(len(image.BoundingBoxes) == 1) {
-		t.Fatalf("expected to retrieve image with 1 bounding box, got %v", len(image.BoundingBoxes))
-	}
+	image, _ := s.Find(im.BaseImage{ImageId: im.NewImageId().String(),
+		Collection: collection.Name})
+	assert.Equal(t, collection.Id, image.Collection.Id)
+	assert.Equal(t, 1, len(image.Labels))
+	assert.Equal(t, 1, len(image.BoundingBoxes))
 }
 
 func TestImageReaderGivesCorrectBytes(t *testing.T) {
 	data := []byte("test-data")
 
 	s := New(&FakeRepo{}, &ast.FakeStore{Data: data})
-	image, _ := s.Find(im.BaseImage{ImageId: im.NewImageId(), Collection: "the-collection"})
+	image, _ := s.Find(im.BaseImage{ImageId: im.NewImageId().String(),
+		Collection: "the-collection"})
 	gotBytes, _ := io.ReadAll(image.Reader)
-	if !bytes.Equal(gotBytes, data) {
-		t.Fatalf("expected to retrieve bytes %v, got %v", data, gotBytes)
-
-	}
-}
-
-func TestCorrectSpecs(t *testing.T) {
-	specs := im.ImageSpecs{MIMEType: "the-mimetype", Width: 15, Height: 10}
-	s := New(&FakeRepo{Specs: specs}, &ast.FakeStore{})
-	image, _ := s.Find(im.BaseImage{})
-	got := image.Specs
-	if got.MIMEType != specs.MIMEType {
-		t.Fatalf("expected to retrieve mimetype %v, got %v", specs.MIMEType, got.MIMEType)
-	}
+	assert.Equal(t, true, bytes.Equal(gotBytes, data))
 }

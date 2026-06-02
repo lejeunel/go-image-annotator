@@ -74,7 +74,7 @@ func (i *Interactor) deleteLabels(image im.Image) error {
 
 }
 
-func (i *Interactor) findImage(imageId im.ImageId, collection string) (*im.Image, error) {
+func (i *Interactor) findImage(imageId string, collection string) (*im.Image, error) {
 	baseErr := fmt.Errorf("fetching associated resources")
 	image, err := i.store.Find(im.BaseImage{ImageId: imageId, Collection: collection})
 	if err != nil {

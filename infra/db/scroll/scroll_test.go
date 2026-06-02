@@ -86,7 +86,7 @@ func TestGettingNextImage(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	ids := CreateImagesWithOrderedIds(repos.Image, 3)
 	r, _ := repos.Scroller.GetAdjacent(ids[1], scr.NewCriteria(), scr.ScrollNext)
-	if r.ImageId != ids[2] {
+	if r.ImageId != ids[2].String() {
 		t.Fatalf("expected to retrieve next image with id %v got %v", ids[2], r.ImageId)
 	}
 }
@@ -95,7 +95,7 @@ func TestGettingPrevImage(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	ids := CreateImagesWithOrderedIds(repos.Image, 3)
 	r, _ := repos.Scroller.GetAdjacent(ids[2], scr.NewCriteria(), scr.ScrollPrevious)
-	if r.ImageId != ids[1] {
+	if r.ImageId != ids[1].String() {
 		t.Fatalf("expected to retrieve next image with id %v got %v", ids[1], r.ImageId)
 	}
 }

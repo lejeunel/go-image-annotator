@@ -1,4 +1,4 @@
-package collection
+package annotate
 
 import (
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"

@@ -48,7 +48,7 @@ func (r *SQLiteScrollerRepo) GetAdjacent(id im.ImageId, criteria scroller.Scroll
 	if err != nil {
 		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
 	}
-	var adjId im.ImageId
+	var adjId string
 	if err := r.Db.Get(&adjId, sqlQuery, args...); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, e.ErrNotFound

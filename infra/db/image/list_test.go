@@ -68,7 +68,7 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 		t.Fatalf("expected to retrieve one image, got %v", len(*r))
 	}
 	images := *r
-	if images[0].ImageId != firstImage.Id {
+	if images[0].ImageId != firstImage.Id.String() {
 		t.Fatalf("expected to retrieve first image with id %v, got %v", firstImage.Id, images[0].ImageId)
 	}
 	if images[0].Collection != firstCollection.Name {
@@ -95,7 +95,7 @@ func TestListImagesShouldBeOrderedById(t *testing.T) {
 
 	r, _ := repos.Image.List(ist.FilteringParams{PageSize: 2, Page: 1})
 	got := (*r)[0].ImageId
-	if got != image0.Id {
+	if got != image0.Id.String() {
 		t.Fatalf("expected to retrieve image with first id %v, got %v",
 			image0.Id, got)
 	}

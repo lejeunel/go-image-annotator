@@ -39,7 +39,7 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("submit box: converting box: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	s.annotator.AddBox(*req, aw.NewAnnotationView())
+	s.annotator.AddBox(r.Context(), *req, aw.NewAnnotationView())
 }
 func (s *Server) MakeHTMLAnnotationPanel(w http.ResponseWriter, r *http.Request) {
 	view := aw.NewAnnotationView()

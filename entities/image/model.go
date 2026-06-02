@@ -17,7 +17,7 @@ type RawImage struct {
 }
 
 type BaseImage struct {
-	ImageId    ImageId
+	ImageId    string
 	Collection string
 }
 

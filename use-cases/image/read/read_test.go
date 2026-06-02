@@ -10,14 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandleErrorOnImageIdParsing(t *testing.T) {
-	p := &FakePresenter{}
-	itr := NewInteractor(&st.FakeImageStore{Err: e.ErrNotFound})
-	itr.Execute(Request{ImageId: "invalid-image-id", Collection: "a-collection"}, p)
-	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
-	assert.False(t, p.GotSuccess)
-}
-
 func TestHandleErrorOnFind(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&st.FakeImageStore{Err: e.ErrNotFound})

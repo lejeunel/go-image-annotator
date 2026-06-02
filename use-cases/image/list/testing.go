@@ -24,7 +24,8 @@ func (r *FakeRepo) List(f ist.FilteringParams) (*[]im.BaseImage, error) {
 	result := []im.BaseImage{}
 	collectionName := "a-collection"
 	for range f.PageSize {
-		result = append(result, im.BaseImage{Collection: collectionName, ImageId: im.NewImageId()})
+		result = append(result,
+			im.BaseImage{Collection: collectionName, ImageId: im.NewImageId().String()})
 	}
 
 	return &result, nil

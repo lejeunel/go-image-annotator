@@ -53,3 +53,7 @@ func (a PassThroughAuth) ReadLabel(ctx context.Context) error {
 func (a PassThroughAuth) UpdateLabel(ctx context.Context) error {
 	return nil
 }
+
+func (a PassThroughAuth) Annotate(ctx context.Context, group string) error {
+	return nil
+}

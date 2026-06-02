@@ -17,7 +17,7 @@ type Response struct {
 }
 
 type Request struct {
-	ImageId    im.ImageId
+	ImageId    string
 	Collection string
 	Label      string
 	Xc         float32

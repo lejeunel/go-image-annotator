@@ -55,7 +55,7 @@ type FakeBoxAdder struct {
 	Returns an.BoundingBox
 }
 
-func (b *FakeBoxAdder) Execute(r addbox.Request, o addbox.OutputPort) {
+func (b *FakeBoxAdder) Execute(c context.Context, r addbox.Request, o addbox.OutputPort) {
 	o.SuccessAddBox(b.Returns)
 }
 

@@ -1,32 +1,55 @@
 package add_bbox
 
 import (
+	"context"
 	"fmt"
 
 	st "github.com/lejeunel/go-image-annotator/app/image-store"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
+	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"log/slog"
 )
 
 type Interface interface {
-	Execute(r Request, out OutputPort)
+	Execute(context.Context, Request, OutputPort)
 }
 
 type Interactor struct {
 	imageStore st.Interface
 	repo       Repo
 	logger     *slog.Logger
+	auth       auth.Auth
 }
 
-func NewInteractor(imageStore st.Interface, repo Repo) *Interactor {
-	return &Interactor{repo: repo, imageStore: imageStore, logger: logging.NewNoOpLogger()}
+func NewInteractor(imageStore st.Interface, repo Repo, opts ...Option) *Interactor {
+	i := &Interactor{repo: repo, imageStore: imageStore, logger: logging.NewNoOpLogger(),
+		auth: sauth.PassThroughAuth{}}
+	for _, opt := range opts {
+		opt(i)
+	}
+	return i
 }
-func (i *Interactor) Execute(r Request, out OutputPort) {
+
+type Option func(*Interactor)
+
+func WithAuth(a auth.Auth) Option {
+	return func(i *Interactor) {
+		i.auth = a
+	}
+}
+
+func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	image, err := i.findImage(r.ImageId, r.Collection)
 	if err != nil {
+		i.handleError(err, out)
+		return
+	}
+
+	if err := i.auth.Annotate(ctx, image.Collection.Group); err != nil {
 		i.handleError(err, out)
 		return
 	}
@@ -79,7 +102,7 @@ func (i *Interactor) findLabel(name string) (*lbl.Label, error) {
 	return label, nil
 }
 
-func (i *Interactor) findImage(imageId im.ImageId, collectionName string) (*im.Image, error) {
+func (i *Interactor) findImage(imageId string, collectionName string) (*im.Image, error) {
 	image, err := i.imageStore.Find(im.BaseImage{ImageId: imageId, Collection: collectionName})
 	if err != nil {
 		return nil, err
