@@ -8,4 +8,5 @@ import (
 type Repo interface {
 	FindLabel(string) (*lbl.Label, error)
 	UpdateLabelOfAnnotation(a.AnnotationId, lbl.LabelId) error
+	GroupOfAnnotation(a.AnnotationId) (*string, error)
 }

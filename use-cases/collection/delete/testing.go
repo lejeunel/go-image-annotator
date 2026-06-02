@@ -14,7 +14,7 @@ type FakeRepo struct {
 	ReturnGroup  string
 }
 
-func (r *FakeRepo) Group(string) (*string, error) {
+func (r *FakeRepo) GroupOfCollection(string) (*string, error) {
 	return &r.ReturnGroup, nil
 }
 func (r *FakeRepo) Delete(string) error {

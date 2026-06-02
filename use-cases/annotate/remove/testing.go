@@ -10,6 +10,11 @@ type FakeRepo struct {
 	Got a.AnnotationId
 }
 
+func (r *FakeRepo) GroupOfAnnotation(annotationId a.AnnotationId) (*string, error) {
+	group := "my-group"
+	return &group, nil
+}
+
 func (r *FakeRepo) RemoveAnnotation(annotationId a.AnnotationId) error {
 	if r.Err != nil {
 		return r.Err

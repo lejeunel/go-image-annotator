@@ -1,6 +1,7 @@
 package assign_label
 
 import (
+	"context"
 	"fmt"
 
 	st "github.com/lejeunel/go-image-annotator/app/image-store"
@@ -8,27 +9,36 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
+	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"log/slog"
 )
 
 type Interface interface {
-	Execute(r Request, out OutputPort)
+	Execute(ctx context.Context, r Request, out OutputPort)
 }
 
 type Interactor struct {
 	repo   Repo
 	store  st.Interface
 	logger *slog.Logger
+	auth   auth.Auth
 }
 
-func (i *Interactor) Execute(r Request, out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	image, err := i.findImage(r.ImageId, r.Collection)
 	if err != nil {
 		i.handleError(err, out)
 		return
 	}
+
+	if err := i.auth.AnnotateGroup(ctx, image.Collection.Group); err != nil {
+		i.handleError(err, out)
+		return
+	}
+
 	label, err := i.findLabel(r.Label)
 	if err != nil {
 		i.handleError(err, out)
@@ -79,6 +89,19 @@ func (i *Interactor) addLabel(imageId im.ImageId, collectionId clc.CollectionId,
 
 }
 
-func NewInteractor(repo Repo, store st.Interface) *Interactor {
-	return &Interactor{repo: repo, store: store, logger: logging.NewNoOpLogger()}
+type Option func(*Interactor)
+
+func WithAuth(a auth.Auth) Option {
+	return func(i *Interactor) {
+		i.auth = a
+	}
+}
+
+func NewInteractor(repo Repo, store st.Interface, opts ...Option) *Interactor {
+	i := &Interactor{repo: repo, store: store, logger: logging.NewNoOpLogger(),
+		auth: sauth.PassThroughAuth{}}
+	for _, opt := range opts {
+		opt(i)
+	}
+	return i
 }

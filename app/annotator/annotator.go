@@ -26,20 +26,20 @@ type Annotator struct {
 	presenter       p.Presenter
 }
 
-func (a *Annotator) DeleteAnnotation(r del.Request, view v.View) {
-	a.deleter.Execute(r, a.presenter.SetView(view))
+func (a *Annotator) DeleteAnnotation(ctx context.Context, r del.Request, view v.View) {
+	a.deleter.Execute(ctx, r, a.presenter.SetView(view))
 }
-func (a *Annotator) UpdateLabel(r updlbl.Request, view v.View) {
-	a.labelUpdater.Execute(r, a.presenter.SetView(view))
+func (a *Annotator) UpdateLabel(ctx context.Context, r updlbl.Request, view v.View) {
+	a.labelUpdater.Execute(ctx, r, a.presenter.SetView(view))
 }
-func (a *Annotator) UpdateBox(r updbox.Request, view v.View) {
-	a.boxUpdater.Execute(r, a.presenter.SetView(view))
+func (a *Annotator) UpdateBox(ctx context.Context, r updbox.Request, view v.View) {
+	a.boxUpdater.Execute(ctx, r, a.presenter.SetView(view))
 }
 func (a *Annotator) AddBox(ctx context.Context, r addbox.Request, view v.View) {
 	a.boxAdder.Execute(ctx, r, a.presenter.SetView(view))
 }
-func (a *Annotator) AddLabel(r addlbl.Request, view v.View) {
-	a.imageLabelAdder.Execute(r, a.presenter.SetView(view))
+func (a *Annotator) AddLabel(ctx context.Context, r addlbl.Request, view v.View) {
+	a.imageLabelAdder.Execute(ctx, r, a.presenter.SetView(view))
 }
 
 func (a *Annotator) Init(ctx context.Context, imageId string, collection string, view v.View) {

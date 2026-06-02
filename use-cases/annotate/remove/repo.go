@@ -6,4 +6,5 @@ import (
 
 type Repo interface {
 	RemoveAnnotation(a.AnnotationId) error
+	GroupOfAnnotation(a.AnnotationId) (*string, error)
 }

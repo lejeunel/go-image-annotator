@@ -28,6 +28,10 @@ func (r *FakeRepo) FindLabel(name string) (*lbl.Label, error) {
 	}
 	return &r.Label, nil
 }
+func (r *FakeRepo) GroupOfAnnotation(id a.AnnotationId) (*string, error) {
+	group := "my-group"
+	return &group, nil
+}
 
 type FakePresenter struct {
 	GotSuccess bool

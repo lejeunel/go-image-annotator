@@ -68,17 +68,17 @@ func TestAddBox(t *testing.T) {
 }
 func TestUpdateLabel(t *testing.T) {
 	a, _, _, view := createAnnotator()
-	a.UpdateLabel(updlbl.Request{}, view)
+	a.UpdateLabel(t.Context(), updlbl.Request{}, view)
 	assert.NotNil(t, view.UpdatedAnnotation, "update label")
 }
 func TestDeleteAnnotation(t *testing.T) {
 	a, _, _, view := createAnnotator()
-	a.DeleteAnnotation(del.Request{}, view)
+	a.DeleteAnnotation(t.Context(), del.Request{}, view)
 	assert.NotNil(t, view.RemovedAnnotationId, "removed annotation")
 }
 func TestUpdateBox(t *testing.T) {
 	a, _, _, view := createAnnotator()
-	a.UpdateBox(updbox.Request{}, view)
+	a.UpdateBox(t.Context(), updbox.Request{}, view)
 	assert.NotNil(t, view.UpdatedBoxId, "updated annotation")
 }
 func TestDrawImageAnnotationsOnInit(t *testing.T) {
@@ -90,6 +90,6 @@ func TestDrawImageAnnotationsOnInit(t *testing.T) {
 }
 func TestAddLabelShouldDraw(t *testing.T) {
 	a, image, _, view := createAnnotator()
-	a.AddLabel(addlbl.Request{}, view)
+	a.AddLabel(t.Context(), addlbl.Request{}, view)
 	assert.Equal(t, image.Labels[0].Label.Name, view.AddedImageLabel.Label, "added box with label")
 }

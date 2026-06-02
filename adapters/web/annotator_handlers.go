@@ -21,8 +21,7 @@ func (s *Server) ViewImage(w http.ResponseWriter, r *http.Request) {
 func (s *Server) SubmitLabel(w http.ResponseWriter, r *http.Request) {
 	req := assign_label.Request{ImageId: r.URL.Query().Get("image_id"),
 		Collection: r.URL.Query().Get("collection"), Label: r.URL.Query().Get("label")}
-	s.annotator.AddLabel(req,
-		aw.NewAnnotationView())
+	s.annotator.AddLabel(r.Context(), req, aw.NewAnnotationView())
 }
 func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
@@ -52,7 +51,7 @@ func (s *Server) GetAnnotationsAsJSON(w http.ResponseWriter, r *http.Request) {
 	view.RenderAnnotations(w)
 }
 func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
-	s.annotator.DeleteAnnotation(remove.Request{Id: r.URL.Query().Get("id")}, aw.NewAnnotationView())
+	s.annotator.DeleteAnnotation(r.Context(), remove.Request{Id: r.URL.Query().Get("id")}, aw.NewAnnotationView())
 }
 func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
@@ -69,7 +68,7 @@ func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("submit box: converting box: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	s.annotator.UpdateBox(*req, aw.NewAnnotationView())
+	s.annotator.UpdateBox(r.Context(), *req, aw.NewAnnotationView())
 }
 func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 	errCtx := fmt.Errorf("setting label")
@@ -84,6 +83,6 @@ func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.annotator.UpdateLabel(updlbl.Request{AnnotationId: id, Label: label},
+	s.annotator.UpdateLabel(r.Context(), updlbl.Request{AnnotationId: id, Label: label},
 		aw.NewAnnotationView())
 }

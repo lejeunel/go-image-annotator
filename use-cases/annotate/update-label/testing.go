@@ -16,6 +16,11 @@ type FakeRepo struct {
 	Returns              *lbl.Label
 }
 
+func (r *FakeRepo) GroupOfAnnotation(a.AnnotationId) (*string, error) {
+	group := "my-group"
+	return &group, nil
+}
+
 func (r *FakeRepo) FindLabel(name string) (*lbl.Label, error) {
 	r.FetchedLabelWithName = name
 	if r.ErrOnFindLabel {

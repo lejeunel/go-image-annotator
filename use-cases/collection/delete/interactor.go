@@ -39,7 +39,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 func (i *Interactor) authorizeDeletion(ctx context.Context, name string) error {
 	errCtx := fmt.Errorf("checking group ownership of collection with name %v is empty", name)
-	group, err := i.repo.Group(name)
+	group, err := i.repo.GroupOfCollection(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}

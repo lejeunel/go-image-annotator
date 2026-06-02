@@ -36,7 +36,7 @@ func NewInteractor(r Repo, opts ...Option) Interactor {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
-	group, err := i.repo.Group(r.Name)
+	group, err := i.repo.GroupOfCollection(r.Name)
 	if err != nil {
 		i.handleError(err, out)
 		return

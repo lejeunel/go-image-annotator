@@ -5,24 +5,35 @@ import (
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestHandleAuthError(t *testing.T) {
+	itr := NewInteractor(&FakeRepo{},
+		WithAuth(auth.FailingAuth{}))
+	p := &FakePresenter{}
+	itr.Execute(t.Context(),
+		Request{Id: a.NewAnnotationId().String()},
+		p)
+	assert.True(t, p.GotAuthErr)
+	assert.False(t, p.GotSuccess)
+}
 
 func TestNonExistingBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrNotFound})
-	itr.Execute(Request{Id: a.NewAnnotationId().String()}, p)
-	if !p.GotNotFoundErr || p.GotSuccess {
-		t.Fatalf("expected to get not found error")
-	}
+	itr.Execute(t.Context(), Request{Id: a.NewAnnotationId().String()}, p)
+	assert.True(t, p.GotNotFoundErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestInternalErrShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
-	itr.Execute(Request{}, p)
-	if !p.GotInternalErr || p.GotSuccess {
-		t.Fatalf("expected internal error")
-	}
+	itr.Execute(t.Context(), Request{}, p)
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestRemoveBox(t *testing.T) {
@@ -30,9 +41,7 @@ func TestRemoveBox(t *testing.T) {
 	repo := &FakeRepo{}
 	itr := NewInteractor(repo)
 	annotationId := a.NewAnnotationId()
-	itr.Execute(Request{Id: annotationId.String()}, p)
-	if !p.GotSuccess || !(repo.Got == annotationId) {
-		t.Fatalf("expected to remove annotation, got success %v and annotation id %v, wanted %v",
-			p.GotSuccess, repo.Got.String(), annotationId.String())
-	}
+	itr.Execute(t.Context(), Request{Id: annotationId.String()}, p)
+	assert.False(t, p.GotSuccess)
+	assert.Equal(t, annotationId, repo.Got)
 }

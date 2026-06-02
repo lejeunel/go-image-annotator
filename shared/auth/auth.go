@@ -54,6 +54,6 @@ func (a PassThroughAuth) UpdateLabel(ctx context.Context) error {
 	return nil
 }
 
-func (a PassThroughAuth) Annotate(ctx context.Context, group string) error {
+func (a PassThroughAuth) AnnotateGroup(ctx context.Context, group string) error {
 	return nil
 }

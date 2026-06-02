@@ -47,7 +47,7 @@ type FakeLabelAdder struct {
 	Returns addlbl.Response
 }
 
-func (b *FakeLabelAdder) Execute(r addlbl.Request, o addlbl.OutputPort) {
+func (b *FakeLabelAdder) Execute(ctx context.Context, r addlbl.Request, o addlbl.OutputPort) {
 	o.SuccessAddLabel(b.Returns)
 }
 
@@ -63,14 +63,14 @@ type FakeBoxUpdater struct {
 	Returns *updbox.Response
 }
 
-func (b *FakeBoxUpdater) Execute(r updbox.Request, o updbox.OutputPort) {
+func (b *FakeBoxUpdater) Execute(c context.Context, r updbox.Request, o updbox.OutputPort) {
 	o.SuccessUpdateBox(*b.Returns)
 }
 
 type FakeLabelUpdater struct {
 }
 
-func (b *FakeLabelUpdater) Execute(r updlbl.Request, o updlbl.OutputPort) {
+func (b *FakeLabelUpdater) Execute(ctx context.Context, r updlbl.Request, o updlbl.OutputPort) {
 	o.SuccessUpdateLabel(updlbl.Response{})
 }
 
@@ -78,7 +78,7 @@ type FakeAnnotationDeleter struct {
 	Returns del.Response
 }
 
-func (b *FakeAnnotationDeleter) Execute(r del.Request, o del.OutputPort) {
+func (b *FakeAnnotationDeleter) Execute(c context.Context, r del.Request, o del.OutputPort) {
 	o.SuccessDeleteAnnotation(b.Returns)
 }
 

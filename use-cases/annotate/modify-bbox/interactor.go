@@ -1,27 +1,60 @@
 package modify_bbox
 
 import (
+	"context"
 	"fmt"
+
+	"log/slog"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
-	"log/slog"
+	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 )
 
 type Interface interface {
-	Execute(Request, OutputPort)
+	Execute(context.Context, Request, OutputPort)
 }
 
 type Interactor struct {
 	repo   Repo
 	logger *slog.Logger
+	auth   auth.Auth
 }
 
-func NewInteractor(repo Repo) *Interactor {
-	return &Interactor{repo: repo, logger: logging.NewNoOpLogger()}
+type Option func(*Interactor)
+
+func WithAuth(a auth.Auth) Option {
+	return func(i *Interactor) {
+		i.auth = a
+	}
 }
-func (i *Interactor) Execute(r Request, out OutputPort) {
+
+func NewInteractor(repo Repo, opts ...Option) *Interactor {
+	i := &Interactor{repo: repo, logger: logging.NewNoOpLogger(),
+		auth: sauth.PassThroughAuth{}}
+	for _, opt := range opts {
+		opt(i)
+	}
+	return i
+}
+func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	annotationId, err := a.NewAnnotationIdFromString(r.AnnotationId)
+	if err != nil {
+		i.handleError(err, out)
+		return
+	}
+	group, err := i.repo.GroupOfAnnotation(*annotationId)
+	if err != nil {
+		i.handleError(err, out)
+		return
+	}
+
+	if err := i.auth.AnnotateGroup(ctx, *group); err != nil {
+		i.handleError(err, out)
+		return
+	}
 	label, err := i.findLabel(r.Label)
 	if err != nil {
 		i.handleError(err, out)
@@ -33,7 +66,7 @@ func (i *Interactor) Execute(r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.update(r.AnnotationId, *u); err != nil {
+	if err := i.update(*annotationId, *u); err != nil {
 		i.handleError(err, out)
 		return
 	}

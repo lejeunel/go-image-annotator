@@ -27,7 +27,7 @@ func (r *FakeRepo) Exists(n string) (bool, error) {
 	}
 	return false, nil
 }
-func (r *FakeRepo) Group(n string) (*string, error) {
+func (r *FakeRepo) GroupOfCollection(n string) (*string, error) {
 	group := "my-group"
 	return &group, nil
 }
