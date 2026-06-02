@@ -12,22 +12,22 @@ func TestCreateLabelWithDuplicateNameShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Names: []string{name}})
 	itr.Execute(Request{Name: name}, p)
-	assert.Equal(t, true, p.GotDuplicationErr)
-	assert.Equal(t, false, p.GotSuccess)
+	assert.True(t, p.GotDuplicationErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
 	itr.Execute(Request{Name: "a-name"}, p)
-	assert.Equal(t, true, p.GotInternalErr)
+	assert.True(t, p.GotInternalErr)
 }
 
 func TestCreateLabelWithInvalidNameShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{}, WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
 	itr.Execute(Request{Name: "invalid-name"}, p)
-	assert.Equal(t, true, p.GotValidationErr)
+	assert.True(t, p.GotValidationErr)
 }
 
 func TestCreateLabel(t *testing.T) {
@@ -37,9 +37,9 @@ func TestCreateLabel(t *testing.T) {
 	req := Request{Name: "a-name", Description: "a-description"}
 	itr.Execute(req, p)
 
-	assert.Equal(t, p.Got.Name, req.Name, "name")
-	assert.Equal(t, p.Got.Description, req.Description, "description")
-	assert.Equal(t, repo.Got.Name, req.Name, "name")
-	assert.Equal(t, repo.Got.Description, req.Description, "description")
-	assert.Equal(t, repo.Got.Id.IsNil(), false, "id")
+	assert.Equal(t, p.Got.Name, req.Name)
+	assert.Equal(t, p.Got.Description, req.Description)
+	assert.Equal(t, repo.Got.Name, req.Name)
+	assert.Equal(t, repo.Got.Description, req.Description)
+	assert.False(t, repo.Got.Id.IsNil())
 }

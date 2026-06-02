@@ -34,13 +34,13 @@ func TestReadNonExistingCollectionShouldFail(t *testing.T) {
 	itr := NewInteractor(repo)
 	req := Request{Name: "non-existing-collection"}
 	itr.Execute(context.Background(), req, p)
-	assert.Equal(t, true, p.GotNotFoundErr)
-	assert.Equal(t, false, p.GotSuccess)
+	assert.True(t, p.GotNotFoundErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
 	itr.Execute(context.Background(), Request{}, p)
-	assert.Equal(t, true, p.GotInternalErr)
+	assert.True(t, p.GotInternalErr)
 }

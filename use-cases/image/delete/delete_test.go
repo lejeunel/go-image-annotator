@@ -9,24 +9,23 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNonExistingResourceShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&st.FakeImageStore{Err: e.ErrNotFound}, &FakeRepo{})
 	itr.Execute(Request{}, p)
-	if !p.GotNotFoundErr || p.GotSuccess {
-		t.Fatalf("expected to get not found error")
-	}
+	assert.True(t, p.GotNotFoundErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleInternalErr(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&st.FakeImageStore{Err: e.ErrInternal}, &FakeRepo{})
 	itr.Execute(Request{}, p)
-	if !p.GotInternalErr || p.GotSuccess {
-		t.Fatalf("expected to get internal error")
-	}
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestDeleteNonExistingLabelShouldFail(t *testing.T) {
@@ -37,9 +36,8 @@ func TestDeleteNonExistingLabelShouldFail(t *testing.T) {
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrNotFound})
 	itr.Execute(Request{}, p)
-	if p.GotSuccess || !(p.GotNotFoundErr) {
-		t.Fatalf("expected not found error")
-	}
+	assert.True(t, p.GotNotFoundErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleInternalErrOnRemoveLabel(t *testing.T) {
@@ -50,9 +48,8 @@ func TestHandleInternalErrOnRemoveLabel(t *testing.T) {
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrInternal})
 	itr.Execute(Request{}, p)
-	if p.GotSuccess || !(p.GotInternalErr) {
-		t.Fatalf("expected internal error")
-	}
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestDeleteNonExistingBoxShouldFail(t *testing.T) {
@@ -65,9 +62,8 @@ func TestDeleteNonExistingBoxShouldFail(t *testing.T) {
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrNotFound})
 	itr.Execute(Request{}, p)
-	if p.GotSuccess || !(p.GotNotFoundErr) {
-		t.Fatalf("expected not found error")
-	}
+	assert.True(t, p.GotNotFoundErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleInternalErrOnDeleteBoxes(t *testing.T) {
@@ -79,9 +75,8 @@ func TestHandleInternalErrOnDeleteBoxes(t *testing.T) {
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrInternal})
 	itr.Execute(Request{}, p)
-	if p.GotSuccess || !(p.GotInternalErr) {
-		t.Fatalf("expected internal error")
-	}
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
@@ -91,9 +86,8 @@ func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveImage: true, Err: e.ErrInternal})
 	itr.Execute(Request{}, p)
-	if p.GotSuccess || !(p.GotInternalErr) {
-		t.Fatalf("expected internal error")
-	}
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestRemoveImageFromCollection(t *testing.T) {
@@ -103,7 +97,5 @@ func TestRemoveImageFromCollection(t *testing.T) {
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{})
 	itr.Execute(Request{}, p)
-	if !p.GotSuccess {
-		t.Fatalf("expected success")
-	}
+	assert.True(t, p.GotSuccess)
 }

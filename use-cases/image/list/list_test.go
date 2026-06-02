@@ -13,9 +13,8 @@ func TestHandleNotFoundErrOnList(t *testing.T) {
 	itr := NewInteractor(&FakeRepo{ErrOnList: true, Err: e.ErrNotFound},
 		&st.FakeImageStore{})
 	itr.Execute(Request{}, p)
-	if !p.GotNotFoundErr || p.GotSuccess {
-		t.Fatalf("expected to get not found error")
-	}
+	assert.True(t, p.GotNotFoundErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleInternalErrOnList(t *testing.T) {
@@ -23,27 +22,24 @@ func TestHandleInternalErrOnList(t *testing.T) {
 	itr := NewInteractor(&FakeRepo{ErrOnList: true, Err: e.ErrInternal},
 		&st.FakeImageStore{})
 	itr.Execute(Request{}, p)
-	if !p.GotInternalErr || p.GotSuccess {
-		t.Fatalf("expected to get internal error")
-	}
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleInternalErrOnImageBuild(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{}, &st.FakeImageStore{Err: e.ErrInternal})
 	itr.Execute(Request{PageSize: 1}, p)
-	if !p.GotInternalErr || p.GotSuccess {
-		t.Fatalf("expected to get internal error")
-	}
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal}, &st.FakeImageStore{})
 	itr.Execute(Request{}, p)
-	if !p.GotInternalErr || p.GotSuccess {
-		t.Fatalf("expected to get internal error")
-	}
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestListImages(t *testing.T) {
@@ -52,9 +48,7 @@ func TestListImages(t *testing.T) {
 	itr := NewInteractor(repo, &st.FakeImageStore{})
 	r := Request{Page: 1, PageSize: 2}
 	itr.Execute(r, p)
-	if !p.GotSuccess || (len(p.Got.Images) != r.PageSize) {
-		t.Fatalf("expected to list images")
-	}
+	assert.Equal(t, r.PageSize, len(p.Got.Images))
 }
 
 func TestPaginationMetaData(t *testing.T) {

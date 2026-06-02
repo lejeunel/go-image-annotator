@@ -12,8 +12,8 @@ func TestHandleErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal})
 	itr.Execute(p)
-	assert.Equal(t, true, p.GotInternalErr)
-	assert.Equal(t, false, p.GotSuccess)
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleErrWhenCountExceedsLimit(t *testing.T) {
@@ -27,8 +27,8 @@ func TestHandleErrOnFetch(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{ErrOnFetch: true, Err: e.ErrInternal})
 	itr.Execute(p)
-	assert.Equal(t, true, p.GotInternalErr)
-	assert.Equal(t, false, p.GotSuccess)
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestFetchLabels(t *testing.T) {
@@ -36,6 +36,6 @@ func TestFetchLabels(t *testing.T) {
 	labels := []string{"first-label", "second-labels"}
 	itr := NewInteractor(&FakeRepo{Labels: labels})
 	itr.Execute(p)
-	assert.Equal(t, true, p.GotSuccess)
-	assert.Equal(t, true, slices.Equal(p.Got.Labels, labels))
+	assert.True(t, p.GotSuccess)
+	assert.True(t, slices.Equal(p.Got.Labels, labels))
 }

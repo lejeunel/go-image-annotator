@@ -11,8 +11,8 @@ func TestHandleAuthError(t *testing.T) {
 	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(context.Background(), Request{}, p)
-	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
+	assert.True(t, p.GotAuthErr)
 }
 
 func TestUpdateNonExistingCollectionShouldFail(t *testing.T) {
