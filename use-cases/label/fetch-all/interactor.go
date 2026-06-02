@@ -1,24 +1,32 @@
 package fetchall
 
 import (
+	"context"
 	"fmt"
+	"log/slog"
+
+	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
-	"log/slog"
 )
 
 var defaultLabelCountLimit = 200
 
 type Interface interface {
-	Execute(OutputPort)
+	Execute(context.Context, OutputPort)
 }
 type Interactor struct {
 	repo       Repo
 	logger     *slog.Logger
 	countLimit int
+	auth       Auth
 }
 
-func (i *Interactor) Execute(out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
+	if err := i.auth.FetchAllLabels(ctx); err != nil {
+		i.handleError(err, out)
+		return
+	}
 	count, err := i.repo.Count()
 	if err != nil {
 		i.handleError(e.ErrInternal, out)
@@ -48,7 +56,7 @@ func (i *Interactor) handleError(err error, out OutputPort) {
 
 func NewInteractor(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r, logger: logging.NewNoOpLogger(),
-		countLimit: defaultLabelCountLimit}
+		countLimit: defaultLabelCountLimit, auth: auth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -60,5 +68,11 @@ type Option func(*Interactor)
 func WithLimit(limit int) Option {
 	return func(c *Interactor) {
 		c.countLimit = limit
+	}
+}
+
+func WithAuth(a Auth) Option {
+	return func(i *Interactor) {
+		i.auth = a
 	}
 }

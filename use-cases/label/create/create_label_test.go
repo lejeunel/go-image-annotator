@@ -7,11 +7,19 @@ import (
 	"testing"
 )
 
+func TestHandleAuthError(t *testing.T) {
+	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
+	p := &FakePresenter{}
+	itr.Execute(t.Context(), Request{}, p)
+	assert.True(t, p.GotAuthErr)
+	assert.False(t, p.GotSuccess)
+}
+
 func TestCreateLabelWithDuplicateNameShouldFail(t *testing.T) {
 	name := "my-label"
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Names: []string{name}})
-	itr.Execute(Request{Name: name}, p)
+	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -19,14 +27,14 @@ func TestCreateLabelWithDuplicateNameShouldFail(t *testing.T) {
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
-	itr.Execute(Request{Name: "a-name"}, p)
+	itr.Execute(t.Context(), Request{Name: "a-name"}, p)
 	assert.True(t, p.GotInternalErr)
 }
 
 func TestCreateLabelWithInvalidNameShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{}, WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
-	itr.Execute(Request{Name: "invalid-name"}, p)
+	itr.Execute(t.Context(), Request{Name: "invalid-name"}, p)
 	assert.True(t, p.GotValidationErr)
 }
 
@@ -35,7 +43,7 @@ func TestCreateLabel(t *testing.T) {
 	repo := &FakeRepo{}
 	itr := NewInteractor(repo)
 	req := Request{Name: "a-name", Description: "a-description"}
-	itr.Execute(req, p)
+	itr.Execute(t.Context(), req, p)
 
 	assert.Equal(t, p.Got.Name, req.Name)
 	assert.Equal(t, p.Got.Description, req.Description)

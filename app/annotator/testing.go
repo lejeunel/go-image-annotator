@@ -1,6 +1,7 @@
 package annotator
 
 import (
+	"context"
 	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
 	v "github.com/lejeunel/go-image-annotator/app/annotator/view"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
@@ -30,7 +31,7 @@ func (s *FakeScroller) Init(imageId string, opts ...scr.Option) (*scr.ScrollerSt
 
 type FakeLabelFetcher struct{}
 
-func (f *FakeLabelFetcher) Execute(o fetchlbl.OutputPort) {
+func (f *FakeLabelFetcher) Execute(ctx context.Context, o fetchlbl.OutputPort) {
 	o.SuccessFetchLabels(fetchlbl.Response{Labels: []string{"a-label"}})
 }
 

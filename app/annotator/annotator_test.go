@@ -40,24 +40,24 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
 }
 func TestInitializeScrollerOnStart(t *testing.T) {
 	a, image, scroller, view := createAnnotator()
-	a.Init(image.Id.String(), "a-collection", view)
+	a.Init(t.Context(), image.Id.String(), "a-collection", view)
 	assert.Equal(t, scroller.IsInit, true, "initialized scroller")
 }
 func TestDrawScrollerOnInit(t *testing.T) {
 	a, image, _, view := createAnnotator()
-	a.Init(image.Id.String(), "a-collection", view)
+	a.Init(t.Context(), image.Id.String(), "a-collection", view)
 	assert.NotNil(t, view.GotScrollerButtons, "drawn scroller buttons")
 
 }
 func TestSetAllLabelsForRegions(t *testing.T) {
 	a, image, _, view := createAnnotator()
-	a.Init(image.Id.String(), "a-collection", view)
+	a.Init(t.Context(), image.Id.String(), "a-collection", view)
 	assert.NotNil(t, view.GotAvailableRegionLabels, "drawn label list")
 }
 
 func TestDrawImageOnInit(t *testing.T) {
 	a, image, _, view := createAnnotator()
-	a.Init(image.Id.String(), "a-collection", view)
+	a.Init(t.Context(), image.Id.String(), "a-collection", view)
 	assert.Equal(t, view.GotImage.Id, image.Id.String(), "image id")
 	assert.Equal(t, view.GotImageInfo.Id, image.Id.String(), "image info id")
 }
@@ -83,7 +83,7 @@ func TestUpdateBox(t *testing.T) {
 }
 func TestDrawImageAnnotationsOnInit(t *testing.T) {
 	a, image, _, view := createAnnotator()
-	a.Init(image.Id.String(), "a-collection", view)
+	a.Init(t.Context(), image.Id.String(), "a-collection", view)
 	assert.NotNil(t, view.GotAnnotationIds, "got annotation ids")
 	assert.Contains(t, *view.GotAnnotationIds, image.BoundingBoxes[0].Id.String(), "bbox annotation id")
 	assert.Contains(t, *view.GotAnnotationIds, image.Labels[0].Id.String(), "label annotation id")

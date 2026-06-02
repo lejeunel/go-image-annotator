@@ -1,7 +1,9 @@
 package create
 
 import (
+	"context"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 	"slices"
 )
@@ -35,4 +37,11 @@ func (r *FakeRepo) Exists(name string) (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) CreateLabel(ctx context.Context) error {
+	return e.ErrAuth
 }

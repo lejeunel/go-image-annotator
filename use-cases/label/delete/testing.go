@@ -1,6 +1,8 @@
 package delete
 
 import (
+	"context"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
@@ -52,4 +54,11 @@ type FakePresenter struct {
 
 func (p *FakePresenter) Success() {
 	p.GotSuccess = true
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) DeleteLabel(ctx context.Context) error {
+	return e.ErrAuth
 }

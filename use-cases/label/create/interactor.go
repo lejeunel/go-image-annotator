@@ -1,22 +1,31 @@
 package create
 
 import (
+	"context"
 	"fmt"
 
+	"log/slog"
+
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
-	"log/slog"
 )
 
 type Interactor struct {
 	repo      Repo
 	validator v.Validator
 	logger    *slog.Logger
+	auth      Auth
 }
 
-func (i *Interactor) Execute(r Request, out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	if err := i.auth.CreateLabel(ctx); err != nil {
+		i.handleError(err, out)
+		return
+
+	}
 	if err := i.validator.Validate(r.Name); err != nil {
 		i.handleError(err, out)
 		return
@@ -59,10 +68,17 @@ func WithNameValidator(v v.Validator) Option {
 		i.validator = v
 	}
 }
+func WithAuth(a Auth) Option {
+	return func(i *Interactor) {
+		i.auth = a
+	}
+}
 
 func NewInteractor(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r, validator: v.NewNameValidator(),
-		logger: logging.NewNoOpLogger()}
+		logger: logging.NewNoOpLogger(),
+		auth:   auth.PassThroughAuth{},
+	}
 
 	for _, opt := range opts {
 		opt(i)

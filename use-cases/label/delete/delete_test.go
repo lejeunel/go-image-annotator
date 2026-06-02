@@ -7,10 +7,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestHandleAuthError(t *testing.T) {
+	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
+	p := &FakePresenter{}
+	itr.Execute(t.Context(), Request{}, p)
+	assert.True(t, p.GotAuthErr)
+	assert.False(t, p.GotSuccess)
+}
+
 func TestDeleteLabelWithAssociatedResourcesShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{IsUsed_: true})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotDependencyErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -18,7 +26,7 @@ func TestDeleteLabelWithAssociatedResourcesShouldFail(t *testing.T) {
 func TestHandleInternalErrOnIsUsed(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal, ErrOnIsUsed: true})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -26,7 +34,7 @@ func TestHandleInternalErrOnIsUsed(t *testing.T) {
 func TestHandleInternalErrOnExists(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal, ErrOnExists: true})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -34,7 +42,7 @@ func TestHandleInternalErrOnExists(t *testing.T) {
 func TestDeletingMissingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{IsMissing: true})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -42,14 +50,14 @@ func TestDeletingMissingLabelShouldFail(t *testing.T) {
 func TestDeleteLabel(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{})
-	itr.Execute(Request{Name: "my-collection"}, p)
+	itr.Execute(t.Context(), Request{Name: "my-collection"}, p)
 	assert.True(t, p.GotSuccess)
 }
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }

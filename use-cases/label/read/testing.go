@@ -1,6 +1,7 @@
 package read
 
 import (
+	"context"
 	l "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
@@ -32,4 +33,11 @@ type FakePresenter struct {
 func (p *FakePresenter) Success(r Response) {
 	p.GotSuccess = true
 	p.Got = r
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) ReadLabel(ctx context.Context) error {
+	return e.ErrAuth
 }

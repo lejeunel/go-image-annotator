@@ -6,12 +6,20 @@ import (
 	"testing"
 )
 
+func TestHandleAuthError(t *testing.T) {
+	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
+	p := &FakePresenter{}
+	itr.Execute(t.Context(), Request{}, p)
+	assert.True(t, p.GotAuthErr)
+	assert.False(t, p.GotSuccess)
+}
+
 func TestUpdateNonExistingLabelShouldFail(t *testing.T) {
 
 	p := &FakePresenter{}
 	non_existing_name := "non-existing-name"
 	itr := NewInteractor(&FakeRepo{})
-	itr.Execute(Request{Name: non_existing_name, NewName: "new-name"}, p)
+	itr.Execute(t.Context(), Request{Name: non_existing_name, NewName: "new-name"}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -25,7 +33,7 @@ func TestUpdateLabel(t *testing.T) {
 	req := Request{Name: name,
 		NewName:        "updated-name",
 		NewDescription: "updated-description"}
-	itr.Execute(req, p)
+	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, p.Got.Name, req.NewName)
 	assert.Equal(t, p.Got.Description, req.NewDescription)
 }
@@ -36,7 +44,7 @@ func TestUpdateLabelWithNameAlreadyTakenShouldFail(t *testing.T) {
 	name := "name"
 	existing_name := "existing-name"
 	itr := NewInteractor(&FakeRepo{Names: []string{name, existing_name}})
-	itr.Execute(Request{Name: name, NewName: existing_name}, p)
+	itr.Execute(t.Context(), Request{Name: name, NewName: existing_name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -44,7 +52,7 @@ func TestUpdateLabelWithNameAlreadyTakenShouldFail(t *testing.T) {
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeErrRepo{e.ErrInternal})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }

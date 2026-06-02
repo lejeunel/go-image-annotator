@@ -15,7 +15,7 @@ import (
 
 func (s *Server) ViewImage(w http.ResponseWriter, r *http.Request) {
 	view := aw.NewAnnotationView()
-	s.annotator.Init(r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
+	s.annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
 	view.RenderAll(w)
 }
 func (s *Server) SubmitLabel(w http.ResponseWriter, r *http.Request) {
@@ -43,12 +43,12 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) MakeHTMLAnnotationPanel(w http.ResponseWriter, r *http.Request) {
 	view := aw.NewAnnotationView()
-	s.annotator.Init(r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
+	s.annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
 	view.RenderAnnotationList(w)
 }
 func (s *Server) GetAnnotationsAsJSON(w http.ResponseWriter, r *http.Request) {
 	view := aw.NewAnnotationView()
-	s.annotator.Init(r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
+	s.annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
 	view.RenderAnnotations(w)
 }
 func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {

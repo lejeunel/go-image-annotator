@@ -1,6 +1,7 @@
 package update
 
 import (
+	"context"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
@@ -141,4 +142,11 @@ func (r *FakeImageRepo) AddToCollection(im.ImageId, clc.CollectionId) error {
 		return r.Err
 	}
 	return nil
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) UpdateLabel(ctx context.Context) error {
+	return e.ErrAuth
 }

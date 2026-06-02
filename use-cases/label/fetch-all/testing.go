@@ -1,6 +1,9 @@
 package fetchall
 
 import (
+	"context"
+
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
@@ -35,4 +38,11 @@ func (r *FakeRepo) FetchAll() ([]string, error) {
 		return nil, r.Err
 	}
 	return r.Labels, nil
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) FetchAllLabels(ctx context.Context) error {
+	return e.ErrAuth
 }

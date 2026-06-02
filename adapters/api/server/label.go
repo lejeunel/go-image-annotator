@@ -13,18 +13,23 @@ import (
 )
 
 func (s *Server) FindLabelByName(w http.ResponseWriter, r *http.Request, name string) {
-	s.Label.Find.Execute(read.Request{Name: name}, presenter.NewFindPresenter(w))
+	s.Label.Find.Execute(r.Context(),
+		read.Request{Name: name},
+		presenter.NewFindPresenter(w))
 }
 func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
 	body, ok := json.MustDecodeJSON[models.NewLabel](w, r)
 	if !ok {
 		return
 	}
-	s.Label.Create.Execute(create.Request{Name: body.Name, Description: *body.Description},
+	s.Label.Create.Execute(r.Context(),
+		create.Request{Name: body.Name, Description: *body.Description},
 		&presenter.Create{Writer: w})
 }
 func (s *Server) DeleteLabelByName(w http.ResponseWriter, r *http.Request, name string) {
-	s.Label.Delete.Execute(delete.Request{Name: name}, presenter.NewDeletePresenter(w))
+	s.Label.Delete.Execute(r.Context(),
+		delete.Request{Name: name},
+		presenter.NewDeletePresenter(w))
 }
 func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request, params ListLabelsParams) {
 	req := list.Request{Page: 1, PageSize: s.Label.DefaultPageSize}
@@ -34,5 +39,5 @@ func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request, params ListL
 	if p := params.PageSize; p != nil {
 		req.PageSize = *p
 	}
-	s.Label.List.Execute(req, presenter.NewListPresenter(w))
+	s.Label.List.Execute(r.Context(), req, presenter.NewListPresenter(w))
 }

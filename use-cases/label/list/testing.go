@@ -1,7 +1,9 @@
 package list
 
 import (
+	"context"
 	l "github.com/lejeunel/go-image-annotator/entities/label"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
@@ -43,4 +45,11 @@ func (r *FakeRepo) List(req Request) ([]*l.Label, error) {
 	}
 	return result, nil
 
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) ListLabels(ctx context.Context) error {
+	return e.ErrAuth
 }

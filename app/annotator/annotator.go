@@ -1,6 +1,7 @@
 package annotator
 
 import (
+	"context"
 	p "github.com/lejeunel/go-image-annotator/app/annotator/presenters"
 	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
 	v "github.com/lejeunel/go-image-annotator/app/annotator/view"
@@ -41,7 +42,7 @@ func (a *Annotator) AddLabel(r addlbl.Request, view v.View) {
 	a.imageLabelAdder.Execute(r, a.presenter.SetView(view))
 }
 
-func (a *Annotator) Init(imageId string, collection string, view v.View) {
+func (a *Annotator) Init(ctx context.Context, imageId string, collection string, view v.View) {
 	scrollerState, err := a.scroller.Init(imageId, scr.WithCollection(collection))
 	if err != nil {
 		view.Error(err)
@@ -52,7 +53,7 @@ func (a *Annotator) Init(imageId string, collection string, view v.View) {
 	a.presenter.SetView(view)
 	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection},
 		a.presenter)
-	a.labelFetcher.Execute(a.presenter)
+	a.labelFetcher.Execute(ctx, a.presenter)
 }
 
 func NewAnnotator(scroller scr.Interface, imageMetaReader imread.Interface,

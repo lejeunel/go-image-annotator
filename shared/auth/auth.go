@@ -29,3 +29,27 @@ func (a PassThroughAuth) ReadCollection(context.Context) error {
 func (a PassThroughAuth) UpdateCollection(ctx context.Context, group string) error {
 	return nil
 }
+
+func (a PassThroughAuth) CreateLabel(ctx context.Context) error {
+	return nil
+}
+
+func (a PassThroughAuth) ListLabels(ctx context.Context) error {
+	return nil
+}
+
+func (a PassThroughAuth) DeleteLabel(ctx context.Context) error {
+	return nil
+}
+
+func (a PassThroughAuth) FetchAllLabels(ctx context.Context) error {
+	return nil
+}
+
+func (a PassThroughAuth) ReadLabel(ctx context.Context) error {
+	return nil
+}
+
+func (a PassThroughAuth) UpdateLabel(ctx context.Context) error {
+	return nil
+}
