@@ -44,7 +44,7 @@ jobs:
 
       - name: Build site
         working-directory: docs
-        run: hugo --gc --minify --baseURL https://lejeunel.github.io/go-image-annotator/
+        run: hugo --gc --minify --baseURL https://lejeunel.github.io/go-image-annotator/ --disableFastRender
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

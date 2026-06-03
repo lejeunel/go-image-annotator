@@ -32,4 +32,3 @@ To run the service, run
 ``` sh
 ./go-image-annotator serve -p 8001
 ```
-
