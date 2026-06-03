@@ -3,7 +3,6 @@ title: Home
 linkTitle: Home
 menu: { main: { weight: 1 } }
 ---
-
 A simple web application
 to manage, store, and annotate images
 built in [Go](https://go.dev/).

@@ -4,8 +4,6 @@ description: How to contribute to the docs
 weight: 10
 ---
 
-{{% pageinfo color="info td-max-width-on-larger-screens mx-0" %}}
-
 These basic sample guidelines assume that your Docsy site is deployed using
 Netlify and your files are stored in GitHub. You can use the guidelines "as is"
 or adapt them with your own instructions: for example, other deployment options,
@@ -19,8 +17,6 @@ Don't forget to link to your own doc repo rather than our example site! Also
 make sure users can find these guidelines from your doc repo README: either add
 them there and link to them from this page, add them here and link to them from
 the README, or include them in both locations.
-
-{{% /pageinfo %}}
 
 We use [Hugo](https://gohugo.io/) to format and generate our website, the
 [Docsy](https://github.com/google/docsy) theme for styling and site structure,

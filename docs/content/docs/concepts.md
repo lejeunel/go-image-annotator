@@ -7,14 +7,10 @@ linkTitle: Concepts
 menu: { main: { weight: 20 } }
 ---
 
-{{% pageinfo %}}
-
 We describe here the major concepts that allow to use this application,
 namely how to organize image-data into collections, define labels,
 annotate images, and versioning annotations.
 Also, we elaborate on the notion of 
-
-{{% /pageinfo %}}
 
 ## Data Organization
 

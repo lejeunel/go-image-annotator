@@ -1,5 +1,8 @@
 locale = 'en-us'
 title = 'Go Image Annotator'
+[params.ui]
+showLightDarkModeMenu = true
+
 [module]
 proxy = "direct"
 [[module.imports]]
@@ -9,3 +12,8 @@ path = "github.com/google/docsy"
     docs = '/:sections[1:]/:slug/'
   [permalinks.section]
     docs = '/:sections[1:]'
+[[menu.main]]
+  name = "GitHub"
+  weight = 50
+  url = "https://github.com/lejeunel/go-image-annotator/"
+  pre = "<i class='fa-brands fa-github'></i>"
