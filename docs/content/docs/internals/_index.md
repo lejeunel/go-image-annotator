@@ -3,6 +3,7 @@ title: Internals
 description: >
     Where we explain how this application is built, with what technologies, and how one might proceed to extend it
 weight: 8
+menu: { main: { weight: 20 } }
 ---
 
 This project is meant as a starter-kit for small/medium sized

@@ -1,7 +1,7 @@
 ---
 title: Home
 linkTitle: Home
-menu: { main: { weight: 20 } }
+menu: { main: { weight: 1 } }
 ---
 
 A simple web application
