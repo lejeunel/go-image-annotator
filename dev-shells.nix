@@ -11,6 +11,8 @@
           gotestsum
           oapi-codegen
           tailwindcss_4
+          hugo
+          nodejs
         ];
       };
     };
