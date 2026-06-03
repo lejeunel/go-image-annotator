@@ -1,7 +1,7 @@
 ---
 title: Develop & Deploy
 linkTitle: Develop
-weight: 1
+weight: 15
 ---
 
 ## Development Environment
