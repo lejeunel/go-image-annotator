@@ -1,6 +1,8 @@
 baseURL = 'https://lejeunel.github.io/go-image-annotator/'
 locale = 'en-us'
 title = 'Go Image Annotator'
+relativeURLs = false
+canonifyURLs = true
 [module]
 proxy = "direct"
 [[module.imports]]
