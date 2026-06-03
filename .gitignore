@@ -1,3 +1,4 @@
 /go-image-annotator
-.direnv/
-.direnv
+/.direnv/
+/docs/public/
+/docs/resources/
