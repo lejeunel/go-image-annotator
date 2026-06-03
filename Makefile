@@ -42,6 +42,8 @@ $(SERVER_OUT): $(SPEC) $(MODELS_OUT)
 $(CSS_OUT): $(CSS_MAIN)
 	tailwindcss -i $(CSS_MAIN) -o $(CSS_OUT) --minify
 
+docs-dev:
+	cd docs && hugo server --baseURL http://localhost:1313 --disableFastRender
 
 # --- Cleanup generated files ---
 clean:
