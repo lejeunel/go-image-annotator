@@ -12,7 +12,7 @@ computer vision and machine learning pipelines.
 
 The goals of this applications are to provide:
 
-- A way to organize and version images 
+- A way to organize and version images
 - Annotate images through a web interface
-- Retrieve images and their corresponding annotations 
+- Retrieve images and their corresponding annotations
 - Easily integrate downstream data processing pipelines
