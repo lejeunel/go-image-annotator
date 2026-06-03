@@ -6,14 +6,6 @@ import (
 	"testing"
 )
 
-func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
-	assert.True(t, p.GotAuthErr)
-	assert.False(t, p.GotSuccess)
-}
-
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal})

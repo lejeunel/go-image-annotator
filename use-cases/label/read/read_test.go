@@ -7,14 +7,6 @@ import (
 	"testing"
 )
 
-func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
-	assert.True(t, p.GotAuthErr)
-	assert.False(t, p.GotSuccess)
-}
-
 func TestReadNonExistingLabelShouldFail(t *testing.T) {
 	repo := &FakeRepo{Label: l.Label{Name: "my-label", Description: "a-description"}}
 	p := &FakePresenter{}

@@ -8,14 +8,6 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
-	assert.True(t, p.GotAuthErr)
-	assert.False(t, p.GotSuccess)
-}
-
 func TestReadCollection(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(),
 		"my-collection",

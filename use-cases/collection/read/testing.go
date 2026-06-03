@@ -1,7 +1,6 @@
 package read
 
 import (
-	"context"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
@@ -33,11 +32,4 @@ type FakePresenter struct {
 func (p *FakePresenter) Success(r Response) {
 	p.GotSuccess = true
 	p.Got = r
-}
-
-type FailingAuth struct {
-}
-
-func (f FailingAuth) ReadCollection(ctx context.Context) error {
-	return e.ErrAuth
 }

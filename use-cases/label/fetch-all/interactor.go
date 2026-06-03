@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 )
@@ -56,7 +55,7 @@ func (i *Interactor) handleError(err error, out OutputPort) {
 
 func NewInteractor(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r, logger: logging.NewNoOpLogger(),
-		countLimit: defaultLabelCountLimit, auth: auth.PassThroughAuth{}}
+		countLimit: defaultLabelCountLimit}
 	for _, opt := range opts {
 		opt(i)
 	}
