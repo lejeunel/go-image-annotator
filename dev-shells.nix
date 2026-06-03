@@ -13,6 +13,8 @@
           tailwindcss_4
           hugo
           nodejs
+          pkgsite
+          gotools
         ];
       };
     };

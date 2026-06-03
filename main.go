@@ -1,3 +1,4 @@
+// Command go-image-annotator starts the web server and CLI.
 package main
 
 import (
