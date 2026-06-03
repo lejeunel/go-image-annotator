@@ -43,7 +43,7 @@ $(CSS_OUT): $(CSS_MAIN)
 	tailwindcss -i $(CSS_MAIN) -o $(CSS_OUT) --minify
 
 docs-dev:
-	cd docs && hugo server --baseURL http://localhost:1313 --disableFastRender --logLevel debug
+	cd docs && hugo server --gc --minify --disableFastRender --logLevel debug --baseURL http://localhost:1313 
 
 # --- Cleanup generated files ---
 clean:
