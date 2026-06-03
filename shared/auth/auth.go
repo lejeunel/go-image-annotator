@@ -57,3 +57,15 @@ func (a PassThroughAuth) UpdateLabel(ctx context.Context) error {
 func (a PassThroughAuth) AnnotateGroup(ctx context.Context, group string) error {
 	return nil
 }
+
+func (a PassThroughAuth) DeleteImage(ctx context.Context, group string) error {
+	return nil
+}
+
+func (a PassThroughAuth) ImportImage(ctx context.Context, srcGroup string, dstGroup string) error {
+	return nil
+}
+
+func (a PassThroughAuth) IngestImage(ctx context.Context, group string) error {
+	return nil
+}

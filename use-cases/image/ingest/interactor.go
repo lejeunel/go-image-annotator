@@ -1,6 +1,7 @@
 package ingest
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -14,6 +15,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	"github.com/lejeunel/go-image-annotator/shared/auth"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"hash"
 )
@@ -31,22 +33,40 @@ type Interactor struct {
 	ArtefactRepo       ast.Interface
 	Logger             *slog.Logger
 	ImageSpecsDetector IImageSpecsDetector
+	auth               Auth
+}
+
+type Option func(*Interactor)
+
+func WithAuth(a Auth) Option {
+	return func(i *Interactor) {
+		i.auth = a
+	}
 }
 
 func NewInteractor(imageRepo ImageRepo, collectionRepo CollectionRepo,
 	labelRepo LabelRepo, annotationRepo AnnotationRepo,
-	fileStore ast.Interface, hasher hash.Hash, specsDetector IImageSpecsDetector) *Interactor {
-	return &Interactor{ImageRepo: imageRepo, CollectionRepo: collectionRepo,
+	fileStore ast.Interface, hasher hash.Hash, specsDetector IImageSpecsDetector, opts ...Option) *Interactor {
+	i := &Interactor{ImageRepo: imageRepo, CollectionRepo: collectionRepo,
 		AnnotationRepo: annotationRepo, LabelRepo: labelRepo,
 		ArtefactRepo: fileStore, Hasher: hasher,
 		ImageSpecsDetector: specsDetector,
 		Logger:             logging.NewNoOpLogger(),
+		auth:               auth.PassThroughAuth{},
 	}
+	for _, opt := range opts {
+		opt(i)
+	}
+	return i
 }
 
-func (i *Interactor) Execute(r Request, out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	collection, err := i.findCollectionByName(r.Collection)
 	if err != nil {
+		i.handleError(err, out)
+		return
+	}
+	if err := i.auth.IngestImage(ctx, collection.Group); err != nil {
 		i.handleError(err, out)
 		return
 	}

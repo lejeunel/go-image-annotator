@@ -1,6 +1,7 @@
 package image
 
 import (
+	"context"
 	"fmt"
 	"github.com/lejeunel/go-image-annotator/config"
 	"os"
@@ -44,7 +45,7 @@ func ingestImage(itr *ing.Interactor, dir string, entry os.DirEntry, collection 
 			fmt.Println(err)
 			return
 		}
-		itr.Execute(ing.Request{Collection: collection, Reader: f}, &IngestPresenter{})
+		itr.Execute(context.Background(), ing.Request{Collection: collection, Reader: f}, &IngestPresenter{})
 	}
 
 }

@@ -2,6 +2,7 @@ package ingest
 
 import (
 	"bytes"
+	"context"
 	"io"
 
 	ast "github.com/lejeunel/go-image-annotator/app/file-store"
@@ -9,13 +10,14 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
-func NewTestingInteractor() *Interactor {
-	return &Interactor{
+func NewTestingInteractor(opts ...Option) *Interactor {
+	i := &Interactor{
 		ImageRepo:          &FakeImageRepo{},
 		CollectionRepo:     &FakeCollectionRepo{},
 		LabelRepo:          &FakeLabelRepo{},
@@ -24,7 +26,12 @@ func NewTestingInteractor() *Interactor {
 		Hasher:             &FakeHasher{},
 		Logger:             logging.NewNoOpLogger(),
 		ImageSpecsDetector: &FakeSpecsDetector{},
+		auth:               auth.PassThroughAuth{},
 	}
+	for _, opt := range opts {
+		opt(i)
+	}
+	return i
 }
 
 type FakeHasher struct {
@@ -190,4 +197,11 @@ func (d *FakeSpecsDetector) Detect(r io.Reader) (*im.ImageSpecs, io.Reader, erro
 	}
 	return &d.Return, r, nil
 
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) IngestImage(ctx context.Context, group string) error {
+	return e.ErrAuth
 }

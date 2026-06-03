@@ -1,8 +1,10 @@
 package import_image
 
 import (
+	"context"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
@@ -64,4 +66,11 @@ func (r *FakeRepo) AddToCollection(imageId im.ImageId, collectionId clc.Collecti
 	r.ImportedImageId = imageId
 	r.ImportedIntoCollectionId = collectionId
 	return nil
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) ImportImage(ctx context.Context, srcGroup string, dstGroup string) error {
+	return e.ErrAuth
 }

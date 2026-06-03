@@ -1,7 +1,6 @@
 package update_label
 
 import (
-	"errors"
 	"testing"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
@@ -27,10 +26,8 @@ func TestHandleErrOnFindLabel(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&FakeRepo{Err: e.ErrNotFound, ErrOnFindLabel: true})
 	itr.Execute(t.Context(), Request{}, p)
-	if !errors.Is(p.GotErr, e.ErrNotFound) || p.GotSuccess {
-		t.Fatalf("expected to get error %v, got %v, with success %v",
-			e.ErrNotFound, p.GotErr, p.GotSuccess)
-	}
+	assert.False(t, p.GotSuccess)
+	assert.ErrorIs(t, p.GotErr, e.ErrNotFound)
 }
 
 func TestHandleErrOnUpdateLabel(t *testing.T) {
@@ -38,10 +35,8 @@ func TestHandleErrOnUpdateLabel(t *testing.T) {
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	itr := NewInteractor(&FakeRepo{Returns: &label, Err: e.ErrNotFound, ErrOnUpdate: true})
 	itr.Execute(t.Context(), Request{AnnotationId: a.NewAnnotationId().String()}, p)
-	if !p.GotNotFoundErr || p.GotSuccess {
-		t.Fatalf("expected to get error %v, got %v, with success %v",
-			e.ErrNotFound, p.GotErr, p.GotSuccess)
-	}
+	assert.True(t, p.GotNotFoundErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestFetchLabelFromName(t *testing.T) {

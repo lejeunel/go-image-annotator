@@ -1,12 +1,9 @@
 package import_image
 
-import (
-	im "github.com/lejeunel/go-image-annotator/entities/image"
-)
-
 type Request struct {
-	ImageId    im.ImageId
-	Collection string
+	ImageId               string
+	SourceCollection      string
+	DestinationCollection string
 }
 
 type Response struct{}

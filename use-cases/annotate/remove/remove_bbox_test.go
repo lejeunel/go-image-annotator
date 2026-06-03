@@ -42,6 +42,6 @@ func TestRemoveBox(t *testing.T) {
 	itr := NewInteractor(repo)
 	annotationId := a.NewAnnotationId()
 	itr.Execute(t.Context(), Request{Id: annotationId.String()}, p)
-	assert.False(t, p.GotSuccess)
+	assert.True(t, p.GotSuccess)
 	assert.Equal(t, annotationId, repo.Got)
 }

@@ -1,9 +1,11 @@
 package delete
 
 import (
+	"context"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
@@ -36,4 +38,11 @@ type FakePresenter struct {
 
 func (p *FakePresenter) Success(Response) {
 	p.GotSuccess = true
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) DeleteImage(ctx context.Context, g string) error {
+	return e.ErrAuth
 }

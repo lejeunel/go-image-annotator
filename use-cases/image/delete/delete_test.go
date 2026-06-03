@@ -12,10 +12,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestHandleAuthError(t *testing.T) {
+	itr := NewInteractor(&st.FakeImageStore{}, &FakeRepo{},
+		WithAuth(FailingAuth{}))
+	p := &FakePresenter{}
+	itr.Execute(t.Context(),
+		Request{ImageId: im.NewImageId().String(), Collection: "a-collection"},
+		p)
+	assert.True(t, p.GotAuthErr)
+	assert.False(t, p.GotSuccess)
+}
+
 func TestNonExistingResourceShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&st.FakeImageStore{Err: e.ErrNotFound}, &FakeRepo{})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -23,7 +34,7 @@ func TestNonExistingResourceShouldFail(t *testing.T) {
 func TestHandleInternalErr(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewInteractor(&st.FakeImageStore{Err: e.ErrInternal}, &FakeRepo{})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -35,7 +46,7 @@ func TestDeleteNonExistingLabelShouldFail(t *testing.T) {
 	image.AddLabel(lbl.NewLabel(lbl.NewLabelId(), "a-label"))
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrNotFound})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -47,7 +58,7 @@ func TestHandleInternalErrOnRemoveLabel(t *testing.T) {
 	image.AddLabel(lbl.NewLabel(lbl.NewLabelId(), "a-label"))
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrInternal})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -61,7 +72,7 @@ func TestDeleteNonExistingBoxShouldFail(t *testing.T) {
 	image.AddBoundingBox(box)
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrNotFound})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -74,7 +85,7 @@ func TestHandleInternalErrOnDeleteBoxes(t *testing.T) {
 	image.AddBoundingBox(box)
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveAnnotation: true, Err: e.ErrInternal})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -85,7 +96,7 @@ func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
 	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{ErrOnRemoveImage: true, Err: e.ErrInternal})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -96,6 +107,6 @@ func TestRemoveImageFromCollection(t *testing.T) {
 	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	itr := NewInteractor(&st.FakeImageStore{Return: &image},
 		&FakeRepo{})
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotSuccess)
 }

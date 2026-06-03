@@ -1,10 +1,12 @@
 package import_image
 
 import (
+	"context"
 	"fmt"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
@@ -13,32 +15,65 @@ import (
 type Interactor struct {
 	repo   Repo
 	logger *slog.Logger
+	auth   Auth
 }
 
-func NewInteractor(repo Repo) *Interactor {
-	return &Interactor{repo: repo, logger: logging.NewNoOpLogger()}
-}
-func (i *Interactor) Execute(r Request, out OutputPort) {
+type Option func(*Interactor)
 
-	if err := i.ensureSourceImageExists(r.ImageId); err != nil {
-		i.handleError(err, out)
-		return
+func WithAuth(a Auth) Option {
+	return func(i *Interactor) {
+		i.auth = a
 	}
-	collection, err := i.findDestinationCollection(r.Collection)
+}
+
+func NewInteractor(repo Repo, opts ...Option) *Interactor {
+	i := &Interactor{repo: repo, logger: logging.NewNoOpLogger(),
+		auth: auth.PassThroughAuth{}}
+	for _, opt := range opts {
+		opt(i)
+	}
+	return i
+
+}
+
+func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	imageId, err := im.NewImageIdFromString(r.ImageId)
 	if err != nil {
 		i.handleError(err, out)
 		return
 	}
 
-	if err := i.ensureImageDoesNotAlreadyExistInCollection(r.ImageId, collection.Id); err != nil {
+	if err := i.ensureSourceImageExists(imageId); err != nil {
+		i.handleError(err, out)
+		return
+	}
+	srcCollection, err := i.findCollection(r.SourceCollection)
+	if err != nil {
+		i.handleError(err, out)
+		return
+	}
+	dstCollection, err := i.findCollection(r.DestinationCollection)
+	if err != nil {
 		i.handleError(err, out)
 		return
 	}
 
-	if err := i.repo.AddToCollection(r.ImageId, collection.Id); err != nil {
+	if err := i.auth.ImportImage(ctx, srcCollection.Group, dstCollection.Group); err != nil {
 		i.handleError(err, out)
 		return
 	}
+
+	if err := i.ensureImageDoesNotAlreadyExistInCollection(imageId, dstCollection.Id); err != nil {
+		i.handleError(err, out)
+		return
+	}
+
+	if err := i.repo.AddToCollection(imageId, dstCollection.Id); err != nil {
+		i.handleError(err, out)
+		return
+	}
+
+	// TODO import annotations here
 
 	out.Success(Response{})
 
@@ -69,9 +104,9 @@ func (i *Interactor) ensureSourceImageExists(id im.ImageId) error {
 
 }
 
-func (i *Interactor) findDestinationCollection(name string) (*clc.Collection, error) {
+func (i *Interactor) findCollection(name string) (*clc.Collection, error) {
 
-	errCtx := fmt.Errorf("fetching destination collection")
+	errCtx := fmt.Errorf("fetching collection %v", name)
 	collection, err := i.repo.FindCollectionByName(name)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", errCtx, err)

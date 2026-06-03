@@ -10,11 +10,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestHandleAuthError(t *testing.T) {
+	itr := NewTestingInteractor(WithAuth(FailingAuth{}))
+	p := &FakePresenter{}
+	itr.Execute(t.Context(),
+		Request{},
+		p)
+	assert.True(t, p.GotAuthErr)
+	assert.False(t, p.GotSuccess)
+}
+
 func TestNonExistingCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.CollectionRepo = &FakeCollectionRepo{MissingCollection: true}
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -23,7 +33,7 @@ func TestHandleInternalErrorOnCollectionExistsCheck(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.CollectionRepo = &FakeCollectionRepo{ErrOnFindCollection: true, Err: e.ErrInternal}
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -32,7 +42,7 @@ func TestHandleArtefactRepoError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.CollectionRepo = &FakeCollectionRepo{ErrOnFindCollection: true, Err: e.ErrInternal}
-	itr.Execute(Request{}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -41,7 +51,7 @@ func TestNonExistingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.LabelRepo = &FakeLabelRepo{MissingLabel: true}
-	itr.Execute(Request{Labels: []string{"a-label"}}, p)
+	itr.Execute(t.Context(), Request{Labels: []string{"a-label"}}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -50,7 +60,7 @@ func TestHandleLabelExistsInternalErr(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.LabelRepo = &FakeLabelRepo{ErrOnLabelExists: true, Err: e.ErrInternal}
-	itr.Execute(Request{Labels: []string{"a-label"}}, p)
+	itr.Execute(t.Context(), Request{Labels: []string{"a-label"}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -59,7 +69,7 @@ func TestHandleIngestionInternalErr(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.ImageRepo = &FakeImageRepo{ErrOnAddToCollection: true, Err: e.ErrInternal}
-	itr.Execute(Request{Reader: &FakeImageReader{}}, p)
+	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -68,7 +78,7 @@ func TestHandleAddLabelInternalErr(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.AnnotationRepo = &FakeAnnotationRepo{ErrOnAddLabel: true, Err: e.ErrInternal}
-	itr.Execute(Request{Labels: []string{"a-label"}, Reader: &FakeImageReader{}}, p)
+	itr.Execute(t.Context(), Request{Labels: []string{"a-label"}, Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -76,7 +86,7 @@ func TestHandleAddLabelInternalErr(t *testing.T) {
 func TestHandleValidationErrorOnAddLabel(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
-	itr.Execute(Request{Labels: []string{"a-label", "a-label"}, Reader: &FakeImageReader{}}, p)
+	itr.Execute(t.Context(), Request{Labels: []string{"a-label", "a-label"}, Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotValidationErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -85,7 +95,7 @@ func TestAddImageDuplicateHashShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.ImageRepo = &FakeImageRepo{HashAlreadyExists: true}
-	itr.Execute(Request{Reader: &FakeImageReader{}}, p)
+	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -94,7 +104,7 @@ func TestHandleDuplicateHashInternalErr(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.ImageRepo = &FakeImageRepo{ErrOnFindHash: true, Err: e.ErrInternal}
-	itr.Execute(Request{Reader: &FakeImageReader{}}, p)
+	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -103,7 +113,7 @@ func TestNonExistingBBoxLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.LabelRepo = &FakeLabelRepo{MissingLabel: true}
-	itr.Execute(Request{BoundingBoxes: []BoundingBoxRequest{{Label: "a-label"}},
+	itr.Execute(t.Context(), Request{BoundingBoxes: []BoundingBoxRequest{{Label: "a-label"}},
 		Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -112,7 +122,7 @@ func TestNonExistingBBoxLabelShouldFail(t *testing.T) {
 func TestHandleBoundingBoxValidationError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
-	itr.Execute(Request{BoundingBoxes: []BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: -2, Height: -4}},
+	itr.Execute(t.Context(), Request{BoundingBoxes: []BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: -2, Height: -4}},
 		Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotValidationErr)
 	assert.False(t, p.GotSuccess)
@@ -122,7 +132,7 @@ func TestHandleAddBoundingBoxInternalErr(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.AnnotationRepo = &FakeAnnotationRepo{ErrOnAddBoundingBox: true, Err: e.ErrInternal}
-	itr.Execute(Request{BoundingBoxes: []BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: 2, Height: 4}},
+	itr.Execute(t.Context(), Request{BoundingBoxes: []BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: 2, Height: 4}},
 		Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -136,7 +146,7 @@ func TestInternalErrOnAddLabelMustDeleteImage(t *testing.T) {
 	itr.ArtefactRepo = fileStore
 	itr.ImageRepo = imageRepo
 	itr.AnnotationRepo = &FakeAnnotationRepo{ErrOnAddLabel: true, Err: e.ErrInternal}
-	itr.Execute(Request{Labels: []string{"a-label"}, Reader: &FakeImageReader{}}, p)
+	itr.Execute(t.Context(), Request{Labels: []string{"a-label"}, Reader: &FakeImageReader{}}, p)
 	assert.Equal(t, 1, imageRepo.NumDeletedImages)
 	assert.Equal(t, 1, fileStore.NumDeletedImages)
 }
@@ -146,7 +156,7 @@ func TestCorrectDataIsStored(t *testing.T) {
 	itr := NewTestingInteractor()
 	itr.ArtefactRepo = artefactRepo
 	data := []byte("the-data")
-	itr.Execute(Request{Reader: &FakeImageReader{Buffer: *bytes.NewBuffer(data)}}, &FakePresenter{})
+	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{Buffer: *bytes.NewBuffer(data)}}, &FakePresenter{})
 	assert.True(t, bytes.Equal(artefactRepo.GotData, data))
 }
 
@@ -155,7 +165,7 @@ func TestAddBoundingBoxToImage(t *testing.T) {
 	annotationRepo := &FakeAnnotationRepo{}
 	itr := NewTestingInteractor()
 	itr.AnnotationRepo = annotationRepo
-	itr.Execute(Request{BoundingBoxes: []BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: 2, Height: 4}},
+	itr.Execute(t.Context(), Request{BoundingBoxes: []BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: 2, Height: 4}},
 		Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, 1, annotationRepo.NumBoundingboxesAdded)
@@ -165,7 +175,7 @@ func TestInternalErrOnAddImageShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.ImageRepo = &FakeImageRepo{ErrOnAddImage: true, Err: e.ErrInternal}
-	itr.Execute(Request{Labels: []string{"a-label"}, Reader: &FakeImageReader{}}, p)
+	itr.Execute(t.Context(), Request{Labels: []string{"a-label"}, Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -177,7 +187,7 @@ func TestAddImageWithHash(t *testing.T) {
 	itr.Hasher = &FakeHasher{sum: hash}
 	imageRepo := &FakeImageRepo{}
 	itr.ImageRepo = imageRepo
-	itr.Execute(Request{Reader: &FakeImageReader{}}, p)
+	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, p)
 	assert.True(t, bytes.Equal(imageRepo.GotHash, hash))
 	assert.True(t, p.GotSuccess)
 }
@@ -187,7 +197,7 @@ func TestAddImageWithTwoLabels(t *testing.T) {
 	itr := NewTestingInteractor()
 	annotationRepo := &FakeAnnotationRepo{}
 	itr.AnnotationRepo = annotationRepo
-	itr.Execute(Request{Labels: []string{"a-label", "another-label"},
+	itr.Execute(t.Context(), Request{Labels: []string{"a-label", "another-label"},
 		Reader: &FakeImageReader{}}, p)
 	assert.Equal(t, 2, annotationRepo.NumLabelsAdded)
 	assert.True(t, p.GotSuccess)
@@ -197,7 +207,7 @@ func TestValidationErrOnImageMIMETypeInferShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.ImageSpecsDetector = &FakeSpecsDetector{Err: e.ErrValidation}
-	itr.Execute(Request{Reader: &FakeImageReader{}}, p)
+	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotValidationErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -209,6 +219,6 @@ func TestAddImageShouldAddMIMEType(t *testing.T) {
 	itr.ImageRepo = imageRepo
 	specs := im.ImageSpecs{MIMEType: "image/jpeg"}
 	itr.ImageSpecsDetector = &FakeSpecsDetector{Return: specs}
-	itr.Execute(Request{Reader: &FakeImageReader{}}, p)
+	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, p)
 	assert.Equal(t, specs.MIMEType, imageRepo.GotSpecs.MIMEType)
 }

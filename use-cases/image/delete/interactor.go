@@ -1,10 +1,12 @@
 package delete
 
 import (
+	"context"
 	"fmt"
 
 	st "github.com/lejeunel/go-image-annotator/app/image-store"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	"github.com/lejeunel/go-image-annotator/shared/auth"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
 )
@@ -13,15 +15,33 @@ type Interactor struct {
 	store  st.Interface
 	repo   Repo
 	logger *slog.Logger
+	auth   Auth
 }
 
-func NewInteractor(store st.Interface, repo Repo) *Interactor {
-	return &Interactor{store: store, repo: repo, logger: logging.NewNoOpLogger()}
+type Option func(*Interactor)
+
+func WithAuth(a Auth) Option {
+	return func(i *Interactor) {
+		i.auth = a
+	}
 }
 
-func (i *Interactor) Execute(r Request, out OutputPort) {
+func NewInteractor(store st.Interface, repo Repo, opts ...Option) *Interactor {
+	i := &Interactor{store: store, repo: repo, logger: logging.NewNoOpLogger(),
+		auth: auth.PassThroughAuth{}}
+	for _, opt := range opts {
+		opt(i)
+	}
+	return i
+}
+
+func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	image, err := i.findImage(r.ImageId, r.Collection)
 	if err != nil {
+		i.handleError(err, out)
+		return
+	}
+	if err := i.auth.DeleteImage(ctx, image.Collection.Group); err != nil {
 		i.handleError(err, out)
 		return
 	}

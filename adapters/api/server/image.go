@@ -18,7 +18,7 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.Image.Ingest.Execute(NewIngestImageRequest(*body, s.Image.AllowedImageFormats),
+	s.Image.Ingest.Execute(r.Context(), NewIngestImageRequest(*body, s.Image.AllowedImageFormats),
 		presenter.NewIngestPresenter(w))
 }
 
