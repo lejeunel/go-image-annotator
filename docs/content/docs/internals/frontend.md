@@ -1,6 +1,9 @@
 ---
 title: Frontend
 weight: 1
+description: >
+  How data is generated and displayed for the user, and how 
+  user inputs on annotator are handled
 ---
 
 We try to keep this project lightweight, by avoiding

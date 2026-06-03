@@ -2,7 +2,7 @@
 title: Core Concepts
 description: >
   Where we explain how data are organized and how to restrict access to it
-weight: 5
+weight: 2
 linkTitle: Concepts
 menu: { main: { weight: 20 } }
 ---

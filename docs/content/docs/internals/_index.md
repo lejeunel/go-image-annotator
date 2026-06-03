@@ -2,8 +2,7 @@
 title: Internals
 description: >
     Where we explain how this application is built, with what technologies, and how one might proceed to extend it
-weight: 8
-menu: { main: { weight: 20 } }
+weight: 10
 ---
 
 This project is meant as a starter-kit for small/medium sized
@@ -19,3 +18,4 @@ annotation projects. Therefore, we attempt to fullfil the following requirements
 - **Few dependencies** on third-party packages. We strive to use Go's standard library,
     and lean to simple alternatives when necessary.
 
+The following sub-sections provides technical details for use by developers.

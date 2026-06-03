@@ -1,6 +1,8 @@
 ---
 title: Data Persistence
 weight: 2
+description: >
+  How raw and meta-data are stored
 ---
 
 ## Meta-data
