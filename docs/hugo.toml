@@ -1,4 +1,4 @@
-baseURL = 'https://lejeunel.github.io/'
+baseURL = 'https://lejeunel.github.io/go-image-annotator/'
 locale = 'en-us'
 title = 'Go Image Annotator'
 [module]
