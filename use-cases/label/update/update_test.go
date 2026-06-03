@@ -19,7 +19,7 @@ func TestUpdateNonExistingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	non_existing_name := "non-existing-name"
 	itr := NewInteractor(&FakeRepo{})
-	itr.Execute(t.Context(), Request{Name: non_existing_name, NewName: "new-name"}, p)
+	itr.Execute(t.Context(), Request{Name: non_existing_name}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -31,22 +31,9 @@ func TestUpdateLabel(t *testing.T) {
 	repo := &FakeRepo{Names: []string{name}}
 	itr := NewInteractor(repo)
 	req := Request{Name: name,
-		NewName:        "updated-name",
 		NewDescription: "updated-description"}
 	itr.Execute(t.Context(), req, p)
-	assert.Equal(t, p.Got.Name, req.NewName)
 	assert.Equal(t, p.Got.Description, req.NewDescription)
-}
-
-func TestUpdateLabelWithNameAlreadyTakenShouldFail(t *testing.T) {
-
-	p := &FakePresenter{}
-	name := "name"
-	existing_name := "existing-name"
-	itr := NewInteractor(&FakeRepo{Names: []string{name, existing_name}})
-	itr.Execute(t.Context(), Request{Name: name, NewName: existing_name}, p)
-	assert.True(t, p.GotDuplicationErr)
-	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleInternalError(t *testing.T) {

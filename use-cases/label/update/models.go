@@ -2,7 +2,6 @@ package update
 
 type Request struct {
 	Name           string
-	NewName        string
 	NewDescription string
 }
 
@@ -13,6 +12,5 @@ type Response struct {
 
 type Model struct {
 	Name           string
-	NewName        string
 	NewDescription string
 }

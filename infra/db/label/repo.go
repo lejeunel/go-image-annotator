@@ -108,8 +108,8 @@ func (r *SQLiteLabelRepo) FetchAll() ([]string, error) {
 }
 
 func (r *SQLiteLabelRepo) Update(m update.Model) error {
-	query := "UPDATE labels SET name=$1,description=$2 WHERE name=$3"
-	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
+	query := "UPDATE labels SET description=$1 WHERE name=$2"
+	_, err := r.Db.Exec(query, m.NewDescription, m.Name)
 
 	if err != nil {
 		return fmt.Errorf("%v: %w", err, e.ErrInternal)

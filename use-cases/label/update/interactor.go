@@ -46,17 +46,12 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.ensureNameDoesNotExist(r.NewName); err != nil {
+	if err := i.repo.Update(Model{Name: r.Name, NewDescription: r.NewDescription}); err != nil {
 		i.handleError(err, out)
 		return
 	}
 
-	if err := i.repo.Update(Model{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription}); err != nil {
-		i.handleError(err, out)
-		return
-	}
-
-	out.Success(Response{Name: r.NewName, Description: r.NewDescription})
+	out.Success(Response{Name: r.Name, Description: r.NewDescription})
 }
 func (i *Interactor) ensureNameExists(name string) error {
 	exists, err := i.repo.Exists(name)
@@ -69,18 +64,6 @@ func (i *Interactor) ensureNameExists(name string) error {
 	}
 	return nil
 }
-func (i *Interactor) ensureNameDoesNotExist(name string) error {
-	exists, err := i.repo.Exists(name)
-	errCtx := fmt.Errorf("checking that label name %v does not exist", name)
-	if err != nil {
-		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
-	}
-	if exists {
-		return fmt.Errorf("%w: %w", errCtx, e.ErrDuplicate)
-	}
-	return nil
-}
-
 func (i *Interactor) handleError(err error, out OutputPort) {
 	errCtx := "updating label"
 	err = fmt.Errorf("%v: %w", errCtx, err)
