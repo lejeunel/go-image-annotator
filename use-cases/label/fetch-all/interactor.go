@@ -18,14 +18,9 @@ type Interactor struct {
 	repo       Repo
 	logger     *slog.Logger
 	countLimit int
-	auth       Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
-	if err := i.auth.FetchAllLabels(ctx); err != nil {
-		i.handleError(err, out)
-		return
-	}
 	count, err := i.repo.Count()
 	if err != nil {
 		i.handleError(e.ErrInternal, out)
@@ -67,11 +62,5 @@ type Option func(*Interactor)
 func WithLimit(limit int) Option {
 	return func(c *Interactor) {
 		c.countLimit = limit
-	}
-}
-
-func WithAuth(a Auth) Option {
-	return func(i *Interactor) {
-		i.auth = a
 	}
 }

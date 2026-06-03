@@ -24,16 +24,17 @@ var (
 
 var (
 	CreateCollectionCmd = &cobra.Command{
-		Use:   "create-collection [name] [description]",
-		Short: "Creates a new collection with [name] and [description]",
-		Args:  cobra.MinimumNArgs(1),
+		Use:   "create-collection [name] [group] [description]",
+		Short: "Creates a new collection with [name] in [group] with [description]",
+		Args:  cobra.MinimumNArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			description := ""
-			if len(args) == 2 {
-				description = args[1]
+			if len(args) == 3 {
+				description = args[2]
 			}
 			name := args[0]
-			clc.Create(name, description)
+			group := args[1]
+			clc.Create(name, group, description)
 		},
 	}
 )

@@ -49,9 +49,10 @@ func TestCreateCollection(t *testing.T) {
 	repo := &FakeRepo{}
 	now := time.Now()
 	itr := NewInteractor(repo, WithClock(clockwork.NewFakeClockAt(now)))
-	req := Request{Name: "a-name", Description: "a-descriptin"}
+	req := Request{Name: "a-name", Description: "a-description", Group: "my-group"}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, repo.Got.Name, req.Name)
+	assert.Equal(t, repo.Got.Group, req.Group)
 	assert.Equal(t, repo.Got.Description, req.Description)
 	assert.Equal(t, repo.Got.CreatedAt, now)
 	assert.False(t, repo.Got.Id.IsNil())

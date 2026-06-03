@@ -43,7 +43,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 func (i *Interactor) create(r Request) error {
 	collection := clc.NewCollection(clc.NewCollectionId(), r.Name,
 		clc.WithDescription(r.Description),
-		clc.WithCreatedAt(i.clock.Now()))
+		clc.WithCreatedAt(i.clock.Now()), clc.WithGroup(r.Group))
 	if err := i.repo.Create(collection); err != nil {
 		return err
 	}
