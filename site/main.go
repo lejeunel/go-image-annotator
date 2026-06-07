@@ -33,7 +33,7 @@ func RegisterHandlers(mux *http.ServeMux, apiServer api.Server, webServer web.Se
 	web.RegisterWebPages(mux, webServer, pageBuilder)
 }
 
-func Make(apiPath string) *http.ServeMux {
+func Make(apiPath string) http.Handler {
 	cfg := config.Parse()
 	mux := http.NewServeMux()
 
@@ -41,12 +41,13 @@ func Make(apiPath string) *http.ServeMux {
 	interactors := i.NewSQLiteInteractors(infra, cfg.DefaultPageSize, cfg.AllowedImageFormats)
 	scroller := scr.New(infra.ScrollerRepo)
 	pageBuilder := html.NewPageBuilder(apiPath)
+
 	sessionManager := sm.NewSQLiteSessionManager(infra.Db.DB)
 	identityProvider := ip.NewGothIdentityHandler(sessionManager)
-	os.Setenv("SESSION_SECRET", os.Getenv("GOIA_SESSION_SECRET"))
 	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
 		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),
-		CallbackURL: "http:localhost:3000/callback/google"})
+		CallbackURL: "http://localhost:3000/callback/google"})
+
 	annotator := a.NewAnnotator(scroller, &interactors.Image.Read,
 		&interactors.Annotation.AddBox, &interactors.Annotation.UpdateBox, &interactors.Annotation.Delete,
 		&interactors.Label.FetchAll, &interactors.Annotation.UpdateLabel, &interactors.Annotation.AddImageLabel,
@@ -58,7 +59,7 @@ func Make(apiPath string) *http.ServeMux {
 			OpenAPISpecsPath: fmt.Sprintf("%v/openapi.yaml", apiPath)},
 		*pageBuilder)
 
-	return mux
+	return sessionManager.MiddleWare(mux)
 }
 
 func Serve(handler http.Handler, port int) {
