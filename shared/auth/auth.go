@@ -44,3 +44,7 @@ func (a PassThroughAuth) ImportImage(ctx context.Context, srcGroup string, dstGr
 func (a PassThroughAuth) IngestImage(ctx context.Context, group string) error {
 	return nil
 }
+
+func (a PassThroughAuth) CreateUser(ctx context.Context) error {
+	return nil
+}
