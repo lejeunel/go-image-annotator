@@ -12,7 +12,6 @@ var openapiyaml []byte
 
 func RegisterAPIDocs(mux *http.ServeMux, server api.Server, apiPath string) {
 	api.HandlerFromMuxWithBaseURL(&server, mux, fmt.Sprintf("/%v", apiPath))
-	RegisterAPISpecs(mux, apiPath)
 }
 
 func RegisterAPISpecs(mux *http.ServeMux, apiPath string) {
