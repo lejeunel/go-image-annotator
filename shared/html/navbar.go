@@ -1,6 +1,12 @@
 package html
 
 import (
+	"bytes"
+	"fmt"
+	_ "strings"
+	"text/template"
+
+	i "github.com/lejeunel/go-image-annotator/entities/identity"
 	n "github.com/lejeunel/go-image-annotator/shared/navigation"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -11,6 +17,41 @@ type NavBarActivatedItems struct {
 	Collections bool
 	Labels      bool
 	API         bool
+}
+
+var UserIcon = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"  class="w-1/2 h-1/2">
+	<path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/>
+</svg>
+`
+
+type UserMenu struct {
+	Icon     string
+	UserName string
+	Entries  []UserMenuEntry
+}
+type UserMenuEntry struct {
+	Name string
+	URL  string
+}
+
+func MakeLoginOrUserBadge(id *i.Identity) Node {
+	if id == nil {
+		return A(Href("/login/google"),
+			Class("rounded-radius bg-primary border border-primary px-4 py-2 text-center text-sm font-medium tracking-wide text-on-primary hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"),
+			Text("Login"))
+	}
+	tUser := template.New("")
+	template.Must(tUser.ParseFS(templatesFiles, "templates/user_badge.html"))
+	var iconBuf bytes.Buffer
+	Span(Class("flex size-10 items-center justify-center overflow-hidden rounded-full border border-outline bg-surface-alt text-on-surface/80 dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark/80"),
+		Raw(UserIcon)).Render(&iconBuf)
+	var buf bytes.Buffer
+	entries := UserMenu{UserName: id.Id,
+		Entries: []UserMenuEntry{{"Dashboard", "/user"}, {"Sign Out", "/logout"}},
+		Icon:    iconBuf.String()}
+	tUser.ExecuteTemplate(&buf, "user_badge", entries)
+	return Raw(buf.String())
 }
 
 func MakeRepoButton(url string) Node {
@@ -63,7 +104,7 @@ func DarkModeToggle() Node {
 		),
 	)
 }
-func MakeNavBar(isActivated n.ActivePage, repoURL string) Node {
+func MakeNavBar(isActivated n.ActivePage, repoURL string, apiPrefix string, user *i.Identity) Node {
 	return Nav(
 		Attr("x-on:click.away", "mobileMenuIsOpen = false"),
 		Class("fixed top-0 z-30 hidden h-16 w-screen items-center justify-between border-outline px-10 py-2 backdrop-blur-xl md:flex dark:border-outline-dark bg-surface-alt/75 dark:bg-surface-dark-alt/75 border-b"),
@@ -95,13 +136,13 @@ func MakeNavBar(isActivated n.ActivePage, repoURL string) Node {
 				MakeMenuItem("Labels", "/labels", isActivated == n.LabelsPageActive),
 			),
 			Li(
-				MakeMenuItem("API Docs", "/api/docs", isActivated == n.APIDocsPageActive),
+				MakeMenuItem("API Docs", fmt.Sprintf("/%v/docs", apiPrefix), isActivated == n.APIDocsPageActive),
 			),
-
 			Li(MakeRepoButton(repoURL)),
 			Li(
 				DarkModeToggle(),
 			),
+			Li(MakeLoginOrUserBadge(user)),
 		),
 	)
 }

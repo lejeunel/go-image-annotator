@@ -2,12 +2,7 @@ package auth
 
 import (
 	"context"
-	p "github.com/lejeunel/go-image-annotator/entities/principal"
 )
-
-type PrincipalProvider interface {
-	Provide() (*p.Principal, error)
-}
 
 type PassThroughAuth struct {
 }

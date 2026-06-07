@@ -1,18 +1,24 @@
 package html
 
 import (
-	s "github.com/lejeunel/go-image-annotator/shared"
-	n "github.com/lejeunel/go-image-annotator/shared/navigation"
+	"context"
 	"io"
+
+	i "github.com/lejeunel/go-image-annotator/entities/identity"
+	s "github.com/lejeunel/go-image-annotator/shared"
+	p "github.com/lejeunel/go-image-annotator/shared/identity_provider"
+	n "github.com/lejeunel/go-image-annotator/shared/navigation"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
 
 type PageBuilder struct {
-	Title      string
-	scripts    []Node
-	ActivePage n.ActivePage
-	Content    Node
+	Title        string
+	APIPath      string
+	scripts      []Node
+	ActivePage   n.ActivePage
+	UserIdentity *i.Identity
+	Content      Node
 }
 
 func (b *PageBuilder) AddScripts(scripts ...Node) *PageBuilder {
@@ -21,8 +27,18 @@ func (b *PageBuilder) AddScripts(scripts ...Node) *PageBuilder {
 	}
 	return b
 }
+func (b *PageBuilder) SetTitle(title string) *PageBuilder {
+	b.Title = title
+	return b
+}
+
 func (b *PageBuilder) SetActive(a n.ActivePage) *PageBuilder {
 	b.ActivePage = a
+	return b
+}
+func (b *PageBuilder) SetUserIdentityFromContext(ctx context.Context) *PageBuilder {
+	id := p.IdentityFromContext(ctx)
+	b.UserIdentity = id
 	return b
 }
 func (b *PageBuilder) SetContent(c Node) *PageBuilder {
@@ -70,8 +86,10 @@ func (b *PageBuilder) Build() Node {
 		),
 		Body(
 			Class("bg-white text-gray-900 dark:bg-gray-900 dark:text-white"),
-			MakeNavBar(b.ActivePage, s.RepoURL),
-			Div(Class("grow w-full px-1 md:px-2 lg:px-4 py-10 md:py-20"), b.Content),
+			MakeNavBar(b.ActivePage, s.RepoURL, b.APIPath, b.UserIdentity),
+			Div(Class("grow w-full px-1 md:px-2 lg:px-4 py-10 md:py-20"),
+				Div(Class("font-bold text-xl"), Text(b.Title)),
+				b.Content),
 			Group(b.scripts),
 		),
 	))
@@ -82,12 +100,6 @@ func (b *PageBuilder) Render(w io.Writer) {
 
 }
 
-func NewTitledPageBuilder(title string) *PageBuilder {
-	return &PageBuilder{
-		Title: title,
-	}
-}
-
-func NewPageBuilder() *PageBuilder {
-	return &PageBuilder{}
+func NewPageBuilder(apiPrefix string) *PageBuilder {
+	return &PageBuilder{APIPath: apiPrefix}
 }

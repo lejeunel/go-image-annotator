@@ -20,6 +20,6 @@ with the [nix-direnv](https://github.com/nix-community/nix-direnv) plugin
 to automatically enter the devshell upon entering the project's root.
 To do so, add a `.envrc` file at root with content:
 
-```
+``` sh
 use flake
 ```

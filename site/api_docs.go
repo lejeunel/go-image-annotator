@@ -7,12 +7,12 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func APIDocsPage(specsFilePath string) Node {
-	p := html.NewPageBuilder()
+func APIDocsPage(specsPath string, apiPath string) Node {
+	p := html.NewPageBuilder(apiPath)
 	p.AddScripts(html.APIDocsLib())
 	p.SetContent(Div(Class("spotlight "),
 		El("elements-api",
-			Attr("apiDescriptionUrl", specsFilePath),
+			Attr("apiDescriptionUrl", specsPath),
 			Attr("router", "hash"),
 			Attr("layout", "sidebar"),
 		)))

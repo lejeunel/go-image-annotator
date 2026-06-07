@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"github.com/jmoiron/sqlx"
 	af_store "github.com/lejeunel/go-image-annotator/app/file-store"
 	im_store "github.com/lejeunel/go-image-annotator/app/image-store"
 	db "github.com/lejeunel/go-image-annotator/infra/db"
@@ -19,6 +20,7 @@ type SQLiteInfra struct {
 	FileStore      *af_store.FileStore
 	AnnotationRepo *an.SQLiteAnnotationRepo
 	ScrollerRepo   *scr.SQLiteScrollerRepo
+	Db             *sqlx.DB
 }
 
 type SQLiteImageStoreRepo struct {
@@ -46,6 +48,7 @@ func NewSQLiteInfra(dbPath, artefactDir string) *SQLiteInfra {
 		FileStore:      afrepo,
 		AnnotationRepo: anrepo,
 		ScrollerRepo:   scrrepo,
+		Db:             db,
 	}
 
 }

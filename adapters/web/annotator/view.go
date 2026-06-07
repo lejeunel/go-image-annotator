@@ -28,6 +28,7 @@ type AnnotationView struct {
 	availableImageLabels []string
 	scrollerButtons      v.ScrollerButtons
 	err                  error
+	PageBuilder          html.PageBuilder
 }
 
 func (v *AnnotationView) SetScroller(buttons v.ScrollerButtons) {
@@ -93,10 +94,11 @@ func (v *AnnotationView) RenderAnnotations(w http.ResponseWriter) {
 
 }
 func (v *AnnotationView) render(w http.ResponseWriter) {
-	b := html.NewTitledPageBuilder("Image")
+	b := v.PageBuilder.SetTitle("image")
+
 	script, err := MakeAnnotoriousScript(v.image.Id, v.image.Collection)
 	if err != nil {
-		b.SetError(err).Render(w)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	regionLabelModal, _ := makeLabelModal(v.availableLabels, RegionLabelModal)
@@ -119,10 +121,11 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 	b.Render(w)
 }
 
-func NewAnnotationView() *AnnotationView {
+func NewAnnotationView(pageBuilder html.PageBuilder) *AnnotationView {
 	return &AnnotationView{
 		ImageView:      ImageView{},
 		ImageInfosView: ImageInfosView{},
 		ScrollerView:   ScrollerView{},
+		PageBuilder:    pageBuilder,
 	}
 }

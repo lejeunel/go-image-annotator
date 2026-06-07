@@ -8,6 +8,8 @@ import (
 	goose "github.com/pressly/goose/v3"
 	"io/fs"
 	_ "modernc.org/sqlite"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -15,6 +17,10 @@ import (
 var MigrationsFS embed.FS
 
 func NewSQLiteConnection(path string) *sqlx.DB {
+	err := os.MkdirAll(filepath.Dir(path), 0755)
+	if err != nil {
+		panic(err)
+	}
 	db, err := sqlx.Open("sqlite", path)
 	if err != nil {
 		panic(err)

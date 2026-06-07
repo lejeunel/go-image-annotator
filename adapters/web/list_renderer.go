@@ -10,7 +10,7 @@ import (
 )
 
 type ListRenderer struct {
-	Title      string
+	html.PageBuilder
 	ActivePage n.ActivePage
 	ListURL    url.URL
 	Writer     io.Writer
@@ -19,15 +19,15 @@ type ListRenderer struct {
 func (p ListRenderer) RenderSuccess(table html.PaginationTable, pagination pagination.Pagination) {
 
 	content := html.MakePaginatedContent(p.ListURL, table, pagination)
-	html.NewTitledPageBuilder(p.Title).SetContent(content).SetActive(p.ActivePage).Render(p.Writer)
+	p.PageBuilder.SetContent(content).SetActive(p.ActivePage).Render(p.Writer)
 }
 
 func (p ListRenderer) Error(err error) {
-	html.NewPageBuilder().SetError(err).Render(p.Writer)
+	html.NewPageBuilder(p.APIPath).SetError(err).Render(p.Writer)
 }
 
-func NewListRenderer(title string, listURL url.URL, page n.ActivePage, w io.Writer) ListRenderer {
-	return ListRenderer{Title: title, ListURL: listURL,
+func NewListRenderer(pageBuilder html.PageBuilder, listURL url.URL, page n.ActivePage, w io.Writer) ListRenderer {
+	return ListRenderer{PageBuilder: pageBuilder, ListURL: listURL,
 		ActivePage: page, Writer: w}
 
 }

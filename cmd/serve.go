@@ -11,7 +11,8 @@ var (
 		Use:   "serve",
 		Short: "Run server",
 		Run: func(cmd *cobra.Command, args []string) {
-			site.Serve(port)
+			handler := site.Make("api")
+			site.Serve(port, handler)
 		},
 	}
 )

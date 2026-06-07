@@ -1,11 +1,11 @@
 package cli
 
 import (
-	"github.com/lejeunel/go-image-annotator/entities/principal"
+	i "github.com/lejeunel/go-image-annotator/entities/identity"
 )
 
-type PrincipalProvider struct{}
+type IdentityProvider struct{}
 
-func (p *PrincipalProvider) Provide() (*principal.Principal, error) {
-	return &principal.Principal{}, nil
+func (p *IdentityProvider) Provide() (*i.Identity, error) {
+	return &i.Identity{}, nil
 }

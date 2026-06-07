@@ -47,9 +47,18 @@ CREATE TABLE IF NOT EXISTS annotations (
 
 CREATE INDEX idx_annotations_image_collection ON annotations(image_id,collection_id);
 
+CREATE TABLE sessions (
+	token TEXT PRIMARY KEY,
+	data BLOB NOT NULL,
+	expiry REAL NOT NULL
+);
+
+CREATE INDEX sessions_expiry_idx ON sessions(expiry);
 -- +goose Down
 
 DROP TABLE labels;
 DROP TABLE collections;
 DROP TABLE images_collections;
 DROP TABLE images;
+DROP TABLE annotations;
+DROP TABLE sessions;

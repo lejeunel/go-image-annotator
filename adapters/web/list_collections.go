@@ -25,14 +25,15 @@ func (p ListCollectionsPresenter) Success(r list.Response) {
 }
 
 func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
+	s.PageBuilder.SetUserIdentityFromContext(r.Context())
 	s.Collection.List.Execute(r.Context(), list.Request{PageSize: s.Collection.DefaultPageSize, Page: int64(GetPageFromRequest(r))},
-		NewListCollectionsPresenter(w))
+		NewListCollectionsPresenter(w, s.PageBuilder))
 }
 
-func NewListCollectionsPresenter(w http.ResponseWriter) ListCollectionsPresenter {
+func NewListCollectionsPresenter(w http.ResponseWriter, p html.PageBuilder) ListCollectionsPresenter {
 	baseURL, _ := url.Parse("/collections")
 	return ListCollectionsPresenter{
-		ListRenderer: NewListRenderer("Collections", *baseURL,
+		ListRenderer: NewListRenderer(*p.SetTitle("Collections"), *baseURL,
 			n.CollectionsPageActive, w),
 	}
 }

@@ -24,15 +24,16 @@ func (p ListLabelsPresenter) Success(r list.Response) {
 }
 
 func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request) {
+	s.PageBuilder.SetUserIdentityFromContext(r.Context())
 	s.Label.List.Execute(r.Context(),
 		list.Request{PageSize: s.Label.DefaultPageSize, Page: int64(GetPageFromRequest(r))},
-		NewListLabelsPresenter(w))
+		NewListLabelsPresenter(w, s.PageBuilder))
 }
 
-func NewListLabelsPresenter(w http.ResponseWriter) ListLabelsPresenter {
+func NewListLabelsPresenter(w http.ResponseWriter, p html.PageBuilder) ListLabelsPresenter {
 	baseURL, _ := url.Parse("/labels")
 	return ListLabelsPresenter{
-		ListRenderer: NewListRenderer("Labels", *baseURL,
+		ListRenderer: NewListRenderer(*p.SetTitle("Labels"), *baseURL,
 			n.LabelsPageActive, w),
 	}
 }

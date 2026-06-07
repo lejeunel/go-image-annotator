@@ -1,5 +1,60 @@
 #+title: Readme
 
+* Authentication
+** Endpoints
+*** /login/{provider}
+Initiates OAuth flow by opening
+a browser window
+
+This tries to fetch a /session-id/
+from the request. If the key exists
+in a local (persistent) store,
+retrieve the /Identity/ data struct and
+skip the OAuth flow.
+
+If there is no /session-id/
+proceed with the normal OAuth flow
+
+*** /login/{provider}/callback
+This is where user is redirected after
+entering valid credentials in browser window.
+
+Create a new session, store it in
+the session store, and return the
+session-id.
+  
+** Session Manager
+
+Use [[https://github.com/alexedwards/scs][scs]] to manage sessions.
+
+*** SQLite adapter
+
+We can use a *SQLite* adapter for persistence
+by [[https://github.com/alexedwards/scs/tree/master/sqlite3store][migrating]] the following table to the main database:
+
+#+begin_src sql
+CREATE TABLE sessions (
+	token TEXT PRIMARY KEY,
+	data BLOB NOT NULL,
+	expiry REAL NOT NULL
+);
+
+CREATE INDEX sessions_expiry_idx ON sessions(expiry);
+#+end_src
+
+*** Custom Middleware
+
+We need to define a custom middleware ([[https://gist.github.com/alexedwards/cc6190195acfa466bf27f05aa5023f50][example here]])
+for the API endpoints: these endpoints are using
+HTTP headers instead of cookies.
+
+*** Push custom data in store
+
+The */login* and */logout* endpoints should first apply *RenewToken*
+to delete (possibly existing) tokens
+
+
+
 * TODO Image domain object
 ** TODO Add bounding box: check for range constraints
 * DONE Image listing

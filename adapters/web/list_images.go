@@ -30,20 +30,21 @@ func (p ListImagesPresenter) Success(r list.Response) {
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 
+	s.PageBuilder.SetUserIdentityFromContext(r.Context())
 	collection := r.URL.Query().Get("collection")
 	if collection == "" {
-		p := html.NewPageBuilder().SetError(fmt.Errorf("parsing url to get collection name: %w", e.ErrURLParsing))
+		p := html.NewPageBuilder(s.APIPath).SetError(fmt.Errorf("parsing url to get collection name: %w", e.ErrURLParsing))
 		p.Render(w)
 	}
 	s.Image.List.Execute(list_im.Request{PageSize: s.Image.DefaultPageSize,
 		Page:           int64(GetPageFromRequest(r)),
 		CollectionName: &collection},
-		NewListImagesPresenter(w, *r.URL))
+		NewListImagesPresenter(w, *r.URL, s.PageBuilder))
 }
 
-func NewListImagesPresenter(w http.ResponseWriter, baseURL url.URL) ListImagesPresenter {
+func NewListImagesPresenter(w http.ResponseWriter, baseURL url.URL, b html.PageBuilder) ListImagesPresenter {
 	return ListImagesPresenter{
-		ListRenderer: NewListRenderer("Images", baseURL,
+		ListRenderer: NewListRenderer(b, baseURL,
 			n.NoPageActive, w),
 	}
 }
