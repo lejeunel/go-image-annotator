@@ -48,3 +48,15 @@ func (a PassThroughAuth) IngestImage(ctx context.Context, group string) error {
 func (a PassThroughAuth) CreateUser(ctx context.Context) error {
 	return nil
 }
+
+func (a PassThroughAuth) DeleteUser(ctx context.Context) error {
+	return nil
+}
+
+func (a PassThroughAuth) RenewToken(ctx context.Context, id string) error {
+	return nil
+}
+
+func (a PassThroughAuth) AssignUserToGroup(ctx context.Context, id string, group string) error {
+	return nil
+}

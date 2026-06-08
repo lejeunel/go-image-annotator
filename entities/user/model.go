@@ -22,3 +22,9 @@ func WithHashedPersonalAccessToken(h []byte) Option {
 		l.HashPAT = h
 	}
 }
+
+func WithGroups(groups []string) Option {
+	return func(l *User) {
+		l.Groups = groups
+	}
+}
