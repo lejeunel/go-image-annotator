@@ -60,3 +60,7 @@ func (a PassThroughAuth) RenewToken(ctx context.Context, id string) error {
 func (a PassThroughAuth) AssignUserToGroup(ctx context.Context, id string, group string) error {
 	return nil
 }
+
+func (a PassThroughAuth) UnAssignUserFromGroup(ctx context.Context, id string, group string) error {
+	return nil
+}

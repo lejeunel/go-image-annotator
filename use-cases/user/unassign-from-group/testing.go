@@ -1,4 +1,4 @@
-package assign_group
+package unassign_group
 
 import (
 	"context"
@@ -20,11 +20,11 @@ func (p *FakePresenter) Success(r Response) {
 }
 
 type FakeRepo struct {
-	Err          error
-	UserMissing  bool
-	GroupMissing bool
-	Return       *usr.User
-	GotNewGroup  *string
+	Err                error
+	UserMissing        bool
+	GroupMissing       bool
+	Return             *usr.User
+	GotUnassignedGroup *string
 }
 
 func (r *FakeRepo) Find(id string) (*usr.User, error) {
@@ -33,11 +33,11 @@ func (r *FakeRepo) Find(id string) (*usr.User, error) {
 	}
 	return r.Return, nil
 }
-func (r *FakeRepo) AssignToGroup(id string, group string) error {
+func (r *FakeRepo) UnAssignFromGroup(id string, group string) error {
 	if r.Err != nil {
 		return r.Err
 	}
-	r.GotNewGroup = &group
+	r.GotUnassignedGroup = &group
 	return nil
 }
 func (r *FakeRepo) UserExists(id string) error {
@@ -57,6 +57,6 @@ func (r *FakeRepo) GroupExists(id string) error {
 type FailingAuth struct {
 }
 
-func (f FailingAuth) AssignUserToGroup(ctx context.Context, id string, group string) error {
+func (f FailingAuth) UnAssignUserFromGroup(ctx context.Context, id string, group string) error {
 	return e.ErrAuth
 }
