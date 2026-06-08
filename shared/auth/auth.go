@@ -64,3 +64,7 @@ func (a PassThroughAuth) AssignUserToGroup(ctx context.Context, id string, group
 func (a PassThroughAuth) UnAssignUserFromGroup(ctx context.Context, id string, group string) error {
 	return nil
 }
+
+func (a PassThroughAuth) AssignRoleToUser(ctx context.Context, id string, role string) error {
+	return nil
+}

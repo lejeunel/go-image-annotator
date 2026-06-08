@@ -28,3 +28,9 @@ func WithGroups(groups []string) Option {
 		l.Groups = groups
 	}
 }
+
+func WithRoles(roles []string) Option {
+	return func(l *User) {
+		l.Roles = roles
+	}
+}
