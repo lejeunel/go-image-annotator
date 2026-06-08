@@ -1,7 +1,7 @@
 package interactors
 
 import (
-	"github.com/lejeunel/go-image-annotator/adapters/infra"
+	"github.com/lejeunel/go-image-annotator/adapters/sqlite"
 	u "github.com/lejeunel/go-image-annotator/use-cases"
 )
 

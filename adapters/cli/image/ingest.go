@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
-	"github.com/lejeunel/go-image-annotator/adapters/infra"
+	"github.com/lejeunel/go-image-annotator/adapters/sqlite"
 	itr "github.com/lejeunel/go-image-annotator/adapters/sqlite/interactors"
 	ing "github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 )

@@ -2,7 +2,7 @@ package interactors
 
 import (
 	"crypto/sha256"
-	"github.com/lejeunel/go-image-annotator/adapters/infra"
+	"github.com/lejeunel/go-image-annotator/adapters/sqlite"
 	rea "github.com/lejeunel/go-image-annotator/app/reader"
 	im "github.com/lejeunel/go-image-annotator/use-cases/image"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
