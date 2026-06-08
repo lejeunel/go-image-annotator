@@ -72,3 +72,7 @@ func (a PassThroughAuth) AssignRoleToUser(ctx context.Context, id string, role s
 func (a PassThroughAuth) UnAssignRoleFromUser(ctx context.Context, id string, role string) error {
 	return nil
 }
+
+func (a PassThroughAuth) ListUsers(ctx context.Context) error {
+	return nil
+}
