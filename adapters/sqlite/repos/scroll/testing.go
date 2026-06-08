@@ -2,11 +2,11 @@ package scroll
 
 import (
 	"fmt"
+	s "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
+	clcsql "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/collection"
+	imsql "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/image"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	s "github.com/lejeunel/go-image-annotator/infra/db"
-	clcsql "github.com/lejeunel/go-image-annotator/infra/db/collection"
-	imsql "github.com/lejeunel/go-image-annotator/infra/db/image"
 	"strings"
 )
 

@@ -2,11 +2,11 @@ package image
 
 import (
 	"errors"
+	s "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
+	sc "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/collection"
 	ist "github.com/lejeunel/go-image-annotator/app/image-store"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	s "github.com/lejeunel/go-image-annotator/infra/db"
-	sc "github.com/lejeunel/go-image-annotator/infra/db/collection"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"testing"
 )

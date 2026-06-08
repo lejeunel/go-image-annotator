@@ -7,10 +7,10 @@ import (
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
+	s "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
 	ist "github.com/lejeunel/go-image-annotator/app/image-store"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	s "github.com/lejeunel/go-image-annotator/infra/db"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 

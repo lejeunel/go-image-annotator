@@ -2,14 +2,14 @@ package infra
 
 import (
 	"github.com/jmoiron/sqlx"
+	db "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
+	an "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/annotation"
+	clc "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/collection"
+	im "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/image"
+	lbl "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/label"
+	scr "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/scroll"
 	af_store "github.com/lejeunel/go-image-annotator/app/file-store"
 	im_store "github.com/lejeunel/go-image-annotator/app/image-store"
-	db "github.com/lejeunel/go-image-annotator/infra/db"
-	an "github.com/lejeunel/go-image-annotator/infra/db/annotation"
-	clc "github.com/lejeunel/go-image-annotator/infra/db/collection"
-	im "github.com/lejeunel/go-image-annotator/infra/db/image"
-	lbl "github.com/lejeunel/go-image-annotator/infra/db/label"
-	scr "github.com/lejeunel/go-image-annotator/infra/db/scroll"
 )
 
 type SQLiteInfra struct {

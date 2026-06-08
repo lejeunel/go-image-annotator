@@ -2,7 +2,7 @@ package interactors
 
 import (
 	"github.com/jonboulle/clockwork"
-	infra "github.com/lejeunel/go-image-annotator/infra/db/collection"
+	infra "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/collection"
 	"github.com/lejeunel/go-image-annotator/shared/validation"
 	clc "github.com/lejeunel/go-image-annotator/use-cases/collection"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"

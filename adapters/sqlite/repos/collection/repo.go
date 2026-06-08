@@ -8,8 +8,8 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
+	s "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
-	s "github.com/lejeunel/go-image-annotator/infra/db"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"

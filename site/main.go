@@ -15,9 +15,9 @@ import (
 
 	"net/http"
 
+	"github.com/lejeunel/go-image-annotator/adapters/sqlite"
+	i "github.com/lejeunel/go-image-annotator/adapters/sqlite/interactors"
 	"github.com/lejeunel/go-image-annotator/config"
-	"github.com/lejeunel/go-image-annotator/infra"
-	i "github.com/lejeunel/go-image-annotator/infra/interactors"
 )
 
 type SiteConfig struct {

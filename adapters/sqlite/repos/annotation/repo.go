@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	sl "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/label"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	c "github.com/lejeunel/go-image-annotator/entities/collection"
 	i "github.com/lejeunel/go-image-annotator/entities/image"
 	l "github.com/lejeunel/go-image-annotator/entities/label"
-	sl "github.com/lejeunel/go-image-annotator/infra/db/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 

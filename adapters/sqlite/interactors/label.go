@@ -1,7 +1,7 @@
 package interactors
 
 import (
-	infra "github.com/lejeunel/go-image-annotator/infra/db/label"
+	infra "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/label"
 	lbl "github.com/lejeunel/go-image-annotator/use-cases/label"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/delete"

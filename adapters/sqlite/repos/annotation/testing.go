@@ -1,10 +1,10 @@
 package annotation
 
 import (
-	s "github.com/lejeunel/go-image-annotator/infra/db"
-	sc "github.com/lejeunel/go-image-annotator/infra/db/collection"
-	si "github.com/lejeunel/go-image-annotator/infra/db/image"
-	sl "github.com/lejeunel/go-image-annotator/infra/db/label"
+	s "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
+	sc "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/collection"
+	si "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/image"
+	sl "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/label"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
