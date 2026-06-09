@@ -1,12 +1,12 @@
 package image
 
 import (
-	"errors"
 	"testing"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
@@ -19,9 +19,7 @@ func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
 	repos.Image.AddToCollection(imageId, collectionId)
 	repos.Image.Db.Close()
 	err := repos.Image.RemoveImageFromCollection(imageId, collectionId)
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestRemoveImageFromCollection(t *testing.T) {
@@ -33,11 +31,7 @@ func TestRemoveImageFromCollection(t *testing.T) {
 
 	repos.Image.AddToCollection(imageId, collectionId)
 	err := repos.Image.RemoveImageFromCollection(imageId, collectionId)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
+	assert.NoError(t, err)
 	exists, _ := repos.Image.ImageExistsInCollection(imageId, collectionId)
-	if exists {
-		t.Fatal("expected that removed image does not exist")
-	}
+	assert.False(t, exists)
 }

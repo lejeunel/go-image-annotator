@@ -1,11 +1,11 @@
 package image
 
 import (
-	"errors"
 	ist "github.com/lejeunel/go-image-annotator/app/image-store"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -16,12 +16,8 @@ func TestAddSpecs(t *testing.T) {
 	specs := im.ImageSpecs{MIMEType: "the-mimetype", Width: 15, Height: 10}
 	repos.Image.AddImage(id, nil, specs)
 	r, err := repos.Image.GetSpecs(id)
-	if err != nil {
-		t.Fatalf("expected no error when retrieving specs, got %v", err)
-	}
-	if r.MIMEType != specs.MIMEType {
-		t.Fatalf("expected to retrieve mimetype %v, got %v", specs.MIMEType, r.MIMEType)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, r.MIMEType, specs.MIMEType)
 }
 
 func TestCountAddedImageToCollection(t *testing.T) {
@@ -29,33 +25,23 @@ func TestCountAddedImageToCollection(t *testing.T) {
 	collection := "a-collection"
 	AddToCollection(repos, collection, "")
 	count, err := repos.Image.Count(ist.CountingParams{Collection: &collection})
-	if err != nil {
-		t.Fatalf("expected no error when counting images in collection, got %v", err)
-	}
-	if *count != 1 {
-		t.Fatalf("expected that one image is added to collection, got %v", *count)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, 1, int(*count))
 }
 
 func TestCountAllImagesWhenAddingImageToCollection(t *testing.T) {
 	repos := NewImageTestRepos()
 	AddToCollection(repos, "a-collection", "")
 	count, err := repos.Image.Count(ist.CountingParams{})
-	if err != nil {
-		t.Fatalf("expected no error when counting images in collection, got %v", err)
-	}
-	if *count != 1 {
-		t.Fatalf("expected that one image is added to collection, got %v", *count)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, 1, int(*count))
 }
 
 func TestInternalErrOnCreateShouldFail(t *testing.T) {
 	repo := NewTestSQLiteImageRepo()
 	repo.Db.Close()
 	err := repo.AddToCollection(im.NewImageId(), clc.NewCollectionId())
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestInternalErrOnIsCollectionPopulatedShouldFail(t *testing.T) {
@@ -64,9 +50,7 @@ func TestInternalErrOnIsCollectionPopulatedShouldFail(t *testing.T) {
 	AddToCollection(repos, collectionName, "the-hash")
 	repos.Image.Db.Close()
 	_, err := repos.Collection.IsPopulated(collectionName)
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestIsCollectionPopulated(t *testing.T) {
@@ -74,10 +58,6 @@ func TestIsCollectionPopulated(t *testing.T) {
 	collectionName := "a-collection"
 	AddToCollection(repos, collectionName, "the-hash")
 	isPopulated, err := repos.Collection.IsPopulated(collectionName)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-	if !(*isPopulated) {
-		t.Fatal("expected populated collection, got")
-	}
+	assert.NoError(t, err)
+	assert.True(t, *isPopulated)
 }

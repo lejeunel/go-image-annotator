@@ -1,9 +1,9 @@
 package label
 
 import (
-	"errors"
 	l "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -11,9 +11,7 @@ func TestInternalErrOnFetchAll(t *testing.T) {
 	repo := NewTestSQLiteLabelRepo()
 	repo.Db.Close()
 	_, err := repo.FetchAll()
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestFetchAll(t *testing.T) {
@@ -21,7 +19,5 @@ func TestFetchAll(t *testing.T) {
 	repo.Create(l.NewLabel(l.NewLabelId(), "first-label"))
 	repo.Create(l.NewLabel(l.NewLabelId(), "second-label"))
 	labels, _ := repo.FetchAll()
-	if len(labels) != 2 {
-		t.Fatalf("expected to retrieve 2 labels, got %v", len(labels))
-	}
+	assert.Equal(t, 2, len(labels))
 }

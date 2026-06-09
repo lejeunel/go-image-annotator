@@ -20,13 +20,16 @@ func (p *FakePresenter) Success(r Response) {
 }
 
 type FakeRepo struct {
-	Err         error
-	UserMissing bool
-	Return      *usr.User
-	GotNewRole  *string
+	Err        error
+	Missing    bool
+	Return     *usr.User
+	GotNewRole *string
 }
 
 func (r *FakeRepo) Find(id string) (*usr.User, error) {
+	if r.Missing {
+		return nil, e.ErrNotFound
+	}
 	if r.Err != nil {
 		return nil, r.Err
 	}

@@ -1,8 +1,8 @@
 package label
 
 import (
-	"errors"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -10,41 +10,31 @@ func TestCreatedLabelExists(t *testing.T) {
 	repo := NewTestSQLiteLabelRepo()
 	label, _ := CreateLabel(repo, "a-label")
 	exists, _ := repo.Exists(label.Name)
-	if !exists {
-		t.Fatal("expected that created label exists")
-	}
+	assert.True(t, exists)
 }
 
 func TestNonExistingLabelDoesNotExists(t *testing.T) {
 	exists, _ := NewTestSQLiteLabelRepo().Exists("non-existing-label")
-	if exists {
-		t.Fatal("expected that non-existing label does not exist")
-	}
+	assert.False(t, exists)
 }
 
 func TestInternalErrOnLabelExistsShouldFail(t *testing.T) {
 	repo := NewTestSQLiteLabelRepo()
 	repo.Db.Close()
 	_, err := repo.Exists("")
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestInternalErrOnDeleteShouldFail(t *testing.T) {
 	repo := NewTestSQLiteLabelRepo()
 	repo.Db.Close()
 	err := repo.Delete("a-label")
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestDeleteLabel(t *testing.T) {
 	repo := NewTestSQLiteLabelRepo()
 	label, _ := CreateLabel(repo, "a-label")
 	err := repo.Delete(label.Name)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
+	assert.NoError(t, err)
 }

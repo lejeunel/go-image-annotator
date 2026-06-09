@@ -39,6 +39,9 @@ type FakeUserRepo struct {
 }
 
 func (r *FakeUserRepo) Find(id string) (*usr.User, error) {
+	if r.Missing {
+		return nil, e.ErrNotFound
+	}
 	if r.Err != nil {
 		return nil, r.Err
 	}

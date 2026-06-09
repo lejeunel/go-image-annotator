@@ -50,7 +50,6 @@ func TestUnAssignUserWhoIsNotAssignedHasNoEffect(t *testing.T) {
 	itr.Execute(t.Context(), Request{Id: user.Id, Group: group}, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, 0, len(p.Got.Groups))
-	assert.Nil(t, repo.GotUnassignedGroup)
 }
 
 func TestUnAssignUser(t *testing.T) {

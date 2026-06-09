@@ -1,13 +1,13 @@
 package image
 
 import (
-	"errors"
 	s "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
 	sc "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/collection"
 	ist "github.com/lejeunel/go-image-annotator/app/image-store"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -37,9 +37,7 @@ func TestInternalErrOnImageListShouldFail(t *testing.T) {
 	repo := NewTestSQLiteImageRepo()
 	repo.Db.Close()
 	_, err := repo.List(ist.FilteringParams{})
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestListOneImage(t *testing.T) {
@@ -52,9 +50,7 @@ func TestListOneImage(t *testing.T) {
 	repos.Image.AddToCollection(image.Id, collection.Id)
 
 	r, _ := repos.Image.List(ist.FilteringParams{PageSize: 2, Page: 1})
-	if len(*r) != 1 {
-		t.Fatalf("expected to retrieve one image, got %v", len(*r))
-	}
+	assert.Equal(t, 1, len(*r))
 }
 
 func TestListOneImageInGivenCollection(t *testing.T) {
@@ -64,16 +60,10 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 	CreateSingleImageCollection(repos, "second-collection")
 
 	r, _ := repos.Image.List(ist.FilteringParams{Collection: &firstCollection.Name, PageSize: 2, Page: 1})
-	if len(*r) != 1 {
-		t.Fatalf("expected to retrieve one image, got %v", len(*r))
-	}
+	assert.Equal(t, 1, len(*r))
 	images := *r
-	if images[0].ImageId != firstImage.Id.String() {
-		t.Fatalf("expected to retrieve first image with id %v, got %v", firstImage.Id, images[0].ImageId)
-	}
-	if images[0].Collection != firstCollection.Name {
-		t.Fatalf("expected that image belongs to collection named %v, got %v", firstCollection.Name, images[0].Collection)
-	}
+	assert.True(t, images[0].ImageId == firstImage.Id.String())
+	assert.True(t, images[0].Collection == firstCollection.Name)
 }
 
 func CreateImageInCollectionFromString(repo SQLiteImageRepo, collection clc.Collection, imageId string) im.Image {
@@ -95,9 +85,5 @@ func TestListImagesShouldBeOrderedById(t *testing.T) {
 
 	r, _ := repos.Image.List(ist.FilteringParams{PageSize: 2, Page: 1})
 	got := (*r)[0].ImageId
-	if got != image0.Id.String() {
-		t.Fatalf("expected to retrieve image with first id %v, got %v",
-			image0.Id, got)
-	}
-
+	assert.Equal(t, image0.Id.String(), got)
 }

@@ -1,11 +1,11 @@
 package image
 
 import (
-	"errors"
 	"testing"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRetrieveImageIdByHash(t *testing.T) {
@@ -13,17 +13,11 @@ func TestRetrieveImageIdByHash(t *testing.T) {
 	imageId := im.NewImageId()
 	hash := []byte("the-hash")
 	err := repo.AddImage(imageId, hash, im.ImageSpecs{})
-	if err != nil {
-		t.Fatalf("expected no error on adding image, got %v", err)
-	}
+	assert.NoError(t, err)
 
 	existingId, err := repo.FindImageIdByHash(hash)
-	if err != nil {
-		t.Fatalf("expected no error finding image by hash, got %v", err)
-	}
-	if *existingId != imageId {
-		t.Fatalf("expected to retrieve image with identical hash and id %v, got %v", imageId, existingId)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, *existingId, imageId)
 }
 
 func TestRetrieveImageIdByNonExistingHashShouldFail(t *testing.T) {
@@ -31,17 +25,12 @@ func TestRetrieveImageIdByNonExistingHashShouldFail(t *testing.T) {
 	imageId := im.NewImageId()
 	repo.AddImage(imageId, nil, im.ImageSpecs{})
 	_, err := repo.FindImageIdByHash([]byte("non-existing-hash"))
-
-	if !errors.Is(err, e.ErrNotFound) {
-		t.Fatalf("expected not found error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestRetrieveImageIdByHashInternalErrShouldFail(t *testing.T) {
 	repo := NewTestSQLiteImageRepo()
 	repo.Db.Close()
 	_, err := repo.FindImageIdByHash(nil)
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }

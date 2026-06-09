@@ -3,7 +3,6 @@ package unassign_group
 import (
 	"context"
 	"fmt"
-	"slices"
 
 	"log/slog"
 
@@ -30,10 +29,6 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	user, err := i.userRepo.Find(r.Id)
 	if err != nil {
 		i.handleError(err, out)
-		return
-	}
-	if !slices.Contains(user.Groups, r.Group) {
-		out.Success(Response{Id: r.Id, Groups: user.Groups})
 		return
 	}
 	if err := i.userRepo.UnAssignFromGroup(r.Id, r.Group); err != nil {

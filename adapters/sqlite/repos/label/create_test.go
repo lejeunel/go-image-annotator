@@ -1,11 +1,11 @@
 package label
 
 import (
-	"errors"
 	"testing"
 
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func CreateLabel(repo *SQLiteLabelRepo, name string) (*lbl.Label, error) {
@@ -21,23 +21,14 @@ func TestInternalErrOnCreateShouldFail(t *testing.T) {
 	repo := NewTestSQLiteLabelRepo()
 	repo.Db.Close()
 	_, err := CreateLabel(repo, "a-label")
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestCreateAddsCount(t *testing.T) {
 	repo := NewTestSQLiteLabelRepo()
 	_, err := CreateLabel(repo, "a-label")
-	if err != nil {
-		t.Fatalf("expected no error on create but got %v", err)
-	}
+	assert.NoError(t, err)
 	count, err := repo.Count()
-	if err != nil {
-		t.Fatalf("expected no error on count, got %v", err)
-	}
-	if count != 1 {
-		t.Fatalf("expected count of 1, got %v", count)
-	}
-
+	assert.NoError(t, err)
+	assert.Equal(t, 1, int(count))
 }

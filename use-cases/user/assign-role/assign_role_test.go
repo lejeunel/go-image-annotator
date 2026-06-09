@@ -18,7 +18,7 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestMissingUserShouldFail(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{UserMissing: true})
+	itr := NewInteractor(&FakeRepo{Missing: true})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user@example.com", Role: "a-role"}, p)
 	assert.True(t, p.GotNotFoundErr)
