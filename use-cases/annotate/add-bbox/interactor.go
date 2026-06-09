@@ -49,9 +49,11 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.auth.AnnotateGroup(ctx, image.Collection.Group); err != nil {
-		i.handleError(err, out)
-		return
+	if image.Collection.Group != nil {
+		if err := i.auth.AnnotateGroup(ctx, image.Collection.Group.Name); err != nil {
+			i.handleError(err, out)
+			return
+		}
 	}
 
 	label, err := i.findLabel(r.Label)

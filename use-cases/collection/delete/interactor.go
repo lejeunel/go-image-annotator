@@ -10,9 +10,10 @@ import (
 )
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   Auth
+	collectionRepo CollectionRepo
+	groupRepo      GroupRepo
+	logger         *slog.Logger
+	auth           Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
@@ -30,7 +31,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.repo.Delete(r.Name); err != nil {
+	if err := i.collectionRepo.Delete(r.Name); err != nil {
 		i.handleError(err, out)
 		return
 	}
@@ -39,12 +40,14 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 func (i *Interactor) authorizeDeletion(ctx context.Context, name string) error {
 	errCtx := fmt.Errorf("checking group ownership of collection with name %v is empty", name)
-	group, err := i.repo.GroupOfCollection(name)
+	group, err := i.groupRepo.GroupOfCollection(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
-	if err := i.auth.DeleteCollection(ctx, *group); err != nil {
-		return fmt.Errorf("%w: %w", errCtx, e.ErrAuth)
+	if group != nil {
+		if err := i.auth.DeleteCollection(ctx, *group); err != nil {
+			return fmt.Errorf("%w: %w", errCtx, e.ErrAuth)
+		}
 	}
 	return nil
 
@@ -52,7 +55,7 @@ func (i *Interactor) authorizeDeletion(ctx context.Context, name string) error {
 
 func (i *Interactor) ensureDeletable(name string) error {
 	errCtx := fmt.Errorf("ensuring collection with name %v is empty", name)
-	isPopulated, err := i.repo.IsPopulated(name)
+	isPopulated, err := i.collectionRepo.IsPopulated(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
@@ -64,7 +67,7 @@ func (i *Interactor) ensureDeletable(name string) error {
 
 func (i *Interactor) ensureExists(name string) error {
 	errCtx := fmt.Errorf("checking whether collection with name %v exists", name)
-	exists, err := i.repo.Exists(name)
+	exists, err := i.collectionRepo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
@@ -89,9 +92,10 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(r Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: r, logger: logging.NewNoOpLogger(),
-		auth: auth.PassThroughAuth{}}
+func NewInteractor(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
+	i := &Interactor{collectionRepo: cr, groupRepo: gr,
+		logger: logging.NewNoOpLogger(),
+		auth:   auth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
 	}

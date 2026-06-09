@@ -39,7 +39,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 }
 
 func (i *Interactor) create(r Request) error {
-	group := g.NewGroup(r.Name, g.WithDescription(r.Description))
+	group := g.NewGroup(g.NewGroupId(), r.Name, g.WithDescription(r.Description))
 	if err := i.repo.Create(group); err != nil {
 		return err
 	}

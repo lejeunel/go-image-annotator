@@ -1,9 +1,9 @@
 package annotation
 
 import (
-	"errors"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -14,9 +14,7 @@ func TestInternalErrOnRemoveAnnotationShouldFail(t *testing.T) {
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label))
 	repos.Annotation.Db.Close()
 	err := repos.Annotation.RemoveAnnotation(annotationId)
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestRemoveAnnotation(t *testing.T) {
@@ -25,9 +23,7 @@ func TestRemoveAnnotation(t *testing.T) {
 	annotationId := a.NewAnnotationId()
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label))
 	err := repos.Annotation.RemoveAnnotation(annotationId)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
+	assert.NoError(t, err)
 }
 
 func TestInternalErrOnRemoveImageLabelShouldFail(t *testing.T) {
@@ -35,9 +31,7 @@ func TestInternalErrOnRemoveImageLabelShouldFail(t *testing.T) {
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
 	repos.Annotation.Db.Close()
 	err := repos.Annotation.RemoveImageLabel(image.Id, collection.Id, label.Id)
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestRemoveImageLabel(t *testing.T) {
@@ -45,11 +39,7 @@ func TestRemoveImageLabel(t *testing.T) {
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label))
 	err := repos.Annotation.RemoveImageLabel(image.Id, collection.Id, label.Id)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
+	assert.NoError(t, err)
 	labels, _ := repos.Annotation.FindImageLabels(image.Id, collection.Id)
-	if len(labels) != 0 {
-		t.Fatalf("expected zero image labels, got %v", len(labels))
-	}
+	assert.Equal(t, 0, len(labels))
 }

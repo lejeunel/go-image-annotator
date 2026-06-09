@@ -66,7 +66,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		i.handleError(err, out)
 		return
 	}
-	if err := i.auth.IngestImage(ctx, collection.Group); err != nil {
+	if err := i.auth.IngestImage(ctx, collection.Group.Name); err != nil {
 		i.handleError(err, out)
 		return
 	}

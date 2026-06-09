@@ -4,13 +4,16 @@ import (
 	"testing"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{},
+	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection",
+		clc.WithGroup(g.NewGroup(g.NewGroupId(), "dst-group")))
+	itr := NewInteractor(&FakeRepo{Return: dstCollection},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
@@ -56,7 +59,10 @@ func TestInternalErrOnFindCollectionShouldFail(t *testing.T) {
 
 func TestImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ImageAlreadyInCollection: true})
+
+	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection",
+		clc.WithGroup(g.NewGroup(g.NewGroupId(), "dst-group")))
+	itr := NewInteractor(&FakeRepo{Return: dstCollection, ImageAlreadyInCollection: true})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotDependencyErr)
 	assert.False(t, p.GotSuccess)
@@ -64,14 +70,17 @@ func TestImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 
 func TestInternalErrOnImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnImageExistsInCollection: true, Err: e.ErrInternal})
+	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
+	itr := NewInteractor(&FakeRepo{Return: dstCollection, ErrOnImageExistsInCollection: true,
+		Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
 func TestInternalErrOnImportShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeRepo{ErrOnImport: true, Err: e.ErrInternal}
+	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
+	repo := &FakeRepo{Return: dstCollection, ErrOnImport: true, Err: e.ErrInternal}
 	itr := NewInteractor(repo)
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotInternalErr)
@@ -82,7 +91,7 @@ func TestImportImageInCollection(t *testing.T) {
 	p := &FakePresenter{}
 	imageId := im.NewImageId()
 	collection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
-	repo := &FakeRepo{DestinationCollection: collection}
+	repo := &FakeRepo{Return: collection}
 	itr := NewInteractor(repo)
 	itr.Execute(t.Context(),
 		Request{ImageId: imageId.String(),

@@ -163,12 +163,13 @@ func (r *SQLiteAnnotationRepo) UpdateBoundingBox(id a.AnnotationId, u a.Bounding
 func (r *SQLiteAnnotationRepo) GroupOfAnnotation(id a.AnnotationId) (*string, error) {
 	var group string
 	err := r.Db.Get(&group,
-		`SELECT "group" FROM collections WHERE id=(SELECT collection_id FROM annotations WHERE id=$1 )`, id)
+		`SELECT name FROM groups WHERE id=(SELECT group_id FROM collections WHERE id=(SELECT collection_id FROM annotations WHERE id=$1))`,
+		id)
 	if err != nil {
+		fmt.Println(err)
 		return nil, fmt.Errorf("fetching group of annotation by id %v: %w", id, e.ErrInternal)
 	}
 	return &group, nil
-
 }
 func NewSQLiteAnnotationRepo(db *sqlx.DB) *SQLiteAnnotationRepo {
 	return &SQLiteAnnotationRepo{Db: db, SQLiteLabelRepo: *sl.NewSQLiteLabelRepo(db)}

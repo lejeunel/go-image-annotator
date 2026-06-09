@@ -19,7 +19,7 @@ func (p ListCollectionsPresenter) Success(r list.Response) {
 	for _, c := range r.Collections {
 		table.Rows = append(table.Rows,
 			html.PaginationTableRow{Values: []Node{html.MakeTextLink("/images?collection="+c.Name, c.Name),
-				Raw(c.Description), Raw(c.Group), Raw(DateTimeToStr(c.CreatedAt))}})
+				Raw(c.Description), Raw(c.Group.Name), Raw(DateTimeToStr(c.CreatedAt))}})
 	}
 	p.RenderSuccess(table, r.Pagination)
 }

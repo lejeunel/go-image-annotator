@@ -5,14 +5,23 @@ import (
 
 	st "github.com/lejeunel/go-image-annotator/app/image-store"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"github.com/stretchr/testify/assert"
 )
 
+func CreateImage() im.Image {
+	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
+	return im.NewImage(im.NewImageId(), collection)
+}
+
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&st.FakeImageStore{}, &FakeRepo{},
+	image := CreateImage()
+	group := g.NewGroup(g.NewGroupId(), "my-group")
+	image.Collection.Group = &group
+	itr := NewInteractor(&st.FakeImageStore{Return: &image}, &FakeRepo{},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)

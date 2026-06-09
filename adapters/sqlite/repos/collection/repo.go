@@ -10,6 +10,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	s "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	g "github.com/lejeunel/go-image-annotator/entities/group"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
@@ -24,22 +25,26 @@ type Row struct {
 	Name        string           `db:"name"`
 	Description string           `db:"description"`
 	CreatedAt   sql.NullTime     `db:"created_at"`
-	Group       string           `db:"group"`
+	GroupId     g.GroupId        `db:"group_id"`
 }
 
 func (r *SQLiteCollectionRepo) Create(c clc.Collection) error {
-	query := `INSERT INTO collections (id, name, description, created_at, "group") VALUES ($1,$2,$3,$4,$5)`
-	_, err := r.Db.Exec(query, c.Id.String(), c.Name, c.Description, c.CreatedAt, c.Group)
+	var err error
+	if c.Group != nil {
+		query := `INSERT INTO collections (id, name, description, created_at, group_id) VALUES ($1,$2,$3,$4,$5)`
+		_, err = r.Db.Exec(query, c.Id.String(), c.Name, c.Description, c.CreatedAt, c.Group.Id)
+	} else {
+		query := `INSERT INTO collections (id, name, description, created_at) VALUES ($1,$2,$3,$4)`
+		_, err = r.Db.Exec(query, c.Id.String(), c.Name, c.Description, c.CreatedAt)
+	}
 	if err != nil {
 		return fmt.Errorf("creating record: %v: %w", err, e.ErrInternal)
 	}
-
 	return nil
 }
 func (r *SQLiteCollectionRepo) rowToEntity(row Row) clc.Collection {
 	c := clc.NewCollection(row.Id, row.Name,
-		clc.WithDescription(row.Description),
-		clc.WithGroup(row.Group))
+		clc.WithDescription(row.Description))
 	if row.CreatedAt.Valid {
 		c.CreatedAt = row.CreatedAt.Time
 	}
@@ -50,7 +55,7 @@ func (r *SQLiteCollectionRepo) FindCollectionByName(name string) (*clc.Collectio
 
 	row := Row{}
 	err := r.Db.Get(&row,
-		`SELECT id,name,description,created_at,"group" FROM collections WHERE name=$1`, name)
+		`SELECT id,name,description,created_at,group_id FROM collections WHERE name=$1`, name)
 
 	if err != nil {
 		switch {
@@ -117,7 +122,7 @@ func (r *SQLiteCollectionRepo) Count() (*int64, error) {
 	return &count, nil
 }
 func (r *SQLiteCollectionRepo) List(m list.Request) ([]*clc.Collection, error) {
-	q := sq.StatementBuilder.Select(`id,name,description,created_at,"group"`).From("collections")
+	q := sq.StatementBuilder.Select(`id,name,description,created_at,group_id`).From("collections")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
 	if err != nil {
@@ -135,15 +140,6 @@ func (r *SQLiteCollectionRepo) List(m list.Request) ([]*clc.Collection, error) {
 	}
 
 	return objects, nil
-}
-func (r *SQLiteCollectionRepo) GroupOfCollection(name string) (*string, error) {
-	var group string
-	err := r.Db.Get(&group, `SELECT "group" FROM collections WHERE name=$1`, name)
-	if err != nil {
-		return nil, fmt.Errorf("reading group of collection: %v: %w", err, e.ErrInternal)
-	}
-
-	return &group, nil
 }
 
 func NewSQLiteCollectionRepo(db *sqlx.DB) *SQLiteCollectionRepo {

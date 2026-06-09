@@ -14,20 +14,24 @@ import (
 )
 
 type Interactor struct {
-	repo      Repo
-	validator v.Validator
-	logger    *slog.Logger
-	clock     clockwork.Clock
-	auth      Auth
+	collectionRepo CollectionRepo
+	groupRepo      GroupRepo
+	validator      v.Validator
+	logger         *slog.Logger
+	clock          clockwork.Clock
+	auth           Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	if err := i.auth.CreateCollection(ctx, r.Group); err != nil {
-		i.handleError(err, out)
-		return
+	if r.Group != nil {
+		if err := i.auth.CreateCollection(ctx, *r.Group); err != nil {
+			i.handleError(err, out)
+			return
+		}
 	}
 
 	if err := i.validate(r.Name); err != nil {
+		fmt.Println(err)
 		i.handleError(err, out)
 		return
 	}
@@ -43,8 +47,15 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 func (i *Interactor) create(r Request) error {
 	collection := clc.NewCollection(clc.NewCollectionId(), r.Name,
 		clc.WithDescription(r.Description),
-		clc.WithCreatedAt(i.clock.Now()), clc.WithGroup(r.Group))
-	if err := i.repo.Create(collection); err != nil {
+		clc.WithCreatedAt(i.clock.Now()))
+	if r.Group != nil {
+		group, err := i.groupRepo.Find(*r.Group)
+		if err != nil {
+			return err
+		}
+		collection.Group = group
+	}
+	if err := i.collectionRepo.Create(collection); err != nil {
 		return err
 	}
 	return nil
@@ -64,7 +75,7 @@ func (i *Interactor) validate(name string) error {
 
 func (i *Interactor) isDuplicate(name string) error {
 	errBaseMsg := fmt.Sprintf("checking for duplicate collection with name %v", name)
-	alreadyExists, err := i.repo.Exists(name)
+	alreadyExists, err := i.collectionRepo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%v: %w", errBaseMsg, e.ErrInternal)
 	}
@@ -101,11 +112,13 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(r Repo, opts ...Option) *Interactor {
-	i := &Interactor{repo: r, validator: v.NewNameValidator(),
-		logger: logging.NewNoOpLogger(),
-		clock:  clockwork.NewRealClock(),
-		auth:   auth.PassThroughAuth{}}
+func NewInteractor(rc CollectionRepo, rg GroupRepo, opts ...Option) *Interactor {
+	i := &Interactor{collectionRepo: rc,
+		groupRepo: rg,
+		validator: v.NewNameValidator(),
+		logger:    logging.NewNoOpLogger(),
+		clock:     clockwork.NewRealClock(),
+		auth:      auth.PassThroughAuth{}}
 
 	for _, opt := range opts {
 		opt(i)

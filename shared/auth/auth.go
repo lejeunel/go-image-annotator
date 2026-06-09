@@ -37,7 +37,7 @@ func (a PassThroughAuth) DeleteImage(ctx context.Context, group string) error {
 	return nil
 }
 
-func (a PassThroughAuth) ImportImage(ctx context.Context, srcGroup string, dstGroup string) error {
+func (a PassThroughAuth) ImportImage(ctx context.Context, dstGroup string) error {
 	return nil
 }
 

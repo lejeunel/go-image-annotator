@@ -34,7 +34,7 @@ var (
 			}
 			name := args[0]
 			group := args[1]
-			clc.Create(name, group, description)
+			clc.Create(name, &group, description)
 		},
 	}
 )

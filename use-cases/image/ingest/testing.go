@@ -8,6 +8,7 @@ import (
 	ast "github.com/lejeunel/go-image-annotator/app/file-store"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
@@ -107,7 +108,8 @@ func (r *FakeCollectionRepo) FindCollectionByName(name string) (*clc.Collection,
 	if r.MissingCollection {
 		return nil, e.ErrNotFound
 	}
-	c := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	c := clc.NewCollection(clc.NewCollectionId(), "a-collection",
+		clc.WithGroup(g.NewGroup(g.NewGroupId(), "my-group")))
 	return &c, nil
 }
 

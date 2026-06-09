@@ -1,12 +1,12 @@
 package annotation
 
 import (
-	"errors"
 	"testing"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInternalErrOnUpdateLabelShouldFail(t *testing.T) {
@@ -16,10 +16,7 @@ func TestInternalErrOnUpdateLabelShouldFail(t *testing.T) {
 	bbox := a.NewBoundingBox(annotationId, 1, 1, 1, 1, label)
 	repos.Annotation.Db.Close()
 	err := repos.Annotation.UpdateLabelOfAnnotation(bbox.Id, label.Id)
-
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestUpdateLabelOfAnnotation(t *testing.T) {
@@ -31,9 +28,5 @@ func TestUpdateLabelOfAnnotation(t *testing.T) {
 	repos.Label.Create(newLabel)
 	repos.Annotation.UpdateLabelOfAnnotation(bbox.Id, newLabel.Id)
 	updatedBoxes, _ := repos.Annotation.FindBoundingBoxes(image.Id, collection.Id)
-	if updatedBoxes[0].Label.Id != newLabel.Id {
-		t.Fatalf("expected to update label to id %v, got %v",
-			newLabel.Id, updatedBoxes[0].Label.Id)
-	}
-
+	assert.True(t, updatedBoxes[0].Label.Id == newLabel.Id)
 }

@@ -8,26 +8,35 @@ import (
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
-type FakeRepo struct {
+type FakeGroupRepo struct {
+	Return *string
+	Err    error
+}
+
+func (r *FakeGroupRepo) GroupOfCollection(string) (*string, error) {
+	return r.Return, nil
+}
+
+type FakeCollectionRepo struct {
 	Names []string
 	Got   Model
 	Err   error
 }
 
-func (r *FakeRepo) Update(m Model) error {
+func (r *FakeCollectionRepo) Update(m Model) error {
 	if r.Err != nil {
 		return r.Err
 	}
 	r.Got = m
 	return nil
 }
-func (r *FakeRepo) Exists(n string) (bool, error) {
+func (r *FakeCollectionRepo) Exists(n string) (bool, error) {
 	if slices.Contains(r.Names, n) {
 		return true, nil
 	}
 	return false, nil
 }
-func (r *FakeRepo) GroupOfCollection(n string) (*string, error) {
+func (r *FakeCollectionRepo) GroupOfCollection(n string) (*string, error) {
 	group := "my-group"
 	return &group, nil
 }

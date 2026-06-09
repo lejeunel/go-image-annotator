@@ -3,6 +3,7 @@ package collection
 import (
 	"errors"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -10,16 +11,12 @@ func TestCreatedCollectionExists(t *testing.T) {
 	repo := NewTestSQLiteCollectionRepo()
 	collection, _ := CreateCollection(repo, "a-collection")
 	exists, _ := repo.Exists(collection.Name)
-	if !exists {
-		t.Fatal("expected that created collection exists")
-	}
+	assert.True(t, exists)
 }
 
 func TestNonExistingCollectionDoesNotExists(t *testing.T) {
 	exists, _ := NewTestSQLiteCollectionRepo().Exists("non-existing-collection")
-	if exists {
-		t.Fatal("expected that non-existing collection does not exist")
-	}
+	assert.False(t, exists)
 }
 
 func TestInternalErrOnCollectionExistsShouldFail(t *testing.T) {

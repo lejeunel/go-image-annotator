@@ -1,11 +1,11 @@
 package annotation
 
 import (
-	"errors"
 	"testing"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInternalErrOnUpdateBoundingBoxShouldFail(t *testing.T) {
@@ -18,9 +18,7 @@ func TestInternalErrOnUpdateBoundingBoxShouldFail(t *testing.T) {
 	err := repos.Annotation.UpdateBoundingBox(annotationId,
 		a.BoundingBoxUpdatables{LabelId: label.Id, Xc: 1, Yc: 1, Width: 1, Height: 1})
 
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestUpdateBoundingBoxWithInvalidValuesShouldFail(t *testing.T) {
@@ -32,9 +30,7 @@ func TestUpdateBoundingBoxWithInvalidValuesShouldFail(t *testing.T) {
 
 	err := repos.Annotation.UpdateBoundingBox(annotationId,
 		a.BoundingBoxUpdatables{LabelId: label.Id, Xc: 1, Yc: 1, Width: -10, Height: 1})
-	if !errors.Is(err, e.ErrValidation) {
-		t.Fatalf("expected validation error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrValidation)
 }
 
 func TestUpdateBoundingBox(t *testing.T) {
@@ -47,12 +43,8 @@ func TestUpdateBoundingBox(t *testing.T) {
 	newWidth := float32(2)
 	err := repos.Annotation.UpdateBoundingBox(annotationId,
 		a.BoundingBoxUpdatables{LabelId: label.Id, Xc: 1, Yc: 1, Width: newWidth, Height: 1})
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
+	assert.NoError(t, err)
 
 	r, _ := repos.Annotation.FindBoundingBoxes(image.Id, collection.Id)
-	if r[0].Width != newWidth {
-		t.Fatalf("expected to update width to %v, got %v", newWidth, r[0].Width)
-	}
+	assert.Equal(t, r[0].Width, newWidth)
 }

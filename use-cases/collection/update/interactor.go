@@ -12,9 +12,10 @@ import (
 )
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   Auth
+	collectionRepo CollectionRepo
+	groupRepo      GroupRepo
+	logger         *slog.Logger
+	auth           Auth
 }
 
 type Option func(*Interactor)
@@ -25,8 +26,8 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(r Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: r, logger: logging.NewNoOpLogger(),
+func NewInteractor(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
+	i := &Interactor{collectionRepo: cr, groupRepo: gr, logger: logging.NewNoOpLogger(),
 		auth: auth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
@@ -36,15 +37,17 @@ func NewInteractor(r Repo, opts ...Option) Interactor {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
-	group, err := i.repo.GroupOfCollection(r.Name)
+	group, err := i.groupRepo.GroupOfCollection(r.Name)
 	if err != nil {
 		i.handleError(err, out)
 		return
 
 	}
-	if err := i.auth.UpdateCollection(ctx, *group); err != nil {
-		i.handleError(err, out)
-		return
+	if group != nil {
+		if err := i.auth.UpdateCollection(ctx, *group); err != nil {
+			i.handleError(err, out)
+			return
+		}
 	}
 
 	if err := i.ensureNameExists(r.Name); err != nil {
@@ -60,7 +63,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	}
 
-	if err := i.repo.Update(Model{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription}); err != nil {
+	if err := i.collectionRepo.Update(Model{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription}); err != nil {
 		i.handleError(err, out)
 		return
 	}
@@ -70,7 +73,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 func (i *Interactor) ensureNameExists(name string) error {
 	baseErr := fmt.Errorf("ensuring that collection with name %v exists", name)
-	exists, err := i.repo.Exists(name)
+	exists, err := i.collectionRepo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
 	}
@@ -82,7 +85,7 @@ func (i *Interactor) ensureNameExists(name string) error {
 
 func (i *Interactor) ensureNameDoesNotExist(name string) error {
 	baseErr := fmt.Errorf("ensuring that a collection with name %v does not already exist", name)
-	exists, err := i.repo.Exists(name)
+	exists, err := i.collectionRepo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
 	}

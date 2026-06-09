@@ -13,9 +13,7 @@ import (
 func TestHandleAuthError(t *testing.T) {
 	itr := NewTestingInteractor(WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
-	itr.Execute(t.Context(),
-		Request{},
-		p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }

@@ -6,18 +6,22 @@ import (
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
-type FakeRepo struct {
+type FakeCollectionRepo struct {
 	Err          error
 	ErrOnDelete  bool
 	Missing      bool
 	IsPopulated_ bool
-	ReturnGroup  string
 }
 
-func (r *FakeRepo) GroupOfCollection(string) (*string, error) {
-	return &r.ReturnGroup, nil
+type FakeGroupRepo struct {
+	Return *string
+	Err    error
 }
-func (r *FakeRepo) Delete(string) error {
+
+func (r *FakeGroupRepo) GroupOfCollection(string) (*string, error) {
+	return r.Return, nil
+}
+func (r *FakeCollectionRepo) Delete(string) error {
 
 	if r.ErrOnDelete {
 		return r.Err
@@ -25,14 +29,14 @@ func (r *FakeRepo) Delete(string) error {
 	return nil
 }
 
-func (r *FakeRepo) Exists(c string) (bool, error) {
+func (r *FakeCollectionRepo) Exists(c string) (bool, error) {
 	if r.Missing {
 		return false, nil
 	}
 	return true, nil
 }
 
-func (r *FakeRepo) IsPopulated(c string) (*bool, error) {
+func (r *FakeCollectionRepo) IsPopulated(c string) (*bool, error) {
 	res := true
 	if r.IsPopulated_ {
 		return &res, nil

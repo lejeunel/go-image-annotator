@@ -2,7 +2,8 @@ package interactors
 
 import (
 	"github.com/jonboulle/clockwork"
-	infra "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/collection"
+	ci "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/collection"
+	gi "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/group"
 	"github.com/lejeunel/go-image-annotator/shared/validation"
 	clc "github.com/lejeunel/go-image-annotator/use-cases/collection"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
@@ -12,14 +13,16 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
 )
 
-func NewSQLiteCollectionInteractors(repo *infra.SQLiteCollectionRepo, pageSize int) *clc.Interactors {
+func NewSQLiteCollectionInteractors(cr *ci.SQLiteCollectionRepo,
+	gr *gi.SQLiteGroupRepo,
+	pageSize int) *clc.Interactors {
 	return &clc.Interactors{
-		Find: read.NewInteractor(repo),
-		Create: *create.NewInteractor(repo, create.WithNameValidator(validation.NewNameValidator()),
+		Find: read.NewInteractor(cr),
+		Create: *create.NewInteractor(cr, gr, create.WithNameValidator(validation.NewNameValidator()),
 			create.WithClock(clockwork.NewRealClock())),
-		Delete:          delete.NewInteractor(repo),
-		List:            list.NewInteractor(repo),
-		Update:          update.NewInteractor(repo),
+		Delete:          delete.NewInteractor(cr, gr),
+		List:            list.NewInteractor(cr),
+		Update:          update.NewInteractor(cr, gr),
 		DefaultPageSize: pageSize,
 	}
 }

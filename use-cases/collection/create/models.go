@@ -9,5 +9,5 @@ type Response struct {
 type Request struct {
 	Name        string
 	Description string
-	Group       string
+	Group       *string
 }

@@ -6,6 +6,7 @@ import (
 	st "github.com/lejeunel/go-image-annotator/app/image-store"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -13,7 +14,11 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&st.FakeImageStore{}, &FakeRepo{},
+	group := g.NewGroup(g.NewGroupId(), "my-group")
+	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection",
+		clc.WithGroup(group))
+	image := im.NewImage(im.NewImageId(), collection)
+	itr := NewInteractor(&st.FakeImageStore{Return: &image}, &FakeRepo{},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),

@@ -28,8 +28,8 @@ type FakeRepo struct {
 	ImportedImageId          im.ImageId
 	ImportedIntoCollectionId clc.CollectionId
 
-	Err                   error
-	DestinationCollection clc.Collection
+	Err    error
+	Return clc.Collection
 }
 
 func (r *FakeRepo) ImageExists(imageId im.ImageId) (bool, error) {
@@ -46,7 +46,7 @@ func (r *FakeRepo) FindCollectionByName(name string) (*clc.Collection, error) {
 	if r.ErrOnFindCollection {
 		return nil, r.Err
 	}
-	return &r.DestinationCollection, nil
+	return &r.Return, nil
 }
 
 func (r *FakeRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc.CollectionId) (bool, error) {
@@ -71,6 +71,6 @@ func (r *FakeRepo) AddToCollection(imageId im.ImageId, collectionId clc.Collecti
 type FailingAuth struct {
 }
 
-func (f FailingAuth) ImportImage(ctx context.Context, srcGroup string, dstGroup string) error {
+func (f FailingAuth) ImportImage(ctx context.Context, dstGroup string) error {
 	return e.ErrAuth
 }

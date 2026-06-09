@@ -14,10 +14,19 @@ CREATE TABLE IF NOT EXISTS collections (
     name varchar(30) not null unique,
     description text,
     created_at DATETIME,
-    "group" text,
+    group_id varchar(36) NULL,
+    FOREIGN KEY (group_id) REFERENCES groups(id),
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX idx_collections_name ON collections(name);
+
+CREATE TABLE IF NOT EXISTS groups (
+    id varchar(36),
+    name varchar(30) not null unique,
+    description text,
+    PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX idx_groups_name ON groups(name);
 
 CREATE TABLE IF NOT EXISTS images (
     id varchar(36),

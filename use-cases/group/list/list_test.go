@@ -30,7 +30,7 @@ func TestHandleInternalErrOnList(t *testing.T) {
 	assert.Equal(t, p.GotSuccess, false)
 }
 
-func TestListCollection(t *testing.T) {
+func TestList(t *testing.T) {
 	count := int64(3)
 	pageSize := 2
 	page := int64(1)

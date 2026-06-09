@@ -27,7 +27,7 @@ func NewAnnotationTestRepos() AnnotationTestingRepos {
 }
 
 func CreateAnnotableImage(repos AnnotationTestingRepos, collectionName string, labelName string) (im.Image, clc.Collection, lbl.Label) {
-	collection := clc.NewCollection(clc.NewCollectionId(), collectionName, clc.WithGroup("a-group"))
+	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	label := lbl.NewLabel(lbl.NewLabelId(), labelName)
 	repos.Label.Create(label)
 	repos.Collection.Create(collection)

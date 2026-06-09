@@ -41,9 +41,12 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		i.handleError(err, out)
 		return
 	}
-	if err := i.auth.DeleteImage(ctx, image.Collection.Group); err != nil {
-		i.handleError(err, out)
-		return
+
+	if image.Collection.Group != nil {
+		if err := i.auth.DeleteImage(ctx, image.Collection.Group.Name); err != nil {
+			i.handleError(err, out)
+			return
+		}
 	}
 
 	if err := i.deleteLabels(*image); err != nil {

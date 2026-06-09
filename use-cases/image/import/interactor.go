@@ -47,20 +47,17 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		i.handleError(err, out)
 		return
 	}
-	srcCollection, err := i.findCollection(r.SourceCollection)
-	if err != nil {
-		i.handleError(err, out)
-		return
-	}
 	dstCollection, err := i.findCollection(r.DestinationCollection)
 	if err != nil {
 		i.handleError(err, out)
 		return
 	}
 
-	if err := i.auth.ImportImage(ctx, srcCollection.Group, dstCollection.Group); err != nil {
-		i.handleError(err, out)
-		return
+	if dstCollection.Group != nil {
+		if err := i.auth.ImportImage(ctx, dstCollection.Group.Name); err != nil {
+			i.handleError(err, out)
+			return
+		}
 	}
 
 	if err := i.ensureImageDoesNotAlreadyExistInCollection(imageId, dstCollection.Id); err != nil {

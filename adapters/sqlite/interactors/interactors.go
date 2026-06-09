@@ -9,7 +9,7 @@ func NewSQLiteInteractors(repos *infra.SQLiteInfra, pageSize int, allowedImageFo
 
 	return &u.Interactors{
 		Label:      NewSQLiteLabelInteractors(repos.LabelRepo, pageSize),
-		Collection: NewSQLiteCollectionInteractors(repos.CollectionRepo, pageSize),
+		Collection: NewSQLiteCollectionInteractors(repos.CollectionRepo, repos.GroupRepo, pageSize),
 		Image:      NewSQLiteImageInteractors(repos, allowedImageFormats),
 		Annotation: NewSQLiteAnnotationInteractors(repos),
 	}
