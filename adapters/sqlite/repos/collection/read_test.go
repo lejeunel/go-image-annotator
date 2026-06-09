@@ -1,7 +1,6 @@
 package collection
 
 import (
-	"errors"
 	"testing"
 	"time"
 
@@ -14,9 +13,7 @@ func TestRetrieveNonExistingShouldFail(t *testing.T) {
 	repo := NewTestSQLiteCollectionRepo()
 	CreateCollection(repo, "a-collection")
 	_, err := repo.FindCollectionByName("non-existing-collection")
-	if !errors.Is(err, e.ErrNotFound) {
-		t.Fatalf("expected not found error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestInternalErrOnFindShouldFail(t *testing.T) {
@@ -24,9 +21,7 @@ func TestInternalErrOnFindShouldFail(t *testing.T) {
 	CreateCollection(repo, "a-collection")
 	repo.Db.Close()
 	_, err := repo.FindCollectionByName("a-collection")
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestRetrieve(t *testing.T) {

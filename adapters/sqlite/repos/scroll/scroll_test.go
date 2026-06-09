@@ -1,48 +1,41 @@
 package scroll
 
 import (
-	"errors"
 	"testing"
 
 	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInternalErrOnImageMustExist(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	repos.Scroller.Db.Close()
 	err := repos.Scroller.ImageMustExist(im.NewImageId())
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestInternalErrOnCollectionMustExist(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	repos.Scroller.Db.Close()
 	err := repos.Scroller.CollectionMustExist("a-collection")
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestInternalErrOnGetAdjacent(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	repos.Scroller.Db.Close()
 	_, err := repos.Scroller.GetAdjacent(im.NewImageId(), scr.NewCriteria(), scr.ScrollNext)
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
+
 }
 
 func TestShouldFailWhenImageDoesNotExist(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	err := repos.Scroller.ImageMustExist(im.NewImageId())
-	if !errors.Is(err, e.ErrNotFound) {
-		t.Fatalf("expected not found error got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestImageMustExist(t *testing.T) {
@@ -50,26 +43,20 @@ func TestImageMustExist(t *testing.T) {
 	id := im.NewImageId()
 	repos.Image.AddImage(id, nil, im.ImageSpecs{})
 	err := repos.Scroller.ImageMustExist(id)
-	if err != nil {
-		t.Fatalf("expected no error got %v", err)
-	}
+	assert.NoError(t, err)
 }
 
 func TestShouldFailWhenCollectionDoesNotExist(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	err := repos.Scroller.CollectionMustExist("non-existing-collection")
-	if !errors.Is(err, e.ErrNotFound) {
-		t.Fatalf("expected not found error got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestShouldFailWhenNoImage(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	id := im.NewImageId()
 	_, err := repos.Scroller.GetAdjacent(id, scr.NewCriteria(), scr.ScrollNext)
-	if !errors.Is(err, e.ErrNotFound) {
-		t.Fatalf("expected not found error got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestGettingAdjacentImageWhenSingleImageShouldFail(t *testing.T) {
@@ -77,27 +64,21 @@ func TestGettingAdjacentImageWhenSingleImageShouldFail(t *testing.T) {
 	id, _ := im.NewImageIdFromString("00000000-0000-0000-0000-000000000000")
 	repos.Image.AddImage(id, nil, im.ImageSpecs{})
 	_, err := repos.Scroller.GetAdjacent(id, scr.NewCriteria(), scr.ScrollPrevious)
-	if !errors.Is(err, e.ErrNotFound) {
-		t.Fatalf("expected not found err got  %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestGettingNextImage(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	ids := CreateImagesWithOrderedIds(repos.Image, 3)
 	r, _ := repos.Scroller.GetAdjacent(ids[1], scr.NewCriteria(), scr.ScrollNext)
-	if r.ImageId != ids[2].String() {
-		t.Fatalf("expected to retrieve next image with id %v got %v", ids[2], r.ImageId)
-	}
+	assert.True(t, r.ImageId == ids[2].String())
 }
 
 func TestGettingPrevImage(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	ids := CreateImagesWithOrderedIds(repos.Image, 3)
 	r, _ := repos.Scroller.GetAdjacent(ids[2], scr.NewCriteria(), scr.ScrollPrevious)
-	if r.ImageId != ids[1].String() {
-		t.Fatalf("expected to retrieve next image with id %v got %v", ids[1], r.ImageId)
-	}
+	assert.True(t, r.ImageId == ids[1].String())
 }
 
 func TestScrollWithCollectionCriteria(t *testing.T) {
@@ -111,9 +92,7 @@ func TestScrollWithCollectionCriteria(t *testing.T) {
 		scr.NewCriteria(scr.WithCollection("first-collection")),
 		scr.ScrollPrevious)
 
-	if !errors.Is(err, e.ErrNotFound) {
-		t.Fatalf("expected not found err got  %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestGettingNextImageInCollection(t *testing.T) {
@@ -127,8 +106,5 @@ func TestGettingNextImageInCollection(t *testing.T) {
 	r, _ := repos.Scroller.GetAdjacent(ids[0],
 		scr.NewCriteria(scr.WithCollection(collection.Name)),
 		scr.ScrollNext)
-	if r.Collection != collection.Name {
-		t.Fatalf("expected to retrieve next image in collection %v got %v",
-			collection.Name, r.Collection)
-	}
+	assert.True(t, r.Collection == collection.Name)
 }

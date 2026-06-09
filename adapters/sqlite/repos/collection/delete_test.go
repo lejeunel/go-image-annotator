@@ -1,7 +1,6 @@
 package collection
 
 import (
-	"errors"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -23,25 +22,19 @@ func TestInternalErrOnCollectionExistsShouldFail(t *testing.T) {
 	repo := NewTestSQLiteCollectionRepo()
 	repo.Db.Close()
 	_, err := repo.Exists("")
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestInternalErrOnDeleteShouldFail(t *testing.T) {
 	repo := NewTestSQLiteCollectionRepo()
 	repo.Db.Close()
 	err := repo.Delete("a-collection")
-	if !errors.Is(err, e.ErrInternal) {
-		t.Fatalf("expected internal error, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestDeleteCollection(t *testing.T) {
 	repo := NewTestSQLiteCollectionRepo()
 	collection, _ := CreateCollection(repo, "a-collection")
 	err := repo.Delete(collection.Name)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
+	assert.NoError(t, err)
 }

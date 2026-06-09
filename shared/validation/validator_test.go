@@ -1,8 +1,8 @@
 package validation
 
 import (
-	"errors"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -22,11 +22,11 @@ func TestNameValidator(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			validator := NewNameValidator()
 			err := validator.Validate(tt.name)
-			if !tt.isValid && !errors.Is(err, e.ErrValidation) {
-				t.Fatalf("expected validation error given name %v, got none", tt.name)
+			if !tt.isValid {
+				assert.ErrorIs(t, err, e.ErrValidation)
 			}
-			if tt.isValid && err != nil {
-				t.Fatalf("expected no validation error given name %v, got one", tt.name)
+			if tt.isValid {
+				assert.NoError(t, err)
 			}
 		})
 	}

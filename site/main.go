@@ -39,7 +39,6 @@ func Make(apiPath string) http.Handler {
 
 	infra := infra.NewSQLiteInfra(cfg.DBPath, cfg.ArtefactDir)
 	interactors := i.NewSQLiteInteractors(infra, cfg.DefaultPageSize, cfg.AllowedImageFormats)
-	scroller := scr.New(infra.Scroller)
 	pageBuilder := html.NewPageBuilder(apiPath)
 
 	sessionManager := sm.NewSQLiteSessionManager(infra.Db.DB)
@@ -48,6 +47,7 @@ func Make(apiPath string) http.Handler {
 		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),
 		CallbackURL: "http://localhost:3000/callback/google"})
 
+	scroller := scr.New(infra.Scroller)
 	annotator := a.NewAnnotator(scroller, &interactors.Image.Read,
 		&interactors.Annotation.AddBox, &interactors.Annotation.UpdateBox, &interactors.Annotation.Delete,
 		&interactors.Label.FetchAll, &interactors.Annotation.UpdateLabel, &interactors.Annotation.AddImageLabel,

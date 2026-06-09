@@ -4,45 +4,35 @@ import (
 	"bytes"
 	_ "embed"
 	"encoding/base64"
-	"errors"
 	"io"
 	"testing"
 
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestErrOnInvalidDataShouldFail(t *testing.T) {
 	decoder := NewBase64ImageDecoder([]string{"jpeg"}, "invalid-data")
 	_, err := io.ReadAll(decoder)
-	if !errors.Is(err, e.ErrImageFormat) {
-		t.Fatalf("expected image format error on invalid base64 data, got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrImageFormat)
 }
 
 func TestDecodeJPGImage(t *testing.T) {
 	decoder := NewBase64ImageDecoder([]string{"jpeg"}, base64.StdEncoding.EncodeToString(testJPGImage))
 	_, err := io.ReadAll(decoder)
-	if err != nil {
-		t.Fatalf("expected no error got %v", err)
-	}
+	assert.NoError(t, err)
 }
 
 func TestFormatNotAllowedShouldFail(t *testing.T) {
 	decoder := NewBase64ImageDecoder([]string{"png"}, base64.StdEncoding.EncodeToString(testJPGImage))
 	_, err := io.ReadAll(decoder)
-	if !errors.Is(err, e.ErrImageFormat) {
-		t.Fatalf("expected error on invalid format got %v", err)
-	}
+	assert.ErrorIs(t, err, e.ErrImageFormat)
 }
 
 func RecoverEncodedBytes(t *testing.T) {
 	decoder := NewBase64ImageDecoder([]string{"jpeg"}, base64.StdEncoding.EncodeToString(testJPGImage))
 	r, err := io.ReadAll(decoder)
-	if err != nil {
-		t.Fatalf("did not expect error, got %v", err)
-	}
-	if !bytes.Equal(r, testJPGImage) {
-		t.Fatal("did not recover original byte slice")
-	}
+	assert.NoError(t, err)
+	assert.True(t, bytes.Equal(r, testJPGImage))
 
 }
