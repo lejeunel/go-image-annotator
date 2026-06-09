@@ -48,7 +48,7 @@ func (i *Interactor) handleError(err error, out OutputPort) {
 	out.Error(err)
 }
 
-func NewInteractor(r Repo, opts ...Option) *Interactor {
+func New(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r, logger: logging.NewNoOpLogger(),
 		countLimit: defaultLabelCountLimit}
 	for _, opt := range opts {

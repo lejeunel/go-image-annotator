@@ -74,7 +74,7 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(r Repo, opts ...Option) *Interactor {
+func New(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r, validator: v.NewNameValidator(),
 		logger: logging.NewNoOpLogger(),
 		auth:   auth.PassThroughAuth{},

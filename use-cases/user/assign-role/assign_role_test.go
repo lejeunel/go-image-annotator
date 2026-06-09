@@ -9,7 +9,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{},
+	itr := New(&FakeRepo{},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
@@ -18,7 +18,7 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestMissingUserShouldFail(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{Missing: true})
+	itr := New(&FakeRepo{Missing: true})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user@example.com", Role: "a-role"}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -26,7 +26,7 @@ func TestMissingUserShouldFail(t *testing.T) {
 }
 
 func TestHandleErrorOnFindUser(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
+	itr := New(&FakeRepo{Err: e.ErrInternal})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -38,7 +38,7 @@ func TestAssignUserRoleAlreadyAssignedDoesNothing(t *testing.T) {
 	user := usr.NewUser("user@example.com",
 		usr.WithRoles(roles))
 	repo := &FakeRepo{Return: &user}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Role: "a-role"}, p)
 	assert.True(t, p.GotSuccess)
@@ -52,7 +52,7 @@ func TestAssignUser(t *testing.T) {
 	newGroup := "new-role"
 	updatedRoles := []string{"a-role", newGroup}
 	repo := &FakeRepo{Return: &user}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Role: newGroup}, p)
 	assert.True(t, p.GotSuccess)

@@ -9,7 +9,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{},
+	itr := New(&FakeRepo{},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
@@ -18,7 +18,7 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestHandleErrorOnFindUser(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
+	itr := New(&FakeRepo{Err: e.ErrInternal})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -29,7 +29,7 @@ func TestUnAssignUserWhoIsNotAssignedHasNoEffect(t *testing.T) {
 	role := "a-role"
 	user := usr.NewUser("user@example.com")
 	repo := &FakeRepo{Return: &user}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Role: role}, p)
 	assert.True(t, p.GotSuccess)
@@ -42,7 +42,7 @@ func TestUnAssignUser(t *testing.T) {
 	user := usr.NewUser("user@example.com",
 		usr.WithRoles([]string{role}))
 	repo := &FakeRepo{Return: &user}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Role: role}, p)
 	assert.True(t, p.GotSuccess)

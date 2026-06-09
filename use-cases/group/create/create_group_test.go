@@ -9,7 +9,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
+	itr := New(&FakeRepo{}, WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotAuthErr)
@@ -19,7 +19,7 @@ func TestHandleAuthError(t *testing.T) {
 func TestCreateGroupWithDuplicateNameShouldFail(t *testing.T) {
 	name := "my-group"
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Names: []string{name}})
+	itr := New(&FakeRepo{Names: []string{name}})
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
@@ -27,7 +27,7 @@ func TestCreateGroupWithDuplicateNameShouldFail(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal},
+	itr := New(&FakeRepo{Err: e.ErrInternal},
 		WithNameValidator(&v.FakeNameValidator{}))
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -36,7 +36,7 @@ func TestHandleInternalError(t *testing.T) {
 func TestCreateWithInvalidNameShouldFail(t *testing.T) {
 	name := "my-group%/"
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Names: []string{name}},
+	itr := New(&FakeRepo{Names: []string{name}},
 		WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotValidationErr)
@@ -45,7 +45,7 @@ func TestCreateWithInvalidNameShouldFail(t *testing.T) {
 func TestCreate(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	req := Request{Name: "a-group", Description: "a-description"}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, repo.Got.Name, req.Name)

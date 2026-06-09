@@ -92,7 +92,7 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
+func New(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
 	i := &Interactor{collectionRepo: cr, groupRepo: gr,
 		logger: logging.NewNoOpLogger(),
 		auth:   auth.PassThroughAuth{}}

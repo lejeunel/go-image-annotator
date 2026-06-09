@@ -12,11 +12,11 @@ import (
 
 func NewSQLiteImageInteractors(repos *infra.SQLiteInfra, allowedImageFormats []string) *im.Interactors {
 	return &im.Interactors{
-		Ingest: *ingest.NewInteractor(repos.ImageRepo, repos.CollectionRepo,
-			repos.LabelRepo, repos.AnnotationRepo,
+		Ingest: *ingest.New(repos.Image, repos.Collection,
+			repos.Label, repos.Annotation,
 			repos.FileStore, sha256.New(), rea.ImageSpecsDetector{}),
-		Read:                *read.NewInteractor(*repos.ImageStore),
-		List:                *list.NewInteractor(repos.ImageRepo, repos.ImageStore),
+		Read:                *read.New(*repos.ImageStore),
+		List:                *list.New(repos.Image, repos.ImageStore),
 		AllowedImageFormats: allowedImageFormats,
 		DefaultPageSize:     10,
 	}

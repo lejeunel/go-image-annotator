@@ -10,7 +10,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{},
+	itr := New(&FakeRepo{},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
@@ -22,7 +22,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestNonExistingBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrNotFound})
+	itr := New(&FakeRepo{Err: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{Id: a.NewAnnotationId().String()}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -30,7 +30,7 @@ func TestNonExistingBoxShouldFail(t *testing.T) {
 
 func TestInternalErrShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
+	itr := New(&FakeRepo{Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -39,7 +39,7 @@ func TestInternalErrShouldFail(t *testing.T) {
 func TestRemoveBox(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	annotationId := a.NewAnnotationId()
 	itr.Execute(t.Context(), Request{Id: annotationId.String()}, p)
 	assert.True(t, p.GotSuccess)

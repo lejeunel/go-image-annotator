@@ -12,7 +12,7 @@ import (
 
 func TestHandleAuthError(t *testing.T) {
 	group := "my-group"
-	itr := NewInteractor(&FakeCollectionRepo{}, &FakeGroupRepo{Return: group}, WithAuth(FailingAuth{}))
+	itr := New(&FakeCollectionRepo{}, &FakeGroupRepo{Return: group}, WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Group: &group}, p)
 	assert.True(t, p.GotAuthErr)
@@ -22,7 +22,7 @@ func TestHandleAuthError(t *testing.T) {
 func TestCreateCollectionWithDuplicateNameShouldFail(t *testing.T) {
 	name := "my-collection"
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeCollectionRepo{Names: []string{name}},
+	itr := New(&FakeCollectionRepo{Names: []string{name}},
 		&FakeGroupRepo{})
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotDuplicationErr)
@@ -31,7 +31,7 @@ func TestCreateCollectionWithDuplicateNameShouldFail(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeCollectionRepo{Err: e.ErrInternal},
+	itr := New(&FakeCollectionRepo{Err: e.ErrInternal},
 		&FakeGroupRepo{},
 		WithNameValidator(&v.FakeNameValidator{}))
 	itr.Execute(t.Context(), Request{}, p)
@@ -41,7 +41,7 @@ func TestHandleInternalError(t *testing.T) {
 func TestCreateCollectionWithInvalidNameShouldFail(t *testing.T) {
 	name := "my-collection%/"
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeCollectionRepo{Names: []string{name}},
+	itr := New(&FakeCollectionRepo{Names: []string{name}},
 		&FakeGroupRepo{},
 		WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
 	itr.Execute(t.Context(), Request{Name: name}, p)
@@ -52,7 +52,7 @@ func TestCreateCollectionInNonExistingGroupShouldFail(t *testing.T) {
 	name := "my-collection"
 	group := "non-existing-group"
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeCollectionRepo{},
+	itr := New(&FakeCollectionRepo{},
 		&FakeGroupRepo{MissingGroup: true},
 	)
 	itr.Execute(t.Context(), Request{Name: name, Group: &group}, p)
@@ -64,7 +64,7 @@ func TestCreateCollection(t *testing.T) {
 	repo := &FakeCollectionRepo{}
 	now := time.Now()
 	group := "my-group"
-	itr := NewInteractor(repo,
+	itr := New(repo,
 		&FakeGroupRepo{Return: group},
 		WithClock(clockwork.NewFakeClockAt(now)))
 	req := Request{Name: "a-name", Description: "a-description", Group: &group}

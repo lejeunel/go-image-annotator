@@ -9,7 +9,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{},
+	itr := New(&FakeRepo{},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
@@ -19,7 +19,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
+	itr := New(&FakeRepo{Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -33,7 +33,7 @@ func TestFindUser(t *testing.T) {
 		u.WithRoles(roles))
 	repo := &FakeRepo{Return: &user}
 	p := &FakePresenter{}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	req := Request{Id: user.Id}
 	itr.Execute(t.Context(), req, p)
 

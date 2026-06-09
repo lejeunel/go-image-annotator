@@ -32,7 +32,7 @@ func (i *Interactor) handleError(err error, out OutputPort) {
 
 type Option func(*Interactor)
 
-func NewInteractor(r Repo, opts ...Option) *Interactor {
+func New(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r, logger: logging.NewNoOpLogger()}
 	for _, opt := range opts {
 		opt(i)

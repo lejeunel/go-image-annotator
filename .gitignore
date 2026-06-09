@@ -4,3 +4,4 @@
 /docs/resources/
 /docs/node_modules/
 /.direnv/
+/.envrc

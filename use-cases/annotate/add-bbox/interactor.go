@@ -25,13 +25,13 @@ type Interactor struct {
 	auth       auth.Auth
 }
 
-func NewInteractor(imageStore st.Interface, repo Repo, opts ...Option) *Interactor {
+func New(imageStore st.Interface, repo Repo, opts ...Option) Interactor {
 	i := &Interactor{repo: repo, imageStore: imageStore, logger: logging.NewNoOpLogger(),
 		auth: sauth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
 	}
-	return i
+	return *i
 }
 
 type Option func(*Interactor)

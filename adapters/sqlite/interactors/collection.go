@@ -17,12 +17,12 @@ func NewSQLiteCollectionInteractors(cr *ci.SQLiteCollectionRepo,
 	gr *gi.SQLiteGroupRepo,
 	pageSize int) *clc.Interactors {
 	return &clc.Interactors{
-		Find: read.NewInteractor(cr),
-		Create: *create.NewInteractor(cr, gr, create.WithNameValidator(validation.NewNameValidator()),
+		Find: read.New(cr),
+		Create: create.New(cr, gr, create.WithNameValidator(validation.NewNameValidator()),
 			create.WithClock(clockwork.NewRealClock())),
-		Delete:          delete.NewInteractor(cr, gr),
-		List:            list.NewInteractor(cr),
-		Update:          update.NewInteractor(cr, gr),
+		Delete:          delete.New(cr, gr),
+		List:            list.New(cr),
+		Update:          update.New(cr, gr),
 		DefaultPageSize: pageSize,
 	}
 }

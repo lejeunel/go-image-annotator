@@ -7,7 +7,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{},
+	itr := New(&FakeRepo{},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
@@ -17,7 +17,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestHandleInternalErrOnList(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnList: true, Err: e.ErrInternal})
+	itr := New(&FakeRepo{ErrOnList: true, Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.False(t, p.GotSuccess)
 	assert.True(t, p.GotInternalErr)
@@ -25,7 +25,7 @@ func TestHandleInternalErrOnList(t *testing.T) {
 
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal})
+	itr := New(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.False(t, p.GotSuccess)
 	assert.True(t, p.GotInternalErr)
@@ -37,7 +37,7 @@ func TestListUsers(t *testing.T) {
 	page := 1
 	repo := &FakeRepo{Count_: count}
 	p := &FakePresenter{}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	itr.Execute(t.Context(), Request{PageSize: pageSize, Page: int64(page)}, p)
 
 	assert.Equal(t, len(p.Got.Users), pageSize, "page size")

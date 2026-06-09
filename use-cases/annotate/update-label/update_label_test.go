@@ -12,7 +12,7 @@ import (
 
 func TestHandleAuthError(t *testing.T) {
 	lbl := lbl.NewLabel(lbl.NewLabelId(), "my-label")
-	itr := NewInteractor(&FakeRepo{Returns: &lbl},
+	itr := New(&FakeRepo{Returns: &lbl},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
@@ -24,7 +24,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestHandleErrOnFindLabel(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrNotFound, ErrOnFindLabel: true})
+	itr := New(&FakeRepo{Err: e.ErrNotFound, ErrOnFindLabel: true})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.False(t, p.GotSuccess)
 	assert.ErrorIs(t, p.GotErr, e.ErrNotFound)
@@ -33,7 +33,7 @@ func TestHandleErrOnFindLabel(t *testing.T) {
 func TestHandleErrOnUpdateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
-	itr := NewInteractor(&FakeRepo{Returns: &label, Err: e.ErrNotFound, ErrOnUpdate: true})
+	itr := New(&FakeRepo{Returns: &label, Err: e.ErrNotFound, ErrOnUpdate: true})
 	itr.Execute(t.Context(), Request{AnnotationId: a.NewAnnotationId().String()}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -43,7 +43,7 @@ func TestFetchLabelFromName(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
 	repo := &FakeRepo{Returns: &newLabel}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	itr.Execute(t.Context(), Request{AnnotationId: a.NewAnnotationId().String(), Label: newLabel.Name}, p)
 	assert.Equal(t, repo.FetchedLabelWithName, newLabel.Name, "label name")
 }
@@ -52,7 +52,7 @@ func TestUpdateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
 	repo := &FakeRepo{Returns: &newLabel}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	annotationId := a.NewAnnotationId()
 	itr.Execute(t.Context(), Request{AnnotationId: annotationId.String(), Label: newLabel.Name}, p)
 	assert.Equal(t, repo.UpdatedAnnotationId, annotationId, "annotation id")

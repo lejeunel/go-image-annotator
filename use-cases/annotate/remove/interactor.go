@@ -29,13 +29,13 @@ func WithAuth(a auth.Auth) Option {
 	}
 }
 
-func NewInteractor(repo Repo, opts ...Option) *Interactor {
+func New(repo Repo, opts ...Option) Interactor {
 	i := &Interactor{repo: repo, logger: logging.NewNoOpLogger(),
 		auth: sauth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
 	}
-	return i
+	return *i
 }
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	id, err := a.NewAnnotationIdFromString(r.Id)

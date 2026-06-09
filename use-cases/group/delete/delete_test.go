@@ -7,7 +7,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
+	itr := New(&FakeRepo{}, WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotAuthErr)
@@ -16,7 +16,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestDeleteNonExistingCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Missing: true})
+	itr := New(&FakeRepo{Missing: true})
 	itr.Execute(t.Context(), Request{Name: "my-collection"}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -24,7 +24,7 @@ func TestDeleteNonExistingCollectionShouldFail(t *testing.T) {
 
 func TestDeleteCollectionWithAssociatedResourcesShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{IsPopulated_: true})
+	itr := New(&FakeRepo{IsPopulated_: true})
 	itr.Execute(t.Context(), Request{Name: "my-collection"}, p)
 	assert.True(t, p.GotDependencyErr)
 	assert.False(t, p.GotSuccess)
@@ -32,14 +32,14 @@ func TestDeleteCollectionWithAssociatedResourcesShouldFail(t *testing.T) {
 
 func TestHandleInternalErrorOnDelete(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnDelete: true, Err: e.ErrInternal})
+	itr := New(&FakeRepo{ErrOnDelete: true, Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 }
 
 func TestDeleteCollection(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{})
+	itr := New(&FakeRepo{})
 	itr.Execute(t.Context(), Request{Name: "my-collection"}, p)
 	assert.True(t, p.GotSuccess)
 }

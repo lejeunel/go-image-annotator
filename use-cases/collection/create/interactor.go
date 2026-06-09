@@ -112,7 +112,7 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(rc CollectionRepo, rg GroupRepo, opts ...Option) *Interactor {
+func New(rc CollectionRepo, rg GroupRepo, opts ...Option) Interactor {
 	i := &Interactor{collectionRepo: rc,
 		groupRepo: rg,
 		validator: v.NewNameValidator(),
@@ -123,5 +123,5 @@ func NewInteractor(rc CollectionRepo, rg GroupRepo, opts ...Option) *Interactor 
 	for _, opt := range opts {
 		opt(i)
 	}
-	return i
+	return *i
 }

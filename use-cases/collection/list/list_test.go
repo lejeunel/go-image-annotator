@@ -8,7 +8,7 @@ import (
 
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal})
+	itr := New(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{Page: 1, PageSize: 1}, p)
 	assert.Equal(t, p.GotInternalErr, true)
 	assert.Equal(t, p.GotSuccess, false)
@@ -16,7 +16,7 @@ func TestHandleInternalErrOnCount(t *testing.T) {
 
 func TestInvalidPageShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{})
+	itr := New(&FakeRepo{})
 	itr.Execute(t.Context(), Request{Page: -1}, p)
 	assert.Equal(t, p.GotValidationErr, true)
 	assert.Equal(t, p.GotSuccess, false)
@@ -24,7 +24,7 @@ func TestInvalidPageShouldFail(t *testing.T) {
 
 func TestHandleInternalErrOnList(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnList: true, Err: e.ErrInternal})
+	itr := New(&FakeRepo{ErrOnList: true, Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{Page: 1, PageSize: 1}, p)
 	assert.Equal(t, p.GotInternalErr, true)
 	assert.Equal(t, p.GotSuccess, false)
@@ -37,7 +37,7 @@ func TestListCollection(t *testing.T) {
 
 	repo := &FakeRepo{Count_: count}
 	p := &FakePresenter{}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	req := Request{PageSize: pageSize, Page: page}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, len(p.Got.Collections), pageSize, "page size")

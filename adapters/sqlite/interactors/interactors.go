@@ -8,8 +8,8 @@ import (
 func NewSQLiteInteractors(repos *infra.SQLiteInfra, pageSize int, allowedImageFormats []string) *u.Interactors {
 
 	return &u.Interactors{
-		Label:      NewSQLiteLabelInteractors(repos.LabelRepo, pageSize),
-		Collection: NewSQLiteCollectionInteractors(repos.CollectionRepo, repos.GroupRepo, pageSize),
+		Label:      NewSQLiteLabelInteractors(repos.Label, pageSize),
+		Collection: NewSQLiteCollectionInteractors(repos.Collection, repos.Group, pageSize),
 		Image:      NewSQLiteImageInteractors(repos, allowedImageFormats),
 		Annotation: NewSQLiteAnnotationInteractors(repos),
 	}

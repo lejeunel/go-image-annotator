@@ -8,7 +8,7 @@ import (
 
 func TestHandleAuthError(t *testing.T) {
 	group := "a-group"
-	itr := NewInteractor(&FakeCollectionRepo{},
+	itr := New(&FakeCollectionRepo{},
 		&FakeGroupRepo{Return: &group},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
@@ -20,7 +20,7 @@ func TestHandleAuthError(t *testing.T) {
 func TestUpdateNonExistingCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	non_existing_name := "non-existing-name"
-	itr := NewInteractor(&FakeCollectionRepo{}, &FakeGroupRepo{})
+	itr := New(&FakeCollectionRepo{}, &FakeGroupRepo{})
 	itr.Execute(t.Context(), Request{Name: non_existing_name, NewName: "new-name"}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -30,7 +30,7 @@ func TestUpdateCollection(t *testing.T) {
 	name := "name"
 	p := &FakePresenter{}
 	repo := &FakeCollectionRepo{Names: []string{name}}
-	itr := NewInteractor(repo, &FakeGroupRepo{})
+	itr := New(repo, &FakeGroupRepo{})
 	req := Request{Name: name,
 		NewName:        "updated-name",
 		NewDescription: "updated-description"}
@@ -44,7 +44,7 @@ func TestUpdateCollectionWithNameAlreadyTakenShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	name := "name"
 	existing_name := "existing-name"
-	itr := NewInteractor(&FakeCollectionRepo{Names: []string{name, existing_name}},
+	itr := New(&FakeCollectionRepo{Names: []string{name, existing_name}},
 		&FakeGroupRepo{})
 	itr.Execute(t.Context(), Request{Name: name, NewName: existing_name}, p)
 	assert.True(t, p.GotDuplicationErr)
@@ -55,7 +55,7 @@ func TestUpdateCollectionWithUnchangedNameShouldSucceed(t *testing.T) {
 
 	p := &FakePresenter{}
 	name := "name"
-	itr := NewInteractor(&FakeCollectionRepo{Names: []string{name}}, &FakeGroupRepo{})
+	itr := New(&FakeCollectionRepo{Names: []string{name}}, &FakeGroupRepo{})
 	itr.Execute(t.Context(), Request{Name: name, NewName: name}, p)
 	assert.True(t, p.GotSuccess)
 }
@@ -63,7 +63,7 @@ func TestUpdateCollectionWithUnchangedNameShouldSucceed(t *testing.T) {
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	name := "name"
-	itr := NewInteractor(&FakeCollectionRepo{Names: []string{name},
+	itr := New(&FakeCollectionRepo{Names: []string{name},
 		Err: e.ErrInternal}, &FakeGroupRepo{})
 	itr.Execute(t.Context(),
 		Request{Name: name, NewName: name}, p)

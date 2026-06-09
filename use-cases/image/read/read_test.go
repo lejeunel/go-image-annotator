@@ -12,7 +12,7 @@ import (
 
 func TestHandleErrorOnFind(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&st.FakeImageStore{Err: e.ErrNotFound})
+	itr := New(&st.FakeImageStore{Err: e.ErrNotFound})
 	itr.Execute(Request{ImageId: im.NewImageId().String(), Collection: "a-collection"}, p)
 	assert.ErrorIs(t, p.GotErr, e.ErrNotFound)
 	assert.False(t, p.GotSuccess)
@@ -21,7 +21,7 @@ func TestHandleErrorOnFind(t *testing.T) {
 func TestFindImageGivesCorrectIdAndCollection(t *testing.T) {
 	p := &FakePresenter{}
 	existingImage := im.NewImage(im.NewImageId(), clc.NewCollection(clc.NewCollectionId(), "a-collection"))
-	itr := NewInteractor(&st.FakeImageStore{Return: &existingImage})
+	itr := New(&st.FakeImageStore{Return: &existingImage})
 	itr.Execute(Request{ImageId: existingImage.Id.String(),
 		Collection: existingImage.Collection.Name}, p)
 	assert.True(t, p.GotSuccess)

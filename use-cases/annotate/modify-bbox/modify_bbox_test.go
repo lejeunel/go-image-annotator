@@ -11,7 +11,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{},
+	itr := New(&FakeRepo{},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
@@ -23,7 +23,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestNonExistingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrNotFound, ErrOnFindLabel: true})
+	itr := New(&FakeRepo{Err: e.ErrNotFound, ErrOnFindLabel: true})
 	itr.Execute(t.Context(),
 		Request{AnnotationId: a.NewAnnotationId().String()},
 		p)
@@ -33,7 +33,7 @@ func TestNonExistingLabelShouldFail(t *testing.T) {
 
 func TestInternalErrOnFindLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal, ErrOnFindLabel: true})
+	itr := New(&FakeRepo{Err: e.ErrInternal, ErrOnFindLabel: true})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -41,7 +41,7 @@ func TestInternalErrOnFindLabelShouldFail(t *testing.T) {
 
 func TestValidationErrShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{})
+	itr := New(&FakeRepo{})
 	itr.Execute(t.Context(),
 		Request{AnnotationId: a.NewAnnotationId().String(), Xc: 1, Yc: 1, Width: -999, Height: 1}, p)
 	assert.True(t, p.GotValidationErr)
@@ -50,7 +50,7 @@ func TestValidationErrShouldFail(t *testing.T) {
 
 func TestNotFoundErrOnUpdateShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnUpdate: true, Err: e.ErrNotFound})
+	itr := New(&FakeRepo{ErrOnUpdate: true, Err: e.ErrNotFound})
 	itr.Execute(t.Context(),
 		Request{AnnotationId: a.NewAnnotationId().String(), Xc: 1, Yc: 1, Width: 1, Height: 1}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -59,7 +59,7 @@ func TestNotFoundErrOnUpdateShouldFail(t *testing.T) {
 
 func TestInternalErrOnUpdateShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnUpdate: true, Err: e.ErrInternal})
+	itr := New(&FakeRepo{ErrOnUpdate: true, Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{Xc: 1, Yc: 1, Width: 1, Height: 1}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -69,7 +69,7 @@ func TestUpdate(t *testing.T) {
 	p := &FakePresenter{}
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	repo := &FakeRepo{Label: label}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	annotationId := a.NewAnnotationId()
 	r := Request{AnnotationId: annotationId.String(), Xc: 1, Yc: 1, Width: 1, Height: 1}
 	itr.Execute(t.Context(), r, p)

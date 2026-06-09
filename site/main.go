@@ -39,7 +39,7 @@ func Make(apiPath string) http.Handler {
 
 	infra := infra.NewSQLiteInfra(cfg.DBPath, cfg.ArtefactDir)
 	interactors := i.NewSQLiteInteractors(infra, cfg.DefaultPageSize, cfg.AllowedImageFormats)
-	scroller := scr.New(infra.ScrollerRepo)
+	scroller := scr.New(infra.Scroller)
 	pageBuilder := html.NewPageBuilder(apiPath)
 
 	sessionManager := sm.NewSQLiteSessionManager(infra.Db.DB)

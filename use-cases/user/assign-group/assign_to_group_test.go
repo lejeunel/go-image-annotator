@@ -9,7 +9,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeUserRepo{},
+	itr := New(&FakeUserRepo{},
 		&FakeGroupRepo{},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
@@ -19,7 +19,7 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestMissingUserShouldFail(t *testing.T) {
-	itr := NewInteractor(&FakeUserRepo{Missing: true},
+	itr := New(&FakeUserRepo{Missing: true},
 		&FakeGroupRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user@example.com", Group: "my-group"}, p)
@@ -28,7 +28,7 @@ func TestMissingUserShouldFail(t *testing.T) {
 }
 
 func TestMissingGroupShouldFail(t *testing.T) {
-	itr := NewInteractor(&FakeUserRepo{}, &FakeGroupRepo{Missing: true})
+	itr := New(&FakeUserRepo{}, &FakeGroupRepo{Missing: true})
 
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user@example.com", Group: "my-group"}, p)
@@ -37,7 +37,7 @@ func TestMissingGroupShouldFail(t *testing.T) {
 }
 
 func TestHandleErrorOnFindUser(t *testing.T) {
-	itr := NewInteractor(&FakeUserRepo{Err: e.ErrInternal}, &FakeGroupRepo{})
+	itr := New(&FakeUserRepo{Err: e.ErrInternal}, &FakeGroupRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -49,7 +49,7 @@ func TestAssignUserWhoIsAlreadyAssignedHasNoEffect(t *testing.T) {
 	user := usr.NewUser("user@example.com",
 		usr.WithGroups(groups))
 	repo := &FakeUserRepo{Return: &user}
-	itr := NewInteractor(repo, &FakeGroupRepo{})
+	itr := New(repo, &FakeGroupRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Group: "a-group"}, p)
 	assert.True(t, p.GotSuccess)
@@ -63,7 +63,7 @@ func TestAssignUser(t *testing.T) {
 	newGroup := "new-group"
 	updatedGroups := []string{"a-group", newGroup}
 	repo := &FakeUserRepo{Return: &user}
-	itr := NewInteractor(repo, &FakeGroupRepo{})
+	itr := New(repo, &FakeGroupRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Group: newGroup}, p)
 	assert.True(t, p.GotSuccess)

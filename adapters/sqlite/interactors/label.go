@@ -12,11 +12,11 @@ import (
 
 func NewSQLiteLabelInteractors(repo *infra.SQLiteLabelRepo, pageSize int) *lbl.Interactors {
 	return &lbl.Interactors{
-		Find:            *read.NewInteractor(repo),
-		Create:          *create.NewInteractor(repo),
-		Delete:          *delete.NewInteractor(repo),
-		List:            *list.NewInteractor(repo),
-		FetchAll:        *fetchall.NewInteractor(repo),
+		Find:            *read.New(repo),
+		Create:          *create.New(repo),
+		Delete:          *delete.New(repo),
+		List:            *list.New(repo),
+		FetchAll:        *fetchall.New(repo),
 		DefaultPageSize: pageSize,
 	}
 }

@@ -17,14 +17,14 @@ import (
 
 func NewSQLiteUserInteractors(repos *infra.SQLiteInfra, tokenGen tg.TokenGenerator) *usr.Interactors {
 	return &usr.Interactors{
-		Find:          *read.NewInteractor(repos.UserRepo),
-		Create:        *create.NewInteractor(repos.UserRepo, tokenGen),
-		Delete:        *delete.NewInteractor(repos.UserRepo),
-		List:          *list.NewInteractor(repos.UserRepo),
-		RenewToken:    *rt.NewInteractor(repos.UserRepo, tokenGen),
-		AssignRole:    *aro.NewInteractor(repos.UserRepo),
-		UnAssignRole:  *uar.NewInteractor(repos.UserRepo),
-		AssignGroup:   *agr.NewInteractor(repos.UserRepo, repos.GroupRepo),
-		UnAssignGroup: *ugr.NewInteractor(repos.UserRepo, repos.GroupRepo),
+		Find:          read.New(repos.User),
+		Create:        create.New(repos.User, tokenGen),
+		Delete:        delete.New(repos.User),
+		List:          list.New(repos.User),
+		RenewToken:    rt.New(repos.User, tokenGen),
+		AssignRole:    aro.New(repos.User),
+		UnAssignRole:  uar.New(repos.User),
+		AssignGroup:   agr.New(repos.User, repos.Group),
+		UnAssignGroup: ugr.New(repos.User, repos.Group),
 	}
 }

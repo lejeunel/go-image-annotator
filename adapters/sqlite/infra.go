@@ -15,16 +15,16 @@ import (
 )
 
 type SQLiteInfra struct {
-	ImageRepo      *im.SQLiteImageRepo
-	CollectionRepo *clc.SQLiteCollectionRepo
-	LabelRepo      *lbl.SQLiteLabelRepo
-	ImageStore     *im_store.ImageStore
-	FileStore      *af_store.FileStore
-	AnnotationRepo *an.SQLiteAnnotationRepo
-	ScrollerRepo   *scr.SQLiteScrollerRepo
-	GroupRepo      *grp.SQLiteGroupRepo
-	UserRepo       *usr.SQLiteUserRepo
-	Db             *sqlx.DB
+	Image      *im.SQLiteImageRepo
+	Collection *clc.SQLiteCollectionRepo
+	Label      *lbl.SQLiteLabelRepo
+	ImageStore *im_store.ImageStore
+	FileStore  *af_store.FileStore
+	Annotation *an.SQLiteAnnotationRepo
+	Scroller   *scr.SQLiteScrollerRepo
+	Group      *grp.SQLiteGroupRepo
+	User       *usr.SQLiteUserRepo
+	Db         *sqlx.DB
 }
 
 type SQLiteImageStoreRepo struct {
@@ -47,16 +47,16 @@ func NewSQLiteInfra(dbPath, artefactDir string) *SQLiteInfra {
 	imstore := im_store.New(imstorerepo, afrepo)
 	scrrepo := scr.NewSQLiteScrollerRepo(db)
 	return &SQLiteInfra{
-		ImageRepo:      imrepo,
-		CollectionRepo: clrepo,
-		LabelRepo:      lbrepo,
-		ImageStore:     imstore,
-		FileStore:      afrepo,
-		AnnotationRepo: anrepo,
-		ScrollerRepo:   scrrepo,
-		GroupRepo:      grprepo,
-		UserRepo:       usrrepo,
-		Db:             db,
+		Image:      imrepo,
+		Collection: clrepo,
+		Label:      lbrepo,
+		ImageStore: imstore,
+		FileStore:  afrepo,
+		Annotation: anrepo,
+		Scroller:   scrrepo,
+		Group:      grprepo,
+		User:       usrrepo,
+		Db:         db,
 	}
 
 }

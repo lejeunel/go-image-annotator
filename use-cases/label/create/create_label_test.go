@@ -8,7 +8,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{}, WithAuth(FailingAuth{}))
+	itr := New(&FakeRepo{}, WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotAuthErr)
@@ -18,7 +18,7 @@ func TestHandleAuthError(t *testing.T) {
 func TestCreateLabelWithDuplicateNameShouldFail(t *testing.T) {
 	name := "my-label"
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Names: []string{name}})
+	itr := New(&FakeRepo{Names: []string{name}})
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
@@ -26,14 +26,14 @@ func TestCreateLabelWithDuplicateNameShouldFail(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
+	itr := New(&FakeRepo{Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{Name: "a-name"}, p)
 	assert.True(t, p.GotInternalErr)
 }
 
 func TestCreateLabelWithInvalidNameShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{}, WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
+	itr := New(&FakeRepo{}, WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
 	itr.Execute(t.Context(), Request{Name: "invalid-name"}, p)
 	assert.True(t, p.GotValidationErr)
 }
@@ -41,7 +41,7 @@ func TestCreateLabelWithInvalidNameShouldFail(t *testing.T) {
 func TestCreateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	req := Request{Name: "a-name", Description: "a-description"}
 	itr.Execute(t.Context(), req, p)
 

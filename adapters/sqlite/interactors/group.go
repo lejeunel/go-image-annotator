@@ -13,10 +13,10 @@ import (
 
 func NewSQLiteGroupInteractors(repos *infra.SQLiteInfra, tokenGen tg.TokenGenerator) *grp.Interactors {
 	return &grp.Interactors{
-		Find:   read.NewInteractor(repos.GroupRepo),
-		Create: create.NewInteractor(repos.GroupRepo),
-		Delete: delete.NewInteractor(repos.GroupRepo),
-		List:   list.NewInteractor(repos.GroupRepo),
-		Update: update.NewInteractor(repos.GroupRepo),
+		Find:   read.New(repos.Group),
+		Create: create.New(repos.Group),
+		Delete: delete.New(repos.Group),
+		List:   list.New(repos.Group),
+		Update: update.New(repos.Group),
 	}
 }

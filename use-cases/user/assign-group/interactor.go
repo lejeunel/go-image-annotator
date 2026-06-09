@@ -62,7 +62,7 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(ur UserRepo, gr GroupRepo, opts ...Option) *Interactor {
+func New(ur UserRepo, gr GroupRepo, opts ...Option) Interactor {
 	i := &Interactor{userRepo: ur,
 		groupRepo: gr,
 		logger:    logging.NewNoOpLogger(),
@@ -72,5 +72,5 @@ func NewInteractor(ur UserRepo, gr GroupRepo, opts ...Option) *Interactor {
 	for _, opt := range opts {
 		opt(i)
 	}
-	return i
+	return *i
 }

@@ -10,7 +10,7 @@ import (
 
 func TestHandleNotFoundErrOnList(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnList: true, Err: e.ErrNotFound},
+	itr := New(&FakeRepo{ErrOnList: true, Err: e.ErrNotFound},
 		&st.FakeImageStore{})
 	itr.Execute(Request{}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -19,7 +19,7 @@ func TestHandleNotFoundErrOnList(t *testing.T) {
 
 func TestHandleInternalErrOnList(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnList: true, Err: e.ErrInternal},
+	itr := New(&FakeRepo{ErrOnList: true, Err: e.ErrInternal},
 		&st.FakeImageStore{})
 	itr.Execute(Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -28,7 +28,7 @@ func TestHandleInternalErrOnList(t *testing.T) {
 
 func TestHandleInternalErrOnImageBuild(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{}, &st.FakeImageStore{Err: e.ErrInternal})
+	itr := New(&FakeRepo{}, &st.FakeImageStore{Err: e.ErrInternal})
 	itr.Execute(Request{PageSize: 1}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -36,7 +36,7 @@ func TestHandleInternalErrOnImageBuild(t *testing.T) {
 
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal}, &st.FakeImageStore{})
+	itr := New(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal}, &st.FakeImageStore{})
 	itr.Execute(Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -45,7 +45,7 @@ func TestHandleInternalErrOnCount(t *testing.T) {
 func TestListImages(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{}
-	itr := NewInteractor(repo, &st.FakeImageStore{})
+	itr := New(repo, &st.FakeImageStore{})
 	r := Request{Page: 1, PageSize: 2}
 	itr.Execute(r, p)
 	assert.Equal(t, r.PageSize, len(p.Got.Images))
@@ -54,7 +54,7 @@ func TestListImages(t *testing.T) {
 func TestPaginationMetaData(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{Count_: 10}
-	itr := NewInteractor(repo, &st.FakeImageStore{})
+	itr := New(repo, &st.FakeImageStore{})
 	r := Request{Page: 1, PageSize: 2}
 	itr.Execute(r, p)
 	pg := p.Got.Pagination
@@ -67,7 +67,7 @@ func TestPaginationMetaData(t *testing.T) {
 func TestQueryCorrectPaginationWithFilters(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{Count_: 10}
-	itr := NewInteractor(repo, &st.FakeImageStore{})
+	itr := New(repo, &st.FakeImageStore{})
 	r := Request{Page: 1, PageSize: 2}
 	itr.Execute(r, p)
 	f := repo.GotFilters

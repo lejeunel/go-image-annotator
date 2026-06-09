@@ -44,7 +44,7 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(imageRepo ImageRepo, collectionRepo CollectionRepo,
+func New(imageRepo ImageRepo, collectionRepo CollectionRepo,
 	labelRepo LabelRepo, annotationRepo AnnotationRepo,
 	fileStore ast.Interface, hasher hash.Hash, specsDetector IImageSpecsDetector, opts ...Option) *Interactor {
 	i := &Interactor{ImageRepo: imageRepo, CollectionRepo: collectionRepo,

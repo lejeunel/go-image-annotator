@@ -58,7 +58,7 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(r Repo, g TokenGenerator, opts ...Option) *Interactor {
+func New(r Repo, g TokenGenerator, opts ...Option) Interactor {
 	i := &Interactor{repo: r,
 		logger:         logging.NewNoOpLogger(),
 		auth:           auth.PassThroughAuth{},
@@ -68,5 +68,5 @@ func NewInteractor(r Repo, g TokenGenerator, opts ...Option) *Interactor {
 	for _, opt := range opts {
 		opt(i)
 	}
-	return i
+	return *i
 }

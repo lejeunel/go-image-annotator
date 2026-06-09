@@ -17,7 +17,7 @@ type Interactor struct {
 	logger *slog.Logger
 }
 
-func NewInteractor(store imstore.Interface) *Interactor {
+func New(store imstore.Interface) *Interactor {
 	return &Interactor{store: store, logger: logging.NewNoOpLogger()}
 }
 

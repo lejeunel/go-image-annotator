@@ -14,7 +14,7 @@ func TestReadCollection(t *testing.T) {
 		clc.WithDescription("a-description"))
 	repo := &FakeRepo{Collection: collection}
 	p := &FakePresenter{}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	itr.Execute(t.Context(), Request{Name: collection.Name}, p)
 	assert.Equal(t, Response{Name: collection.Name, Description: collection.Description}, p.Got)
 }
@@ -22,7 +22,7 @@ func TestReadCollection(t *testing.T) {
 func TestReadNonExistingCollectionShouldFail(t *testing.T) {
 	repo := &FakeRepo{Collection: clc.Collection{Name: "my-collection", Description: "a-description"}}
 	p := &FakePresenter{}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	req := Request{Name: "non-existing-collection"}
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -31,7 +31,7 @@ func TestReadNonExistingCollectionShouldFail(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
+	itr := New(&FakeRepo{Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 }

@@ -10,7 +10,7 @@ import (
 func TestReadNonExistingLabelShouldFail(t *testing.T) {
 	repo := &FakeRepo{Label: l.Label{Name: "my-label", Description: "a-description"}}
 	p := &FakePresenter{}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	req := Request{Name: "non-existing-label"}
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -19,7 +19,7 @@ func TestReadNonExistingLabelShouldFail(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
+	itr := New(&FakeRepo{Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -31,7 +31,7 @@ func TestReadLabel(t *testing.T) {
 		l.WithDescription("a-description"))
 	repo := &FakeRepo{Label: label}
 	p := &FakePresenter{}
-	itr := NewInteractor(repo)
+	itr := New(repo)
 	req := Request{Name: label.Name}
 	want := Response{Name: label.Name, Description: label.Description}
 	itr.Execute(t.Context(), req, p)
