@@ -13,7 +13,7 @@ type FakeRepo struct {
 	Err    error
 }
 
-func (r *FakeRepo) FindUser(id string) (*u.User, error) {
+func (r *FakeRepo) Find(id string) (*u.User, error) {
 	if r.Err != nil {
 		return nil, r.Err
 	}

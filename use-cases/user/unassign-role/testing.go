@@ -21,8 +21,7 @@ func (p *FakePresenter) Success(r Response) {
 
 type FakeRepo struct {
 	Err               error
-	UserMissing       bool
-	GroupMissing      bool
+	Missing           bool
 	Return            *usr.User
 	GotUnassignedRole *string
 }
@@ -38,12 +37,6 @@ func (r *FakeRepo) UnAssignRole(id string, role string) error {
 		return r.Err
 	}
 	r.GotUnassignedRole = &role
-	return nil
-}
-func (r *FakeRepo) UserExists(id string) error {
-	if r.UserMissing {
-		return e.ErrNotFound
-	}
 	return nil
 }
 

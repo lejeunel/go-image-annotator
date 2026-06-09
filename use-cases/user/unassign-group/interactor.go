@@ -12,26 +12,22 @@ import (
 )
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   Auth
+	userRepo  UserRepo
+	groupRepo GroupRepo
+	logger    *slog.Logger
+	auth      Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	if err := i.auth.UnAssignUserFromGroup(ctx, r.Id, r.Group); err != nil {
 		i.handleError(err, out)
 		return
-
 	}
-	if err := i.repo.UserExists(r.Id); err != nil {
+	if err := i.groupRepo.Exists(r.Group); err != nil {
 		i.handleError(err, out)
 		return
 	}
-	if err := i.repo.GroupExists(r.Id); err != nil {
-		i.handleError(err, out)
-		return
-	}
-	user, err := i.repo.Find(r.Id)
+	user, err := i.userRepo.Find(r.Id)
 	if err != nil {
 		i.handleError(err, out)
 		return
@@ -40,7 +36,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Success(Response{Id: r.Id, Groups: user.Groups})
 		return
 	}
-	if err := i.repo.UnAssignFromGroup(r.Id, r.Group); err != nil {
+	if err := i.userRepo.UnAssignFromGroup(r.Id, r.Group); err != nil {
 		i.handleError(err, out)
 		return
 	}
@@ -69,10 +65,11 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(r Repo, opts ...Option) *Interactor {
-	i := &Interactor{repo: r,
-		logger: logging.NewNoOpLogger(),
-		auth:   auth.PassThroughAuth{},
+func NewInteractor(ur UserRepo, gr GroupRepo, opts ...Option) *Interactor {
+	i := &Interactor{userRepo: ur,
+		groupRepo: gr,
+		logger:    logging.NewNoOpLogger(),
+		auth:      auth.PassThroughAuth{},
 	}
 
 	for _, opt := range opts {

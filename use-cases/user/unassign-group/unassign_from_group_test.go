@@ -9,7 +9,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{},
+	itr := NewInteractor(&FakeUserRepo{}, &FakeGroupRepo{},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
@@ -18,7 +18,7 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestMissingUserShouldFail(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{UserMissing: true})
+	itr := NewInteractor(&FakeUserRepo{Missing: true}, &FakeGroupRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user@example.com", Group: "my-group"}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -26,7 +26,7 @@ func TestMissingUserShouldFail(t *testing.T) {
 }
 
 func TestMissingGroupShouldFail(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{GroupMissing: true})
+	itr := NewInteractor(&FakeUserRepo{}, &FakeGroupRepo{Missing: true})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user@example.com", Group: "my-group"}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -34,7 +34,7 @@ func TestMissingGroupShouldFail(t *testing.T) {
 }
 
 func TestHandleErrorOnFindUser(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
+	itr := NewInteractor(&FakeUserRepo{Err: e.ErrInternal}, &FakeGroupRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -44,8 +44,8 @@ func TestHandleErrorOnFindUser(t *testing.T) {
 func TestUnAssignUserWhoIsNotAssignedHasNoEffect(t *testing.T) {
 	group := "a-group"
 	user := usr.NewUser("user@example.com")
-	repo := &FakeRepo{Return: &user}
-	itr := NewInteractor(repo)
+	repo := &FakeUserRepo{Return: &user}
+	itr := NewInteractor(repo, &FakeGroupRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Group: group}, p)
 	assert.True(t, p.GotSuccess)
@@ -57,8 +57,8 @@ func TestUnAssignUser(t *testing.T) {
 	group := "a-group"
 	user := usr.NewUser("user@example.com",
 		usr.WithGroups([]string{group}))
-	repo := &FakeRepo{Return: &user}
-	itr := NewInteractor(repo)
+	repo := &FakeUserRepo{Return: &user}
+	itr := NewInteractor(repo, &FakeGroupRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Group: group}, p)
 	assert.True(t, p.GotSuccess)

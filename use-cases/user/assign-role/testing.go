@@ -39,12 +39,6 @@ func (r *FakeRepo) AssignRole(id string, role string) error {
 	r.GotNewRole = &role
 	return nil
 }
-func (r *FakeRepo) UserExists(id string) error {
-	if r.UserMissing {
-		return e.ErrNotFound
-	}
-	return nil
-}
 
 type FailingAuth struct {
 }

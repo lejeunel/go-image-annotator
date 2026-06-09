@@ -5,5 +5,5 @@ import (
 )
 
 type Repo interface {
-	FindUser(string) (*u.User, error)
+	Find(string) (*u.User, error)
 }

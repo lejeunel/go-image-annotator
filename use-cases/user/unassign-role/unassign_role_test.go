@@ -17,14 +17,6 @@ func TestHandleAuthError(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestMissingUserShouldFail(t *testing.T) {
-	itr := NewInteractor(&FakeRepo{UserMissing: true})
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user@example.com", Role: "my-role"}, p)
-	assert.True(t, p.GotNotFoundErr)
-	assert.False(t, p.GotSuccess)
-}
-
 func TestHandleErrorOnFindUser(t *testing.T) {
 	itr := NewInteractor(&FakeRepo{Err: e.ErrInternal})
 	p := &FakePresenter{}

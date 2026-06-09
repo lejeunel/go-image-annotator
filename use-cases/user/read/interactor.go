@@ -20,7 +20,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		i.handleError(err, out)
 		return
 	}
-	found, err := i.repo.FindUser(r.Id)
+	found, err := i.repo.Find(r.Id)
 	if err != nil {
 		i.handleError(err, out)
 		return

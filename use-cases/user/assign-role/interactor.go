@@ -12,7 +12,7 @@ import (
 )
 
 type Interactor struct {
-	repo   Repo
+	repo   UserRepo
 	logger *slog.Logger
 	auth   Auth
 }
@@ -22,10 +22,6 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		i.handleError(err, out)
 		return
 
-	}
-	if err := i.repo.UserExists(r.Id); err != nil {
-		i.handleError(err, out)
-		return
 	}
 	user, err := i.repo.Find(r.Id)
 	if err != nil {
@@ -57,7 +53,7 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(r Repo, opts ...Option) *Interactor {
+func NewInteractor(r UserRepo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r,
 		logger: logging.NewNoOpLogger(),
 		auth:   auth.PassThroughAuth{},

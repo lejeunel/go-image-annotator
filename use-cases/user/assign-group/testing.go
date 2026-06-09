@@ -19,38 +19,36 @@ func (p *FakePresenter) Success(r Response) {
 	p.Got = r
 }
 
-type FakeRepo struct {
-	Err          error
-	UserMissing  bool
-	GroupMissing bool
-	Return       *usr.User
-	GotNewGroup  *string
+type FakeGroupRepo struct {
+	Err     error
+	Missing bool
 }
 
-func (r *FakeRepo) Find(id string) (*usr.User, error) {
+func (r *FakeGroupRepo) Exists(id string) error {
+	if r.Missing {
+		return e.ErrNotFound
+	}
+	return nil
+}
+
+type FakeUserRepo struct {
+	Err         error
+	Missing     bool
+	Return      *usr.User
+	GotNewGroup *string
+}
+
+func (r *FakeUserRepo) Find(id string) (*usr.User, error) {
 	if r.Err != nil {
 		return nil, r.Err
 	}
 	return r.Return, nil
 }
-func (r *FakeRepo) AssignToGroup(id string, group string) error {
+func (r *FakeUserRepo) AssignToGroup(id string, group string) error {
 	if r.Err != nil {
 		return r.Err
 	}
 	r.GotNewGroup = &group
-	return nil
-}
-func (r *FakeRepo) UserExists(id string) error {
-	if r.UserMissing {
-		return e.ErrNotFound
-	}
-	return nil
-}
-
-func (r *FakeRepo) GroupExists(id string) error {
-	if r.GroupMissing {
-		return e.ErrNotFound
-	}
 	return nil
 }
 
