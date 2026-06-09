@@ -10,12 +10,12 @@ func TestCreatedExists(t *testing.T) {
 	repo := NewTestSQLiteGroupRepo()
 	group, _ := CreateGroup(repo, "a-group")
 	exists, _ := repo.Exists(group.Name)
-	assert.True(t, exists)
+	assert.True(t, *exists)
 }
 
 func TestNonExistingDoesNotExists(t *testing.T) {
 	exists, _ := NewTestSQLiteGroupRepo().Exists("non-existing-group")
-	assert.False(t, exists)
+	assert.False(t, *exists)
 }
 
 func TestInternalErrOnExistsShouldFail(t *testing.T) {

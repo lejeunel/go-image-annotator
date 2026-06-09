@@ -61,8 +61,12 @@ CREATE TABLE sessions (
 	data BLOB NOT NULL,
 	expiry REAL NOT NULL
 );
-
 CREATE INDEX sessions_expiry_idx ON sessions(expiry);
+
+CREATE TABLE users (
+	id varchar(60) PRIMARY KEY,
+    roles TEXT
+);
 -- +goose Down
 
 DROP TABLE labels;
@@ -71,3 +75,4 @@ DROP TABLE images_collections;
 DROP TABLE images;
 DROP TABLE annotations;
 DROP TABLE sessions;
+DROP TABLE groups;

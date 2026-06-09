@@ -5,17 +5,15 @@ Add dependency on Group.FindByName
 * TODO Add bounding box: check for range constraints
 * TODO Import image into collection with annotations (needs source collection)
 * TODO Redesign users use-cases: Separate repos into a UserRepo and a GroupRepo.
-
 GroupRepo should contain:
-- Exists(string) error
+** DONE Exists(string) (*bool, error)
 * TODO users sqlite adapter
-	Create(usr.User) error
-	Delete(string) error
-	List(Request) ([]*u.User, error)
-	Count() (int64, error)
-	Find(string) (*usr.User, error)
-	UnAssignRole(string, string) error
-	AssignRole(string, string) error
-	AssignToGroup(string, string) error
-	UnAssignFromGroup(string, string) error
-	GroupExists(string) error
+** DONE Create(usr.User) error
+** DONE Delete(string) error
+** DONE List(Request) ([]*u.User, error)
+** DONE Count() (int64, error)
+** DONE Find(string) (*usr.User, error)
+** TODO UnAssignRole(string, string) error
+** TODO AssignRole(string, string) error
+** TODO AssignToGroup(string, string) error
+** TODO UnAssignFromGroup(string, string) error

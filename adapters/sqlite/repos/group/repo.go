@@ -58,15 +58,15 @@ func (r *SQLiteGroupRepo) Find(name string) (*g.Group, error) {
 	entity := r.rowToEntity(row)
 	return &entity, nil
 }
-func (r *SQLiteGroupRepo) Exists(name string) (bool, error) {
+func (r *SQLiteGroupRepo) Exists(name string) (*bool, error) {
 	var exists bool
 
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM groups WHERE name = $1)`, name)
 	if err != nil {
-		return false, fmt.Errorf("checking whether record exists: %v: %w", err, e.ErrInternal)
+		return nil, fmt.Errorf("checking whether record exists: %v: %w", err, e.ErrInternal)
 	}
 
-	return exists, nil
+	return &exists, nil
 }
 func (r *SQLiteGroupRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM groups WHERE name=$1", name)
