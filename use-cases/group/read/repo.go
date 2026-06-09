@@ -1,9 +1,9 @@
 package read
 
 import (
-	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	grp "github.com/lejeunel/go-image-annotator/entities/group"
 )
 
 type Repo interface {
-	FindCollectionByName(string) (*clc.Collection, error)
+	Find(string) (*grp.Group, error)
 }

@@ -21,11 +21,13 @@ func (r *FakeRepo) Update(m Model) error {
 	r.Got = m
 	return nil
 }
-func (r *FakeRepo) Exists(n string) (bool, error) {
+func (r *FakeRepo) Exists(n string) (*bool, error) {
+	var exist = false
 	if slices.Contains(r.Names, n) {
-		return true, nil
+		exist = true
+		return &exist, nil
 	}
-	return false, nil
+	return &exist, nil
 }
 func (r *FakeRepo) GroupOfCollection(n string) (*string, error) {
 	group := "my-group"

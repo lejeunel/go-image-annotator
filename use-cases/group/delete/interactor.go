@@ -39,11 +39,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 func (i *Interactor) authorizeDeletion(ctx context.Context, name string) error {
 	errCtx := fmt.Errorf("checking group ownership of collection with name %v is empty", name)
-	group, err := i.repo.GroupOfCollection(name)
-	if err != nil {
-		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
-	}
-	if err := i.auth.DeleteCollection(ctx, *group); err != nil {
+	if err := i.auth.DeleteGroup(ctx, name); err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrAuth)
 	}
 	return nil
@@ -68,7 +64,7 @@ func (i *Interactor) ensureExists(name string) error {
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
-	if !exists {
+	if !*exists {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
 	}
 	return nil

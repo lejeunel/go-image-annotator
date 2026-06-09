@@ -8,5 +8,5 @@ type UserRepo interface {
 }
 
 type GroupRepo interface {
-	Exists(string) error
+	Exists(string) (*bool, error)
 }

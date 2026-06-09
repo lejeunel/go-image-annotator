@@ -67,6 +67,12 @@ CREATE TABLE users (
 	id varchar(60) PRIMARY KEY,
     roles TEXT
 );
+
+CREATE TABLE IF NOT EXISTS users_groups (
+  user_id varchar(36) REFERENCES users(id),
+  group_id varchar(36) REFERENCES groups(id),
+  PRIMARY KEY (user_id, group_id)
+);
 -- +goose Down
 
 DROP TABLE labels;

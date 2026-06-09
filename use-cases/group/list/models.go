@@ -1,7 +1,7 @@
 package list
 
 import (
-	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	grp "github.com/lejeunel/go-image-annotator/entities/group"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
@@ -11,6 +11,6 @@ type Request struct {
 }
 
 type Response struct {
-	Collections []*clc.Collection
-	Pagination  pagination.Pagination
+	Groups     []*grp.Group
+	Pagination pagination.Pagination
 }

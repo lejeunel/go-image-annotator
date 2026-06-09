@@ -33,16 +33,16 @@ func (r *FakeRepo) Count() (int64, error) {
 	return int64(r.Count_), nil
 }
 
-func (r *FakeRepo) List(req Request) ([]*u.User, error) {
+func (r *FakeRepo) List(req Request) ([]u.User, error) {
 	if r.ErrOnList {
 		return nil, r.Err
 
 	}
 
-	result := []*u.User{}
+	result := []u.User{}
 	for range req.PageSize {
 		usr := u.NewUser("the-id")
-		result = append(result, &usr)
+		result = append(result, usr)
 	}
 	return result, nil
 

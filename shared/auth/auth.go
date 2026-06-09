@@ -84,3 +84,7 @@ func (a PassThroughAuth) FindUser(ctx context.Context, id string) error {
 func (a PassThroughAuth) CreateGroup(ctx context.Context) error {
 	return nil
 }
+
+func (a PassThroughAuth) DeleteGroup(ctx context.Context, group string) error {
+	return nil
+}

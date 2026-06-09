@@ -64,7 +64,7 @@ func (i *Interactor) isDuplicate(name string) error {
 	if err != nil {
 		return fmt.Errorf("%v: %w", errBaseMsg, e.ErrInternal)
 	}
-	if alreadyExists {
+	if *alreadyExists {
 		return fmt.Errorf("%v: %w", errBaseMsg, e.ErrDuplicate)
 	}
 	return nil
@@ -91,7 +91,7 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(r Repo, opts ...Option) *Interactor {
+func NewInteractor(r Repo, opts ...Option) Interactor {
 	i := &Interactor{repo: r, validator: v.NewNameValidator(),
 		logger: logging.NewNoOpLogger(),
 		auth:   auth.PassThroughAuth{}}
@@ -99,5 +99,5 @@ func NewInteractor(r Repo, opts ...Option) *Interactor {
 	for _, opt := range opts {
 		opt(i)
 	}
-	return i
+	return *i
 }

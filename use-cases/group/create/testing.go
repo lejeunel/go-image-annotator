@@ -24,11 +24,13 @@ func (r *FakeRepo) Create(g g.Group) error {
 	return nil
 }
 
-func (r *FakeRepo) Exists(name string) (bool, error) {
+func (r *FakeRepo) Exists(name string) (*bool, error) {
+	var exist = true
 	if slices.Contains(r.Names, name) {
-		return true, nil
+		return &exist, nil
 	}
-	return false, nil
+	exist = false
+	return &exist, nil
 }
 
 type FakePresenter struct {

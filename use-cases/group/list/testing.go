@@ -1,7 +1,7 @@
 package list
 
 import (
-	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	grp "github.com/lejeunel/go-image-annotator/entities/group"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
@@ -20,14 +20,14 @@ func (r *FakeRepo) Count() (*int64, error) {
 	return &r.Count_, nil
 }
 
-func (r *FakeRepo) List(req Request) ([]*clc.Collection, error) {
+func (r *FakeRepo) List(req Request) ([]*grp.Group, error) {
 	if r.ErrOnList {
 		return nil, r.Err
 	}
 
-	result := []*clc.Collection{}
+	result := []*grp.Group{}
 	for range req.PageSize {
-		c := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+		c := grp.NewGroup(grp.NewGroupId(), "a-group")
 		result = append(result, &c)
 	}
 	return result, nil

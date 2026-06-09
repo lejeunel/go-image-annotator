@@ -6,5 +6,5 @@ import (
 
 type Auth interface {
 	// delete collection given its group ownership
-	DeleteCollection(ctx context.Context, group string) error
+	DeleteGroup(ctx context.Context, group string) error
 }

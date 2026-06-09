@@ -24,11 +24,12 @@ type FakeGroupRepo struct {
 	Missing bool
 }
 
-func (r *FakeGroupRepo) Exists(id string) error {
+func (r *FakeGroupRepo) Exists(id string) (*bool, error) {
 	if r.Missing {
-		return e.ErrNotFound
+		return nil, e.ErrNotFound
 	}
-	return nil
+	exist := true
+	return &exist, nil
 }
 
 type FakeUserRepo struct {

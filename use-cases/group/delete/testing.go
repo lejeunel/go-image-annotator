@@ -25,11 +25,13 @@ func (r *FakeRepo) Delete(string) error {
 	return nil
 }
 
-func (r *FakeRepo) Exists(c string) (bool, error) {
+func (r *FakeRepo) Exists(c string) (*bool, error) {
+	var exist = true
 	if r.Missing {
-		return false, nil
+		exist = false
+		return &exist, nil
 	}
-	return true, nil
+	return &exist, nil
 }
 
 func (r *FakeRepo) IsPopulated(c string) (*bool, error) {
@@ -53,6 +55,6 @@ func (p *FakePresenter) Success() {
 type FailingAuth struct {
 }
 
-func (f FailingAuth) DeleteCollection(ctx context.Context, g string) error {
+func (f FailingAuth) DeleteGroup(ctx context.Context, g string) error {
 	return e.ErrAuth
 }

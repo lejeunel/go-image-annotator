@@ -16,10 +16,8 @@ import (
 )
 
 func appendUnique(slice []string, s string) []string {
-	for _, existing := range slice {
-		if existing == s {
-			return slice
-		}
+	if slices.Contains(slice, s) {
+		return slice
 	}
 	return append(slice, s)
 }
@@ -54,7 +52,40 @@ func (r *SQLiteUserRepo) Create(usr u.User) error {
 		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
 	}
 
+	for _, g := range usr.Groups {
+		if err := r.AssignToGroup(usr.Id, g); err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+func (r *SQLiteUserRepo) AssignToGroup(user string, group string) error {
+	query := "INSERT INTO users_groups (user_id,group_id) VALUES ($1,(SELECT id FROM groups WHERE name=$2))"
+	_, err := r.Db.Exec(query, user, group)
+	if err != nil {
+		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
+	}
+	return nil
+}
+func (r *SQLiteUserRepo) UnAssignFromGroup(user string, group string) error {
+	query := "DELETE FROM users_groups WHERE user_id=$1 AND group_id=(SELECT id FROM groups WHERE name=$2)"
+	_, err := r.Db.Exec(query, user, group)
+	if err != nil {
+		return fmt.Errorf("unassigning user from group: %v: %w", err, e.ErrInternal)
+	}
+	return nil
+}
+func (r *SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
+	var groups []string
+	query := "SELECT name FROM groups WHERE id=(SELECT id FROM users_groups WHERE user_id=$1)"
+	err := r.Db.Select(&groups, query, userId)
+	if err != nil {
+		return nil, fmt.Errorf("fetching groups: %v: %w", err, e.ErrInternal)
+	}
+
+	return groups, nil
 
 }
 func (r *SQLiteUserRepo) Find(id string) (*u.User, error) {
@@ -76,7 +107,13 @@ func (r *SQLiteUserRepo) Find(id string) (*u.User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("finding user by id: unmarshaling user roles %v: %w: %w", record.Roles, err, e.ErrInternal)
 	}
-	user := u.NewUser(record.Id, u.WithRoles(roles))
+
+	groups, err := r.getGroupNames(id)
+	if err != nil {
+		return nil, err
+	}
+
+	user := u.NewUser(record.Id, u.WithRoles(roles), u.WithGroups(groups))
 	return &user, nil
 }
 func (r *SQLiteUserRepo) Delete(id string) error {
@@ -86,6 +123,17 @@ func (r *SQLiteUserRepo) Delete(id string) error {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
+}
+func (r *SQLiteUserRepo) Exists(id string) (bool, error) {
+	var exists bool
+
+	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM users WHERE id=$1)`, id)
+	if err != nil {
+		return exists, fmt.Errorf("%v: %w", err, e.ErrInternal)
+	}
+
+	return exists, nil
+
 }
 func (r *SQLiteUserRepo) Count() (int64, error) {
 	var count int64

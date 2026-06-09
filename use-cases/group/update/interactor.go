@@ -74,7 +74,7 @@ func (i *Interactor) ensureNameExists(name string) error {
 	if err != nil {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
 	}
-	if !exists {
+	if !*exists {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrNotFound)
 	}
 	return nil
@@ -86,7 +86,7 @@ func (i *Interactor) ensureNameDoesNotExist(name string) error {
 	if err != nil {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
 	}
-	if exists {
+	if *exists {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrDuplicate)
 	}
 	return nil

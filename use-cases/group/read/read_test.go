@@ -4,26 +4,25 @@ import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 
-	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	grp "github.com/lejeunel/go-image-annotator/entities/group"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-func TestReadCollection(t *testing.T) {
-	collection := clc.NewCollection(clc.NewCollectionId(),
-		"my-collection",
-		clc.WithDescription("a-description"))
-	repo := &FakeRepo{Collection: collection}
+func TestRead(t *testing.T) {
+	group := grp.NewGroup(grp.NewGroupId(), "my-group")
+	repo := &FakeRepo{Group: group}
 	p := &FakePresenter{}
 	itr := NewInteractor(repo)
-	itr.Execute(t.Context(), Request{Name: collection.Name}, p)
-	assert.Equal(t, Response{Name: collection.Name, Description: collection.Description}, p.Got)
+	itr.Execute(t.Context(), Request{Name: group.Name}, p)
+	assert.Equal(t, Response{Name: group.Name}, p.Got)
 }
 
-func TestReadNonExistingCollectionShouldFail(t *testing.T) {
-	repo := &FakeRepo{Collection: clc.Collection{Name: "my-collection", Description: "a-description"}}
+func TestReadNonExistingShouldFail(t *testing.T) {
+	group := grp.NewGroup(grp.NewGroupId(), "my-group")
+	repo := &FakeRepo{Group: group}
 	p := &FakePresenter{}
 	itr := NewInteractor(repo)
-	req := Request{Name: "non-existing-collection"}
+	req := Request{Name: "non-existing-group"}
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)

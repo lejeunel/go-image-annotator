@@ -9,6 +9,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/image"
 	lbl "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/label"
 	scr "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/scroll"
+	usr "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/user"
 	af_store "github.com/lejeunel/go-image-annotator/app/file-store"
 	im_store "github.com/lejeunel/go-image-annotator/app/image-store"
 )
@@ -22,6 +23,7 @@ type SQLiteInfra struct {
 	AnnotationRepo *an.SQLiteAnnotationRepo
 	ScrollerRepo   *scr.SQLiteScrollerRepo
 	GroupRepo      *grp.SQLiteGroupRepo
+	UserRepo       *usr.SQLiteUserRepo
 	Db             *sqlx.DB
 }
 
@@ -40,6 +42,7 @@ func NewSQLiteInfra(dbPath, artefactDir string) *SQLiteInfra {
 	lbrepo := lbl.NewSQLiteLabelRepo(db)
 	afrepo := af_store.NewFileStore(artefactDir)
 	grprepo := grp.NewSQLiteGroupRepo(db)
+	usrrepo := usr.NewSQLiteUserRepo(db)
 	imstorerepo := SQLiteImageStoreRepo{imrepo, clrepo, lbrepo, anrepo}
 	imstore := im_store.New(imstorerepo, afrepo)
 	scrrepo := scr.NewSQLiteScrollerRepo(db)
@@ -52,6 +55,7 @@ func NewSQLiteInfra(dbPath, artefactDir string) *SQLiteInfra {
 		AnnotationRepo: anrepo,
 		ScrollerRepo:   scrrepo,
 		GroupRepo:      grprepo,
+		UserRepo:       usrrepo,
 		Db:             db,
 	}
 

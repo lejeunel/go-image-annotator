@@ -22,8 +22,13 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		i.handleError(err, out)
 		return
 	}
-	if err := i.groupRepo.Exists(r.Group); err != nil {
+	exists, err := i.groupRepo.Exists(r.Group)
+	if err != nil {
 		i.handleError(err, out)
+		return
+	}
+	if !*exists {
+		i.handleError(fmt.Errorf("checking for existence of group %v", r.Group), out)
 		return
 	}
 	user, err := i.userRepo.Find(r.Id)

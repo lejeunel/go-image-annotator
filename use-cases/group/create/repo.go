@@ -6,5 +6,5 @@ import (
 
 type Repo interface {
 	Create(g.Group) error
-	Exists(string) (bool, error)
+	Exists(string) (*bool, error)
 }

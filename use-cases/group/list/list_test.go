@@ -40,7 +40,7 @@ func TestList(t *testing.T) {
 	itr := NewInteractor(repo)
 	req := Request{PageSize: pageSize, Page: page}
 	itr.Execute(t.Context(), req, p)
-	assert.Equal(t, len(p.Got.Collections), pageSize, "page size")
+	assert.Equal(t, len(p.Got.Groups), pageSize, "page size")
 	assert.Equal(t, p.Got.Pagination.TotalRecords, count, "total records")
 	assert.Equal(t, int(p.Got.Pagination.TotalPages), 2, "total pages")
 	assert.Equal(t, p.Got.Pagination.Page, page, "page")

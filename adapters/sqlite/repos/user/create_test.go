@@ -20,15 +20,22 @@ func CreateUser(repo *SQLiteUserRepo, id string) (*u.User, error) {
 func TestInternalErrOnCreateShouldFail(t *testing.T) {
 	repo := NewTestSQLiteUserRepo()
 	repo.Db.Close()
-	_, err := CreateUser(repo, "user@example.com")
+	_, err := CreateUser(repo, userId)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestCreateAddsCount(t *testing.T) {
 	repo := NewTestSQLiteUserRepo()
-	_, err := CreateUser(repo, "user@example.com")
+	_, err := CreateUser(repo, userId)
 	assert.NoError(t, err)
 	count, err := repo.Count()
 	assert.Equal(t, int64(1), count)
 	assert.NoError(t, err)
+}
+
+func TestNoCreatedUserDoNotExist(t *testing.T) {
+	repo := NewTestSQLiteUserRepo()
+	exists, err := repo.Exists(userId)
+	assert.NoError(t, err)
+	assert.False(t, exists)
 }

@@ -1,11 +1,11 @@
-package collection
+package group
 
 import (
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/delete"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/read"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
+	"github.com/lejeunel/go-image-annotator/use-cases/group/create"
+	"github.com/lejeunel/go-image-annotator/use-cases/group/delete"
+	"github.com/lejeunel/go-image-annotator/use-cases/group/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/group/read"
+	"github.com/lejeunel/go-image-annotator/use-cases/group/update"
 )
 
 type Interactors struct {

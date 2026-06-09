@@ -58,9 +58,17 @@ func (r *SQLiteGroupRepo) Find(name string) (*g.Group, error) {
 	entity := r.rowToEntity(row)
 	return &entity, nil
 }
+func (r *SQLiteGroupRepo) IsPopulated(name string) (*bool, error) {
+	var exists bool
+	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM collections WHERE group_id=(SELECT id FROM groups WHERE name=$1))`, name)
+	if err != nil {
+		return nil, fmt.Errorf("checking whether group is used: %v: %w", err, e.ErrInternal)
+	}
+
+	return &exists, nil
+}
 func (r *SQLiteGroupRepo) Exists(name string) (*bool, error) {
 	var exists bool
-
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM groups WHERE name = $1)`, name)
 	if err != nil {
 		return nil, fmt.Errorf("checking whether record exists: %v: %w", err, e.ErrInternal)

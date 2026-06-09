@@ -1,6 +1,9 @@
 package group
 
 import (
+	s "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
+	clcr "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/collection"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -37,4 +40,16 @@ func TestDelete(t *testing.T) {
 	grp, _ := CreateGroup(repo, "a-group")
 	err := repo.Delete(grp.Name)
 	assert.Nil(t, err)
+}
+
+func TestGroupPopulatedWithCollection(t *testing.T) {
+	db := s.NewSQLiteDB(":memory:")
+	clcRepo := clcr.NewSQLiteCollectionRepo(db)
+	groupRepo := NewSQLiteGroupRepo(db)
+	group, _ := CreateGroup(groupRepo, "a-group")
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection", clc.WithGroup(*group))
+	clcRepo.Create(collection)
+	isPopulated, err := groupRepo.IsPopulated(group.Name)
+	assert.NoError(t, err)
+	assert.True(t, *isPopulated)
 }

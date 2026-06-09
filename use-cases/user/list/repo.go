@@ -5,6 +5,6 @@ import (
 )
 
 type Repo interface {
-	List(Request) ([]*u.User, error)
+	List(Request) ([]u.User, error)
 	Count() (int64, error)
 }
