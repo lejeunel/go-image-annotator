@@ -194,6 +194,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /users:
+    post:
+      summary: Create a new user
+      description: Creates a new user. Duplicate id are not allowed
+      operationId: createUser
+      tags: [User]
+      requestBody:
+        description: User to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '200':
+          description: user response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
   /collections:
     get:
       summary: List collections
@@ -406,7 +433,19 @@ components:
           type: integer
           format: int64
           description: total number of pages
+    User:
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Name of the user
+        is_admin:
+          type: boolean
+          description: Is the user admin?
     Collection:
+      required:
+        - name
       properties:
         name:
           type: string
@@ -543,6 +582,17 @@ components:
         id:
           type: string
           description: ID of ingested image
+    NewUser:
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Id of the new user
+        is_admin: 
+          type: boolean
+          description: Give admin privileges to new user
+          default: false
     NewCollection:
       required:
         - name

@@ -6,6 +6,7 @@ import (
 
 	clc "github.com/lejeunel/go-image-annotator/adapters/cli/collection"
 	im "github.com/lejeunel/go-image-annotator/adapters/cli/image"
+	usr "github.com/lejeunel/go-image-annotator/adapters/cli/user"
 )
 
 var (
@@ -38,3 +39,19 @@ var (
 		},
 	}
 )
+
+var (
+	isAdmin       bool
+	CreateUserCmd = &cobra.Command{
+		Use:   "create-user [id] [is-admin]",
+		Short: "Creates a new user with [id] and [group] with [description]",
+		Args:  cobra.MinimumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			usr.Create(args[0], isAdmin)
+		},
+	}
+)
+
+func init() {
+	CreateUserCmd.Flags().BoolVar(&isAdmin, "is-admin", false, "set admin privileges")
+}

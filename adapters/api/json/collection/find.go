@@ -16,7 +16,7 @@ type Find struct {
 
 func (p Find) Success(r read.Response) {
 	response := models.Collection{
-		Name:        &r.Name,
+		Name:        r.Name,
 		Description: &r.Description,
 	}
 

@@ -1,4 +1,4 @@
-package collection
+package user
 
 import (
 	"log/slog"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
+	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
 )
 
 type Create struct {
@@ -15,9 +15,9 @@ type Create struct {
 }
 
 func (p Create) Success(r create.Response) {
-	response := models.Collection{
-		Name:        r.Name,
-		Description: &r.Description,
+	response := models.User{
+		Id:      r.Id,
+		IsAdmin: &r.IsAdmin,
 	}
 
 	json.WriteJSON(p.Writer, 200, response)

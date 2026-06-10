@@ -39,7 +39,7 @@ type Collection struct {
 	Description *string `json:"description,omitempty"`
 
 	// Name Name of the collection
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 }
 
 // Error defines model for Error.
@@ -144,6 +144,15 @@ type NewLabel struct {
 	Name string `json:"name"`
 }
 
+// NewUser defines model for NewUser.
+type NewUser struct {
+	// Id Id of the new user
+	Id string `json:"id"`
+
+	// IsAdmin Give admin privileges to new user
+	IsAdmin *bool `json:"is_admin,omitempty"`
+}
+
 // Pagination defines model for Pagination.
 type Pagination struct {
 	// Page current page number
@@ -166,6 +175,15 @@ type UpdateCollection struct {
 
 	// Name New name of the collection
 	Name string `json:"name"`
+}
+
+// User defines model for User.
+type User struct {
+	// Id Name of the user
+	Id string `json:"id"`
+
+	// IsAdmin Is the user admin?
+	IsAdmin *bool `json:"is_admin,omitempty"`
 }
 
 // ListCollectionsParams defines parameters for ListCollections.
@@ -210,6 +228,9 @@ type IngestImageJSONRequestBody = NewImage
 // CreateLabelJSONRequestBody defines body for CreateLabel for application/json ContentType.
 type CreateLabelJSONRequestBody = NewLabel
 
+// CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
+type CreateUserJSONRequestBody = NewUser
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// List collections
@@ -248,6 +269,9 @@ type ServerInterface interface {
 	// Find a label by name
 	// (GET /labels/{name})
 	FindLabelByName(w http.ResponseWriter, r *http.Request, name string)
+	// Create a new user
+	// (POST /users)
+	CreateUser(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -573,6 +597,20 @@ func (siw *ServerInterfaceWrapper) FindLabelByName(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r)
 }
 
+// CreateUser operation middleware
+func (siw *ServerInterfaceWrapper) CreateUser(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateUser(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -705,6 +743,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("POST "+options.BaseURL+"/labels", wrapper.CreateLabel)
 	m.HandleFunc("DELETE "+options.BaseURL+"/labels/{name}", wrapper.DeleteLabelByName)
 	m.HandleFunc("GET "+options.BaseURL+"/labels/{name}", wrapper.FindLabelByName)
+	m.HandleFunc("POST "+options.BaseURL+"/users", wrapper.CreateUser)
 
 	return m
 }

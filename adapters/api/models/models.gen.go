@@ -30,7 +30,7 @@ type Collection struct {
 	Description *string `json:"description,omitempty"`
 
 	// Name Name of the collection
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 }
 
 // Error defines model for Error.
@@ -135,6 +135,15 @@ type NewLabel struct {
 	Name string `json:"name"`
 }
 
+// NewUser defines model for NewUser.
+type NewUser struct {
+	// Id Id of the new user
+	Id string `json:"id"`
+
+	// IsAdmin Give admin privileges to new user
+	IsAdmin *bool `json:"is_admin,omitempty"`
+}
+
 // Pagination defines model for Pagination.
 type Pagination struct {
 	// Page current page number
@@ -157,6 +166,15 @@ type UpdateCollection struct {
 
 	// Name New name of the collection
 	Name string `json:"name"`
+}
+
+// User defines model for User.
+type User struct {
+	// Id Name of the user
+	Id string `json:"id"`
+
+	// IsAdmin Is the user admin?
+	IsAdmin *bool `json:"is_admin,omitempty"`
 }
 
 // ListCollectionsParams defines parameters for ListCollections.
@@ -200,3 +218,6 @@ type IngestImageJSONRequestBody = NewImage
 
 // CreateLabelJSONRequestBody defines body for CreateLabel for application/json ContentType.
 type CreateLabelJSONRequestBody = NewLabel
+
+// CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
+type CreateUserJSONRequestBody = NewUser

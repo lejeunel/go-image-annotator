@@ -19,7 +19,7 @@ func (p List) Success(r list.Response) {
 	for _, c := range r.Collections {
 		data = append(data,
 			models.Collection{
-				Name:        &c.Name,
+				Name:        c.Name,
 				Description: &c.Description,
 			})
 	}

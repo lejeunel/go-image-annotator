@@ -28,4 +28,5 @@ func init() {
 	rootCmd.AddCommand(ServeCmd)
 	rootCmd.AddCommand(IngestDirectoryCmd)
 	rootCmd.AddCommand(CreateCollectionCmd)
+	rootCmd.AddCommand(CreateUserCmd)
 }
