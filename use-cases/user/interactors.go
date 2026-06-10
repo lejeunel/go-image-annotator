@@ -8,6 +8,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/user/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/read"
 	rat "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
+	adm "github.com/lejeunel/go-image-annotator/use-cases/user/set-admin"
 	ugr "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-group"
 	uro "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-role"
 )
@@ -22,5 +23,6 @@ type Interactors struct {
 	UnAssignRole    uro.Interactor
 	AssignGroup     agr.Interactor
 	UnAssignGroup   ugr.Interactor
+	SetAdmin        adm.Interactor
 	DefaultPageSize int
 }

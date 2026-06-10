@@ -11,6 +11,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/user/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/read"
 	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
+	adm "github.com/lejeunel/go-image-annotator/use-cases/user/set-admin"
 	ugr "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-group"
 	uar "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-role"
 )
@@ -26,5 +27,6 @@ func NewSQLiteUserInteractors(repos *infra.SQLiteInfra, tokenGen tg.TokenGenerat
 		UnAssignRole:  uar.New(repos.User),
 		AssignGroup:   agr.New(repos.User, repos.Group),
 		UnAssignGroup: ugr.New(repos.User, repos.Group),
+		SetAdmin:      adm.New(repos.User),
 	}
 }

@@ -88,3 +88,7 @@ func (a PassThroughAuth) CreateGroup(ctx context.Context) error {
 func (a PassThroughAuth) DeleteGroup(ctx context.Context, group string) error {
 	return nil
 }
+
+func (a PassThroughAuth) SetAdminRights(ctx context.Context) error {
+	return nil
+}

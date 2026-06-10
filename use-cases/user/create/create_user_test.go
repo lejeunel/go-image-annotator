@@ -34,3 +34,12 @@ func TestCreateWithTokenHash(t *testing.T) {
 	assert.Equal(t, token, p.Got.PersonalAccessToken)
 	assert.Equal(t, hash, repo.Got.HashPAT)
 }
+
+func TestCreateAdmin(t *testing.T) {
+	repo := &FakeRepo{}
+	itr := New(repo, &FakeTokenGenerator{})
+	p := &FakePresenter{}
+	itr.Execute(t.Context(), Request{Id: "user", IsAdmin: true}, p)
+	assert.True(t, repo.Got.IsAdmin)
+	assert.True(t, p.Got.IsAdmin)
+}

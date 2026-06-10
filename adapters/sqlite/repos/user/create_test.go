@@ -39,3 +39,23 @@ func TestNoCreatedUserDoNotExist(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, exists)
 }
+
+func TestCreateAdmin(t *testing.T) {
+	repo := NewTestSQLiteUserRepo()
+	user := u.NewUser("admin", u.WithAdmin(true))
+	err := repo.Create(user)
+	assert.NoError(t, err)
+	r, err := repo.Find("admin")
+	assert.NoError(t, err)
+	assert.Equal(t, true, r.IsAdmin)
+}
+
+func TestSetAdmin(t *testing.T) {
+	repo := NewTestSQLiteUserRepo()
+	user := u.NewUser("admin")
+	repo.Create(user)
+	err := repo.SetAdmin(user.Id, true)
+	assert.NoError(t, err)
+	r, _ := repo.Find(user.Id)
+	assert.True(t, r.IsAdmin)
+}

@@ -37,8 +37,9 @@ type SQLiteUserRepo struct {
 }
 
 type Record struct {
-	Id    string `db:"id"`
-	Roles string `db:"roles"`
+	Id      string `db:"id"`
+	Roles   string `db:"roles"`
+	IsAdmin bool   `db:"is_admin"`
 }
 
 func (r *SQLiteUserRepo) Create(usr u.User) error {
@@ -46,8 +47,8 @@ func (r *SQLiteUserRepo) Create(usr u.User) error {
 	if err != nil {
 		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
 	}
-	query := "INSERT INTO users (id,roles) VALUES ($1,$2)"
-	_, err = r.Db.Exec(query, usr.Id, roles)
+	query := "INSERT INTO users (id,roles,is_admin) VALUES ($1,$2,$3)"
+	_, err = r.Db.Exec(query, usr.Id, roles, usr.IsAdmin)
 	if err != nil {
 		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
 	}
@@ -91,7 +92,7 @@ func (r *SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 func (r *SQLiteUserRepo) Find(id string) (*u.User, error) {
 	record := Record{}
 	err := r.Db.Get(&record,
-		"SELECT id,roles FROM users WHERE id=$1", id)
+		"SELECT id,roles,is_admin FROM users WHERE id=$1", id)
 
 	if err != nil {
 		switch {
@@ -113,7 +114,8 @@ func (r *SQLiteUserRepo) Find(id string) (*u.User, error) {
 		return nil, err
 	}
 
-	user := u.NewUser(record.Id, u.WithRoles(roles), u.WithGroups(groups))
+	user := u.NewUser(record.Id, u.WithRoles(roles), u.WithGroups(groups),
+		u.WithAdmin(record.IsAdmin))
 	return &user, nil
 }
 func (r *SQLiteUserRepo) Delete(id string) error {
@@ -213,6 +215,14 @@ func (r *SQLiteUserRepo) UnAssignRole(userId string, role string) error {
 	}
 	if err := r.setRoles(userId, remove(currentRoles, role)); err != nil {
 		return err
+	}
+	return nil
+}
+func (r *SQLiteUserRepo) SetAdmin(userId string, value bool) error {
+	query := "UPDATE users SET is_admin=$2 WHERE id=$1"
+	_, err := r.Db.Exec(query, userId, value)
+	if err != nil {
+		return fmt.Errorf("setting admin right to %v : %v: %w", value, err, e.ErrInternal)
 	}
 	return nil
 }

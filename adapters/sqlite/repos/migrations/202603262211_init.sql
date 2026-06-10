@@ -65,7 +65,8 @@ CREATE INDEX sessions_expiry_idx ON sessions(expiry);
 
 CREATE TABLE users (
 	id varchar(60) PRIMARY KEY,
-    roles TEXT
+    roles TEXT,
+    is_admin BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS users_groups (

@@ -42,12 +42,16 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	user := usr.NewUser(r.Id, usr.WithHashedPersonalAccessToken(token.Hash))
+	user := usr.NewUser(r.Id, usr.WithHashedPersonalAccessToken(token.Hash),
+		usr.WithAdmin(r.IsAdmin))
 	if err := i.repo.Create(user); err != nil {
 		i.handleError(err, out)
 		return
 	}
-	out.Success(Response{Id: r.Id, PersonalAccessToken: token.Token})
+	out.Success(Response{
+		Id:                  r.Id,
+		PersonalAccessToken: token.Token,
+		IsAdmin:             r.IsAdmin})
 }
 func (i *Interactor) handleError(err error, out OutputPort) {
 	errCtx := "creating user"

@@ -5,9 +5,12 @@ type User struct {
 	HashPAT []byte
 	Roles   []string
 	Groups  []string
+	IsAdmin bool
 }
 
-func NewUser(id string, opts ...Option) User {
+type UserId = string
+
+func NewUser(id UserId, opts ...Option) User {
 	l := &User{Id: id}
 	for _, opt := range opts {
 		opt(l)
@@ -26,6 +29,14 @@ func WithHashedPersonalAccessToken(h []byte) Option {
 func WithGroups(groups []string) Option {
 	return func(l *User) {
 		l.Groups = groups
+	}
+}
+
+func WithAdmin(admin bool) Option {
+	return func(l *User) {
+		if admin {
+			l.IsAdmin = true
+		}
 	}
 }
 
