@@ -1,38 +1,35 @@
 package delete
 
 import (
-	"fmt"
-
 	"context"
-	"log/slog"
+	"fmt"
 
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 )
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   Auth
+	repo Repo
+	auth Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "deleting label"
 	if err := i.auth.DeleteLabel(ctx); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	if err := i.isUsed(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	if err := i.exists(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.repo.Delete(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	out.Success()
@@ -62,13 +59,6 @@ func (i *Interactor) isUsed(name string) error {
 
 }
 
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "creating label"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
-}
-
 type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
@@ -78,7 +68,7 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo, opts ...Option) *Interactor {
-	i := &Interactor{repo: r, logger: logging.NewNoOpLogger(),
+	i := &Interactor{repo: r,
 		auth: auth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)

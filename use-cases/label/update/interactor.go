@@ -24,7 +24,7 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(r Repo, opts ...Option) *Interactor {
+func New(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r,
 		logger: logging.NewNoOpLogger(),
 		auth:   auth.PassThroughAuth{}}
@@ -36,18 +36,19 @@ func NewInteractor(r Repo, opts ...Option) *Interactor {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
+	errCtx := "updating label"
 	if err := i.auth.UpdateLabel(ctx); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.ensureNameExists(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.repo.Update(Model{Name: r.Name, NewDescription: r.NewDescription}); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
@@ -63,10 +64,4 @@ func (i *Interactor) ensureNameExists(name string) error {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
 	}
 	return nil
-}
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "updating label"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
 }

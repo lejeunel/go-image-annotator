@@ -1,10 +1,12 @@
 package label
 
 import (
+	"log/slog"
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
-	"net/http"
 )
 
 type Create struct {
@@ -22,6 +24,6 @@ func (p Create) Success(r create.Response) {
 
 }
 
-func NewCreatePresenter(w http.ResponseWriter) Create {
-	return Create{Writer: w, ErrorPresenter: json.ErrorPresenter{Writer: w}}
+func NewCreatePresenter(w http.ResponseWriter, l slog.Logger) Create {
+	return Create{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
 }

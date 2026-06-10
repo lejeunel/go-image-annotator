@@ -1,10 +1,12 @@
 package collection
 
 import (
+	"log/slog"
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/read"
-	"net/http"
 )
 
 type Find struct {
@@ -22,6 +24,6 @@ func (p Find) Success(r read.Response) {
 
 }
 
-func NewFindPresenter(w http.ResponseWriter) Find {
-	return Find{Writer: w, ErrorPresenter: json.ErrorPresenter{Writer: w}}
+func NewFindPresenter(w http.ResponseWriter, l slog.Logger) Find {
+	return Find{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
 }

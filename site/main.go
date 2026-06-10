@@ -2,6 +2,7 @@ package site
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
@@ -21,14 +22,16 @@ import (
 )
 
 type SiteConfig struct {
+	APIPath          string
 	APIDocsPath      string
 	OpenAPISpecsPath string
 }
 
 func RegisterHandlers(mux *http.ServeMux, apiServer api.Server, webServer web.Server, cfg SiteConfig,
 	pageBuilder html.PageBuilder) {
-	RegisterAPIDocs(mux, apiServer, cfg.APIDocsPath)
-	RegisterAPISpecs(mux, cfg.APIDocsPath)
+	RegisterAPIDocs(mux, cfg.OpenAPISpecsPath, cfg.APIDocsPath)
+	RegisterAPISpecs(mux, cfg.OpenAPISpecsPath)
+	RegisterAPIEndpoints(mux, apiServer, cfg.APIPath)
 	RegisterStaticFiles(mux)
 	web.RegisterWebPages(mux, webServer, pageBuilder)
 }
@@ -52,11 +55,13 @@ func Make(apiPath string) http.Handler {
 		&interactors.Annotation.AddBox, &interactors.Annotation.UpdateBox, &interactors.Annotation.Delete,
 		&interactors.Label.FetchAll, &interactors.Annotation.UpdateLabel, &interactors.Annotation.AddImageLabel,
 		presenters.NewPresenter())
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	RegisterHandlers(mux,
-		*api.NewServer(interactors),
+		*api.NewServer(interactors, *logger),
 		*web.NewServer(interactors, annotator, *pageBuilder, sessionManager, identityProvider),
-		SiteConfig{APIDocsPath: fmt.Sprintf("%v/docs", apiPath),
-			OpenAPISpecsPath: fmt.Sprintf("%v/openapi.yaml", apiPath)},
+		SiteConfig{APIPath: fmt.Sprintf("/%v", apiPath),
+			APIDocsPath:      fmt.Sprintf("/%v/docs", apiPath),
+			OpenAPISpecsPath: fmt.Sprintf("/%v/openapi.yaml", apiPath)},
 		*pageBuilder)
 
 	return sessionManager.MiddleWare(mux)

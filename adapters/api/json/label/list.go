@@ -1,10 +1,12 @@
 package label
 
 import (
+	"log/slog"
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
-	"net/http"
 )
 
 type List struct {
@@ -30,6 +32,6 @@ func (p List) Success(r list.Response) {
 
 }
 
-func NewListPresenter(w http.ResponseWriter) List {
-	return List{Writer: w, ErrorPresenter: json.ErrorPresenter{Writer: w}}
+func NewListPresenter(w http.ResponseWriter, l slog.Logger) List {
+	return List{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
+	"log/slog"
 	"net/http"
 )
 
@@ -71,8 +72,14 @@ func HTTPStatusCodeFromErr(err error) int {
 
 type ErrorPresenter struct {
 	Writer http.ResponseWriter
+	Logger slog.Logger
 }
 
 func (p ErrorPresenter) Error(err error) {
+	p.Logger.Error(err.Error())
 	WriteError(p.Writer, HTTPStatusCodeFromErr(err), err.Error())
+}
+
+func NewErrPresenter(w http.ResponseWriter, l slog.Logger) ErrorPresenter {
+	return ErrorPresenter{w, l}
 }

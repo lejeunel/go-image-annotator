@@ -6,7 +6,6 @@ import (
 	"log/slog"
 
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 )
 
 var defaultLabelCountLimit = 200
@@ -21,35 +20,29 @@ type Interactor struct {
 }
 
 func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
+	errCtx := "listing label"
 	count, err := i.repo.Count()
 	if err != nil {
-		i.handleError(e.ErrInternal, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	if count > int64(i.countLimit) {
-		i.handleError(fmt.Errorf("checking whether current label count (%v) exceeds limit (%v): %w",
-			count, i.countLimit, e.ErrLabelLimitExceeded), out)
+		out.Error(fmt.Errorf("checking whether current label count (%v) exceeds limit (%v): %w",
+			count, i.countLimit, e.ErrLabelLimitExceeded))
 		return
 	}
 
 	labels, err := i.repo.FetchAll()
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	out.SuccessFetchLabels(Response{labels})
 
 }
 
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "listing label"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
-}
-
 func New(r Repo, opts ...Option) *Interactor {
-	i := &Interactor{repo: r, logger: logging.NewNoOpLogger(),
+	i := &Interactor{repo: r,
 		countLimit: defaultLabelCountLimit}
 	for _, opt := range opts {
 		opt(i)

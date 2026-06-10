@@ -19,12 +19,12 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.Image.Ingest.Execute(r.Context(), NewIngestImageRequest(*body, s.Image.AllowedImageFormats),
-		presenter.NewIngestPresenter(w))
+		presenter.NewIngestPresenter(w, s.Logger))
 }
 
 func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionName, imageId string) {
 	s.Image.Read.Execute(read.Request{ImageId: imageId, Collection: collectionName},
-		presenter.NewReadMetaPresenter(w))
+		presenter.NewReadMetaPresenter(w, s.Logger))
 }
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams) {
@@ -35,7 +35,7 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 	if p := params.PageSize; p != nil {
 		req.PageSize = *p
 	}
-	s.Image.List.Execute(req, presenter.NewListPresenter(w))
+	s.Image.List.Execute(req, presenter.NewListPresenter(w, s.Logger))
 }
 
 func NewIngestImageRequest(req models.NewImage, allowedImageFormats []string) ingest.Request {

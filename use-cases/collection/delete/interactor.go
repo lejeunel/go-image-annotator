@@ -5,34 +5,32 @@ import (
 	"fmt"
 	auth "github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
-	"log/slog"
 )
 
 type Interactor struct {
 	collectionRepo CollectionRepo
 	groupRepo      GroupRepo
-	logger         *slog.Logger
 	auth           Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "deleting collection"
 	if err := i.authorizeDeletion(ctx, r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.ensureExists(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	if err := i.ensureDeletable(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.collectionRepo.Delete(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	out.Success()
@@ -77,13 +75,6 @@ func (i *Interactor) ensureExists(name string) error {
 	return nil
 }
 
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "deleting collection"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
-}
-
 type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
@@ -94,8 +85,7 @@ func WithAuth(a Auth) Option {
 
 func New(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
 	i := &Interactor{collectionRepo: cr, groupRepo: gr,
-		logger: logging.NewNoOpLogger(),
-		auth:   auth.PassThroughAuth{}}
+		auth: auth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
 	}

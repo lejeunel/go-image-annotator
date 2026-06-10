@@ -9,7 +9,6 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
 )
 
@@ -21,32 +20,27 @@ type Interactor struct {
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "creating label"
 	if err := i.auth.CreateLabel(ctx); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
 	}
 	if err := i.validator.Validate(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	if err := i.checkDuplicate(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	label := lbl.NewLabel(lbl.NewLabelId(), r.Name, lbl.WithDescription(r.Description))
 	if err := i.repo.Create(label); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	out.Success(Response{Name: r.Name, Description: r.Description})
-}
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "creating label"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
 }
 
 func (i *Interactor) checkDuplicate(name string) error {
@@ -76,8 +70,7 @@ func WithAuth(a Auth) Option {
 
 func New(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r, validator: v.NewNameValidator(),
-		logger: logging.NewNoOpLogger(),
-		auth:   auth.PassThroughAuth{},
+		auth: auth.PassThroughAuth{},
 	}
 
 	for _, opt := range opts {

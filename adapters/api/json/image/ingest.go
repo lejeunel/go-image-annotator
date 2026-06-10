@@ -1,10 +1,12 @@
 package image
 
 import (
+	"log/slog"
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
-	"net/http"
 )
 
 type Ingest struct {
@@ -22,6 +24,6 @@ func (p Ingest) Success(r ingest.Response) {
 
 }
 
-func NewIngestPresenter(w http.ResponseWriter) Ingest {
-	return Ingest{Writer: w, ErrorPresenter: json.ErrorPresenter{Writer: w}}
+func NewIngestPresenter(w http.ResponseWriter, l slog.Logger) Ingest {
+	return Ingest{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
 }

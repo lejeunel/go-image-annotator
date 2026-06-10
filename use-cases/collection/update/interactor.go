@@ -4,17 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"log/slog"
-
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 )
 
 type Interactor struct {
 	collectionRepo CollectionRepo
 	groupRepo      GroupRepo
-	logger         *slog.Logger
 	auth           Auth
 }
 
@@ -27,7 +23,7 @@ func WithAuth(a Auth) Option {
 }
 
 func New(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
-	i := &Interactor{collectionRepo: cr, groupRepo: gr, logger: logging.NewNoOpLogger(),
+	i := &Interactor{collectionRepo: cr, groupRepo: gr,
 		auth: auth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
@@ -37,34 +33,35 @@ func New(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
+	errCtx := "updating collection"
 	group, err := i.groupRepo.GroupOfCollection(r.Name)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
 	}
 	if group != nil {
 		if err := i.auth.UpdateCollection(ctx, *group); err != nil {
-			i.handleError(err, out)
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 	}
 
 	if err := i.ensureNameExists(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if r.NewName != r.Name {
 		if err := i.ensureNameDoesNotExist(r.NewName); err != nil {
-			i.handleError(err, out)
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 
 	}
 
 	if err := i.collectionRepo.Update(Model{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription}); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
@@ -93,11 +90,4 @@ func (i *Interactor) ensureNameDoesNotExist(name string) error {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrDuplicate)
 	}
 	return nil
-}
-
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "updating collection"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
 }

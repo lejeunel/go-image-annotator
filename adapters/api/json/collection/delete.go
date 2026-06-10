@@ -1,8 +1,10 @@
 package collection
 
 import (
-	"github.com/lejeunel/go-image-annotator/adapters/api/json"
+	"log/slog"
 	"net/http"
+
+	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 )
 
 type Delete struct {
@@ -15,6 +17,6 @@ func (p Delete) Success() {
 
 }
 
-func NewDeletePresenter(w http.ResponseWriter) Delete {
-	return Delete{Writer: w, ErrorPresenter: json.ErrorPresenter{Writer: w}}
+func NewDeletePresenter(w http.ResponseWriter, l slog.Logger) Delete {
+	return Delete{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
 }

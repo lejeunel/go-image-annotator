@@ -1,9 +1,11 @@
 package image
 
 import (
+	"log/slog"
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	"net/http"
 )
 
 type ReadMeta struct {
@@ -17,6 +19,6 @@ func (p ReadMeta) SuccessReadImage(image im.Image) {
 
 }
 
-func NewReadMetaPresenter(w http.ResponseWriter) ReadMeta {
-	return ReadMeta{Writer: w, ErrorPresenter: json.ErrorPresenter{Writer: w}}
+func NewReadMetaPresenter(w http.ResponseWriter, l slog.Logger) ReadMeta {
+	return ReadMeta{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
 }

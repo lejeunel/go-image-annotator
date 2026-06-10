@@ -1,6 +1,7 @@
 package collection
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
@@ -23,6 +24,6 @@ func (p Create) Success(r create.Response) {
 
 }
 
-func NewCreatePresenter(w http.ResponseWriter) Create {
-	return Create{Writer: w, ErrorPresenter: json.ErrorPresenter{Writer: w}}
+func NewCreatePresenter(w http.ResponseWriter, l slog.Logger) Create {
+	return Create{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
 }
