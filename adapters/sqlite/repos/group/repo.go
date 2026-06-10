@@ -42,6 +42,7 @@ func (r *SQLiteGroupRepo) rowToEntity(row Row) g.Group {
 }
 func (r *SQLiteGroupRepo) Find(name string) (*g.Group, error) {
 
+	errCtx := fmt.Errorf("fetching group with name %v", name)
 	row := Row{}
 	err := r.Db.Get(&row,
 		`SELECT id,name,description FROM groups WHERE name=$1`, name)
@@ -49,9 +50,9 @@ func (r *SQLiteGroupRepo) Find(name string) (*g.Group, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, e.ErrNotFound
+			return nil, fmt.Errorf("%w: %w: %w", errCtx, err, e.ErrNotFound)
 		default:
-			return nil, fmt.Errorf("fetching record by name: %v: %w", err, e.ErrInternal)
+			return nil, fmt.Errorf("%w: %w: %w", errCtx, err, e.ErrInternal)
 		}
 	}
 

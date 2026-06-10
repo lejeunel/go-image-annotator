@@ -69,9 +69,10 @@ func (p *FakePresenter) Success(r Response) {
 }
 
 type FakeCollectionRepo struct {
-	Err                 error
-	ErrOnFindCollection bool
-	MissingCollection   bool
+	Err                    error
+	ErrOnFindCollection    bool
+	MissingCollection      bool
+	CollectionWithoutGroup bool
 }
 
 type FakeLabelRepo struct {
@@ -108,8 +109,13 @@ func (r *FakeCollectionRepo) FindCollectionByName(name string) (*clc.Collection,
 	if r.MissingCollection {
 		return nil, e.ErrNotFound
 	}
-	c := clc.NewCollection(clc.NewCollectionId(), "a-collection",
-		clc.WithGroup(g.NewGroup(g.NewGroupId(), "my-group")))
+
+	c := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	if r.CollectionWithoutGroup {
+		return &c, nil
+	}
+	group := g.NewGroup(g.NewGroupId(), "my-group")
+	c.Group = &group
 	return &c, nil
 }
 

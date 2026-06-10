@@ -220,3 +220,11 @@ func TestAddImageShouldAddMIMEType(t *testing.T) {
 	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, p)
 	assert.Equal(t, specs.MIMEType, imageRepo.GotSpecs.MIMEType)
 }
+
+func TestAddImageInCollectionWithoutGroup(t *testing.T) {
+	p := &FakePresenter{}
+	itr := NewTestingInteractor()
+	itr.CollectionRepo = &FakeCollectionRepo{CollectionWithoutGroup: true}
+	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, p)
+	assert.True(t, p.GotSuccess)
+}
