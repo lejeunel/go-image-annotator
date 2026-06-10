@@ -5,5 +5,5 @@ import (
 )
 
 type Repo interface {
-	Find(string) (*u.User, error)
+	Find(u.UserId) (*u.User, error)
 }

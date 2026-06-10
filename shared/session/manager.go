@@ -6,9 +6,12 @@ import (
 	"database/sql"
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
-	i "github.com/lejeunel/go-image-annotator/entities/identity"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
+	readusr "github.com/lejeunel/go-image-annotator/use-cases/user/read"
 	"net/http"
 )
+
+var UserIdKey = "user-id"
 
 type SessionManager interface {
 	Login(context.Context, string) error
@@ -18,6 +21,7 @@ type SessionManager interface {
 
 type MySessionManager struct {
 	*scs.SessionManager
+	readusr.Repo
 }
 
 func (m MySessionManager) MiddleWare(next http.Handler) http.Handler {
@@ -57,21 +61,14 @@ func (m MySessionManager) LoadAndSaveWithHeader(next http.Handler) http.Handler 
 	})
 }
 
-// Append a User record in the current request context.
-// This looks in the session manager's store for a user-id.
-// If it exists, it queries the user repository and append
-// the user record to current context
-// TODO This appends a hard-coded user for now.
 func (m MySessionManager) appendUserIdentityToContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userId := m.GetString(r.Context(), "user-id")
-		if userId == "" {
+		user, err := m.Repo.Find(m.GetString(r.Context(), UserIdKey))
+		if err != nil {
 			next.ServeHTTP(w, r)
 			return
 		}
-		identity := &i.Identity{Id: userId, Groups: []string{"group-0", "group-1"},
-			Roles: []string{"reader", "writer"}}
-		ctx := context.WithValue(r.Context(), i.UserKey, identity)
+		ctx := context.WithValue(r.Context(), u.UserContextKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -86,7 +83,7 @@ func (m MySessionManager) Login(ctx context.Context, id string) error {
 	if err := m.SessionManager.RenewToken(ctx); err != nil {
 		return err
 	}
-	m.SessionManager.Put(ctx, "user-id", id)
+	m.SessionManager.Put(ctx, UserIdKey, id)
 	return nil
 }
 
@@ -104,9 +101,9 @@ func (bw *bufferedResponseWriter) WriteHeader(code int) {
 	bw.code = code
 }
 
-func NewSQLiteSessionManager(db *sql.DB) MySessionManager {
+func NewSQLiteSessionManager(db *sql.DB, repo readusr.Repo) MySessionManager {
 	store := sqlite3store.New(db)
-	m := MySessionManager{scs.New()}
+	m := MySessionManager{SessionManager: scs.New(), Repo: repo}
 	m.Store = store
 	return m
 }

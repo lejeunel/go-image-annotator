@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	i "github.com/lejeunel/go-image-annotator/entities/identity"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	s "github.com/lejeunel/go-image-annotator/shared"
 	p "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	n "github.com/lejeunel/go-image-annotator/shared/navigation"
@@ -13,12 +13,12 @@ import (
 )
 
 type PageBuilder struct {
-	Title        string
-	APIPath      string
-	scripts      []Node
-	ActivePage   n.ActivePage
-	UserIdentity *i.Identity
-	Content      Node
+	Title      string
+	APIPath    string
+	scripts    []Node
+	ActivePage n.ActivePage
+	User       *u.User
+	Content    Node
 }
 
 func (b *PageBuilder) AddScripts(scripts ...Node) *PageBuilder {
@@ -38,7 +38,7 @@ func (b *PageBuilder) SetActive(a n.ActivePage) *PageBuilder {
 }
 func (b *PageBuilder) SetUserIdentityFromContext(ctx context.Context) *PageBuilder {
 	id := p.IdentityFromContext(ctx)
-	b.UserIdentity = id
+	b.User = id
 	return b
 }
 func (b *PageBuilder) SetContent(c Node) *PageBuilder {
@@ -86,7 +86,7 @@ func (b *PageBuilder) Build() Node {
 		),
 		Body(
 			Class("bg-white text-gray-900 dark:bg-gray-900 dark:text-white"),
-			MakeNavBar(b.ActivePage, s.RepoURL, b.APIPath, b.UserIdentity),
+			MakeNavBar(b.ActivePage, s.RepoURL, b.APIPath, b.User),
 			Div(Class("grow w-full px-1 md:px-2 lg:px-4 py-10 md:py-20"),
 				Div(Class("font-bold text-xl"), Text(b.Title)),
 				b.Content),

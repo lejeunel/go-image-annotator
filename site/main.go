@@ -44,7 +44,7 @@ func Make(apiPath string) http.Handler {
 	interactors := i.NewSQLiteInteractors(infra, cfg.DefaultPageSize, cfg.AllowedImageFormats)
 	pageBuilder := html.NewPageBuilder(apiPath)
 
-	sessionManager := sm.NewSQLiteSessionManager(infra.Db.DB)
+	sessionManager := sm.NewSQLiteSessionManager(infra.Db.DB, infra.User)
 	identityProvider := ip.NewGothIdentityHandler(sessionManager)
 	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
 		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),

@@ -22,12 +22,14 @@ func (r UserInfoRow) Render() Node {
 func (s *Server) User(w http.ResponseWriter, r *http.Request) {
 	p := s.PageBuilder
 	p.SetUserIdentityFromContext(r.Context())
-	id := p.UserIdentity
+	user := p.User
 	p.SetTitle("User Dashboard")
-	rows := []UserInfoRow{{Name: "Email", Value: id.Id},
-		{Name: "Groups", Value: strings.Join(id.Groups, ", ")},
-		{Name: "Roles", Value: strings.Join(id.Roles, ", ")},
+	rows := []UserInfoRow{{Name: "Email", Value: user.Id}}
+	if user.IsAdmin {
+		rows = append(rows, UserInfoRow{Name: "Is admin", Value: "yes"})
 	}
+	rows = append(rows, UserInfoRow{Name: "Groups", Value: strings.Join(user.Groups, ", ")})
+	rows = append(rows, UserInfoRow{Name: "Roles", Value: strings.Join(user.Roles, ", ")})
 	info := Table(Class("text-left text-sm text-on-surface dark:text-on-surface-dark"),
 		Map(rows, func(r UserInfoRow) Node {
 			return r.Render()

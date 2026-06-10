@@ -8,6 +8,8 @@ type User struct {
 	IsAdmin bool
 }
 
+var UserContextKey = "user"
+
 type UserId = string
 
 func NewUser(id UserId, opts ...Option) User {

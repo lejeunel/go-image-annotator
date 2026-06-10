@@ -6,7 +6,7 @@ import (
 	_ "strings"
 	"text/template"
 
-	i "github.com/lejeunel/go-image-annotator/entities/identity"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	n "github.com/lejeunel/go-image-annotator/shared/navigation"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -35,8 +35,8 @@ type UserMenuEntry struct {
 	URL  string
 }
 
-func MakeLoginOrUserBadge(id *i.Identity) Node {
-	if id == nil {
+func MakeLoginOrUserBadge(user *u.User) Node {
+	if user == nil {
 		return A(Href("/login/google"),
 			Class("rounded-radius bg-primary border border-primary px-4 py-2 text-center text-sm font-medium tracking-wide text-on-primary hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"),
 			Text("Login"))
@@ -47,7 +47,7 @@ func MakeLoginOrUserBadge(id *i.Identity) Node {
 	Span(Class("flex size-10 items-center justify-center overflow-hidden rounded-full border border-outline bg-surface-alt text-on-surface/80 dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark/80"),
 		Raw(UserIcon)).Render(&iconBuf)
 	var buf bytes.Buffer
-	entries := UserMenu{UserName: id.Id,
+	entries := UserMenu{UserName: user.Id,
 		Entries: []UserMenuEntry{{"Dashboard", "/user"}, {"Sign Out", "/logout"}},
 		Icon:    iconBuf.String()}
 	tUser.ExecuteTemplate(&buf, "user_badge", entries)
@@ -104,7 +104,7 @@ func DarkModeToggle() Node {
 		),
 	)
 }
-func MakeNavBar(isActivated n.ActivePage, repoURL string, apiPrefix string, user *i.Identity) Node {
+func MakeNavBar(isActivated n.ActivePage, repoURL string, apiPrefix string, user *u.User) Node {
 	return Nav(
 		Attr("x-on:click.away", "mobileMenuIsOpen = false"),
 		Class("fixed top-0 z-30 hidden h-16 w-screen items-center justify-between border-outline px-10 py-2 backdrop-blur-xl md:flex dark:border-outline-dark bg-surface-alt/75 dark:bg-surface-dark-alt/75 border-b"),

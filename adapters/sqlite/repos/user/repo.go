@@ -89,7 +89,7 @@ func (r *SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 	return groups, nil
 
 }
-func (r *SQLiteUserRepo) Find(id string) (*u.User, error) {
+func (r *SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 	record := Record{}
 	err := r.Db.Get(&record,
 		"SELECT id,roles,is_admin FROM users WHERE id=$1", id)
