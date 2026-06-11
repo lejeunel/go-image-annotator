@@ -2,7 +2,7 @@ package interactors
 
 import (
 	infra "github.com/lejeunel/go-image-annotator/adapters/sqlite"
-	tg "github.com/lejeunel/go-image-annotator/app/token-generator"
+	tok "github.com/lejeunel/go-image-annotator/app/token"
 	usr "github.com/lejeunel/go-image-annotator/use-cases/user"
 	agr "github.com/lejeunel/go-image-annotator/use-cases/user/assign-group"
 	aro "github.com/lejeunel/go-image-annotator/use-cases/user/assign-role"
@@ -16,7 +16,7 @@ import (
 	uar "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-role"
 )
 
-func NewSQLiteUserInteractors(repos *infra.SQLiteInfra, tokenGen tg.TokenGenerator) *usr.Interactors {
+func NewSQLiteUserInteractors(repos *infra.SQLiteInfra, tokenGen tok.TokenGenerator) *usr.Interactors {
 	return &usr.Interactors{
 		Find:          read.New(repos.User),
 		Create:        create.New(repos.User, tokenGen),

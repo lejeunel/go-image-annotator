@@ -11,7 +11,7 @@ import (
 
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
-	t "github.com/lejeunel/go-image-annotator/app/token-generator"
+	tok "github.com/lejeunel/go-image-annotator/app/token"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	readusr "github.com/lejeunel/go-image-annotator/use-cases/user/read"
@@ -44,7 +44,7 @@ func (m MySessionManager) LookForAPIToken(next http.Handler) http.Handler {
 		authHeader := r.Header.Get("Authorization")
 		bearerToken, ok := strings.CutPrefix(authHeader, "Bearer ")
 		if ok && bearerToken != "" {
-			token, err := t.DecodeAndSplitToken(bearerToken)
+			token, err := tok.DecodeAndSplitToken(bearerToken)
 			if err != nil {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return

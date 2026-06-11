@@ -6,14 +6,14 @@ import (
 
 	"log/slog"
 
-	g "github.com/lejeunel/go-image-annotator/app/token-generator"
+	tok "github.com/lejeunel/go-image-annotator/app/token"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 )
 
 type TokenGenerator interface {
-	Generate() (*g.TokenPair, error)
+	Generate() (*tok.TokenPair, error)
 }
 
 type Interactor struct {

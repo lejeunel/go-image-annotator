@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	tg "github.com/lejeunel/go-image-annotator/app/token-generator"
+	tok "github.com/lejeunel/go-image-annotator/app/token"
 	p "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 )
@@ -39,7 +39,7 @@ func (p APITokenPresenter) Success(resp rt.Response) {
 		p.Writer.Write([]byte(err.Error()))
 	}
 	t.Execute(p.Writer,
-		TokenData{Token: tg.Base64Encode(tg.AppendUserToToken(resp.Id,
+		TokenData{Token: tok.Base64Encode(tok.AppendUserToToken(resp.Id,
 			resp.PersonalAccessToken))})
 }
 func NewAPITokenPresenter(w http.ResponseWriter) APITokenPresenter {

@@ -10,7 +10,7 @@ import (
 	a "github.com/lejeunel/go-image-annotator/app/annotator"
 	"github.com/lejeunel/go-image-annotator/app/annotator/presenters"
 	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
-	tg "github.com/lejeunel/go-image-annotator/app/token-generator"
+	tok "github.com/lejeunel/go-image-annotator/app/token"
 	"github.com/lejeunel/go-image-annotator/shared/html"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
@@ -42,10 +42,11 @@ func Make(apiPath string) http.Handler {
 	mux := http.NewServeMux()
 
 	infra := infra.NewSQLiteInfra(cfg.DBPath, cfg.ArtefactDir)
-	interactors := i.NewSQLiteInteractors(infra, cfg.DefaultPageSize, cfg.AllowedImageFormats)
+	tokenGenerator := tok.NewTokenGenerator(32)
+	interactors := i.NewSQLiteInteractors(infra, cfg.DefaultPageSize, cfg.AllowedImageFormats, tokenGenerator)
 	pageBuilder := html.NewPageBuilder(apiPath)
 
-	sessionManager := sm.NewSQLiteSessionManager(infra.Db.DB, infra.User, tg.NewTokenGenerator(32))
+	sessionManager := sm.NewSQLiteSessionManager(infra.Db.DB, infra.User, tokenGenerator)
 	identityProvider := ip.NewGothIdentityHandler(sessionManager)
 	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
 		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),

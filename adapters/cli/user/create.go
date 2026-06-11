@@ -6,7 +6,7 @@ import (
 
 	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
 	"github.com/lejeunel/go-image-annotator/adapters/sqlite"
-	tg "github.com/lejeunel/go-image-annotator/app/token-generator"
+	tok "github.com/lejeunel/go-image-annotator/app/token"
 	"github.com/lejeunel/go-image-annotator/config"
 	uc "github.com/lejeunel/go-image-annotator/use-cases/user/create"
 )
@@ -25,7 +25,7 @@ func (p Presenter) Error(err error) {
 func Create(id string, isAdmin bool) {
 	cfg := config.Parse()
 	app := infra.NewSQLiteInfra(cfg.DBPath, cfg.ArtefactDir)
-	itr := uc.New(app.User, tg.NewTokenGenerator(32))
+	itr := uc.New(app.User, tok.NewTokenGenerator(32))
 	itr.Execute(context.Background(),
 		uc.Request{Id: id, IsAdmin: isAdmin}, Presenter{})
 }

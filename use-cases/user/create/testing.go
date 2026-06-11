@@ -4,7 +4,7 @@ import (
 	"context"
 	"slices"
 
-	g "github.com/lejeunel/go-image-annotator/app/token-generator"
+	tok "github.com/lejeunel/go-image-annotator/app/token"
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
@@ -53,6 +53,6 @@ type FakeTokenGenerator struct {
 	Hash_ []byte
 }
 
-func (t *FakeTokenGenerator) Generate() (*g.TokenPair, error) {
-	return &g.TokenPair{Token: t.Token, Hash: t.Hash_}, nil
+func (t *FakeTokenGenerator) Generate() (*tok.TokenPair, error) {
+	return &tok.TokenPair{Token: t.Token, Hash: t.Hash_}, nil
 }
