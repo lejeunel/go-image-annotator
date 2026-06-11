@@ -5,7 +5,34 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/base64"
+	"fmt"
+	"strings"
 )
+
+func AppendUserToToken(user string, token string) string {
+	return user + ":" + token
+}
+
+func Base64Encode(input string) string {
+	return base64.StdEncoding.EncodeToString([]byte(input))
+}
+
+type IdentifiedToken struct {
+	UserId   string
+	APIToken string
+}
+
+func DecodeAndSplitToken(input string) (*IdentifiedToken, error) {
+	decoded, err := base64.RawURLEncoding.DecodeString(input)
+	if err != nil {
+		return nil, err
+	}
+	userId, apiToken, ok := strings.Cut(string(decoded), ":")
+	if !ok {
+		return nil, fmt.Errorf("decoding token")
+	}
+	return &IdentifiedToken{userId, apiToken}, nil
+}
 
 type TokenPair struct {
 	Token string

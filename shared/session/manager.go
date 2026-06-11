@@ -4,11 +4,17 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
+	t "github.com/lejeunel/go-image-annotator/app/token-generator"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	readusr "github.com/lejeunel/go-image-annotator/use-cases/user/read"
-	"net/http"
 )
 
 var UserIdKey = "user-id"
@@ -19,51 +25,56 @@ type SessionManager interface {
 	MiddleWare(next http.Handler) http.Handler
 }
 
+type TokenVerifier interface {
+	Verify(token string, storedHash []byte) bool
+}
+
 type MySessionManager struct {
 	*scs.SessionManager
 	readusr.Repo
+	TokenVerifier
 }
 
 func (m MySessionManager) MiddleWare(next http.Handler) http.Handler {
-	return m.LoadAndSave(m.LoadAndSaveWithHeader(m.appendUserIdentityToContext(next)))
+	return m.LoadAndSave(m.middlewareDecodeUserFromSessionId(m.LookForAPIToken(next)))
 }
 
-func (m MySessionManager) LoadAndSaveWithHeader(next http.Handler) http.Handler {
+func (m MySessionManager) LookForAPIToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		headerKey := "X-Session"
-		headerKeyExpiry := "X-Session-Expiry"
-
-		ctx, err := m.Load(r.Context(), r.Header.Get(headerKey))
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-
-		bw := &bufferedResponseWriter{ResponseWriter: w}
-		sr := r.WithContext(ctx)
-		next.ServeHTTP(bw, sr)
-
-		if m.Status(ctx) == scs.Modified {
-			token, expiry, err := m.Commit(ctx)
+		authHeader := r.Header.Get("Authorization")
+		bearerToken, ok := strings.CutPrefix(authHeader, "Bearer ")
+		if ok && bearerToken != "" {
+			token, err := t.DecodeAndSplitToken(bearerToken)
 			if err != nil {
-				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return
 			}
 
-			w.Header().Set(headerKey, token)
-			w.Header().Set(headerKeyExpiry, expiry.Format(http.TimeFormat))
+			user, err := m.Repo.Find(token.UserId)
+			if errors.Is(err, e.ErrNotFound) {
+			}
+			if match := m.TokenVerifier.Verify(token.APIToken, []byte(user.HashPAT)); !match {
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+			ctx := context.WithValue(r.Context(), u.UserContextKey, user)
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
 		}
-
-		if bw.code != 0 {
-			w.WriteHeader(bw.code)
-		}
-		w.Write(bw.buf.Bytes())
+		next.ServeHTTP(w, r)
 	})
 }
 
-func (m MySessionManager) appendUserIdentityToContext(next http.Handler) http.Handler {
+func (m MySessionManager) middlewareDecodeUserFromSessionId(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user, err := m.Repo.Find(m.GetString(r.Context(), UserIdKey))
+
+		id := m.GetString(r.Context(), UserIdKey)
+		if id == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		user, err := m.Repo.Find(id)
 		if err != nil {
 			next.ServeHTTP(w, r)
 			return
@@ -80,8 +91,13 @@ func (m MySessionManager) Logout(ctx context.Context) error {
 }
 
 func (m MySessionManager) Login(ctx context.Context, id string) error {
+	errCtx := fmt.Errorf("logging in user %v", id)
+	if _, err := m.Repo.Find(id); err != nil {
+		return fmt.Errorf("%w: checking if user is registered: %w", errCtx, err)
+	}
+
 	if err := m.SessionManager.RenewToken(ctx); err != nil {
-		return err
+		return fmt.Errorf("%w: renewing token: %w", errCtx, err)
 	}
 	m.SessionManager.Put(ctx, UserIdKey, id)
 	return nil
@@ -101,9 +117,11 @@ func (bw *bufferedResponseWriter) WriteHeader(code int) {
 	bw.code = code
 }
 
-func NewSQLiteSessionManager(db *sql.DB, repo readusr.Repo) MySessionManager {
+func NewSQLiteSessionManager(db *sql.DB, repo readusr.Repo,
+	verifier TokenVerifier) MySessionManager {
 	store := sqlite3store.New(db)
-	m := MySessionManager{SessionManager: scs.New(), Repo: repo}
+	m := MySessionManager{SessionManager: scs.New(), Repo: repo,
+		TokenVerifier: verifier}
 	m.Store = store
 	return m
 }

@@ -1,0 +1,93 @@
+<style>
+    .btn-copy {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-family: 'Inter', sans-serif;
+      font-size: .8rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 5px;
+      padding: .45rem .8rem;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-copy:hover { background: #3a8a6e; }
+    .btn-copy.copied { background: #1e4a35; color: #6EE7B7; }
+    #confirm-zone {
+      display: none;
+    }
+    #confirm-zone.visible {
+      display: block;
+      animation: fadeSlide .2s ease;
+    }
+</style>
+<script>
+    function showConfirm() {
+      document.getElementById('confirm-zone').classList.add('visible');
+      document.getElementById('token-result').innerHTML = '';
+    }
+
+    function cancelConfirm() {
+      document.getElementById('confirm-zone').classList.remove('visible');
+    }
+    function onTokenGenerated() {
+      document.getElementById('confirm-zone').classList.remove('visible');
+    }
+	function copyToken(btn) {
+		const token = document.getElementById('token-value').textContent;
+		navigator.clipboard.writeText(token).then(() => {
+			btn.classList.add('copied');
+			btn.innerHTML = `<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Copied`;
+			setTimeout(() => {
+			btn.classList.remove('copied');
+			btn.innerHTML = `<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-2 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg> Copy`;
+			}, 2500);
+		});
+	}
+</script>
+	<!-- return Article( -->
+	<!-- 	Class("group rounded-radius flex max-w-md flex-col border border-outline bg-surface-alt p-1 text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark"), -->
+	<!-- 	P(Class("text-pretty text-sm"), node), -->
+	<!-- ) -->
+
+<article
+  class="group rounded-radius flex max-w-md flex-col border border-outline bg-surface-alt p-1 dark:border-outline-dark dark:bg-surface-dark-alt">
+
+    <div id="generate-zone" class="p-2">
+        <button
+        class="whitespace-nowrap rounded-radius bg-warning border border-warning px-4 py-2 text-sm font-medium tracking-wide text-onWarning transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warning active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-warning dark:border-warning dark:text-onWarning dark:focus-visible:outline-warning"
+        onclick="showConfirm()">
+        <span class="flex items-center">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            <div class="ml-1">Generate token</div>
+        </span>
+        </button>
+    </div>
+    <div class="pt-2 pb-2">
+        <div id="confirm-zone">
+        <div class="p-2 group rounded-radius flex max-w-md flex-col border border-outline bg-surface-alt p-1 text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark">
+            <p class="pt-1 pb-1">This will <span class="text-red-500 font-bold">invalidate your current token</span> immediately. Any integrations using it will stop working. Continue?</p>
+            <div class="confirm-actions">
+            <button
+                class="whitespace-nowrap rounded-radius bg-danger border border-danger px-4 py-2 text-sm font-medium tracking-wide text-onDanger transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-danger dark:border-danger dark:text-onDanger dark:focus-visible:outline-danger"
+                hx-get="/ui/new-api-token"
+                hx-target="#token-result"
+                hx-swap="innerHTML"
+                hx-on::after-request="onTokenGenerated()"
+            >
+                <span class="flex items-center">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <div class="ml-1">Yes, generate token</div>
+                </span>
+            </button>
+            <button class="whitespace-nowrap rounded-radius bg-surface border border-surface px-4 py-2 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark dark:border-surface-dark dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt" onclick="cancelConfirm()">Cancel</button>
+            </div>
+        </div>
+        </div>
+    </div>
+    <div id="token-result"></div>
+</article>

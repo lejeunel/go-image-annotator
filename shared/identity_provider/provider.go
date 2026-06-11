@@ -37,13 +37,11 @@ type GothIdentityHandler struct {
 func (p GothIdentityHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	gothic.BeginAuthHandler(w, r)
 }
-
 func (p GothIdentityHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	gothic.Logout(w, r)
 	p.SessionManager.Logout(r.Context())
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
-
 func (p GothIdentityHandler) HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	if user, err := gothic.CompleteUserAuth(w, r); err == nil {
 		if err := p.SessionManager.Login(r.Context(), user.Email); err != nil {

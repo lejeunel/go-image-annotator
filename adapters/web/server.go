@@ -11,6 +11,7 @@ import (
 type Server struct {
 	*u.Interactors
 	html.PageBuilder
+	UserDashboardBuilder
 	annotator *a.Annotator
 	s.SessionManager
 	ip.OAuthHandler
@@ -21,5 +22,6 @@ func NewServer(interactors *u.Interactors, annotator *a.Annotator,
 	identityHandler ip.OAuthHandler) *Server {
 	return &Server{Interactors: interactors, annotator: annotator,
 		SessionManager: sessionManager, PageBuilder: pageBuilder,
-		OAuthHandler: identityHandler}
+		UserDashboardBuilder: NewUserDashboardBuilder(),
+		OAuthHandler:         identityHandler}
 }

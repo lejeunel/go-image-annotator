@@ -13,7 +13,7 @@ func RegisterWebPages(mux *http.ServeMux, server Server, b html.PageBuilder) {
 	mux.HandleFunc("/callback/{provider}", server.HandleAuthCallback)
 
 	mux.HandleFunc("/user-dashboard", server.UserDashboard)
-	mux.HandleFunc("/new-api-token", server.NewAPIToken)
+	mux.HandleFunc("/ui/new-api-token", server.NewAPIToken)
 
 	mux.HandleFunc("/collections", server.ListCollections)
 	mux.HandleFunc("/images", server.ListImages)
