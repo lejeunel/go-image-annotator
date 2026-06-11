@@ -13,7 +13,11 @@ GroupRepo should contain:
 ** DONE List(Request) ([]*u.User, error)
 ** DONE Count() (int64, error)
 ** DONE Find(string) (*usr.User, error)
-** TODO UnAssignRole(string, string) error
-** TODO AssignRole(string, string) error
-** TODO AssignToGroup(string, string) error
-** TODO UnAssignFromGroup(string, string) error
+** DONE UnAssignRole(string, string) error
+** DONE AssignRole(string, string) error
+** DONE AssignToGroup(string, string) error
+** DONE UnAssignFromGroup(string, string) error
+* TODO Some handlers fail when user is not logged in
+** TODO user-dashboard
+** TODO new-api-token
+* TODO Give explicit error message when logged in user does not exist

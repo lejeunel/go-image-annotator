@@ -7,8 +7,8 @@ import (
 	"log/slog"
 
 	g "github.com/lejeunel/go-image-annotator/app/token-generator"
-	usr "github.com/lejeunel/go-image-annotator/entities/user"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 )
 
@@ -25,20 +25,30 @@ type Interactor struct {
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := fmt.Errorf("setting api access token to user %v", r.Id)
 	if err := i.auth.RenewToken(ctx, r.Id); err != nil {
 		i.handleError(err, out)
 		return
 
 	}
-	token, err := i.tokenGenerator.Generate()
+	exists, err := i.repo.Exists(r.Id)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%w: checking user exists: %w", errCtx, err))
+		return
+	}
+	if !exists {
+		out.Error(fmt.Errorf("%w: checking user exists: %w", errCtx, e.ErrNotFound))
 		return
 	}
 
-	user := usr.NewUser(r.Id, usr.WithHashedPersonalAccessToken(token.Hash))
-	if err := i.repo.Create(user); err != nil {
-		i.handleError(err, out)
+	token, err := i.tokenGenerator.Generate()
+	if err != nil {
+		out.Error(fmt.Errorf("%w: generating token: %w", errCtx, err))
+		return
+	}
+
+	if err := i.repo.SetAccessTokenHash(r.Id, token.Hash); err != nil {
+		out.Error(fmt.Errorf("%w: setting token hash: %w", errCtx, err))
 		return
 	}
 	out.Success(Response{Id: r.Id, PersonalAccessToken: token.Token})

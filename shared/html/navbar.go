@@ -48,7 +48,7 @@ func MakeLoginOrUserBadge(user *u.User) Node {
 		Raw(UserIcon)).Render(&iconBuf)
 	var buf bytes.Buffer
 	entries := UserMenu{UserName: user.Id,
-		Entries: []UserMenuEntry{{"Dashboard", "/user"}, {"Sign Out", "/logout"}},
+		Entries: []UserMenuEntry{{"Dashboard", "/user-dashboard"}, {"Sign Out", "/logout"}},
 		Icon:    iconBuf.String()}
 	tUser.ExecuteTemplate(&buf, "user_badge", entries)
 	return Raw(buf.String())

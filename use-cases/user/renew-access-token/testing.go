@@ -2,7 +2,6 @@ package renew_token
 
 import (
 	"context"
-	"slices"
 
 	g "github.com/lejeunel/go-image-annotator/app/token-generator"
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
@@ -22,23 +21,25 @@ func (p *FakePresenter) Success(r Response) {
 }
 
 type FakeRepo struct {
-	Err error
-	Ids []string
-	Got *usr.User
+	Err     error
+	GotId   usr.UserId
+	GotHash []byte
+	Missing bool
 }
 
-func (r *FakeRepo) Create(u usr.User) error {
+func (r *FakeRepo) SetAccessTokenHash(id usr.UserId, hash []byte) error {
 	if r.Err != nil {
 		return r.Err
 	}
-	r.Got = &u
+	r.GotId = id
+	r.GotHash = hash
 	return nil
 }
 func (r *FakeRepo) Exists(id string) (bool, error) {
-	if slices.Contains(r.Ids, id) {
-		return true, nil
+	if r.Missing {
+		return false, nil
 	}
-	return false, nil
+	return true, nil
 }
 
 type FailingAuth struct {

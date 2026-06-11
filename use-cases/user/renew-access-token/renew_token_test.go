@@ -13,6 +13,13 @@ func TestHandleAuthError(t *testing.T) {
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }
+func TestNonExistingUserShouldFail(t *testing.T) {
+	repo := &FakeRepo{Missing: true}
+	itr := New(repo, &FakeTokenGenerator{})
+	p := &FakePresenter{}
+	itr.Execute(t.Context(), Request{Id: "user"}, p)
+	assert.True(t, p.GotNotFoundErr)
+}
 
 func TestCreateWithTokenHash(t *testing.T) {
 	token := "new-token"
@@ -20,7 +27,9 @@ func TestCreateWithTokenHash(t *testing.T) {
 	repo := &FakeRepo{}
 	itr := New(repo, &FakeTokenGenerator{Token: token, Hash_: hash})
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user"}, p)
+	id := "user"
+	itr.Execute(t.Context(), Request{Id: id}, p)
 	assert.Equal(t, token, p.Got.PersonalAccessToken)
-	assert.Equal(t, hash, repo.Got.HashPAT)
+	assert.Equal(t, hash, repo.GotHash)
+	assert.Equal(t, id, repo.GotId)
 }

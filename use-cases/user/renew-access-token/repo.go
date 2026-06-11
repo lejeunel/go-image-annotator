@@ -5,6 +5,6 @@ import (
 )
 
 type Repo interface {
-	Create(usr.User) error
-	Exists(string) (bool, error)
+	SetAccessTokenHash(usr.UserId, []byte) error
+	Exists(usr.UserId) (bool, error)
 }

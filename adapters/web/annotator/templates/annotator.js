@@ -32,20 +32,20 @@ document.addEventListener('alpine:init', () => {
 
     const AnnotationAPI = {
         async fetchAll() {
-            const res = await fetch(`/ui/annotations?id={{.ImageId}}&collection={{.Collection}}`);
+            const res = await fetch(`/ui/annotate/annotations?id={{.ImageId}}&collection={{.Collection}}`);
             if (!res.ok) throw new Error('Could not fetch annotations');
             return res.json();
         },
         async setLabel(id, label) {
-            const res = await fetch(`/ui/set-label?id=${id}&label=${label}`);
+            const res = await fetch(`/ui/annotate/set-label?id=${id}&label=${label}`);
             if (!res.ok) throw new Error('Could not relabel');
         },
         async submit_label(label) {
-            const res = await fetch(`/ui/submit-label?image_id={{.ImageId}}&collection={{.Collection}}&label=${label}`)
+            const res = await fetch(`/ui/annotate/submit-label?image_id={{.ImageId}}&collection={{.Collection}}&label=${label}`)
             if (!res.ok) throw new Error('Could not submit annotation');
         },
         async submit_region(label, annotation) {
-            const res = await fetch("/ui/submit-box", {
+            const res = await fetch("/ui/annotate/submit-box", {
                 method: "POST",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify({
@@ -60,12 +60,12 @@ document.addEventListener('alpine:init', () => {
         },
 
         async remove(id) {
-            const res = await fetch(`/ui/remove-annotation?id=${id}`);
+            const res = await fetch(`/ui/annotate/remove-annotation?id=${id}`);
             if (!res.ok) throw new Error('Could not remove annotation');
         },
 
         async update_box(annotation) {
-            const res = await fetch("/ui/update-box", {
+            const res = await fetch("/ui/annotate/update-box", {
                 method: "POST",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify(annotation),
@@ -188,7 +188,7 @@ document.addEventListener('alpine:init', () => {
         refreshList() {
             htmx.ajax(
                 'GET',
-                `/ui/annotation-panel?id={{.ImageId}}&collection={{.Collection}}`,
+                `/ui/annotate/annotation-panel?id={{.ImageId}}&collection={{.Collection}}`,
                 '#annotation-list'
             );
         },

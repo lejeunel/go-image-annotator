@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -37,9 +38,10 @@ type SQLiteUserRepo struct {
 }
 
 type Record struct {
-	Id      string `db:"id"`
-	Roles   string `db:"roles"`
-	IsAdmin bool   `db:"is_admin"`
+	Id           string `db:"id"`
+	Roles        string `db:"roles"`
+	IsAdmin      bool   `db:"is_admin"`
+	ApiTokenHash string `db:"api_token_hash"`
 }
 
 func (r *SQLiteUserRepo) Create(usr u.User) error {
@@ -47,8 +49,8 @@ func (r *SQLiteUserRepo) Create(usr u.User) error {
 	if err != nil {
 		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
 	}
-	query := "INSERT INTO users (id,roles,is_admin) VALUES ($1,$2,$3)"
-	_, err = r.Db.Exec(query, usr.Id, roles, usr.IsAdmin)
+	query := "INSERT INTO users (id,roles,is_admin,api_token_hash) VALUES ($1,$2,$3,$4)"
+	_, err = r.Db.Exec(query, usr.Id, roles, usr.IsAdmin, hex.EncodeToString(usr.HashPAT))
 	if err != nil {
 		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
 	}
@@ -92,7 +94,7 @@ func (r *SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 func (r *SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 	record := Record{}
 	err := r.Db.Get(&record,
-		"SELECT id,roles,is_admin FROM users WHERE id=$1", id)
+		"SELECT id,roles,is_admin,api_token_hash FROM users WHERE id=$1", id)
 
 	if err != nil {
 		switch {
@@ -114,8 +116,13 @@ func (r *SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 		return nil, err
 	}
 
+	hash, err := hex.DecodeString(record.ApiTokenHash)
+	if err != nil {
+		return nil, err
+	}
+
 	user := u.NewUser(record.Id, u.WithRoles(roles), u.WithGroups(groups),
-		u.WithAdmin(record.IsAdmin))
+		u.WithAdmin(record.IsAdmin), u.WithHashedPersonalAccessToken(hash))
 	return &user, nil
 }
 func (r *SQLiteUserRepo) Delete(id string) error {
@@ -227,6 +234,15 @@ func (r *SQLiteUserRepo) SetAdmin(userId string, value bool) error {
 	return nil
 }
 
+func (r *SQLiteUserRepo) SetAccessTokenHash(userId u.UserId, hash []byte) error {
+	hashStr := hex.EncodeToString(hash)
+	query := "UPDATE users SET api_token_hash=$2 WHERE id=$1"
+	_, err := r.Db.Exec(query, userId, hashStr)
+	if err != nil {
+		return fmt.Errorf("setting access token hash: %v: %w", err, e.ErrInternal)
+	}
+	return nil
+}
 func NewSQLiteUserRepo(db *sqlx.DB) *SQLiteUserRepo {
 	return &SQLiteUserRepo{Db: db}
 }
