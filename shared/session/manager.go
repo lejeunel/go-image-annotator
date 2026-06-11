@@ -34,7 +34,7 @@ type MySessionManager struct {
 }
 
 func (m MySessionManager) MiddleWare(next http.Handler) http.Handler {
-	return m.LoadAndSave(m.middlewareDecodeUserFromSessionId(m.WithBearerToken(next)))
+	return m.LoadAndSave(m.AuthFromSessionId(m.AuthBearerToken(next)))
 }
 func (m MySessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, error) {
 	errCtx := fmt.Errorf("inferring user's identity from bearer token")
@@ -52,7 +52,7 @@ func (m MySessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User,
 	return user, nil
 }
 
-func (m MySessionManager) WithBearerToken(next http.Handler) http.Handler {
+func (m MySessionManager) AuthBearerToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
@@ -75,7 +75,7 @@ func (m MySessionManager) WithBearerToken(next http.Handler) http.Handler {
 	})
 }
 
-func (m MySessionManager) middlewareDecodeUserFromSessionId(next http.Handler) http.Handler {
+func (m MySessionManager) AuthFromSessionId(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		id := m.GetString(r.Context(), UserIdKey)
