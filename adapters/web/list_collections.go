@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"net/url"
 
-	html "github.com/lejeunel/go-image-annotator/shared/html"
-	n "github.com/lejeunel/go-image-annotator/shared/navigation"
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 	. "maragu.dev/gomponents"
 )
@@ -36,10 +36,10 @@ func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
 		NewListCollectionsPresenter(w, s.PageBuilder))
 }
 
-func NewListCollectionsPresenter(w http.ResponseWriter, p html.PageBuilder) ListCollectionsPresenter {
+func NewListCollectionsPresenter(w http.ResponseWriter, p b.PageBuilder) ListCollectionsPresenter {
 	baseURL, _ := url.Parse("/collections")
 	return ListCollectionsPresenter{
 		ListRenderer: NewListRenderer(*p.SetTitle("Collections"), *baseURL,
-			n.CollectionsPageActive, w),
+			b.CollectionsPageActive, w),
 	}
 }

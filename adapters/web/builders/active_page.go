@@ -1,4 +1,4 @@
-package navigation
+package builders
 
 type ActivePage int
 

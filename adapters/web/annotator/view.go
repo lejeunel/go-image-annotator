@@ -6,8 +6,8 @@ import (
 
 	"embed"
 
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	v "github.com/lejeunel/go-image-annotator/app/annotator/view"
-	html "github.com/lejeunel/go-image-annotator/shared/html"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -28,7 +28,7 @@ type AnnotationView struct {
 	availableImageLabels []string
 	scrollerButtons      v.ScrollerButtons
 	err                  error
-	PageBuilder          html.PageBuilder
+	PageBuilder          b.PageBuilder
 }
 
 func (v *AnnotationView) SetScroller(buttons v.ScrollerButtons) {
@@ -93,8 +93,16 @@ func (v *AnnotationView) RenderAnnotations(w http.ResponseWriter) {
 	}
 
 }
+
+func AnnotoriousLib() []Node {
+	var scripts []Node
+	scripts = append(scripts, Script(Defer(), Src("/static/annotorious.js")))
+	scripts = append(scripts, Link(Href("/static/annotorious.css"), Rel("stylesheet")))
+	return scripts
+}
+
 func (v *AnnotationView) render(w http.ResponseWriter) {
-	b := v.PageBuilder.SetTitle("image")
+	pb := v.PageBuilder.SetTitle("image")
 
 	script, err := MakeAnnotoriousScript(v.image.Id, v.image.Collection)
 	if err != nil {
@@ -103,12 +111,12 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 	}
 	regionLabelModal, _ := makeLabelModal(v.availableLabels, RegionLabelModal)
 	imageLabelModal, _ := makeLabelModal(v.availableLabels, ImageLabelModal)
-	b.AddScripts(html.AnnotoriousLib()...)
-	b.AddScripts(*script)
-	b.AddScripts(Raw(*regionLabelModal))
-	b.AddScripts(Raw(*imageLabelModal))
+	pb.AddScripts(AnnotoriousLib()...)
+	pb.AddScripts(*script)
+	pb.AddScripts(Raw(*regionLabelModal))
+	pb.AddScripts(Raw(*imageLabelModal))
 
-	b.SetContent(
+	pb.SetContent(
 		Table(
 			Tr(Td(v.ScrollerView.Render(v.scrollerButtons))),
 			Tr(Td(Table(
@@ -118,10 +126,10 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 						Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes, v.imageLabels, v.availableLabels)))),
 			),
 			))))
-	b.Render(w)
+	pb.Render(w)
 }
 
-func NewAnnotationView(pageBuilder html.PageBuilder) *AnnotationView {
+func NewAnnotationView(pageBuilder b.PageBuilder) *AnnotationView {
 	return &AnnotationView{
 		ImageView:      ImageView{},
 		ImageInfosView: ImageInfosView{},

@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"net/url"
 
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	html "github.com/lejeunel/go-image-annotator/shared/html"
-	n "github.com/lejeunel/go-image-annotator/shared/navigation"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	list_im "github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	. "maragu.dev/gomponents"
@@ -33,7 +33,7 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentityFromContext(r.Context())
 	collection := r.URL.Query().Get("collection")
 	if collection == "" {
-		p := html.NewPageBuilder(s.APIPath).SetError(fmt.Errorf("parsing url to get collection name: %w", e.ErrURLParsing))
+		p := b.NewPageBuilder(s.APIPath).SetError(fmt.Errorf("parsing url to get collection name: %w", e.ErrURLParsing))
 		p.Render(w)
 	}
 	s.Image.List.Execute(list_im.Request{PageSize: s.Image.DefaultPageSize,
@@ -42,9 +42,9 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 		NewListImagesPresenter(w, *r.URL, s.PageBuilder))
 }
 
-func NewListImagesPresenter(w http.ResponseWriter, baseURL url.URL, b html.PageBuilder) ListImagesPresenter {
+func NewListImagesPresenter(w http.ResponseWriter, baseURL url.URL, pb b.PageBuilder) ListImagesPresenter {
 	return ListImagesPresenter{
-		ListRenderer: NewListRenderer(b, baseURL,
-			n.NoPageActive, w),
+		ListRenderer: NewListRenderer(pb, baseURL,
+			b.NoPageActive, w),
 	}
 }

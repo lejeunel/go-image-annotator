@@ -1,4 +1,4 @@
-package html
+package builders
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	s "github.com/lejeunel/go-image-annotator/shared"
 	p "github.com/lejeunel/go-image-annotator/shared/identity_provider"
-	n "github.com/lejeunel/go-image-annotator/shared/navigation"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -16,7 +15,7 @@ type PageBuilder struct {
 	Title      string
 	APIPath    string
 	scripts    []Node
-	ActivePage n.ActivePage
+	ActivePage ActivePage
 	User       *u.User
 	Content    Node
 }
@@ -32,7 +31,7 @@ func (b *PageBuilder) SetTitle(title string) *PageBuilder {
 	return b
 }
 
-func (b *PageBuilder) SetActive(a n.ActivePage) *PageBuilder {
+func (b *PageBuilder) SetActive(a ActivePage) *PageBuilder {
 	b.ActivePage = a
 	return b
 }

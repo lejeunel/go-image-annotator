@@ -1,12 +1,11 @@
 package web
 
 import (
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	"net/http"
-
-	"github.com/lejeunel/go-image-annotator/shared/html"
 )
 
-func RegisterWebPages(mux *http.ServeMux, server Server, b html.PageBuilder) {
+func RegisterWebPages(mux *http.ServeMux, server Server, b b.PageBuilder) {
 	mux.Handle("/", HomePageHandlerFunc(b))
 	mux.HandleFunc("/login/{provider}", server.HandleLogin)
 	mux.HandleFunc("/logout", server.HandleLogout)

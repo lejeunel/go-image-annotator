@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"net/url"
 
-	html "github.com/lejeunel/go-image-annotator/shared/html"
-	n "github.com/lejeunel/go-image-annotator/shared/navigation"
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
 	. "maragu.dev/gomponents"
 )
@@ -30,10 +30,10 @@ func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request) {
 		NewListLabelsPresenter(w, s.PageBuilder))
 }
 
-func NewListLabelsPresenter(w http.ResponseWriter, p html.PageBuilder) ListLabelsPresenter {
+func NewListLabelsPresenter(w http.ResponseWriter, p b.PageBuilder) ListLabelsPresenter {
 	baseURL, _ := url.Parse("/labels")
 	return ListLabelsPresenter{
 		ListRenderer: NewListRenderer(*p.SetTitle("Labels"), *baseURL,
-			n.LabelsPageActive, w),
+			b.LabelsPageActive, w),
 	}
 }

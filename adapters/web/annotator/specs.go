@@ -3,7 +3,7 @@ package annotator
 import (
 	"fmt"
 	"github.com/lejeunel/go-image-annotator/app/annotator/view"
-	html "github.com/lejeunel/go-image-annotator/shared/html"
+	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	. "maragu.dev/gomponents"
 )
 

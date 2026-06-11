@@ -1,4 +1,4 @@
-package site
+package server
 
 import (
 	"fmt"
@@ -6,12 +6,13 @@ import (
 	"os"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
-	web "github.com/lejeunel/go-image-annotator/adapters/web"
+	"github.com/lejeunel/go-image-annotator/adapters/web"
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	a "github.com/lejeunel/go-image-annotator/app/annotator"
 	"github.com/lejeunel/go-image-annotator/app/annotator/presenters"
 	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
 	tok "github.com/lejeunel/go-image-annotator/app/token"
-	"github.com/lejeunel/go-image-annotator/shared/html"
+	as "github.com/lejeunel/go-image-annotator/assets"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
 
@@ -29,12 +30,12 @@ type SiteConfig struct {
 }
 
 func RegisterHandlers(mux *http.ServeMux, apiServer api.Server, webServer web.Server, cfg SiteConfig,
-	pageBuilder html.PageBuilder) {
-	RegisterAPIDocs(mux, cfg.OpenAPISpecsPath, cfg.APIDocsPath)
-	RegisterAPISpecs(mux, cfg.OpenAPISpecsPath)
-	RegisterAPIEndpoints(mux, apiServer, cfg.APIPath)
-	RegisterStaticFiles(mux)
+	pageBuilder b.PageBuilder) {
+	api.RegisterAPIEndpoints(mux, apiServer, cfg.APIPath)
 	web.RegisterWebPages(mux, webServer, pageBuilder)
+	web.RegisterAPIDocs(mux, cfg.OpenAPISpecsPath, cfg.APIDocsPath)
+	as.RegisterAPISpecs(mux, cfg.OpenAPISpecsPath)
+	as.RegisterStaticFiles(mux)
 }
 
 func Make(apiPath string) http.Handler {
@@ -44,7 +45,7 @@ func Make(apiPath string) http.Handler {
 	infra := infra.NewSQLiteInfra(cfg.DBPath, cfg.ArtefactDir)
 	tokenGenerator := tok.NewTokenGenerator(32)
 	interactors := i.NewSQLiteInteractors(infra, cfg.DefaultPageSize, cfg.AllowedImageFormats, tokenGenerator)
-	pageBuilder := html.NewPageBuilder(apiPath)
+	pageBuilder := b.NewPageBuilder(apiPath)
 
 	sessionManager := sm.NewSQLiteSessionManager(infra.Db.DB, infra.User, tokenGenerator)
 	identityProvider := ip.NewGothIdentityHandler(sessionManager)

@@ -3,15 +3,15 @@ package web
 import (
 	"io"
 
-	html "github.com/lejeunel/go-image-annotator/shared/html"
-	n "github.com/lejeunel/go-image-annotator/shared/navigation"
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
 	"net/url"
 )
 
 type ListRenderer struct {
-	html.PageBuilder
-	ActivePage n.ActivePage
+	b.PageBuilder
+	ActivePage b.ActivePage
 	ListURL    url.URL
 	Writer     io.Writer
 }
@@ -23,10 +23,10 @@ func (p ListRenderer) RenderSuccess(table html.PaginationTable, pagination pagin
 }
 
 func (p ListRenderer) Error(err error) {
-	html.NewPageBuilder(p.APIPath).SetError(err).Render(p.Writer)
+	b.NewPageBuilder(p.APIPath).SetError(err).Render(p.Writer)
 }
 
-func NewListRenderer(pageBuilder html.PageBuilder, listURL url.URL, page n.ActivePage, w io.Writer) ListRenderer {
+func NewListRenderer(pageBuilder b.PageBuilder, listURL url.URL, page b.ActivePage, w io.Writer) ListRenderer {
 	return ListRenderer{PageBuilder: pageBuilder, ListURL: listURL,
 		ActivePage: page, Writer: w}
 

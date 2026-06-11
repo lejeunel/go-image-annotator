@@ -1,21 +1,20 @@
 package web
 
 import (
-	html "github.com/lejeunel/go-image-annotator/shared/html"
-	n "github.com/lejeunel/go-image-annotator/shared/navigation"
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	. "maragu.dev/gomponents"
 	"net/http"
 )
 
-func MakeHomePage(b html.PageBuilder) Node {
-	b.SetTitle("Home")
-	b.SetActive(n.HomePageActive)
-	return b.Build()
+func MakeHomePage(pb b.PageBuilder) Node {
+	pb.SetTitle("Home")
+	pb.SetActive(b.HomePageActive)
+	return pb.Build()
 }
 
-func HomePageHandlerFunc(b html.PageBuilder) http.HandlerFunc {
+func HomePageHandlerFunc(pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		b.SetUserIdentityFromContext(r.Context())
-		MakeHomePage(b).Render(w)
+		pb.SetUserIdentityFromContext(r.Context())
+		MakeHomePage(pb).Render(w)
 	}
 }

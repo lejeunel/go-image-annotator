@@ -3,9 +3,9 @@ package annotator
 import (
 	"fmt"
 
+	h "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
 	"github.com/lejeunel/go-image-annotator/app/annotator/view"
-	myhtml "github.com/lejeunel/go-image-annotator/shared/html"
 
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -29,8 +29,8 @@ func (p *ScrollerView) Render(buttons view.ScrollerButtons) Node {
 		nextURL = MakeLink(buttons.Next.ImageId, buttons.Next.Collection)
 	}
 	return Table(Tr(
-		Td(myhtml.MakeNavigationButton(prevURL, buttons.Prev.IsActive, scr.ScrollPrevious, "Previous")),
-		Td(myhtml.MakeNavigationButton(nextURL, buttons.Next.IsActive, scr.ScrollNext, "Next")),
+		Td(h.MakeNavigationButton(prevURL, buttons.Prev.IsActive, scr.ScrollPrevious, "Previous")),
+		Td(h.MakeNavigationButton(nextURL, buttons.Next.IsActive, scr.ScrollNext, "Next")),
 	))
 
 }
