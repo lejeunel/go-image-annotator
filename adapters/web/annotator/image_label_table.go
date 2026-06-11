@@ -15,7 +15,7 @@ type ImageLabelRow struct {
 func (r ImageLabelRow) Render() Node {
 	return Tr(Class("text-left"), Td(Class("ps-2 py-1"), Text(r.Label)), Td(
 		Div(
-			Class("pe-1 text-right"),
+			Class("flex justify-end items-center pr-1"),
 			Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, r.Id, TrashIcon)),
 		),
 	))
@@ -37,8 +37,10 @@ func (t *ImageLabelTable) Build() Node {
 				TBody(Class("divide-y divide-outline dark:divide-outline-dark"),
 					Tr(
 						Td(Div(Class("text-left py-2 ps-2 pe-2 text-sm font-bold"), Text("Labels"))),
-						Td(Class("text-right"),
-							Raw(fmt.Sprintf(`<a href="#" onclick="Alpine.store('imageLabelModal').open()"> %v </a>`, AddIcon)),
+						Td(Class("align-middle"),
+							Div(Class("flex items-center justify-end pr-1"),
+								Raw(fmt.Sprintf(`<a href="#" onclick="Alpine.store('imageLabelModal').open()"> %v </a>`, AddIcon)),
+							),
 						),
 					),
 					Map(t.Rows, func(r ImageLabelRow) Node {

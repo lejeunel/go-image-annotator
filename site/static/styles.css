@@ -464,6 +464,9 @@
   .justify-center {
     justify-content: center;
   }
+  .justify-end {
+    justify-content: flex-end;
+  }
   .gap-1 {
     gap: calc(var(--spacing) * 1);
   }
@@ -645,9 +648,6 @@
   .ps-2 {
     padding-inline-start: calc(var(--spacing) * 2);
   }
-  .pe-1 {
-    padding-inline-end: calc(var(--spacing) * 1);
-  }
   .pe-2 {
     padding-inline-end: calc(var(--spacing) * 2);
   }
@@ -659,6 +659,9 @@
   }
   .pt-36 {
     padding-top: calc(var(--spacing) * 36);
+  }
+  .pr-1 {
+    padding-right: calc(var(--spacing) * 1);
   }
   .pb-1 {
     padding-bottom: calc(var(--spacing) * 1);
@@ -678,8 +681,8 @@
   .text-left {
     text-align: left;
   }
-  .text-right {
-    text-align: right;
+  .align-middle {
+    vertical-align: middle;
   }
   .align-top {
     vertical-align: top;

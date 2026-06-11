@@ -15,7 +15,9 @@ func APIDocsPage(ctx context.Context, specsPath string, apiPath string) Node {
 	p.SetContent(Div(Class("spotlight "),
 		El("elements-api",
 			Attr("apiDescriptionUrl", specsPath),
-			Attr("hideTryIt", "true"),
+			// This includes session cookies when calling endpoints with the
+			// "try-it" button
+			Attr("tryItCredentialsPolicy", "include"),
 			Attr("router", "hash"),
 			Attr("layout", "sidebar"),
 		)))

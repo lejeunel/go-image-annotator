@@ -33,7 +33,7 @@ func (t *RegionTable) AddBox(b view.BoundingBox) {
 			Text(shortId),
 			Raw(buf.String()),
 			Div(
-				Class("pe-1"),
+				Class("flex  justify-end items-center pr-1"),
 				Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, b.Id, TrashIcon)),
 			),
 		}})
