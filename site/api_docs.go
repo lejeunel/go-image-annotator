@@ -15,10 +15,10 @@ func APIDocsPage(ctx context.Context, specsPath string, apiPath string) Node {
 	p.SetContent(Div(Class("spotlight "),
 		El("elements-api",
 			Attr("apiDescriptionUrl", specsPath),
+			Attr("hideTryIt", "true"),
 			Attr("router", "hash"),
 			Attr("layout", "sidebar"),
 		)))
 	p.SetActive(n.APIDocsPageActive)
 	return p.Build()
-
 }

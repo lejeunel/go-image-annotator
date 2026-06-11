@@ -14,6 +14,26 @@ info:
 servers:
   - url: /api
 paths:
+  /whoami:
+    get:
+      summary: Get current user's identity
+      description: Get user's identity, groups and roles
+      operationId: whoAmI
+      tags: [User]
+      responses:
+        '200':
+          description: User's identity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserIdentity'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
   /images/{collection_name}/{image_id}:
     get:
       summary: Read image meta-data
@@ -603,6 +623,23 @@ components:
         description:
           type: string
           description: Description of the collection
+    UserIdentity:
+      required:
+        - id
+        - roles
+        - groups
+      properties:
+        id:
+          type: string
+          description: Id of the user
+        roles:
+          type: array
+          items:
+            type: string
+        groups:
+          type: array
+          items:
+            type: string
     Label:
       properties:
         name:
@@ -622,7 +659,6 @@ components:
             $ref: '#/components/schemas/Label'
         pagination:
           $ref: '#/components/schemas/Pagination'
-
     NewLabel:
       required:
         - name

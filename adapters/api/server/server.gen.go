@@ -186,6 +186,15 @@ type User struct {
 	IsAdmin *bool `json:"is_admin,omitempty"`
 }
 
+// UserIdentity defines model for UserIdentity.
+type UserIdentity struct {
+	Groups []string `json:"groups"`
+
+	// Id Id of the user
+	Id    string   `json:"id"`
+	Roles []string `json:"roles"`
+}
+
 // ListCollectionsParams defines parameters for ListCollections.
 type ListCollectionsParams struct {
 	// Page page number
@@ -272,6 +281,9 @@ type ServerInterface interface {
 	// Create a new user
 	// (POST /users)
 	CreateUser(w http.ResponseWriter, r *http.Request)
+	// Get current user's identity
+	// (GET /whoami)
+	WhoAmI(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -611,6 +623,20 @@ func (siw *ServerInterfaceWrapper) CreateUser(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
+// WhoAmI operation middleware
+func (siw *ServerInterfaceWrapper) WhoAmI(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.WhoAmI(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -744,6 +770,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("DELETE "+options.BaseURL+"/labels/{name}", wrapper.DeleteLabelByName)
 	m.HandleFunc("GET "+options.BaseURL+"/labels/{name}", wrapper.FindLabelByName)
 	m.HandleFunc("POST "+options.BaseURL+"/users", wrapper.CreateUser)
+	m.HandleFunc("GET "+options.BaseURL+"/whoami", wrapper.WhoAmI)
 
 	return m
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	p "github.com/lejeunel/go-image-annotator/adapters/api/json/user"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
 	"net/http"
 )
@@ -21,5 +22,17 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	s.User.Create.Execute(
 		r.Context(), req, p.NewCreatePresenter(w, s.Logger))
+}
 
+func (s *Server) WhoAmI(w http.ResponseWriter, r *http.Request) {
+	user := ip.IdentityFromContext(r.Context())
+
+	if user != nil {
+		json.WriteJSON(w, 200, UserIdentity{
+			Id:     user.Id,
+			Groups: user.Groups,
+			Roles:  user.Roles})
+		return
+	}
+	http.Error(w, "failed fetching user's identity", http.StatusBadRequest)
 }

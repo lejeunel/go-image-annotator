@@ -52,6 +52,8 @@ func (m MySessionManager) LookForAPIToken(next http.Handler) http.Handler {
 
 			user, err := m.Repo.Find(token.UserId)
 			if errors.Is(err, e.ErrNotFound) {
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
 			}
 			if match := m.TokenVerifier.Verify(token.APIToken, []byte(user.HashPAT)); !match {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)

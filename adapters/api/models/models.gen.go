@@ -177,6 +177,15 @@ type User struct {
 	IsAdmin *bool `json:"is_admin,omitempty"`
 }
 
+// UserIdentity defines model for UserIdentity.
+type UserIdentity struct {
+	Groups []string `json:"groups"`
+
+	// Id Id of the user
+	Id    string   `json:"id"`
+	Roles []string `json:"roles"`
+}
+
 // ListCollectionsParams defines parameters for ListCollections.
 type ListCollectionsParams struct {
 	// Page page number
