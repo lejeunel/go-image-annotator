@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -13,7 +12,6 @@ import (
 	"github.com/alexedwards/scs/v2"
 	tok "github.com/lejeunel/go-image-annotator/app/token"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	readusr "github.com/lejeunel/go-image-annotator/use-cases/user/read"
 )
 
@@ -36,34 +34,44 @@ type MySessionManager struct {
 }
 
 func (m MySessionManager) MiddleWare(next http.Handler) http.Handler {
-	return m.LoadAndSave(m.middlewareDecodeUserFromSessionId(m.LookForAPIToken(next)))
+	return m.LoadAndSave(m.middlewareDecodeUserFromSessionId(m.WithBearerToken(next)))
+}
+func (m MySessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, error) {
+	errCtx := fmt.Errorf("inferring user's identity from bearer token")
+	token, err := tok.DecodeAndSplitToken(bearerToken)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", errCtx, err)
+	}
+	user, err := m.Repo.Find(token.UserId)
+	if err != nil {
+		return nil, fmt.Errorf("%w: fetching user: %w", errCtx, err)
+	}
+	if match := m.TokenVerifier.Verify(token.APIToken, []byte(user.HashPAT)); !match {
+		return nil, fmt.Errorf("%w: verifying token: %w", errCtx, err)
+	}
+	return user, nil
 }
 
-func (m MySessionManager) LookForAPIToken(next http.Handler) http.Handler {
+func (m MySessionManager) WithBearerToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
-		bearerToken, ok := strings.CutPrefix(authHeader, "Bearer ")
-		if ok && bearerToken != "" {
-			token, err := tok.DecodeAndSplitToken(bearerToken)
-			if err != nil {
-				http.Error(w, "unauthorized", http.StatusUnauthorized)
-				return
-			}
-
-			user, err := m.Repo.Find(token.UserId)
-			if errors.Is(err, e.ErrNotFound) {
-				http.Error(w, "unauthorized", http.StatusUnauthorized)
-				return
-			}
-			if match := m.TokenVerifier.Verify(token.APIToken, []byte(user.HashPAT)); !match {
-				http.Error(w, "unauthorized", http.StatusUnauthorized)
-				return
-			}
-			ctx := context.WithValue(r.Context(), u.UserContextKey, user)
-			next.ServeHTTP(w, r.WithContext(ctx))
+		if authHeader == "" {
+			next.ServeHTTP(w, r)
 			return
 		}
-		next.ServeHTTP(w, r)
+		bearerToken, ok := strings.CutPrefix(authHeader, "Bearer ")
+		if !ok || bearerToken == "" {
+			http.Error(w, "got invalid bearer token", http.StatusUnauthorized)
+			return
+		}
+
+		user, err := m.fetchUserFromBearerToken(bearerToken)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		ctx := context.WithValue(r.Context(), u.UserContextKey, user)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 

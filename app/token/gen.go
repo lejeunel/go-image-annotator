@@ -23,13 +23,13 @@ type IdentifiedToken struct {
 }
 
 func DecodeAndSplitToken(input string) (*IdentifiedToken, error) {
-	decoded, err := base64.RawURLEncoding.DecodeString(input)
+	decoded, err := base64.StdEncoding.DecodeString(input)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decoding token from base64: %w", err)
 	}
 	userId, apiToken, ok := strings.Cut(string(decoded), ":")
 	if !ok {
-		return nil, fmt.Errorf("decoding token")
+		return nil, fmt.Errorf("splitting token")
 	}
 	return &IdentifiedToken{userId, apiToken}, nil
 }
