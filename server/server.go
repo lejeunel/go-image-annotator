@@ -6,23 +6,19 @@ import (
 	"os"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
-	db "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
+
+	app "github.com/lejeunel/go-image-annotator/adapters/sqlite/app"
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	a "github.com/lejeunel/go-image-annotator/app/annotator"
 	ap "github.com/lejeunel/go-image-annotator/app/annotator/presenters"
 	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
-	fs "github.com/lejeunel/go-image-annotator/app/file-store"
-	tok "github.com/lejeunel/go-image-annotator/app/token"
 	as "github.com/lejeunel/go-image-annotator/assets"
 	"github.com/lejeunel/go-image-annotator/config"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
 
 	"net/http"
-
-	"github.com/lejeunel/go-image-annotator/adapters/sqlite/infra"
-	i "github.com/lejeunel/go-image-annotator/adapters/sqlite/interactors"
 )
 
 func RegisterHandlers(mux *http.ServeMux, apiServer api.Server, webServer web.Server, apicfg config.APIConfig,
@@ -35,30 +31,26 @@ func RegisterHandlers(mux *http.ServeMux, apiServer api.Server, webServer web.Se
 }
 
 func Make(apiPath string) http.Handler {
-	cfg := config.Parse()
+	app := app.NewSQLiteApp()
 	mux := http.NewServeMux()
 
-	infra := infra.NewSQLiteInfra(db.NewSQLiteDB(cfg.DBPath),
-		fs.NewFileStore(cfg.ArtefactDir))
-	tokenGenerator := tok.NewTokenGenerator(32)
-	interactors := i.NewSQLiteInteractors(infra, cfg.DefaultPageSize, cfg.AllowedImageFormats, tokenGenerator)
 	pageBuilder := b.NewPageBuilder(apiPath)
 
-	sessionManager := sm.NewSQLiteSessionManager(infra.Db.DB, infra.User, tokenGenerator)
+	sessionManager := sm.NewSQLiteSessionManager(app.Infra.Db.DB, app.Infra.User, app.TokenGenerator)
 	identityProvider := ip.NewGothIdentityHandler(sessionManager)
 	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
 		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),
 		CallbackURL: "http://localhost:3000/callback/google"})
 
-	scroller := scr.New(infra.Scroller)
-	annotator := a.NewAnnotator(scroller, &interactors.Image.Read,
-		&interactors.Annotation.AddBox, &interactors.Annotation.UpdateBox, &interactors.Annotation.Delete,
-		&interactors.Label.FetchAll, &interactors.Annotation.UpdateLabel, &interactors.Annotation.AddImageLabel,
+	scroller := scr.New(app.Infra.Scroller)
+	annotator := a.NewAnnotator(scroller, &app.Itrs.Image.Read,
+		&app.Itrs.Annotation.AddBox, &app.Itrs.Annotation.UpdateBox, &app.Itrs.Annotation.Delete,
+		&app.Itrs.Label.FetchAll, &app.Itrs.Annotation.UpdateLabel, &app.Itrs.Annotation.AddImageLabel,
 		ap.New())
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	RegisterHandlers(mux,
-		*api.NewServer(interactors, *logger),
-		*web.NewServer(interactors, annotator, *pageBuilder, sessionManager, identityProvider),
+		*api.NewServer(&app.Itrs, *logger),
+		*web.NewServer(&app.Itrs, annotator, *pageBuilder, sessionManager, identityProvider),
 		config.APIConfig{APIPath: fmt.Sprintf("/%v", apiPath),
 			APIDocsPath:      fmt.Sprintf("/%v/docs", apiPath),
 			OpenAPISpecsPath: fmt.Sprintf("/%v/openapi.yaml", apiPath)},

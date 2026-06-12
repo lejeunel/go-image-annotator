@@ -10,6 +10,7 @@ type Config struct {
 	ArtefactDir         string   `required:"true"`
 	AllowedImageFormats []string `default:"jpeg,png"`
 	DefaultPageSize     int      `default:"10"`
+	TokenLength         int      `default:"32"`
 }
 
 func Parse() Config {

@@ -7,9 +7,9 @@ import (
 )
 
 func NewSQLiteInteractors(i i.SQLiteInfra, pageSize int, allowedImageFormats []string,
-	tokenGenerator tok.TokenGenerator) *u.Interactors {
+	tokenGenerator tok.TokenGenerator) u.Interactors {
 
-	return &u.Interactors{
+	return u.Interactors{
 		Label:      NewSQLiteLabelInteractors(i.Label, pageSize),
 		Collection: NewSQLiteCollectionInteractors(i.Collection, i.Group, pageSize),
 		Image:      NewSQLiteImageInteractors(i, allowedImageFormats),
