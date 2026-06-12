@@ -11,6 +11,7 @@ type Config struct {
 	AllowedImageFormats []string `default:"jpeg,png"`
 	DefaultPageSize     int      `default:"10"`
 	TokenLength         int      `default:"32"`
+	APIPath             string   `default:"api"`
 }
 
 func Parse() Config {

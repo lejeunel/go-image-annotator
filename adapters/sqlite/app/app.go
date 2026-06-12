@@ -16,8 +16,7 @@ type SQLiteApp struct {
 	tok.TokenGenerator
 }
 
-func NewSQLiteApp() SQLiteApp {
-	cfg := config.Parse()
+func NewSQLiteApp(cfg config.Config) SQLiteApp {
 	infra := infra.NewSQLiteInfra(db.NewSQLiteDB(cfg.DBPath),
 		fs.NewFileStore(cfg.ArtefactDir))
 	tg := tok.NewTokenGenerator(cfg.TokenLength)

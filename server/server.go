@@ -30,11 +30,12 @@ func RegisterHandlers(mux *http.ServeMux, apiServer api.Server, webServer web.Se
 	as.RegisterStaticFiles(mux)
 }
 
-func Make(apiPath string) http.Handler {
-	app := app.NewSQLiteApp()
+func Make() http.Handler {
+	cfg := config.Parse()
+	app := app.NewSQLiteApp(cfg)
 	mux := http.NewServeMux()
 
-	pageBuilder := b.NewPageBuilder(apiPath)
+	pageBuilder := b.NewPageBuilder(cfg.APIPath)
 
 	sessionManager := sm.NewSQLiteSessionManager(app.Infra.Db.DB, app.Infra.User, app.TokenGenerator)
 	identityProvider := ip.NewGothIdentityHandler(sessionManager)
@@ -51,9 +52,9 @@ func Make(apiPath string) http.Handler {
 	RegisterHandlers(mux,
 		*api.NewServer(&app.Itrs, *logger),
 		*web.NewServer(&app.Itrs, annotator, *pageBuilder, sessionManager, identityProvider),
-		config.APIConfig{APIPath: fmt.Sprintf("/%v", apiPath),
-			APIDocsPath:      fmt.Sprintf("/%v/docs", apiPath),
-			OpenAPISpecsPath: fmt.Sprintf("/%v/openapi.yaml", apiPath)},
+		config.APIConfig{APIPath: fmt.Sprintf("/%v", cfg.APIPath),
+			APIDocsPath:      fmt.Sprintf("/%v/docs", cfg.APIPath),
+			OpenAPISpecsPath: fmt.Sprintf("/%v/openapi.yaml", cfg.APIPath)},
 		*pageBuilder)
 
 	return sessionManager.MiddleWare(mux)

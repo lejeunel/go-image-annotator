@@ -8,6 +8,7 @@ import (
 
 	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
 	a "github.com/lejeunel/go-image-annotator/adapters/sqlite/app"
+	"github.com/lejeunel/go-image-annotator/config"
 	ing "github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 )
 
@@ -26,7 +27,7 @@ func IngestDirectory(dir, collection string) {
 		panic(err)
 	}
 
-	app := a.NewSQLiteApp()
+	app := a.NewSQLiteApp(config.Parse())
 	for _, entry := range entries {
 		ingestImage(&app.Itrs.Image.Ingest, dir, entry, collection)
 	}

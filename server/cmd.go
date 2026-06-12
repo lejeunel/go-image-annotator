@@ -10,7 +10,7 @@ var (
 		Use:   "serve",
 		Short: "Run server",
 		Run: func(cmd *cobra.Command, args []string) {
-			handler := Make("api")
+			handler := Make()
 			Serve(handler, port)
 		},
 	}
