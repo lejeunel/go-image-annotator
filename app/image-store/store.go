@@ -61,6 +61,6 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 
 }
 
-func New(repo Repo, fileStore fs.Interface) *ImageStore {
-	return &ImageStore{repo: repo, fileStore: fileStore}
+func New(repo Repo, fileStore fs.Interface) ImageStore {
+	return ImageStore{repo: repo, fileStore: fileStore}
 }

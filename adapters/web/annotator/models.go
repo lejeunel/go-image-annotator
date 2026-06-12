@@ -26,7 +26,7 @@ func ToUpdateBoxRequest(r AnnotoriousBoxModel) (*updbox.Request, error) {
 
 	return &updbox.Request{AnnotationId: r.AnnotationId,
 		Label: r.Bodies[0].Value, Xc: coords.Xc, Yc: coords.Yc,
-		Width: coords.Width, Height: coords.Height}, nil
+		Width: coords.Width, Height: coords.Height, Angle: coords.Angle}, nil
 
 }
 
@@ -35,22 +35,22 @@ func ConvertToAnnotorious(boxes []view.BoundingBox) []AnnotoriousBoxModel {
 	for _, b := range boxes {
 		xtopleft := b.Xc - b.Width/2
 		ytopleft := b.Yc - b.Height/2
-		width := b.Width
-		height := b.Height
 		result = append(result,
 			AnnotoriousBoxModel{
 				AnnotationId: b.Id,
 				Properties:   Properties{Color: b.Color},
 				Bodies:       []AnnotoriousBody{{Purpose: "label", Value: b.Label}},
 				Target: BoxTarget{BoxSelector{Type: "RECTANGLE",
-					Geometry: BoxGeometry{XTopLeft: xtopleft,
+					Geometry: BoxGeometry{
+						XTopLeft: xtopleft,
 						YTopLeft: ytopleft,
-						W:        width,
-						H:        height,
+						W:        b.Width,
+						H:        b.Height,
+						Rot:      b.Angle,
 						Bounds: Bounds{MinX: xtopleft,
 							MinY: ytopleft,
-							MaxX: xtopleft + width,
-							MaxY: ytopleft + height}}}}})
+							MaxX: xtopleft + b.Width,
+							MaxY: ytopleft + b.Height}}}}})
 
 	}
 	return result

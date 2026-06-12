@@ -62,7 +62,8 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	box := a.NewBoundingBox(a.NewAnnotationId(), r.Xc, r.Yc, r.Width, r.Height, *label)
+	box := a.NewBoundingBox(a.NewAnnotationId(), r.Xc, r.Yc, r.Width, r.Height, *label,
+		a.WithAngle(r.Angle))
 	if err := i.validateBox(image, box); err != nil {
 		i.handleError(err, out)
 		return
@@ -73,7 +74,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.SuccessAddBox(box)
+	out.SuccessAddBox(Response{box.Id})
 
 }
 func (i *Interactor) handleError(err error, out OutputPort) {

@@ -1,6 +1,8 @@
 package image
 
 import (
+	"testing"
+
 	s "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
 	sc "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/collection"
 	ist "github.com/lejeunel/go-image-annotator/app/image-store"
@@ -8,7 +10,6 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type ImageListingTestingRepos struct {
@@ -28,8 +29,9 @@ func CreateSingleImageCollection(repos ImageListingTestingRepos, collectionName 
 
 func NewImageListingTestRepos() ImageListingTestingRepos {
 	db := s.NewSQLiteDB(":memory:")
-	return ImageListingTestingRepos{Image: *NewSQLiteImageRepo(db),
-		Collection: *sc.NewSQLiteCollectionRepo(db),
+	return ImageListingTestingRepos{
+		Image:      NewSQLiteImageRepo(db),
+		Collection: sc.NewSQLiteCollectionRepo(db),
 	}
 }
 

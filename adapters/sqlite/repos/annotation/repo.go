@@ -1,8 +1,11 @@
 package annotation
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
+
 	"github.com/jmoiron/sqlx"
 	sl "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos/label"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
@@ -29,9 +32,10 @@ type BoundingBoxSpecs struct {
 	Yc     float32 `json:"yc"`
 	Width  float32 `json:"width"`
 	Height float32 `json:"height"`
+	Angle  float32 `json:"angle"`
 }
 
-func (r *SQLiteAnnotationRepo) AddImageLabel(imageId i.ImageId, collectionId c.CollectionId, ann a.ImageLabel) error {
+func (r SQLiteAnnotationRepo) AddImageLabel(imageId i.ImageId, collectionId c.CollectionId, ann a.ImageLabel) error {
 	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type) VALUES ($1,$2,$3,$4,$5)"
 	_, err := r.Db.Exec(query, ann.Id, imageId, collectionId, ann.Label.Id, "image")
 	if err != nil {
@@ -40,7 +44,7 @@ func (r *SQLiteAnnotationRepo) AddImageLabel(imageId i.ImageId, collectionId c.C
 
 	return nil
 }
-func (r *SQLiteAnnotationRepo) findLabelById(labelId l.LabelId) (*l.Label, error) {
+func (r SQLiteAnnotationRepo) findLabelById(labelId l.LabelId) (*l.Label, error) {
 
 	rec := sl.LabelRecord{}
 	err := r.Db.Get(&rec,
@@ -51,7 +55,7 @@ func (r *SQLiteAnnotationRepo) findLabelById(labelId l.LabelId) (*l.Label, error
 	return &l.Label{Id: rec.Id, Name: rec.Name, Description: rec.Description}, nil
 
 }
-func (r *SQLiteAnnotationRepo) FindImageLabels(imageId i.ImageId, collectionId c.CollectionId) ([]a.ImageLabel, error) {
+func (r SQLiteAnnotationRepo) FindImageLabels(imageId i.ImageId, collectionId c.CollectionId) ([]a.ImageLabel, error) {
 	query := "SELECT id,label_id,type FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='image'"
 
 	errCtx := "querying image annotations"
@@ -71,7 +75,7 @@ func (r *SQLiteAnnotationRepo) FindImageLabels(imageId i.ImageId, collectionId c
 
 	return imageLabels, nil
 }
-func (r *SQLiteAnnotationRepo) RemoveAnnotation(id a.AnnotationId) error {
+func (r SQLiteAnnotationRepo) RemoveAnnotation(id a.AnnotationId) error {
 	_, err := r.Db.Exec("DELETE FROM annotations WHERE id=$1", id)
 
 	if err != nil {
@@ -79,7 +83,7 @@ func (r *SQLiteAnnotationRepo) RemoveAnnotation(id a.AnnotationId) error {
 	}
 	return nil
 }
-func (r *SQLiteAnnotationRepo) RemoveImageLabel(imageId i.ImageId, collectionId c.CollectionId, labelId l.LabelId) error {
+func (r SQLiteAnnotationRepo) RemoveImageLabel(imageId i.ImageId, collectionId c.CollectionId, labelId l.LabelId) error {
 	_, err := r.Db.Exec("DELETE FROM annotations WHERE image_id=$1 AND collection_id=$2 AND label_id=$3 AND type='image'",
 		imageId, collectionId, labelId)
 
@@ -88,22 +92,22 @@ func (r *SQLiteAnnotationRepo) RemoveImageLabel(imageId i.ImageId, collectionId 
 	}
 	return nil
 }
-func (r *SQLiteAnnotationRepo) AddBoundingBox(imageId i.ImageId, collectionId c.CollectionId, box a.BoundingBox) error {
+func (r SQLiteAnnotationRepo) AddBoundingBox(imageId i.ImageId, collectionId c.CollectionId, box a.BoundingBox) error {
 
-	coordsBytes, _ := json.Marshal(BoundingBoxSpecs{Xc: box.Xc, Yc: box.Yc, Width: box.Width, Height: box.Height})
+	coordsBytes, _ := json.Marshal(BoundingBoxSpecs{Xc: box.Xc, Yc: box.Yc, Width: box.Width, Height: box.Height, Angle: box.Angle})
 	coordsString := string(coordsBytes)
 	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type, coordinates) VALUES ($1,$2,$3,$4,$5,$6)"
 	_, err := r.Db.Exec(query, box.Id, imageId, collectionId, box.Label.Id, "bounding_box", coordsString)
 	if err != nil {
-		return fmt.Errorf("inserting record in annotation table: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf("inserting bounding box: %v: %w", err, e.ErrInternal)
 	}
 
 	return nil
 }
-func (r *SQLiteAnnotationRepo) FindBoundingBoxes(imageId i.ImageId, collectionId c.CollectionId) ([]a.BoundingBox, error) {
+func (r SQLiteAnnotationRepo) FindBoundingBoxes(imageId i.ImageId, collectionId c.CollectionId) ([]a.BoundingBox, error) {
 	query := "SELECT id,label_id,type,coordinates FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='bounding_box'"
 
-	errCtx := "querying image annotations"
+	errCtx := "querying bounding-box annotations"
 	records := []AnnotationRow{}
 	if err := r.Db.Select(&records, query, imageId, collectionId); err != nil {
 		return nil, fmt.Errorf("%v: applying query: %v: %w", errCtx, err, e.ErrInternal)
@@ -119,12 +123,13 @@ func (r *SQLiteAnnotationRepo) FindBoundingBoxes(imageId i.ImageId, collectionId
 		}
 		label, err := r.findLabelById(rec.LabelId)
 		boxes = append(boxes,
-			a.NewBoundingBox(rec.Id, specs.Xc, specs.Yc, specs.Width, specs.Height, *label))
+			a.NewBoundingBox(rec.Id, specs.Xc, specs.Yc, specs.Width, specs.Height, *label,
+				a.WithAngle(specs.Angle)))
 	}
 
 	return boxes, nil
 }
-func (r *SQLiteAnnotationRepo) UpdateLabelOfAnnotation(id a.AnnotationId, labelId l.LabelId) error {
+func (r SQLiteAnnotationRepo) UpdateLabelOfAnnotation(id a.AnnotationId, labelId l.LabelId) error {
 	query := "UPDATE annotations SET label_id=$1 WHERE id=$2"
 	_, err := r.Db.Exec(query, labelId, id)
 
@@ -135,13 +140,13 @@ func (r *SQLiteAnnotationRepo) UpdateLabelOfAnnotation(id a.AnnotationId, labelI
 	return nil
 
 }
-func (r *SQLiteAnnotationRepo) UpdateBoundingBoxCoordinates(id a.AnnotationId, xc, yc, width, height float32) error {
+func (r SQLiteAnnotationRepo) UpdateBoundingBoxCoordinates(id a.AnnotationId, xc, yc, width, height, angle float32) error {
 	errCtx := "updating bounding box coordinates"
-	if err := a.ValidateBoundingBox(xc, yc, width, height); err != nil {
+	if err := a.ValidateBoundingBox(xc, yc, width, height, angle); err != nil {
 		return fmt.Errorf("%v: %w", errCtx, err)
 	}
 
-	coordsBytes, _ := json.Marshal(BoundingBoxSpecs{Xc: xc, Yc: yc, Width: width, Height: height})
+	coordsBytes, _ := json.Marshal(BoundingBoxSpecs{Xc: xc, Yc: yc, Width: width, Height: height, Angle: angle})
 	coordsString := string(coordsBytes)
 	query := "UPDATE annotations SET coordinates=$1 WHERE id=$2"
 	_, err := r.Db.Exec(query, coordsString, id)
@@ -150,27 +155,29 @@ func (r *SQLiteAnnotationRepo) UpdateBoundingBoxCoordinates(id a.AnnotationId, x
 	}
 	return nil
 }
-func (r *SQLiteAnnotationRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingBoxUpdatables) error {
+func (r SQLiteAnnotationRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingBoxUpdatables) error {
 	if err := r.UpdateLabelOfAnnotation(id, u.LabelId); err != nil {
 		return err
 	}
 
-	if err := r.UpdateBoundingBoxCoordinates(id, u.Xc, u.Yc, u.Width, u.Height); err != nil {
+	if err := r.UpdateBoundingBoxCoordinates(id, u.Xc, u.Yc, u.Width, u.Height, u.Angle); err != nil {
 		return err
 	}
 	return nil
 }
-func (r *SQLiteAnnotationRepo) GroupOfAnnotation(id a.AnnotationId) (*string, error) {
+func (r SQLiteAnnotationRepo) GroupOfAnnotation(id a.AnnotationId) (*string, error) {
 	var group string
 	err := r.Db.Get(&group,
 		`SELECT name FROM groups WHERE id=(SELECT group_id FROM collections WHERE id=(SELECT collection_id FROM annotations WHERE id=$1))`,
 		id)
 	if err != nil {
-		fmt.Println(err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("fetching group of annotation by id %v: %w", id, e.ErrInternal)
 	}
 	return &group, nil
 }
-func NewSQLiteAnnotationRepo(db *sqlx.DB) *SQLiteAnnotationRepo {
-	return &SQLiteAnnotationRepo{Db: db, SQLiteLabelRepo: *sl.NewSQLiteLabelRepo(db)}
+func NewSQLiteAnnotationRepo(db *sqlx.DB) SQLiteAnnotationRepo {
+	return SQLiteAnnotationRepo{Db: db, SQLiteLabelRepo: sl.NewSQLiteLabelRepo(db)}
 }

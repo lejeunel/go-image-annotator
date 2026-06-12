@@ -23,6 +23,7 @@ type BoundingBox struct {
 	Yc     float32
 	Width  float32
 	Height float32
+	Angle  float32
 }
 
 type BoundingBoxResponse struct {
@@ -39,13 +40,28 @@ type BoundingBoxUpdatables struct {
 	Yc      float32
 	Width   float32
 	Height  float32
+	Angle   float32
 }
 
-func NewBoundingBox(id AnnotationId, xc float32, yc float32, width float32, height float32, label lbl.Label) BoundingBox {
-	return BoundingBox{Id: id, Xc: xc, Yc: yc, Width: width, Height: height, Label: label}
+type Option func(*BoundingBox)
+
+func WithAngle(ang float32) Option {
+	return func(c *BoundingBox) {
+		c.Angle = ang
+	}
 }
 
-func ValidateBoundingBox(xc float32, yc float32, width float32, height float32) error {
+func NewBoundingBox(id AnnotationId, xc float32, yc float32,
+	width float32, height float32, label lbl.Label, opts ...Option,
+) BoundingBox {
+	b := &BoundingBox{Id: id, Xc: xc, Yc: yc, Width: width, Height: height, Label: label}
+	for _, opt := range opts {
+		opt(b)
+	}
+	return *b
+}
+
+func ValidateBoundingBox(xc float32, yc float32, width float32, height float32, angle float32) error {
 	errCtx := "validating bounding box"
 	if width <= 0 {
 		return fmt.Errorf("%v: checking whether width (%v) <= 0: %w", errCtx, width, e.ErrValidation)

@@ -14,18 +14,17 @@ type FileStore struct {
 	baseDir string
 }
 
-func NewFileStore(baseDir string) *FileStore {
+func NewFileStore(baseDir string) FileStore {
 	if err := os.MkdirAll(baseDir, 0755); err != nil {
 		panic(fmt.Sprintf("failed to create base directory: %v", err))
 	}
-	return &FileStore{baseDir: baseDir}
+	return FileStore{baseDir: baseDir}
 }
 
-func (r *FileStore) filePath(id im.ImageId) string {
+func (r FileStore) filePath(id im.ImageId) string {
 	return filepath.Join(r.baseDir, fmt.Sprintf("%s", id.String()))
 }
-
-func (r *FileStore) Store(id im.ImageId, reader io.Reader) error {
+func (r FileStore) Store(id im.ImageId, reader io.Reader) error {
 	path := r.filePath(id)
 
 	f, err := os.Create(path)
@@ -36,8 +35,7 @@ func (r *FileStore) Store(id im.ImageId, reader io.Reader) error {
 	_, err = io.Copy(f, reader)
 	return err
 }
-
-func (r *FileStore) Delete(id im.ImageId) error {
+func (r FileStore) Delete(id im.ImageId) error {
 	path := r.filePath(id)
 	if err := os.Remove(path); err != nil {
 		if os.IsNotExist(err) {
@@ -47,8 +45,7 @@ func (r *FileStore) Delete(id im.ImageId) error {
 	}
 	return nil
 }
-
-func (r *FileStore) Get(id im.ImageId) (io.Reader, error) {
+func (r FileStore) Get(id im.ImageId) (io.Reader, error) {
 	path := r.filePath(id)
 	reader, err := os.Open(path)
 	if err != nil {

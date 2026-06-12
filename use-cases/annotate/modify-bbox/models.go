@@ -5,12 +5,7 @@ import (
 )
 
 type Response struct {
-	AnnotationId a.AnnotationId
-	Label        string
-	Xc           float32
-	Yc           float32
-	Width        float32
-	Height       float32
+	Id a.AnnotationId
 }
 
 type Request struct {
@@ -20,4 +15,5 @@ type Request struct {
 	Yc           float32
 	Width        float32
 	Height       float32
+	Angle        float32
 }

@@ -41,7 +41,6 @@ func (a *Annotator) AddBox(ctx context.Context, r addbox.Request, view v.View) {
 func (a *Annotator) AddLabel(ctx context.Context, r addlbl.Request, view v.View) {
 	a.imageLabelAdder.Execute(ctx, r, a.presenter.SetView(view))
 }
-
 func (a *Annotator) Init(ctx context.Context, imageId string, collection string, view v.View) {
 	scrollerState, err := a.scroller.Init(imageId, scr.WithCollection(collection))
 	if err != nil {

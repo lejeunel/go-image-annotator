@@ -20,6 +20,7 @@ type BoxGeometry struct {
 	W        float32 `json:"w"`
 	H        float32 `json:"h"`
 	Bounds   Bounds  `json:"bounds"`
+	Rot      float32 `json:"rot"`
 }
 
 type BoxSelector struct {
@@ -49,6 +50,7 @@ func (b AnnotoriousBoxModel) ExtractCoordinates() BoxCoordinates {
 		Yc:     b.Target.Selector.Geometry.YTopLeft + b.Target.Selector.Geometry.H/2,
 		Width:  b.Target.Selector.Geometry.W,
 		Height: b.Target.Selector.Geometry.H,
+		Angle:  b.Target.Selector.Geometry.Rot,
 	}
 }
 
@@ -69,6 +71,7 @@ type BoxCoordinates struct {
 	Yc     float32
 	Width  float32
 	Height float32
+	Angle  float32
 }
 
 type AnnotatorState struct {

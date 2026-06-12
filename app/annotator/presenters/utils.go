@@ -14,6 +14,7 @@ func MakeBoundingBox(b a.BoundingBox, c Colorizer) v.BoundingBox {
 		Yc:     b.Yc,
 		Width:  b.Width,
 		Height: b.Height,
+		Angle:  b.Angle,
 	}
 }
 

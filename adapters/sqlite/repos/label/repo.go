@@ -24,7 +24,7 @@ type LabelRecord struct {
 	Description string      `db:"description"`
 }
 
-func (r *SQLiteLabelRepo) Create(l lbl.Label) error {
+func (r SQLiteLabelRepo) Create(l lbl.Label) error {
 	query := "INSERT INTO labels (id, name, description) VALUES ($1,$2,$3)"
 	_, err := r.Db.Exec(query, l.Id.String(), l.Name, l.Description)
 	if err != nil {
@@ -35,7 +35,7 @@ func (r *SQLiteLabelRepo) Create(l lbl.Label) error {
 
 }
 
-func (r *SQLiteLabelRepo) FindLabel(name string) (*lbl.Label, error) {
+func (r SQLiteLabelRepo) FindLabel(name string) (*lbl.Label, error) {
 	record := LabelRecord{}
 	err := r.Db.Get(&record,
 		"SELECT id,name,description FROM labels WHERE name=$1", name)
@@ -54,7 +54,7 @@ func (r *SQLiteLabelRepo) FindLabel(name string) (*lbl.Label, error) {
 	return &l, nil
 }
 
-func (r *SQLiteLabelRepo) Delete(name string) error {
+func (r SQLiteLabelRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM labels WHERE name=$1", name)
 
 	if err != nil {
@@ -62,7 +62,7 @@ func (r *SQLiteLabelRepo) Delete(name string) error {
 	}
 	return nil
 }
-func (r *SQLiteLabelRepo) Count() (int64, error) {
+func (r SQLiteLabelRepo) Count() (int64, error) {
 	var count int64
 
 	query := "SELECT COUNT(*) FROM labels"
@@ -74,7 +74,7 @@ func (r *SQLiteLabelRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (r *SQLiteLabelRepo) List(m list.Request) ([]*lbl.Label, error) {
+func (r SQLiteLabelRepo) List(m list.Request) ([]*lbl.Label, error) {
 	q := sq.StatementBuilder.Select("id,name,description").From("labels")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
@@ -93,7 +93,7 @@ func (r *SQLiteLabelRepo) List(m list.Request) ([]*lbl.Label, error) {
 
 	return objects, nil
 }
-func (r *SQLiteLabelRepo) FetchAll() ([]string, error) {
+func (r SQLiteLabelRepo) FetchAll() ([]string, error) {
 	q := sq.StatementBuilder.Select("name").From("labels")
 	sql, args, err := q.ToSql()
 	if err != nil {
@@ -107,7 +107,7 @@ func (r *SQLiteLabelRepo) FetchAll() ([]string, error) {
 	return names, nil
 }
 
-func (r *SQLiteLabelRepo) Update(m update.Model) error {
+func (r SQLiteLabelRepo) Update(m update.Model) error {
 	query := "UPDATE labels SET description=$1 WHERE name=$2"
 	_, err := r.Db.Exec(query, m.NewDescription, m.Name)
 
@@ -118,7 +118,7 @@ func (r *SQLiteLabelRepo) Update(m update.Model) error {
 	return nil
 }
 
-func (r *SQLiteLabelRepo) Exists(name string) (bool, error) {
+func (r SQLiteLabelRepo) Exists(name string) (bool, error) {
 	var exists bool
 
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM labels WHERE name = $1)`, name)
@@ -129,7 +129,7 @@ func (r *SQLiteLabelRepo) Exists(name string) (bool, error) {
 	return exists, nil
 }
 
-func (r *SQLiteLabelRepo) IsUsed(name string) (*bool, error) {
+func (r SQLiteLabelRepo) IsUsed(name string) (*bool, error) {
 	var count int64
 	query := "SELECT COUNT(*) FROM annotations WHERE label_id=(SELECT id FROM labels WHERE name=$1)"
 	err := r.Db.QueryRow(query, name).Scan(&count)
@@ -142,10 +142,10 @@ func (r *SQLiteLabelRepo) IsUsed(name string) (*bool, error) {
 
 }
 
-func NewSQLiteLabelRepo(db *sqlx.DB) *SQLiteLabelRepo {
-	return &SQLiteLabelRepo{Db: db}
+func NewSQLiteLabelRepo(db *sqlx.DB) SQLiteLabelRepo {
+	return SQLiteLabelRepo{Db: db}
 }
 
-func NewTestSQLiteLabelRepo() *SQLiteLabelRepo {
+func NewTestSQLiteLabelRepo() SQLiteLabelRepo {
 	return NewSQLiteLabelRepo(s.NewSQLiteDB(":memory:"))
 }

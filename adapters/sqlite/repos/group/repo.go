@@ -25,22 +25,22 @@ type Row struct {
 	Description string    `db:"description"`
 }
 
-func (r *SQLiteGroupRepo) Create(grp g.Group) error {
+func (r SQLiteGroupRepo) Create(grp g.Group) error {
 	query := `INSERT INTO groups (id, name, description) VALUES ($1,$2,$3)`
-	_, err := r.Db.Exec(query, grp.Id.String(), grp.Name, grp.Description)
+	_, err := r.Db.Exec(query, grp.Id, grp.Name, grp.Description)
 	if err != nil {
-		return fmt.Errorf("creating record: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf("creating group: %v: %w", err, e.ErrInternal)
 	}
 
 	return nil
 }
-func (r *SQLiteGroupRepo) rowToEntity(row Row) g.Group {
+func (r SQLiteGroupRepo) rowToEntity(row Row) g.Group {
 	c := g.NewGroup(row.Id, row.Name,
 		g.WithDescription(row.Description))
 	return c
 
 }
-func (r *SQLiteGroupRepo) Find(name string) (*g.Group, error) {
+func (r SQLiteGroupRepo) Find(name string) (*g.Group, error) {
 
 	errCtx := fmt.Errorf("fetching group with name %v", name)
 	row := Row{}
@@ -59,7 +59,7 @@ func (r *SQLiteGroupRepo) Find(name string) (*g.Group, error) {
 	entity := r.rowToEntity(row)
 	return &entity, nil
 }
-func (r *SQLiteGroupRepo) IsPopulated(name string) (*bool, error) {
+func (r SQLiteGroupRepo) IsPopulated(name string) (*bool, error) {
 	var exists bool
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM collections WHERE group_id=(SELECT id FROM groups WHERE name=$1))`, name)
 	if err != nil {
@@ -68,7 +68,7 @@ func (r *SQLiteGroupRepo) IsPopulated(name string) (*bool, error) {
 
 	return &exists, nil
 }
-func (r *SQLiteGroupRepo) Exists(name string) (*bool, error) {
+func (r SQLiteGroupRepo) Exists(name string) (*bool, error) {
 	var exists bool
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM groups WHERE name = $1)`, name)
 	if err != nil {
@@ -77,7 +77,7 @@ func (r *SQLiteGroupRepo) Exists(name string) (*bool, error) {
 
 	return &exists, nil
 }
-func (r *SQLiteGroupRepo) Delete(name string) error {
+func (r SQLiteGroupRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM groups WHERE name=$1", name)
 
 	if err != nil {
@@ -85,7 +85,7 @@ func (r *SQLiteGroupRepo) Delete(name string) error {
 	}
 	return nil
 }
-func (r *SQLiteGroupRepo) Update(m update.Model) error {
+func (r SQLiteGroupRepo) Update(m update.Model) error {
 	query := "UPDATE groups SET name=$1,description=$2 WHERE name=$3"
 	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
 
@@ -95,7 +95,7 @@ func (r *SQLiteGroupRepo) Update(m update.Model) error {
 
 	return nil
 }
-func (r *SQLiteGroupRepo) IsUsed(name string) (*bool, error) {
+func (r SQLiteGroupRepo) IsUsed(name string) (*bool, error) {
 	var count int64
 
 	var isUsed bool
@@ -117,7 +117,7 @@ func (r *SQLiteGroupRepo) IsUsed(name string) (*bool, error) {
 
 	return &isUsed, nil
 }
-func (r *SQLiteGroupRepo) Count() (*int64, error) {
+func (r SQLiteGroupRepo) Count() (*int64, error) {
 	var count int64
 
 	query := "SELECT COUNT(*) FROM groups"
@@ -128,7 +128,7 @@ func (r *SQLiteGroupRepo) Count() (*int64, error) {
 
 	return &count, nil
 }
-func (r *SQLiteGroupRepo) GroupOfCollection(name string) (*string, error) {
+func (r SQLiteGroupRepo) GroupOfCollection(name string) (*string, error) {
 	var group string
 
 	err := r.Db.Get(&group, `SELECT name FROM groups WHERE id=(SELECT group_id FROM collections WHERE name=$1)`, name)
@@ -139,7 +139,7 @@ func (r *SQLiteGroupRepo) GroupOfCollection(name string) (*string, error) {
 	return &group, nil
 
 }
-func (r *SQLiteGroupRepo) List(m list.Request) ([]*g.Group, error) {
+func (r SQLiteGroupRepo) List(m list.Request) ([]*g.Group, error) {
 	q := sq.StatementBuilder.Select(`id,name,description`).From("groups")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
@@ -160,10 +160,10 @@ func (r *SQLiteGroupRepo) List(m list.Request) ([]*g.Group, error) {
 	return objects, nil
 }
 
-func NewSQLiteGroupRepo(db *sqlx.DB) *SQLiteGroupRepo {
-	return &SQLiteGroupRepo{Db: db}
+func NewSQLiteGroupRepo(db *sqlx.DB) SQLiteGroupRepo {
+	return SQLiteGroupRepo{Db: db}
 }
 
-func NewTestSQLiteGroupRepo() *SQLiteGroupRepo {
+func NewTestSQLiteGroupRepo() SQLiteGroupRepo {
 	return NewSQLiteGroupRepo(s.NewSQLiteDB(":memory:"))
 }

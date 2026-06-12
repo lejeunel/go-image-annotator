@@ -3,7 +3,9 @@ package ingest
 import (
 	"bytes"
 	"testing"
+	"time"
 
+	"github.com/jonboulle/clockwork"
 	ast "github.com/lejeunel/go-image-annotator/app/file-store"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -210,21 +212,32 @@ func TestValidationErrOnImageMIMETypeInferShouldFail(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestAddImageShouldAddMIMEType(t *testing.T) {
-	p := &FakePresenter{}
+func TestShouldAddMIMEType(t *testing.T) {
 	imageRepo := &FakeImageRepo{}
 	itr := NewTestingInteractor()
 	itr.ImageRepo = imageRepo
 	specs := im.ImageSpecs{MIMEType: "image/jpeg"}
 	itr.ImageSpecsDetector = &FakeSpecsDetector{Return: specs}
-	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, p)
+	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, &FakePresenter{})
 	assert.Equal(t, specs.MIMEType, imageRepo.GotSpecs.MIMEType)
 }
 
-func TestAddImageInCollectionWithoutGroup(t *testing.T) {
+func TestCollectionWithoutGroup(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	itr.CollectionRepo = &FakeCollectionRepo{CollectionWithoutGroup: true}
 	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, p)
 	assert.True(t, p.GotSuccess)
+}
+
+func TestShouldStoreIngestionTime(t *testing.T) {
+	imageRepo := &FakeImageRepo{}
+	itr := NewTestingInteractor()
+	itr.ImageRepo = imageRepo
+	specs := im.ImageSpecs{MIMEType: "image/jpeg"}
+	now := time.Now()
+	itr.clock = clockwork.NewFakeClockAt(now)
+	itr.ImageSpecsDetector = &FakeSpecsDetector{Return: specs}
+	itr.Execute(t.Context(), Request{Reader: &FakeImageReader{}}, &FakePresenter{})
+	assert.Equal(t, now, imageRepo.GotSpecs.IngestedAt)
 }

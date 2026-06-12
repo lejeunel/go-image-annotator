@@ -151,6 +151,7 @@ document.addEventListener('alpine:init', () => {
         async submit_region(label) {
             try {
                 const store = Alpine.store("annotator");
+                console.log(store.lastCreatedAnnotation);
                 await AnnotationAPI.submit_region(label, store.lastCreatedAnnotation);
                 Alpine.store("regionLabelModal").close();
                 await this.refreshUI();

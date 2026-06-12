@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func CreateLabel(repo *SQLiteLabelRepo, name string) (*lbl.Label, error) {
+func CreateLabel(repo SQLiteLabelRepo, name string) (*lbl.Label, error) {
 	label := lbl.NewLabel(lbl.NewLabelId(), name, lbl.WithDescription("a-description"))
 	if err := repo.Create(label); err != nil {
 		return nil, err

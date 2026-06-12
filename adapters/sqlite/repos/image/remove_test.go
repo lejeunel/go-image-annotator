@@ -1,37 +1,36 @@
 package image
 
 import (
-	"testing"
-
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
-	repos := NewImageTestRepos()
+	imRepo, clcRepo := MakeRepos()
 	collectionId := clc.NewCollectionId()
-	repos.Collection.Create(clc.NewCollection(collectionId, "a-collection"))
+	clcRepo.Create(clc.NewCollection(collectionId, "a-collection"))
 	imageId := im.NewImageId()
-	repos.Image.AddImage(imageId, nil, im.ImageSpecs{})
+	imRepo.AddImage(imageId, nil, im.ImageSpecs{})
 
-	repos.Image.AddToCollection(imageId, collectionId)
-	repos.Image.Db.Close()
-	err := repos.Image.RemoveImageFromCollection(imageId, collectionId)
+	imRepo.AddToCollection(imageId, collectionId)
+	imRepo.Db.Close()
+	err := imRepo.RemoveImageFromCollection(imageId, collectionId)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestRemoveImageFromCollection(t *testing.T) {
-	repos := NewImageTestRepos()
+	imRepo, clcRepo := MakeRepos()
 	collectionId := clc.NewCollectionId()
-	repos.Collection.Create(clc.NewCollection(collectionId, "a-collection"))
+	clcRepo.Create(clc.NewCollection(collectionId, "a-collection"))
 	imageId := im.NewImageId()
-	repos.Image.AddImage(imageId, nil, im.ImageSpecs{})
+	imRepo.AddImage(imageId, nil, im.ImageSpecs{})
 
-	repos.Image.AddToCollection(imageId, collectionId)
-	err := repos.Image.RemoveImageFromCollection(imageId, collectionId)
+	imRepo.AddToCollection(imageId, collectionId)
+	err := imRepo.RemoveImageFromCollection(imageId, collectionId)
 	assert.NoError(t, err)
-	exists, _ := repos.Image.ImageExistsInCollection(imageId, collectionId)
+	exists, _ := imRepo.ImageExistsInCollection(imageId, collectionId)
 	assert.False(t, exists)
 }

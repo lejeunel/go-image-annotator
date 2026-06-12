@@ -95,16 +95,17 @@ func TestAddBoundingBox(t *testing.T) {
 	image := im.NewImage(im.NewImageId(), collection)
 	req := Request{ImageId: image.Id.String(), Collection: collection.Name,
 		Label: "a-label", Xc: float32(1.0), Yc: float32(1.0), Width: float32(3.0),
-		Height: float32(3.0)}
+		Height: float32(3.0), Angle: float32(32)}
 	itr := New(&st.FakeImageStore{Return: &image}, &repo)
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)
-	assert.Equal(t, repo.GotImageId.String(), req.ImageId, "image id")
-	assert.Equal(t, repo.GotCollectionId, collection.Id, "collection id")
-	assert.Equal(t, repo.GotBox.Label.Name, req.Label, "label name")
-	assert.Equal(t, repo.GotBox.Xc, req.Xc, "xc")
-	assert.Equal(t, repo.GotBox.Yc, req.Yc, "yc")
-	assert.Equal(t, repo.GotBox.Width, req.Width, "width")
-	assert.Equal(t, repo.GotBox.Height, req.Height, "height")
+	assert.Equal(t, req.ImageId, repo.GotImageId.String())
+	assert.Equal(t, collection.Id, repo.GotCollectionId)
+	assert.Equal(t, req.Label, repo.GotBox.Label.Name)
+	assert.Equal(t, req.Xc, repo.GotBox.Xc)
+	assert.Equal(t, req.Yc, repo.GotBox.Yc)
+	assert.Equal(t, req.Width, repo.GotBox.Width)
+	assert.Equal(t, req.Height, repo.GotBox.Height)
+	assert.Equal(t, req.Angle, repo.GotBox.Angle)
 
 }

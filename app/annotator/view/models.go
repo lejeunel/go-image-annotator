@@ -41,6 +41,7 @@ type BoundingBox struct {
 	Yc     float32
 	Width  float32
 	Height float32
+	Angle  float32
 }
 
 type Annotations struct {

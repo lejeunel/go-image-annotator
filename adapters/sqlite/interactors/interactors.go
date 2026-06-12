@@ -1,19 +1,19 @@
 package interactors
 
 import (
-	"github.com/lejeunel/go-image-annotator/adapters/sqlite"
+	i "github.com/lejeunel/go-image-annotator/adapters/sqlite/infra"
 	tok "github.com/lejeunel/go-image-annotator/app/token"
 	u "github.com/lejeunel/go-image-annotator/use-cases"
 )
 
-func NewSQLiteInteractors(repos *infra.SQLiteInfra, pageSize int, allowedImageFormats []string,
+func NewSQLiteInteractors(i i.SQLiteInfra, pageSize int, allowedImageFormats []string,
 	tokenGenerator tok.TokenGenerator) *u.Interactors {
 
 	return &u.Interactors{
-		Label:      NewSQLiteLabelInteractors(repos.Label, pageSize),
-		Collection: NewSQLiteCollectionInteractors(repos.Collection, repos.Group, pageSize),
-		Image:      NewSQLiteImageInteractors(repos, allowedImageFormats),
-		User:       NewSQLiteUserInteractors(repos, tokenGenerator),
-		Annotation: NewSQLiteAnnotationInteractors(repos),
+		Label:      NewSQLiteLabelInteractors(i.Label, pageSize),
+		Collection: NewSQLiteCollectionInteractors(i.Collection, i.Group, pageSize),
+		Image:      NewSQLiteImageInteractors(i, allowedImageFormats),
+		User:       NewSQLiteUserInteractors(i, tokenGenerator),
+		Annotation: NewSQLiteAnnotationInteractors(i),
 	}
 }

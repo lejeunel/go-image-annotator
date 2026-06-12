@@ -12,6 +12,7 @@ type FakeRepo struct {
 	ErrOnFindLabel bool
 	Got            a.BoundingBoxUpdatables
 	Label          lbl.Label
+	NoGroup        bool
 }
 
 func (r *FakeRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingBoxUpdatables) error {
@@ -29,6 +30,9 @@ func (r *FakeRepo) FindLabel(name string) (*lbl.Label, error) {
 	return &r.Label, nil
 }
 func (r *FakeRepo) GroupOfAnnotation(id a.AnnotationId) (*string, error) {
+	if r.NoGroup {
+		return nil, nil
+	}
 	group := "my-group"
 	return &group, nil
 }

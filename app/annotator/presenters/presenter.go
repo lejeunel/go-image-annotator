@@ -2,8 +2,8 @@ package presenters
 
 import (
 	v "github.com/lejeunel/go-image-annotator/app/annotator/view"
-	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
@@ -17,7 +17,7 @@ type Presenter struct {
 	usedImageLabels []string
 }
 
-func NewPresenter() Presenter {
+func New() Presenter {
 	return Presenter{Colorizer: NewCyclicColorizer(Palette)}
 }
 
@@ -38,22 +38,9 @@ func (p Presenter) SuccessReadImage(im im.Image) {
 func (p Presenter) SuccessFetchLabels(r fetchlbl.Response) {
 	p.View.SetAvailableLabels(r.Labels)
 }
-func (p Presenter) SuccessAddLabel(r addlbl.Response) {
-	p.View.AddLabel(v.ImageLabel{Id: r.AnnotationId, Label: r.Label})
-}
-func (p Presenter) SuccessAddBox(b a.BoundingBox) {
-	p.View.AddBox(MakeBoundingBox(b, p.Colorizer))
-}
-func (p Presenter) SuccessUpdateBox(r updbox.Response) {
-	p.View.UpdateBox(v.BoundingBox{Id: r.AnnotationId.String(),
-		Label:  r.Label,
-		Color:  p.Colorizer.Colorize(r.AnnotationId.String()),
-		Xc:     r.Xc,
-		Yc:     r.Yc,
-		Width:  r.Width,
-		Height: r.Height,
-	})
-}
+func (p Presenter) SuccessAddLabel(r addlbl.Response)  {}
+func (p Presenter) SuccessAddBox(r addbox.Response)    {}
+func (p Presenter) SuccessUpdateBox(r updbox.Response) {}
 func (p Presenter) SuccessUpdateLabel(r updlbl.Response) {
 	p.View.UpdateLabel(v.Annotation{Id: r.AnnotationId.String(), Label: r.Label})
 }

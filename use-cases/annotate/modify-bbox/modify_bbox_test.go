@@ -10,6 +10,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func CreateRequestAndUpdatable() (Request, a.BoundingBoxUpdatables, lbl.Label) {
+	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
+	req := Request{AnnotationId: a.NewAnnotationId().String(), Xc: 1, Yc: 1, Width: 1, Height: 1,
+		Angle: -1, Label: label.Name}
+	upd := a.BoundingBoxUpdatables{LabelId: label.Id, Xc: req.Xc,
+		Yc: req.Yc, Width: req.Width, Height: req.Height, Angle: req.Angle}
+	return req, upd, label
+}
+
+func AssertUpdated(t *testing.T, expected, got a.BoundingBoxUpdatables) {
+	assert.Equal(t, expected.Xc, got.Xc)
+	assert.Equal(t, expected.Yc, got.Yc)
+	assert.Equal(t, expected.Width, got.Width)
+	assert.Equal(t, expected.Height, got.Height)
+	assert.Equal(t, expected.Angle, got.Angle)
+	assert.Equal(t, expected.LabelId, got.LabelId)
+}
+
 func TestHandleAuthError(t *testing.T) {
 	itr := New(&FakeRepo{},
 		WithAuth(auth.FailingAuth{}))
@@ -47,12 +65,11 @@ func TestValidationErrShouldFail(t *testing.T) {
 	assert.True(t, p.GotValidationErr)
 	assert.False(t, p.GotSuccess)
 }
-
 func TestNotFoundErrOnUpdateShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{ErrOnUpdate: true, Err: e.ErrNotFound})
-	itr.Execute(t.Context(),
-		Request{AnnotationId: a.NewAnnotationId().String(), Xc: 1, Yc: 1, Width: 1, Height: 1}, p)
+	req, _, _ := CreateRequestAndUpdatable()
+	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -60,24 +77,28 @@ func TestNotFoundErrOnUpdateShouldFail(t *testing.T) {
 func TestInternalErrOnUpdateShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{ErrOnUpdate: true, Err: e.ErrInternal})
-	itr.Execute(t.Context(), Request{Xc: 1, Yc: 1, Width: 1, Height: 1}, p)
+	req, _, _ := CreateRequestAndUpdatable()
+	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
 
+func TestUpdateWithDefaultGroup(t *testing.T) {
+	p := &FakePresenter{}
+	req, upd, label := CreateRequestAndUpdatable()
+	repo := &FakeRepo{Label: label, NoGroup: true}
+	itr := New(repo)
+	itr.Execute(t.Context(), req, p)
+	assert.True(t, p.GotSuccess)
+	AssertUpdated(t, upd, repo.Got)
+}
+
 func TestUpdate(t *testing.T) {
 	p := &FakePresenter{}
-	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
+	req, upd, label := CreateRequestAndUpdatable()
 	repo := &FakeRepo{Label: label}
 	itr := New(repo)
-	annotationId := a.NewAnnotationId()
-	r := Request{AnnotationId: annotationId.String(), Xc: 1, Yc: 1, Width: 1, Height: 1}
-	itr.Execute(t.Context(), r, p)
-	got := repo.Got
-	want := a.BoundingBoxUpdatables{LabelId: label.Id, Xc: r.Xc,
-		Yc: r.Yc, Width: r.Width, Height: r.Height}
+	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)
-	if got != want {
-		t.Fatalf("expected to update with %+v, got %+v", want, got)
-	}
+	AssertUpdated(t, upd, repo.Got)
 }

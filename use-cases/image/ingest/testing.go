@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"time"
 
+	"github.com/jonboulle/clockwork"
 	ast "github.com/lejeunel/go-image-annotator/app/file-store"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
@@ -28,6 +30,7 @@ func NewTestingInteractor(opts ...Option) *Interactor {
 		Logger:             logging.NewNoOpLogger(),
 		ImageSpecsDetector: &FakeSpecsDetector{},
 		auth:               auth.PassThroughAuth{},
+		clock:              clockwork.NewFakeClock(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -94,6 +97,7 @@ type FakeImageRepo struct {
 	GotImage             bool
 	GotHash              []byte
 	GotSpecs             im.ImageSpecs
+	GotImageAt           time.Time
 	ErrOnAddToCollection bool
 	ErrOnAddImage        bool
 	ErrOnFindHash        bool

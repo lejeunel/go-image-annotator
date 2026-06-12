@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 	s "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
@@ -12,6 +13,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"time"
 )
 
 type SQLiteImageRepo struct {
@@ -24,12 +26,13 @@ type Row struct {
 }
 
 type SpecsRow struct {
-	MIMEType string `db:"mimetype"`
-	Width    int    `db:"width"`
-	Height   int    `db:"height"`
+	MIMEType   string    `db:"mimetype"`
+	Width      int       `db:"width"`
+	Height     int       `db:"height"`
+	IngestedAt time.Time `db:"ingested_at"`
 }
 
-func (r *SQLiteImageRepo) AddToCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
+func (r SQLiteImageRepo) AddToCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
 	query := "INSERT INTO images_collections (image_id, collection_id) VALUES ($1,$2)"
 	_, err := r.Db.Exec(query, imageId.String(), collectionId.String())
 	if err != nil {
@@ -38,7 +41,7 @@ func (r *SQLiteImageRepo) AddToCollection(imageId im.ImageId, collectionId clc.C
 
 	return nil
 }
-func (r *SQLiteImageRepo) Count(f ist.CountingParams) (*int64, error) {
+func (r SQLiteImageRepo) Count(f ist.CountingParams) (*int64, error) {
 	var count int64
 
 	var query string
@@ -56,8 +59,7 @@ func (r *SQLiteImageRepo) Count(f ist.CountingParams) (*int64, error) {
 	return &count, nil
 
 }
-
-func (r *SQLiteImageRepo) List(f ist.FilteringParams) (*[]im.BaseImage, error) {
+func (r SQLiteImageRepo) List(f ist.FilteringParams) (*[]im.BaseImage, error) {
 
 	q := sq.StatementBuilder.Select("image_id,collection_id").From("images_collections")
 	q = q.Limit(uint64(f.PageSize)).Offset((uint64(f.Page-1) * uint64(f.PageSize)))
@@ -89,7 +91,7 @@ func (r *SQLiteImageRepo) List(f ist.FilteringParams) (*[]im.BaseImage, error) {
 
 	return &objects, nil
 }
-func (r *SQLiteImageRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc.CollectionId) (bool, error) {
+func (r SQLiteImageRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc.CollectionId) (bool, error) {
 	var count int64
 	query := "SELECT COUNT(*) FROM images_collections WHERE image_id=$1 AND collection_id=$2"
 	err := r.Db.QueryRow(query, imageId.String(), collectionId.String()).Scan(&count)
@@ -99,7 +101,7 @@ func (r *SQLiteImageRepo) ImageExistsInCollection(imageId im.ImageId, collection
 
 	return count > 0, nil
 }
-func (r *SQLiteImageRepo) ImageExists(imageId im.ImageId) (bool, error) {
+func (r SQLiteImageRepo) ImageExists(imageId im.ImageId) (bool, error) {
 	var count int64
 	query := "SELECT COUNT(*) FROM images WHERE id=$1"
 	err := r.Db.QueryRow(query, imageId.String()).Scan(&count)
@@ -109,10 +111,10 @@ func (r *SQLiteImageRepo) ImageExists(imageId im.ImageId) (bool, error) {
 
 	return count > 0, nil
 }
-func (r *SQLiteImageRepo) GetSpecs(imageId im.ImageId) (*im.ImageSpecs, error) {
+func (r SQLiteImageRepo) GetSpecs(imageId im.ImageId) (*im.ImageSpecs, error) {
 	errCtx := "finding image specification"
 	var row SpecsRow
-	err := r.Db.Get(&row, "SELECT mimetype,width,height FROM images WHERE id = $1", imageId)
+	err := r.Db.Get(&row, "SELECT mimetype,width,height,ingested_at FROM images WHERE id = $1", imageId)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -121,19 +123,18 @@ func (r *SQLiteImageRepo) GetSpecs(imageId im.ImageId) (*im.ImageSpecs, error) {
 			return nil, fmt.Errorf("%v: %v: %w", errCtx, err, e.ErrInternal)
 		}
 	}
-	return &im.ImageSpecs{MIMEType: row.MIMEType, Width: row.Width, Height: row.Height}, nil
+	return &im.ImageSpecs{MIMEType: row.MIMEType, Width: row.Width, Height: row.Height, IngestedAt: row.IngestedAt}, nil
 }
-
-func (r *SQLiteImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.ImageSpecs) error {
-	query := "INSERT INTO images (id, hash, mimetype, width, height) VALUES ($1,$2,$3,$4,$5)"
+func (r SQLiteImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.ImageSpecs) error {
+	query := "INSERT INTO images (id, hash, mimetype, width, height, ingested_at) VALUES ($1,$2,$3,$4,$5,$6)"
 	_, err := r.Db.Exec(query, imageId.String(), hex.EncodeToString(hash), specs.MIMEType,
-		specs.Width, specs.Height)
+		specs.Width, specs.Height, specs.IngestedAt)
 	if err != nil {
 		return fmt.Errorf("inserting image record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 }
-func (r *SQLiteImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
+func (r SQLiteImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	errCtx := "finding image record by hash"
 	var imageId im.ImageId
 	err := r.Db.Get(&imageId, "SELECT id FROM images WHERE hash = $1", hex.EncodeToString(hash))
@@ -145,14 +146,14 @@ func (r *SQLiteImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	}
 	return &imageId, nil
 }
-func (r *SQLiteImageRepo) Delete(id im.ImageId) error {
+func (r SQLiteImageRepo) Delete(id im.ImageId) error {
 	_, err := r.Db.Exec("DELETE FROM images WHERE id = $1", id)
 	if err != nil {
 		return fmt.Errorf("deleting image record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 }
-func (r *SQLiteImageRepo) RemoveImageFromCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
+func (r SQLiteImageRepo) RemoveImageFromCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
 	_, err := r.Db.Exec("DELETE FROM images_collections WHERE image_id = $1 AND collection_id = $2",
 		imageId, collectionId)
 	if err != nil {
@@ -161,10 +162,10 @@ func (r *SQLiteImageRepo) RemoveImageFromCollection(imageId im.ImageId, collecti
 	return nil
 }
 
-func NewSQLiteImageRepo(db *sqlx.DB) *SQLiteImageRepo {
-	return &SQLiteImageRepo{Db: db}
+func NewSQLiteImageRepo(db *sqlx.DB) SQLiteImageRepo {
+	return SQLiteImageRepo{Db: db}
 }
 
-func NewTestSQLiteImageRepo() *SQLiteImageRepo {
+func NewTestSQLiteImageRepo() SQLiteImageRepo {
 	return NewSQLiteImageRepo(s.NewSQLiteDB(":memory:"))
 }

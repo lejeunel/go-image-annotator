@@ -10,10 +10,10 @@ import (
 )
 
 type Interactors struct {
-	Label      *lbl.Interactors
-	Collection *clc.Interactors
-	Image      *im.Interactors
-	Annotation *an.Interactors
-	Group      *grp.Interactors
-	User       *usr.Interactors
+	Label      lbl.Interactors
+	Collection clc.Interactors
+	Image      im.Interactors
+	Annotation an.Interactors
+	Group      grp.Interactors
+	User       usr.Interactors
 }

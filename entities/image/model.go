@@ -1,6 +1,7 @@
 package image
 
 import (
+		"time"
 	"fmt"
 	"io"
 
@@ -22,9 +23,10 @@ type BaseImage struct {
 }
 
 type ImageSpecs struct {
-	MIMEType string
-	Width    int
-	Height   int
+	MIMEType   string
+	Width      int
+	Height     int
+	IngestedAt time.Time
 }
 
 type Image struct {
@@ -49,7 +51,7 @@ func (i *Image) AddLabel(l lbl.Label) error {
 }
 
 func (i *Image) AddBoundingBox(box a.BoundingBox) error {
-	if err := a.ValidateBoundingBox(box.Xc, box.Yc, box.Width, box.Height); err != nil {
+	if err := a.ValidateBoundingBox(box.Xc, box.Yc, box.Width, box.Height, box.Angle); err != nil {
 		return fmt.Errorf("adding bounding box to image: %w", err)
 	}
 	i.BoundingBoxes = append(i.BoundingBoxes, box)

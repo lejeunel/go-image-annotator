@@ -64,7 +64,6 @@ func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("submit box: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-
 	req, err := aw.ToUpdateBoxRequest(boxreq)
 	if err != nil {
 		http.Error(w, fmt.Errorf("submit box: converting box: %w", err).Error(), http.StatusBadRequest)

@@ -1,7 +1,7 @@
 package interactors
 
 import (
-	infra "github.com/lejeunel/go-image-annotator/adapters/sqlite"
+	i "github.com/lejeunel/go-image-annotator/adapters/sqlite/infra"
 	tok "github.com/lejeunel/go-image-annotator/app/token"
 	grp "github.com/lejeunel/go-image-annotator/use-cases/group"
 	"github.com/lejeunel/go-image-annotator/use-cases/group/create"
@@ -11,7 +11,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/group/update"
 )
 
-func NewSQLiteGroupInteractors(repos *infra.SQLiteInfra, tokenGen tok.TokenGenerator) *grp.Interactors {
+func NewSQLiteGroupInteractors(repos *i.SQLiteInfra, tokenGen tok.TokenGenerator) *grp.Interactors {
 	return &grp.Interactors{
 		Find:   read.New(repos.Group),
 		Create: create.New(repos.Group),

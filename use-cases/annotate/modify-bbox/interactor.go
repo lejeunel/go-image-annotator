@@ -40,45 +40,41 @@ func New(repo Repo, opts ...Option) Interactor {
 	return *i
 }
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "updating bounding box properties"
 	annotationId, err := a.NewAnnotationIdFromString(r.AnnotationId)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(err)
 		return
 	}
 	group, err := i.repo.GroupOfAnnotation(*annotationId)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: fetching annotation group: %w", errCtx, err))
 		return
 	}
 
-	if err := i.auth.AnnotateGroup(ctx, *group); err != nil {
-		i.handleError(err, out)
-		return
+	if group != nil {
+		if err := i.auth.AnnotateGroup(ctx, *group); err != nil {
+			out.Error(fmt.Errorf("%v: authenticating: %w", errCtx, err))
+			return
+		}
 	}
 	label, err := i.findLabel(r.Label)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: fetching label %v: %w", errCtx, r.Label, err))
 		return
 	}
-	u, err := i.validate(r.Xc, r.Yc, r.Width, r.Height, *label)
+	u, err := i.validate(r.Xc, r.Yc, r.Width, r.Height, *label, r.Angle)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: validating coordinates: %w", errCtx, err))
 		return
 	}
 
 	if err := i.update(*annotationId, *u); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: updating: %w", errCtx, err))
 		return
 	}
 	out.SuccessUpdateBox(Response{})
 
-}
-
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "updating bounding box properties"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
 }
 
 func (i *Interactor) update(id a.AnnotationId, u a.BoundingBoxUpdatables) error {
@@ -90,12 +86,13 @@ func (i *Interactor) update(id a.AnnotationId, u a.BoundingBoxUpdatables) error 
 }
 
 func (i *Interactor) validate(xc float32, yc float32, width float32,
-	height float32, label lbl.Label) (*a.BoundingBoxUpdatables, error) {
+	height float32, label lbl.Label, angle float32) (*a.BoundingBoxUpdatables, error) {
 
-	if err := a.ValidateBoundingBox(xc, yc, width, height); err != nil {
+	if err := a.ValidateBoundingBox(xc, yc, width, height, angle); err != nil {
 		return nil, err
 	}
-	return &a.BoundingBoxUpdatables{LabelId: label.Id, Xc: xc, Yc: yc, Width: width, Height: height}, nil
+	return &a.BoundingBoxUpdatables{LabelId: label.Id, Xc: xc, Yc: yc, Width: width, Height: height,
+		Angle: angle}, nil
 
 }
 

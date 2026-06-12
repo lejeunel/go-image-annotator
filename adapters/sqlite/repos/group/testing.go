@@ -4,7 +4,7 @@ import (
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 )
 
-func CreateGroup(repo *SQLiteGroupRepo, name string) (*g.Group, error) {
+func CreateGroup(repo SQLiteGroupRepo, name string) (*g.Group, error) {
 	c := g.NewGroup(g.NewGroupId(), name,
 		g.WithDescription("a-description"))
 

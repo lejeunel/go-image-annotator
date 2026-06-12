@@ -13,10 +13,10 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
 )
 
-func NewSQLiteCollectionInteractors(cr *ci.SQLiteCollectionRepo,
-	gr *gi.SQLiteGroupRepo,
-	pageSize int) *clc.Interactors {
-	return &clc.Interactors{
+func NewSQLiteCollectionInteractors(cr ci.SQLiteCollectionRepo,
+	gr gi.SQLiteGroupRepo,
+	pageSize int) clc.Interactors {
+	return clc.Interactors{
 		Find: read.New(cr),
 		Create: create.New(cr, gr, create.WithNameValidator(validation.NewNameValidator()),
 			create.WithClock(clockwork.NewRealClock())),

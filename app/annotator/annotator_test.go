@@ -28,13 +28,13 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
 	annotator := NewAnnotator(
 		scroller,
 		&FakeImageReader{Return: &image},
-		&FakeBoxAdder{Returns: box},
-		&FakeBoxUpdater{Returns: &updbox.Response{AnnotationId: box.Id}},
+		&FakeBoxAdder{Returns: addbox.Response{Id: box.Id}},
+		&FakeBoxUpdater{Returns: &updbox.Response{Id: box.Id}},
 		&FakeAnnotationDeleter{Returns: del.Response{Id: box.Id}},
 		&FakeLabelFetcher{},
 		&FakeLabelUpdater{},
 		&FakeLabelAdder{Returns: addlbl.Response{ImageId: image.Id.String(), Collection: image.Collection.Name, Label: label.Name}},
-		presenters.NewPresenter())
+		presenters.New())
 	return annotator, &image, scroller, view
 
 }
@@ -62,9 +62,9 @@ func TestDrawImageOnInit(t *testing.T) {
 	assert.Equal(t, view.GotImageInfo.Id, image.Id.String(), "image info id")
 }
 func TestAddBox(t *testing.T) {
-	a, image, _, view := createAnnotator()
+	a, _, _, view := createAnnotator()
 	a.AddBox(t.Context(), addbox.Request{}, view)
-	assert.Equal(t, image.BoundingBoxes[0].Label.Name, view.AddedBox.Label, "added box with label")
+	assert.NoError(t, view.GotErr)
 }
 func TestUpdateLabel(t *testing.T) {
 	a, _, _, view := createAnnotator()
@@ -76,20 +76,10 @@ func TestDeleteAnnotation(t *testing.T) {
 	a.DeleteAnnotation(t.Context(), del.Request{}, view)
 	assert.NotNil(t, view.RemovedAnnotationId, "removed annotation")
 }
-func TestUpdateBox(t *testing.T) {
-	a, _, _, view := createAnnotator()
-	a.UpdateBox(t.Context(), updbox.Request{}, view)
-	assert.NotNil(t, view.UpdatedBoxId, "updated annotation")
-}
 func TestDrawImageAnnotationsOnInit(t *testing.T) {
 	a, image, _, view := createAnnotator()
 	a.Init(t.Context(), image.Id.String(), "a-collection", view)
 	assert.NotNil(t, view.GotAnnotationIds, "got annotation ids")
 	assert.Contains(t, *view.GotAnnotationIds, image.BoundingBoxes[0].Id.String(), "bbox annotation id")
 	assert.Contains(t, *view.GotAnnotationIds, image.Labels[0].Id.String(), "label annotation id")
-}
-func TestAddLabelShouldDraw(t *testing.T) {
-	a, image, _, view := createAnnotator()
-	a.AddLabel(t.Context(), addlbl.Request{}, view)
-	assert.Equal(t, image.Labels[0].Label.Name, view.AddedImageLabel.Label, "added box with label")
 }

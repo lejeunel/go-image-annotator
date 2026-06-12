@@ -9,7 +9,7 @@ import (
 
 func TestInternalErrOnAddLabelShouldFail(t *testing.T) {
 	repos := NewAnnotationTestRepos()
-	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
+	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	repos.Annotation.Db.Close()
 	err := repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label))
 	assert.ErrorIs(t, err, e.ErrInternal)
@@ -17,7 +17,7 @@ func TestInternalErrOnAddLabelShouldFail(t *testing.T) {
 
 func TestInternalErrOnFindImageLabels(t *testing.T) {
 	repos := NewAnnotationTestRepos()
-	image, collection, _ := CreateAnnotableImage(repos, "a-collection", "a-label")
+	image, collection, _ := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	repos.Annotation.Db.Close()
 	_, err := repos.Annotation.FindImageLabels(image.Id, collection.Id)
 	assert.ErrorIs(t, err, e.ErrInternal)
@@ -25,7 +25,7 @@ func TestInternalErrOnFindImageLabels(t *testing.T) {
 
 func TestAddAndRetrieveImageLabels(t *testing.T) {
 	repos := NewAnnotationTestRepos()
-	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
+	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label))
 	labels, err := repos.Annotation.FindImageLabels(image.Id, collection.Id)
 	assert.NoError(t, err)

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"testing"
+	"time"
 
 	ast "github.com/lejeunel/go-image-annotator/app/file-store"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
@@ -65,4 +66,13 @@ func TestImageReaderGivesCorrectBytes(t *testing.T) {
 		Collection: "the-collection"})
 	gotBytes, _ := io.ReadAll(image.Reader)
 	assert.Equal(t, true, bytes.Equal(gotBytes, data))
+}
+
+func TestRetrieveSpecs(t *testing.T) {
+	now := time.Now()
+	s := New(&FakeRepo{Specs: im.ImageSpecs{IngestedAt: now}},
+		&ast.FakeStore{})
+	image, _ := s.Find(im.BaseImage{ImageId: im.NewImageId().String(),
+		Collection: "the-collection"})
+	assert.Equal(t, image.Specs.IngestedAt, now)
 }

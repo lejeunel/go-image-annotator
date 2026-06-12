@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS images (
     mimetype TEXT,
     width INTEGER,
     height INTEGER,
+    ingested_at DATETIME,
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX idx_images_hash ON images(hash);

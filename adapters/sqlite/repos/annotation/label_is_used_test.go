@@ -9,7 +9,7 @@ import (
 
 func TestInternalErrOnLabelIsUsedShouldFail(t *testing.T) {
 	repos := NewAnnotationTestRepos()
-	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
+	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	imLabel := a.NewImageLabel(label)
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, imLabel)
 	repos.Annotation.Db.Close()
@@ -19,7 +19,7 @@ func TestInternalErrOnLabelIsUsedShouldFail(t *testing.T) {
 
 func TestLabelIsUsedbyAnnotation(t *testing.T) {
 	repos := NewAnnotationTestRepos()
-	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label")
+	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	imLabel := a.NewImageLabel(label)
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, imLabel)
 	isUsed, err := repos.Label.IsUsed(label.Name)

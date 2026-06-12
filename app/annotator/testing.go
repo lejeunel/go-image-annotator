@@ -4,7 +4,6 @@ import (
 	"context"
 	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
 	v "github.com/lejeunel/go-image-annotator/app/annotator/view"
-	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
@@ -52,7 +51,7 @@ func (b *FakeLabelAdder) Execute(ctx context.Context, r addlbl.Request, o addlbl
 }
 
 type FakeBoxAdder struct {
-	Returns an.BoundingBox
+	Returns addbox.Response
 }
 
 func (b *FakeBoxAdder) Execute(c context.Context, r addbox.Request, o addbox.OutputPort) {
@@ -85,8 +84,6 @@ func (b *FakeAnnotationDeleter) Execute(c context.Context, r del.Request, o del.
 type FakeView struct {
 	GotScrollerButtons       *v.ScrollerButtons
 	GotErr                   error
-	AddedBox                 *v.BoundingBox
-	AddedImageLabel          *v.ImageLabel
 	GotImage                 *v.Image
 	GotImageInfo             *v.ImageInfo
 	GotAvailableRegionLabels *[]string
@@ -116,13 +113,6 @@ func (s *FakeView) SetAnnotations(boxes []v.BoundingBox, labels []v.ImageLabel) 
 		ids = append(ids, l.Id)
 	}
 	s.GotAnnotationIds = &ids
-}
-
-func (s *FakeView) AddBox(box v.BoundingBox) {
-	s.AddedBox = &box
-}
-func (s *FakeView) AddLabel(l v.ImageLabel) {
-	s.AddedImageLabel = &l
 }
 
 func (s *FakeView) UpdateBox(b v.BoundingBox) {

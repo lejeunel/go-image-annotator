@@ -6,35 +6,31 @@ import (
 	"os"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
+	db "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	a "github.com/lejeunel/go-image-annotator/app/annotator"
-	"github.com/lejeunel/go-image-annotator/app/annotator/presenters"
+	ap "github.com/lejeunel/go-image-annotator/app/annotator/presenters"
 	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
+	fs "github.com/lejeunel/go-image-annotator/app/file-store"
 	tok "github.com/lejeunel/go-image-annotator/app/token"
 	as "github.com/lejeunel/go-image-annotator/assets"
+	"github.com/lejeunel/go-image-annotator/config"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
 
 	"net/http"
 
-	"github.com/lejeunel/go-image-annotator/adapters/sqlite"
+	"github.com/lejeunel/go-image-annotator/adapters/sqlite/infra"
 	i "github.com/lejeunel/go-image-annotator/adapters/sqlite/interactors"
-	"github.com/lejeunel/go-image-annotator/config"
 )
 
-type SiteConfig struct {
-	APIPath          string
-	APIDocsPath      string
-	OpenAPISpecsPath string
-}
-
-func RegisterHandlers(mux *http.ServeMux, apiServer api.Server, webServer web.Server, cfg SiteConfig,
+func RegisterHandlers(mux *http.ServeMux, apiServer api.Server, webServer web.Server, apicfg config.APIConfig,
 	pageBuilder b.PageBuilder) {
-	api.RegisterAPIEndpoints(mux, apiServer, cfg.APIPath)
+	api.RegisterAPIEndpoints(mux, apiServer, apicfg.APIPath)
 	web.RegisterWebPages(mux, webServer, pageBuilder)
-	web.RegisterAPIDocs(mux, cfg.OpenAPISpecsPath, cfg.APIDocsPath)
-	as.RegisterAPISpecs(mux, cfg.OpenAPISpecsPath)
+	web.RegisterAPIDocs(mux, apicfg.OpenAPISpecsPath, apicfg.APIDocsPath)
+	as.RegisterAPISpecs(mux, apicfg.OpenAPISpecsPath)
 	as.RegisterStaticFiles(mux)
 }
 
@@ -42,7 +38,8 @@ func Make(apiPath string) http.Handler {
 	cfg := config.Parse()
 	mux := http.NewServeMux()
 
-	infra := infra.NewSQLiteInfra(cfg.DBPath, cfg.ArtefactDir)
+	infra := infra.NewSQLiteInfra(db.NewSQLiteDB(cfg.DBPath),
+		fs.NewFileStore(cfg.ArtefactDir))
 	tokenGenerator := tok.NewTokenGenerator(32)
 	interactors := i.NewSQLiteInteractors(infra, cfg.DefaultPageSize, cfg.AllowedImageFormats, tokenGenerator)
 	pageBuilder := b.NewPageBuilder(apiPath)
@@ -57,12 +54,12 @@ func Make(apiPath string) http.Handler {
 	annotator := a.NewAnnotator(scroller, &interactors.Image.Read,
 		&interactors.Annotation.AddBox, &interactors.Annotation.UpdateBox, &interactors.Annotation.Delete,
 		&interactors.Label.FetchAll, &interactors.Annotation.UpdateLabel, &interactors.Annotation.AddImageLabel,
-		presenters.NewPresenter())
+		ap.New())
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	RegisterHandlers(mux,
 		*api.NewServer(interactors, *logger),
 		*web.NewServer(interactors, annotator, *pageBuilder, sessionManager, identityProvider),
-		SiteConfig{APIPath: fmt.Sprintf("/%v", apiPath),
+		config.APIConfig{APIPath: fmt.Sprintf("/%v", apiPath),
 			APIDocsPath:      fmt.Sprintf("/%v/docs", apiPath),
 			OpenAPISpecsPath: fmt.Sprintf("/%v/openapi.yaml", apiPath)},
 		*pageBuilder)

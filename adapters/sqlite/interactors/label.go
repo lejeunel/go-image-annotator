@@ -10,8 +10,8 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/label/read"
 )
 
-func NewSQLiteLabelInteractors(repo *infra.SQLiteLabelRepo, pageSize int) *lbl.Interactors {
-	return &lbl.Interactors{
+func NewSQLiteLabelInteractors(repo infra.SQLiteLabelRepo, pageSize int) lbl.Interactors {
+	return lbl.Interactors{
 		Find:            *read.New(repo),
 		Create:          *create.New(repo),
 		Delete:          *delete.New(repo),

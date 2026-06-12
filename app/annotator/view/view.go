@@ -3,8 +3,6 @@ package view
 type View interface {
 	SetScroller(ScrollerButtons)
 	Error(error)
-	AddBox(BoundingBox)
-	AddLabel(ImageLabel)
 	SetAvailableLabels([]string)
 	SetAvailableImageLabels([]string)
 	SetImageInfo(ImageInfo)

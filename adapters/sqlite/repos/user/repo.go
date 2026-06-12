@@ -44,7 +44,7 @@ type Record struct {
 	ApiTokenHash string `db:"api_token_hash"`
 }
 
-func (r *SQLiteUserRepo) Create(usr u.User) error {
+func (r SQLiteUserRepo) Create(usr u.User) error {
 	roles, err := json.Marshal(usr.Roles)
 	if err != nil {
 		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
@@ -64,7 +64,7 @@ func (r *SQLiteUserRepo) Create(usr u.User) error {
 	return nil
 }
 
-func (r *SQLiteUserRepo) AssignToGroup(user string, group string) error {
+func (r SQLiteUserRepo) AssignToGroup(user string, group string) error {
 	query := "INSERT INTO users_groups (user_id,group_id) VALUES ($1,(SELECT id FROM groups WHERE name=$2))"
 	_, err := r.Db.Exec(query, user, group)
 	if err != nil {
@@ -72,7 +72,7 @@ func (r *SQLiteUserRepo) AssignToGroup(user string, group string) error {
 	}
 	return nil
 }
-func (r *SQLiteUserRepo) UnAssignFromGroup(user string, group string) error {
+func (r SQLiteUserRepo) UnAssignFromGroup(user string, group string) error {
 	query := "DELETE FROM users_groups WHERE user_id=$1 AND group_id=(SELECT id FROM groups WHERE name=$2)"
 	_, err := r.Db.Exec(query, user, group)
 	if err != nil {
@@ -80,7 +80,7 @@ func (r *SQLiteUserRepo) UnAssignFromGroup(user string, group string) error {
 	}
 	return nil
 }
-func (r *SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
+func (r SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 	var groups []string
 	query := "SELECT name FROM groups WHERE id=(SELECT id FROM users_groups WHERE user_id=$1)"
 	err := r.Db.Select(&groups, query, userId)
@@ -91,7 +91,7 @@ func (r *SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 	return groups, nil
 
 }
-func (r *SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
+func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 	record := Record{}
 	err := r.Db.Get(&record,
 		"SELECT id,roles,is_admin,api_token_hash FROM users WHERE id=$1", id)
@@ -125,7 +125,7 @@ func (r *SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 		u.WithAdmin(record.IsAdmin), u.WithHashedPersonalAccessToken(hash))
 	return &user, nil
 }
-func (r *SQLiteUserRepo) Delete(id string) error {
+func (r SQLiteUserRepo) Delete(id string) error {
 	_, err := r.Db.Exec("DELETE FROM users WHERE id=$1", id)
 
 	if err != nil {
@@ -133,7 +133,7 @@ func (r *SQLiteUserRepo) Delete(id string) error {
 	}
 	return nil
 }
-func (r *SQLiteUserRepo) Exists(id string) (bool, error) {
+func (r SQLiteUserRepo) Exists(id string) (bool, error) {
 	var exists bool
 
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM users WHERE id=$1)`, id)
@@ -144,7 +144,7 @@ func (r *SQLiteUserRepo) Exists(id string) (bool, error) {
 	return exists, nil
 
 }
-func (r *SQLiteUserRepo) Count() (int64, error) {
+func (r SQLiteUserRepo) Count() (int64, error) {
 	var count int64
 
 	query := "SELECT COUNT(*) FROM users"
@@ -155,7 +155,7 @@ func (r *SQLiteUserRepo) Count() (int64, error) {
 
 	return count, nil
 }
-func (r *SQLiteUserRepo) List(m list.Request) ([]u.User, error) {
+func (r SQLiteUserRepo) List(m list.Request) ([]u.User, error) {
 	q := sq.StatementBuilder.Select("id").From("users")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
@@ -175,7 +175,7 @@ func (r *SQLiteUserRepo) List(m list.Request) ([]u.User, error) {
 
 	return objects, nil
 }
-func (r *SQLiteUserRepo) getCurrentRoles(userId string) ([]string, error) {
+func (r SQLiteUserRepo) getCurrentRoles(userId string) ([]string, error) {
 	var currentRoles string
 	query := "SELECT roles FROM users WHERE id=$1"
 	err := r.Db.QueryRow(query, userId).Scan(&currentRoles)
@@ -189,7 +189,7 @@ func (r *SQLiteUserRepo) getCurrentRoles(userId string) ([]string, error) {
 	}
 	return roles, nil
 }
-func (r *SQLiteUserRepo) setRoles(userId string, roles []string) error {
+func (r SQLiteUserRepo) setRoles(userId string, roles []string) error {
 	query := "UPDATE users SET roles=$2 WHERE id=$1"
 	data, err := json.Marshal(roles)
 	if err != nil {
@@ -201,7 +201,7 @@ func (r *SQLiteUserRepo) setRoles(userId string, roles []string) error {
 	}
 	return nil
 }
-func (r *SQLiteUserRepo) AssignRole(userId string, role string) error {
+func (r SQLiteUserRepo) AssignRole(userId string, role string) error {
 	currentRoles, err := r.getCurrentRoles(userId)
 	if err != nil {
 		return fmt.Errorf("assigning role: %w", err)
@@ -212,7 +212,7 @@ func (r *SQLiteUserRepo) AssignRole(userId string, role string) error {
 	}
 	return nil
 }
-func (r *SQLiteUserRepo) UnAssignRole(userId string, role string) error {
+func (r SQLiteUserRepo) UnAssignRole(userId string, role string) error {
 	currentRoles, err := r.getCurrentRoles(userId)
 	if err != nil {
 		return fmt.Errorf("unassigning role: %w", err)
@@ -225,7 +225,7 @@ func (r *SQLiteUserRepo) UnAssignRole(userId string, role string) error {
 	}
 	return nil
 }
-func (r *SQLiteUserRepo) SetAdmin(userId string, value bool) error {
+func (r SQLiteUserRepo) SetAdmin(userId string, value bool) error {
 	query := "UPDATE users SET is_admin=$2 WHERE id=$1"
 	_, err := r.Db.Exec(query, userId, value)
 	if err != nil {
@@ -234,7 +234,7 @@ func (r *SQLiteUserRepo) SetAdmin(userId string, value bool) error {
 	return nil
 }
 
-func (r *SQLiteUserRepo) SetAccessTokenHash(userId u.UserId, hash []byte) error {
+func (r SQLiteUserRepo) SetAccessTokenHash(userId u.UserId, hash []byte) error {
 	hashStr := hex.EncodeToString(hash)
 	query := "UPDATE users SET api_token_hash=$2 WHERE id=$1"
 	_, err := r.Db.Exec(query, userId, hashStr)
@@ -243,10 +243,10 @@ func (r *SQLiteUserRepo) SetAccessTokenHash(userId u.UserId, hash []byte) error 
 	}
 	return nil
 }
-func NewSQLiteUserRepo(db *sqlx.DB) *SQLiteUserRepo {
-	return &SQLiteUserRepo{Db: db}
+func NewSQLiteUserRepo(db *sqlx.DB) SQLiteUserRepo {
+	return SQLiteUserRepo{Db: db}
 }
 
-func NewTestSQLiteUserRepo() *SQLiteUserRepo {
+func NewTestSQLiteUserRepo() SQLiteUserRepo {
 	return NewSQLiteUserRepo(s.NewSQLiteDB(":memory:"))
 }

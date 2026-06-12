@@ -1,7 +1,7 @@
 package interactors
 
 import (
-	infra "github.com/lejeunel/go-image-annotator/adapters/sqlite"
+	i "github.com/lejeunel/go-image-annotator/adapters/sqlite/infra"
 	an "github.com/lejeunel/go-image-annotator/use-cases/annotate"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
@@ -10,8 +10,8 @@ import (
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
-func NewSQLiteAnnotationInteractors(repos *infra.SQLiteInfra) *an.Interactors {
-	return &an.Interactors{
+func NewSQLiteAnnotationInteractors(repos i.SQLiteInfra) an.Interactors {
+	return an.Interactors{
 		AddBox:        addbox.New(repos.ImageStore, repos.Annotation),
 		UpdateBox:     updbox.New(repos.Annotation),
 		Delete:        remano.New(repos.Annotation),

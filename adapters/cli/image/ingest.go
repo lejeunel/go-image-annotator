@@ -8,8 +8,10 @@ import (
 	"path/filepath"
 
 	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
-	"github.com/lejeunel/go-image-annotator/adapters/sqlite"
+	i "github.com/lejeunel/go-image-annotator/adapters/sqlite/infra"
 	itr "github.com/lejeunel/go-image-annotator/adapters/sqlite/interactors"
+	db "github.com/lejeunel/go-image-annotator/adapters/sqlite/repos"
+	afs "github.com/lejeunel/go-image-annotator/app/file-store"
 	ing "github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 )
 
@@ -25,9 +27,9 @@ func IngestDirectory(dir, collection string) {
 
 	cfg := config.Parse()
 
-	itr := itr.NewSQLiteImageInteractors(infra.NewSQLiteInfra(cfg.DBPath, cfg.ArtefactDir),
-		cfg.AllowedImageFormats).Ingest
-
+	infra := i.NewSQLiteInfra(db.NewSQLiteDB(cfg.DBPath),
+		afs.NewFileStore(cfg.ArtefactDir))
+	itr := itr.NewSQLiteImageInteractors(infra, cfg.AllowedImageFormats).Ingest
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		panic(err)

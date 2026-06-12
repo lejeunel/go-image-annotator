@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/jonboulle/clockwork"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 
 	"log/slog"
@@ -34,9 +35,16 @@ type Interactor struct {
 	Logger             *slog.Logger
 	ImageSpecsDetector IImageSpecsDetector
 	auth               Auth
+	clock              clockwork.Clock
 }
 
 type Option func(*Interactor)
+
+func WithClock(c clockwork.Clock) Option {
+	return func(i *Interactor) {
+		i.clock = c
+	}
+}
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
@@ -53,6 +61,7 @@ func New(imageRepo ImageRepo, collectionRepo CollectionRepo,
 		ImageSpecsDetector: specsDetector,
 		Logger:             logging.NewNoOpLogger(),
 		auth:               auth.PassThroughAuth{},
+		clock:              clockwork.NewRealClock(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -61,15 +70,16 @@ func New(imageRepo ImageRepo, collectionRepo CollectionRepo,
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "ingesting image"
 	collection, err := i.findCollectionByName(r.Collection)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if collection.Group != nil {
 		if err := i.auth.IngestImage(ctx, collection.Group.Name); err != nil {
-			i.handleError(err, out)
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 	}
@@ -77,25 +87,26 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	imageId := im.NewImageId()
 	image, err := i.buildImage(imageId, *collection, r.Labels, r.BoundingBoxes)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	specs, reader, err := i.ImageSpecsDetector.Detect(r.Reader)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
 	}
 
 	hash, err := i.ingestRawData(imageId, reader)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
+	specs.IngestedAt = i.clock.Now()
 	if err := i.ingestImage(image, *hash, *specs); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		i.ImageRepo.Delete(image.Id)
 		i.ArtefactRepo.Delete(image.Id)
 		return
@@ -103,13 +114,6 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	out.Success(NewIngestionResponse(image))
 
-}
-
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "ingesting image"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.Logger.Error(errCtx, "error", err)
-	out.Error(err)
 }
 func (i *Interactor) ingestRawData(id im.ImageId, reader io.Reader) (*[]byte, error) {
 

@@ -20,3 +20,9 @@ func Parse() Config {
 	}
 	return cfg
 }
+
+type APIConfig struct {
+	APIPath          string
+	APIDocsPath      string
+	OpenAPISpecsPath string
+}

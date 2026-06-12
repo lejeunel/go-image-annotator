@@ -28,7 +28,7 @@ type Row struct {
 	GroupId     g.GroupId        `db:"group_id"`
 }
 
-func (r *SQLiteCollectionRepo) Create(c clc.Collection) error {
+func (r SQLiteCollectionRepo) Create(c clc.Collection) error {
 	var err error
 	if c.Group != nil {
 		query := `INSERT INTO collections (id, name, description, created_at, group_id) VALUES ($1,$2,$3,$4,$5)`
@@ -42,7 +42,7 @@ func (r *SQLiteCollectionRepo) Create(c clc.Collection) error {
 	}
 	return nil
 }
-func (r *SQLiteCollectionRepo) rowToEntity(row Row) clc.Collection {
+func (r SQLiteCollectionRepo) rowToEntity(row Row) clc.Collection {
 	c := clc.NewCollection(row.Id, row.Name,
 		clc.WithDescription(row.Description))
 	if row.CreatedAt.Valid {
@@ -51,7 +51,7 @@ func (r *SQLiteCollectionRepo) rowToEntity(row Row) clc.Collection {
 	return c
 
 }
-func (r *SQLiteCollectionRepo) FindCollectionByName(name string) (*clc.Collection, error) {
+func (r SQLiteCollectionRepo) FindCollectionByName(name string) (*clc.Collection, error) {
 
 	row := Row{}
 	err := r.Db.Get(&row,
@@ -69,7 +69,7 @@ func (r *SQLiteCollectionRepo) FindCollectionByName(name string) (*clc.Collectio
 	entity := r.rowToEntity(row)
 	return &entity, nil
 }
-func (r *SQLiteCollectionRepo) Exists(name string) (bool, error) {
+func (r SQLiteCollectionRepo) Exists(name string) (bool, error) {
 	var exists bool
 
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM collections WHERE name = $1)`, name)
@@ -79,7 +79,7 @@ func (r *SQLiteCollectionRepo) Exists(name string) (bool, error) {
 
 	return exists, nil
 }
-func (r *SQLiteCollectionRepo) Delete(name string) error {
+func (r SQLiteCollectionRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM collections WHERE name=$1", name)
 
 	if err != nil {
@@ -87,7 +87,7 @@ func (r *SQLiteCollectionRepo) Delete(name string) error {
 	}
 	return nil
 }
-func (r *SQLiteCollectionRepo) Update(m update.Model) error {
+func (r SQLiteCollectionRepo) Update(m update.Model) error {
 	query := "UPDATE collections SET name=$1,description=$2 WHERE name=$3"
 	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
 
@@ -97,7 +97,7 @@ func (r *SQLiteCollectionRepo) Update(m update.Model) error {
 
 	return nil
 }
-func (r *SQLiteCollectionRepo) IsPopulated(name string) (*bool, error) {
+func (r SQLiteCollectionRepo) IsPopulated(name string) (*bool, error) {
 	var count int64
 
 	var query string
@@ -110,7 +110,7 @@ func (r *SQLiteCollectionRepo) IsPopulated(name string) (*bool, error) {
 	isPopulated := count > 0
 	return &isPopulated, nil
 }
-func (r *SQLiteCollectionRepo) Count() (*int64, error) {
+func (r SQLiteCollectionRepo) Count() (*int64, error) {
 	var count int64
 
 	query := "SELECT COUNT(*) FROM collections"
@@ -121,7 +121,7 @@ func (r *SQLiteCollectionRepo) Count() (*int64, error) {
 
 	return &count, nil
 }
-func (r *SQLiteCollectionRepo) List(m list.Request) ([]*clc.Collection, error) {
+func (r SQLiteCollectionRepo) List(m list.Request) ([]*clc.Collection, error) {
 	q := sq.StatementBuilder.Select(`id,name,description,created_at,group_id`).From("collections")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
@@ -142,10 +142,10 @@ func (r *SQLiteCollectionRepo) List(m list.Request) ([]*clc.Collection, error) {
 	return objects, nil
 }
 
-func NewSQLiteCollectionRepo(db *sqlx.DB) *SQLiteCollectionRepo {
-	return &SQLiteCollectionRepo{Db: db}
+func NewSQLiteCollectionRepo(db *sqlx.DB) SQLiteCollectionRepo {
+	return SQLiteCollectionRepo{Db: db}
 }
 
-func NewTestSQLiteCollectionRepo() *SQLiteCollectionRepo {
+func NewTestSQLiteCollectionRepo() SQLiteCollectionRepo {
 	return NewSQLiteCollectionRepo(s.NewSQLiteDB(":memory:"))
 }

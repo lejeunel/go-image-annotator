@@ -22,7 +22,7 @@ type Row struct {
 	CollectionId clc.CollectionId `db:"collection_id"`
 }
 
-func (r *SQLiteScrollerRepo) GetAdjacent(id im.ImageId, criteria scroller.ScrollingCriteria,
+func (r SQLiteScrollerRepo) GetAdjacent(id im.ImageId, criteria scroller.ScrollingCriteria,
 	d scroller.ScrollingDirection) (*im.BaseImage, error) {
 	q := sq.StatementBuilder.Select("id").From("images")
 
@@ -59,8 +59,7 @@ func (r *SQLiteScrollerRepo) GetAdjacent(id im.ImageId, criteria scroller.Scroll
 	result.ImageId = adjId
 	return &result, nil
 }
-
-func (r *SQLiteScrollerRepo) ImageMustExist(id im.ImageId) error {
+func (r SQLiteScrollerRepo) ImageMustExist(id im.ImageId) error {
 	var count int64
 	query := "SELECT COUNT(*) FROM images WHERE id=$1"
 	err := r.Db.QueryRow(query, id.String()).Scan(&count)
@@ -72,8 +71,7 @@ func (r *SQLiteScrollerRepo) ImageMustExist(id im.ImageId) error {
 	}
 	return nil
 }
-
-func (r *SQLiteScrollerRepo) CollectionMustExist(collection string) error {
+func (r SQLiteScrollerRepo) CollectionMustExist(collection string) error {
 	var count int64
 	query := "SELECT COUNT(*) FROM collections WHERE name=$1"
 	err := r.Db.QueryRow(query, collection).Scan(&count)
@@ -86,6 +84,6 @@ func (r *SQLiteScrollerRepo) CollectionMustExist(collection string) error {
 	return nil
 }
 
-func NewSQLiteScrollerRepo(db *sqlx.DB) *SQLiteScrollerRepo {
-	return &SQLiteScrollerRepo{Db: db}
+func NewSQLiteScrollerRepo(db *sqlx.DB) SQLiteScrollerRepo {
+	return SQLiteScrollerRepo{Db: db}
 }

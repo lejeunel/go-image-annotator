@@ -59,7 +59,7 @@ func (g MyTokenGenerator) Generate() (*TokenPair, error) {
 		return nil, err
 	}
 
-	token := base64.RawURLEncoding.EncodeToString(buf)
+	token := base64.StdEncoding.EncodeToString(buf)
 	sum := g.Hash(token)
 
 	return &TokenPair{
