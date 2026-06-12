@@ -5,12 +5,12 @@ import (
 	gh "maragu.dev/gomponents/html"
 )
 
-type PaginationTable struct {
+type MyTable struct {
 	Fields []string
-	Rows   []PaginationTableRow
+	Rows   []MyTableRow
 }
 
-func (t *PaginationTable) Build() gp.Node {
+func (t *MyTable) Build() gp.Node {
 	return gh.Div(gh.Class("overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark"),
 		gh.Table(gh.Class("w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
 			TableHeader(t.Fields),
@@ -18,11 +18,11 @@ func (t *PaginationTable) Build() gp.Node {
 		))
 }
 
-type PaginationTableRow struct {
+type MyTableRow struct {
 	Values []gp.Node
 }
 
-func (r PaginationTableRow) Render() gp.Node {
+func (r MyTableRow) Render() gp.Node {
 	return gh.Tr(
 		gh.Class("even:bg-primary/5 dark:even:bg-primary-dark/10"),
 		gp.Map(r.Values, func(node gp.Node) gp.Node {
@@ -39,9 +39,9 @@ func TableHeader(fields []string) gp.Node {
 		})))
 }
 
-func TableBody(rows []PaginationTableRow) gp.Node {
+func TableBody(rows []MyTableRow) gp.Node {
 	return gh.TBody(gh.Class("divide-y divide-outline dark:divide-outline-dark"),
-		gp.Map(rows, func(r PaginationTableRow) gp.Node {
+		gp.Map(rows, func(r MyTableRow) gp.Node {
 			return r.Render()
 
 		}),

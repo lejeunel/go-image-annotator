@@ -11,6 +11,13 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
+var MoonIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+			<path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"></path>
+		</svg>`
+var SunIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+			<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"></path>
+		</svg>`
+
 type NavBarActivatedItems struct {
 	Home        bool
 	Collections bool
@@ -19,7 +26,7 @@ type NavBarActivatedItems struct {
 }
 
 var UserIcon = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"  class="w-1/2 h-1/2">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"  class="w-2/3 h-2/3">
 	<path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/>
 </svg>
 `
@@ -43,7 +50,7 @@ func MakeLoginOrUserBadge(user *u.User) Node {
 	tUser := template.New("")
 	template.Must(tUser.ParseFS(templatesFiles, "templates/user_badge.html"))
 	var iconBuf bytes.Buffer
-	Span(Class("flex size-10 items-center justify-center overflow-hidden rounded-full border border-outline bg-surface-alt text-on-surface/80 dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark/80"),
+	Span(Class("flex size-8 items-center justify-center overflow-hidden rounded-full border border-outline bg-surface-alt text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark"),
 		Raw(UserIcon)).Render(&iconBuf)
 	var buf bytes.Buffer
 	entries := UserMenu{UserName: user.Id,
@@ -52,7 +59,6 @@ func MakeLoginOrUserBadge(user *u.User) Node {
 	tUser.ExecuteTemplate(&buf, "user_badge", entries)
 	return Raw(buf.String())
 }
-
 func MakeRepoButton(url string) Node {
 	icon := `
 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="size-5" viewBox="0 0 16 16">
@@ -66,7 +72,6 @@ func MakeRepoButton(url string) Node {
 		Attr(":class", "darkMode ? 'text-gray-300' : 'text-gray-700'"),
 	))
 }
-
 func MakeMenuItem(name string, url string, activated bool) Node {
 	class := "font-medium text-on-surface underline-offset-2 hover:text-primary focus:outline-hidden focus:underline dark:text-on-surface-dark dark:hover:text-primary-dark"
 	if activated {
@@ -80,14 +85,7 @@ func MakeMenuItem(name string, url string, activated bool) Node {
 	)
 
 }
-
 func DarkModeToggle() Node {
-	moon := `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"></path>
-			</svg>`
-	sun := `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"></path>
-			</svg>`
 	return Button(
 		Attr("@click", "toggleDark()"),
 		Attr("type", "button"),
@@ -98,7 +96,7 @@ func DarkModeToggle() Node {
 			dark:text-surface dark:focus-visible:outline-surface
 		`),
 		Span(
-			Attr("x-html", "darkMode ? `"+sun+"` : `"+moon+"`"),
+			Attr("x-html", "darkMode ? `"+SunIcon+"` : `"+MoonIcon+"`"),
 			Attr(":class", "darkMode ? 'text-gray-300' : 'text-gray-700'"),
 		),
 	)

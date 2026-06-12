@@ -6,6 +6,8 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
+	. "maragu.dev/gomponents"
+	. "maragu.dev/gomponents/html"
 	"net/url"
 )
 
@@ -16,10 +18,16 @@ type ListRenderer struct {
 	Writer     io.Writer
 }
 
-func (p ListRenderer) RenderSuccess(table html.PaginationTable, pagination pagination.Pagination) {
+func (p ListRenderer) RenderSuccess(table html.MyTable, pagination pagination.Pagination, header *Node) {
 
 	content := html.MakePaginatedContent(p.ListURL, table, pagination)
-	p.PageBuilder.SetContent(content).SetActive(p.ActivePage).Render(p.Writer)
+	var cat Node
+	if header != nil {
+		cat = Div(*header, content)
+	} else {
+		cat = content
+	}
+	p.PageBuilder.SetContent(cat).SetActive(p.ActivePage).Render(p.Writer)
 }
 
 func (p ListRenderer) Error(err error) {

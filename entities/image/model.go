@@ -1,9 +1,9 @@
 package image
 
 import (
-		"time"
 	"fmt"
 	"io"
+	"time"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
@@ -49,7 +49,6 @@ func (i *Image) AddLabel(l lbl.Label) error {
 	i.Labels = append(i.Labels, an.NewImageLabel(l))
 	return nil
 }
-
 func (i *Image) AddBoundingBox(box a.BoundingBox) error {
 	if err := a.ValidateBoundingBox(box.Xc, box.Yc, box.Width, box.Height, box.Angle); err != nil {
 		return fmt.Errorf("adding bounding box to image: %w", err)
@@ -57,7 +56,9 @@ func (i *Image) AddBoundingBox(box a.BoundingBox) error {
 	i.BoundingBoxes = append(i.BoundingBoxes, box)
 	return nil
 }
-
+func (i *Image) NumAnnotations() int {
+	return len(i.Labels) + len(i.BoundingBoxes)
+}
 func (i *Image) LabelNames() []string {
 	labelNames := []string{}
 	for _, label := range i.Labels {
@@ -65,7 +66,6 @@ func (i *Image) LabelNames() []string {
 	}
 	return labelNames
 }
-
 func (i *Image) BoundingBoxSummary() []an.BoundingBoxResponse {
 	summary := []an.BoundingBoxResponse{}
 	for _, bbox := range i.BoundingBoxes {

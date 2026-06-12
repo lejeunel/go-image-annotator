@@ -15,7 +15,7 @@ type ListCollectionsPresenter struct {
 }
 
 func (p ListCollectionsPresenter) Success(r list.Response) {
-	table := html.PaginationTable{Fields: []string{"name", "description", "group", "created"}}
+	table := html.MyTable{Fields: []string{"name", "description", "group", "created"}}
 	for _, c := range r.Collections {
 		var groupName string
 		if c.Group == nil {
@@ -24,10 +24,11 @@ func (p ListCollectionsPresenter) Success(r list.Response) {
 			groupName = c.Group.Name
 		}
 		table.Rows = append(table.Rows,
-			html.PaginationTableRow{Values: []Node{html.MakeTextLink("/images?collection="+c.Name, c.Name),
+			html.MyTableRow{Values: []Node{html.MakeTextLink("/images?collection="+c.Name, c.Name),
 				Raw(c.Description), Raw(groupName), Raw(DateTimeToStr(c.CreatedAt))}})
 	}
-	p.RenderSuccess(table, r.Pagination)
+
+	p.RenderSuccess(table, r.Pagination, nil)
 }
 
 func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
