@@ -3,10 +3,10 @@ package add_bbox
 import (
 	"testing"
 
-	st "github.com/lejeunel/go-image-annotator/app/image-store"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"github.com/stretchr/testify/assert"

@@ -1,7 +1,7 @@
 package list
 
 import (
-	ist "github.com/lejeunel/go-image-annotator/app/image-store"
+	ist "github.com/lejeunel/go-image-annotator/modules/image-store"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 

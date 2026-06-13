@@ -1,7 +1,7 @@
 package annotator
 
 import (
-	"github.com/lejeunel/go-image-annotator/app/annotator/view"
+	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )

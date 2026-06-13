@@ -7,7 +7,7 @@ import (
 	"embed"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
-	v "github.com/lejeunel/go-image-annotator/app/annotator/view"
+	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )

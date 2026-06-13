@@ -19,7 +19,7 @@ type Interactor struct {
 	countLimit int
 }
 
-func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, out OutputPort) {
 	errCtx := "listing label"
 	count, err := i.repo.Count()
 	if err != nil {

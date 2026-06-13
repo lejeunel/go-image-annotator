@@ -13,7 +13,7 @@ type Interactor struct {
 	auth           Auth
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "deleting collection"
 	if err := i.authorizeDeletion(ctx, r.Name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
@@ -35,8 +35,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 	out.Success()
 }
-
-func (i *Interactor) authorizeDeletion(ctx context.Context, name string) error {
+func (i Interactor) authorizeDeletion(ctx context.Context, name string) error {
 	errCtx := fmt.Errorf("checking group ownership of collection with name %v is empty", name)
 	group, err := i.groupRepo.GroupOfCollection(name)
 	if err != nil {
@@ -50,8 +49,7 @@ func (i *Interactor) authorizeDeletion(ctx context.Context, name string) error {
 	return nil
 
 }
-
-func (i *Interactor) ensureDeletable(name string) error {
+func (i Interactor) ensureDeletable(name string) error {
 	errCtx := fmt.Errorf("ensuring collection with name %v is empty", name)
 	isPopulated, err := i.collectionRepo.IsPopulated(name)
 	if err != nil {
@@ -62,8 +60,7 @@ func (i *Interactor) ensureDeletable(name string) error {
 	}
 	return nil
 }
-
-func (i *Interactor) ensureExists(name string) error {
+func (i Interactor) ensureExists(name string) error {
 	errCtx := fmt.Errorf("checking whether collection with name %v exists", name)
 	exists, err := i.collectionRepo.Exists(name)
 	if err != nil {

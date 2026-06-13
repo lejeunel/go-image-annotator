@@ -9,7 +9,7 @@ type Interactor struct {
 	repo Repo
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "fetching collection"
 	found, err := i.repo.FindCollectionByName(r.Name)
 	if err != nil {

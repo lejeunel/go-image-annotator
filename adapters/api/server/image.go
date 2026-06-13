@@ -6,7 +6,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/image"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
-	rd "github.com/lejeunel/go-image-annotator/app/reader"
+	rd "github.com/lejeunel/go-image-annotator/modules/reader"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/read"

@@ -16,13 +16,13 @@ import (
 func (s *Server) ViewImage(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentityFromContext(r.Context())
 	view := aw.NewAnnotationView(s.PageBuilder)
-	s.annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
+	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
 	view.RenderAll(w)
 }
 func (s *Server) SubmitLabel(w http.ResponseWriter, r *http.Request) {
 	req := assign_label.Request{ImageId: r.URL.Query().Get("image_id"),
 		Collection: r.URL.Query().Get("collection"), Label: r.URL.Query().Get("label")}
-	s.annotator.AddLabel(r.Context(), req, aw.NewAnnotationView(s.PageBuilder))
+	s.Annotator.AddLabel(r.Context(), req, aw.NewAnnotationView(s.PageBuilder))
 }
 func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
@@ -39,20 +39,20 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("submit box: converting box: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	s.annotator.AddBox(r.Context(), *req, aw.NewAnnotationView(s.PageBuilder))
+	s.Annotator.AddBox(r.Context(), *req, aw.NewAnnotationView(s.PageBuilder))
 }
 func (s *Server) MakeHTMLAnnotationPanel(w http.ResponseWriter, r *http.Request) {
 	view := aw.NewAnnotationView(s.PageBuilder)
-	s.annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
+	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
 	view.RenderAnnotationList(w)
 }
 func (s *Server) GetAnnotationsAsJSON(w http.ResponseWriter, r *http.Request) {
 	view := aw.NewAnnotationView(s.PageBuilder)
-	s.annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
+	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
 	view.RenderAnnotations(w)
 }
 func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
-	s.annotator.DeleteAnnotation(r.Context(), remove.Request{Id: r.URL.Query().Get("id")},
+	s.Annotator.DeleteAnnotation(r.Context(), remove.Request{Id: r.URL.Query().Get("id")},
 		aw.NewAnnotationView(s.PageBuilder))
 }
 func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +69,7 @@ func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("submit box: converting box: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	s.annotator.UpdateBox(r.Context(), *req, aw.NewAnnotationView(s.PageBuilder))
+	s.Annotator.UpdateBox(r.Context(), *req, aw.NewAnnotationView(s.PageBuilder))
 }
 func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 	errCtx := fmt.Errorf("setting label")
@@ -84,6 +84,6 @@ func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.annotator.UpdateLabel(r.Context(), updlbl.Request{AnnotationId: id, Label: label},
+	s.Annotator.UpdateLabel(r.Context(), updlbl.Request{AnnotationId: id, Label: label},
 		aw.NewAnnotationView(s.PageBuilder))
 }

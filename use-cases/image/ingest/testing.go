@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/jonboulle/clockwork"
-	ast "github.com/lejeunel/go-image-annotator/app/file-store"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/logging"

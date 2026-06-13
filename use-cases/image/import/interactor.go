@@ -36,7 +36,7 @@ func NewInteractor(repo Repo, opts ...Option) *Interactor {
 
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	imageId, err := im.NewImageIdFromString(r.ImageId)
 	if err != nil {
 		i.handleError(err, out)
@@ -75,7 +75,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	out.Success(Response{})
 
 }
-func (i *Interactor) ensureImageDoesNotAlreadyExistInCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
+func (i Interactor) ensureImageDoesNotAlreadyExistInCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
 
 	errCtx := fmt.Errorf("ensuring that source image does not already exist in destination collection")
 	alreadyExists, err := i.repo.ImageExistsInCollection(imageId, collectionId)
@@ -87,8 +87,7 @@ func (i *Interactor) ensureImageDoesNotAlreadyExistInCollection(imageId im.Image
 	}
 	return nil
 }
-
-func (i *Interactor) ensureSourceImageExists(id im.ImageId) error {
+func (i Interactor) ensureSourceImageExists(id im.ImageId) error {
 	errCtx := fmt.Errorf("ensuring that source image exists")
 	exists, err := i.repo.ImageExists(id)
 	if err != nil {
@@ -100,8 +99,7 @@ func (i *Interactor) ensureSourceImageExists(id im.ImageId) error {
 	return nil
 
 }
-
-func (i *Interactor) findCollection(name string) (*clc.Collection, error) {
+func (i Interactor) findCollection(name string) (*clc.Collection, error) {
 
 	errCtx := fmt.Errorf("fetching collection %v", name)
 	collection, err := i.repo.FindCollectionByName(name)
@@ -111,8 +109,7 @@ func (i *Interactor) findCollection(name string) (*clc.Collection, error) {
 	return collection, nil
 
 }
-
-func (i *Interactor) handleError(err error, out OutputPort) {
+func (i Interactor) handleError(err error, out OutputPort) {
 	errCtx := "deleting image"
 	err = fmt.Errorf("%v: %w", errCtx, err)
 	i.logger.Error(errCtx, "error", err)

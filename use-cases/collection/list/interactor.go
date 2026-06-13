@@ -11,7 +11,7 @@ type Interactor struct {
 	repo Repo
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "listing collections"
 	if err := pagination.Validate(r.Page, r.PageSize); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))

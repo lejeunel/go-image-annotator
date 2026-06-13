@@ -39,7 +39,7 @@ func New(repo Repo, opts ...Option) Interactor {
 	}
 	return *i
 }
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "updating bounding box properties"
 	annotationId, err := a.NewAnnotationIdFromString(r.AnnotationId)
 	if err != nil {
@@ -76,16 +76,14 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	out.SuccessUpdateBox(Response{})
 
 }
-
-func (i *Interactor) update(id a.AnnotationId, u a.BoundingBoxUpdatables) error {
+func (i Interactor) update(id a.AnnotationId, u a.BoundingBoxUpdatables) error {
 	if err := i.repo.UpdateBoundingBox(id, u); err != nil {
 		return err
 	}
 	return nil
 
 }
-
-func (i *Interactor) validate(xc float32, yc float32, width float32,
+func (i Interactor) validate(xc float32, yc float32, width float32,
 	height float32, label lbl.Label, angle float32) (*a.BoundingBoxUpdatables, error) {
 
 	if err := a.ValidateBoundingBox(xc, yc, width, height, angle); err != nil {
@@ -95,8 +93,7 @@ func (i *Interactor) validate(xc float32, yc float32, width float32,
 		Angle: angle}, nil
 
 }
-
-func (i *Interactor) findLabel(name string) (*lbl.Label, error) {
+func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 
 	label, err := i.repo.FindLabel(name)
 	if err != nil {

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/jonboulle/clockwork"
-	ast "github.com/lejeunel/go-image-annotator/app/file-store"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )

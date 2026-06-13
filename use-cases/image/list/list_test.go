@@ -3,7 +3,7 @@ package list
 import (
 	"testing"
 
-	st "github.com/lejeunel/go-image-annotator/app/image-store"
+	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
-	"github.com/lejeunel/go-image-annotator/app/annotator/view"
+	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
 )
 

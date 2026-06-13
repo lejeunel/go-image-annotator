@@ -6,7 +6,7 @@ import (
 
 	"log/slog"
 
-	tok "github.com/lejeunel/go-image-annotator/app/token"
+	tok "github.com/lejeunel/go-image-annotator/modules/token"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/logging"

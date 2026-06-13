@@ -38,7 +38,7 @@ func New(repo Repo, opts ...Option) Interactor {
 	return *i
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	label, err := i.repo.FindLabel(r.Label)
 	if err != nil {
 		i.handleError(err, out)
@@ -71,8 +71,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	out.SuccessUpdateLabel(Response{})
 
 }
-
-func (i *Interactor) handleError(err error, out OutputPort) {
+func (i Interactor) handleError(err error, out OutputPort) {
 	errCtx := "updating bounding box properties"
 	err = fmt.Errorf("%v: %w", errCtx, err)
 	i.logger.Error(errCtx, "error", err)

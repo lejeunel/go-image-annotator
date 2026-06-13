@@ -1,15 +1,15 @@
 package server
 
 import (
-	u "github.com/lejeunel/go-image-annotator/use-cases"
+	"github.com/lejeunel/go-image-annotator/app"
 	"log/slog"
 )
 
 type Server struct {
-	*u.Interactors
+	*app.Interactors
 	slog.Logger
 }
 
-func NewServer(interactors *u.Interactors, logger slog.Logger) *Server {
+func NewServer(interactors *app.Interactors, logger slog.Logger) *Server {
 	return &Server{interactors, logger}
 }

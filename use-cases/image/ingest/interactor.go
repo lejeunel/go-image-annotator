@@ -11,11 +11,11 @@ import (
 
 	"log/slog"
 
-	ast "github.com/lejeunel/go-image-annotator/app/file-store"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"hash"
@@ -69,7 +69,7 @@ func New(imageRepo ImageRepo, collectionRepo CollectionRepo,
 	return i
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "ingesting image"
 	collection, err := i.findCollectionByName(r.Collection)
 	if err != nil {

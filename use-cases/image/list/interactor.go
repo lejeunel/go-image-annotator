@@ -2,8 +2,8 @@ package list
 
 import (
 	"fmt"
-	ist "github.com/lejeunel/go-image-annotator/app/image-store"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	ist "github.com/lejeunel/go-image-annotator/modules/image-store"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
 	"log/slog"
@@ -19,7 +19,7 @@ func New(r Repo, s ist.Interface) Interactor {
 	return Interactor{repo: r, store: s, logger: logging.NewNoOpLogger()}
 }
 
-func (i *Interactor) Execute(r Request, out OutputPort) {
+func (i Interactor) Execute(r Request, out OutputPort) {
 	filteringParams := &ist.FilteringParams{
 		Page:       r.Page,
 		PageSize:   r.PageSize,

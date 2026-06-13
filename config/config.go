@@ -6,7 +6,7 @@ import (
 )
 
 type Config struct {
-	DBPath              string   `required:"true"`
+	SQLiteDBPath        string   `required:"true"`
 	ArtefactDir         string   `required:"true"`
 	AllowedImageFormats []string `default:"jpeg,png"`
 	DefaultPageSize     int      `default:"10"`

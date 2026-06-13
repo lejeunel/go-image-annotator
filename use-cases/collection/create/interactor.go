@@ -19,7 +19,7 @@ type Interactor struct {
 	auth           Auth
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "creating collection"
 	if r.Group != nil {
 		if err := i.auth.CreateCollection(ctx, *r.Group); err != nil {
@@ -40,8 +40,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	out.Success(Response{Name: r.Name, Description: r.Description})
 }
-
-func (i *Interactor) create(r Request) error {
+func (i Interactor) create(r Request) error {
 	collection := clc.NewCollection(clc.NewCollectionId(), r.Name,
 		clc.WithDescription(r.Description),
 		clc.WithCreatedAt(i.clock.Now()))
@@ -58,8 +57,7 @@ func (i *Interactor) create(r Request) error {
 	return nil
 
 }
-
-func (i *Interactor) validate(name string) error {
+func (i Interactor) validate(name string) error {
 	if err := i.validator.Validate(name); err != nil {
 		return fmt.Errorf("checking collection name %v: %w", name, err)
 	}
@@ -69,8 +67,7 @@ func (i *Interactor) validate(name string) error {
 	return nil
 
 }
-
-func (i *Interactor) isDuplicate(name string) error {
+func (i Interactor) isDuplicate(name string) error {
 	errBaseMsg := fmt.Sprintf("checking for duplicate collection with name %v", name)
 	alreadyExists, err := i.collectionRepo.Exists(name)
 	if err != nil {

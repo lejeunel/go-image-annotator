@@ -10,8 +10,8 @@ import (
 
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
-	tok "github.com/lejeunel/go-image-annotator/app/token"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	tok "github.com/lejeunel/go-image-annotator/modules/token"
 	readusr "github.com/lejeunel/go-image-annotator/use-cases/user/read"
 )
 

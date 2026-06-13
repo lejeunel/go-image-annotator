@@ -3,7 +3,7 @@ package read
 import (
 	"testing"
 
-	st "github.com/lejeunel/go-image-annotator/app/image-store"
+	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"

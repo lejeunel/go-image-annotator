@@ -4,8 +4,8 @@ import (
 	"context"
 	"slices"
 
-	tok "github.com/lejeunel/go-image-annotator/app/token"
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
+	tok "github.com/lejeunel/go-image-annotator/modules/token"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )

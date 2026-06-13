@@ -1,7 +1,7 @@
 package annotator
 
 import (
-	"github.com/lejeunel/go-image-annotator/app/annotator/view"
+	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
 )

@@ -109,7 +109,7 @@ func MakeNavBar(isActivated ActivePage, repoURL string, apiPrefix string, user *
 
 		// --- Brand Logo ---
 		A(
-			Href("#"),
+			Href("/"),
 			Class("text-2xl font-bold text-on-surface-strong dark:text-on-surface-dark-strong"),
 			Span(
 				Text("Image"),

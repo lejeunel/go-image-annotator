@@ -31,7 +31,7 @@ func New(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
 	return *i
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	errCtx := "updating collection"
 	group, err := i.groupRepo.GroupOfCollection(r.Name)
@@ -67,8 +67,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	out.Success(Response{Name: r.NewName, Description: r.NewDescription})
 }
-
-func (i *Interactor) ensureNameExists(name string) error {
+func (i Interactor) ensureNameExists(name string) error {
 	baseErr := fmt.Errorf("ensuring that collection with name %v exists", name)
 	exists, err := i.collectionRepo.Exists(name)
 	if err != nil {
@@ -79,8 +78,7 @@ func (i *Interactor) ensureNameExists(name string) error {
 	}
 	return nil
 }
-
-func (i *Interactor) ensureNameDoesNotExist(name string) error {
+func (i Interactor) ensureNameDoesNotExist(name string) error {
 	baseErr := fmt.Errorf("ensuring that a collection with name %v does not already exist", name)
 	exists, err := i.collectionRepo.Exists(name)
 	if err != nil {

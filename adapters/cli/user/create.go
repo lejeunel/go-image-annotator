@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
-	a "github.com/lejeunel/go-image-annotator/adapters/sqlite/app"
+	a "github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
 	uc "github.com/lejeunel/go-image-annotator/use-cases/user/create"
 )

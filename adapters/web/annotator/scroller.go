@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	h "github.com/lejeunel/go-image-annotator/adapters/web/html"
-	scr "github.com/lejeunel/go-image-annotator/app/annotator/scroller"
-	"github.com/lejeunel/go-image-annotator/app/annotator/view"
+	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
+	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"

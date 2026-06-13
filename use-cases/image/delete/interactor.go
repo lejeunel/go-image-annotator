@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	st "github.com/lejeunel/go-image-annotator/app/image-store"
+	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	"github.com/lejeunel/go-image-annotator/shared/logging"

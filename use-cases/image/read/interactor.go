@@ -2,8 +2,8 @@ package read
 
 import (
 	"fmt"
-	imstore "github.com/lejeunel/go-image-annotator/app/image-store"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	imstore "github.com/lejeunel/go-image-annotator/modules/image-store"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
 )
@@ -21,7 +21,7 @@ func New(store imstore.Interface) Interactor {
 	return Interactor{store: store, logger: logging.NewNoOpLogger()}
 }
 
-func (i *Interactor) Execute(r Request, out OutputPort) {
+func (i Interactor) Execute(r Request, out OutputPort) {
 	errCtx := "reading image meta-data"
 	image, err := i.store.Find(im.BaseImage{ImageId: r.ImageId, Collection: r.Collection})
 	if err != nil {

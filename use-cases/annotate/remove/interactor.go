@@ -37,7 +37,7 @@ func New(repo Repo, opts ...Option) Interactor {
 	}
 	return *i
 }
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	id, err := a.NewAnnotationIdFromString(r.Id)
 	if err != nil {
 		i.handleError(err, out)
@@ -63,8 +63,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	out.SuccessDeleteAnnotation(Response{Id: *id})
 
 }
-
-func (i *Interactor) handleError(err error, out OutputPort) {
+func (i Interactor) handleError(err error, out OutputPort) {
 	errCtx := "removing annotation"
 	err = fmt.Errorf("%v: %w", errCtx, err)
 	i.logger.Error(errCtx, "error", err)

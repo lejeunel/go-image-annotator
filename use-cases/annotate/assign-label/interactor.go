@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	st "github.com/lejeunel/go-image-annotator/app/image-store"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
@@ -26,7 +26,7 @@ type Interactor struct {
 	auth   auth.Auth
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	image, err := i.findImage(r.ImageId, r.Collection)
 	if err != nil {
@@ -60,14 +60,14 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		Label:        r.Label,
 		AnnotationId: imageLabel.Id.String()})
 }
-func (i *Interactor) handleError(err error, out OutputPort) {
+func (i Interactor) handleError(err error, out OutputPort) {
 	errCtx := "assigning label to image"
 	err = fmt.Errorf("%v: %w", errCtx, err)
 	i.logger.Error(errCtx, "error", err)
 	out.Error(err)
 
 }
-func (i *Interactor) findLabel(name string) (*lbl.Label, error) {
+func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 	label, err := i.repo.FindLabel(name)
 	if err != nil {
 		return nil, err
@@ -75,15 +75,14 @@ func (i *Interactor) findLabel(name string) (*lbl.Label, error) {
 	return label, nil
 
 }
-func (i *Interactor) findImage(imageId string, collection string) (*im.Image, error) {
+func (i Interactor) findImage(imageId string, collection string) (*im.Image, error) {
 	image, err := i.store.Find(im.BaseImage{ImageId: imageId, Collection: collection})
 	if err != nil {
 		return nil, err
 	}
 	return image, nil
 }
-
-func (i *Interactor) addLabel(imageId im.ImageId, collectionId clc.CollectionId, label lbl.Label) (*an.ImageLabel, error) {
+func (i Interactor) addLabel(imageId im.ImageId, collectionId clc.CollectionId, label lbl.Label) (*an.ImageLabel, error) {
 	imageLabel := an.NewImageLabel(label)
 	if err := i.repo.AddImageLabel(imageId, collectionId, imageLabel); err != nil {
 		return nil, err

@@ -3,7 +3,7 @@ package delete
 import (
 	"testing"
 
-	st "github.com/lejeunel/go-image-annotator/app/image-store"
+	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
