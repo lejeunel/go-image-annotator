@@ -17,6 +17,7 @@ type RegionTable struct {
 func (t *RegionTable) AddBox(b view.BoundingBox) {
 	shortId := ShortenUUID(b.Id)
 	tmpl := template.New("")
+	smallText := "text-xs text-on-surface dark:text-on-surface-dark"
 	template.Must(tmpl.ParseFS(templatesFiles,
 		"templates/label_combobox.html"))
 
@@ -30,7 +31,11 @@ func (t *RegionTable) AddBox(b view.BoundingBox) {
   <rect x="10" y="10" width="80" height="80" rx="10" ry="10" fill="%v" />
 </svg>`, b.Color)),
 			),
-			Text(shortId),
+			Div(Class("flex flex-col"),
+				Div(Class(smallText), Text(b.Author)),
+				Div(Class(smallText), Text(b.Time)),
+				Div(Class(smallText), Text(shortId)),
+			),
 			Raw(buf.String()),
 			Div(
 				Class("flex  justify-end items-center pr-1"),

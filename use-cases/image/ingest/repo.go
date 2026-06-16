@@ -1,10 +1,13 @@
 package ingest
 
 import (
+	"time"
+
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 )
 
 type CollectionRepo interface {
@@ -17,7 +20,7 @@ type LabelRepo interface {
 
 type AnnotationRepo interface {
 	AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel) error
-	AddBoundingBox(im.ImageId, clc.CollectionId, an.BoundingBox) error
+	AddBoundingBox(im.ImageId, clc.CollectionId, an.BoundingBox, *u.UserId, *time.Time) error
 }
 
 type ImageRepo interface {

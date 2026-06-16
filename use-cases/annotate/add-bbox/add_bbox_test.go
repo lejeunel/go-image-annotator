@@ -1,11 +1,15 @@
 package add_bbox
 
 import (
+	"context"
 	"testing"
+	"time"
 
+	"github.com/jonboulle/clockwork"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
@@ -61,11 +65,18 @@ func TestInternalErrOnFindLabelShouldFail(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
+func CreateTestAddBoxRequest() Request {
+	return Request{ImageId: im.NewImageId().String(), Collection: "a-collection",
+		Label: "a-label", Xc: float32(1.0), Yc: float32(1.0), Width: float32(3.0),
+		Height: float32(3.0), Angle: float32(32)}
+}
+
 func TestValidationErrOnAddBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&st.FakeImageStore{}, &FakeRepo{})
-	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String(), Collection: "a-collection", Label: "a-label",
-		Xc: 1, Yc: 1, Width: -999, Height: 3}, p)
+	req := CreateTestAddBoxRequest()
+	req.Width = -999
+	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotValidationErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -73,8 +84,7 @@ func TestValidationErrOnAddBoxShouldFail(t *testing.T) {
 func TestNotFoundErrOnAddBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&st.FakeImageStore{}, &FakeRepo{ErrOnAdd: true, Err: e.ErrNotFound})
-	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String(), Collection: "a-collection", Label: "a-label",
-		Xc: 1, Yc: 1, Width: 3, Height: 3}, p)
+	itr.Execute(t.Context(), CreateTestAddBoxRequest(), p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -82,10 +92,30 @@ func TestNotFoundErrOnAddBoxShouldFail(t *testing.T) {
 func TestInternalErrOnAddBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&st.FakeImageStore{}, &FakeRepo{ErrOnAdd: true, Err: e.ErrInternal})
-	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String(), Collection: "a-collection", Label: "a-label",
-		Xc: 1, Yc: 1, Width: 3, Height: 3}, p)
+	itr.Execute(t.Context(), CreateTestAddBoxRequest(), p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
+}
+
+func TestAddUserIdFromContext(t *testing.T) {
+	p := &FakePresenter{}
+	repo := &FakeRepo{}
+	itr := New(&st.FakeImageStore{}, repo)
+	user := u.NewUser("user@example.com")
+	ctx := context.WithValue(t.Context(), u.UserContextKey, &user)
+	itr.Execute(ctx, CreateTestAddBoxRequest(), p)
+	assert.NotNil(t, repo.GotUserId)
+	assert.Equal(t, user.Id, *repo.GotUserId)
+}
+
+func TestTime(t *testing.T) {
+	p := &FakePresenter{}
+	repo := &FakeRepo{}
+	now := time.Now()
+	itr := New(&st.FakeImageStore{}, repo, WithClock(clockwork.NewFakeClockAt(now)))
+	itr.Execute(t.Context(), CreateTestAddBoxRequest(), p)
+	assert.NotNil(t, repo.GotTime)
+	assert.Equal(t, now, *repo.GotTime)
 }
 
 func TestAddBoundingBox(t *testing.T) {
@@ -96,6 +126,7 @@ func TestAddBoundingBox(t *testing.T) {
 	req := Request{ImageId: image.Id.String(), Collection: collection.Name,
 		Label: "a-label", Xc: float32(1.0), Yc: float32(1.0), Width: float32(3.0),
 		Height: float32(3.0), Angle: float32(32)}
+
 	itr := New(&st.FakeImageStore{Return: &image}, &repo)
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)

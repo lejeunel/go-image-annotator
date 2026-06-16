@@ -141,6 +141,12 @@ document.addEventListener('alpine:init', () => {
 
             annotator.on('updateAnnotation', (updated) => {
                 AnnotationAPI.update_box(updated)
+                try {
+                    this.refreshUI();
+
+                } catch (err) {
+                    alert(err.message);
+                }
             });
 
             annotator.on('selectionChanged', (annotations) => {
@@ -173,7 +179,6 @@ document.addEventListener('alpine:init', () => {
                 console.error(err);
                 alert(err.message);
             }
-
         },
 
         async submit_region(label) {
@@ -197,7 +202,6 @@ document.addEventListener('alpine:init', () => {
             try {
                 await AnnotationAPI.setLabel(id, label)
             } catch(err) {
-                console.log(err);
                 alert(err.message)
             }
         },
@@ -217,7 +221,7 @@ document.addEventListener('alpine:init', () => {
             await this.draw();
         },
 
-        refreshList() {
+        async refreshList() {
             htmx.ajax(
                 'GET',
                 `/ui/annotate/annotation-panel?id={{.ImageId}}&collection={{.Collection}}`,

@@ -6,6 +6,7 @@ import (
 	sg "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
 	si "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	sl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
+	su "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
@@ -20,6 +21,7 @@ type AnnotationTestingRepos struct {
 	Label      sl.SQLiteLabelRepo
 	Annotation SQLiteAnnotationRepo
 	Group      sg.SQLiteGroupRepo
+	User       su.SQLiteUserRepo
 }
 
 func NewAnnotationTestRepos() AnnotationTestingRepos {
@@ -29,7 +31,8 @@ func NewAnnotationTestRepos() AnnotationTestingRepos {
 		Collection: sc.NewSQLiteCollectionRepo(db),
 		Label:      sl.NewSQLiteLabelRepo(db),
 		Annotation: NewSQLiteAnnotationRepo(db),
-		Group:      sg.NewSQLiteGroupRepo(db)}
+		Group:      sg.NewSQLiteGroupRepo(db),
+		User:       su.NewSQLiteUserRepo(db)}
 }
 func CreateAnnotedImage(repos AnnotationTestingRepos, collectionName string, labelName string,
 	group *string) (im.Image, clc.Collection, lbl.Label, a.ImageLabel) {

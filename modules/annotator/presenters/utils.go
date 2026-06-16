@@ -1,12 +1,14 @@
 package presenters
 
 import (
+	"time"
+
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 )
 
 func MakeBoundingBox(b a.BoundingBox, c Colorizer) v.BoundingBox {
-	return v.BoundingBox{
+	res := v.BoundingBox{
 		Id:     b.Id.String(),
 		Label:  b.Label.Name,
 		Color:  c.Colorize(b.Id.String()),
@@ -16,6 +18,17 @@ func MakeBoundingBox(b a.BoundingBox, c Colorizer) v.BoundingBox {
 		Height: b.Height,
 		Angle:  b.Angle,
 	}
+	if b.Author != nil {
+		res.Author = *b.Author
+	} else {
+		res.Author = "anonymous"
+	}
+
+	if b.Time != nil {
+		t := *b.Time
+		res.Time = t.Format(time.DateTime)
+	}
+	return res
 }
 
 func MakeImageLabels(labels []a.ImageLabel) []v.ImageLabel {

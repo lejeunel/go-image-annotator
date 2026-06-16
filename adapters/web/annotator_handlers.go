@@ -30,10 +30,9 @@ func (s *Server) SubmitPolygon(w http.ResponseWriter, r *http.Request) {
 	var polyreq an.AnnotoriousPolygonRequest
 	err := json.Unmarshal(bodyBytes, &polyreq)
 	if err != nil {
-		http.Error(w, fmt.Errorf("submit box: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
+		http.Error(w, fmt.Errorf("submit polygon: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("%+v", polyreq)
 }
 func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)

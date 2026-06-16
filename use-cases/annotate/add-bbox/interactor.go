@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jonboulle/clockwork"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
+	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"log/slog"
@@ -23,11 +26,13 @@ type Interactor struct {
 	repo       Repo
 	logger     *slog.Logger
 	auth       auth.Auth
+	clock      clockwork.Clock
 }
 
 func New(imageStore st.Interface, repo Repo, opts ...Option) Interactor {
 	i := &Interactor{repo: repo, imageStore: imageStore, logger: logging.NewNoOpLogger(),
-		auth: sauth.PassThroughAuth{}}
+		clock: clockwork.NewRealClock(),
+		auth:  sauth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -41,50 +46,56 @@ func WithAuth(a auth.Auth) Option {
 		i.auth = a
 	}
 }
+func WithClock(c clockwork.Clock) Option {
+	return func(i *Interactor) {
+		i.clock = c
+	}
+}
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "adding bounding box"
 	image, err := i.findImage(r.ImageId, r.Collection)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if image.Collection.Group != nil {
 		if err := i.auth.AnnotateGroup(ctx, image.Collection.Group.Name); err != nil {
-			i.handleError(err, out)
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 	}
 
 	label, err := i.findLabel(r.Label)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	box := a.NewBoundingBox(a.NewAnnotationId(), r.Xc, r.Yc, r.Width, r.Height, *label,
 		a.WithAngle(r.Angle))
 	if err := i.validateBox(image, box); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	if err := i.addBox(image, box); err != nil {
-		i.handleError(err, out)
+	if err := i.addBox(ctx, image, box); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	out.SuccessAddBox(Response{box.Id})
 
 }
-func (i Interactor) handleError(err error, out OutputPort) {
-	errCtx := "adding bounding box"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
-}
-func (i Interactor) addBox(image *im.Image, box a.BoundingBox) error {
-	if err := i.repo.AddBoundingBox(image.Id, image.Collection.Id, box); err != nil {
+func (i Interactor) addBox(ctx context.Context, image *im.Image, box a.BoundingBox) error {
+	var userId *u.UserId
+	user := ip.IdentityFromContext(ctx)
+	if user != nil {
+		userId = &user.Id
+	}
+	now := i.clock.Now()
+	if err := i.repo.AddBoundingBox(image.Id, image.Collection.Id, box, userId, &now); err != nil {
 		return err
 	}
 	return nil

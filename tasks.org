@@ -20,3 +20,9 @@ GroupRepo should contain:
 * DONE Give explicit error message when logged in user does not exist
 in HandleAuthCallback of 
 shared/identity_provider/provider.go
+
+* TODO add datetime / author
+** DONE add-bbox
+** DONE modify-bbox
+** TODO update-label
+** TODO assign-label

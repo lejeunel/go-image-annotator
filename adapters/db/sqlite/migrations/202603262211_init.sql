@@ -50,8 +50,11 @@ CREATE TABLE IF NOT EXISTS annotations (
   image_id varchar(36) REFERENCES images(id),
   collection_id varchar(36) REFERENCES collections(id),
   label_id varchar(36) REFERENCES labels(id),
+  author varchar(60) NULL,
+  touched_at DATETIME,
   type varchar(15),
   coordinates varchar(100),
+  FOREIGN KEY (author) REFERENCES users(id),
   PRIMARY KEY (id)
 );
 

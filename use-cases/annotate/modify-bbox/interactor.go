@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jonboulle/clockwork"
 	"log/slog"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
+	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 )
@@ -21,6 +24,7 @@ type Interactor struct {
 	repo   Repo
 	logger *slog.Logger
 	auth   auth.Auth
+	clock  clockwork.Clock
 }
 
 type Option func(*Interactor)
@@ -31,9 +35,16 @@ func WithAuth(a auth.Auth) Option {
 	}
 }
 
+func WithClock(c clockwork.Clock) Option {
+	return func(i *Interactor) {
+		i.clock = c
+	}
+}
+
 func New(repo Repo, opts ...Option) Interactor {
 	i := &Interactor{repo: repo, logger: logging.NewNoOpLogger(),
-		auth: sauth.PassThroughAuth{}}
+		clock: clockwork.NewRealClock(),
+		auth:  sauth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -69,15 +80,22 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.update(*annotationId, *u); err != nil {
+	if err := i.update(ctx, *annotationId, *u); err != nil {
 		out.Error(fmt.Errorf("%v: updating: %w", errCtx, err))
 		return
 	}
 	out.SuccessUpdateBox(Response{})
 
 }
-func (i Interactor) update(id a.AnnotationId, u a.BoundingBoxUpdatables) error {
-	if err := i.repo.UpdateBoundingBox(id, u); err != nil {
+func (i Interactor) update(ctx context.Context, id a.AnnotationId, upd a.BoundingBoxUpdatables) error {
+	var userId *u.UserId
+	user := ip.IdentityFromContext(ctx)
+	if user != nil {
+		userId = &user.Id
+	}
+	now := i.clock.Now()
+
+	if err := i.repo.UpdateBoundingBox(id, upd, userId, &now); err != nil {
 		return err
 	}
 	return nil

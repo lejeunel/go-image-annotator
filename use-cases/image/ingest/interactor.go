@@ -15,8 +15,10 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
+	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"hash"
 )
@@ -105,7 +107,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	specs.IngestedAt = i.clock.Now()
-	if err := i.ingestImage(image, *hash, *specs); err != nil {
+	if err := i.ingestImage(ctx, image, *hash, *specs); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		i.ImageRepo.Delete(image.Id)
 		i.ArtefactRepo.Delete(image.Id)
@@ -177,7 +179,7 @@ func (i Interactor) appendBoundingBoxes(image *im.Image, bboxes []BoundingBoxReq
 
 }
 
-func (i Interactor) ingestImage(image *im.Image, hash []byte, specs im.ImageSpecs) error {
+func (i Interactor) ingestImage(ctx context.Context, image *im.Image, hash []byte, specs im.ImageSpecs) error {
 
 	if err := i.ImageRepo.AddImage(image.Id, hash, specs); err != nil {
 		return fmt.Errorf("adding image: %w", err)
@@ -194,7 +196,14 @@ func (i Interactor) ingestImage(image *im.Image, hash []byte, specs im.ImageSpec
 	}
 
 	for _, box := range image.BoundingBoxes {
-		if err := i.AnnotationRepo.AddBoundingBox(image.Id, image.Collection.Id, box); err != nil {
+		now := i.clock.Now()
+
+		var authorId u.UserId
+		author := ip.IdentityFromContext(ctx)
+		if author != nil {
+			authorId = author.Id
+		}
+		if err := i.AnnotationRepo.AddBoundingBox(image.Id, image.Collection.Id, box, &authorId, &now); err != nil {
 			return fmt.Errorf("adding bounding box: %w", err)
 		}
 	}

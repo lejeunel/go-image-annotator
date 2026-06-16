@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	sl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
@@ -12,6 +13,7 @@ import (
 	c "github.com/lejeunel/go-image-annotator/entities/collection"
 	i "github.com/lejeunel/go-image-annotator/entities/image"
 	l "github.com/lejeunel/go-image-annotator/entities/label"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -25,6 +27,8 @@ type AnnotationRow struct {
 	LabelId     l.LabelId      `db:"label_id"`
 	Type        string         `db:"type"`
 	Coordinates string         `db:"coordinates"`
+	Author      *u.UserId      `db:"author"`
+	Time        *time.Time     `db:"touched_at"`
 }
 
 type BoundingBoxSpecs struct {
@@ -92,12 +96,12 @@ func (r SQLiteAnnotationRepo) RemoveImageLabel(imageId i.ImageId, collectionId c
 	}
 	return nil
 }
-func (r SQLiteAnnotationRepo) AddBoundingBox(imageId i.ImageId, collectionId c.CollectionId, box a.BoundingBox) error {
+func (r SQLiteAnnotationRepo) AddBoundingBox(imageId i.ImageId, collectionId c.CollectionId, box a.BoundingBox, userId *u.UserId, t *time.Time) error {
 
 	coordsBytes, _ := json.Marshal(BoundingBoxSpecs{Xc: box.Xc, Yc: box.Yc, Width: box.Width, Height: box.Height, Angle: box.Angle})
 	coordsString := string(coordsBytes)
-	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type, coordinates) VALUES ($1,$2,$3,$4,$5,$6)"
-	_, err := r.Db.Exec(query, box.Id, imageId, collectionId, box.Label.Id, "bounding_box", coordsString)
+	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type, coordinates, author, touched_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)"
+	_, err := r.Db.Exec(query, box.Id, imageId, collectionId, box.Label.Id, "bounding_box", coordsString, userId, t)
 	if err != nil {
 		return fmt.Errorf("inserting bounding box: %v: %w", err, e.ErrInternal)
 	}
@@ -105,7 +109,7 @@ func (r SQLiteAnnotationRepo) AddBoundingBox(imageId i.ImageId, collectionId c.C
 	return nil
 }
 func (r SQLiteAnnotationRepo) FindBoundingBoxes(imageId i.ImageId, collectionId c.CollectionId) ([]a.BoundingBox, error) {
-	query := "SELECT id,label_id,type,coordinates FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='bounding_box'"
+	query := "SELECT id,label_id,type,coordinates,author,touched_at FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='bounding_box'"
 
 	errCtx := "querying bounding-box annotations"
 	records := []AnnotationRow{}
@@ -122,9 +126,15 @@ func (r SQLiteAnnotationRepo) FindBoundingBoxes(imageId i.ImageId, collectionId 
 				errCtx, rec.Coordinates, err, e.ErrInternal)
 		}
 		label, err := r.findLabelById(rec.LabelId)
-		boxes = append(boxes,
-			a.NewBoundingBox(rec.Id, specs.Xc, specs.Yc, specs.Width, specs.Height, *label,
-				a.WithAngle(specs.Angle)))
+		box := a.NewBoundingBox(rec.Id, specs.Xc, specs.Yc, specs.Width, specs.Height, *label,
+			a.WithAngle(specs.Angle))
+		if rec.Author != nil {
+			box.Author = rec.Author
+		}
+		if rec.Time != nil {
+			box.Time = rec.Time
+		}
+		boxes = append(boxes, box)
 	}
 
 	return boxes, nil
@@ -155,13 +165,40 @@ func (r SQLiteAnnotationRepo) UpdateBoundingBoxCoordinates(id a.AnnotationId, xc
 	}
 	return nil
 }
-func (r SQLiteAnnotationRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingBoxUpdatables) error {
+func (r SQLiteAnnotationRepo) UpdateAuthor(id a.AnnotationId, userId *u.UserId) error {
+	query := "UPDATE annotations SET author=$1 WHERE id=$2"
+	_, err := r.Db.Exec(query, userId, id)
+
+	if err != nil {
+		return fmt.Errorf("%w: %w", err, e.ErrInternal)
+	}
+
+	return nil
+}
+func (r SQLiteAnnotationRepo) UpdateTime(id a.AnnotationId, t *time.Time) error {
+	query := "UPDATE annotations SET touched_at=$1 WHERE id=$2"
+	_, err := r.Db.Exec(query, t, id)
+
+	if err != nil {
+		return fmt.Errorf("%w: %w", err, e.ErrInternal)
+	}
+
+	return nil
+}
+func (r SQLiteAnnotationRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingBoxUpdatables, userId *u.UserId, t *time.Time) error {
+	errCtx := "updating bounding box"
+	if err := r.UpdateAuthor(id, userId); err != nil {
+		return fmt.Errorf("%v: updating author: %w", errCtx, err)
+	}
+	if err := r.UpdateTime(id, t); err != nil {
+		return fmt.Errorf("%v: updating time: %w", errCtx, err)
+	}
 	if err := r.UpdateLabelOfAnnotation(id, u.LabelId); err != nil {
-		return err
+		return fmt.Errorf("%v: updating label: %w", errCtx, err)
 	}
 
 	if err := r.UpdateBoundingBoxCoordinates(id, u.Xc, u.Yc, u.Width, u.Height, u.Angle); err != nil {
-		return err
+		return fmt.Errorf("%v: updating coordinates: %w", errCtx, err)
 	}
 	return nil
 }

@@ -120,7 +120,7 @@ func AnnotoriousLib() []Node {
 }
 
 func (v *AnnotationView) render(w http.ResponseWriter) {
-	pb := v.PageBuilder.SetTitle("image")
+	pb := v.PageBuilder
 
 	script, err := MakeAnnotoriousScript(v.image.Id, v.image.Collection)
 	if err != nil {
@@ -152,6 +152,6 @@ func NewAnnotationView(pageBuilder b.PageBuilder) *AnnotationView {
 		ImageView:      ImageView{},
 		ImageInfosView: ImageInfosView{},
 		ScrollerView:   ScrollerView{},
-		PageBuilder:    pageBuilder,
+		PageBuilder:    *pageBuilder.SetTitle("Image"),
 	}
 }

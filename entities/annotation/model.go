@@ -3,7 +3,9 @@ package annotation
 import (
 	"fmt"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"time"
 )
 
 type ImageLabel struct {
@@ -24,6 +26,8 @@ type BoundingBox struct {
 	Width  float32
 	Height float32
 	Angle  float32
+	Author *u.UserId
+	Time   *time.Time
 }
 
 type BoundingBoxResponse struct {

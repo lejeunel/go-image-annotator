@@ -15,7 +15,7 @@ type ImageInfosView struct {
 
 func (p *ImageInfosView) Build(info view.ImageInfo) Node {
 	s := html.SpecCard{}
-	s.Fields = append(s.Fields, html.SpecFields{Name: "id", Value: ShortenUUID(info.Id)},
+	s.Fields = append(s.Fields, html.SpecFields{Name: "id", Value: info.Id},
 		html.SpecFields{Name: "collection", Value: info.Collection},
 		html.SpecFields{Name: "mimetype", Value: info.Specs.MIMEType},
 		html.SpecFields{Name: "dimensions",

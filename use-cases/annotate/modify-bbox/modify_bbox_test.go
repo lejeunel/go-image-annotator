@@ -1,10 +1,14 @@
 package modify_bbox
 
 import (
+	"context"
 	"testing"
+	"time"
 
+	"github.com/jonboulle/clockwork"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"github.com/stretchr/testify/assert"
@@ -91,6 +95,29 @@ func TestUpdateWithDefaultGroup(t *testing.T) {
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)
 	AssertUpdated(t, upd, repo.Got)
+}
+
+func TestUpdateWithUserIdFromContext(t *testing.T) {
+	p := &FakePresenter{}
+	req, _, label := CreateRequestAndUpdatable()
+	repo := &FakeRepo{Label: label, NoGroup: true}
+	itr := New(repo)
+	user := u.NewUser("user@example.com")
+	ctx := context.WithValue(t.Context(), u.UserContextKey, &user)
+	itr.Execute(ctx, req, p)
+	assert.NotNil(t, repo.GotUserId)
+	assert.Equal(t, user.Id, *repo.GotUserId)
+}
+
+func TestTime(t *testing.T) {
+	p := &FakePresenter{}
+	req, _, label := CreateRequestAndUpdatable()
+	repo := &FakeRepo{Label: label, NoGroup: true}
+	now := time.Now()
+	itr := New(repo, WithClock(clockwork.NewFakeClockAt(now)))
+	itr.Execute(t.Context(), req, p)
+	assert.NotNil(t, repo.GotTime)
+	assert.Equal(t, now, *repo.GotTime)
 }
 
 func TestUpdate(t *testing.T) {
