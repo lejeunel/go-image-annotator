@@ -12,5 +12,5 @@ type Request struct {
 	ImageId    string
 	Collection string
 	Label      string
-	Points     [][2]float32
+	Points     an.Points
 }

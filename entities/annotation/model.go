@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+type Points = [][2]float32
+
 type ImageLabel struct {
 	Id     AnnotationId
 	Label  lbl.Label
@@ -35,9 +37,14 @@ type BoundingBox struct {
 type Polygon struct {
 	Id     AnnotationId
 	Label  lbl.Label
-	Points [][2]float32
+	Points Points
 	Author *u.UserId
 	Time   *time.Time
+}
+
+type PolygonUpdatables struct {
+	LabelId lbl.LabelId
+	Points  Points
 }
 
 type BoundingBoxResponse struct {
