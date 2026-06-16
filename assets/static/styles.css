@@ -788,6 +788,9 @@
   .uppercase {
     text-transform: uppercase;
   }
+  .italic {
+    font-style: italic;
+  }
   .underline-offset-2 {
     text-underline-offset: 2px;
   }

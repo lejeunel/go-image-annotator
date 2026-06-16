@@ -19,7 +19,7 @@ type LabelRepo interface {
 }
 
 type AnnotationRepo interface {
-	AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel) error
+	AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel, *u.UserId, *time.Time) error
 	AddBoundingBox(im.ImageId, clc.CollectionId, an.BoundingBox, *u.UserId, *time.Time) error
 }
 

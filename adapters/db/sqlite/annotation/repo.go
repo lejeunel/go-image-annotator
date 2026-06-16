@@ -39,9 +39,9 @@ type BoundingBoxSpecs struct {
 	Angle  float32 `json:"angle"`
 }
 
-func (r SQLiteAnnotationRepo) AddImageLabel(imageId i.ImageId, collectionId c.CollectionId, ann a.ImageLabel) error {
-	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type) VALUES ($1,$2,$3,$4,$5)"
-	_, err := r.Db.Exec(query, ann.Id, imageId, collectionId, ann.Label.Id, "image")
+func (r SQLiteAnnotationRepo) AddImageLabel(imageId i.ImageId, collectionId c.CollectionId, ann a.ImageLabel, userId *u.UserId, t *time.Time) error {
+	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type, author, touched_at) VALUES ($1,$2,$3,$4,$5,$6,$7)"
+	_, err := r.Db.Exec(query, ann.Id, imageId, collectionId, ann.Label.Id, "image", userId, t)
 	if err != nil {
 		return fmt.Errorf("adding image label annotation record: %v: %w", err, e.ErrInternal)
 	}
@@ -60,7 +60,7 @@ func (r SQLiteAnnotationRepo) findLabelById(labelId l.LabelId) (*l.Label, error)
 
 }
 func (r SQLiteAnnotationRepo) FindImageLabels(imageId i.ImageId, collectionId c.CollectionId) ([]a.ImageLabel, error) {
-	query := "SELECT id,label_id,type FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='image'"
+	query := "SELECT id,label_id,type,author,touched_at FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='image'"
 
 	errCtx := "querying image annotations"
 	records := []AnnotationRow{}
@@ -74,7 +74,7 @@ func (r SQLiteAnnotationRepo) FindImageLabels(imageId i.ImageId, collectionId c.
 		if err != nil {
 			return nil, fmt.Errorf("%v: %w", errCtx, err)
 		}
-		imageLabels = append(imageLabels, a.ImageLabel{Id: rec.Id, Label: *label})
+		imageLabels = append(imageLabels, a.ImageLabel{Id: rec.Id, Label: *label, Author: rec.Author, Time: rec.Time})
 	}
 
 	return imageLabels, nil
@@ -139,7 +139,15 @@ func (r SQLiteAnnotationRepo) FindBoundingBoxes(imageId i.ImageId, collectionId 
 
 	return boxes, nil
 }
-func (r SQLiteAnnotationRepo) UpdateLabelOfAnnotation(id a.AnnotationId, labelId l.LabelId) error {
+func (r SQLiteAnnotationRepo) UpdateLabelOfAnnotation(id a.AnnotationId, labelId l.LabelId, userId *u.UserId, t *time.Time) error {
+	errCtx := "updating bounding box"
+	if err := r.UpdateAuthor(id, userId); err != nil {
+		return fmt.Errorf("%v: updating author: %w", errCtx, err)
+	}
+	if err := r.UpdateTime(id, t); err != nil {
+		return fmt.Errorf("%v: updating time: %w", errCtx, err)
+	}
+
 	query := "UPDATE annotations SET label_id=$1 WHERE id=$2"
 	_, err := r.Db.Exec(query, labelId, id)
 
@@ -187,13 +195,7 @@ func (r SQLiteAnnotationRepo) UpdateTime(id a.AnnotationId, t *time.Time) error 
 }
 func (r SQLiteAnnotationRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingBoxUpdatables, userId *u.UserId, t *time.Time) error {
 	errCtx := "updating bounding box"
-	if err := r.UpdateAuthor(id, userId); err != nil {
-		return fmt.Errorf("%v: updating author: %w", errCtx, err)
-	}
-	if err := r.UpdateTime(id, t); err != nil {
-		return fmt.Errorf("%v: updating time: %w", errCtx, err)
-	}
-	if err := r.UpdateLabelOfAnnotation(id, u.LabelId); err != nil {
+	if err := r.UpdateLabelOfAnnotation(id, u.LabelId, userId, t); err != nil {
 		return fmt.Errorf("%v: updating label: %w", errCtx, err)
 	}
 

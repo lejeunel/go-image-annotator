@@ -29,7 +29,7 @@ func (v *AnnotationsListView) makeRegionList(boxes []view.BoundingBox, available
 func (v *AnnotationsListView) makeImageLabelList(imageLabels []view.ImageLabel) Node {
 	table := ImageLabelTable{}
 	for _, l := range imageLabels {
-		table.Rows = append(table.Rows, ImageLabelRow{Label: l.Label, Id: l.Id})
+		table.Rows = append(table.Rows, ImageLabelRow{Label: l.Label, Id: l.Id, Author: l.Author, Time: l.Time})
 	}
 	return table.Build()
 }

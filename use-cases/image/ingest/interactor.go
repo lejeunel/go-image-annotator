@@ -180,6 +180,13 @@ func (i Interactor) appendBoundingBoxes(image *im.Image, bboxes []BoundingBoxReq
 }
 
 func (i Interactor) ingestImage(ctx context.Context, image *im.Image, hash []byte, specs im.ImageSpecs) error {
+	now := i.clock.Now()
+
+	var authorId u.UserId
+	author := ip.IdentityFromContext(ctx)
+	if author != nil {
+		authorId = author.Id
+	}
 
 	if err := i.ImageRepo.AddImage(image.Id, hash, specs); err != nil {
 		return fmt.Errorf("adding image: %w", err)
@@ -190,19 +197,12 @@ func (i Interactor) ingestImage(ctx context.Context, image *im.Image, hash []byt
 	}
 
 	for _, label := range image.Labels {
-		if err := i.AnnotationRepo.AddImageLabel(image.Id, image.Collection.Id, label); err != nil {
+		if err := i.AnnotationRepo.AddImageLabel(image.Id, image.Collection.Id, label, &authorId, &now); err != nil {
 			return fmt.Errorf("adding image label to collection: %w", err)
 		}
 	}
 
 	for _, box := range image.BoundingBoxes {
-		now := i.clock.Now()
-
-		var authorId u.UserId
-		author := ip.IdentityFromContext(ctx)
-		if author != nil {
-			authorId = author.Id
-		}
 		if err := i.AnnotationRepo.AddBoundingBox(image.Id, image.Collection.Id, box, &authorId, &now); err != nil {
 			return fmt.Errorf("adding bounding box: %w", err)
 		}

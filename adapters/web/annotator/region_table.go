@@ -9,6 +9,8 @@ import (
 	"text/template"
 )
 
+var smallText = "text-xs italic text-gray-500 dark:gray-500"
+
 type RegionTable struct {
 	Rows            []RegionRow
 	AvailableLabels []string
@@ -17,7 +19,6 @@ type RegionTable struct {
 func (t *RegionTable) AddBox(b view.BoundingBox) {
 	shortId := ShortenUUID(b.Id)
 	tmpl := template.New("")
-	smallText := "text-xs text-on-surface dark:text-on-surface-dark"
 	template.Must(tmpl.ParseFS(templatesFiles,
 		"templates/label_combobox.html"))
 
@@ -26,15 +27,15 @@ func (t *RegionTable) AddBox(b view.BoundingBox) {
 		LabelSelector{Labels: t.AvailableLabels, SelectorIsOpen: false, Selected: &b.Label, AnnotationId: b.Id})
 	t.Rows = append(t.Rows,
 		RegionRow{Values: []Node{
-			Div(Class("ps-1"),
-				Raw(fmt.Sprintf(`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <rect x="10" y="10" width="80" height="80" rx="10" ry="10" fill="%v" />
-</svg>`, b.Color)),
-			),
 			Div(Class("flex flex-col"),
 				Div(Class(smallText), Text(b.Author)),
 				Div(Class(smallText), Text(b.Time)),
 				Div(Class(smallText), Text(shortId)),
+			),
+			Div(Class("ps-1"),
+				Raw(fmt.Sprintf(`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="80" height="80" rx="10" ry="10" fill="%v" />
+</svg>`, b.Color)),
 			),
 			Raw(buf.String()),
 			Div(

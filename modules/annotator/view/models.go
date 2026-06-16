@@ -18,8 +18,10 @@ type ScrollerButtons struct {
 }
 
 type ImageLabel struct {
-	Id    string
-	Label string
+	Id     string
+	Label  string
+	Author string
+	Time   string
 }
 
 type ImageInfo struct {

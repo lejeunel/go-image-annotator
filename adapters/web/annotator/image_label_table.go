@@ -8,17 +8,28 @@ import (
 )
 
 type ImageLabelRow struct {
-	Label string
-	Id    string
+	Label  string
+	Id     string
+	Author string
+	Time   string
 }
 
 func (r ImageLabelRow) Render() Node {
-	return Tr(Class("text-left"), Td(Class("ps-2 py-1"), Text(r.Label)), Td(
-		Div(
+	return Tr(Class("text-left"),
+		Td(
+			Div(Class("flex flex-col"),
+				Div(Class(smallText), Text(r.Author)),
+				Div(Class(smallText), Text(r.Time)),
+			),
+		),
+		Td(Class("ps-2 py-1"),
+			Text(r.Label),
+		),
+		Td(Div(
 			Class("flex justify-end items-center pr-1"),
 			Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, r.Id, TrashIcon)),
 		),
-	))
+		))
 }
 
 type ImageLabelTable struct {
@@ -27,7 +38,7 @@ type ImageLabelTable struct {
 }
 
 func (t *ImageLabelTable) AddImageLabel(l view.ImageLabel) {
-	t.Rows = append(t.Rows, ImageLabelRow{l.Label, l.Id})
+	t.Rows = append(t.Rows, ImageLabelRow{Label: l.Label, Id: l.Id, Author: l.Author, Time: l.Time})
 }
 
 func (t *ImageLabelTable) Build() Node {
@@ -37,6 +48,7 @@ func (t *ImageLabelTable) Build() Node {
 				TBody(Class("divide-y divide-outline dark:divide-outline-dark"),
 					Tr(
 						Td(Div(Class("text-left py-2 ps-2 pe-2 text-sm font-bold"), Text("Labels"))),
+						Td(),
 						Td(Class("align-middle"),
 							Div(Class("flex items-center justify-end pr-1"),
 								Raw(fmt.Sprintf(`<a href="#" onclick="Alpine.store('imageLabelModal').open()"> %v </a>`, AddIcon)),

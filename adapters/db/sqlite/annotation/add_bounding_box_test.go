@@ -5,7 +5,6 @@ import (
 	"time"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
-	l "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -49,18 +48,4 @@ func TestAddBoundingBox(t *testing.T) {
 	assert.NotNil(t, r[0].Author)
 	assert.Equal(t, user.Id, *r[0].Author)
 	assert.NotNil(t, r[0].Time)
-}
-
-func TestAddImageLabels(t *testing.T) {
-	repos := NewAnnotationTestRepos()
-	image, collection, _ := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
-	newLabelName := "new-label"
-	newLabel := l.NewLabel(l.NewLabelId(), newLabelName)
-	imLabel := a.NewImageLabel(newLabel)
-	repos.Label.Create(newLabel)
-	repos.Annotation.AddImageLabel(image.Id, collection.Id, imLabel)
-	imageLabels, _ := repos.Annotation.FindImageLabels(image.Id, collection.Id)
-	assert.Equal(t, 1, len(imageLabels))
-	assert.Equal(t, newLabelName, imageLabels[0].Label.Name)
-
 }

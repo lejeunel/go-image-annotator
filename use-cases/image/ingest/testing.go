@@ -146,7 +146,7 @@ func (r *FakeImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	return nil, e.ErrNotFound
 }
 
-func (r *FakeAnnotationRepo) AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel) error {
+func (r *FakeAnnotationRepo) AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel, *u.UserId, *time.Time) error {
 	if r.ErrOnAddLabel {
 		return r.Err
 	}

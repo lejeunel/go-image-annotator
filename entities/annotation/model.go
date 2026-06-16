@@ -9,8 +9,10 @@ import (
 )
 
 type ImageLabel struct {
-	Id    AnnotationId
-	Label lbl.Label
+	Id     AnnotationId
+	Label  lbl.Label
+	Author *u.UserId
+	Time   *time.Time
 }
 
 type Annotation struct {

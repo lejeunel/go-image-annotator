@@ -21,8 +21,8 @@ GroupRepo should contain:
 in HandleAuthCallback of 
 shared/identity_provider/provider.go
 
-* TODO add datetime / author
+* DONE add datetime / author
 ** DONE add-bbox
 ** DONE modify-bbox
-** TODO update-label
-** TODO assign-label
+** DONE update-label
+** DONE assign-label

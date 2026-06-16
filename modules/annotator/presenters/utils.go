@@ -34,8 +34,18 @@ func MakeBoundingBox(b a.BoundingBox, c Colorizer) v.BoundingBox {
 func MakeImageLabels(labels []a.ImageLabel) []v.ImageLabel {
 	result := []v.ImageLabel{}
 	for _, l := range labels {
-		result = append(result, v.ImageLabel{Id: l.Id.String(),
-			Label: l.Label.Name})
+		row := v.ImageLabel{Id: l.Id.String(),
+			Label: l.Label.Name}
+		if l.Author != nil {
+			row.Author = *l.Author
+		} else {
+			row.Author = "anonymous"
+		}
+		if l.Time != nil {
+			t := *l.Time
+			row.Time = t.Format(time.DateTime)
+		}
+		result = append(result, row)
 	}
 	return result
 }

@@ -2,12 +2,17 @@ package assign_label
 
 import (
 	"testing"
+	"time"
 
-	st "github.com/lejeunel/go-image-annotator/modules/image-store"
+	"context"
+
+	"github.com/jonboulle/clockwork"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
+	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"github.com/stretchr/testify/assert"
@@ -62,6 +67,27 @@ func TestInternalErrOnFindLabelShouldFail(t *testing.T) {
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
+}
+func TestAddUserIdFromContext(t *testing.T) {
+	p := &FakePresenter{}
+	image := CreateImage()
+	repo := &FakeRepo{}
+	itr := New(repo, &st.FakeImageStore{Return: &image})
+	user := u.NewUser("user@example.com")
+	ctx := context.WithValue(t.Context(), u.UserContextKey, &user)
+	itr.Execute(ctx, Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
+	assert.NotNil(t, repo.GotUserId)
+	assert.Equal(t, user.Id, *repo.GotUserId)
+}
+func TestTime(t *testing.T) {
+	p := &FakePresenter{}
+	image := CreateImage()
+	repo := &FakeRepo{}
+	now := time.Now()
+	itr := New(repo, &st.FakeImageStore{Return: &image}, WithClock(clockwork.NewFakeClockAt(now)))
+	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
+	assert.NotNil(t, repo.GotTime)
+	assert.Equal(t, now, *repo.GotTime)
 }
 
 func TestAssignLabelToImage(t *testing.T) {

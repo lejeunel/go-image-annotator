@@ -2,9 +2,11 @@ package annotation
 
 import (
 	"testing"
+	"time"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,7 +17,7 @@ func TestInternalErrOnUpdateLabelShouldFail(t *testing.T) {
 	label := lbl.NewLabel(lbl.NewLabelId(), "new-label")
 	bbox := a.NewBoundingBox(annotationId, 1, 1, 1, 1, label)
 	repos.Annotation.Db.Close()
-	err := repos.Annotation.UpdateLabelOfAnnotation(bbox.Id, label.Id)
+	err := repos.Annotation.UpdateLabelOfAnnotation(bbox.Id, label.Id, nil, nil)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
@@ -26,7 +28,13 @@ func TestUpdateLabelOfAnnotation(t *testing.T) {
 	repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox, nil, nil)
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
 	repos.Label.Create(newLabel)
-	repos.Annotation.UpdateLabelOfAnnotation(bbox.Id, newLabel.Id)
-	updatedBoxes, _ := repos.Annotation.FindBoundingBoxes(image.Id, collection.Id)
-	assert.True(t, updatedBoxes[0].Label.Id == newLabel.Id)
+	user := u.NewUser("user@example.com")
+	repos.User.Create(user)
+	now := time.Now()
+	repos.Annotation.UpdateLabelOfAnnotation(bbox.Id, newLabel.Id, &user.Id, &now)
+	r, _ := repos.Annotation.FindBoundingBoxes(image.Id, collection.Id)
+	assert.Equal(t, newLabel.Id, r[0].Label.Id)
+	assert.NotNil(t, r[0].Time)
+	assert.NotNil(t, r[0].Author)
+	assert.Equal(t, user.Id, *r[0].Author)
 }
