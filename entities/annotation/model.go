@@ -32,6 +32,14 @@ type BoundingBox struct {
 	Time   *time.Time
 }
 
+type Polygon struct {
+	Id     AnnotationId
+	Label  lbl.Label
+	Points [][2]float32
+	Author *u.UserId
+	Time   *time.Time
+}
+
 type BoundingBoxResponse struct {
 	Label  string
 	Xc     float32
@@ -78,4 +86,8 @@ func ValidateBoundingBox(xc float32, yc float32, width float32, height float32, 
 
 func NewImageLabel(label lbl.Label) ImageLabel {
 	return ImageLabel{Id: NewAnnotationId(), Label: label}
+}
+
+func NewPolygon(id AnnotationId, points [][2]float32, label lbl.Label) Polygon {
+	return Polygon{Id: id, Points: points, Label: label}
 }
