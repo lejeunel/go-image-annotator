@@ -2,10 +2,12 @@ package annotator
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"embed"
 
+	an "github.com/lejeunel/go-image-annotator/adapters/web/annotator/annotorious"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
@@ -78,7 +80,7 @@ func (v *AnnotationView) RenderAnnotations(w http.ResponseWriter) {
 		http.Error(w, v.err.Error(), http.StatusBadRequest)
 		return
 	}
-	boxes := ConvertToAnnotorious(v.boxes)
+	boxes := an.ConvertBoxesToAnnotorious(v.boxes)
 	data, err := json.Marshal(boxes)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -91,7 +93,23 @@ func (v *AnnotationView) RenderAnnotations(w http.ResponseWriter) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
 
+func (v *AnnotationView) ShapeSelector() Node {
+	classInactive := `flex items-center whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-2 py-1 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt`
+	classActive := `flex items-center whitespace-nowrap rounded-radius bg-primary border border-surface-primary px-2 py-1 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark`
+
+	return Div(
+		Attr("x-data", "{ active: 'rectangle'}"),
+		Class("flex gap-2 pb-2"),
+		Button(
+			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'rectangle', '%v': active !== 'rectangle'}`, classActive, classInactive)),
+			Attr("@click", "AnnotatorModule.drawRectangle(); active = 'rectangle';"),
+			Raw(RectangleIcon), Div(Class("ml-1"), Text("Rectangle"))),
+		Button(
+			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'polygon', '%v': active !== 'polygon'}`, classActive, classInactive)),
+			Attr("@click", "AnnotatorModule.drawPolygon(); active = 'polygon';"),
+			Raw(PolygonIcon), Div(Class("ml-1"), Text("Polygon"))))
 }
 
 func AnnotoriousLib() []Node {
@@ -118,7 +136,7 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 
 	pb.SetContent(
 		Table(
-			Tr(Td(v.ScrollerView.Render(v.scrollerButtons))),
+			Tr(Div(Class("flex"), v.ScrollerView.Render(v.scrollerButtons), v.ShapeSelector())),
 			Tr(Td(Table(
 				Tr(Td(Class("align-top"), v.ImageView.Build(*v.image)),
 					Td(Class("align-top pl-2"),

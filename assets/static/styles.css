@@ -546,6 +546,9 @@
   .border-surface {
     border-color: var(--color-surface);
   }
+  .border-surface-alt {
+    border-color: var(--color-surface-alt);
+  }
   .border-warning {
     border-color: var(--color-warning);
   }
@@ -1082,6 +1085,11 @@
   .dark\:border-surface-dark {
     &:where(.dark, .dark *) {
       border-color: var(--color-surface-dark);
+    }
+  }
+  .dark\:border-surface-dark-alt {
+    &:where(.dark, .dark *) {
+      border-color: var(--color-surface-dark-alt);
     }
   }
   .dark\:border-warning {

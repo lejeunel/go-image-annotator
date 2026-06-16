@@ -6,11 +6,15 @@ import (
 )
 
 type FakeRepo struct {
-	Err error
-	Got a.AnnotationId
+	Err     error
+	Got     a.AnnotationId
+	NoGroup bool
 }
 
 func (r *FakeRepo) GroupOfAnnotation(annotationId a.AnnotationId) (*string, error) {
+	if r.NoGroup {
+		return nil, nil
+	}
 	group := "my-group"
 	return &group, nil
 }

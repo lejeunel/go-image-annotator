@@ -20,9 +20,16 @@ document.addEventListener('alpine:init', () => {
     Alpine.store('annotator', {
         instance: null,
         lastCreatedAnnotation: null,
+        currentDrawingShape: "rectangle",
 
         setInstance(annotator) {
             this.instance = annotator;
+        },
+        DrawWithPolygon() {
+            this.currentDrawingShape = "polygon";
+        },
+        DrawWithRectangle() {
+            this.currentDrawingShape = "rectangle";
         },
 
         setLastCreated(annotation) {
@@ -44,7 +51,7 @@ document.addEventListener('alpine:init', () => {
             const res = await fetch(`/ui/annotate/submit-label?image_id={{.ImageId}}&collection={{.Collection}}&label=${label}`)
             if (!res.ok) throw new Error('Could not submit annotation');
         },
-        async submit_region(label, annotation) {
+        async submit_box(label, annotation) {
             const res = await fetch("/ui/annotate/submit-box", {
                 method: "POST",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
@@ -55,8 +62,20 @@ document.addEventListener('alpine:init', () => {
                     annotation
                 })
             });
-
-            if (!res.ok) throw new Error('Could not submit annotation');
+            if (!res.ok) throw new Error('Could not submit bounding-box');
+        },
+        async submit_polygon(label, annotation) {
+            const res = await fetch("/ui/annotate/submit-polygon", {
+                method: "POST",
+                headers: { "Content-type": "application/json; charset=UTF-8" },
+                body: JSON.stringify({
+                    image_id: "{{.ImageId}}",
+                    collection: "{{.Collection}}",
+                    label,
+                    annotation
+                })
+            });
+            if (!res.ok) throw new Error('Could not submit polygon');
         },
 
         async remove(id) {
@@ -104,7 +123,16 @@ document.addEventListener('alpine:init', () => {
 
             return annotator;
         },
-
+        drawPolygon(){
+            const annotator = Alpine.store("annotator").instance;
+            annotator.setDrawingTool('polygon');
+            Alpine.store("annotator").DrawWithPolygon();
+        },
+        drawRectangle(){
+            const annotator = Alpine.store("annotator").instance;
+            annotator.setDrawingTool('rectangle');
+            Alpine.store("annotator").DrawWithRectangle();
+        },
         registerEvents(annotator) {
             annotator.on('createAnnotation', (annotation) => {
                 Alpine.store("annotator").setLastCreated(annotation);
@@ -151,8 +179,11 @@ document.addEventListener('alpine:init', () => {
         async submit_region(label) {
             try {
                 const store = Alpine.store("annotator");
-                console.log(store.lastCreatedAnnotation);
-                await AnnotationAPI.submit_region(label, store.lastCreatedAnnotation);
+                if (store.currentDrawingShape === "rectangle"){
+                    await AnnotationAPI.submit_box(label, store.lastCreatedAnnotation);
+                } else {
+                    await AnnotationAPI.submit_polygon(label, store.lastCreatedAnnotation);
+                }
                 Alpine.store("regionLabelModal").close();
                 await this.refreshUI();
 

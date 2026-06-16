@@ -21,3 +21,12 @@ var AddIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" vi
   <line x1="12" y1="4" x2="12" y2="20"/>
   <line x1="4" y1="12" x2="20" y2="12"/>
 </svg>`
+
+var RectangleIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square" aria-hidden="true">
+	<rect width="18" height="18" x="3" y="3" rx="2"></rect>
+</svg>`
+
+var PolygonIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-right" aria-hidden="true">
+<path d="M22 18a2 2 0 0 1-2 2H3c-1.1 0-1.3-.6-.4-1.3L20.4 4.3c.9-.7 1.6-.4 1.6.7Z">
+</path>
+</svg>`

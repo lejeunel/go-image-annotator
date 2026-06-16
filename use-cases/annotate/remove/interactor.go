@@ -50,9 +50,12 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.auth.AnnotateGroup(ctx, *group); err != nil {
-		i.handleError(err, out)
-		return
+	if group != nil {
+
+		if err := i.auth.AnnotateGroup(ctx, *group); err != nil {
+			i.handleError(err, out)
+			return
+		}
 	}
 
 	if err := i.repo.RemoveAnnotation(*id); err != nil {

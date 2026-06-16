@@ -1,4 +1,4 @@
-# Go Image Annotation Tool
+# Image Annotator
 
 A simple web application
 to manage, store, and annotate images using bounding boxes

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	aw "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
+	an "github.com/lejeunel/go-image-annotator/adapters/web/annotator/annotorious"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	assign_label "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
@@ -24,17 +25,27 @@ func (s *Server) SubmitLabel(w http.ResponseWriter, r *http.Request) {
 		Collection: r.URL.Query().Get("collection"), Label: r.URL.Query().Get("label")}
 	s.Annotator.AddLabel(r.Context(), req, aw.NewAnnotationView(s.PageBuilder))
 }
+func (s *Server) SubmitPolygon(w http.ResponseWriter, r *http.Request) {
+	bodyBytes, _ := io.ReadAll(r.Body)
+	var polyreq an.AnnotoriousPolygonRequest
+	err := json.Unmarshal(bodyBytes, &polyreq)
+	if err != nil {
+		http.Error(w, fmt.Errorf("submit box: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
+		return
+	}
+	fmt.Printf("%+v", polyreq)
+}
 func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
 
-	var boxreq aw.AnnotoriousBoxRequest
+	var boxreq an.AnnotoriousBoxRequest
 	err := json.Unmarshal(bodyBytes, &boxreq)
 	if err != nil {
 		http.Error(w, fmt.Errorf("submit box: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
 
-	req, err := aw.ToAddBoxRequest(boxreq)
+	req, err := an.ToAddBoxRequest(boxreq)
 	if err != nil {
 		http.Error(w, fmt.Errorf("submit box: converting box: %w", err).Error(), http.StatusBadRequest)
 		return
@@ -58,13 +69,13 @@ func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
 func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
 
-	var boxreq aw.AnnotoriousBoxModel
+	var boxreq an.AnnotoriousBoxModel
 	err := json.Unmarshal(bodyBytes, &boxreq)
 	if err != nil {
 		http.Error(w, fmt.Errorf("submit box: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	req, err := aw.ToUpdateBoxRequest(boxreq)
+	req, err := an.ToUpdateBoxRequest(boxreq)
 	if err != nil {
 		http.Error(w, fmt.Errorf("submit box: converting box: %w", err).Error(), http.StatusBadRequest)
 		return

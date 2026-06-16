@@ -36,6 +36,16 @@ func TestInternalErrShouldFail(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
+func TestRemoveBoxWithNoGroup(t *testing.T) {
+	p := &FakePresenter{}
+	repo := &FakeRepo{NoGroup: true}
+	itr := New(repo)
+	annotationId := a.NewAnnotationId()
+	itr.Execute(t.Context(), Request{Id: annotationId.String()}, p)
+	assert.True(t, p.GotSuccess)
+	assert.Equal(t, annotationId, repo.Got)
+}
+
 func TestRemoveBox(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{}
