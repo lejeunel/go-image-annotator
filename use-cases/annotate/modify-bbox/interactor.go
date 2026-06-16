@@ -21,10 +21,11 @@ type Interface interface {
 }
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   auth.Auth
-	clock  clockwork.Clock
+	annotationRepo AnnotationRepo
+	labelRepo      LabelRepo
+	logger         *slog.Logger
+	auth           auth.Auth
+	clock          clockwork.Clock
 }
 
 type Option func(*Interactor)
@@ -41,10 +42,11 @@ func WithClock(c clockwork.Clock) Option {
 	}
 }
 
-func New(repo Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: repo, logger: logging.NewNoOpLogger(),
-		clock: clockwork.NewRealClock(),
-		auth:  sauth.PassThroughAuth{}}
+func New(repo AnnotationRepo, labelRepo LabelRepo, opts ...Option) Interactor {
+	i := &Interactor{annotationRepo: repo, logger: logging.NewNoOpLogger(),
+		labelRepo: labelRepo,
+		clock:     clockwork.NewRealClock(),
+		auth:      sauth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -57,7 +59,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(err)
 		return
 	}
-	group, err := i.repo.GroupOfAnnotation(*annotationId)
+	group, err := i.annotationRepo.GroupOfAnnotation(*annotationId)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: fetching annotation group: %w", errCtx, err))
 		return
@@ -95,7 +97,7 @@ func (i Interactor) update(ctx context.Context, id a.AnnotationId, upd a.Boundin
 	}
 	now := i.clock.Now()
 
-	if err := i.repo.UpdateBoundingBox(id, upd, userId, &now); err != nil {
+	if err := i.annotationRepo.UpdateBoundingBox(id, upd, userId, &now); err != nil {
 		return err
 	}
 	return nil
@@ -113,7 +115,7 @@ func (i Interactor) validate(xc float32, yc float32, width float32,
 }
 func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 
-	label, err := i.repo.FindLabel(name)
+	label, err := i.labelRepo.FindLabel(name)
 	if err != nil {
 		return nil, err
 	}

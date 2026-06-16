@@ -34,7 +34,6 @@ func (r SQLiteLabelRepo) Create(l lbl.Label) error {
 	return nil
 
 }
-
 func (r SQLiteLabelRepo) FindLabel(name string) (*lbl.Label, error) {
 	record := LabelRecord{}
 	err := r.Db.Get(&record,
@@ -53,7 +52,6 @@ func (r SQLiteLabelRepo) FindLabel(name string) (*lbl.Label, error) {
 	l := lbl.NewLabel(record.Id, record.Name, lbl.WithDescription(record.Description))
 	return &l, nil
 }
-
 func (r SQLiteLabelRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM labels WHERE name=$1", name)
 
@@ -73,7 +71,6 @@ func (r SQLiteLabelRepo) Count() (int64, error) {
 
 	return count, nil
 }
-
 func (r SQLiteLabelRepo) List(m list.Request) ([]*lbl.Label, error) {
 	q := sq.StatementBuilder.Select("id,name,description").From("labels")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
@@ -106,7 +103,6 @@ func (r SQLiteLabelRepo) FetchAll() ([]string, error) {
 
 	return names, nil
 }
-
 func (r SQLiteLabelRepo) Update(m update.Model) error {
 	query := "UPDATE labels SET description=$1 WHERE name=$2"
 	_, err := r.Db.Exec(query, m.NewDescription, m.Name)
@@ -117,7 +113,6 @@ func (r SQLiteLabelRepo) Update(m update.Model) error {
 
 	return nil
 }
-
 func (r SQLiteLabelRepo) Exists(name string) (bool, error) {
 	var exists bool
 
@@ -128,7 +123,6 @@ func (r SQLiteLabelRepo) Exists(name string) (bool, error) {
 
 	return exists, nil
 }
-
 func (r SQLiteLabelRepo) IsUsed(name string) (*bool, error) {
 	var count int64
 	query := "SELECT COUNT(*) FROM annotations WHERE label_id=(SELECT id FROM labels WHERE name=$1)"

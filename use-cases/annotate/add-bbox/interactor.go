@@ -22,15 +22,19 @@ type Interface interface {
 }
 
 type Interactor struct {
-	imageStore st.Interface
-	repo       Repo
-	logger     *slog.Logger
-	auth       auth.Auth
-	clock      clockwork.Clock
+	imageStore     st.Interface
+	annotationRepo Repo
+	labelRepo      LabelRepo
+	logger         *slog.Logger
+	auth           auth.Auth
+	clock          clockwork.Clock
 }
 
-func New(imageStore st.Interface, repo Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: repo, imageStore: imageStore, logger: logging.NewNoOpLogger(),
+func New(imageStore st.Interface, repo Repo, labelRepo LabelRepo, opts ...Option) Interactor {
+	i := &Interactor{
+		annotationRepo: repo,
+		labelRepo:      labelRepo,
+		imageStore:     imageStore, logger: logging.NewNoOpLogger(),
 		clock: clockwork.NewRealClock(),
 		auth:  sauth.PassThroughAuth{}}
 	for _, opt := range opts {
@@ -95,7 +99,7 @@ func (i Interactor) addBox(ctx context.Context, image *im.Image, box a.BoundingB
 		userId = &user.Id
 	}
 	now := i.clock.Now()
-	if err := i.repo.AddBoundingBox(image.Id, image.Collection.Id, box, userId, &now); err != nil {
+	if err := i.annotationRepo.AddBoundingBox(image.Id, image.Collection.Id, box, userId, &now); err != nil {
 		return err
 	}
 	return nil
@@ -107,7 +111,7 @@ func (i Interactor) validateBox(image *im.Image, box a.BoundingBox) error {
 	return nil
 }
 func (i Interactor) findLabel(name string) (*lbl.Label, error) {
-	label, err := i.repo.FindLabel(name)
+	label, err := i.labelRepo.FindLabel(name)
 	if err != nil {
 		return nil, err
 	}

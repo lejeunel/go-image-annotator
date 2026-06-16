@@ -12,5 +12,8 @@ import (
 
 type Repo interface {
 	AddBoundingBox(im.ImageId, clc.CollectionId, a.BoundingBox, *u.UserId, *time.Time) error
+}
+
+type LabelRepo interface {
 	FindLabel(string) (*lbl.Label, error)
 }

@@ -20,10 +20,9 @@ func (p *FakePresenter) SuccessAddBox(Response) {
 	p.GotSuccess = true
 }
 
-type FakeRepo struct {
+type FakeAnnotationRepo struct {
 	Err             error
 	ErrOnAdd        bool
-	ErrOnFindLabel  bool
 	GotImageId      im.ImageId
 	GotCollectionId clc.CollectionId
 	GotUserId       *u.UserId
@@ -31,7 +30,7 @@ type FakeRepo struct {
 	GotBox          a.BoundingBox
 }
 
-func (r *FakeRepo) AddBoundingBox(imageId im.ImageId, collectionId clc.CollectionId, box a.BoundingBox, userId *u.UserId, t *time.Time) error {
+func (r *FakeAnnotationRepo) AddBoundingBox(imageId im.ImageId, collectionId clc.CollectionId, box a.BoundingBox, userId *u.UserId, t *time.Time) error {
 	if r.ErrOnAdd {
 		return r.Err
 	}
@@ -43,8 +42,12 @@ func (r *FakeRepo) AddBoundingBox(imageId im.ImageId, collectionId clc.Collectio
 	return nil
 }
 
-func (r *FakeRepo) FindLabel(name string) (*lbl.Label, error) {
-	if r.ErrOnFindLabel {
+type FakeLabelRepo struct {
+	Err error
+}
+
+func (r *FakeLabelRepo) FindLabel(name string) (*lbl.Label, error) {
+	if r.Err != nil {
 		return nil, r.Err
 	}
 	l := lbl.NewLabel(lbl.NewLabelId(), name)

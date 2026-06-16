@@ -8,32 +8,37 @@ import (
 	"time"
 )
 
-type FakeRepo struct {
+type FakeLabelRepo struct {
 	Err                  error
-	ErrOnFindLabel       bool
-	ErrOnUpdate          bool
-	FetchedLabelWithName string
-	UpdatedAnnotationId  a.AnnotationId
-	UpdatedLabelId       lbl.LabelId
 	Returns              *lbl.Label
-	GotUserId            *u.UserId
-	GotTime              *time.Time
+	FetchedLabelWithName string
 }
 
-func (r *FakeRepo) GroupOfAnnotation(a.AnnotationId) (*string, error) {
-	group := "my-group"
-	return &group, nil
-}
-
-func (r *FakeRepo) FindLabel(name string) (*lbl.Label, error) {
+func (r *FakeLabelRepo) FindLabel(name string) (*lbl.Label, error) {
 	r.FetchedLabelWithName = name
-	if r.ErrOnFindLabel {
+	if r.Err != nil {
 		return nil, r.Err
 	}
 	return r.Returns, nil
 }
 
-func (r *FakeRepo) UpdateLabelOfAnnotation(annotationId a.AnnotationId, labelId lbl.LabelId, userId *u.UserId, t *time.Time) error {
+type FakeAnnotationRepo struct {
+	Err                 error
+	ErrOnFindLabel      bool
+	ErrOnUpdate         bool
+	UpdatedAnnotationId a.AnnotationId
+	UpdatedLabelId      lbl.LabelId
+	Returns             *lbl.Label
+	GotUserId           *u.UserId
+	GotTime             *time.Time
+}
+
+func (r *FakeAnnotationRepo) GroupOfAnnotation(a.AnnotationId) (*string, error) {
+	group := "my-group"
+	return &group, nil
+}
+
+func (r *FakeAnnotationRepo) UpdateLabelOfAnnotation(annotationId a.AnnotationId, labelId lbl.LabelId, userId *u.UserId, t *time.Time) error {
 	if r.ErrOnUpdate {
 		return r.Err
 	}

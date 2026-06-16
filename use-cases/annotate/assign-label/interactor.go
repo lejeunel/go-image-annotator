@@ -23,24 +23,26 @@ type Interface interface {
 }
 
 type Interactor struct {
-	repo   Repo
-	store  st.Interface
-	logger *slog.Logger
-	auth   auth.Auth
-	clock  clockwork.Clock
+	annotationRepo AnnotationRepo
+	labelRepo      LabelRepo
+	store          st.Interface
+	logger         *slog.Logger
+	auth           auth.Auth
+	clock          clockwork.Clock
 }
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
+	errCtx := "assigning label to image"
 	image, err := i.findImage(r.ImageId, r.Collection)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if image.Collection.Group != nil {
 		if err := i.auth.AnnotateGroup(ctx, image.Collection.Group.Name); err != nil {
-			i.handleError(err, out)
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 
@@ -48,13 +50,13 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	label, err := i.findLabel(r.Label)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	imageLabel, err := i.addLabel(ctx, image.Id, image.Collection.Id, *label)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
@@ -64,15 +66,8 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		Label:        r.Label,
 		AnnotationId: imageLabel.Id.String()})
 }
-func (i Interactor) handleError(err error, out OutputPort) {
-	errCtx := "assigning label to image"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
-
-}
 func (i Interactor) findLabel(name string) (*lbl.Label, error) {
-	label, err := i.repo.FindLabel(name)
+	label, err := i.labelRepo.FindLabel(name)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +90,7 @@ func (i Interactor) addLabel(ctx context.Context, imageId im.ImageId, collection
 	now := i.clock.Now()
 
 	imageLabel := an.NewImageLabel(label)
-	if err := i.repo.AddImageLabel(imageId, collectionId, imageLabel, userId, &now); err != nil {
+	if err := i.annotationRepo.AddImageLabel(imageId, collectionId, imageLabel, userId, &now); err != nil {
 		return nil, err
 	}
 	return &imageLabel, nil
@@ -115,8 +110,10 @@ func WithClock(c clockwork.Clock) Option {
 	}
 }
 
-func New(repo Repo, store st.Interface, opts ...Option) Interactor {
-	i := &Interactor{repo: repo, store: store, logger: logging.NewNoOpLogger(),
+func New(repo AnnotationRepo, labelRepo LabelRepo, store st.Interface, opts ...Option) Interactor {
+	i := &Interactor{annotationRepo: repo,
+		labelRepo: labelRepo,
+		store:     store, logger: logging.NewNoOpLogger(),
 		clock: clockwork.NewRealClock(),
 
 		auth: sauth.PassThroughAuth{}}

@@ -9,9 +9,7 @@ import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
-	"log/slog"
 )
 
 type Interface interface {
@@ -19,10 +17,10 @@ type Interface interface {
 }
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   auth.Auth
-	clock  clockwork.Clock
+	annotationRepo AnnotationRepo
+	labelRepo      LabelRepo
+	auth           auth.Auth
+	clock          clockwork.Clock
 }
 
 type Option func(*Interactor)
@@ -39,10 +37,11 @@ func WithClock(c clockwork.Clock) Option {
 	}
 }
 
-func New(repo Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: repo, logger: logging.NewNoOpLogger(),
-		clock: clockwork.NewRealClock(),
-		auth:  sauth.PassThroughAuth{}}
+func New(repo AnnotationRepo, labelRepo LabelRepo, opts ...Option) Interactor {
+	i := &Interactor{annotationRepo: repo,
+		labelRepo: labelRepo,
+		clock:     clockwork.NewRealClock(),
+		auth:      sauth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -50,26 +49,27 @@ func New(repo Repo, opts ...Option) Interactor {
 }
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	label, err := i.repo.FindLabel(r.Label)
+	errCtx := "updating bounding box properties"
+	label, err := i.labelRepo.FindLabel(r.Label)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	id, err := a.NewAnnotationIdFromString(r.AnnotationId)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	group, err := i.repo.GroupOfAnnotation(*id)
+	group, err := i.annotationRepo.GroupOfAnnotation(*id)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.auth.AnnotateGroup(ctx, *group); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
@@ -80,18 +80,12 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 	now := i.clock.Now()
 
-	err = i.repo.UpdateLabelOfAnnotation(*id, label.Id, userId, &now)
+	err = i.annotationRepo.UpdateLabelOfAnnotation(*id, label.Id, userId, &now)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	out.SuccessUpdateLabel(Response{})
 
-}
-func (i Interactor) handleError(err error, out OutputPort) {
-	errCtx := "updating bounding box properties"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
 }

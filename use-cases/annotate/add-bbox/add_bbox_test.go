@@ -25,7 +25,9 @@ func TestHandleAuthError(t *testing.T) {
 	image := CreateImage()
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	image.Collection.Group = &group
-	itr := New(&st.FakeImageStore{Return: &image}, &FakeRepo{},
+	itr := New(&st.FakeImageStore{Return: &image},
+		&FakeAnnotationRepo{},
+		&FakeLabelRepo{},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
@@ -33,33 +35,22 @@ func TestHandleAuthError(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestNonExistingImageStoreResourceShouldFail(t *testing.T) {
+func TestErrOnImageRetrievalShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{Err: e.ErrNotFound}, &FakeRepo{})
-	itr.Execute(t.Context(), Request{}, p)
-	assert.True(t, p.GotNotFoundErr)
-	assert.False(t, p.GotSuccess)
-}
-
-func TestInternalErrOnImageRetrievalShouldFail(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{Err: e.ErrInternal}, &FakeRepo{})
+	itr := New(&st.FakeImageStore{Err: e.ErrInternal},
+		&FakeAnnotationRepo{},
+		&FakeLabelRepo{})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
 
-func TestNotFoundErrOnFindLabelShouldFail(t *testing.T) {
+func TestErrOnFindLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{}, &FakeRepo{ErrOnFindLabel: true, Err: e.ErrNotFound})
-	itr.Execute(t.Context(), Request{}, p)
-	assert.True(t, p.GotNotFoundErr)
-	assert.False(t, p.GotSuccess)
-}
-
-func TestInternalErrOnFindLabelShouldFail(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{}, &FakeRepo{ErrOnFindLabel: true, Err: e.ErrInternal})
+	itr := New(&st.FakeImageStore{},
+		&FakeAnnotationRepo{},
+		&FakeLabelRepo{Err: e.ErrInternal},
+	)
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -71,9 +62,10 @@ func CreateTestAddBoxRequest() Request {
 		Height: float32(3.0), Angle: float32(32)}
 }
 
-func TestValidationErrOnAddBoxShouldFail(t *testing.T) {
+func TestValidationErrShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{}, &FakeRepo{})
+	itr := New(&st.FakeImageStore{}, &FakeAnnotationRepo{},
+		&FakeLabelRepo{})
 	req := CreateTestAddBoxRequest()
 	req.Width = -999
 	itr.Execute(t.Context(), req, p)
@@ -81,17 +73,11 @@ func TestValidationErrOnAddBoxShouldFail(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestNotFoundErrOnAddBoxShouldFail(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{}, &FakeRepo{ErrOnAdd: true, Err: e.ErrNotFound})
-	itr.Execute(t.Context(), CreateTestAddBoxRequest(), p)
-	assert.True(t, p.GotNotFoundErr)
-	assert.False(t, p.GotSuccess)
-}
-
 func TestInternalErrOnAddBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{}, &FakeRepo{ErrOnAdd: true, Err: e.ErrInternal})
+	itr := New(&st.FakeImageStore{},
+		&FakeAnnotationRepo{ErrOnAdd: true, Err: e.ErrInternal},
+		&FakeLabelRepo{})
 	itr.Execute(t.Context(), CreateTestAddBoxRequest(), p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -99,8 +85,9 @@ func TestInternalErrOnAddBoxShouldFail(t *testing.T) {
 
 func TestAddUserIdFromContext(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeRepo{}
-	itr := New(&st.FakeImageStore{}, repo)
+	repo := &FakeAnnotationRepo{}
+	itr := New(&st.FakeImageStore{}, repo,
+		&FakeLabelRepo{})
 	user := u.NewUser("user@example.com")
 	ctx := context.WithValue(t.Context(), u.UserContextKey, &user)
 	itr.Execute(ctx, CreateTestAddBoxRequest(), p)
@@ -110,9 +97,12 @@ func TestAddUserIdFromContext(t *testing.T) {
 
 func TestTime(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeRepo{}
+	repo := &FakeAnnotationRepo{}
 	now := time.Now()
-	itr := New(&st.FakeImageStore{}, repo, WithClock(clockwork.NewFakeClockAt(now)))
+	itr := New(&st.FakeImageStore{},
+		repo,
+		&FakeLabelRepo{},
+		WithClock(clockwork.NewFakeClockAt(now)))
 	itr.Execute(t.Context(), CreateTestAddBoxRequest(), p)
 	assert.NotNil(t, repo.GotTime)
 	assert.Equal(t, now, *repo.GotTime)
@@ -120,14 +110,17 @@ func TestTime(t *testing.T) {
 
 func TestAddBoundingBox(t *testing.T) {
 	p := &FakePresenter{}
-	repo := FakeRepo{}
+	repo := FakeAnnotationRepo{}
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	image := im.NewImage(im.NewImageId(), collection)
 	req := Request{ImageId: image.Id.String(), Collection: collection.Name,
 		Label: "a-label", Xc: float32(1.0), Yc: float32(1.0), Width: float32(3.0),
 		Height: float32(3.0), Angle: float32(32)}
 
-	itr := New(&st.FakeImageStore{Return: &image}, &repo)
+	itr := New(&st.FakeImageStore{Return: &image},
+		&repo,
+		&FakeLabelRepo{},
+	)
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, req.ImageId, repo.GotImageId.String())

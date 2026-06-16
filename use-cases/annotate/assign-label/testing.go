@@ -6,12 +6,23 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 	"time"
 )
 
-type FakeRepo struct {
+type FakeLabelRepo struct {
+	Err         error
+	ReturnLabel lbl.Label
+}
+
+func (r *FakeLabelRepo) FindLabel(string) (*lbl.Label, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+	return &r.ReturnLabel, nil
+}
+
+type FakeAnnotationRepo struct {
 	Err            error
 	ErrOnAddLabel  bool
 	ErrOnFindLabel bool
@@ -21,23 +32,11 @@ type FakeRepo struct {
 	AddedOnImageId      im.ImageId
 	AddedOnCollectionId clc.CollectionId
 
-	ReturnLabel lbl.Label
-	GotUserId   *u.UserId
-	GotTime     *time.Time
+	GotUserId *u.UserId
+	GotTime   *time.Time
 }
 
-func (r *FakeRepo) FindLabel(string) (*lbl.Label, error) {
-	if r.MissingLabel {
-		return nil, e.ErrNotFound
-	}
-	if r.ErrOnFindLabel {
-		return nil, r.Err
-	}
-	return &r.ReturnLabel, nil
-}
-
-// AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel, *u.UserId, *time.Time) error
-func (r *FakeRepo) AddImageLabel(imageId im.ImageId, collectionId clc.CollectionId, imageLabel an.ImageLabel, userId *u.UserId, t *time.Time) error {
+func (r *FakeAnnotationRepo) AddImageLabel(imageId im.ImageId, collectionId clc.CollectionId, imageLabel an.ImageLabel, userId *u.UserId, t *time.Time) error {
 	if r.ErrOnAddLabel {
 		return r.Err
 	}

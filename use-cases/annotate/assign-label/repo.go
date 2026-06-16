@@ -9,7 +9,10 @@ import (
 	"time"
 )
 
-type Repo interface {
+type AnnotationRepo interface {
 	AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel, *u.UserId, *time.Time) error
+}
+
+type LabelRepo interface {
 	FindLabel(string) (*lbl.Label, error)
 }

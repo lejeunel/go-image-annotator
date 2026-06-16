@@ -11,10 +11,10 @@ import (
 
 func NewSQLiteAnnotationInteractors(repos SQLiteRepos) an.Interactors {
 	return an.Interactors{
-		AddBox:        addbox.New(repos.ImageStore, repos.Annotation),
-		UpdateBox:     updbox.New(repos.Annotation),
+		AddBox:        addbox.New(repos.ImageStore, repos.Annotation, repos.Label),
+		UpdateBox:     updbox.New(repos.Annotation, repos.Label),
 		Delete:        remano.New(repos.Annotation),
-		UpdateLabel:   updlbl.New(repos.Annotation),
-		AddImageLabel: addlbl.New(repos.Annotation, repos.ImageStore),
+		UpdateLabel:   updlbl.New(repos.Annotation, repos.Label),
+		AddImageLabel: addlbl.New(repos.Annotation, repos.Label, repos.ImageStore),
 	}
 }

@@ -7,8 +7,11 @@ import (
 	"time"
 )
 
-type Repo interface {
-	FindLabel(string) (*lbl.Label, error)
+type AnnotationRepo interface {
 	UpdateLabelOfAnnotation(a.AnnotationId, lbl.LabelId, *u.UserId, *time.Time) error
 	GroupOfAnnotation(a.AnnotationId) (*string, error)
+}
+
+type LabelRepo interface {
+	FindLabel(string) (*lbl.Label, error)
 }

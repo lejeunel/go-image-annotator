@@ -9,18 +9,17 @@ import (
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
-type FakeRepo struct {
+type FakeAnnotationRepo struct {
 	Err            error
 	ErrOnUpdate    bool
 	ErrOnFindLabel bool
 	Got            a.BoundingBoxUpdatables
 	GotUserId      *u.UserId
 	GotTime        *time.Time
-	Label          lbl.Label
 	NoGroup        bool
 }
 
-func (r *FakeRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingBoxUpdatables, userId *u.UserId, t *time.Time) error {
+func (r *FakeAnnotationRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingBoxUpdatables, userId *u.UserId, t *time.Time) error {
 	if r.ErrOnUpdate {
 		return r.Err
 	}
@@ -30,13 +29,18 @@ func (r *FakeRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingBoxUpdatable
 	return nil
 }
 
-func (r *FakeRepo) FindLabel(name string) (*lbl.Label, error) {
-	if r.ErrOnFindLabel {
+type FakeLabelRepo struct {
+	Err   error
+	Label lbl.Label
+}
+
+func (r *FakeLabelRepo) FindLabel(name string) (*lbl.Label, error) {
+	if r.Err != nil {
 		return nil, r.Err
 	}
 	return &r.Label, nil
 }
-func (r *FakeRepo) GroupOfAnnotation(id a.AnnotationId) (*string, error) {
+func (r *FakeAnnotationRepo) GroupOfAnnotation(id a.AnnotationId) (*string, error) {
 	if r.NoGroup {
 		return nil, nil
 	}

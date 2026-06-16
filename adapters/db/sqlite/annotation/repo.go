@@ -19,7 +19,6 @@ import (
 
 type SQLiteAnnotationRepo struct {
 	Db *sqlx.DB
-	sl.SQLiteLabelRepo
 }
 
 type AnnotationRow struct {
@@ -218,5 +217,5 @@ func (r SQLiteAnnotationRepo) GroupOfAnnotation(id a.AnnotationId) (*string, err
 	return &group, nil
 }
 func NewSQLiteAnnotationRepo(db *sqlx.DB) SQLiteAnnotationRepo {
-	return SQLiteAnnotationRepo{Db: db, SQLiteLabelRepo: sl.NewSQLiteLabelRepo(db)}
+	return SQLiteAnnotationRepo{Db: db}
 }

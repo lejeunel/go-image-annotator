@@ -21,7 +21,8 @@ func CreateTestRequest() Request {
 
 func TestHandleAuthError(t *testing.T) {
 	lbl := lbl.NewLabel(lbl.NewLabelId(), "my-label")
-	itr := New(&FakeRepo{Returns: &lbl},
+	itr := New(&FakeAnnotationRepo{Returns: &lbl},
+		&FakeLabelRepo{},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), CreateTestRequest(), p)
@@ -31,7 +32,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestHandleErrOnFindLabel(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{Err: e.ErrNotFound, ErrOnFindLabel: true})
+	itr := New(&FakeAnnotationRepo{}, &FakeLabelRepo{Err: e.ErrNotFound})
 	itr.Execute(t.Context(), CreateTestRequest(), p)
 	assert.False(t, p.GotSuccess)
 	assert.ErrorIs(t, p.GotErr, e.ErrNotFound)
@@ -40,25 +41,18 @@ func TestHandleErrOnFindLabel(t *testing.T) {
 func TestHandleErrOnUpdateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
-	itr := New(&FakeRepo{Returns: &label, Err: e.ErrNotFound, ErrOnUpdate: true})
+	itr := New(&FakeAnnotationRepo{Err: e.ErrNotFound, ErrOnUpdate: true},
+		&FakeLabelRepo{Returns: &label})
 	itr.Execute(t.Context(), CreateTestRequest(), p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
 
-func TestFetchLabelFromName(t *testing.T) {
-	p := &FakePresenter{}
-	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
-	repo := &FakeRepo{Returns: &newLabel}
-	itr := New(repo)
-	itr.Execute(t.Context(), CreateTestRequest(), p)
-	assert.Equal(t, repo.FetchedLabelWithName, newLabel.Name, "label name")
-}
 func TestAddUserIdFromContext(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
-	repo := &FakeRepo{Returns: &newLabel}
-	itr := New(repo)
+	repo := &FakeAnnotationRepo{}
+	itr := New(repo, &FakeLabelRepo{Returns: &newLabel})
 	user := u.NewUser("user@example.com")
 	ctx := context.WithValue(t.Context(), u.UserContextKey, &user)
 	itr.Execute(ctx, CreateTestRequest(), p)
@@ -69,9 +63,10 @@ func TestAddUserIdFromContext(t *testing.T) {
 func TestTime(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
-	repo := &FakeRepo{Returns: &newLabel}
+	repo := &FakeAnnotationRepo{}
 	now := time.Now()
-	itr := New(repo, WithClock(clockwork.NewFakeClockAt(now)))
+	itr := New(repo, &FakeLabelRepo{Returns: &newLabel},
+		WithClock(clockwork.NewFakeClockAt(now)))
 	itr.Execute(t.Context(), CreateTestRequest(), p)
 	assert.NotNil(t, repo.GotTime)
 	assert.Equal(t, now, *repo.GotTime)
@@ -80,8 +75,8 @@ func TestTime(t *testing.T) {
 func TestUpdateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
-	repo := &FakeRepo{Returns: &newLabel}
-	itr := New(repo)
+	repo := &FakeAnnotationRepo{}
+	itr := New(repo, &FakeLabelRepo{Returns: &newLabel})
 	req := CreateTestRequest()
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, req.AnnotationId, repo.UpdatedAnnotationId.String())

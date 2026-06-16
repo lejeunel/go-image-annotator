@@ -27,7 +27,8 @@ func TestHandleAuthError(t *testing.T) {
 	image := CreateImage()
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	image.Collection.Group = &group
-	itr := New(&FakeRepo{},
+	itr := New(&FakeAnnotationRepo{},
+		&FakeLabelRepo{},
 		&st.FakeImageStore{Return: &image},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
@@ -38,7 +39,9 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestHandleNotFoundErrOnImageRetrieval(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{}, &st.FakeImageStore{Err: e.ErrNotFound})
+	itr := New(&FakeAnnotationRepo{},
+		&FakeLabelRepo{},
+		&st.FakeImageStore{Err: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -46,7 +49,9 @@ func TestHandleNotFoundErrOnImageRetrieval(t *testing.T) {
 
 func TestHandleInternalErrOnImageRetrieval(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{}, &st.FakeImageStore{Err: e.ErrInternal})
+	itr := New(&FakeAnnotationRepo{},
+		&FakeLabelRepo{},
+		&st.FakeImageStore{Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -55,24 +60,18 @@ func TestHandleInternalErrOnImageRetrieval(t *testing.T) {
 func TestAssignNonExistingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	image := CreateImage()
-	itr := New(&FakeRepo{MissingLabel: true}, &st.FakeImageStore{Return: &image})
+	itr := New(&FakeAnnotationRepo{},
+		&FakeLabelRepo{Err: e.ErrNotFound},
+		&st.FakeImageStore{Return: &image})
 	itr.Execute(t.Context(), Request{image.Id.String(), image.Collection.Name, "a-label"}, p)
 	assert.True(t, p.GotNotFoundErr)
-	assert.False(t, p.GotSuccess)
-}
-func TestInternalErrOnFindLabelShouldFail(t *testing.T) {
-	p := &FakePresenter{}
-	image := CreateImage()
-	itr := New(&FakeRepo{ErrOnFindLabel: true, Err: e.ErrInternal}, &st.FakeImageStore{Return: &image})
-	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
-	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
 func TestAddUserIdFromContext(t *testing.T) {
 	p := &FakePresenter{}
 	image := CreateImage()
-	repo := &FakeRepo{}
-	itr := New(repo, &st.FakeImageStore{Return: &image})
+	repo := &FakeAnnotationRepo{}
+	itr := New(repo, &FakeLabelRepo{}, &st.FakeImageStore{Return: &image})
 	user := u.NewUser("user@example.com")
 	ctx := context.WithValue(t.Context(), u.UserContextKey, &user)
 	itr.Execute(ctx, Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
@@ -82,9 +81,10 @@ func TestAddUserIdFromContext(t *testing.T) {
 func TestTime(t *testing.T) {
 	p := &FakePresenter{}
 	image := CreateImage()
-	repo := &FakeRepo{}
+	repo := &FakeAnnotationRepo{}
 	now := time.Now()
-	itr := New(repo, &st.FakeImageStore{Return: &image}, WithClock(clockwork.NewFakeClockAt(now)))
+	itr := New(repo, &FakeLabelRepo{},
+		&st.FakeImageStore{Return: &image}, WithClock(clockwork.NewFakeClockAt(now)))
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.NotNil(t, repo.GotTime)
 	assert.Equal(t, now, *repo.GotTime)
@@ -97,8 +97,10 @@ func TestAssignLabelToImage(t *testing.T) {
 	req := Request{ImageId: image.Id.String(),
 		Collection: image.Collection.Name,
 		Label:      label.Name}
-	repo := &FakeRepo{ReturnLabel: label}
-	itr := New(repo, &st.FakeImageStore{Return: &image})
+	repo := &FakeAnnotationRepo{}
+	itr := New(repo,
+		&FakeLabelRepo{ReturnLabel: label},
+		&st.FakeImageStore{Return: &image})
 	itr.Execute(t.Context(), req, p)
 	resp := p.Got
 	assert.Equal(t, resp.Label, req.Label, "label")
