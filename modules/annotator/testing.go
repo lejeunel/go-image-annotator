@@ -9,6 +9,7 @@ import (
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
+	updpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-polygon"
 	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	imread "github.com/lejeunel/go-image-annotator/use-cases/image/read"
@@ -57,6 +58,14 @@ type FakePolygonAdder struct {
 
 func (b *FakePolygonAdder) Execute(c context.Context, r addpoly.Request, o addpoly.OutputPort) {
 	o.SuccessAddPolygon(b.Returns)
+}
+
+type FakePolygonUpdater struct {
+	Returns updpoly.Response
+}
+
+func (b *FakePolygonUpdater) Execute(c context.Context, r updpoly.Request, o updpoly.OutputPort) {
+	o.SuccessUpdatePolygon(b.Returns)
 }
 
 type FakeBoxAdder struct {

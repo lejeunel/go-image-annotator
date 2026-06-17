@@ -9,6 +9,7 @@ import (
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
+	updpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-polygon"
 	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	imread "github.com/lejeunel/go-image-annotator/use-cases/image/read"
@@ -20,6 +21,7 @@ type Annotator struct {
 	imageReader     imread.Interface
 	boxAdder        addbox.Interface
 	polygonAdder    addpoly.Interface
+	polygonUpdater  updpoly.Interface
 	imageLabelAdder addlbl.Interface
 	boxUpdater      updbox.Interface
 	deleter         del.Interface
@@ -36,6 +38,9 @@ func (a *Annotator) UpdateLabel(ctx context.Context, r updlbl.Request, view v.Vi
 }
 func (a *Annotator) UpdateBox(ctx context.Context, r updbox.Request, view v.View) {
 	a.boxUpdater.Execute(ctx, r, a.presenter.SetView(view))
+}
+func (a *Annotator) UpdatePolygon(ctx context.Context, r updpoly.Request, view v.View) {
+	a.polygonUpdater.Execute(ctx, r, a.presenter.SetView(view))
 }
 func (a *Annotator) AddBox(ctx context.Context, r addbox.Request, view v.View) {
 	a.boxAdder.Execute(ctx, r, a.presenter.SetView(view))
@@ -61,7 +66,8 @@ func (a *Annotator) Init(ctx context.Context, imageId string, collection string,
 }
 
 func NewAnnotator(scroller scr.Interface, imageMetaReader imread.Interface,
-	boxAdder addbox.Interface, boxUpdater updbox.Interface, polygonAdder addpoly.Interface, annotationDeleter del.Interface,
+	boxAdder addbox.Interface, boxUpdater updbox.Interface, polygonAdder addpoly.Interface,
+	polygonUpdater updpoly.Interface, annotationDeleter del.Interface,
 	labelFetcher fetchlbl.Interface, labelUpdater updlbl.Interface, imageLabelAdder addlbl.Interface) Annotator {
 	return Annotator{
 		scroller:        scroller,
@@ -69,6 +75,7 @@ func NewAnnotator(scroller scr.Interface, imageMetaReader imread.Interface,
 		boxAdder:        boxAdder,
 		boxUpdater:      boxUpdater,
 		polygonAdder:    polygonAdder,
+		polygonUpdater:  polygonUpdater,
 		deleter:         annotationDeleter,
 		labelFetcher:    labelFetcher,
 		labelUpdater:    labelUpdater,

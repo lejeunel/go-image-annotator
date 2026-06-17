@@ -7,6 +7,7 @@ import (
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
+	updpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-polygon"
 	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
@@ -40,10 +41,11 @@ func (p Presenter) SuccessReadImage(im im.Image) {
 func (p Presenter) SuccessFetchLabels(r fetchlbl.Response) {
 	p.View.SetAvailableLabels(r.Labels)
 }
-func (p Presenter) SuccessAddLabel(r addlbl.Response)    {}
-func (p Presenter) SuccessAddBox(r addbox.Response)      {}
-func (p Presenter) SuccessAddPolygon(r addpoly.Response) {}
-func (p Presenter) SuccessUpdateBox(r updbox.Response)   {}
+func (p Presenter) SuccessAddLabel(r addlbl.Response)       {}
+func (p Presenter) SuccessAddBox(r addbox.Response)         {}
+func (p Presenter) SuccessAddPolygon(r addpoly.Response)    {}
+func (p Presenter) SuccessUpdatePolygon(r updpoly.Response) {}
+func (p Presenter) SuccessUpdateBox(r updbox.Response)      {}
 func (p Presenter) SuccessUpdateLabel(r updlbl.Response) {
 	p.View.UpdateLabel(v.Annotation{Id: r.AnnotationId.String(), Label: r.Label})
 }

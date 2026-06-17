@@ -26,7 +26,7 @@ func (r MyTableRow) Render() gp.Node {
 	return gh.Tr(
 		gh.Class("even:bg-primary/5 dark:even:bg-primary-dark/10"),
 		gp.Map(r.Values, func(node gp.Node) gp.Node {
-			return gh.Td(gh.Class("p-4"),
+			return gh.Td(gh.Class("p-2"),
 				node)
 		}))
 
@@ -35,7 +35,7 @@ func (r MyTableRow) Render() gp.Node {
 func TableHeader(fields []string) gp.Node {
 	return gh.THead(gh.Tr(gh.Class("border-b border-outline bg-surface-alt text-sm text-on-surface-strong dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark-strong"),
 		gp.Map(fields, func(f string) gp.Node {
-			return gh.Th(gh.Scope("col"), gh.Class("p-4"), gp.Text(f))
+			return gh.Th(gh.Scope("col"), gh.Class("p-2"), gp.Text(f))
 		})))
 }
 

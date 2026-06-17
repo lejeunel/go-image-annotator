@@ -9,7 +9,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/image/read"
 )
 
-func NewSQLiteImageInteractors(repos SQLiteRepos, allowedImageFormats []string) im.Interactors {
+func NewSQLiteImageInteractors(repos SQLiteRepos, allowedImageFormats []string, pageSize int) im.Interactors {
 	return im.Interactors{
 		Ingest: *ingest.New(repos.Image, repos.Collection,
 			repos.Label, repos.Annotation,
@@ -17,6 +17,6 @@ func NewSQLiteImageInteractors(repos SQLiteRepos, allowedImageFormats []string) 
 		Read:                read.New(repos.ImageStore),
 		List:                list.New(repos.Image, repos.ImageStore),
 		AllowedImageFormats: allowedImageFormats,
-		DefaultPageSize:     10,
+		DefaultPageSize:     pageSize,
 	}
 }

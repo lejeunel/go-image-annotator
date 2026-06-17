@@ -11,7 +11,7 @@ func NewSQLiteInteractors(i SQLiteRepos, pageSize int, allowedImageFormats []str
 	return a.Interactors{
 		Label:      NewSQLiteLabelInteractors(i.Label, pageSize),
 		Collection: NewSQLiteCollectionInteractors(i.Collection, i.Group, pageSize),
-		Image:      NewSQLiteImageInteractors(i, allowedImageFormats),
+		Image:      NewSQLiteImageInteractors(i, allowedImageFormats, pageSize),
 		User:       NewSQLiteUserInteractors(i, tokenGenerator),
 		Annotation: NewSQLiteAnnotationInteractors(i),
 	}

@@ -11,6 +11,7 @@ import (
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
+	updpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-polygon"
 	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	"github.com/stretchr/testify/assert"
@@ -32,6 +33,7 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
 		&FakeBoxAdder{Returns: addbox.Response{Id: box.Id}},
 		&FakeBoxUpdater{Returns: &updbox.Response{Id: box.Id}},
 		&FakePolygonAdder{Returns: addpoly.Response{Id: polygon.Id}},
+		&FakePolygonUpdater{Returns: updpoly.Response{Id: polygon.Id}},
 		&FakeAnnotationDeleter{Returns: del.Response{Id: box.Id}},
 		&FakeLabelFetcher{},
 		&FakeLabelUpdater{},

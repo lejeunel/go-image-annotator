@@ -20,7 +20,7 @@ type ListImagesPresenter struct {
 }
 
 func (p ListImagesPresenter) Success(r list.Response) {
-	table := html.MyTable{Fields: []string{"id", "collection", "created", "n. annot."}}
+	table := html.MyTable{Fields: []string{"id", "collection", "ingested", "n. annot."}}
 	for _, im := range r.Images {
 		link := fmt.Sprintf("/image?id=%v&collection=%v", im.Id.String(), im.Collection.Name)
 		table.Rows = append(table.Rows,

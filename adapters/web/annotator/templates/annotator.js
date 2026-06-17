@@ -90,7 +90,16 @@ document.addEventListener('alpine:init', () => {
                 body: JSON.stringify(annotation),
             });
             if (!res.ok) throw new Error('Could not update annotation');
+        },
+        async update_polygon(annotation) {
+            const res = await fetch("/ui/annotate/update-polygon", {
+                method: "POST",
+                headers: { "Content-type": "application/json; charset=UTF-8" },
+                body: JSON.stringify(annotation),
+            });
+            if (!res.ok) throw new Error('Could not update annotation');
         }
+
     };
 
     function styler(annotation) {
@@ -140,7 +149,17 @@ document.addEventListener('alpine:init', () => {
             });
 
             annotator.on('updateAnnotation', (updated) => {
-                AnnotationAPI.update_box(updated)
+                switch(updated.target.selector.type){
+                case "RECTANGLE":
+                    AnnotationAPI.update_box(updated);
+                    break;
+                case "POLYGON":
+                    AnnotationAPI.update_polygon(updated);
+                    break
+                default:
+                    alert("selector type " + updated.target.selector.type + " not recognized! Should be RECTANGLE or POLYGON")
+                }
+
                 try {
                     this.refreshUI();
 
@@ -152,10 +171,10 @@ document.addEventListener('alpine:init', () => {
             annotator.on('selectionChanged', (annotations) => {
             });
             annotator.on('mouseEnterAnnotation', (annotation) => {
-            console.log('Mouse entered: ' + annotation.id);
+                // console.log('Mouse entered: ' + annotation.id);
             });
             annotator.on('mouseLeaveAnnotation', (annotation) => {
-            console.log('Mouse left: ' + annotation.id);
+                // console.log('Mouse left: ' + annotation.id);
             });
         },
 

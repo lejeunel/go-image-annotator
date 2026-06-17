@@ -156,7 +156,6 @@ func (r SQLiteAnnotationRepo) FindPolygons(imageId i.ImageId, collectionId c.Col
 
 	return polygons, nil
 }
-
 func (r SQLiteAnnotationRepo) AddBoundingBox(imageId i.ImageId, collectionId c.CollectionId, box a.BoundingBox, userId *u.UserId, t *time.Time) error {
 
 	coordsBytes, _ := json.Marshal(BoundingBoxSpecs{Xc: box.Xc, Yc: box.Yc, Width: box.Width, Height: box.Height, Angle: box.Angle})
@@ -262,6 +261,32 @@ func (r SQLiteAnnotationRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingB
 
 	if err := r.UpdateBoundingBoxCoordinates(id, u.Xc, u.Yc, u.Width, u.Height, u.Angle); err != nil {
 		return fmt.Errorf("%v: updating coordinates: %w", errCtx, err)
+	}
+	return nil
+}
+func (r SQLiteAnnotationRepo) UpdatePolygonPoints(id a.AnnotationId, points a.Points) error {
+	errCtx := "updating polygon points"
+	pointSpecs := []PointSpec{}
+	for _, p := range points.Coordinates {
+		pointSpecs = append(pointSpecs, PointSpec{X: p[0], Y: p[1]})
+	}
+	coordsBytes, _ := json.Marshal(PolygonSpecs{Points: pointSpecs})
+	coordsString := string(coordsBytes)
+	query := "UPDATE annotations SET coordinates=$1 WHERE id=$2"
+	_, err := r.Db.Exec(query, coordsString, id)
+	if err != nil {
+		return fmt.Errorf("%v: %v: %w", errCtx, err, e.ErrInternal)
+	}
+	return nil
+}
+func (r SQLiteAnnotationRepo) UpdatePolygon(id a.AnnotationId, u a.PolygonUpdatables, userId *u.UserId, t *time.Time) error {
+	errCtx := "updating polygon"
+	if err := r.UpdateLabelOfAnnotation(id, u.LabelId, userId, t); err != nil {
+		return fmt.Errorf("%v: updating label: %w", errCtx, err)
+	}
+
+	if err := r.UpdatePolygonPoints(id, u.Points); err != nil {
+		return fmt.Errorf("%v: updating polygon points: %w", errCtx, err)
 	}
 	return nil
 }

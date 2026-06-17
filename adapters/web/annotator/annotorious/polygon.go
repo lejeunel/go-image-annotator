@@ -4,6 +4,7 @@ import (
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
+	updpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-polygon"
 )
 
 type AnnotoriousPolygonRequest struct {
@@ -37,6 +38,13 @@ func ToAddPolygonRequest(r AnnotoriousPolygonRequest) addpoly.Request {
 		Label:  r.Label,
 		Points: a.Points{Coordinates: r.Annotation.Target.Selector.Geometry.Points},
 	}
+}
+
+func ToUpdatePolygonRequest(r AnnotoriousPolygonModel) (*updpoly.Request, error) {
+
+	return &updpoly.Request{AnnotationId: r.AnnotationId,
+		Label:  r.Bodies[0].Value,
+		Points: a.Points{Coordinates: r.Target.Selector.Geometry.Points}}, nil
 
 }
 

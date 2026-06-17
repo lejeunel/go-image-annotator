@@ -8,10 +8,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var TestingPolygonPoints = a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}}
+
 func TestInternalErrOnAddPolygonShouldFail(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
-	polygon := a.NewPolygon(a.NewAnnotationId(), a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}}, label)
+	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
 	repos.Annotation.Db.Close()
 	err := repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
 	assert.ErrorIs(t, err, e.ErrInternal)
@@ -20,7 +22,7 @@ func TestInternalErrOnAddPolygonShouldFail(t *testing.T) {
 func TestInternalErrOnFindPolygonShouldFail(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
-	polygon := a.NewPolygon(a.NewAnnotationId(), a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}}, label)
+	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
 	repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
 	repos.Annotation.Db.Close()
 	_, err := repos.Annotation.FindPolygons(image.Id, collection.Id)
@@ -31,7 +33,7 @@ func TestAddPolygon(t *testing.T) {
 	repos := NewAnnotationTestRepos()
 	labelName := "a-label"
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", labelName, nil)
-	polygon := a.NewPolygon(a.NewAnnotationId(), a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}}, label)
+	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
 	err := repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
 	assert.NoError(t, err)
 	r, err := repos.Annotation.FindPolygons(image.Id, collection.Id)
