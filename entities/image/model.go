@@ -35,6 +35,7 @@ type Image struct {
 	Specs         ImageSpecs
 	Labels        []an.ImageLabel
 	BoundingBoxes []an.BoundingBox
+	Polygons      []an.Polygon
 	Reader        io.Reader
 	Hash          string
 	MIMEType      string

@@ -45,6 +45,11 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 		return nil, fmt.Errorf("fetching bounding boxes: %w", err)
 	}
 
+	polygons, err := s.repo.FindPolygons(imageId, collection.Id)
+	if err != nil {
+		return nil, fmt.Errorf("fetching polygons: %w", err)
+	}
+
 	specs, err := s.repo.GetSpecs(imageId)
 	if err != nil {
 		return nil, fmt.Errorf("fetching image specs: %w", err)
@@ -56,6 +61,7 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 	}
 	return &im.Image{Id: imageId, Collection: *collection, Labels: labels,
 		BoundingBoxes: boxes,
+		Polygons:      polygons,
 		Specs:         *specs,
 		Reader:        reader}, nil
 

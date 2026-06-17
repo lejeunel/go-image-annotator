@@ -23,7 +23,7 @@ func NewSQLiteApp(cfg config.Config) app.App {
 	itrs := NewSQLiteInteractors(repos,
 		cfg.DefaultPageSize, cfg.AllowedImageFormats, tg)
 	annotator := a.NewAnnotator(scr, itrs.Image.Read,
-		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox, itrs.Annotation.Delete,
+		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox, itrs.Annotation.AddPolygon, itrs.Annotation.Delete,
 		itrs.Label.FetchAll, itrs.Annotation.UpdateLabel, itrs.Annotation.AddImageLabel)
 
 	return app.App{

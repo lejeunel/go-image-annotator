@@ -33,6 +33,7 @@ func (s *Server) SubmitPolygon(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("submit polygon: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
+	s.Annotator.AddPolygon(r.Context(), an.ToAddPolygonRequest(polyreq), aw.NewAnnotationView(s.PageBuilder))
 }
 func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
@@ -59,7 +60,7 @@ func (s *Server) MakeHTMLAnnotationPanel(w http.ResponseWriter, r *http.Request)
 func (s *Server) GetAnnotationsAsJSON(w http.ResponseWriter, r *http.Request) {
 	view := aw.NewAnnotationView(s.PageBuilder)
 	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), view)
-	view.RenderAnnotations(w)
+	view.RenderRegionAnnotationsAsJSON(w)
 }
 func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
 	s.Annotator.DeleteAnnotation(r.Context(), remove.Request{Id: r.URL.Query().Get("id")},

@@ -36,6 +36,13 @@ func TestErrOnFindBoundingBoxesShouldFail(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestErrOnFindPolygonsShouldFail(t *testing.T) {
+	s := New(&FakeRepo{ErrOnFindPolygons: true, Err: e.ErrInternal}, &ast.FakeStore{})
+	_, err := s.Find(im.BaseImage{ImageId: im.NewImageId().String(),
+		Collection: "a-collection"})
+	assert.NotNil(t, err)
+}
+
 func TestErrOnExistsShouldFail(t *testing.T) {
 	s := New(&FakeRepo{ErrOnExists: true, Err: e.ErrInternal}, &ast.FakeStore{})
 	_, err := s.Find(im.BaseImage{ImageId: im.NewImageId().String(),
@@ -47,15 +54,17 @@ func TestFindImageGivesCorrectAnnotations(t *testing.T) {
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	labels := []a.ImageLabel{{Id: a.NewAnnotationId(), Label: label}}
 	bboxes := []a.BoundingBox{{Id: a.NewAnnotationId(), Label: label}}
+	polygons := []a.Polygon{{Id: a.NewAnnotationId(), Label: label}}
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 
 	s := New(&FakeRepo{Collection: collection, Labels: labels,
-		BoundingBoxes: bboxes}, &ast.FakeStore{Data: []byte("test-data")})
+		BoundingBoxes: bboxes, Polygons: polygons}, &ast.FakeStore{Data: []byte("test-data")})
 	image, _ := s.Find(im.BaseImage{ImageId: im.NewImageId().String(),
 		Collection: collection.Name})
 	assert.Equal(t, collection.Id, image.Collection.Id)
 	assert.Equal(t, 1, len(image.Labels))
 	assert.Equal(t, 1, len(image.BoundingBoxes))
+	assert.Equal(t, 1, len(image.Polygons))
 }
 
 func TestImageReaderGivesCorrectBytes(t *testing.T) {

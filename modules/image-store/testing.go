@@ -14,11 +14,13 @@ type FakeRepo struct {
 	ErrOnSpecs             bool
 	ErrOnFindImageLabel    bool
 	ErrOnFindBoundingBoxes bool
+	ErrOnFindPolygons      bool
 	MissingCollection      bool
 	ErrOnFindCollection    bool
 	Collection             clc.Collection
 	Labels                 []a.ImageLabel
 	BoundingBoxes          []a.BoundingBox
+	Polygons               []a.Polygon
 }
 
 func (r *FakeRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc.CollectionId) (bool, error) {
@@ -40,6 +42,16 @@ func (r *FakeRepo) FindBoundingBoxes(imageId im.ImageId, collectionId clc.Collec
 	}
 	if r.BoundingBoxes != nil {
 		return r.BoundingBoxes, nil
+	}
+	return nil, nil
+}
+
+func (r *FakeRepo) FindPolygons(imageId im.ImageId, collectionId clc.CollectionId) ([]a.Polygon, error) {
+	if r.ErrOnFindPolygons {
+		return nil, r.Err
+	}
+	if r.Polygons != nil {
+		return r.Polygons, nil
 	}
 	return nil, nil
 }

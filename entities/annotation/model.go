@@ -2,13 +2,71 @@ package annotation
 
 import (
 	"fmt"
+	"math"
+	"time"
+
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"time"
 )
 
-type Points = [][2]float32
+type Points struct {
+	Coordinates [][2]float32
+}
+
+func (p Points) MaxX() float32 {
+	if len(p.Coordinates) == 0 {
+		return float32(math.Inf(1))
+	}
+
+	r := float32(math.Inf(-1))
+	for _, p := range p.Coordinates {
+		if p[0] > r {
+			r = p[0]
+		}
+	}
+	return r
+}
+func (p Points) MaxY() float32 {
+	if len(p.Coordinates) == 0 {
+		return float32(math.Inf(1))
+	}
+
+	r := float32(math.Inf(-1))
+	for _, p := range p.Coordinates {
+		if p[1] > r {
+			r = p[1]
+		}
+	}
+	return r
+}
+
+func (p Points) MinX() float32 {
+	if len(p.Coordinates) == 0 {
+		return float32(math.Inf(-1))
+	}
+
+	r := float32(math.Inf(1))
+	for _, p := range p.Coordinates {
+		if p[0] < r {
+			r = p[0]
+		}
+	}
+	return r
+}
+func (p Points) MinY() float32 {
+	if len(p.Coordinates) == 0 {
+		return float32(math.Inf(-1))
+	}
+
+	r := float32(math.Inf(1))
+	for _, p := range p.Coordinates {
+		if p[1] < r {
+			r = p[1]
+		}
+	}
+	return r
+}
 
 type ImageLabel struct {
 	Id     AnnotationId
@@ -95,6 +153,6 @@ func NewImageLabel(label lbl.Label) ImageLabel {
 	return ImageLabel{Id: NewAnnotationId(), Label: label}
 }
 
-func NewPolygon(id AnnotationId, points [][2]float32, label lbl.Label) Polygon {
+func NewPolygon(id AnnotationId, points Points, label lbl.Label) Polygon {
 	return Polygon{Id: id, Points: points, Label: label}
 }

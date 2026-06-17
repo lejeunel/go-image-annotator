@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jonboulle/clockwork"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
@@ -58,7 +59,8 @@ func TestErrOnFindLabelShouldFail(t *testing.T) {
 
 func CreateTestAddPolygonRequest() Request {
 	return Request{ImageId: im.NewImageId().String(), Collection: "a-collection",
-		Label: "a-label", Points: [][2]float32{{0, 0}, {1, 1}}}
+
+		Label: "a-label", Points: a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}}}
 }
 
 func TestErrOnAddPolygonShouldFail(t *testing.T) {

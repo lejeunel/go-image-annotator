@@ -38,6 +38,15 @@ type BoundingBoxSpecs struct {
 	Angle  float32 `json:"angle"`
 }
 
+type PointSpec struct {
+	X float32 `json:"x"`
+	Y float32 `json:"y"`
+}
+
+type PolygonSpecs struct {
+	Points []PointSpec `json:"points"`
+}
+
 func (r SQLiteAnnotationRepo) AddImageLabel(imageId i.ImageId, collectionId c.CollectionId, ann a.ImageLabel, userId *u.UserId, t *time.Time) error {
 	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type, author, touched_at) VALUES ($1,$2,$3,$4,$5,$6,$7)"
 	_, err := r.Db.Exec(query, ann.Id, imageId, collectionId, ann.Label.Id, "image", userId, t)
@@ -95,6 +104,59 @@ func (r SQLiteAnnotationRepo) RemoveImageLabel(imageId i.ImageId, collectionId c
 	}
 	return nil
 }
+func (r SQLiteAnnotationRepo) AddPolygon(imageId i.ImageId, collectionId c.CollectionId, polygon a.Polygon, userId *u.UserId, t *time.Time) error {
+	pointSpecs := []PointSpec{}
+	for _, p := range polygon.Points.Coordinates {
+		pointSpecs = append(pointSpecs, PointSpec{X: p[0], Y: p[1]})
+	}
+	coordsBytes, _ := json.Marshal(PolygonSpecs{Points: pointSpecs})
+	coordsString := string(coordsBytes)
+	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type, coordinates, author, touched_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)"
+	_, err := r.Db.Exec(query, polygon.Id, imageId, collectionId, polygon.Label.Id, "polygon", coordsString, userId, t)
+	if err != nil {
+		return fmt.Errorf("inserting polygon: %v: %w", err, e.ErrInternal)
+	}
+
+	return nil
+}
+func (r SQLiteAnnotationRepo) FindPolygons(imageId i.ImageId, collectionId c.CollectionId) ([]a.Polygon, error) {
+	query := "SELECT id,label_id,type,coordinates,author,touched_at FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='polygon'"
+
+	errCtx := "querying polygon annotations"
+	records := []AnnotationRow{}
+	if err := r.Db.Select(&records, query, imageId, collectionId); err != nil {
+		return nil, fmt.Errorf("%v: applying query: %v: %w", errCtx, err, e.ErrInternal)
+	}
+
+	polygons := []a.Polygon{}
+	for _, rec := range records {
+		var specs PolygonSpecs
+		err := json.Unmarshal([]byte(rec.Coordinates), &specs)
+		if err != nil {
+			return nil, fmt.Errorf("%v: unmarshaling polygon specs: %+v: %w: %w",
+				errCtx, rec.Coordinates, err, e.ErrInternal)
+		}
+		label, err := r.findLabelById(rec.LabelId)
+
+		points := a.Points{}
+		for _, p := range specs.Points {
+			points.Coordinates = append(points.Coordinates, [2]float32{p.X, p.Y})
+
+		}
+		polygon := a.NewPolygon(rec.Id, points, *label)
+
+		if rec.Author != nil {
+			polygon.Author = rec.Author
+		}
+		if rec.Time != nil {
+			polygon.Time = rec.Time
+		}
+		polygons = append(polygons, polygon)
+	}
+
+	return polygons, nil
+}
+
 func (r SQLiteAnnotationRepo) AddBoundingBox(imageId i.ImageId, collectionId c.CollectionId, box a.BoundingBox, userId *u.UserId, t *time.Time) error {
 
 	coordsBytes, _ := json.Marshal(BoundingBoxSpecs{Xc: box.Xc, Yc: box.Yc, Width: box.Width, Height: box.Height, Angle: box.Angle})

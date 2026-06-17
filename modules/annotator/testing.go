@@ -6,6 +6,7 @@ import (
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
+	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
@@ -48,6 +49,14 @@ type FakeLabelAdder struct {
 
 func (b *FakeLabelAdder) Execute(ctx context.Context, r addlbl.Request, o addlbl.OutputPort) {
 	o.SuccessAddLabel(b.Returns)
+}
+
+type FakePolygonAdder struct {
+	Returns addpoly.Response
+}
+
+func (b *FakePolygonAdder) Execute(c context.Context, r addpoly.Request, o addpoly.OutputPort) {
+	o.SuccessAddPolygon(b.Returns)
 }
 
 type FakeBoxAdder struct {
@@ -104,13 +113,16 @@ func (s *FakeView) SetImage(i v.Image) {
 func (s *FakeView) SetImageInfo(i v.ImageInfo) {
 	s.GotImageInfo = &i
 }
-func (s *FakeView) SetAnnotations(boxes []v.BoundingBox, labels []v.ImageLabel) {
+func (s *FakeView) SetAnnotations(boxes []v.BoundingBox, polygons []v.Polygon, labels []v.ImageLabel) {
 	ids := []string{}
 	for _, b := range boxes {
 		ids = append(ids, b.Id)
 	}
 	for _, l := range labels {
 		ids = append(ids, l.Id)
+	}
+	for _, p := range polygons {
+		ids = append(ids, p.Id)
 	}
 	s.GotAnnotationIds = &ids
 }

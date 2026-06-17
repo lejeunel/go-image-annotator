@@ -16,33 +16,39 @@ type RegionTable struct {
 	AvailableLabels []string
 }
 
-func (t *RegionTable) AddBox(b view.BoundingBox) {
-	shortId := ShortenUUID(b.Id)
+func (t *RegionTable) addRow(author, time, id, label, color string) {
 	tmpl := template.New("")
 	template.Must(tmpl.ParseFS(templatesFiles,
 		"templates/label_combobox.html"))
 
 	var buf bytes.Buffer
 	tmpl.ExecuteTemplate(&buf, "label_combobox",
-		LabelSelector{Labels: t.AvailableLabels, SelectorIsOpen: false, Selected: &b.Label, AnnotationId: b.Id})
+		LabelSelector{Labels: t.AvailableLabels, SelectorIsOpen: false, Selected: &label, AnnotationId: id})
 	t.Rows = append(t.Rows,
 		RegionRow{Values: []Node{
 			Div(Class("flex flex-col"),
-				Div(Class(smallText), Text(b.Author)),
-				Div(Class(smallText), Text(b.Time)),
-				Div(Class(smallText), Text(shortId)),
+				Div(Class(smallText), Text(author)),
+				Div(Class(smallText), Text(time)),
 			),
 			Div(Class("ps-1"),
 				Raw(fmt.Sprintf(`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <rect x="10" y="10" width="80" height="80" rx="10" ry="10" fill="%v" />
-</svg>`, b.Color)),
+</svg>`, color)),
 			),
 			Raw(buf.String()),
 			Div(
 				Class("flex  justify-end items-center pr-1"),
-				Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, b.Id, TrashIcon)),
+				Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, id, TrashIcon)),
 			),
 		}})
+}
+
+func (t *RegionTable) AddPolygon(p view.Polygon) {
+	t.addRow(p.Author, p.Time, p.Id, p.Label, p.Color)
+}
+
+func (t *RegionTable) AddBox(b view.BoundingBox) {
+	t.addRow(b.Author, b.Time, b.Id, b.Label, b.Color)
 
 }
 

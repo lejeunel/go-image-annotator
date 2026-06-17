@@ -18,10 +18,13 @@ type LabelSelector struct {
 }
 type AnnotationsListView struct{}
 
-func (v *AnnotationsListView) makeRegionList(boxes []view.BoundingBox, availableLabels []string) Node {
+func (v *AnnotationsListView) makeRegionList(boxes []view.BoundingBox, polygons []view.Polygon, availableLabels []string) Node {
 	table := RegionTable{AvailableLabels: availableLabels}
 	for _, b := range boxes {
 		table.AddBox(b)
+	}
+	for _, p := range polygons {
+		table.AddPolygon(p)
 	}
 	return table.Build("Regions")
 }
@@ -34,12 +37,12 @@ func (v *AnnotationsListView) makeImageLabelList(imageLabels []view.ImageLabel) 
 	return table.Build()
 }
 
-func (v *AnnotationsListView) Build(boxes []view.BoundingBox, imageLabels []view.ImageLabel, availableLabels []string) Node {
-	bboxTable := v.makeRegionList(boxes, availableLabels)
+func (v *AnnotationsListView) Build(boxes []view.BoundingBox, polygons []view.Polygon, imageLabels []view.ImageLabel, availableLabels []string) Node {
+	regionsList := v.makeRegionList(boxes, polygons, availableLabels)
 	imageLabelsTable := v.makeImageLabelList(imageLabels)
 
 	fullTable := Div(
 		imageLabelsTable,
-		bboxTable)
+		regionsList)
 	return fullTable
 }

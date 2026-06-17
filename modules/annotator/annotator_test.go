@@ -8,6 +8,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
+	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
 	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
@@ -22,6 +23,7 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
 		clc.NewCollection(clc.NewCollectionId(), "name"))
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	box := an.NewBoundingBox(an.NewAnnotationId(), 1, 1, 1, 1, label)
+	polygon := an.NewPolygon(an.NewAnnotationId(), an.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}}, label)
 	image.AddBoundingBox(box)
 	image.AddLabel(label)
 	annotator := NewAnnotator(
@@ -29,6 +31,7 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller, *FakeView) {
 		&FakeImageReader{Return: &image},
 		&FakeBoxAdder{Returns: addbox.Response{Id: box.Id}},
 		&FakeBoxUpdater{Returns: &updbox.Response{Id: box.Id}},
+		&FakePolygonAdder{Returns: addpoly.Response{Id: polygon.Id}},
 		&FakeAnnotationDeleter{Returns: del.Response{Id: box.Id}},
 		&FakeLabelFetcher{},
 		&FakeLabelUpdater{},

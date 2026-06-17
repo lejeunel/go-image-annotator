@@ -1,6 +1,7 @@
 package view
 
 import (
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	"io"
 )
@@ -44,6 +45,14 @@ type BoundingBox struct {
 	Width  float32
 	Height float32
 	Angle  float32
+	Author string
+	Time   string
+}
+type Polygon struct {
+	Id     string
+	Label  string
+	Color  string
+	Points an.Points
 	Author string
 	Time   string
 }

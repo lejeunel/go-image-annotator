@@ -7,7 +7,7 @@ type View interface {
 	SetAvailableImageLabels([]string)
 	SetImageInfo(ImageInfo)
 	SetImage(Image)
-	SetAnnotations([]BoundingBox, []ImageLabel)
+	SetAnnotations([]BoundingBox, []Polygon, []ImageLabel)
 	UpdateBox(BoundingBox)
 	UpdateLabel(Annotation)
 	DeleteAnnotation(string)

@@ -24,6 +24,7 @@ type AnnotationView struct {
 	ScrollerView
 	image                *v.Image
 	boxes                []v.BoundingBox
+	polygons             []v.Polygon
 	imageLabels          []v.ImageLabel
 	imageInfo            *v.ImageInfo
 	availableLabels      []string
@@ -36,8 +37,9 @@ type AnnotationView struct {
 func (v *AnnotationView) SetScroller(buttons v.ScrollerButtons) {
 	v.scrollerButtons = buttons
 }
-func (v *AnnotationView) SetAnnotations(boxes []v.BoundingBox, imageLabels []v.ImageLabel) {
+func (v *AnnotationView) SetAnnotations(boxes []v.BoundingBox, polygons []v.Polygon, imageLabels []v.ImageLabel) {
 	v.boxes = boxes
+	v.polygons = polygons
 	v.imageLabels = imageLabels
 }
 func (v *AnnotationView) SetAvailableLabels(labels []string) {
@@ -61,7 +63,7 @@ func (v *AnnotationView) Error(err error) {
 	v.err = err
 }
 func (v *AnnotationView) RenderAnnotationList(w http.ResponseWriter) {
-	v.AnnotationsListView.Build(v.boxes, v.imageLabels, v.availableLabels).Render(w)
+	v.AnnotationsListView.Build(v.boxes, v.polygons, v.imageLabels, v.availableLabels).Render(w)
 }
 func (v *AnnotationView) RenderAll(w http.ResponseWriter) {
 
@@ -75,13 +77,22 @@ func (v *AnnotationView) RenderAll(w http.ResponseWriter) {
 	}
 
 }
-func (v *AnnotationView) RenderAnnotations(w http.ResponseWriter) {
+func (v *AnnotationView) RenderRegionAnnotationsAsJSON(w http.ResponseWriter) {
 	if v.err != nil {
 		http.Error(w, v.err.Error(), http.StatusBadRequest)
 		return
 	}
 	boxes := an.ConvertBoxesToAnnotorious(v.boxes)
-	data, err := json.Marshal(boxes)
+	polygons := an.ConvertPolygonsToAnnotorious(v.polygons)
+	mergedRegions := make([]any, 0, len(boxes)+len(polygons))
+	for _, b := range boxes {
+		mergedRegions = append(mergedRegions, b)
+	}
+	for _, p := range polygons {
+		mergedRegions = append(mergedRegions, p)
+	}
+
+	data, err := json.Marshal(mergedRegions)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -141,7 +152,7 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 				Tr(Td(Class("align-top"), v.ImageView.Build(*v.image)),
 					Td(Class("align-top pl-2"),
 						Div(Class("pb-2"), v.ImageInfosView.Build(*v.imageInfo)),
-						Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes, v.imageLabels, v.availableLabels)))),
+						Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes, v.polygons, v.imageLabels, v.availableLabels)))),
 			),
 			))))
 	pb.Render(w)
