@@ -1,13 +1,11 @@
 package annotator
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"embed"
 
-	an "github.com/lejeunel/go-image-annotator/adapters/web/annotator/annotorious"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
@@ -60,7 +58,7 @@ func (v *AnnotationView) Error(err error) {
 func (v *AnnotationView) RenderAnnotationList(w http.ResponseWriter) {
 	v.AnnotationsListView.Build(v.boxes, v.polygons, v.imageLabels, v.availableLabels).Render(w)
 }
-func (v *AnnotationView) RenderAll(w http.ResponseWriter) {
+func (v *AnnotationView) Render(w http.ResponseWriter) {
 
 	if v.err != nil {
 		http.Error(w, v.err.Error(), http.StatusBadRequest)
@@ -69,35 +67,6 @@ func (v *AnnotationView) RenderAll(w http.ResponseWriter) {
 
 	if v.image != nil {
 		v.render(w)
-	}
-
-}
-func (v *AnnotationView) RenderRegionAnnotationsAsJSON(w http.ResponseWriter) {
-	if v.err != nil {
-		http.Error(w, v.err.Error(), http.StatusBadRequest)
-		return
-	}
-	boxes := an.ConvertBoxesToAnnotorious(v.boxes)
-	polygons := an.ConvertPolygonsToAnnotorious(v.polygons)
-	mergedRegions := make([]any, 0, len(boxes)+len(polygons))
-	for _, b := range boxes {
-		mergedRegions = append(mergedRegions, b)
-	}
-	for _, p := range polygons {
-		mergedRegions = append(mergedRegions, p)
-	}
-
-	data, err := json.Marshal(mergedRegions)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 }
 

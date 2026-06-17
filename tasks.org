@@ -28,7 +28,7 @@ shared/identity_provider/provider.go
 ** DONE assign-label
 
 * DONE Update polygon
-* TODO split annotator presenters
+* DONE split annotator presenters
 1. HTML page presenter to render annotation page on Annotator.Init(). Needs:
    - SuccessReadImage
    - SuccessFetchLabels
@@ -52,5 +52,4 @@ shared/identity_provider/provider.go
      - SuccessUpdateBox
      - SuccessUpdateLabel
      - Error
-  
    

@@ -19,12 +19,18 @@ func (s *Server) ViewImage(w http.ResponseWriter, r *http.Request) {
 	view := aw.NewAnnotationView(s.PageBuilder)
 	p := ap.NewAnnotationPagePresenter(view)
 	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), p, p, p)
-	view.RenderAll(w)
+	view.Render(w)
+}
+func (s *Server) MakeHTMLAnnotationPanel(w http.ResponseWriter, r *http.Request) {
+	view := aw.NewAnnotationView(s.PageBuilder)
+	p := ap.NewAnnotationPagePresenter(view)
+	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), p, p, p)
+	view.RenderAnnotationList(w)
 }
 func (s *Server) SubmitLabel(w http.ResponseWriter, r *http.Request) {
 	req := assign_label.Request{ImageId: r.URL.Query().Get("image_id"),
 		Collection: r.URL.Query().Get("collection"), Label: r.URL.Query().Get("label")}
-	p := ap.NewHTTPErrorPresenter()
+	p := ap.NewJSONPresenter()
 	s.Annotator.AddLabel(r.Context(), req, &p)
 	p.Write(w)
 }
@@ -36,7 +42,7 @@ func (s *Server) SubmitPolygon(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("submit polygon: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	p := ap.NewHTTPErrorPresenter()
+	p := ap.NewJSONPresenter()
 	s.Annotator.AddPolygon(r.Context(), an.ToAddPolygonRequest(polyreq), &p)
 	p.Write(w)
 }
@@ -49,7 +55,7 @@ func (s *Server) UpdatePolygon(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("updating polygon: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	p := ap.NewHTTPErrorPresenter()
+	p := ap.NewJSONPresenter()
 	s.Annotator.UpdatePolygon(r.Context(), an.ToUpdatePolygonRequest(polyreq), &p)
 	p.Write(w)
 
@@ -64,7 +70,7 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p := ap.NewHTTPErrorPresenter()
+	p := ap.NewJSONPresenter()
 	s.Annotator.AddBox(r.Context(), an.ToAddBoxRequest(boxreq), &p)
 	p.Write(w)
 }
@@ -77,12 +83,12 @@ func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("updating box: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	p := ap.NewHTTPErrorPresenter()
+	p := ap.NewJSONPresenter()
 	s.Annotator.UpdateBox(r.Context(), an.ToUpdateBoxRequest(boxreq), &p)
 	p.Write(w)
 }
 func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
-	p := ap.NewHTTPErrorPresenter()
+	p := ap.NewJSONPresenter()
 	s.Annotator.DeleteAnnotation(r.Context(), remove.Request{Id: r.URL.Query().Get("id")}, &p)
 	p.Write(w)
 }
@@ -99,19 +105,12 @@ func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p := ap.NewHTTPErrorPresenter()
+	p := ap.NewJSONPresenter()
 	s.Annotator.UpdateLabel(r.Context(), updlbl.Request{AnnotationId: id, Label: label}, &p)
 	p.Write(w)
 }
-func (s *Server) MakeHTMLAnnotationPanel(w http.ResponseWriter, r *http.Request) {
-	view := aw.NewAnnotationView(s.PageBuilder)
-	p := ap.NewAnnotationPagePresenter(view)
-	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), p, p, p)
-	view.RenderAnnotationList(w)
-}
 func (s *Server) GetRegionsAsJSON(w http.ResponseWriter, r *http.Request) {
-	view := aw.NewAnnotationView(s.PageBuilder)
-	p := ap.NewAnnotationPagePresenter(view)
-	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), p, p, p)
-	view.RenderRegionAnnotationsAsJSON(w)
+	p := ap.NewJSONPresenter()
+	s.Annotator.ReadImage(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), &p)
+	p.RenderRegionAnnotationsAsJSON(w)
 }

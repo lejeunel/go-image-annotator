@@ -28,10 +28,13 @@ type Annotator struct {
 	labelUpdater    updlbl.Interface
 }
 
-func (a *Annotator) Init(ctx context.Context, imageId string, collection string, oim imread.OutputPort, olbl fetchlbl.OutputPort, oscr scr.OutputPort) {
+func (a *Annotator) Init(ctx context.Context, imageId string, collection string,
+	oim imread.OutputPort, olbl fetchlbl.OutputPort, oscr scr.OutputPort) {
 	a.scroller.Init(imageId, oscr, scr.WithCollection(collection))
 	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection}, oim)
 	a.labelFetcher.Execute(ctx, olbl)
+}
+func (a *Annotator) ReadImage(ctx context.Context, imageId string, collection string, o imread.OutputPort) {
 }
 
 func (a *Annotator) DeleteAnnotation(ctx context.Context, r del.Request, o del.OutputPort) {
