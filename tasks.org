@@ -27,4 +27,30 @@ shared/identity_provider/provider.go
 ** DONE update-label
 ** DONE assign-label
 
-* TODO Update polygon
+* DONE Update polygon
+* TODO split annotator presenters
+1. HTML page presenter to render annotation page on Annotator.Init(). Needs:
+   - SuccessReadImage
+   - SuccessFetchLabels
+   - Error
+     
+2. "Error only" presenter to return HTTP errors. Used in:
+   - Annotator.DeleteAnnotation
+   - Annotator.UpdateLabel
+   - Annotator.UpdateBox
+   - Annotator.UpdatePolygon
+   - Annotator.AddBox
+   - Annotator.AddPolygon
+   - Annotator.AddLabel
+
+    Must implement:
+     - SuccessDeleteAnnotation
+     - SuccessAddLabel
+     - SuccessAddBox
+     - SuccessAddPolygon
+     - SuccessUpdatePolygon
+     - SuccessUpdateBox
+     - SuccessUpdateLabel
+     - Error
+  
+   

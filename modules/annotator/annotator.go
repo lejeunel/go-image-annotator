@@ -2,8 +2,7 @@ package annotator
 
 import (
 	"context"
-	p "github.com/lejeunel/go-image-annotator/modules/annotator/presenters"
-	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
+
 	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
@@ -27,42 +26,34 @@ type Annotator struct {
 	deleter         del.Interface
 	labelFetcher    fetchlbl.Interface
 	labelUpdater    updlbl.Interface
-	presenter       p.Presenter
 }
 
-func (a *Annotator) DeleteAnnotation(ctx context.Context, r del.Request, view v.View) {
-	a.deleter.Execute(ctx, r, a.presenter.SetView(view))
+func (a *Annotator) Init(ctx context.Context, imageId string, collection string, oim imread.OutputPort, olbl fetchlbl.OutputPort, oscr scr.OutputPort) {
+	a.scroller.Init(imageId, oscr, scr.WithCollection(collection))
+	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection}, oim)
+	a.labelFetcher.Execute(ctx, olbl)
 }
-func (a *Annotator) UpdateLabel(ctx context.Context, r updlbl.Request, view v.View) {
-	a.labelUpdater.Execute(ctx, r, a.presenter.SetView(view))
-}
-func (a *Annotator) UpdateBox(ctx context.Context, r updbox.Request, view v.View) {
-	a.boxUpdater.Execute(ctx, r, a.presenter.SetView(view))
-}
-func (a *Annotator) UpdatePolygon(ctx context.Context, r updpoly.Request, view v.View) {
-	a.polygonUpdater.Execute(ctx, r, a.presenter.SetView(view))
-}
-func (a *Annotator) AddBox(ctx context.Context, r addbox.Request, view v.View) {
-	a.boxAdder.Execute(ctx, r, a.presenter.SetView(view))
-}
-func (a *Annotator) AddPolygon(ctx context.Context, r addpoly.Request, view v.View) {
-	a.polygonAdder.Execute(ctx, r, a.presenter.SetView(view))
-}
-func (a *Annotator) AddLabel(ctx context.Context, r addlbl.Request, view v.View) {
-	a.imageLabelAdder.Execute(ctx, r, a.presenter.SetView(view))
-}
-func (a *Annotator) Init(ctx context.Context, imageId string, collection string, view v.View) {
-	scrollerState, err := a.scroller.Init(imageId, scr.WithCollection(collection))
-	if err != nil {
-		view.Error(err)
-		return
-	}
-	view.SetScroller(p.MakeScrollerButtons(*scrollerState))
 
-	a.presenter.SetView(view)
-	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection},
-		a.presenter)
-	a.labelFetcher.Execute(ctx, a.presenter)
+func (a *Annotator) DeleteAnnotation(ctx context.Context, r del.Request, o del.OutputPort) {
+	a.deleter.Execute(ctx, r, o)
+}
+func (a *Annotator) UpdateLabel(ctx context.Context, r updlbl.Request, o updlbl.OutputPort) {
+	a.labelUpdater.Execute(ctx, r, o)
+}
+func (a *Annotator) UpdateBox(ctx context.Context, r updbox.Request, o updbox.OutputPort) {
+	a.boxUpdater.Execute(ctx, r, o)
+}
+func (a *Annotator) UpdatePolygon(ctx context.Context, r updpoly.Request, o updpoly.OutputPort) {
+	a.polygonUpdater.Execute(ctx, r, o)
+}
+func (a *Annotator) AddBox(ctx context.Context, r addbox.Request, o addbox.OutputPort) {
+	a.boxAdder.Execute(ctx, r, o)
+}
+func (a *Annotator) AddPolygon(ctx context.Context, r addpoly.Request, o addpoly.OutputPort) {
+	a.polygonAdder.Execute(ctx, r, o)
+}
+func (a *Annotator) AddLabel(ctx context.Context, r addlbl.Request, o addlbl.OutputPort) {
+	a.imageLabelAdder.Execute(ctx, r, o)
 }
 
 func NewAnnotator(scroller scr.Interface, imageMetaReader imread.Interface,
@@ -80,6 +71,5 @@ func NewAnnotator(scroller scr.Interface, imageMetaReader imread.Interface,
 		labelFetcher:    labelFetcher,
 		labelUpdater:    labelUpdater,
 		imageLabelAdder: imageLabelAdder,
-		presenter:       p.New(),
 	}
 }

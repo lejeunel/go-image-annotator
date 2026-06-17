@@ -35,3 +35,15 @@ func (r *FakeRepo) GetAdjacent(id im.ImageId, criteria ScrollingCriteria, d Scro
 	}
 	return nil, nil
 }
+
+type FakePresenter struct {
+	GotState *ScrollerState
+	GotErr   error
+}
+
+func (p *FakePresenter) SuccessInitScroller(state ScrollerState) {
+	p.GotState = &state
+}
+func (p *FakePresenter) Error(err error) {
+	p.GotErr = err
+}

@@ -8,7 +8,4 @@ type View interface {
 	SetImageInfo(ImageInfo)
 	SetImage(Image)
 	SetAnnotations([]BoundingBox, []Polygon, []ImageLabel)
-	UpdateBox(BoundingBox)
-	UpdateLabel(Annotation)
-	DeleteAnnotation(string)
 }

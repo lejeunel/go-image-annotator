@@ -9,7 +9,7 @@ import (
 )
 
 type Interface interface {
-	Init(string, ...Option) (*ScrollerState, error)
+	Init(string, OutputPort, ...Option)
 }
 
 type Scroller struct {
@@ -21,26 +21,34 @@ type ScrollerState struct {
 	Previous *im.BaseImage
 }
 
-func (s Scroller) Init(imageIdStr string, opts ...Option) (*ScrollerState, error) {
+type OutputPort interface {
+	SuccessInitScroller(ScrollerState)
+	Error(error)
+}
+
+func (s Scroller) Init(imageIdStr string, out OutputPort, opts ...Option) {
 	imageId, err := im.NewImageIdFromString(imageIdStr)
+
 	if err != nil {
-		return nil, err
+		out.Error(err)
+		return
 	}
 	criteria := NewCriteria(opts...)
 	if err := checkCriteria(s.repo, imageId, criteria); err != nil {
-		return nil, err
+		out.Error(err)
+		return
 	}
 	state := ScrollerState{}
 	next, errNext := s.getOne(imageId, ScrollNext, criteria)
 	prev, errPrev := s.getOne(imageId, ScrollPrevious, criteria)
 
 	if errNext != nil || errPrev != nil {
-		return nil, fmt.Errorf("%w, %w", errNext, errPrev)
+		out.Error(fmt.Errorf("%w, %w", errNext, errPrev))
+		return
 	}
 	state.Next = next
 	state.Previous = prev
-
-	return &state, nil
+	out.SuccessInitScroller(state)
 }
 
 func (s *Scroller) getOne(current im.ImageId, direction ScrollingDirection, criteria ScrollingCriteria) (*im.BaseImage, error) {

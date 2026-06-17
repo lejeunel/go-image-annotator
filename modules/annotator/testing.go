@@ -3,7 +3,6 @@ package annotator
 import (
 	"context"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
@@ -22,12 +21,11 @@ type FakeScroller struct {
 	IsInit    bool
 }
 
-func (s *FakeScroller) Init(imageId string, opts ...scr.Option) (*scr.ScrollerState, error) {
+func (s *FakeScroller) Init(imageId string, o scr.OutputPort, opts ...scr.Option) {
 	if s.ErrOnInit {
-		return nil, s.Err
+		return
 	}
 	s.IsInit = true
-	return &scr.ScrollerState{}, nil
 }
 
 type FakeLabelFetcher struct{}
@@ -37,19 +35,17 @@ func (f *FakeLabelFetcher) Execute(ctx context.Context, o fetchlbl.OutputPort) {
 }
 
 type FakeImageReader struct {
-	Return *im.Image
 }
 
 func (b *FakeImageReader) Execute(r imread.Request, o imread.OutputPort) {
-	o.SuccessReadImage(*b.Return)
+	o.SuccessReadImage(im.Image{})
 }
 
 type FakeLabelAdder struct {
-	Returns addlbl.Response
 }
 
 func (b *FakeLabelAdder) Execute(ctx context.Context, r addlbl.Request, o addlbl.OutputPort) {
-	o.SuccessAddLabel(b.Returns)
+	o.SuccessAddLabel(addlbl.Response{})
 }
 
 type FakePolygonAdder struct {
@@ -57,31 +53,28 @@ type FakePolygonAdder struct {
 }
 
 func (b *FakePolygonAdder) Execute(c context.Context, r addpoly.Request, o addpoly.OutputPort) {
-	o.SuccessAddPolygon(b.Returns)
+	o.SuccessAddPolygon(addpoly.Response{})
 }
 
 type FakePolygonUpdater struct {
-	Returns updpoly.Response
 }
 
 func (b *FakePolygonUpdater) Execute(c context.Context, r updpoly.Request, o updpoly.OutputPort) {
-	o.SuccessUpdatePolygon(b.Returns)
+	o.SuccessUpdatePolygon(updpoly.Response{})
 }
 
 type FakeBoxAdder struct {
-	Returns addbox.Response
 }
 
 func (b *FakeBoxAdder) Execute(c context.Context, r addbox.Request, o addbox.OutputPort) {
-	o.SuccessAddBox(b.Returns)
+	o.SuccessAddBox(addbox.Response{})
 }
 
 type FakeBoxUpdater struct {
-	Returns *updbox.Response
 }
 
 func (b *FakeBoxUpdater) Execute(c context.Context, r updbox.Request, o updbox.OutputPort) {
-	o.SuccessUpdateBox(*b.Returns)
+	o.SuccessUpdateBox(updbox.Response{})
 }
 
 type FakeLabelUpdater struct {
@@ -92,64 +85,8 @@ func (b *FakeLabelUpdater) Execute(ctx context.Context, r updlbl.Request, o updl
 }
 
 type FakeAnnotationDeleter struct {
-	Returns del.Response
 }
 
 func (b *FakeAnnotationDeleter) Execute(c context.Context, r del.Request, o del.OutputPort) {
-	o.SuccessDeleteAnnotation(b.Returns)
-}
-
-type FakeView struct {
-	GotScrollerButtons       *v.ScrollerButtons
-	GotErr                   error
-	GotImage                 *v.Image
-	GotImageInfo             *v.ImageInfo
-	GotAvailableRegionLabels *[]string
-	GotAvailableImageLabels  *[]string
-	GotAnnotationIds         *[]string
-	RemovedAnnotationId      *string
-	UpdatedBoxId             *string
-	UpdatedAnnotation        *v.Annotation
-}
-
-func (s *FakeView) SetScroller(buttons v.ScrollerButtons) {
-	s.GotScrollerButtons = &buttons
-}
-func (s *FakeView) Error(error) {}
-func (s *FakeView) SetImage(i v.Image) {
-	s.GotImage = &i
-}
-func (s *FakeView) SetImageInfo(i v.ImageInfo) {
-	s.GotImageInfo = &i
-}
-func (s *FakeView) SetAnnotations(boxes []v.BoundingBox, polygons []v.Polygon, labels []v.ImageLabel) {
-	ids := []string{}
-	for _, b := range boxes {
-		ids = append(ids, b.Id)
-	}
-	for _, l := range labels {
-		ids = append(ids, l.Id)
-	}
-	for _, p := range polygons {
-		ids = append(ids, p.Id)
-	}
-	s.GotAnnotationIds = &ids
-}
-
-func (s *FakeView) UpdateBox(b v.BoundingBox) {
-	s.UpdatedBoxId = &b.Id
-}
-func (s *FakeView) UpdateLabel(a v.Annotation) {
-	s.UpdatedAnnotation = &a
-}
-
-func (s *FakeView) DeleteAnnotation(id string) {
-	s.RemovedAnnotationId = &id
-}
-func (s *FakeView) SetAvailableLabels(l []string) {
-	s.GotAvailableRegionLabels = &l
-}
-
-func (s *FakeView) SetAvailableImageLabels(l []string) {
-	s.GotAvailableImageLabels = &l
+	o.SuccessDeleteAnnotation(del.Response{})
 }

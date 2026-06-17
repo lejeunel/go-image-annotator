@@ -54,11 +54,6 @@ func (v *AnnotationView) SetImageInfo(info v.ImageInfo) {
 func (v *AnnotationView) SetImage(image v.Image) {
 	v.image = &image
 }
-func (v *AnnotationView) AddBox(b v.BoundingBox)     {}
-func (v *AnnotationView) AddLabel(l v.ImageLabel)    {}
-func (v *AnnotationView) UpdateBox(b v.BoundingBox)  {}
-func (v *AnnotationView) UpdateLabel(a v.Annotation) {}
-func (v *AnnotationView) DeleteAnnotation(string)    {}
 func (v *AnnotationView) Error(err error) {
 	v.err = err
 }

@@ -9,47 +9,54 @@ import (
 )
 
 func TestErrOnInvalidImageId(t *testing.T) {
+	p := &FakePresenter{}
 	s := New(&FakeRepo{})
-	_, err := s.Init("invalid-image-id")
-	assert.ErrorIs(t, err, e.ErrValidation)
+	s.Init("invalid-image-id", p)
+	assert.Error(t, p.GotErr)
 }
 
 func TestErrOnCurrentImageShouldFail(t *testing.T) {
+	p := &FakePresenter{}
 	s := New(&FakeRepo{ErrOnImageExists: true, Err: e.ErrNotFound})
-	_, err := s.Init(im.NewImageId().String())
-	assert.ErrorIs(t, err, e.ErrNotFound)
+	s.Init(im.NewImageId().String(), p)
+	assert.ErrorIs(t, p.GotErr, e.ErrNotFound)
 }
 
 func TestNonExistingCollectionShouldFail(t *testing.T) {
+	p := &FakePresenter{}
 	s := New(&FakeRepo{ErrOnCollectionExists: true, Err: e.ErrNotFound})
-	_, err := s.Init(im.NewImageId().String(), WithCollection("non-existing-collection"))
-	assert.ErrorIs(t, err, e.ErrNotFound)
+	s.Init(im.NewImageId().String(), p, WithCollection("non-existing-collection"))
+	assert.ErrorIs(t, p.GotErr, e.ErrNotFound)
 }
 
 func TestSingleImageHasNoNextImage(t *testing.T) {
+	p := &FakePresenter{}
 	s := New(&FakeRepo{})
-	state, _ := s.Init(im.NewImageId().String())
-	assert.Nil(t, state.Next)
+	s.Init(im.NewImageId().String(), p)
+	assert.Nil(t, p.GotState.Next)
 }
 
 func TestSingleImageHasNoPreviousImage(t *testing.T) {
+	p := &FakePresenter{}
 	s := New(&FakeRepo{})
-	state, _ := s.Init(im.NewImageId().String())
-	assert.Nil(t, state.Previous)
+	s.Init(im.NewImageId().String(), p)
+	assert.Nil(t, p.GotState.Previous)
 }
 
 func TestNextImage(t *testing.T) {
+	p := &FakePresenter{}
 	next := &im.BaseImage{ImageId: im.NewImageId().String()}
 	s := New(&FakeRepo{NextImage: next})
-	state, _ := s.Init(im.NewImageId().String())
-	assert.NotNil(t, state.Next)
-	assert.Equal(t, next.ImageId, state.Next.ImageId)
+	s.Init(im.NewImageId().String(), p)
+	assert.NotNil(t, p.GotState.Next)
+	assert.Equal(t, next.ImageId, p.GotState.Next.ImageId)
 }
 
 func TestPreviousImage(t *testing.T) {
+	p := &FakePresenter{}
 	prev := &im.BaseImage{ImageId: im.NewImageId().String()}
 	s := New(&FakeRepo{PreviousImage: prev})
-	state, _ := s.Init(im.NewImageId().String())
-	assert.NotNil(t, state.Previous)
-	assert.Equal(t, prev.ImageId, state.Previous.ImageId)
+	s.Init(im.NewImageId().String(), p)
+	assert.NotNil(t, p.GotState.Previous)
+	assert.Equal(t, prev.ImageId, p.GotState.Previous.ImageId)
 }
