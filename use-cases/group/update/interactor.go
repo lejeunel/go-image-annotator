@@ -4,17 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"log/slog"
-
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 )
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   Auth
+	repo Repo
+	auth Auth
 }
 
 type Option func(*Interactor)
@@ -26,7 +22,7 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: r, logger: logging.NewNoOpLogger(),
+	i := &Interactor{repo: r,
 		auth: auth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
@@ -36,32 +32,33 @@ func New(r Repo, opts ...Option) Interactor {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
+	errCtx := "updating collection"
 	group, err := i.repo.GroupOfCollection(r.Name)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
 	}
 	if err := i.auth.UpdateCollection(ctx, *group); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.ensureNameExists(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if r.NewName != r.Name {
 		if err := i.ensureNameDoesNotExist(r.NewName); err != nil {
-			i.handleError(err, out)
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 
 	}
 
 	if err := i.repo.Update(Model{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription}); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
@@ -90,11 +87,4 @@ func (i *Interactor) ensureNameDoesNotExist(name string) error {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrDuplicate)
 	}
 	return nil
-}
-
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "updating collection"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
 }

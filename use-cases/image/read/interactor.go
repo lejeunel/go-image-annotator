@@ -4,8 +4,6 @@ import (
 	"fmt"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	imstore "github.com/lejeunel/go-image-annotator/modules/image-store"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
-	"log/slog"
 )
 
 type Interface interface {
@@ -13,12 +11,11 @@ type Interface interface {
 }
 
 type Interactor struct {
-	store  imstore.Interface
-	logger *slog.Logger
+	store imstore.Interface
 }
 
 func New(store imstore.Interface) Interactor {
-	return Interactor{store: store, logger: logging.NewNoOpLogger()}
+	return Interactor{store: store}
 }
 
 func (i Interactor) Execute(r Request, out OutputPort) {

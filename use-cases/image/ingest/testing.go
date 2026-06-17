@@ -16,7 +16,6 @@ import (
 	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
@@ -28,7 +27,6 @@ func NewTestingInteractor(opts ...Option) *Interactor {
 		AnnotationRepo:     &FakeAnnotationRepo{},
 		ArtefactRepo:       &ast.FakeStore{},
 		Hasher:             &FakeHasher{},
-		Logger:             logging.NewNoOpLogger(),
 		ImageSpecsDetector: &FakeSpecsDetector{},
 		auth:               auth.PassThroughAuth{},
 		clock:              clockwork.NewFakeClock(),

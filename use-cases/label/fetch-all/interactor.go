@@ -3,7 +3,6 @@ package fetchall
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -15,7 +14,6 @@ type Interface interface {
 }
 type Interactor struct {
 	repo       Repo
-	logger     *slog.Logger
 	countLimit int
 }
 

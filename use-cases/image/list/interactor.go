@@ -4,22 +4,20 @@ import (
 	"fmt"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	ist "github.com/lejeunel/go-image-annotator/modules/image-store"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
-	"log/slog"
 )
 
 type Interactor struct {
-	repo   Repo
-	store  ist.Interface
-	logger *slog.Logger
+	repo  Repo
+	store ist.Interface
 }
 
 func New(r Repo, s ist.Interface) Interactor {
-	return Interactor{repo: r, store: s, logger: logging.NewNoOpLogger()}
+	return Interactor{repo: r, store: s}
 }
 
 func (i Interactor) Execute(r Request, out OutputPort) {
+	errCtx := "listing images"
 	filteringParams := &ist.FilteringParams{
 		Page:       r.Page,
 		PageSize:   r.PageSize,
@@ -27,19 +25,19 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 
 	baseImages, err := i.repo.List(*filteringParams)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	count, err := i.repo.Count(ist.CountingParams{Collection: filteringParams.Collection})
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	imageResponses, err := i.buildResponse(*baseImages)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
@@ -61,11 +59,4 @@ func (i *Interactor) buildResponse(baseImages []im.BaseImage) (*[]im.Image, erro
 	}
 	return &r, nil
 
-}
-
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "listing images"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
 }

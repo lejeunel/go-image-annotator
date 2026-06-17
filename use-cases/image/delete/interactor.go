@@ -4,18 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
-	"log/slog"
 )
 
 type Interactor struct {
-	store  st.Interface
-	repo   Repo
-	logger *slog.Logger
-	auth   Auth
+	store st.Interface
+	repo  Repo
+	auth  Auth
 }
 
 type Option func(*Interactor)
@@ -27,7 +24,7 @@ func WithAuth(a Auth) Option {
 }
 
 func NewInteractor(store st.Interface, repo Repo, opts ...Option) *Interactor {
-	i := &Interactor{store: store, repo: repo, logger: logging.NewNoOpLogger(),
+	i := &Interactor{store: store, repo: repo,
 		auth: auth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
@@ -36,43 +33,37 @@ func NewInteractor(store st.Interface, repo Repo, opts ...Option) *Interactor {
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "deleting image"
 	image, err := i.findImage(r.ImageId, r.Collection)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if image.Collection.Group != nil {
 		if err := i.auth.DeleteImage(ctx, image.Collection.Group.Name); err != nil {
-			i.handleError(err, out)
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 	}
 
 	if err := i.deleteLabels(*image); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.deleteBoundingBoxes(*image); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.repo.RemoveImageFromCollection(image.Id, image.Collection.Id); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
 	}
 
 	out.Success(Response{})
-}
-
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "deleting image"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
 }
 
 func (i *Interactor) deleteBoundingBoxes(image im.Image) error {

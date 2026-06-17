@@ -3,38 +3,30 @@ package read
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"github.com/lejeunel/go-image-annotator/shared/auth"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 )
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   Auth
+	repo Repo
+	auth Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "fetching user"
 	if err := i.auth.FindUser(ctx, r.Id); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	found, err := i.repo.Find(r.Id)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	out.Success(Response{Id: found.Id, Groups: found.Groups,
 		Roles: found.Roles})
 
-}
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "fetching user"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
 }
 
 type Option func(*Interactor)
@@ -46,7 +38,7 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: r, logger: logging.NewNoOpLogger(),
+	i := &Interactor{repo: r,
 		auth: auth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)

@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"log/slog"
-
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -15,7 +13,6 @@ import (
 type Interactor struct {
 	repo      Repo
 	validator v.Validator
-	logger    *slog.Logger
 	auth      Auth
 }
 

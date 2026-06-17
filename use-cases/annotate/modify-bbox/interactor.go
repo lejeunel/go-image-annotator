@@ -5,14 +5,12 @@ import (
 	"fmt"
 
 	"github.com/jonboulle/clockwork"
-	"log/slog"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 )
 
@@ -23,7 +21,6 @@ type Interface interface {
 type Interactor struct {
 	annotationRepo AnnotationRepo
 	labelRepo      LabelRepo
-	logger         *slog.Logger
 	auth           auth.Auth
 	clock          clockwork.Clock
 }
@@ -43,7 +40,7 @@ func WithClock(c clockwork.Clock) Option {
 }
 
 func New(repo AnnotationRepo, labelRepo LabelRepo, opts ...Option) Interactor {
-	i := &Interactor{annotationRepo: repo, logger: logging.NewNoOpLogger(),
+	i := &Interactor{annotationRepo: repo,
 		labelRepo: labelRepo,
 		clock:     clockwork.NewRealClock(),
 		auth:      sauth.PassThroughAuth{}}

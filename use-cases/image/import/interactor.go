@@ -8,14 +8,11 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
-	"log/slog"
 )
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   Auth
+	repo Repo
+	auth Auth
 }
 
 type Option func(*Interactor)
@@ -27,7 +24,7 @@ func WithAuth(a Auth) Option {
 }
 
 func NewInteractor(repo Repo, opts ...Option) *Interactor {
-	i := &Interactor{repo: repo, logger: logging.NewNoOpLogger(),
+	i := &Interactor{repo: repo,
 		auth: auth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
@@ -37,36 +34,37 @@ func NewInteractor(repo Repo, opts ...Option) *Interactor {
 }
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "importing image"
 	imageId, err := im.NewImageIdFromString(r.ImageId)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.ensureSourceImageExists(imageId); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	dstCollection, err := i.findCollection(r.DestinationCollection)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if dstCollection.Group != nil {
 		if err := i.auth.ImportImage(ctx, dstCollection.Group.Name); err != nil {
-			i.handleError(err, out)
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 	}
 
 	if err := i.ensureImageDoesNotAlreadyExistInCollection(imageId, dstCollection.Id); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.repo.AddToCollection(imageId, dstCollection.Id); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
@@ -108,10 +106,4 @@ func (i Interactor) findCollection(name string) (*clc.Collection, error) {
 	}
 	return collection, nil
 
-}
-func (i Interactor) handleError(err error, out OutputPort) {
-	errCtx := "deleting image"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
 }

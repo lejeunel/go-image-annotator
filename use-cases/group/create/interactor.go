@@ -3,35 +3,33 @@ package create
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	auth "github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
 )
 
 type Interactor struct {
 	repo      Repo
 	validator v.Validator
-	logger    *slog.Logger
 	auth      Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "creating collection"
 	if err := i.auth.CreateGroup(ctx); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.validate(r.Name); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if err := i.create(r); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
@@ -70,13 +68,6 @@ func (i *Interactor) isDuplicate(name string) error {
 	return nil
 }
 
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "creating collection"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
-}
-
 type Option func(*Interactor)
 
 func WithNameValidator(v v.Validator) Option {
@@ -93,8 +84,7 @@ func WithAuth(a Auth) Option {
 
 func New(r Repo, opts ...Option) Interactor {
 	i := &Interactor{repo: r, validator: v.NewNameValidator(),
-		logger: logging.NewNoOpLogger(),
-		auth:   auth.PassThroughAuth{}}
+		auth: auth.PassThroughAuth{}}
 
 	for _, opt := range opts {
 		opt(i)

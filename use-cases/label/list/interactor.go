@@ -3,14 +3,12 @@ package list
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
+	repo Repo
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {

@@ -5,27 +5,24 @@ import (
 	"fmt"
 	"slices"
 
-	"log/slog"
-
 	"github.com/lejeunel/go-image-annotator/shared/auth"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 )
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   Auth
+	repo Repo
+	auth Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "creating user"
 	if err := i.auth.UnAssignRoleFromUser(ctx, r.Id, r.Role); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
 	}
 	user, err := i.repo.Find(r.Id)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	if !slices.Contains(user.Roles, r.Role) {
@@ -33,7 +30,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 	if err := i.repo.UnAssignRole(r.Id, r.Role); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
@@ -46,12 +43,6 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 	out.Success(Response{Id: r.Id, Roles: newRoles})
 }
-func (i *Interactor) handleError(err error, out OutputPort) {
-	errCtx := "creating user"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
-}
 
 type Option func(*Interactor)
 
@@ -63,8 +54,7 @@ func WithAuth(a Auth) Option {
 
 func New(r Repo, opts ...Option) Interactor {
 	i := &Interactor{repo: r,
-		logger: logging.NewNoOpLogger(),
-		auth:   auth.PassThroughAuth{},
+		auth: auth.PassThroughAuth{},
 	}
 
 	for _, opt := range opts {

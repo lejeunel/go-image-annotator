@@ -9,8 +9,6 @@ import (
 	"github.com/jonboulle/clockwork"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 
-	"log/slog"
-
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
@@ -19,7 +17,6 @@ import (
 	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"hash"
 )
 
@@ -34,7 +31,6 @@ type Interactor struct {
 	AnnotationRepo     AnnotationRepo
 	LabelRepo          LabelRepo
 	ArtefactRepo       ast.Interface
-	Logger             *slog.Logger
 	ImageSpecsDetector IImageSpecsDetector
 	auth               Auth
 	clock              clockwork.Clock
@@ -61,7 +57,6 @@ func New(imageRepo ImageRepo, collectionRepo CollectionRepo,
 		AnnotationRepo: annotationRepo, LabelRepo: labelRepo,
 		ArtefactRepo: fileStore, Hasher: hasher,
 		ImageSpecsDetector: specsDetector,
-		Logger:             logging.NewNoOpLogger(),
 		auth:               auth.PassThroughAuth{},
 		clock:              clockwork.NewRealClock(),
 	}

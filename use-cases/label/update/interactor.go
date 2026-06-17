@@ -4,17 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"log/slog"
-
 	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 )
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   Auth
+	repo Repo
+	auth Auth
 }
 type Option func(*Interactor)
 
@@ -26,8 +22,7 @@ func WithAuth(a Auth) Option {
 
 func New(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r,
-		logger: logging.NewNoOpLogger(),
-		auth:   auth.PassThroughAuth{}}
+		auth: auth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
 	}

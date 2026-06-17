@@ -13,9 +13,7 @@ import (
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
-	"log/slog"
 )
 
 type Interface interface {
@@ -26,7 +24,6 @@ type Interactor struct {
 	annotationRepo AnnotationRepo
 	labelRepo      LabelRepo
 	store          st.Interface
-	logger         *slog.Logger
 	auth           auth.Auth
 	clock          clockwork.Clock
 }
@@ -113,8 +110,8 @@ func WithClock(c clockwork.Clock) Option {
 func New(repo AnnotationRepo, labelRepo LabelRepo, store st.Interface, opts ...Option) Interactor {
 	i := &Interactor{annotationRepo: repo,
 		labelRepo: labelRepo,
-		store:     store, logger: logging.NewNoOpLogger(),
-		clock: clockwork.NewRealClock(),
+		store:     store,
+		clock:     clockwork.NewRealClock(),
 
 		auth: sauth.PassThroughAuth{}}
 	for _, opt := range opts {

@@ -6,9 +6,7 @@ import (
 	"context"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
-	"github.com/lejeunel/go-image-annotator/shared/logging"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
-	"log/slog"
 )
 
 type Interface interface {
@@ -16,9 +14,8 @@ type Interface interface {
 }
 
 type Interactor struct {
-	repo   Repo
-	logger *slog.Logger
-	auth   auth.Auth
+	repo Repo
+	auth auth.Auth
 }
 
 type Option func(*Interactor)
@@ -30,7 +27,7 @@ func WithAuth(a auth.Auth) Option {
 }
 
 func New(repo Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: repo, logger: logging.NewNoOpLogger(),
+	i := &Interactor{repo: repo,
 		auth: sauth.PassThroughAuth{}}
 	for _, opt := range opts {
 		opt(i)
@@ -38,37 +35,32 @@ func New(repo Repo, opts ...Option) Interactor {
 	return *i
 }
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := "removing annotation"
 	id, err := a.NewAnnotationIdFromString(r.Id)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	group, err := i.repo.GroupOfAnnotation(*id)
 	if err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if group != nil {
 
 		if err := i.auth.AnnotateGroup(ctx, *group); err != nil {
-			i.handleError(err, out)
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 	}
 
 	if err := i.repo.RemoveAnnotation(*id); err != nil {
-		i.handleError(err, out)
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	out.SuccessDeleteAnnotation(Response{Id: *id})
 
-}
-func (i Interactor) handleError(err error, out OutputPort) {
-	errCtx := "removing annotation"
-	err = fmt.Errorf("%v: %w", errCtx, err)
-	i.logger.Error(errCtx, "error", err)
-	out.Error(err)
 }
