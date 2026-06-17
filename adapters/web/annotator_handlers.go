@@ -43,12 +43,7 @@ func (s *Server) UpdatePolygon(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("updating polygon: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	req, err := an.ToUpdatePolygonRequest(polyreq)
-	if err != nil {
-		http.Error(w, fmt.Errorf("updating polygon: converting box: %w", err).Error(), http.StatusBadRequest)
-		return
-	}
-	s.Annotator.UpdatePolygon(r.Context(), *req, aw.NewAnnotationView(s.PageBuilder))
+	s.Annotator.UpdatePolygon(r.Context(), an.ToUpdatePolygonRequest(polyreq), aw.NewAnnotationView(s.PageBuilder))
 
 }
 func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
@@ -61,12 +56,7 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req, err := an.ToAddBoxRequest(boxreq)
-	if err != nil {
-		http.Error(w, fmt.Errorf("submit box: converting box: %w", err).Error(), http.StatusBadRequest)
-		return
-	}
-	s.Annotator.AddBox(r.Context(), *req, aw.NewAnnotationView(s.PageBuilder))
+	s.Annotator.AddBox(r.Context(), an.ToAddBoxRequest(boxreq), aw.NewAnnotationView(s.PageBuilder))
 }
 func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
@@ -77,12 +67,7 @@ func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("updating box: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	req, err := an.ToUpdateBoxRequest(boxreq)
-	if err != nil {
-		http.Error(w, fmt.Errorf("updating box: converting box: %w", err).Error(), http.StatusBadRequest)
-		return
-	}
-	s.Annotator.UpdateBox(r.Context(), *req, aw.NewAnnotationView(s.PageBuilder))
+	s.Annotator.UpdateBox(r.Context(), an.ToUpdateBoxRequest(boxreq), aw.NewAnnotationView(s.PageBuilder))
 }
 func (s *Server) MakeHTMLAnnotationPanel(w http.ResponseWriter, r *http.Request) {
 	view := aw.NewAnnotationView(s.PageBuilder)

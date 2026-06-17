@@ -9,6 +9,13 @@ import (
 	"text/template"
 )
 
+type RegionKind int
+
+const (
+	RegionBox RegionKind = iota
+	RegionPolygon
+)
+
 var smallText = "text-xs italic text-gray-500 dark:gray-500"
 
 type RegionTable struct {
@@ -16,7 +23,7 @@ type RegionTable struct {
 	AvailableLabels []string
 }
 
-func (t *RegionTable) addRow(author, time, id, label, color string) {
+func (t *RegionTable) addRow(author, time, id, label, color string, regionKind RegionKind) {
 	tmpl := template.New("")
 	template.Must(tmpl.ParseFS(templatesFiles,
 		"templates/label_combobox.html"))
@@ -24,6 +31,15 @@ func (t *RegionTable) addRow(author, time, id, label, color string) {
 	var buf bytes.Buffer
 	tmpl.ExecuteTemplate(&buf, "label_combobox",
 		LabelSelector{Labels: t.AvailableLabels, SelectorIsOpen: false, Selected: &label, AnnotationId: id})
+
+	var regionIcon string
+	switch regionKind {
+	case RegionBox:
+		regionIcon = MakeColoredRectangleIcon(color)
+	case RegionPolygon:
+		regionIcon = MakeColoredHexagonIcon(color)
+	}
+
 	t.Rows = append(t.Rows,
 		RegionRow{Values: []Node{
 			Div(Class("flex flex-col"),
@@ -31,9 +47,7 @@ func (t *RegionTable) addRow(author, time, id, label, color string) {
 				Div(Class(smallText), Text(time)),
 			),
 			Div(Class("ps-1"),
-				Raw(fmt.Sprintf(`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <rect x="10" y="10" width="80" height="80" rx="10" ry="10" fill="%v" />
-</svg>`, color)),
+				Raw(regionIcon),
 			),
 			Raw(buf.String()),
 			Div(
@@ -44,11 +58,11 @@ func (t *RegionTable) addRow(author, time, id, label, color string) {
 }
 
 func (t *RegionTable) AddPolygon(p view.Polygon) {
-	t.addRow(p.Author, p.Time, p.Id, p.Label, p.Color)
+	t.addRow(p.Author, p.Time, p.Id, p.Label, p.Color, RegionPolygon)
 }
 
 func (t *RegionTable) AddBox(b view.BoundingBox) {
-	t.addRow(b.Author, b.Time, b.Id, b.Label, b.Color)
+	t.addRow(b.Author, b.Time, b.Id, b.Label, b.Color, RegionBox)
 
 }
 

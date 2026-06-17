@@ -40,11 +40,11 @@ func ToAddPolygonRequest(r AnnotoriousPolygonRequest) addpoly.Request {
 	}
 }
 
-func ToUpdatePolygonRequest(r AnnotoriousPolygonModel) (*updpoly.Request, error) {
+func ToUpdatePolygonRequest(r AnnotoriousPolygonModel) updpoly.Request {
 
-	return &updpoly.Request{AnnotationId: r.AnnotationId,
+	return updpoly.Request{AnnotationId: r.AnnotationId,
 		Label:  r.Bodies[0].Value,
-		Points: a.Points{Coordinates: r.Target.Selector.Geometry.Points}}, nil
+		Points: a.Points{Coordinates: r.Target.Selector.Geometry.Points}}
 
 }
 

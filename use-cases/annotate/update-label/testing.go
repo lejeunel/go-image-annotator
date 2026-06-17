@@ -29,11 +29,15 @@ type FakeAnnotationRepo struct {
 	UpdatedAnnotationId a.AnnotationId
 	UpdatedLabelId      lbl.LabelId
 	Returns             *lbl.Label
+	NoGroup             bool
 	GotUserId           *u.UserId
 	GotTime             *time.Time
 }
 
 func (r *FakeAnnotationRepo) GroupOfAnnotation(a.AnnotationId) (*string, error) {
+	if r.NoGroup {
+		return nil, nil
+	}
 	group := "my-group"
 	return &group, nil
 }

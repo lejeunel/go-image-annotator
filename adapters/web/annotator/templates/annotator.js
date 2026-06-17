@@ -184,7 +184,7 @@ document.addEventListener('alpine:init', () => {
                 const annotator = Alpine.store("annotator").instance;
                 annotator.setAnnotations(data, true);
             } catch (err) {
-                console.error(err);
+                alert(err.message);
             }
         },
 
@@ -195,7 +195,6 @@ document.addEventListener('alpine:init', () => {
                 await this.refreshUI();
 
             } catch (err) {
-                console.error(err);
                 alert(err.message);
             }
         },
@@ -212,7 +211,6 @@ document.addEventListener('alpine:init', () => {
                 await this.refreshUI();
 
             } catch (err) {
-                console.error(err);
                 alert(err.message);
             }
         },
@@ -220,6 +218,7 @@ document.addEventListener('alpine:init', () => {
         async relabel(id, label) {
             try {
                 await AnnotationAPI.setLabel(id, label)
+                await this.refreshList();
             } catch(err) {
                 alert(err.message)
             }
@@ -230,7 +229,6 @@ document.addEventListener('alpine:init', () => {
                 await AnnotationAPI.remove(id);
                 await this.refreshUI();
             } catch (err) {
-                console.error(err);
                 alert(err.message);
             }
         },

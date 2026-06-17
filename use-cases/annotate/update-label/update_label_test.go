@@ -72,6 +72,17 @@ func TestTime(t *testing.T) {
 	assert.Equal(t, now, *repo.GotTime)
 }
 
+func TestUpdateLabelNoGroup(t *testing.T) {
+	p := &FakePresenter{}
+	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
+	repo := &FakeAnnotationRepo{NoGroup: true}
+	itr := New(repo, &FakeLabelRepo{Returns: &newLabel})
+	req := CreateTestRequest()
+	itr.Execute(t.Context(), req, p)
+	assert.Equal(t, req.AnnotationId, repo.UpdatedAnnotationId.String())
+	assert.Equal(t, repo.UpdatedLabelId, newLabel.Id)
+}
+
 func TestUpdateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
