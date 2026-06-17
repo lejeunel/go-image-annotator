@@ -20,8 +20,11 @@ type Server struct {
 func NewServer(interactors *app.Interactors, annotator a.Annotator,
 	pageBuilder b.PageBuilder, sessionManager s.SessionManager,
 	identityHandler ip.OAuthHandler) *Server {
-	return &Server{Interactors: interactors, Annotator: annotator,
-		SessionManager: sessionManager, PageBuilder: pageBuilder,
+	return &Server{
+		Interactors:          interactors,
+		Annotator:            annotator,
+		SessionManager:       sessionManager,
+		PageBuilder:          pageBuilder,
 		UserDashboardBuilder: b.NewUserDashboardBuilder(),
 		OAuthHandler:         identityHandler}
 }

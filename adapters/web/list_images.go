@@ -36,8 +36,8 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentityFromContext(r.Context())
 	collection := r.URL.Query().Get("collection")
 	if collection == "" {
-		p := b.NewPageBuilder(s.APIPath).SetError(fmt.Errorf("parsing url to get collection name: %w", e.ErrURLParsing))
-		p.Render(w)
+		s.PageBuilder.SetError(fmt.Errorf("parsing url to get collection name: %w", e.ErrURLParsing))
+		s.PageBuilder.Render(w)
 	}
 	s.Image.List.Execute(list_im.Request{PageSize: s.Image.DefaultPageSize,
 		Page:           int64(GetPageFromRequest(r)),

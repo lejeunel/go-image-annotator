@@ -8,7 +8,6 @@ import (
 
 	aw "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
 	an "github.com/lejeunel/go-image-annotator/adapters/web/annotator/annotorious"
-	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	assign_label "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
@@ -86,12 +85,12 @@ func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 	errCtx := fmt.Errorf("setting label")
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		b.NewPageBuilder(s.APIPath).SetError(fmt.Errorf("%w: failed parsing url to get annotation id", errCtx)).Render(w)
+		s.PageBuilder.SetError(fmt.Errorf("%w: failed parsing url to get annotation id", errCtx)).Render(w)
 		return
 	}
 	label := r.URL.Query().Get("label")
 	if label == "" {
-		b.NewPageBuilder(s.APIPath).SetError(fmt.Errorf("%w: failed parsing url to get label field", errCtx)).Render(w)
+		s.PageBuilder.SetError(fmt.Errorf("%w: failed parsing url to get label field", errCtx)).Render(w)
 		return
 	}
 

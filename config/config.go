@@ -12,6 +12,8 @@ type Config struct {
 	DefaultPageSize     int      `default:"10"`
 	TokenLength         int      `default:"32"`
 	APIPath             string   `default:"api"`
+	RepoURL             string   `default:"https://github.com/lejeunel/go-image-annotator"`
+	DocsURL             string   `default:"https://lejeunel.github.io/go-image-annotator/"`
 }
 
 func Parse() Config {

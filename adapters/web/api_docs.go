@@ -13,8 +13,7 @@ func APIDocsLib() Node {
 
 }
 
-func APIDocsPage(ctx context.Context, specsPath string, apiPath string) Node {
-	p := b.NewPageBuilder(apiPath)
+func APIDocsPage(ctx context.Context, specsPath string, p b.PageBuilder) Node {
 	p.AddScripts(APIDocsLib())
 	p.SetUserIdentityFromContext(ctx)
 	p.SetContent(Div(Class("spotlight "),
@@ -30,10 +29,10 @@ func APIDocsPage(ctx context.Context, specsPath string, apiPath string) Node {
 	return p.Build()
 }
 
-func RegisterAPIDocs(mux *http.ServeMux, specsPath, docsPath string) {
+func RegisterAPIDocs(mux *http.ServeMux, specsPath, docsPath string, p b.PageBuilder) {
 	mux.HandleFunc(docsPath,
 		func(w http.ResponseWriter, r *http.Request) {
-			if err := APIDocsPage(r.Context(), specsPath, docsPath).Render(w); err != nil {
+			if err := APIDocsPage(r.Context(), specsPath, p).Render(w); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		})

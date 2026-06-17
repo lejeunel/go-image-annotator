@@ -21,7 +21,7 @@ func RegisterHandlers(mux *http.ServeMux, apiServer api.Server, webServer web.Se
 	pageBuilder b.PageBuilder) {
 	api.RegisterAPIEndpoints(mux, apiServer, apicfg.APIPath)
 	web.RegisterWebPages(mux, webServer, pageBuilder)
-	web.RegisterAPIDocs(mux, apicfg.OpenAPISpecsPath, apicfg.APIDocsPath)
+	web.RegisterAPIDocs(mux, apicfg.OpenAPISpecsPath, apicfg.APIDocsPath, pageBuilder)
 	as.RegisterAPISpecs(mux, apicfg.OpenAPISpecsPath)
 	as.RegisterStaticFiles(mux)
 }
@@ -30,7 +30,7 @@ func Make() http.Handler {
 	cfg := config.Parse()
 	mux := http.NewServeMux()
 
-	pageBuilder := b.NewPageBuilder(cfg.APIPath)
+	pageBuilder := b.NewPageBuilder(cfg.APIPath, cfg.RepoURL, cfg.DocsURL)
 
 	app := sqlite.NewSQLiteApp(cfg)
 	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),

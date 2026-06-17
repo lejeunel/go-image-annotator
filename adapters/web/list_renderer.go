@@ -31,7 +31,7 @@ func (p ListRenderer) RenderSuccess(table html.MyTable, pagination pagination.Pa
 }
 
 func (p ListRenderer) Error(err error) {
-	b.NewPageBuilder(p.APIPath).SetError(err).Render(p.Writer)
+	p.SetError(err).Render(p.Writer)
 }
 
 func NewListRenderer(pageBuilder b.PageBuilder, listURL url.URL, page b.ActivePage, w io.Writer) ListRenderer {

@@ -26,3 +26,5 @@ shared/identity_provider/provider.go
 ** DONE modify-bbox
 ** DONE update-label
 ** DONE assign-label
+
+* TODO Update polygon
