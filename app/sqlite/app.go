@@ -5,6 +5,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/config"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	"github.com/lejeunel/go-image-annotator/modules/scroller"
 	tok "github.com/lejeunel/go-image-annotator/modules/token"
@@ -12,7 +13,7 @@ import (
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
 )
 
-func NewSQLiteApp(cfg config.Config) app.App {
+func NewSQLiteApp(cfg config.Config, auth auth.Auth) app.App {
 	tg := tok.NewTokenGenerator(cfg.TokenLength)
 	sqldb := db.NewSQLiteDB(cfg.SQLiteDBPath)
 	repos := NewSQLiteRepos(sqldb,
@@ -21,7 +22,7 @@ func NewSQLiteApp(cfg config.Config) app.App {
 	identityProvider := ip.NewGothIdentityHandler(sessionManager)
 	scr := scroller.New(repos.Scroller)
 	itrs := NewSQLiteInteractors(repos,
-		cfg.DefaultPageSize, cfg.AllowedImageFormats, tg)
+		cfg.DefaultPageSize, cfg.AllowedImageFormats, tg, auth)
 	annotator := a.NewAnnotator(scr, itrs.Image.Read,
 		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox,
 		itrs.Annotation.AddPolygon, itrs.Annotation.UpdatePolygon,

@@ -7,6 +7,7 @@ import (
 	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
 	a "github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	clc "github.com/lejeunel/go-image-annotator/use-cases/collection/create"
 )
 
@@ -19,7 +20,7 @@ func (p CreatePresenter) Success(r clc.Response) {
 }
 
 func Create(name string, group *string, description string) {
-	app := a.NewSQLiteApp(config.Parse())
+	app := a.NewSQLiteApp(config.Parse(), auth.NewVoidAuth())
 	app.Itrs.Collection.Create.Execute(context.Background(),
 		clc.Request{Name: name, Group: group, Description: description}, CreatePresenter{})
 

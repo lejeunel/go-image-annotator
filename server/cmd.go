@@ -1,16 +1,27 @@
 package server
 
 import (
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	"github.com/spf13/cobra"
 )
 
 var (
-	port int
-	Cmd  = &cobra.Command{
+	port          int
+	authSpecsPath string
+	Cmd           = &cobra.Command{
 		Use:   "serve",
 		Short: "Run server",
 		Run: func(cmd *cobra.Command, args []string) {
-			handler := Make()
+			specs, err := auth.ReadAuthSpecsFromPath(authSpecsPath)
+			if err != nil {
+				panic(err)
+			}
+
+			authorizer, err := auth.New(*specs)
+			if err != nil {
+				panic(err)
+			}
+			handler := Make(*authorizer)
 			Serve(handler, port)
 		},
 	}
@@ -18,4 +29,5 @@ var (
 
 func init() {
 	Cmd.Flags().IntVarP(&port, "port", "p", 80, "port to serve on")
+	Cmd.Flags().StringVarP(&authSpecsPath, "auth-specs", "a", "", "path to yaml authentication specification file")
 }

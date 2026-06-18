@@ -10,32 +10,32 @@ import (
 	"io"
 )
 
-type ConfigurableAuth struct {
+type Auth struct {
 	Rules map[string]AuthRule
 }
 
-func NewVoidAuth() ConfigurableAuth {
-	return ConfigurableAuth{}
+func NewVoidAuth() Auth {
+	return Auth{}
 }
 
-func NewConfigurableAuth(rules []AuthRule) (*ConfigurableAuth, error) {
+func New(rules []AuthRule) (*Auth, error) {
 	ruleMap := make(map[string]AuthRule)
 	for _, r := range rules {
 		ruleMap[r.Method] = r
 	}
-	return &ConfigurableAuth{ruleMap}, nil
+	return &Auth{ruleMap}, nil
 }
 
-func NewConfigurableAuthFromYaml(r io.Reader) (*ConfigurableAuth, error) {
+func NewFromYaml(r io.Reader) (*Auth, error) {
 	rules, err := NewAuthRulesFromYaml(r)
 	if err != nil {
 		return nil, fmt.Errorf("building authorizer from yaml: %w", err)
 	}
 
-	return NewConfigurableAuth(*rules)
+	return New(*rules)
 
 }
-func (a ConfigurableAuth) checkForGroup(userGroups []string, neededGroup string) error {
+func (a Auth) checkForGroup(userGroups []string, neededGroup string) error {
 	for _, userGroup := range userGroups {
 		if userGroup == neededGroup {
 			return nil
@@ -43,7 +43,7 @@ func (a ConfigurableAuth) checkForGroup(userGroups []string, neededGroup string)
 	}
 	return fmt.Errorf("checking membership to group %v: %w", neededGroup, e.ErrAuth)
 }
-func (a ConfigurableAuth) checkForRole(userRoles, allowedRoles []string) error {
+func (a Auth) checkForRole(userRoles, allowedRoles []string) error {
 
 	gotAdequateRole := false
 	for _, userRole := range userRoles {
@@ -59,7 +59,7 @@ func (a ConfigurableAuth) checkForRole(userRoles, allowedRoles []string) error {
 	}
 	return nil
 }
-func (a ConfigurableAuth) check(ctx context.Context, method, group string) error {
+func (a Auth) check(ctx context.Context, method, group string) error {
 	errCtx := "authorizing request"
 	rule, ok := a.Rules[method]
 	if !ok {
@@ -81,69 +81,69 @@ func (a ConfigurableAuth) check(ctx context.Context, method, group string) error
 	return nil
 }
 
-func (a ConfigurableAuth) CreateCollection(ctx context.Context, group string) error {
+func (a Auth) CreateCollection(ctx context.Context, group string) error {
 	return a.check(ctx, "CreateCollection", group)
 }
-func (a ConfigurableAuth) DeleteCollection(ctx context.Context, group string) error {
+func (a Auth) DeleteCollection(ctx context.Context, group string) error {
 	return a.check(ctx, "DeleteCollection", group)
 }
-func (a ConfigurableAuth) UpdateCollection(ctx context.Context, group string) error {
+func (a Auth) UpdateCollection(ctx context.Context, group string) error {
 	return a.check(ctx, "UpdateCollection", group)
 }
-func (a ConfigurableAuth) CreateLabel(ctx context.Context) error {
+func (a Auth) CreateLabel(ctx context.Context) error {
 	return a.check(ctx, "CreateLabel", "")
 }
-func (a ConfigurableAuth) DeleteLabel(ctx context.Context) error {
+func (a Auth) DeleteLabel(ctx context.Context) error {
 	return a.check(ctx, "DeleteLabel", "")
 }
-func (a ConfigurableAuth) UpdateLabel(ctx context.Context) error {
+func (a Auth) UpdateLabel(ctx context.Context) error {
 	return a.check(ctx, "UpdateLabel", "")
 }
-func (a ConfigurableAuth) AnnotateGroup(ctx context.Context, group string) error {
+func (a Auth) AnnotateGroup(ctx context.Context, group string) error {
 	return a.check(ctx, "AnnotateGroup", group)
 }
-func (a ConfigurableAuth) DeleteImage(ctx context.Context, group string) error {
+func (a Auth) DeleteImage(ctx context.Context, group string) error {
 	return a.check(ctx, "DeleteImage", group)
 }
-func (a ConfigurableAuth) ImportImage(ctx context.Context, group string) error {
+func (a Auth) ImportImage(ctx context.Context, group string) error {
 	return a.check(ctx, "ImportImage", group)
 }
-func (a ConfigurableAuth) IngestImage(ctx context.Context, group string) error {
+func (a Auth) IngestImage(ctx context.Context, group string) error {
 	return a.check(ctx, "IngestImage", group)
 }
-func (a ConfigurableAuth) CreateUser(ctx context.Context) error {
+func (a Auth) CreateUser(ctx context.Context) error {
 	return a.check(ctx, "CreateUser", "")
 }
-func (a ConfigurableAuth) DeleteUser(ctx context.Context) error {
+func (a Auth) DeleteUser(ctx context.Context) error {
 	return a.check(ctx, "DeleteUser", "")
 }
-func (a ConfigurableAuth) RenewToken(ctx context.Context) error {
+func (a Auth) RenewToken(ctx context.Context) error {
 	return a.check(ctx, "RenewToken", "")
 }
-func (a ConfigurableAuth) AssignUserToGroup(ctx context.Context) error {
+func (a Auth) AssignUserToGroup(ctx context.Context) error {
 	return a.check(ctx, "AssignUserToGroup", "")
 }
-func (a ConfigurableAuth) UnAssignUserFromGroup(ctx context.Context) error {
+func (a Auth) UnAssignUserFromGroup(ctx context.Context) error {
 	return a.check(ctx, "UnAssignUserFromGroup", "")
 }
-func (a ConfigurableAuth) AssignRoleToUser(ctx context.Context) error {
+func (a Auth) AssignRoleToUser(ctx context.Context) error {
 	return a.check(ctx, "AssignRoleToUser", "")
 }
-func (a ConfigurableAuth) UnAssignRoleFromUser(ctx context.Context) error {
+func (a Auth) UnAssignRoleFromUser(ctx context.Context) error {
 	return a.check(ctx, "UnAssignRoleFromUser", "")
 }
-func (a ConfigurableAuth) ListUsers(ctx context.Context) error {
+func (a Auth) ListUsers(ctx context.Context) error {
 	return a.check(ctx, "ListUsers", "")
 }
-func (a ConfigurableAuth) FindUser(ctx context.Context) error {
+func (a Auth) FindUser(ctx context.Context) error {
 	return a.check(ctx, "FindUser", "")
 }
-func (a ConfigurableAuth) CreateGroup(ctx context.Context) error {
+func (a Auth) CreateGroup(ctx context.Context) error {
 	return a.check(ctx, "CreateGroup", "")
 }
-func (a ConfigurableAuth) DeleteGroup(ctx context.Context) error {
+func (a Auth) DeleteGroup(ctx context.Context) error {
 	return a.check(ctx, "DeleteGroup", "")
 }
-func (a ConfigurableAuth) SetAdminRights(ctx context.Context) error {
+func (a Auth) SetAdminRights(ctx context.Context) error {
 	return a.check(ctx, "SetAdminRights", "")
 }

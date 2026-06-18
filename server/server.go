@@ -6,6 +6,7 @@ import (
 	"os"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
@@ -27,13 +28,13 @@ func RegisterHandlers(mux *http.ServeMux, apiServer api.Server, webServer web.Se
 	as.RegisterStaticFiles(mux)
 }
 
-func Make() http.Handler {
+func Make(auth auth.Auth) http.Handler {
 	cfg := config.Parse()
 	mux := http.NewServeMux()
 
 	pageBuilder := b.NewPageBuilder(cfg.APIPath, cfg.RepoURL, cfg.DocsURL)
 
-	app := sqlite.NewSQLiteApp(cfg)
+	app := sqlite.NewSQLiteApp(cfg, auth)
 	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
 		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),
 		CallbackURL: "http://localhost:3000/callback/google"})

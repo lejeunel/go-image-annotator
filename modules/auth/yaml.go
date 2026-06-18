@@ -5,6 +5,8 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"gopkg.in/yaml.v2"
 	"io"
+	"os"
+	"strings"
 )
 
 type YamlConfigAuthRule struct {
@@ -57,4 +59,33 @@ func NewAuthRulesFromYaml(r io.Reader) (*[]AuthRule, error) {
 	}
 
 	return &rules, nil
+}
+
+func ReadAuthSpecsFromPath(path string) (*[]AuthRule, error) {
+	voidRules := []AuthRule{}
+	if path == "" {
+		return &voidRules, nil
+	}
+	errCtx := fmt.Errorf("parsing authentication specifications from file %v", path)
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return nil, fmt.Errorf("%w: file does not exist", errCtx)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", errCtx, err)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("%w: reading file: %w", errCtx, err)
+	}
+	rules, err := NewAuthRulesFromYaml(strings.NewReader(string(data)))
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", errCtx, err)
+	}
+	if rules == nil {
+		return &voidRules, nil
+	}
+	return rules, nil
+
 }

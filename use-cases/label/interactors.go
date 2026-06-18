@@ -1,6 +1,7 @@
 package label
 
 import (
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
@@ -15,4 +16,5 @@ type Interactors struct {
 	List            list.Interactor
 	FetchAll        fetchall.Interactor
 	DefaultPageSize int
+	Authorizer      auth.Auth
 }

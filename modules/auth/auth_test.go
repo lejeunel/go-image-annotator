@@ -65,20 +65,20 @@ func TestValidRules(t *testing.T) {
 }
 
 func TestAuthConstruction(t *testing.T) {
-	auth, err := NewConfigurableAuthFromYaml(strings.NewReader(validSpec))
+	auth, err := NewFromYaml(strings.NewReader(validSpec))
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(auth.Rules))
 }
 
 func TestAuthorizeWhenNoRuleSpecified(t *testing.T) {
-	auth, err := NewConfigurableAuthFromYaml(strings.NewReader(""))
+	auth, err := NewFromYaml(strings.NewReader(""))
 	assert.NoError(t, err)
 	err = auth.CreateCollection(t.Context(), "")
 	assert.NoError(t, err)
 }
 
 func TestNotAuthorizedWhenRequiredRoleIsMissing(t *testing.T) {
-	auth, err := NewConfigurableAuth(
+	auth, err := New(
 		[]AuthRule{{
 			Method:      "CreateCollection",
 			IgnoreGroup: true,
@@ -90,7 +90,7 @@ func TestNotAuthorizedWhenRequiredRoleIsMissing(t *testing.T) {
 }
 
 func TestAuthorizedWhenRequiredRoleIsPresent(t *testing.T) {
-	auth, err := NewConfigurableAuth(
+	auth, err := New(
 		[]AuthRule{{
 			Method:      "CreateCollection",
 			IgnoreGroup: true,
@@ -102,7 +102,7 @@ func TestAuthorizedWhenRequiredRoleIsPresent(t *testing.T) {
 }
 
 func TestNotAuthorizedWhenNotInGroup(t *testing.T) {
-	auth, err := NewConfigurableAuth(
+	auth, err := New(
 		[]AuthRule{{
 			Method: "CreateCollection",
 			Roles:  []string{"a-role-that-i-have"}}})
@@ -114,7 +114,7 @@ func TestNotAuthorizedWhenNotInGroup(t *testing.T) {
 }
 
 func TestAuthorizedWhenMemberOfGroup(t *testing.T) {
-	auth, err := NewConfigurableAuth(
+	auth, err := New(
 		[]AuthRule{{
 			Method: "CreateCollection",
 			Roles:  []string{"a-role-that-i-have"}}})
@@ -126,7 +126,7 @@ func TestAuthorizedWhenMemberOfGroup(t *testing.T) {
 }
 
 func TestAuthorizedWhenNeededGroupIsVoid(t *testing.T) {
-	auth, err := NewConfigurableAuth(
+	auth, err := New(
 		[]AuthRule{{
 			Method: "CreateCollection",
 			Roles:  []string{"a-role-that-i-have"}}})

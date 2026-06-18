@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	infra "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	lbl "github.com/lejeunel/go-image-annotator/use-cases/label"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/delete"
@@ -10,13 +11,12 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/label/read"
 )
 
-func NewSQLiteLabelInteractors(repo infra.SQLiteLabelRepo, pageSize int) lbl.Interactors {
+func NewSQLiteLabelInteractors(repo infra.SQLiteLabelRepo, pageSize int, auth auth.Auth) lbl.Interactors {
 	return lbl.Interactors{
-		Find:            *read.New(repo),
-		Create:          *create.New(repo),
-		Delete:          *delete.New(repo),
-		List:            *list.New(repo),
-		FetchAll:        *fetchall.New(repo),
-		DefaultPageSize: pageSize,
+		Find:     *read.New(repo),
+		Create:   *create.New(repo, create.WithAuth(auth)),
+		Delete:   *delete.New(repo, delete.WithAuth(auth)),
+		List:     *list.New(repo),
+		FetchAll: *fetchall.New(repo),
 	}
 }

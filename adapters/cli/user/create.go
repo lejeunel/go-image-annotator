@@ -7,6 +7,7 @@ import (
 	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
 	a "github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	uc "github.com/lejeunel/go-image-annotator/use-cases/user/create"
 )
 
@@ -19,7 +20,7 @@ func (p Presenter) Success(r uc.Response) {
 }
 
 func Create(id string, isAdmin bool) {
-	app := a.NewSQLiteApp(config.Parse())
+	app := a.NewSQLiteApp(config.Parse(), auth.NewVoidAuth())
 	app.Itrs.User.Create.Execute(context.Background(),
 		uc.Request{Id: id, IsAdmin: isAdmin}, Presenter{})
 }

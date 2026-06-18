@@ -1,6 +1,7 @@
 package annotate
 
 import (
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
@@ -18,4 +19,5 @@ type Interactors struct {
 	Delete        remove.Interactor
 	UpdateLabel   updlbl.Interactor
 	AddImageLabel addlbl.Interactor
+	Authorizer    auth.Auth
 }

@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	an "github.com/lejeunel/go-image-annotator/use-cases/annotate"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
@@ -11,14 +12,14 @@ import (
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
-func NewSQLiteAnnotationInteractors(repos SQLiteRepos) an.Interactors {
+func NewSQLiteAnnotationInteractors(repos SQLiteRepos, auth auth.Auth) an.Interactors {
 	return an.Interactors{
-		AddPolygon:    addpoly.New(repos.ImageStore, repos.Annotation, repos.Label),
-		UpdatePolygon: updpoly.New(repos.Annotation, repos.Label),
-		AddBox:        addbox.New(repos.ImageStore, repos.Annotation, repos.Label),
-		UpdateBox:     updbox.New(repos.Annotation, repos.Label),
-		Delete:        remano.New(repos.Annotation),
-		UpdateLabel:   updlbl.New(repos.Annotation, repos.Label),
-		AddImageLabel: addlbl.New(repos.Annotation, repos.Label, repos.ImageStore),
+		AddPolygon:    addpoly.New(repos.ImageStore, repos.Annotation, repos.Label, addpoly.WithAuth(auth)),
+		UpdatePolygon: updpoly.New(repos.Annotation, repos.Label, updpoly.WithAuth(auth)),
+		AddBox:        addbox.New(repos.ImageStore, repos.Annotation, repos.Label, addbox.WithAuth(auth)),
+		UpdateBox:     updbox.New(repos.Annotation, repos.Label, updbox.WithAuth(auth)),
+		Delete:        remano.New(repos.Annotation, remano.WithAuth(auth)),
+		UpdateLabel:   updlbl.New(repos.Annotation, repos.Label, updlbl.WithAuth(auth)),
+		AddImageLabel: addlbl.New(repos.Annotation, repos.Label, repos.ImageStore, addlbl.WithAuth(auth)),
 	}
 }

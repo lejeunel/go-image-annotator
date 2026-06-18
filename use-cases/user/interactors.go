@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	agr "github.com/lejeunel/go-image-annotator/use-cases/user/assign-group"
 	aro "github.com/lejeunel/go-image-annotator/use-cases/user/assign-role"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
@@ -25,4 +26,5 @@ type Interactors struct {
 	UnAssignGroup   ugr.Interactor
 	SetAdmin        adm.Interactor
 	DefaultPageSize int
+	Authorizer      auth.Auth
 }
