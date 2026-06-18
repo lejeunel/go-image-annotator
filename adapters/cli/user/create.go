@@ -17,9 +17,6 @@ type Presenter struct {
 func (p Presenter) Success(r uc.Response) {
 	fmt.Println("created user with id", r.Id, "and admin rights", r.IsAdmin)
 }
-func (p Presenter) Error(err error) {
-	fmt.Println(err.Error())
-}
 
 func Create(id string, isAdmin bool) {
 	app := a.NewSQLiteApp(config.Parse())

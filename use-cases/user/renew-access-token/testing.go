@@ -45,7 +45,7 @@ func (r *FakeRepo) Exists(id string) (bool, error) {
 type FailingAuth struct {
 }
 
-func (f FailingAuth) RenewToken(ctx context.Context, id string) error {
+func (f FailingAuth) RenewToken(ctx context.Context) error {
 	return e.ErrAuth
 }
 

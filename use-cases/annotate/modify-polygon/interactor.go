@@ -9,8 +9,7 @@ import (
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
-	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
+	sauth "github.com/lejeunel/go-image-annotator/modules/auth"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 )
 
@@ -43,7 +42,7 @@ func New(repo AnnotationRepo, labelRepo LabelRepo, opts ...Option) Interactor {
 	i := &Interactor{annotationRepo: repo,
 		labelRepo: labelRepo,
 		clock:     clockwork.NewRealClock(),
-		auth:      sauth.PassThroughAuth{}}
+		auth:      sauth.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -82,7 +81,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 }
 func (i Interactor) update(ctx context.Context, id a.AnnotationId, upd a.PolygonUpdatables) error {
 	var userId *u.UserId
-	user := ip.IdentityFromContext(ctx)
+	user := u.IdentityFromContext(ctx)
 	if user != nil {
 		userId = &user.Id
 	}

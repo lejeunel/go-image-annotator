@@ -13,8 +13,8 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
-	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
@@ -28,7 +28,7 @@ func NewTestingInteractor(opts ...Option) *Interactor {
 		ArtefactRepo:       &ast.FakeStore{},
 		Hasher:             &FakeHasher{},
 		ImageSpecsDetector: &FakeSpecsDetector{},
-		auth:               auth.PassThroughAuth{},
+		auth:               auth.NewVoidAuth(),
 		clock:              clockwork.NewFakeClock(),
 	}
 	for _, opt := range opts {

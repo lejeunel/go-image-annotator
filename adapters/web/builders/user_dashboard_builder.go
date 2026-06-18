@@ -3,7 +3,6 @@ package builders
 import (
 	"context"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	p "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 	"strings"
@@ -24,7 +23,7 @@ type UserDashboardBuilder struct {
 }
 
 func (b *UserDashboardBuilder) SetUserIdentityFromContext(ctx context.Context) *UserDashboardBuilder {
-	id := p.IdentityFromContext(ctx)
+	id := u.IdentityFromContext(ctx)
 	b.User = id
 	return b
 }

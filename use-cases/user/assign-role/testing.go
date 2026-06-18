@@ -46,6 +46,6 @@ func (r *FakeRepo) AssignRole(id string, role string) error {
 type FailingAuth struct {
 }
 
-func (f FailingAuth) AssignRoleToUser(ctx context.Context, id string, role string) error {
+func (f FailingAuth) AssignRoleToUser(ctx context.Context) error {
 	return e.ErrAuth
 }

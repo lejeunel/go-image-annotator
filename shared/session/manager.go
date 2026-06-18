@@ -70,7 +70,7 @@ func (m MySessionManager) AuthBearerToken(next http.Handler) http.Handler {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		ctx := context.WithValue(r.Context(), u.UserContextKey, user)
+		ctx := u.AppendUserToContext(r.Context(), *user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -89,7 +89,7 @@ func (m MySessionManager) AuthFromSessionId(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		ctx := context.WithValue(r.Context(), u.UserContextKey, user)
+		ctx := u.AppendUserToContext(r.Context(), *user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	UnAssignUserFromGroup(ctx context.Context, id string, group string) error
+	UnAssignUserFromGroup(ctx context.Context) error
 }

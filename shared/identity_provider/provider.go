@@ -1,28 +1,13 @@
 package provider
 
 import (
-	"context"
 	"net/http"
 
-	u "github.com/lejeunel/go-image-annotator/entities/user"
 	s "github.com/lejeunel/go-image-annotator/shared/session"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
 )
-
-func IdentityFromContext(ctx context.Context) *u.User {
-	v := ctx.Value(u.UserContextKey)
-	if v == nil {
-		return nil
-	}
-	user, ok := v.(*u.User)
-	if !ok {
-		return nil
-	}
-
-	return user
-}
 
 type OAuthHandler interface {
 	HandleLogin(http.ResponseWriter, *http.Request)

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
-	p "github.com/lejeunel/go-image-annotator/shared/identity_provider"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 )
 
@@ -19,7 +19,7 @@ func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
 
 }
 func (s *Server) NewAPIToken(w http.ResponseWriter, r *http.Request) {
-	user := p.IdentityFromContext(r.Context())
+	user := u.IdentityFromContext(r.Context())
 	if user == nil {
 		http.Error(w, "failed getting user identity", http.StatusForbidden)
 	}

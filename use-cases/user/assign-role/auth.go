@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	AssignRoleToUser(ctx context.Context, id string, role string) error
+	AssignRoleToUser(ctx context.Context) error
 }

@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	FindUser(ctx context.Context, id string) error
+	FindUser(ctx context.Context) error
 }

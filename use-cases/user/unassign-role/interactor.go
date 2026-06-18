@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/lejeunel/go-image-annotator/shared/auth"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 )
 
 type Interactor struct {
@@ -15,7 +15,7 @@ type Interactor struct {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "creating user"
-	if err := i.auth.UnAssignRoleFromUser(ctx, r.Id, r.Role); err != nil {
+	if err := i.auth.UnAssignRoleFromUser(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
@@ -54,7 +54,7 @@ func WithAuth(a Auth) Option {
 
 func New(r Repo, opts ...Option) Interactor {
 	i := &Interactor{repo: r,
-		auth: auth.PassThroughAuth{},
+		auth: auth.NewVoidAuth(),
 	}
 
 	for _, opt := range opts {

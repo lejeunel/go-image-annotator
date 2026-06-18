@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	RenewToken(ctx context.Context, id string) error
+	RenewToken(ctx context.Context) error
 }

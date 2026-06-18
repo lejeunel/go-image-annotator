@@ -59,6 +59,6 @@ func (r *FakeUserRepo) AssignToGroup(id string, group string) error {
 type FailingAuth struct {
 }
 
-func (f FailingAuth) AssignUserToGroup(ctx context.Context, id string, group string) error {
+func (f FailingAuth) AssignUserToGroup(ctx context.Context) error {
 	return e.ErrAuth
 }

@@ -1,5 +1,9 @@
 package user
 
+import (
+	"context"
+)
+
 type User struct {
 	Id      string
 	HashPAT []byte
@@ -46,4 +50,20 @@ func WithRoles(roles []string) Option {
 	return func(l *User) {
 		l.Roles = roles
 	}
+}
+func AppendUserToContext(ctx context.Context, user User) context.Context {
+	return context.WithValue(ctx, UserContextKey, &user)
+}
+
+func IdentityFromContext(ctx context.Context) *User {
+	v := ctx.Value(UserContextKey)
+	if v == nil {
+		return nil
+	}
+	user, ok := v.(*User)
+	if !ok {
+		return nil
+	}
+
+	return user
 }

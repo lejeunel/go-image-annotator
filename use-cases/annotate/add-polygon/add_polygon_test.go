@@ -1,7 +1,6 @@
 package add_polygon
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -81,7 +80,7 @@ func TestAddUserIdFromContext(t *testing.T) {
 	itr := New(&st.FakeImageStore{}, repo,
 		&FakeLabelRepo{})
 	user := u.NewUser("user@example.com")
-	ctx := context.WithValue(t.Context(), u.UserContextKey, &user)
+	ctx := u.AppendUserToContext(t.Context(), user)
 	itr.Execute(ctx, CreateTestAddPolygonRequest(), p)
 	assert.NotNil(t, repo.GotUserId)
 	assert.Equal(t, user.Id, *repo.GotUserId)

@@ -9,9 +9,8 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	sauth "github.com/lejeunel/go-image-annotator/modules/auth"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
-	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
-	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 )
 
@@ -33,7 +32,7 @@ func New(imageStore st.Interface, repo Repo, labelRepo LabelRepo, opts ...Option
 		labelRepo:      labelRepo,
 		imageStore:     imageStore,
 		clock:          clockwork.NewRealClock(),
-		auth:           sauth.PassThroughAuth{}}
+		auth:           sauth.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -96,7 +95,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 }
 func (i Interactor) addBox(ctx context.Context, image *im.Image, box a.BoundingBox) error {
 	var userId *u.UserId
-	user := ip.IdentityFromContext(ctx)
+	user := u.IdentityFromContext(ctx)
 	if user != nil {
 		userId = &user.Id
 	}

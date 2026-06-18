@@ -55,6 +55,6 @@ func (p *FakePresenter) Success() {
 type FailingAuth struct {
 }
 
-func (f FailingAuth) DeleteGroup(ctx context.Context, g string) error {
+func (f FailingAuth) DeleteGroup(ctx context.Context) error {
 	return e.ErrAuth
 }

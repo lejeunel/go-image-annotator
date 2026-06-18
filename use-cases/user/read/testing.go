@@ -36,6 +36,6 @@ func (p *FakePresenter) Success(r Response) {
 type FailingAuth struct {
 }
 
-func (f FailingAuth) FindUser(ctx context.Context, id string) error {
+func (f FailingAuth) FindUser(ctx context.Context) error {
 	return e.ErrAuth
 }

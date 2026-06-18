@@ -43,6 +43,6 @@ func (r *FakeRepo) UnAssignRole(id string, role string) error {
 type FailingAuth struct {
 }
 
-func (f FailingAuth) UnAssignRoleFromUser(ctx context.Context, id string, role string) error {
+func (f FailingAuth) UnAssignRoleFromUser(ctx context.Context) error {
 	return e.ErrAuth
 }

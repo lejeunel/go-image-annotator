@@ -6,7 +6,7 @@ import (
 
 	"github.com/jonboulle/clockwork"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
-	auth "github.com/lejeunel/go-image-annotator/shared/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
 )
@@ -104,7 +104,7 @@ func New(rc CollectionRepo, rg GroupRepo, opts ...Option) Interactor {
 		groupRepo: rg,
 		validator: v.NewNameValidator(),
 		clock:     clockwork.NewRealClock(),
-		auth:      auth.PassThroughAuth{}}
+		auth:      auth.NewVoidAuth()}
 
 	for _, opt := range opts {
 		opt(i)

@@ -17,9 +17,6 @@ type CreatePresenter struct {
 func (p CreatePresenter) Success(r clc.Response) {
 	fmt.Println("created collection with name", r.Name, "and description", r.Description)
 }
-func (p CreatePresenter) Error(err error) {
-	fmt.Println(err.Error())
-}
 
 func Create(name string, group *string, description string) {
 	app := a.NewSQLiteApp(config.Parse())

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	tok "github.com/lejeunel/go-image-annotator/modules/token"
-	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -22,7 +22,7 @@ type Interactor struct {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "renewing personal access token"
-	if err := i.auth.RenewToken(ctx, r.Id); err != nil {
+	if err := i.auth.RenewToken(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
@@ -60,7 +60,7 @@ func WithAuth(a Auth) Option {
 
 func New(r Repo, g TokenGenerator, opts ...Option) Interactor {
 	i := &Interactor{repo: r,
-		auth:           auth.PassThroughAuth{},
+		auth:           auth.NewVoidAuth(),
 		tokenGenerator: g,
 	}
 

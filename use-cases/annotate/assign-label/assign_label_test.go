@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"context"
-
 	"github.com/jonboulle/clockwork"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
@@ -73,7 +71,7 @@ func TestAddUserIdFromContext(t *testing.T) {
 	repo := &FakeAnnotationRepo{}
 	itr := New(repo, &FakeLabelRepo{}, &st.FakeImageStore{Return: &image})
 	user := u.NewUser("user@example.com")
-	ctx := context.WithValue(t.Context(), u.UserContextKey, &user)
+	ctx := u.AppendUserToContext(t.Context(), user)
 	itr.Execute(ctx, Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.NotNil(t, repo.GotUserId)
 	assert.Equal(t, user.Id, *repo.GotUserId)

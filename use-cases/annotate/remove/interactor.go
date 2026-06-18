@@ -5,7 +5,7 @@ import (
 
 	"context"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
-	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
+	sauth "github.com/lejeunel/go-image-annotator/modules/auth"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 )
 
@@ -28,7 +28,7 @@ func WithAuth(a auth.Auth) Option {
 
 func New(repo Repo, opts ...Option) Interactor {
 	i := &Interactor{repo: repo,
-		auth: sauth.PassThroughAuth{}}
+		auth: sauth.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
 	}

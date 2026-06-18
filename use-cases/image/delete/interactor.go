@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
-	"github.com/lejeunel/go-image-annotator/shared/auth"
 )
 
 type Interactor struct {
@@ -25,7 +25,7 @@ func WithAuth(a Auth) Option {
 
 func NewInteractor(store st.Interface, repo Repo, opts ...Option) *Interactor {
 	i := &Interactor{store: store, repo: repo,
-		auth: auth.PassThroughAuth{}}
+		auth: auth.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
 	}

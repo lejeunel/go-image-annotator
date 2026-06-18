@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	tok "github.com/lejeunel/go-image-annotator/modules/token"
-	"github.com/lejeunel/go-image-annotator/shared/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -72,7 +72,7 @@ func WithAuth(a Auth) Option {
 
 func New(r Repo, g TokenGenerator, opts ...Option) Interactor {
 	i := &Interactor{repo: r,
-		auth:           auth.PassThroughAuth{},
+		auth:           auth.NewVoidAuth(),
 		tokenGenerator: g,
 	}
 

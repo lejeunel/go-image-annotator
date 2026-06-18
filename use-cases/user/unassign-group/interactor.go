@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lejeunel/go-image-annotator/shared/auth"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 )
 
 type Interactor struct {
@@ -15,7 +15,7 @@ type Interactor struct {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "un-assigning user from group"
-	if err := i.auth.UnAssignUserFromGroup(ctx, r.Id, r.Group); err != nil {
+	if err := i.auth.UnAssignUserFromGroup(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -59,7 +59,7 @@ func WithAuth(a Auth) Option {
 func New(ur UserRepo, gr GroupRepo, opts ...Option) Interactor {
 	i := &Interactor{userRepo: ur,
 		groupRepo: gr,
-		auth:      auth.PassThroughAuth{},
+		auth:      auth.NewVoidAuth(),
 	}
 
 	for _, opt := range opts {

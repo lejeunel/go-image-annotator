@@ -10,9 +10,8 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	sauth "github.com/lejeunel/go-image-annotator/modules/auth"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
-	sauth "github.com/lejeunel/go-image-annotator/shared/auth"
-	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 )
 
@@ -87,7 +86,7 @@ func (i Interactor) findImage(imageId im.ImageId, collection string) (*im.Image,
 }
 func (i Interactor) addLabel(ctx context.Context, imageId im.ImageId, collectionId clc.CollectionId, label lbl.Label) (*an.ImageLabel, error) {
 	var userId *u.UserId
-	user := ip.IdentityFromContext(ctx)
+	user := u.IdentityFromContext(ctx)
 	if user != nil {
 		userId = &user.Id
 	}
@@ -120,7 +119,7 @@ func New(repo AnnotationRepo, labelRepo LabelRepo, store st.Interface, opts ...O
 		store:     store,
 		clock:     clockwork.NewRealClock(),
 
-		auth: sauth.PassThroughAuth{}}
+		auth: sauth.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
 	}

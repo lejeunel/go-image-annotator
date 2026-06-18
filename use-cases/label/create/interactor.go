@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
-	"github.com/lejeunel/go-image-annotator/shared/auth"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
 )
@@ -67,7 +67,7 @@ func WithAuth(a Auth) Option {
 
 func New(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{repo: r, validator: v.NewNameValidator(),
-		auth: auth.PassThroughAuth{},
+		auth: auth.NewVoidAuth(),
 	}
 
 	for _, opt := range opts {

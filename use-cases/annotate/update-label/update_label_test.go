@@ -1,7 +1,6 @@
 package update_label
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -54,7 +53,7 @@ func TestAddUserIdFromContext(t *testing.T) {
 	repo := &FakeAnnotationRepo{}
 	itr := New(repo, &FakeLabelRepo{Returns: &newLabel})
 	user := u.NewUser("user@example.com")
-	ctx := context.WithValue(t.Context(), u.UserContextKey, &user)
+	ctx := u.AppendUserToContext(t.Context(), user)
 	itr.Execute(ctx, CreateTestRequest(), p)
 	assert.NotNil(t, repo.GotUserId)
 	assert.Equal(t, user.Id, *repo.GotUserId)

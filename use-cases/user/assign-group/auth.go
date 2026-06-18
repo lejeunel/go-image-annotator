@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	AssignUserToGroup(ctx context.Context, id string, group string) error
+	AssignUserToGroup(ctx context.Context) error
 }

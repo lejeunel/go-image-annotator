@@ -5,7 +5,6 @@ import (
 	"io"
 
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	p "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -37,7 +36,7 @@ func (b *PageBuilder) SetActive(a ActivePage) *PageBuilder {
 	return b
 }
 func (b *PageBuilder) SetUserIdentityFromContext(ctx context.Context) *PageBuilder {
-	id := p.IdentityFromContext(ctx)
+	id := u.IdentityFromContext(ctx)
 	b.User = id
 	return b
 }

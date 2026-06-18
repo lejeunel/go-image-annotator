@@ -14,9 +14,8 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	"github.com/lejeunel/go-image-annotator/modules/auth"
 	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
-	"github.com/lejeunel/go-image-annotator/shared/auth"
-	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	"hash"
 )
 
@@ -57,7 +56,7 @@ func New(imageRepo ImageRepo, collectionRepo CollectionRepo,
 		AnnotationRepo: annotationRepo, LabelRepo: labelRepo,
 		ArtefactRepo: fileStore, Hasher: hasher,
 		ImageSpecsDetector: specsDetector,
-		auth:               auth.PassThroughAuth{},
+		auth:               auth.NewVoidAuth(),
 		clock:              clockwork.NewRealClock(),
 	}
 	for _, opt := range opts {
@@ -178,7 +177,7 @@ func (i Interactor) ingestImage(ctx context.Context, image *im.Image, hash []byt
 	now := i.clock.Now()
 
 	var authorId u.UserId
-	author := ip.IdentityFromContext(ctx)
+	author := u.IdentityFromContext(ctx)
 	if author != nil {
 		authorId = author.Id
 	}

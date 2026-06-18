@@ -7,6 +7,7 @@ MODELS_PKG := adapters/api/models
 SERVER_PKG := adapters/api/server
 MODELS_OUT := $(MODELS_PKG)/models.gen.go
 SERVER_OUT := $(SERVER_PKG)/server.gen.go
+VALID_AUTH_OUT := modules/auth/valid_methods.gen.go
 
 CSS_MAIN := assets/app.css
 CSS_OUT := assets/static/styles.css
@@ -15,8 +16,9 @@ CSS_OUT := assets/static/styles.css
 
 .PHONY: all api-code clean
 
-all: api-code css
+all: api-code css auth-valid-methods
 
+auth-valid-methods: $(VALID_AUTH_OUT)
 api-code: $(MODELS_OUT) $(SERVER_OUT)
 css: $(CSS_OUT)
 
@@ -43,8 +45,11 @@ $(CSS_OUT): $(CSS_MAIN)
 	tailwindcss -i $(CSS_MAIN) -o $(CSS_OUT) --minify
 
 docs-dev:
-	cd docs && hugo server --gc --minify --disableFastRender --logLevel debug --baseURL http://localhost:1313 
+	cd docs && hugo server --gc --minify --disableFastRender --logLevel debug --baseURL http://localhost:1313
+
+$(VALID_AUTH_OUT):
+	go generate ./modules/auth
 
 # --- Cleanup generated files ---
 clean:
-	rm -f $(MODELS_OUT) $(SERVER_OUT) $(CSS_OUT)
+	rm -f $(MODELS_OUT) $(SERVER_OUT) $(CSS_OUT) $(VALID_AUTH_OUT)

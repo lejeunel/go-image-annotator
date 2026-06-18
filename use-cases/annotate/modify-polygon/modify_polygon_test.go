@@ -1,7 +1,6 @@
 package modify_polygon
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -75,7 +74,7 @@ func TestUpdateWithUserIdFromContext(t *testing.T) {
 	repo := &FakeAnnotationRepo{NoGroup: true}
 	itr := New(repo, &FakeLabelRepo{Label: label})
 	user := u.NewUser("user@example.com")
-	ctx := context.WithValue(t.Context(), u.UserContextKey, &user)
+	ctx := u.AppendUserToContext(t.Context(), user)
 	itr.Execute(ctx, req, p)
 	assert.NotNil(t, repo.GotUserId)
 	assert.Equal(t, user.Id, *repo.GotUserId)
