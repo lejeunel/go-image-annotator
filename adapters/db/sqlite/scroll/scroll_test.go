@@ -1,7 +1,9 @@
 package scroll
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
@@ -72,40 +74,72 @@ func TestGettingNextImage(t *testing.T) {
 	ids := CreateImagesWithOrderedIds(repos, 3)
 	r, err := repos.Scroller.GetAdjacent(ids[1], scr.NewCriteria(), scr.ScrollNext)
 	assert.NoError(t, err)
-	assert.True(t, r.ImageId == ids[2].String())
+	assert.True(t, r.ImageId == ids[2])
 }
 
 func TestGettingPrevImage(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	ids := CreateImagesWithOrderedIds(repos, 3)
 	r, _ := repos.Scroller.GetAdjacent(ids[2], scr.NewCriteria(), scr.ScrollPrevious)
-	assert.True(t, r.ImageId == ids[1].String())
+	assert.True(t, r.ImageId == ids[1])
 }
-
-func TestScrollWithCollectionCriteria(t *testing.T) {
+func TestNextImageInCollection(t *testing.T) {
 	repos := NewTestScrollerRepos()
-	firstImage := CreateImageInCollection(repos.Image, repos.Collection,
-		im.NewImageId(), "first-collection")
-	CreateImageInCollection(repos.Image, repos.Collection,
-		im.NewImageId(), "second-collection")
-
-	_, err := repos.Scroller.GetAdjacent(firstImage.Id,
-		scr.NewCriteria(scr.WithCollection("first-collection")),
-		scr.ScrollPrevious)
-
-	assert.ErrorIs(t, err, e.ErrNotFound)
-}
-
-func TestGettingNextImageInCollection(t *testing.T) {
-	repos := NewTestScrollerRepos()
-	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
-	ids := CreateImagesWithOrderedIds(repos, 2)
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	repos.Collection.Create(collection)
-	repos.Image.AddToCollection(ids[0], collection.Id)
-	repos.Image.AddToCollection(ids[1], collection.Id)
+	firstId, _ := im.NewImageIdFromString(FakeUUIDFromInt(0))
+	secondId, _ := im.NewImageIdFromString(FakeUUIDFromInt(1))
+	repos.Image.AddImage(firstId, []byte("first-hash"), im.ImageSpecs{})
+	repos.Image.AddImage(secondId, []byte("second-hash"), im.ImageSpecs{})
+	repos.Image.AddToCollection(firstId, collection.Id)
+	repos.Image.AddToCollection(secondId, collection.Id)
 
-	r, _ := repos.Scroller.GetAdjacent(ids[0],
-		scr.NewCriteria(scr.WithCollection(collection.Name)),
+	r, err := repos.Scroller.GetAdjacent(firstId,
+		scr.NewCriteria(
+			scr.WithCollection(collection.Name)),
 		scr.ScrollNext)
-	assert.True(t, r.Collection == collection.Name)
+	assert.NoError(t, err)
+	assert.Equal(t, secondId, r.ImageId)
+}
+
+func CreateImagesWithIngestTime(repos SQLiteScrollerRepos, num int) ([]im.ImageId, clc.Collection) {
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	repos.Collection.Create(collection)
+	ids := []im.ImageId{}
+	now := time.Now()
+	for n := range num {
+		id := im.NewImageId()
+		repos.Image.AddImage(id, fmt.Append([]byte{}, n),
+			im.ImageSpecs{IngestedAt: now.Add(time.Duration(n) * time.Hour)})
+		repos.Image.AddToCollection(id, collection.Id)
+		ids = append(ids, id)
+	}
+	return ids, collection
+
+}
+
+func TestNextIngestedImageInCollection(t *testing.T) {
+	repos := NewTestScrollerRepos()
+	ids, collection := CreateImagesWithIngestTime(repos, 3)
+
+	r, err := repos.Scroller.GetAdjacent(ids[0],
+		scr.NewCriteria(
+			scr.WithCollection(collection.Name),
+			scr.WithOrdering(im.OrderingParams{IngestTime: true})),
+		scr.ScrollNext)
+	assert.NoError(t, err)
+	assert.Equal(t, ids[1], r.ImageId)
+}
+
+func TestPreviousIngestedImageInCollection(t *testing.T) {
+	repos := NewTestScrollerRepos()
+	ids, collection := CreateImagesWithIngestTime(repos, 3)
+
+	r, err := repos.Scroller.GetAdjacent(ids[2],
+		scr.NewCriteria(
+			scr.WithCollection(collection.Name),
+			scr.WithOrdering(im.OrderingParams{IngestTime: true})),
+		scr.ScrollPrevious)
+	assert.NoError(t, err)
+	assert.Equal(t, ids[1], r.ImageId)
 }

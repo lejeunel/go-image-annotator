@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	goose "github.com/pressly/goose/v3"
 	"io/fs"
@@ -21,7 +22,7 @@ func NewSQLiteConnection(path string) *sqlx.DB {
 	if err != nil {
 		panic(err)
 	}
-	db, err := sqlx.Open("sqlite", path)
+	db, err := sqlx.Open("sqlite", fmt.Sprintf("file:%s?_time_format=sqlite&_timezone=UTC&_texttotime=true", path))
 	if err != nil {
 		panic(err)
 	}

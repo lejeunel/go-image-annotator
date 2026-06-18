@@ -64,7 +64,7 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 	r, _ := repos.Image.List(im.FilteringParams{Collection: &firstCollection.Name, PageSize: 2, Page: 1}, im.OrderingParams{})
 	assert.Equal(t, 1, len(r))
 	images := r
-	assert.True(t, images[0].ImageId == firstImage.Id.String())
+	assert.True(t, images[0].ImageId == firstImage.Id)
 	assert.True(t, images[0].Collection == firstCollection.Name)
 }
 

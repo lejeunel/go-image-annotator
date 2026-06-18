@@ -14,52 +14,49 @@ type ImageStore struct {
 }
 
 func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
-	imageId, err := im.NewImageIdFromString(base.ImageId)
-	if err != nil {
-		return nil, fmt.Errorf("fetching collection by name (%v): %w", base.Collection, err)
-	}
-
 	collection, err := s.repo.FindCollectionByName(base.Collection)
 	if err != nil {
 		return nil, fmt.Errorf("fetching collection by name (%v): %w", base.Collection, err)
 	}
 
-	ok, err := s.repo.ImageExistsInCollection(imageId, collection.Id)
+	ok, err := s.repo.ImageExistsInCollection(base.ImageId, collection.Id)
 	if err != nil {
 		return nil, fmt.Errorf("checking whether image %v exists in collection %v: %w",
-			imageId, base.Collection, err)
+			base.ImageId, base.Collection, err)
 	}
 	if !ok {
 		return nil, fmt.Errorf("checking whether image %v exists in collection %v: %w",
-			imageId, base.Collection, e.ErrNotFound)
+			base.ImageId, base.Collection, e.ErrNotFound)
 
 	}
 
-	labels, err := s.repo.FindImageLabels(imageId, collection.Id)
+	labels, err := s.repo.FindImageLabels(base.ImageId, collection.Id)
 	if err != nil {
 		return nil, fmt.Errorf("fetching labels: %w", err)
 	}
 
-	boxes, err := s.repo.FindBoundingBoxes(imageId, collection.Id)
+	boxes, err := s.repo.FindBoundingBoxes(base.ImageId, collection.Id)
 	if err != nil {
 		return nil, fmt.Errorf("fetching bounding boxes: %w", err)
 	}
 
-	polygons, err := s.repo.FindPolygons(imageId, collection.Id)
+	polygons, err := s.repo.FindPolygons(base.ImageId, collection.Id)
 	if err != nil {
 		return nil, fmt.Errorf("fetching polygons: %w", err)
 	}
 
-	specs, err := s.repo.GetSpecs(imageId)
+	specs, err := s.repo.GetSpecs(base.ImageId)
 	if err != nil {
 		return nil, fmt.Errorf("fetching image specs: %w", err)
 	}
 
-	reader, err := s.fileStore.Get(imageId)
+	reader, err := s.fileStore.Get(base.ImageId)
 	if err != nil {
 		return nil, fmt.Errorf("fetching raw data: %w", err)
 	}
-	return &im.Image{Id: imageId, Collection: *collection, Labels: labels,
+	return &im.Image{
+		Id:         base.ImageId,
+		Collection: *collection, Labels: labels,
 		BoundingBoxes: boxes,
 		Polygons:      polygons,
 		Specs:         *specs,

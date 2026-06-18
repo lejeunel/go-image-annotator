@@ -34,7 +34,13 @@ func NewInteractor(store st.Interface, repo Repo, opts ...Option) *Interactor {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "deleting image"
-	image, err := i.findImage(r.ImageId, r.Collection)
+
+	imageId, err := im.NewImageIdFromString(r.ImageId)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+	}
+
+	image, err := i.findImage(imageId, r.Collection)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -88,7 +94,7 @@ func (i *Interactor) deleteLabels(image im.Image) error {
 
 }
 
-func (i *Interactor) findImage(imageId string, collection string) (*im.Image, error) {
+func (i *Interactor) findImage(imageId im.ImageId, collection string) (*im.Image, error) {
 	baseErr := fmt.Errorf("fetching associated resources")
 	image, err := i.store.Find(im.BaseImage{ImageId: imageId, Collection: collection})
 	if err != nil {

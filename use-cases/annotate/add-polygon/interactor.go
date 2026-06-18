@@ -55,7 +55,14 @@ func WithClock(c clockwork.Clock) Option {
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "adding polygon"
-	image, err := i.findImage(r.ImageId, r.Collection)
+
+	imageId, err := im.NewImageIdFromString(r.ImageId)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
+
+	image, err := i.findImage(imageId, r.Collection)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -102,7 +109,7 @@ func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 	}
 	return label, nil
 }
-func (i Interactor) findImage(imageId string, collectionName string) (*im.Image, error) {
+func (i Interactor) findImage(imageId im.ImageId, collectionName string) (*im.Image, error) {
 	image, err := i.imageStore.Find(im.BaseImage{ImageId: imageId, Collection: collectionName})
 	if err != nil {
 		return nil, err

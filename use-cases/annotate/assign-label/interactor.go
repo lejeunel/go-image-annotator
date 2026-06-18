@@ -31,7 +31,14 @@ type Interactor struct {
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	errCtx := "assigning label to image"
-	image, err := i.findImage(r.ImageId, r.Collection)
+
+	imageId, err := im.NewImageIdFromString(r.ImageId)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
+
+	image, err := i.findImage(imageId, r.Collection)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -71,7 +78,7 @@ func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 	return label, nil
 
 }
-func (i Interactor) findImage(imageId string, collection string) (*im.Image, error) {
+func (i Interactor) findImage(imageId im.ImageId, collection string) (*im.Image, error) {
 	image, err := i.store.Find(im.BaseImage{ImageId: imageId, Collection: collection})
 	if err != nil {
 		return nil, err

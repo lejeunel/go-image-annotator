@@ -25,15 +25,16 @@ type Row struct {
 	IngestTime   time.Time        `db:"ingested_at"`
 }
 
-func (r SQLiteScrollerRepo) applyScrollOrdering(q sq.SelectBuilder, currentImageId im.ImageId, ord im.OrderingParams,
-	d scroller.ScrollingDirection) sq.SelectBuilder {
+func (r SQLiteScrollerRepo) applyScrollOrdering(q sq.SelectBuilder, currentImageId im.ImageId,
+	ord im.OrderingParams, d scroller.ScrollingDirection) sq.SelectBuilder {
 	if ord.IngestTime {
 		if d == scroller.ScrollNext {
 			q = q.Where("i.ingested_at>(SELECT ingested_at FROM images WHERE id=?)", currentImageId)
+			q = q.OrderBy("i.ingested_at")
 		} else {
 			q = q.Where("i.ingested_at<(SELECT ingested_at FROM images WHERE id=?)", currentImageId)
+			q = q.OrderBy("i.ingested_at DESC")
 		}
-		q = q.OrderBy("i.ingested_at")
 		return q
 	}
 	if d == scroller.ScrollNext {
@@ -72,7 +73,7 @@ func (r SQLiteScrollerRepo) GetAdjacent(id im.ImageId, criteria scroller.Scrolli
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
 
-	result := im.BaseImage{ImageId: row.ImageId.String(), Collection: row.Collection}
+	result := im.BaseImage{ImageId: row.ImageId, Collection: row.Collection}
 	return &result, nil
 }
 func (r SQLiteScrollerRepo) ImageMustExist(id im.ImageId) error {

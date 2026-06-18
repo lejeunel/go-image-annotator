@@ -20,7 +20,12 @@ func New(store imstore.Interface) Interactor {
 
 func (i Interactor) Execute(r Request, out OutputPort) {
 	errCtx := "reading image meta-data"
-	image, err := i.store.Find(im.BaseImage{ImageId: r.ImageId, Collection: r.Collection})
+	imageId, err := im.NewImageIdFromString(r.ImageId)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
+	image, err := i.store.Find(im.BaseImage{ImageId: imageId, Collection: r.Collection})
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

@@ -96,7 +96,7 @@ func (r SQLiteImageRepo) List(f im.FilteringParams, o im.OrderingParams) ([]im.B
 	}
 	objects := []im.BaseImage{}
 	for _, r := range rows {
-		objects = append(objects, im.BaseImage{ImageId: r.ImageId.String(), Collection: r.Name})
+		objects = append(objects, im.BaseImage{ImageId: r.ImageId, Collection: r.Name})
 	}
 
 	return objects, nil
