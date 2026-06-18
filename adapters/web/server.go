@@ -18,6 +18,7 @@ type Server struct {
 	ip.OAuthHandler
 	ap.AnnotationPagePresenter
 	ap.AnnotoriousPresenter
+	DefaultPageSize int
 }
 
 func NewServer(
@@ -27,7 +28,8 @@ func NewServer(
 	annotationPagePresenter ap.AnnotationPagePresenter,
 	annotoriousPresenter ap.AnnotoriousPresenter,
 	sessionManager s.SessionManager,
-	identityHandler ip.OAuthHandler) *Server {
+	identityHandler ip.OAuthHandler,
+	pageSize int) *Server {
 	return &Server{
 		Interactors:             interactors,
 		Annotator:               annotator,
@@ -36,5 +38,7 @@ func NewServer(
 		UserDashboardBuilder:    b.NewUserDashboardBuilder(),
 		AnnotationPagePresenter: annotationPagePresenter,
 		AnnotoriousPresenter:    annotoriousPresenter,
-		OAuthHandler:            identityHandler}
+		OAuthHandler:            identityHandler,
+		DefaultPageSize:         pageSize,
+	}
 }
