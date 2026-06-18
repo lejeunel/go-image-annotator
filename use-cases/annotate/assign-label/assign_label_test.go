@@ -32,7 +32,7 @@ func TestHandleAuthError(t *testing.T) {
 		&st.FakeImageStore{Return: &image},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }

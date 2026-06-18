@@ -87,7 +87,7 @@ func TestListImagesOrderedById(t *testing.T) {
 
 	r, _ := repos.Image.List(im.FilteringParams{PageSize: 2, Page: 1}, im.OrderingParams{})
 	got := r[0].ImageId
-	assert.Equal(t, image0.Id.String(), got)
+	assert.Equal(t, image0.Id, got)
 }
 
 func TestListImagesOrderedByIngestTime(t *testing.T) {
@@ -105,6 +105,6 @@ func TestListImagesOrderedByIngestTime(t *testing.T) {
 
 	r, err := repos.Image.List(im.FilteringParams{PageSize: 2, Page: 1}, im.OrderingParams{IngestTime: true})
 	assert.NoError(t, err)
-	assert.Equal(t, r[0].ImageId, firstImage.Id.String())
-	assert.Equal(t, r[1].ImageId, secondImage.Id.String())
+	assert.Equal(t, r[0].ImageId, firstImage.Id)
+	assert.Equal(t, r[1].ImageId, secondImage.Id)
 }

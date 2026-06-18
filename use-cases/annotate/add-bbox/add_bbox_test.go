@@ -30,7 +30,9 @@ func TestHandleAuthError(t *testing.T) {
 		&FakeLabelRepo{},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(),
+		Request{ImageId: im.NewImageId().String()},
+		p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -40,7 +42,9 @@ func TestErrOnImageRetrievalShouldFail(t *testing.T) {
 	itr := New(&st.FakeImageStore{Err: e.ErrInternal},
 		&FakeAnnotationRepo{},
 		&FakeLabelRepo{})
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(),
+		Request{ImageId: im.NewImageId().String()},
+		p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -51,7 +55,9 @@ func TestErrOnFindLabelShouldFail(t *testing.T) {
 		&FakeAnnotationRepo{},
 		&FakeLabelRepo{Err: e.ErrInternal},
 	)
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(),
+		Request{ImageId: im.NewImageId().String()},
+		p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
