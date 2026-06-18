@@ -77,6 +77,5 @@ func checkCriteria(repo Repo, imageId im.ImageId, criteria ScrollingCriteria) er
 }
 
 func New(repo Repo) Scroller {
-	// criteria := NewCriteria(opts...)
 	return Scroller{repo: repo}
 }

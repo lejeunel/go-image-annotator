@@ -6,9 +6,8 @@ import (
 )
 
 type Request struct {
-	CollectionName *string
-	Page           int64
-	PageSize       int
+	im.FilteringParams
+	im.OrderingParams
 }
 
 type Response struct {

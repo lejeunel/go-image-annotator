@@ -6,7 +6,6 @@ import (
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	ist "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,7 +25,7 @@ func TestCountAddedImageToCollection(t *testing.T) {
 	imRepo, clcRepo := MakeRepos()
 	collection := "a-collection"
 	AddToCollection(imRepo, clcRepo, collection, "")
-	count, err := imRepo.Count(ist.CountingParams{Collection: &collection})
+	count, err := imRepo.Count(im.CountingParams{Collection: &collection})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, int(*count))
 }
@@ -34,7 +33,7 @@ func TestCountAddedImageToCollection(t *testing.T) {
 func TestCountAllImagesWhenAddingImageToCollection(t *testing.T) {
 	imRepo, clcRepo := MakeRepos()
 	AddToCollection(imRepo, clcRepo, "a-collection", "")
-	count, err := imRepo.Count(ist.CountingParams{})
+	count, err := imRepo.Count(im.CountingParams{})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, int(*count))
 }

@@ -17,9 +17,9 @@ type SQLiteScrollerRepos struct {
 	Collection clcsql.SQLiteCollectionRepo
 }
 
-func NewTestScrollerRepos() *SQLiteScrollerRepos {
+func NewTestScrollerRepos() SQLiteScrollerRepos {
 	db := s.NewSQLiteDB(":memory:")
-	return &SQLiteScrollerRepos{
+	return SQLiteScrollerRepos{
 		Scroller:   NewSQLiteScrollerRepo(db),
 		Image:      imsql.NewSQLiteImageRepo(db),
 		Collection: clcsql.NewSQLiteCollectionRepo(db)}
@@ -37,11 +37,14 @@ func FakeUUIDFromInt(n int) string {
 	)
 }
 
-func CreateImagesWithOrderedIds(repo imsql.SQLiteImageRepo, num int) []im.ImageId {
+func CreateImagesWithOrderedIds(repos SQLiteScrollerRepos, num int) []im.ImageId {
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	repos.Collection.Create(collection)
 	ids := []im.ImageId{}
 	for n := range num {
 		id, _ := im.NewImageIdFromString(FakeUUIDFromInt(n))
-		repo.AddImage(id, []byte(id.String()), im.ImageSpecs{})
+		repos.Image.AddImage(id, []byte(id.String()), im.ImageSpecs{})
+		repos.Image.AddToCollection(id, collection.Id)
 		ids = append(ids, id)
 	}
 	return ids

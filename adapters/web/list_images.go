@@ -9,6 +9,7 @@ import (
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	list_im "github.com/lejeunel/go-image-annotator/use-cases/image/list"
@@ -39,9 +40,12 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 		s.PageBuilder.SetError(fmt.Errorf("parsing url to get collection name: %w", e.ErrURLParsing))
 		s.PageBuilder.Render(w)
 	}
-	s.Image.List.Execute(list_im.Request{PageSize: s.Image.DefaultPageSize,
-		Page:           int64(GetPageFromRequest(r)),
-		CollectionName: &collection},
+	s.Image.List.Execute(list_im.Request{
+		FilteringParams: im.FilteringParams{
+			Collection: &collection,
+			PageSize:   s.Image.DefaultPageSize,
+			Page:       int64(GetPageFromRequest(r))},
+		OrderingParams: im.OrderingParams{IngestTime: true}},
 		NewListImagesPresenter(w, *r.URL, s.PageBuilder))
 }
 

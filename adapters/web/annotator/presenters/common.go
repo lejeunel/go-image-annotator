@@ -1,4 +1,4 @@
-package annotorious
+package presenters
 
 type BaseAnnotoriousRequest struct {
 	ImageId    string `json:"image_id"`

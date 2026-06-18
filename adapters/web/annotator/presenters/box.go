@@ -1,4 +1,4 @@
-package annotorious
+package presenters
 
 import (
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"

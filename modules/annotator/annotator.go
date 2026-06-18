@@ -3,6 +3,7 @@ package annotator
 import (
 	"context"
 
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
@@ -30,11 +31,14 @@ type Annotator struct {
 
 func (a *Annotator) Init(ctx context.Context, imageId string, collection string,
 	oim imread.OutputPort, olbl fetchlbl.OutputPort, oscr scr.OutputPort) {
-	a.scroller.Init(imageId, oscr, scr.WithCollection(collection))
-	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection}, oim)
+	a.scroller.Init(imageId, oscr,
+		scr.WithCollection(collection),
+		scr.WithOrdering(im.OrderingParams{IngestTime: true}))
+	a.ReadImage(imageId, collection, oim)
 	a.labelFetcher.Execute(ctx, olbl)
 }
-func (a *Annotator) ReadImage(ctx context.Context, imageId string, collection string, o imread.OutputPort) {
+func (a *Annotator) ReadImage(imageId string, collection string, o imread.OutputPort) {
+	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection}, o)
 }
 
 func (a *Annotator) DeleteAnnotation(ctx context.Context, r del.Request, o del.OutputPort) {

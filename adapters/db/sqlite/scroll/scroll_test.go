@@ -69,14 +69,15 @@ func TestGettingAdjacentImageWhenSingleImageShouldFail(t *testing.T) {
 
 func TestGettingNextImage(t *testing.T) {
 	repos := NewTestScrollerRepos()
-	ids := CreateImagesWithOrderedIds(repos.Image, 3)
-	r, _ := repos.Scroller.GetAdjacent(ids[1], scr.NewCriteria(), scr.ScrollNext)
+	ids := CreateImagesWithOrderedIds(repos, 3)
+	r, err := repos.Scroller.GetAdjacent(ids[1], scr.NewCriteria(), scr.ScrollNext)
+	assert.NoError(t, err)
 	assert.True(t, r.ImageId == ids[2].String())
 }
 
 func TestGettingPrevImage(t *testing.T) {
 	repos := NewTestScrollerRepos()
-	ids := CreateImagesWithOrderedIds(repos.Image, 3)
+	ids := CreateImagesWithOrderedIds(repos, 3)
 	r, _ := repos.Scroller.GetAdjacent(ids[2], scr.NewCriteria(), scr.ScrollPrevious)
 	assert.True(t, r.ImageId == ids[1].String())
 }
@@ -98,7 +99,7 @@ func TestScrollWithCollectionCriteria(t *testing.T) {
 func TestGettingNextImageInCollection(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
-	ids := CreateImagesWithOrderedIds(repos.Image, 2)
+	ids := CreateImagesWithOrderedIds(repos, 2)
 	repos.Collection.Create(collection)
 	repos.Image.AddToCollection(ids[0], collection.Id)
 	repos.Image.AddToCollection(ids[1], collection.Id)

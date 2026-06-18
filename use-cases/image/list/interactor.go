@@ -18,37 +18,38 @@ func New(r Repo, s ist.Interface) Interactor {
 
 func (i Interactor) Execute(r Request, out OutputPort) {
 	errCtx := "listing images"
-	filteringParams := &ist.FilteringParams{
-		Page:       r.Page,
-		PageSize:   r.PageSize,
-		Collection: r.CollectionName}
 
-	baseImages, err := i.repo.List(*filteringParams)
+	if r.PageSize == 0 {
+		out.Error(fmt.Errorf("%v: got page size = 0", errCtx))
+		return
+	}
+
+	baseImages, err := i.repo.List(r.FilteringParams, r.OrderingParams)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	count, err := i.repo.Count(ist.CountingParams{Collection: filteringParams.Collection})
+	count, err := i.repo.Count(im.CountingParams{Collection: r.FilteringParams.Collection})
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	imageResponses, err := i.buildResponse(*baseImages)
+	imageResponses, err := i.buildResponse(baseImages)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	response := Response{Images: *imageResponses,
+	response := Response{Images: imageResponses,
 		Pagination: pagination.Pagination{Page: r.Page, PageSize: r.PageSize, TotalRecords: *count, TotalPages: *count / int64(r.PageSize)}}
 
 	out.Success(response)
 
 }
 
-func (i *Interactor) buildResponse(baseImages []im.BaseImage) (*[]im.Image, error) {
+func (i *Interactor) buildResponse(baseImages []im.BaseImage) ([]im.Image, error) {
 	r := []im.Image{}
 	for _, baseImage := range baseImages {
 		image, err := i.store.Find(baseImage)
@@ -57,6 +58,6 @@ func (i *Interactor) buildResponse(baseImages []im.BaseImage) (*[]im.Image, erro
 		}
 		r = append(r, *image)
 	}
-	return &r, nil
+	return r, nil
 
 }

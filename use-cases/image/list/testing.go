@@ -1,25 +1,26 @@
 package list
 
 import (
-	ist "github.com/lejeunel/go-image-annotator/modules/image-store"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakeRepo struct {
-	GotFilters ist.FilteringParams
-	Err        error
-	Count_     int64
-	ErrOnList  bool
-	ErrOnCount bool
+	GotFilters  im.FilteringParams
+	GotOrdering im.OrderingParams
+	Err         error
+	Count_      int64
+	ErrOnList   bool
+	ErrOnCount  bool
 }
 
-func (r *FakeRepo) List(f ist.FilteringParams) (*[]im.BaseImage, error) {
+func (r *FakeRepo) List(f im.FilteringParams, o im.OrderingParams) ([]im.BaseImage, error) {
 	if r.ErrOnList {
 		return nil, r.Err
 	}
 
 	r.GotFilters = f
+	r.GotOrdering = o
 
 	result := []im.BaseImage{}
 	collectionName := "a-collection"
@@ -28,10 +29,10 @@ func (r *FakeRepo) List(f ist.FilteringParams) (*[]im.BaseImage, error) {
 			im.BaseImage{Collection: collectionName, ImageId: im.NewImageId().String()})
 	}
 
-	return &result, nil
+	return result, nil
 
 }
-func (r *FakeRepo) Count(f ist.CountingParams) (*int64, error) {
+func (r *FakeRepo) Count(f im.CountingParams) (*int64, error) {
 	if r.ErrOnCount {
 		return nil, r.Err
 	}

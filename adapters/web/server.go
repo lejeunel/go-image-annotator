@@ -1,6 +1,7 @@
 package web
 
 import (
+	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	app "github.com/lejeunel/go-image-annotator/app"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
@@ -15,16 +16,25 @@ type Server struct {
 	a.Annotator
 	s.SessionManager
 	ip.OAuthHandler
+	ap.AnnotationPagePresenter
+	ap.AnnotoriousPresenter
 }
 
-func NewServer(interactors *app.Interactors, annotator a.Annotator,
-	pageBuilder b.PageBuilder, sessionManager s.SessionManager,
+func NewServer(
+	interactors *app.Interactors,
+	annotator a.Annotator,
+	pageBuilder b.PageBuilder,
+	annotationPagePresenter ap.AnnotationPagePresenter,
+	annotoriousPresenter ap.AnnotoriousPresenter,
+	sessionManager s.SessionManager,
 	identityHandler ip.OAuthHandler) *Server {
 	return &Server{
-		Interactors:          interactors,
-		Annotator:            annotator,
-		SessionManager:       sessionManager,
-		PageBuilder:          pageBuilder,
-		UserDashboardBuilder: b.NewUserDashboardBuilder(),
-		OAuthHandler:         identityHandler}
+		Interactors:             interactors,
+		Annotator:               annotator,
+		SessionManager:          sessionManager,
+		PageBuilder:             pageBuilder,
+		UserDashboardBuilder:    b.NewUserDashboardBuilder(),
+		AnnotationPagePresenter: annotationPagePresenter,
+		AnnotoriousPresenter:    annotoriousPresenter,
+		OAuthHandler:            identityHandler}
 }

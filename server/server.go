@@ -8,6 +8,7 @@ import (
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
 
 	"github.com/lejeunel/go-image-annotator/adapters/web"
+	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	"github.com/lejeunel/go-image-annotator/app/sqlite"
 	as "github.com/lejeunel/go-image-annotator/assets"
@@ -38,9 +39,13 @@ func Make() http.Handler {
 		CallbackURL: "http://localhost:3000/callback/google"})
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	colorizer := ap.NewCyclicColorizer(ap.Palette)
 	RegisterHandlers(mux,
 		*api.NewServer(&app.Itrs, *logger),
-		*web.NewServer(&app.Itrs, app.Annotator, *pageBuilder, app.SessionManager, app.OAuthHandler),
+		*web.NewServer(&app.Itrs, app.Annotator,
+			*pageBuilder, ap.NewAnnotationPagePresenter(colorizer),
+			ap.NewAnnotoriousPresenter(colorizer),
+			app.SessionManager, app.OAuthHandler),
 		config.APIConfig{APIPath: fmt.Sprintf("/%v", cfg.APIPath),
 			APIDocsPath:      fmt.Sprintf("/%v/docs", cfg.APIPath),
 			OpenAPISpecsPath: fmt.Sprintf("/%v/openapi.yaml", cfg.APIPath)},

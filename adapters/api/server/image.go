@@ -6,6 +6,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/image"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	rd "github.com/lejeunel/go-image-annotator/modules/reader"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
@@ -28,7 +29,12 @@ func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionNam
 }
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams) {
-	req := list.Request{Page: 1, PageSize: s.Collection.DefaultPageSize, CollectionName: params.Collection}
+	req := list.Request{
+		FilteringParams: im.FilteringParams{
+			Collection: params.Collection,
+			PageSize:   s.Image.DefaultPageSize,
+		},
+		OrderingParams: im.OrderingParams{IngestTime: true}}
 	if p := params.Page; p != nil {
 		req.Page = *p
 	}

@@ -11,7 +11,6 @@ import (
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	ist "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"time"
 )
@@ -20,9 +19,11 @@ type SQLiteImageRepo struct {
 	Db *sqlx.DB
 }
 
-type Row struct {
+type ListRow struct {
 	ImageId      im.ImageId       `db:"image_id"`
 	CollectionId clc.CollectionId `db:"collection_id"`
+	Name         string           `db:"name"`
+	IngestTime   time.Time        `db:"ingested_at"`
 }
 
 type SpecsRow struct {
@@ -41,7 +42,7 @@ func (r SQLiteImageRepo) AddToCollection(imageId im.ImageId, collectionId clc.Co
 
 	return nil
 }
-func (r SQLiteImageRepo) Count(f ist.CountingParams) (*int64, error) {
+func (r SQLiteImageRepo) Count(f im.CountingParams) (*int64, error) {
 	var count int64
 
 	var query string
@@ -59,37 +60,46 @@ func (r SQLiteImageRepo) Count(f ist.CountingParams) (*int64, error) {
 	return &count, nil
 
 }
-func (r SQLiteImageRepo) List(f ist.FilteringParams) (*[]im.BaseImage, error) {
-
-	q := sq.StatementBuilder.Select("image_id,collection_id").From("images_collections")
+func (r SQLiteImageRepo) list(f im.FilteringParams, o im.OrderingParams) ([]ListRow, error) {
+	q := sq.StatementBuilder.Select(
+		"ic.image_id,ic.collection_id,i.ingested_at,c.name").From(
+		"images_collections AS ic").Join(
+		"images AS i ON ic.image_id=i.id").Join(
+		"collections AS c ON ic.collection_id=c.id")
 	q = q.Limit(uint64(f.PageSize)).Offset((uint64(f.Page-1) * uint64(f.PageSize)))
 
 	if f.Collection != nil {
 		q = q.Where(fmt.Sprintf("collection_id=(SELECT id FROM collections WHERE name='%v')", *f.Collection))
 	}
 
-	q = q.OrderBy("image_id")
+	if o.IngestTime {
+		q = q.OrderBy("i.ingested_at")
+	}
+
+	q = q.OrderBy("ic.image_id")
 	sql, args, err := q.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
 	}
-	records := []Row{}
+	records := []ListRow{}
 	if err := r.Db.Select(&records, sql, args...); err != nil {
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
+	return records, nil
+}
 
+func (r SQLiteImageRepo) List(f im.FilteringParams, o im.OrderingParams) ([]im.BaseImage, error) {
+
+	rows, err := r.list(f, o)
+	if err != nil {
+		return nil, err
+	}
 	objects := []im.BaseImage{}
-	for _, rec := range records {
-		var collectionName string
-		q := "SELECT name FROM collections WHERE id=$1"
-		err := r.Db.QueryRow(q, rec.CollectionId.String()).Scan(&collectionName)
-		if err != nil {
-			return nil, fmt.Errorf("fetching collection name from id %v: %v: %w", rec.CollectionId, err, e.ErrInternal)
-		}
-		objects = append(objects, im.BaseImage{ImageId: rec.ImageId.String(), Collection: collectionName})
+	for _, r := range rows {
+		objects = append(objects, im.BaseImage{ImageId: r.ImageId.String(), Collection: r.Name})
 	}
 
-	return &objects, nil
+	return objects, nil
 }
 func (r SQLiteImageRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc.CollectionId) (bool, error) {
 	var count int64

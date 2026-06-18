@@ -24,7 +24,7 @@ func RegisterWebPages(mux *http.ServeMux, server Server, b b.PageBuilder) {
 	mux.HandleFunc("/ui/annotate/submit-polygon", server.SubmitPolygon)
 	mux.HandleFunc("/ui/annotate/update-polygon", server.UpdatePolygon)
 	mux.HandleFunc("/ui/annotate/submit-label", server.SubmitLabel)
-	mux.HandleFunc("/ui/annotate/annotation-panel", server.MakeHTMLAnnotationPanel)
+	mux.HandleFunc("/ui/annotate/annotation-panel", server.MakeAnnotationPanel)
 	mux.HandleFunc("/ui/annotate/annotations", server.GetRegionsAsJSON)
 	mux.HandleFunc("/ui/annotate/remove-annotation", server.DeleteAnnotation)
 	mux.HandleFunc("/ui/annotate/set-label", server.SetLabel)

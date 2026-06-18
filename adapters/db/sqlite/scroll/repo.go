@@ -2,6 +2,7 @@ package scroll
 
 import (
 	"fmt"
+	"time"
 
 	"database/sql"
 	"errors"
@@ -20,43 +21,58 @@ type SQLiteScrollerRepo struct {
 type Row struct {
 	ImageId      im.ImageId       `db:"image_id"`
 	CollectionId clc.CollectionId `db:"collection_id"`
+	Collection   string           `db:"name"`
+	IngestTime   time.Time        `db:"ingested_at"`
 }
 
+func (r SQLiteScrollerRepo) applyScrollOrdering(q sq.SelectBuilder, currentImageId im.ImageId, ord im.OrderingParams,
+	d scroller.ScrollingDirection) sq.SelectBuilder {
+	if ord.IngestTime {
+		if d == scroller.ScrollNext {
+			q = q.Where("i.ingested_at>(SELECT ingested_at FROM images WHERE id=?)", currentImageId)
+		} else {
+			q = q.Where("i.ingested_at<(SELECT ingested_at FROM images WHERE id=?)", currentImageId)
+		}
+		q = q.OrderBy("i.ingested_at")
+		return q
+	}
+	if d == scroller.ScrollNext {
+		q = q.Where("i.id>?", currentImageId)
+		q = q.OrderBy("i.id")
+	} else {
+		q = q.Where("i.id<?", currentImageId)
+		q = q.OrderBy("i.id DESC")
+	}
+	return q
+
+}
 func (r SQLiteScrollerRepo) GetAdjacent(id im.ImageId, criteria scroller.ScrollingCriteria,
 	d scroller.ScrollingDirection) (*im.BaseImage, error) {
-	q := sq.StatementBuilder.Select("id").From("images")
-
-	result := im.BaseImage{}
-
-	if d == scroller.ScrollNext {
-		q = q.Where(fmt.Sprintf("id>'%v'", id))
-		q = q.OrderBy("id")
-	} else {
-		q = q.Where(fmt.Sprintf("id<'%v'", id))
-		q = q.OrderBy("id DESC")
-	}
+	q := sq.StatementBuilder.Select(
+		"ic.image_id,ic.collection_id,i.ingested_at,c.name").From(
+		"images_collections AS ic").Join(
+		"images AS i ON ic.image_id=i.id").Join(
+		"collections AS c ON ic.collection_id=c.id")
 
 	if criteria.Collection != nil {
-		q = q.Where(fmt.Sprintf("id IN (SELECT image_id FROM images_collections WHERE collection_id=(SELECT id FROM collections WHERE name='%v'))",
-			*criteria.Collection))
-		result.Collection = *criteria.Collection
+		q = q.Where("c.name=?", *criteria.Collection)
 	}
 
+	q = r.applyScrollOrdering(q, id, criteria.OrderingParams, d)
 	q = q.Limit(1)
-
 	sqlQuery, args, err := q.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
 	}
-	var adjId string
-	if err := r.Db.Get(&adjId, sqlQuery, args...); err != nil {
+	var row Row
+	if err := r.Db.Get(&row, sqlQuery, args...); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, e.ErrNotFound
 		}
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
 
-	result.ImageId = adjId
+	result := im.BaseImage{ImageId: row.ImageId.String(), Collection: row.Collection}
 	return &result, nil
 }
 func (r SQLiteScrollerRepo) ImageMustExist(id im.ImageId) error {
