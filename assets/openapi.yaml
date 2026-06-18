@@ -528,6 +528,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BoundingBox'
+        polygons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Polygon'
     NewImage:
       required:
         - data
@@ -602,6 +606,28 @@ components:
         id:
           type: string
           description: ID of ingested image
+    Point:
+      type: array
+      items:
+        type: number
+      minItems: 2
+      maxItems: 2
+    Polygon:
+      required:
+        - id
+        - label
+        - points
+      properties:
+        id:
+          type: string
+          description: ID of the polygon
+        label:
+          type: string
+          description: Label of the polygon
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/Point'
     NewUser:
       required:
         - id

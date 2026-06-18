@@ -25,4 +25,7 @@ var validMethods = map[string]struct{}{
 	"UnAssignUserFromGroup": {},
 	"UpdateCollection": {},
 	"UpdateLabel": {},
+	"check": {},
+	"checkForGroup": {},
+	"checkForRole": {},
 }

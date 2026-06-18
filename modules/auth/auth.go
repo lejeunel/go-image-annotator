@@ -1,6 +1,6 @@
 package auth
 
-//go:generate go run ./gen -struct ConfigurableAuth -in configurable_auth.go -out validmethods.gen.go -pkg auth
+//go:generate go run ./gen -struct Auth -in auth.go -out validmethods.gen.go -pkg auth
 
 import (
 	"context"

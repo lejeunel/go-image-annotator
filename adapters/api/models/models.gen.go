@@ -50,8 +50,9 @@ type Image struct {
 	Collection string `json:"collection"`
 
 	// Id ID of the image
-	Id     string    `json:"id"`
-	Labels *[]string `json:"labels,omitempty"`
+	Id       string     `json:"id"`
+	Labels   *[]string  `json:"labels,omitempty"`
+	Polygons *[]Polygon `json:"polygons,omitempty"`
 }
 
 // ImageIngestionResponse defines model for ImageIngestionResponse.
@@ -157,6 +158,19 @@ type Pagination struct {
 
 	// TotalPages total number of pages
 	TotalPages int64 `json:"total_pages"`
+}
+
+// Point defines model for Point.
+type Point = []float32
+
+// Polygon defines model for Polygon.
+type Polygon struct {
+	// Id ID of the polygon
+	Id string `json:"id"`
+
+	// Label Label of the polygon
+	Label  string  `json:"label"`
+	Points []Point `json:"points"`
 }
 
 // UpdateCollection defines model for UpdateCollection.

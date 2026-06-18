@@ -8,20 +8,23 @@ import (
 )
 
 type Interactor struct {
-	repo  Repo
-	store ist.Interface
+	repo            Repo
+	store           ist.Interface
+	DefaultPageSize int
 }
 
 func New(r Repo, s ist.Interface) Interactor {
-	return Interactor{repo: r, store: s}
+	return Interactor{repo: r, store: s, DefaultPageSize: 10}
 }
 
 func (i Interactor) Execute(r Request, out OutputPort) {
 	errCtx := "listing images"
 
 	if r.PageSize == 0 {
-		out.Error(fmt.Errorf("%v: got page size = 0", errCtx))
-		return
+		r.FilteringParams.PageSize = i.DefaultPageSize
+	}
+	if r.Page == 0 {
+		r.FilteringParams.Page = 1
 	}
 
 	baseImages, err := i.repo.List(r.FilteringParams, r.OrderingParams)

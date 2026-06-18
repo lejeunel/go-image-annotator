@@ -28,6 +28,20 @@ func BuildImageResponse(image im.Image) models.Image {
 		response.BoundingBoxes = &boxesToAdd
 	}
 
+	if image.Polygons != nil {
+		polygonsToAdd := []models.Polygon{}
+		for _, poly := range image.Polygons {
+			points := []models.Point{}
+			for _, p := range poly.Points.Coordinates {
+				points = append(points, models.Point{p[0], p[1]})
+			}
+			polygonsToAdd = append(polygonsToAdd,
+				models.Polygon{Id: poly.Id.String(),
+					Points: points, Label: poly.Label.Name})
+		}
+		response.Polygons = &polygonsToAdd
+	}
+
 	return response
 
 }

@@ -18,12 +18,12 @@ func TestHandleNotFoundErrOnList(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestPageSizeZero(t *testing.T) {
+func TestPaginationParamsFallbackToDefault(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{},
 		&st.FakeImageStore{})
-	itr.Execute(Request{}, p)
-	assert.Error(t, p.GotErr)
+	itr.Execute(Request{FilteringParams: im.FilteringParams{PageSize: 0, Page: 0}}, p)
+	assert.True(t, p.GotSuccess)
 }
 
 func TestHandleInternalErrOnList(t *testing.T) {
