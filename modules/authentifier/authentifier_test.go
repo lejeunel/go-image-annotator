@@ -8,13 +8,13 @@ import (
 // A Base64 encoding processes data in chunks of 3 bytes (24 bits) and converts each chunk into 4 characters (4 × 6 bits).
 func TestGenerateTokenOfCorrectLength(t *testing.T) {
 	length := 3
-	gen := NewTokenGenerator(length)
+	gen := New(length)
 	pair, _ := gen.Generate()
-	assert.Equal(t, 4, len(pair.Token))
+	assert.Equal(t, 4, len(pair.Value))
 }
 
 func TestVerify(t *testing.T) {
-	gen := NewTokenGenerator(3)
+	gen := New(3)
 	pair, _ := gen.Generate()
-	assert.True(t, gen.Verify(pair.Token, pair.Hash))
+	assert.True(t, gen.Verify(pair.Value, pair.Hash))
 }

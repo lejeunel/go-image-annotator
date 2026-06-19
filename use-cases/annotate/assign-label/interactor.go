@@ -44,7 +44,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if image.Collection.Group != nil {
-		if err := i.auth.AnnotateGroup(ctx, image.Collection.Group.Name); err != nil {
+		if err := i.auth.Annotate(ctx, image.Collection.Group.Name); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}

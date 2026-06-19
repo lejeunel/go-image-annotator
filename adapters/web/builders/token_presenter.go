@@ -2,7 +2,7 @@ package builders
 
 import (
 	"fmt"
-	tok "github.com/lejeunel/go-image-annotator/modules/token"
+	au "github.com/lejeunel/go-image-annotator/modules/authentifier"
 	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 	"html/template"
 	"io"
@@ -27,7 +27,7 @@ func (p APITokenPresenter) Success(resp rt.Response) {
 		p.Writer.Write([]byte(err.Error()))
 	}
 	t.Execute(p.Writer,
-		TokenData{Token: tok.Base64Encode(tok.AppendUserToToken(resp.Id,
+		TokenData{Token: au.Base64Encode(au.AppendUserToToken(resp.Id,
 			resp.PersonalAccessToken))})
 }
 func NewAPITokenPresenter(w http.ResponseWriter) APITokenPresenter {

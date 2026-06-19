@@ -2,7 +2,6 @@ package sqlite
 
 import (
 	"github.com/lejeunel/go-image-annotator/modules/auth"
-	tok "github.com/lejeunel/go-image-annotator/modules/token"
 	usr "github.com/lejeunel/go-image-annotator/use-cases/user"
 	agr "github.com/lejeunel/go-image-annotator/use-cases/user/assign-group"
 	aro "github.com/lejeunel/go-image-annotator/use-cases/user/assign-role"
@@ -16,11 +15,12 @@ import (
 	uar "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-role"
 )
 
-func NewSQLiteUserInteractors(repos SQLiteRepos, tokenGen tok.TokenGenerator,
+func NewSQLiteUserInteractors(repos SQLiteRepos, tokenGen create.TokenGenerator,
+	pwGen create.PasswordGenerator,
 	auth auth.Auth) usr.Interactors {
 	return usr.Interactors{
 		Find:          read.New(repos.User, read.WithAuth(auth)),
-		Create:        create.New(repos.User, tokenGen, create.WithAuth(auth)),
+		Create:        create.New(repos.User, tokenGen, pwGen, create.WithAuth(auth)),
 		Delete:        delete.New(repos.User, delete.WithAuth(auth)),
 		List:          list.New(repos.User, list.WithAuth(auth)),
 		RenewToken:    rt.New(repos.User, tokenGen, rt.WithAuth(auth)),

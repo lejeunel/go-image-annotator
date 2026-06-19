@@ -13,6 +13,7 @@ type YamlConfigAuthRule struct {
 	Method      string   `yaml:"method"`
 	IgnoreGroup bool     `yaml:"ignore_group"`
 	Roles       []string `yaml:"roles"`
+	AdminOnly   bool     `yaml:"admin_only"`
 }
 
 type YamlConfigAuthRules struct {
@@ -54,14 +55,16 @@ func NewAuthRulesFromYaml(r io.Reader) (*[]AuthRule, error) {
 		rules = append(rules, AuthRule{
 			Method:      r.Method,
 			IgnoreGroup: r.IgnoreGroup,
-			Roles:       r.Roles},
+			Roles:       r.Roles,
+			AdminOnly:   r.AdminOnly,
+		},
 		)
 	}
 
 	return &rules, nil
 }
 
-func ReadAuthSpecsFromPath(path string) (*[]AuthRule, error) {
+func ReadAuthRulesFromPath(path string) (*[]AuthRule, error) {
 	voidRules := []AuthRule{}
 	if path == "" {
 		return &voidRules, nil

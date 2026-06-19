@@ -5,11 +5,12 @@ import (
 )
 
 type User struct {
-	Id      string
-	HashPAT []byte
-	Roles   []string
-	Groups  []string
-	IsAdmin bool
+	Id           string
+	HashPAT      []byte
+	HashPassword []byte
+	Roles        []string
+	Groups       []string
+	IsAdmin      bool
 }
 
 var UserContextKey = "user"
@@ -29,6 +30,12 @@ type Option func(*User)
 func WithHashedPersonalAccessToken(h []byte) Option {
 	return func(l *User) {
 		l.HashPAT = h
+	}
+}
+
+func WithHashedPassword(h []byte) Option {
+	return func(l *User) {
+		l.HashPassword = h
 	}
 }
 

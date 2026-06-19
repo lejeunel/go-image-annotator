@@ -11,7 +11,7 @@ import (
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	tok "github.com/lejeunel/go-image-annotator/modules/token"
+	au "github.com/lejeunel/go-image-annotator/modules/authentifier"
 	readusr "github.com/lejeunel/go-image-annotator/use-cases/user/read"
 )
 
@@ -38,7 +38,7 @@ func (m MySessionManager) MiddleWare(next http.Handler) http.Handler {
 }
 func (m MySessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, error) {
 	errCtx := fmt.Errorf("inferring user's identity from bearer token")
-	token, err := tok.DecodeAndSplitToken(bearerToken)
+	token, err := au.DecodeAndSplitPersonalAccessToken(bearerToken)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}

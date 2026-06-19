@@ -59,3 +59,25 @@ func TestSetAdmin(t *testing.T) {
 	r, _ := repo.Find(user.Id)
 	assert.True(t, r.IsAdmin)
 }
+
+func TestPersonalAccessTokenHash(t *testing.T) {
+	hash := []byte("pat-hash")
+	repo := NewTestSQLiteUserRepo()
+	user := u.NewUser("user@example.com",
+		u.WithHashedPersonalAccessToken(hash))
+	repo.Create(user)
+	r, err := repo.Find("user@example.com")
+	assert.NoError(t, err)
+	assert.Equal(t, hash, r.HashPAT)
+}
+
+func TestPasswordHash(t *testing.T) {
+	hash := []byte("password-hash")
+	repo := NewTestSQLiteUserRepo()
+	user := u.NewUser("user@example.com",
+		u.WithHashedPassword(hash))
+	repo.Create(user)
+	r, err := repo.Find("user@example.com")
+	assert.NoError(t, err)
+	assert.Equal(t, hash, r.HashPassword)
+}

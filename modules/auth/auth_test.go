@@ -52,6 +52,7 @@ var validSpec = `
 rules:
   - method: CreateCollection
     ignore_group: true
+    admin_only: true
     roles: [a-role, another-role]
 `
 
@@ -61,6 +62,7 @@ func TestValidRules(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(*authRules))
 	assert.Equal(t, 2, len((*authRules)[0].Roles))
+	assert.True(t, (*authRules)[0].AdminOnly)
 	assert.True(t, (*authRules)[0].IgnoreGroup)
 }
 
@@ -133,5 +135,48 @@ func TestAuthorizedWhenNeededGroupIsVoid(t *testing.T) {
 	assert.NoError(t, err)
 	ctx := u.AppendUserToContext(t.Context(), u.User{Roles: []string{"a-role-that-i-have"}})
 	err = auth.CreateCollection(ctx, "")
+	assert.NoError(t, err)
+}
+
+func TestAppendSetOfRules(t *testing.T) {
+	auth := NewVoidAuth()
+	auth.SetAuthRules(
+		[]AuthRule{{
+			Method: "CreateCollection",
+			Roles:  []string{"a-role-that-i-have"}}})
+	err := auth.CreateCollection(t.Context(), "")
+	assert.Error(t, err)
+}
+func TestAdminOnlyFailsWhenNotAdmin(t *testing.T) {
+	auth, _ := New(
+		[]AuthRule{{
+			Method:    "CreateUser",
+			AdminOnly: true}})
+	ctx := u.AppendUserToContext(t.Context(),
+		u.NewUser("admin@example.com"))
+	err := auth.CreateUser(ctx)
+	assert.Error(t, err)
+}
+
+func TestAdminOnly(t *testing.T) {
+	auth, _ := New(
+		[]AuthRule{{
+			Method:    "CreateUser",
+			AdminOnly: true}})
+	ctx := u.AppendUserToContext(t.Context(),
+		u.NewUser("admin@example.com", u.WithAdmin(true)))
+	err := auth.CreateUser(ctx)
+	assert.NoError(t, err)
+}
+
+func TestAdminDoesNotNeedRoleNorGroup(t *testing.T) {
+	auth, _ := New(
+		[]AuthRule{{
+			Method: "Annotate",
+			Roles:  []string{"a-role-that-i-dont-have"},
+		}})
+	ctx := u.AppendUserToContext(t.Context(),
+		u.NewUser("admin@example.com", u.WithAdmin(true)))
+	err := auth.Annotate(ctx, "a-group-i-am-not-member-of")
 	assert.NoError(t, err)
 }

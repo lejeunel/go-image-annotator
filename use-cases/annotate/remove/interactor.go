@@ -50,7 +50,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	if group != nil {
 
-		if err := i.auth.AnnotateGroup(ctx, *group); err != nil {
+		if err := i.auth.Annotate(ctx, *group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}

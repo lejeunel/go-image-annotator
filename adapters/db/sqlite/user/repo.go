@@ -42,6 +42,7 @@ type Record struct {
 	Roles        string `db:"roles"`
 	IsAdmin      bool   `db:"is_admin"`
 	ApiTokenHash string `db:"api_token_hash"`
+	PasswordHash string `db:"password_hash"`
 }
 
 func (r SQLiteUserRepo) Create(usr u.User) error {
@@ -49,8 +50,8 @@ func (r SQLiteUserRepo) Create(usr u.User) error {
 	if err != nil {
 		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
 	}
-	query := "INSERT INTO users (id,roles,is_admin,api_token_hash) VALUES ($1,$2,$3,$4)"
-	_, err = r.Db.Exec(query, usr.Id, roles, usr.IsAdmin, hex.EncodeToString(usr.HashPAT))
+	query := "INSERT INTO users (id,roles,is_admin,api_token_hash,password_hash) VALUES ($1,$2,$3,$4,$5)"
+	_, err = r.Db.Exec(query, usr.Id, roles, usr.IsAdmin, hex.EncodeToString(usr.HashPAT), hex.EncodeToString(usr.HashPassword))
 	if err != nil {
 		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
 	}
@@ -94,7 +95,7 @@ func (r SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 	record := Record{}
 	err := r.Db.Get(&record,
-		"SELECT id,roles,is_admin,api_token_hash FROM users WHERE id=$1", id)
+		"SELECT id,roles,is_admin,api_token_hash,password_hash FROM users WHERE id=$1", id)
 
 	if err != nil {
 		switch {
@@ -116,13 +117,18 @@ func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 		return nil, err
 	}
 
-	hash, err := hex.DecodeString(record.ApiTokenHash)
+	patHash, err := hex.DecodeString(record.ApiTokenHash)
+	if err != nil {
+		return nil, err
+	}
+	pwHash, err := hex.DecodeString(record.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
 
 	user := u.NewUser(record.Id, u.WithRoles(roles), u.WithGroups(groups),
-		u.WithAdmin(record.IsAdmin), u.WithHashedPersonalAccessToken(hash))
+		u.WithAdmin(record.IsAdmin), u.WithHashedPersonalAccessToken(patHash),
+		u.WithHashedPassword(pwHash))
 	return &user, nil
 }
 func (r SQLiteUserRepo) Delete(id string) error {

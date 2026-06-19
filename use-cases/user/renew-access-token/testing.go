@@ -4,7 +4,7 @@ import (
 	"context"
 
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
-	tok "github.com/lejeunel/go-image-annotator/modules/token"
+	au "github.com/lejeunel/go-image-annotator/modules/authentifier"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
@@ -54,6 +54,6 @@ type FakeTokenGenerator struct {
 	Hash_ []byte
 }
 
-func (t *FakeTokenGenerator) Generate() (*tok.TokenPair, error) {
-	return &tok.TokenPair{Token: t.Token, Hash: t.Hash_}, nil
+func (t *FakeTokenGenerator) Generate() (*au.Pair, error) {
+	return &au.Pair{Value: t.Token, Hash: t.Hash_}, nil
 }

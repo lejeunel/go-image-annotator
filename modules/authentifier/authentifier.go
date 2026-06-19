@@ -17,12 +17,12 @@ func Base64Encode(input string) string {
 	return base64.StdEncoding.EncodeToString([]byte(input))
 }
 
-type IdentifiedToken struct {
+type PersonalAccessToken struct {
 	UserId   string
 	APIToken string
 }
 
-func DecodeAndSplitToken(input string) (*IdentifiedToken, error) {
+func DecodeAndSplitPersonalAccessToken(input string) (*PersonalAccessToken, error) {
 	decoded, err := base64.StdEncoding.DecodeString(input)
 	if err != nil {
 		return nil, fmt.Errorf("decoding token from base64: %w", err)
@@ -31,29 +31,29 @@ func DecodeAndSplitToken(input string) (*IdentifiedToken, error) {
 	if !ok {
 		return nil, fmt.Errorf("splitting token")
 	}
-	return &IdentifiedToken{userId, apiToken}, nil
+	return &PersonalAccessToken{userId, apiToken}, nil
 }
 
-type TokenPair struct {
-	Token string
+type Pair struct {
+	Value string
 	Hash  []byte
 }
 
-type TokenGenerator interface {
-	Generate() (*TokenPair, error)
+type AuthGenerator interface {
+	Generate() (*Pair, error)
 	Hash(token string) []byte
 	Verify(string, []byte) bool
 }
 
-type MyTokenGenerator struct {
+type MyAuthGenerator struct {
 	Length int
 }
 
-func NewTokenGenerator(length int) MyTokenGenerator {
-	return MyTokenGenerator{Length: length}
+func New(length int) MyAuthGenerator {
+	return MyAuthGenerator{Length: length}
 }
 
-func (g MyTokenGenerator) Generate() (*TokenPair, error) {
+func (g MyAuthGenerator) Generate() (*Pair, error) {
 	buf := make([]byte, g.Length)
 	if _, err := rand.Read(buf); err != nil {
 		return nil, err
@@ -62,17 +62,16 @@ func (g MyTokenGenerator) Generate() (*TokenPair, error) {
 	token := base64.StdEncoding.EncodeToString(buf)
 	sum := g.Hash(token)
 
-	return &TokenPair{
-		Token: token,
+	return &Pair{
+		Value: token,
 		Hash:  sum,
 	}, nil
 }
-func (g MyTokenGenerator) Verify(token string, storedHash []byte) bool {
+func (g MyAuthGenerator) Verify(token string, storedHash []byte) bool {
 	computed := sha256.Sum256([]byte(token))
 	return subtle.ConstantTimeCompare(computed[:], storedHash) == 1
 }
-
-func (g MyTokenGenerator) Hash(token string) []byte {
+func (g MyAuthGenerator) Hash(token string) []byte {
 	sum := sha256.Sum256([]byte(token))
 	return sum[:]
 }

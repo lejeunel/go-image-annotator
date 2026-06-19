@@ -5,23 +5,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func MakeAuthorizer(path string) auth.Auth {
+	authorizer := auth.NewDefault()
+	if authRulesPath != "" {
+		rules, err := auth.ReadAuthRulesFromPath(authRulesPath)
+		if err != nil {
+			panic(err)
+		}
+		authorizer.SetAuthRules(*rules)
+	}
+	return authorizer
+
+}
+
 var (
 	port          int
-	authSpecsPath string
+	authRulesPath string
 	Cmd           = &cobra.Command{
 		Use:   "serve",
 		Short: "Run server",
 		Run: func(cmd *cobra.Command, args []string) {
-			specs, err := auth.ReadAuthSpecsFromPath(authSpecsPath)
-			if err != nil {
-				panic(err)
-			}
-
-			authorizer, err := auth.New(*specs)
-			if err != nil {
-				panic(err)
-			}
-			handler := Make(*authorizer)
+			authorizer := MakeAuthorizer(authRulesPath)
+			handler := Make(authorizer)
 			Serve(handler, port)
 		},
 	}
@@ -29,5 +34,5 @@ var (
 
 func init() {
 	Cmd.Flags().IntVarP(&port, "port", "p", 80, "port to serve on")
-	Cmd.Flags().StringVarP(&authSpecsPath, "auth-specs", "a", "", "path to yaml authentication specification file")
+	Cmd.Flags().StringVarP(&authRulesPath, "auth-rules", "a", "", "path to yaml file that specifies authorization rules")
 }

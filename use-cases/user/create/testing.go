@@ -5,7 +5,7 @@ import (
 	"slices"
 
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
-	tok "github.com/lejeunel/go-image-annotator/modules/token"
+	a "github.com/lejeunel/go-image-annotator/modules/authentifier"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
@@ -48,11 +48,17 @@ func (f FailingAuth) CreateUser(ctx context.Context) error {
 	return e.ErrAuth
 }
 
-type FakeTokenGenerator struct {
-	Token string
-	Hash_ []byte
+type FakeAuthGenerator struct {
+	Value                  string
+	Hash_                  []byte
+	GeneratedHashFromValue string
 }
 
-func (t *FakeTokenGenerator) Generate() (*tok.TokenPair, error) {
-	return &tok.TokenPair{Token: t.Token, Hash: t.Hash_}, nil
+func (t FakeAuthGenerator) Generate() (*a.Pair, error) {
+	return &a.Pair{Value: t.Value, Hash: t.Hash_}, nil
+}
+
+func (t *FakeAuthGenerator) Hash(value string) []byte {
+	t.GeneratedHashFromValue = value
+	return t.Hash_
 }

@@ -14,8 +14,13 @@ type Auth struct {
 	Rules map[string]AuthRule
 }
 
+func NewDefault() Auth {
+	r := Auth{Rules: make(map[string]AuthRule)}
+	return *r.SetAuthRules(DefaultRules)
+}
+
 func NewVoidAuth() Auth {
-	return Auth{}
+	return Auth{Rules: make(map[string]AuthRule)}
 }
 
 func New(rules []AuthRule) (*Auth, error) {
@@ -31,10 +36,9 @@ func NewFromYaml(r io.Reader) (*Auth, error) {
 	if err != nil {
 		return nil, fmt.Errorf("building authorizer from yaml: %w", err)
 	}
-
 	return New(*rules)
-
 }
+
 func (a Auth) checkForGroup(userGroups []string, neededGroup string) error {
 	for _, userGroup := range userGroups {
 		if userGroup == neededGroup {
@@ -55,7 +59,7 @@ func (a Auth) checkForRole(userRoles, allowedRoles []string) error {
 		}
 	}
 	if !gotAdequateRole {
-		return fmt.Errorf("checking for adequate role: %w", e.ErrAuth)
+		return fmt.Errorf("checking for roles given allowed role set %v and assigned roles %v: %w", allowedRoles, userRoles, e.ErrAuth)
 	}
 	return nil
 }
@@ -69,6 +73,18 @@ func (a Auth) check(ctx context.Context, method, group string) error {
 	if user == nil {
 		return fmt.Errorf("%v: fetching user info from context: %w", errCtx, e.ErrAuth)
 	}
+
+	if rule.AdminOnly {
+		if user.IsAdmin {
+			return nil
+		}
+		return fmt.Errorf("%v: checking if user is admin given method is admin only: %w", errCtx, e.ErrAuth)
+	}
+
+	if user.IsAdmin {
+		return nil
+	}
+
 	if err := a.checkForRole(user.Roles, rule.Roles); err != nil {
 		return fmt.Errorf("%v: %w", errCtx, err)
 	}
@@ -79,6 +95,12 @@ func (a Auth) check(ctx context.Context, method, group string) error {
 		return fmt.Errorf("%v: %w", errCtx, err)
 	}
 	return nil
+}
+func (a *Auth) SetAuthRules(rules []AuthRule) *Auth {
+	for _, r := range rules {
+		a.Rules[r.Method] = r
+	}
+	return a
 }
 
 func (a Auth) CreateCollection(ctx context.Context, group string) error {
@@ -99,8 +121,8 @@ func (a Auth) DeleteLabel(ctx context.Context) error {
 func (a Auth) UpdateLabel(ctx context.Context) error {
 	return a.check(ctx, "UpdateLabel", "")
 }
-func (a Auth) AnnotateGroup(ctx context.Context, group string) error {
-	return a.check(ctx, "AnnotateGroup", group)
+func (a Auth) Annotate(ctx context.Context, group string) error {
+	return a.check(ctx, "Annotate", group)
 }
 func (a Auth) DeleteImage(ctx context.Context, group string) error {
 	return a.check(ctx, "DeleteImage", group)

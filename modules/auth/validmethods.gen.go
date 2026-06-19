@@ -3,7 +3,7 @@
 package auth
 
 var validMethods = map[string]struct{}{
-	"AnnotateGroup": {},
+	"Annotate": {},
 	"AssignRoleToUser": {},
 	"AssignUserToGroup": {},
 	"CreateCollection": {},
@@ -25,7 +25,4 @@ var validMethods = map[string]struct{}{
 	"UnAssignUserFromGroup": {},
 	"UpdateCollection": {},
 	"UpdateLabel": {},
-	"check": {},
-	"checkForGroup": {},
-	"checkForRole": {},
 }

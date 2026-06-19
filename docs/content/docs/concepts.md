@@ -51,7 +51,7 @@ and `group` that gives the group assigned to the current annotation.
 
 ```
 type Auth interface {
-	AnnotateGroup(ctx context.Context, group string) error
+	Annotate(ctx context.Context, group string) error
 }
 ```
 

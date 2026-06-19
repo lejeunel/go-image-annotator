@@ -8,6 +8,6 @@ import (
 type FailingAuth struct {
 }
 
-func (f FailingAuth) AnnotateGroup(ctx context.Context, g string) error {
+func (f FailingAuth) Annotate(ctx context.Context, g string) error {
 	return e.ErrAuth
 }

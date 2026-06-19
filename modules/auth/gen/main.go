@@ -7,9 +7,22 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"slices"
 	"sort"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
+
+var SkipMethods = []string{"SetAuthRules"}
+
+func isFirstLetterCapitalized(s string) bool {
+	if s == "" {
+		return false
+	}
+	r, _ := utf8.DecodeRuneInString(s)
+	return unicode.IsUpper(r)
+}
 
 func main() {
 	structName := flag.String("struct", "", "name of the struct to extract methods from")
@@ -35,6 +48,12 @@ func main() {
 		fn, ok := decl.(*ast.FuncDecl)
 		if !ok || fn.Recv == nil || len(fn.Recv.List) == 0 {
 			continue // a plain function, not a method
+		}
+		if !isFirstLetterCapitalized(fn.Name.Name) {
+			continue
+		}
+		if slices.Contains(SkipMethods, fn.Name.Name) {
+			continue
 		}
 		if recvTypeName(fn.Recv.List[0].Type) == *structName {
 			methods = append(methods, fn.Name.Name)

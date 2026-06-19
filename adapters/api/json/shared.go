@@ -3,6 +3,7 @@ package json
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
@@ -76,6 +77,8 @@ type ErrorPresenter struct {
 }
 
 func (p ErrorPresenter) Error(err error) {
+	fmt.Println(err)
+	fmt.Println(p.Logger)
 	p.Logger.Error(err.Error())
 	WriteError(p.Writer, HTTPStatusCodeFromErr(err), err.Error())
 }

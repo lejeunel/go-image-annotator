@@ -26,7 +26,7 @@ func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
 	if body.Description != nil {
 		req.Description = *body.Description
 	}
-	s.Label.Create.Execute(r.Context(), req, &p.Create{Writer: w})
+	s.Label.Create.Execute(r.Context(), req, p.NewCreatePresenter(w, s.Logger))
 }
 func (s *Server) DeleteLabelByName(w http.ResponseWriter, r *http.Request, name string) {
 	s.Label.Delete.Execute(r.Context(),

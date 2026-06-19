@@ -6,17 +6,23 @@ import (
 
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
 	"github.com/lejeunel/go-image-annotator/modules/auth"
-	tok "github.com/lejeunel/go-image-annotator/modules/token"
+	au "github.com/lejeunel/go-image-annotator/modules/authentifier"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type TokenGenerator interface {
-	Generate() (*tok.TokenPair, error)
+	Generate() (*au.Pair, error)
+}
+
+type PasswordGenerator interface {
+	Generate() (*au.Pair, error)
+	Hash(string) []byte
 }
 
 type Interactor struct {
-	repo           Repo
-	tokenGenerator TokenGenerator
+	repo              Repo
+	tokenGenerator    TokenGenerator
+	passwordGenerator PasswordGenerator
 
 	auth Auth
 }
@@ -39,16 +45,28 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
+	var passwordHash []byte
+	if r.Password != nil {
+		passwordHash = i.passwordGenerator.Hash(*r.Password)
+
+	} else {
+		passwordPair, err := i.passwordGenerator.Generate()
+		passwordHash = passwordPair.Hash
+		if err != nil {
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
+			return
+		}
+	}
 	user := usr.NewUser(r.Id, usr.WithHashedPersonalAccessToken(token.Hash),
+		usr.WithHashedPassword(passwordHash),
 		usr.WithAdmin(r.IsAdmin))
 	if err := i.repo.Create(user); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	out.Success(Response{
-		Id:                  r.Id,
-		PersonalAccessToken: token.Token,
-		IsAdmin:             r.IsAdmin})
+		Id:      r.Id,
+		IsAdmin: r.IsAdmin})
 }
 func (i *Interactor) checkDuplicate(id string) error {
 	errBaseMsg := "checking for duplicate user with id %v: %w"
@@ -70,10 +88,13 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(r Repo, g TokenGenerator, opts ...Option) Interactor {
+func New(r Repo,
+	tg TokenGenerator,
+	pg PasswordGenerator, opts ...Option) Interactor {
 	i := &Interactor{repo: r,
-		auth:           auth.NewVoidAuth(),
-		tokenGenerator: g,
+		auth:              auth.NewVoidAuth(),
+		tokenGenerator:    tg,
+		passwordGenerator: pg,
 	}
 
 	for _, opt := range opts {

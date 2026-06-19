@@ -6,15 +6,16 @@ import (
 	"github.com/lejeunel/go-image-annotator/config"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
 	"github.com/lejeunel/go-image-annotator/modules/auth"
+	au "github.com/lejeunel/go-image-annotator/modules/authentifier"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	"github.com/lejeunel/go-image-annotator/modules/scroller"
-	tok "github.com/lejeunel/go-image-annotator/modules/token"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
 )
 
 func NewSQLiteApp(cfg config.Config, auth auth.Auth) app.App {
-	tg := tok.NewTokenGenerator(cfg.TokenLength)
+	tg := au.New(cfg.TokenLength)
+	pg := au.New(cfg.RandomPasswordLength)
 	sqldb := db.NewSQLiteDB(cfg.SQLiteDBPath)
 	repos := NewSQLiteRepos(sqldb,
 		fs.NewFileStore(cfg.ArtefactDir))
@@ -22,7 +23,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Auth) app.App {
 	identityProvider := ip.NewGothIdentityHandler(sessionManager)
 	scr := scroller.New(repos.Scroller)
 	itrs := NewSQLiteInteractors(repos,
-		cfg.DefaultPageSize, cfg.AllowedImageFormats, tg, auth)
+		cfg.DefaultPageSize, cfg.AllowedImageFormats, tg, pg, auth)
 	annotator := a.NewAnnotator(scr, itrs.Image.Read,
 		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox,
 		itrs.Annotation.AddPolygon, itrs.Annotation.UpdatePolygon,

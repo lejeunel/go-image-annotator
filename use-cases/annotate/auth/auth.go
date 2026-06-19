@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	AnnotateGroup(ctx context.Context, group string) error
+	Annotate(ctx context.Context, group string) error
 }

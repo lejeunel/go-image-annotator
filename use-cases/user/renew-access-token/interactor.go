@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/lejeunel/go-image-annotator/modules/auth"
-	tok "github.com/lejeunel/go-image-annotator/modules/token"
+	au "github.com/lejeunel/go-image-annotator/modules/authentifier"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type TokenGenerator interface {
-	Generate() (*tok.TokenPair, error)
+	Generate() (*au.Pair, error)
 }
 
 type Interactor struct {
@@ -47,7 +47,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: setting token hash: %w", errCtx, err))
 		return
 	}
-	out.Success(Response{Id: r.Id, PersonalAccessToken: token.Token})
+	out.Success(Response{Id: r.Id, PersonalAccessToken: token.Value})
 }
 
 type Option func(*Interactor)

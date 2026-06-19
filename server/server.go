@@ -11,6 +11,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	a "github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/app/sqlite"
 	as "github.com/lejeunel/go-image-annotator/assets"
 	"github.com/lejeunel/go-image-annotator/config"
@@ -35,11 +36,14 @@ func Make(auth auth.Auth) http.Handler {
 	pageBuilder := b.NewPageBuilder(cfg.APIPath, cfg.RepoURL, cfg.DocsURL)
 
 	app := sqlite.NewSQLiteApp(cfg, auth)
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	a.MaybeCreateInitialAdmin(app.Itrs.User.Create, cfg.InitialAdminEmail, cfg.InitialAdminPassword)
+
 	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
 		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),
 		CallbackURL: "http://localhost:3000/callback/google"})
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	colorizer := ap.NewCyclicColorizer(ap.Palette)
 	RegisterHandlers(mux,
 		*api.NewServer(&app.Itrs, *logger),

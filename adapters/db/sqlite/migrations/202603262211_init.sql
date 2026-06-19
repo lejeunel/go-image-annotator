@@ -71,7 +71,8 @@ CREATE TABLE users (
 	id varchar(60) PRIMARY KEY,
     roles TEXT,
     is_admin BOOLEAN,
-    api_token_hash varchar(128)
+    api_token_hash varchar(128),
+    password_hash TEXT
 );
 
 CREATE TABLE IF NOT EXISTS users_groups (
