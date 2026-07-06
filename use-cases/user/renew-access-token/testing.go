@@ -3,8 +3,8 @@ package renew_token
 import (
 	"context"
 
+	tk "github.com/lejeunel/go-image-annotator/entities/token"
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
-	au "github.com/lejeunel/go-image-annotator/modules/authentifier"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
@@ -54,6 +54,6 @@ type FakeTokenGenerator struct {
 	Hash_ []byte
 }
 
-func (t *FakeTokenGenerator) Generate() (*au.Pair, error) {
-	return &au.Pair{Value: t.Token, Hash: t.Hash_}, nil
+func (t *FakeTokenGenerator) Generate() (*tk.Token, error) {
+	return &tk.Token{Value: t.Token, Hash: t.Hash_}, nil
 }

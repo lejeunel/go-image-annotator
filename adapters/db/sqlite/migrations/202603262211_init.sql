@@ -60,6 +60,12 @@ CREATE TABLE IF NOT EXISTS annotations (
 
 CREATE INDEX idx_annotations_image_collection ON annotations(image_id,collection_id);
 
+CREATE TABLE forgot_password (
+	token_hash varchar(128) PRIMARY KEY,
+	id varchar(60),
+	expires_at DATETIME NOT NULL
+);
+
 CREATE TABLE sessions (
 	token TEXT PRIMARY KEY,
 	data BLOB NOT NULL,

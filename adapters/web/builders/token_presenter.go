@@ -2,7 +2,7 @@ package builders
 
 import (
 	"fmt"
-	au "github.com/lejeunel/go-image-annotator/modules/authentifier"
+	au "github.com/lejeunel/go-image-annotator/modules/token"
 	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 	"html/template"
 	"io"

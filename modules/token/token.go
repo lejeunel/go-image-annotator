@@ -1,4 +1,4 @@
-package token_generator
+package token
 
 import (
 	"crypto/rand"
@@ -6,6 +6,7 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
+	tk "github.com/lejeunel/go-image-annotator/entities/token"
 	"strings"
 )
 
@@ -17,12 +18,12 @@ func Base64Encode(input string) string {
 	return base64.StdEncoding.EncodeToString([]byte(input))
 }
 
-type PersonalAccessToken struct {
+type APIToken struct {
 	UserId   string
 	APIToken string
 }
 
-func DecodeAndSplitPersonalAccessToken(input string) (*PersonalAccessToken, error) {
+func DecodeAndSplitPersonalAccessToken(input string) (*APIToken, error) {
 	decoded, err := base64.StdEncoding.DecodeString(input)
 	if err != nil {
 		return nil, fmt.Errorf("decoding token from base64: %w", err)
@@ -31,29 +32,24 @@ func DecodeAndSplitPersonalAccessToken(input string) (*PersonalAccessToken, erro
 	if !ok {
 		return nil, fmt.Errorf("splitting token")
 	}
-	return &PersonalAccessToken{userId, apiToken}, nil
+	return &APIToken{userId, apiToken}, nil
 }
 
-type Pair struct {
-	Value string
-	Hash  []byte
-}
-
-type AuthGenerator interface {
-	Generate() (*Pair, error)
+type Interface interface {
+	Generate() (*tk.Token, error)
 	Hash(token string) []byte
 	Verify(string, []byte) bool
 }
 
-type MyAuthGenerator struct {
+type TokenGenerator struct {
 	Length int
 }
 
-func New(length int) MyAuthGenerator {
-	return MyAuthGenerator{Length: length}
+func New(length int) TokenGenerator {
+	return TokenGenerator{Length: length}
 }
 
-func (g MyAuthGenerator) Generate() (*Pair, error) {
+func (g TokenGenerator) Generate() (*tk.Token, error) {
 	buf := make([]byte, g.Length)
 	if _, err := rand.Read(buf); err != nil {
 		return nil, err
@@ -62,16 +58,16 @@ func (g MyAuthGenerator) Generate() (*Pair, error) {
 	token := base64.StdEncoding.EncodeToString(buf)
 	sum := g.Hash(token)
 
-	return &Pair{
+	return &tk.Token{
 		Value: token,
 		Hash:  sum,
 	}, nil
 }
-func (g MyAuthGenerator) Verify(token string, storedHash []byte) bool {
+func (g TokenGenerator) Verify(token string, storedHash []byte) bool {
 	computed := sha256.Sum256([]byte(token))
 	return subtle.ConstantTimeCompare(computed[:], storedHash) == 1
 }
-func (g MyAuthGenerator) Hash(token string) []byte {
+func (g TokenGenerator) Hash(token string) []byte {
 	sum := sha256.Sum256([]byte(token))
 	return sum[:]
 }

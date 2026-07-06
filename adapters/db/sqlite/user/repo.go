@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -45,6 +46,11 @@ type Record struct {
 	PasswordHash string `db:"password_hash"`
 }
 
+type ForgottenPasswordStateRecord struct {
+	Id        string    `db:"id"`
+	ExpiresAt time.Time `db:"expires_at"`
+}
+
 func (r SQLiteUserRepo) Create(usr u.User) error {
 	roles, err := json.Marshal(usr.Roles)
 	if err != nil {
@@ -64,7 +70,6 @@ func (r SQLiteUserRepo) Create(usr u.User) error {
 
 	return nil
 }
-
 func (r SQLiteUserRepo) AssignToGroup(user string, group string) error {
 	query := "INSERT INTO users_groups (user_id,group_id) VALUES ($1,(SELECT id FROM groups WHERE name=$2))"
 	_, err := r.Db.Exec(query, user, group)
@@ -239,13 +244,46 @@ func (r SQLiteUserRepo) SetAdmin(userId string, value bool) error {
 	}
 	return nil
 }
-
 func (r SQLiteUserRepo) SetAccessTokenHash(userId u.UserId, hash []byte) error {
-	hashStr := hex.EncodeToString(hash)
 	query := "UPDATE users SET api_token_hash=$2 WHERE id=$1"
-	_, err := r.Db.Exec(query, userId, hashStr)
+	_, err := r.Db.Exec(query, userId, hex.EncodeToString(hash))
 	if err != nil {
 		return fmt.Errorf("setting access token hash: %v: %w", err, e.ErrInternal)
+	}
+	return nil
+}
+func (r SQLiteUserRepo) AddForgottenPasswordState(hash []byte, id u.UserId, expiresAt time.Time) error {
+	query := "INSERT INTO forgot_password (token_hash,id,expires_at) VALUES ($1,$2,$3)"
+	_, err := r.Db.Exec(query, hex.EncodeToString(hash), id, expiresAt)
+	if err != nil {
+		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
+	}
+	return nil
+
+}
+func (r SQLiteUserRepo) FindForgottenPassword(hash []byte) (*u.ForgotPasswordState, error) {
+
+	record := ForgottenPasswordStateRecord{}
+	err := r.Db.Get(&record,
+		"SELECT id,expires_at FROM forgot_password WHERE token_hash=$1", hex.EncodeToString(hash))
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, e.ErrNotFound
+		default:
+			return nil, fmt.Errorf("finding forgotten password state: %v: %w", err, e.ErrInternal)
+		}
+
+	}
+	return &u.ForgotPasswordState{Id: record.Id, ExpiresAt: record.ExpiresAt}, nil
+
+}
+func (r SQLiteUserRepo) UpdatePassword(id u.UserId, hash []byte) error {
+	query := "UPDATE users SET password_hash=$1 WHERE id=$2"
+	_, err := r.Db.Exec(query, hex.EncodeToString(hash), id)
+	if err != nil {
+		return fmt.Errorf("updating password hash: %w: %w", err, e.ErrInternal)
 	}
 	return nil
 }

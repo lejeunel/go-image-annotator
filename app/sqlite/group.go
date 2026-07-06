@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-	a "github.com/lejeunel/go-image-annotator/modules/authentifier"
 	grp "github.com/lejeunel/go-image-annotator/use-cases/group"
 	"github.com/lejeunel/go-image-annotator/use-cases/group/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/group/delete"
@@ -10,7 +9,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/group/update"
 )
 
-func NewSQLiteGroupInteractors(repos *SQLiteRepos, tokenGen a.AuthGenerator) *grp.Interactors {
+func NewSQLiteGroupInteractors(repos *SQLiteRepos) *grp.Interactors {
 	return &grp.Interactors{
 		Find:   read.New(repos.Group),
 		Create: create.New(repos.Group),

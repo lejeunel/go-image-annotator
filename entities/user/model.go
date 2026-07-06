@@ -2,7 +2,15 @@ package user
 
 import (
 	"context"
+	"time"
 )
+
+type UserId = string
+
+type ForgotPasswordState struct {
+	Id        UserId
+	ExpiresAt time.Time
+}
 
 type User struct {
 	Id           string
@@ -14,8 +22,6 @@ type User struct {
 }
 
 var UserContextKey = "user"
-
-type UserId = string
 
 func NewUser(id UserId, opts ...Option) User {
 	l := &User{Id: id}

@@ -11,14 +11,14 @@ import (
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	au "github.com/lejeunel/go-image-annotator/modules/authentifier"
+	au "github.com/lejeunel/go-image-annotator/modules/token"
 	readusr "github.com/lejeunel/go-image-annotator/use-cases/user/read"
 )
 
 var UserIdKey = "user-id"
 
 type SessionManager interface {
-	Login(context.Context, string) error
+	FinishOAuthLogin(context.Context, string) error
 	Logout(context.Context) error
 	MiddleWare(next http.Handler) http.Handler
 }
@@ -51,7 +51,6 @@ func (m MySessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User,
 	}
 	return user, nil
 }
-
 func (m MySessionManager) AuthBearerToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
@@ -74,7 +73,6 @@ func (m MySessionManager) AuthBearerToken(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
-
 func (m MySessionManager) AuthFromSessionId(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -99,8 +97,7 @@ func (m MySessionManager) Logout(ctx context.Context) error {
 	}
 	return m.SessionManager.Clear(ctx)
 }
-
-func (m MySessionManager) Login(ctx context.Context, id string) error {
+func (m MySessionManager) FinishOAuthLogin(ctx context.Context, id string) error {
 	errCtx := fmt.Errorf("logging in user %v", id)
 	if _, err := m.Repo.Find(id); err != nil {
 		return fmt.Errorf("%w: checking if user is registered: %w", errCtx, err)

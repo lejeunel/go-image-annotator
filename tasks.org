@@ -53,3 +53,12 @@ shared/identity_provider/provider.go
      - SuccessUpdateLabel
      - Error
    
+* TODO user password authentication
+** DONE set random password on user creation and store its hash
+** DONE use-case: request new password (forgotten password)
+1. Generate a random token (not derived from anything) — high entropy, via crypto/rand.
+2. Store a hash of that token in the DB (SHA-256 is fine here — see note below on why bcrypt isn't necessary).
+3. Send the raw token to the user via email link.
+** TODO use-case: reset-forgotten-password
+1. On reset submission, hash the incoming token and look up by hash, check expiry and "used" status.
+2. Mark the token used (or delete it) atomically with the password update.

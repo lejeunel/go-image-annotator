@@ -4,24 +4,24 @@ import (
 	"context"
 	"fmt"
 
+	tk "github.com/lejeunel/go-image-annotator/entities/token"
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
 	"github.com/lejeunel/go-image-annotator/modules/auth"
-	au "github.com/lejeunel/go-image-annotator/modules/authentifier"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-type TokenGenerator interface {
-	Generate() (*au.Pair, error)
+type APITokenGenerator interface {
+	Generate() (*tk.Token, error)
 }
 
 type PasswordGenerator interface {
-	Generate() (*au.Pair, error)
+	Generate() (*tk.Token, error)
 	Hash(string) []byte
 }
 
 type Interactor struct {
 	repo              Repo
-	tokenGenerator    TokenGenerator
+	tokenGenerator    APITokenGenerator
 	passwordGenerator PasswordGenerator
 
 	auth Auth
@@ -89,7 +89,7 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo,
-	tg TokenGenerator,
+	tg APITokenGenerator,
 	pg PasswordGenerator, opts ...Option) Interactor {
 	i := &Interactor{repo: r,
 		auth:              auth.NewVoidAuth(),

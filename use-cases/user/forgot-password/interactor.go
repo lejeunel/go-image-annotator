@@ -1,8 +1,10 @@
-package renew_token
+package forgot_password
 
 import (
 	"context"
 	"fmt"
+	"github.com/jonboulle/clockwork"
+	"time"
 
 	tk "github.com/lejeunel/go-image-annotator/entities/token"
 	"github.com/lejeunel/go-image-annotator/modules/auth"
@@ -15,14 +17,15 @@ type TokenGenerator interface {
 
 type Interactor struct {
 	repo           Repo
+	expiresMinutes int
 	tokenGenerator TokenGenerator
-
-	auth Auth
+	auth           Auth
+	clock          clockwork.Clock
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	errCtx := "renewing personal access token"
-	if err := i.auth.RenewToken(ctx); err != nil {
+	errCtx := "requesting forgotten password token"
+	if err := i.auth.RequestForgottenPasswordToken(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
@@ -43,11 +46,13 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.repo.SetAccessTokenHash(r.Id, token.Hash); err != nil {
-		out.Error(fmt.Errorf("%v: setting token hash: %w", errCtx, err))
+	expiresAt := i.clock.Now().Add(time.Minute * time.Duration(i.expiresMinutes))
+	if err := i.repo.AddForgottenPasswordState(token.Hash, r.Id, expiresAt); err != nil {
+		out.Error(fmt.Errorf("%v: storing token: %w", errCtx, err))
 		return
 	}
-	out.Success(Response{Id: r.Id, PersonalAccessToken: token.Value})
+	out.Success(Response{Id: r.Id, Email: r.Id,
+		PasswordResetToken: token.Value})
 }
 
 type Option func(*Interactor)
@@ -58,10 +63,18 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(r Repo, g TokenGenerator, opts ...Option) Interactor {
+func WithClock(c clockwork.Clock) Option {
+	return func(i *Interactor) {
+		i.clock = c
+	}
+}
+
+func New(r Repo, expiresMinutes int, g TokenGenerator, opts ...Option) Interactor {
 	i := &Interactor{repo: r,
 		auth:           auth.NewVoidAuth(),
 		tokenGenerator: g,
+		expiresMinutes: expiresMinutes,
+		clock:          clockwork.NewRealClock(),
 	}
 
 	for _, opt := range opts {

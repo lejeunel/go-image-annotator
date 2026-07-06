@@ -6,17 +6,19 @@ import (
 )
 
 type Config struct {
-	SQLiteDBPath         string   `required:"true"`
-	ArtefactDir          string   `required:"true"`
-	InitialAdminEmail    string   `required:"true"`
-	InitialAdminPassword string   `required:"true"`
-	AllowedImageFormats  []string `default:"jpeg,png"`
-	DefaultPageSize      int      `default:"20"`
-	TokenLength          int      `default:"32"`
-	RandomPasswordLength int      `default:"10"`
-	APIPath              string   `default:"api"`
-	RepoURL              string   `default:"https://github.com/lejeunel/go-image-annotator"`
-	DocsURL              string   `default:"https://lejeunel.github.io/go-image-annotator/"`
+	SQLiteDBPath                         string   `required:"true"`
+	ArtefactDir                          string   `required:"true"`
+	InitialAdminEmail                    string   `required:"true"`
+	InitialAdminPassword                 string   `required:"true"`
+	AllowedImageFormats                  []string `default:"jpeg,png"`
+	DefaultPageSize                      int      `default:"20"`
+	TokenLength                          int      `default:"32"`
+	RandomPasswordLength                 int      `default:"10"`
+	ForgotPasswordTokenExpirationMinutes int      `default:"30"`
+	PasswordMinEntropy                   int      `default:"50"`
+	APIPath                              string   `default:"api"`
+	RepoURL                              string   `default:"https://github.com/lejeunel/go-image-annotator"`
+	DocsURL                              string   `default:"https://lejeunel.github.io/go-image-annotator/"`
 }
 
 func Parse() Config {

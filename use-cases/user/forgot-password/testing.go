@@ -1,8 +1,8 @@
-package create
+package forgot_password
 
 import (
 	"context"
-	"slices"
+	"time"
 
 	tk "github.com/lejeunel/go-image-annotator/entities/token"
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
@@ -22,43 +22,41 @@ func (p *FakePresenter) Success(r Response) {
 }
 
 type FakeRepo struct {
-	Err error
-	Ids []string
-	Got *usr.User
+	Err          error
+	GotId        usr.UserId
+	GotHash      []byte
+	GotExpiresAt time.Time
+	Missing      bool
 }
 
-func (r *FakeRepo) Create(u usr.User) error {
+func (r *FakeRepo) AddForgottenPasswordState(hash []byte, id usr.UserId, expires time.Time) error {
 	if r.Err != nil {
 		return r.Err
 	}
-	r.Got = &u
+	r.GotId = id
+	r.GotHash = hash
+	r.GotExpiresAt = expires
 	return nil
 }
 func (r *FakeRepo) Exists(id string) (bool, error) {
-	if slices.Contains(r.Ids, id) {
-		return true, nil
+	if r.Missing {
+		return false, nil
 	}
-	return false, nil
+	return true, nil
 }
 
 type FailingAuth struct {
 }
 
-func (f FailingAuth) CreateUser(ctx context.Context) error {
+func (f FailingAuth) RequestForgottenPasswordToken(ctx context.Context) error {
 	return e.ErrAuth
 }
 
 type FakeTokenGenerator struct {
-	Value                  string
-	Hash_                  []byte
-	GeneratedHashFromValue string
+	Token string
+	Hash_ []byte
 }
 
-func (t FakeTokenGenerator) Generate() (*tk.Token, error) {
-	return &tk.Token{Value: t.Value, Hash: t.Hash_}, nil
-}
-
-func (t *FakeTokenGenerator) Hash(value string) []byte {
-	t.GeneratedHashFromValue = value
-	return t.Hash_
+func (t *FakeTokenGenerator) Generate() (*tk.Token, error) {
+	return &tk.Token{Value: t.Token, Hash: t.Hash_}, nil
 }

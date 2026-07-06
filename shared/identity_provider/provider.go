@@ -9,27 +9,27 @@ import (
 	"github.com/markbates/goth/providers/google"
 )
 
-type OAuthHandler interface {
-	HandleLogin(http.ResponseWriter, *http.Request)
-	HandleLogout(http.ResponseWriter, *http.Request)
-	HandleAuthCallback(http.ResponseWriter, *http.Request)
+type AuthHandler interface {
+	OAuthLogin(http.ResponseWriter, *http.Request)
+	Logout(http.ResponseWriter, *http.Request)
+	OAuthCallback(http.ResponseWriter, *http.Request)
 }
 
 type GothIdentityHandler struct {
 	s.SessionManager
 }
 
-func (p GothIdentityHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
+func (p GothIdentityHandler) OAuthLogin(w http.ResponseWriter, r *http.Request) {
 	gothic.BeginAuthHandler(w, r)
 }
-func (p GothIdentityHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
+func (p GothIdentityHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	gothic.Logout(w, r)
 	p.SessionManager.Logout(r.Context())
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
-func (p GothIdentityHandler) HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
+func (p GothIdentityHandler) OAuthCallback(w http.ResponseWriter, r *http.Request) {
 	if user, err := gothic.CompleteUserAuth(w, r); err == nil {
-		if err := p.SessionManager.Login(r.Context(), user.Email); err != nil {
+		if err := p.SessionManager.FinishOAuthLogin(r.Context(), user.Email); err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}

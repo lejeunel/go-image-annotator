@@ -169,3 +169,6 @@ func (a Auth) DeleteGroup(ctx context.Context) error {
 func (a Auth) SetAdminRights(ctx context.Context) error {
 	return a.check(ctx, "SetAdminRights", "")
 }
+func (a Auth) RequestForgottenPasswordToken(ctx context.Context) error {
+	return a.check(ctx, "RequestForgottenPasswordToken", "")
+}

@@ -3,6 +3,7 @@ package user
 import (
 	"bytes"
 	"testing"
+	"time"
 
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -15,7 +16,7 @@ func TestInternalErrOnSetTokenShouldFail(t *testing.T) {
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
-func TestSetTokenHash(t *testing.T) {
+func TestSetAPIAccessTokenHash(t *testing.T) {
 	repo := NewTestSQLiteUserRepo()
 	CreateUser(repo, userId)
 	hash := []byte("hello")
@@ -23,4 +24,17 @@ func TestSetTokenHash(t *testing.T) {
 	assert.NoError(t, err)
 	r, _ := repo.Find(userId)
 	assert.True(t, bytes.Equal(r.HashPAT, hash))
+}
+
+func TestSetForgottenPasswordTokenHash(t *testing.T) {
+	repo := NewTestSQLiteUserRepo()
+	CreateUser(repo, userId)
+	hash := []byte("hello")
+	expiresAt := time.Now()
+	err := repo.AddForgottenPasswordState(hash, userId, expiresAt)
+	assert.NoError(t, err)
+	r, err := repo.FindForgottenPassword(hash)
+	assert.NoError(t, err)
+	assert.Equal(t, userId, r.Id)
+	assert.True(t, r.ExpiresAt.Equal(expiresAt))
 }

@@ -20,6 +20,7 @@ var validMethods = map[string]struct{}{
 	"IngestImage": {},
 	"ListUsers": {},
 	"RenewToken": {},
+	"RequestForgottenPasswordToken": {},
 	"SetAdminRights": {},
 	"UnAssignRoleFromUser": {},
 	"UnAssignUserFromGroup": {},

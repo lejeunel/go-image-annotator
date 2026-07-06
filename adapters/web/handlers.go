@@ -7,9 +7,9 @@ import (
 
 func RegisterWebPages(mux *http.ServeMux, server Server, b b.PageBuilder) {
 	mux.Handle("/", HomePageHandlerFunc(b))
-	mux.HandleFunc("/login/{provider}", server.HandleLogin)
-	mux.HandleFunc("/logout", server.HandleLogout)
-	mux.HandleFunc("/callback/{provider}", server.HandleAuthCallback)
+	mux.HandleFunc("/login/{provider}", server.OAuthLogin)
+	mux.HandleFunc("/logout", server.AuthHandler.Logout)
+	mux.HandleFunc("/callback/{provider}", server.OAuthCallback)
 
 	mux.HandleFunc("/user-dashboard", server.UserDashboard)
 	mux.HandleFunc("/ui/new-api-token", server.NewAPIToken)

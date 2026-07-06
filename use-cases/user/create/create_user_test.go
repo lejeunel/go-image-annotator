@@ -6,8 +6,8 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&FakeRepo{}, &FakeAuthGenerator{},
-		&FakeAuthGenerator{},
+	itr := New(&FakeRepo{}, &FakeTokenGenerator{},
+		&FakeTokenGenerator{},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
@@ -18,8 +18,8 @@ func TestHandleAuthError(t *testing.T) {
 func TestHandleDuplicateError(t *testing.T) {
 	userId := "user@example.com"
 	itr := New(&FakeRepo{Ids: []string{userId}},
-		&FakeAuthGenerator{},
-		&FakeAuthGenerator{},
+		&FakeTokenGenerator{},
+		&FakeTokenGenerator{},
 	)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: userId}, p)
@@ -30,8 +30,8 @@ func TestHandleDuplicateError(t *testing.T) {
 func TestCreateWithTokenHash(t *testing.T) {
 	hash := []byte("the-hash")
 	repo := &FakeRepo{}
-	itr := New(repo, &FakeAuthGenerator{Hash_: hash},
-		&FakeAuthGenerator{},
+	itr := New(repo, &FakeTokenGenerator{Hash_: hash},
+		&FakeTokenGenerator{},
 	)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user"}, p)
@@ -42,8 +42,8 @@ func TestCreateWithRandomPassword(t *testing.T) {
 	repo := &FakeRepo{}
 	passwordHash := []byte("a-password-hash")
 	itr := New(repo,
-		&FakeAuthGenerator{},
-		&FakeAuthGenerator{Hash_: passwordHash},
+		&FakeTokenGenerator{},
+		&FakeTokenGenerator{Hash_: passwordHash},
 	)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user"}, p)
@@ -54,9 +54,9 @@ func TestCreateWithPassword(t *testing.T) {
 	password := "a-password"
 	hash := []byte("the-hash")
 	repo := &FakeRepo{}
-	pwGenerator := &FakeAuthGenerator{Hash_: hash}
+	pwGenerator := &FakeTokenGenerator{Hash_: hash}
 	itr := New(repo,
-		&FakeAuthGenerator{},
+		&FakeTokenGenerator{},
 		pwGenerator,
 	)
 	p := &FakePresenter{}
@@ -67,7 +67,7 @@ func TestCreateWithPassword(t *testing.T) {
 
 func TestCreateAdmin(t *testing.T) {
 	repo := &FakeRepo{}
-	itr := New(repo, &FakeAuthGenerator{}, &FakeAuthGenerator{})
+	itr := New(repo, &FakeTokenGenerator{}, &FakeTokenGenerator{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user", IsAdmin: true}, p)
 	assert.True(t, repo.Got.IsAdmin)

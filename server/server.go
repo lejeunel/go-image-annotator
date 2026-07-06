@@ -50,7 +50,7 @@ func Make(auth auth.Auth) http.Handler {
 		*web.NewServer(&app.Itrs, app.Annotator,
 			*pageBuilder, ap.NewAnnotationPagePresenter(colorizer),
 			ap.NewAnnotoriousPresenter(colorizer),
-			app.SessionManager, app.OAuthHandler, cfg.DefaultPageSize),
+			app.SessionManager, app.AuthHandler, cfg.DefaultPageSize),
 		config.APIConfig{APIPath: fmt.Sprintf("/%v", cfg.APIPath),
 			APIDocsPath:      fmt.Sprintf("/%v/docs", cfg.APIPath),
 			OpenAPISpecsPath: fmt.Sprintf("/%v/openapi.yaml", cfg.APIPath)},
