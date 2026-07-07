@@ -40,7 +40,7 @@ func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
 func NewListCollectionsPresenter(w http.ResponseWriter, p b.PageBuilder) ListCollectionsPresenter {
 	baseURL, _ := url.Parse("/collections")
 	return ListCollectionsPresenter{
-		ListRenderer: NewListRenderer(*p.SetTitle("Collections"), *baseURL,
-			b.CollectionsPageActive, w),
+		ListRenderer: NewListRenderer(*p.SetTitle("Collections").SetActive(b.CollectionsPageActive), *baseURL,
+			w),
 	}
 }

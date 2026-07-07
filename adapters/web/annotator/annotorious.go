@@ -27,6 +27,6 @@ func MakeAnnotoriousScript(imageId string, collection string) (*Node, error) {
 	if err != nil {
 		return nil, err
 	}
-	script := Script(Raw(buf.String()))
+	script := Script(Raw(buf.String()), Defer())
 	return &script, nil
 }

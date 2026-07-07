@@ -66,7 +66,9 @@ func MakeAPIMux(apiServer api.Server) *http.ServeMux {
 func Make(auth auth.Auth) http.Handler {
 	cfg := config.Parse()
 
-	pageBuilder := b.NewPageBuilder(cfg.APIPath, cfg.RepoURL, cfg.DocsURL)
+	basePageBuilder := b.NewBasePageBuilder()
+	basePageBuilder.AddScripts(b.BaseLibs()...)
+	pageBuilder := b.NewPageBuilder(basePageBuilder, cfg.APIPath, cfg.RepoURL, cfg.DocsURL)
 	loginPageBuilder := b.NewLoginPageBuilder()
 
 	app := sqlite.NewSQLiteApp(cfg, auth)

@@ -102,23 +102,26 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	regionLabelModal, _ := makeLabelModal(v.availableLabels, RegionLabelModal)
-	imageLabelModal, _ := makeLabelModal(v.availableLabels, ImageLabelModal)
 	pb.AddScripts(AnnotoriousLib()...)
 	pb.AddScripts(*script)
-	pb.AddScripts(Raw(*regionLabelModal))
-	pb.AddScripts(Raw(*imageLabelModal))
+
+	regionLabelModal, _ := makeLabelModal(v.availableLabels, RegionLabelModal)
+	imageLabelModal, _ := makeLabelModal(v.availableLabels, ImageLabelModal)
 
 	pb.SetContent(
-		Table(
-			Tr(Div(Class("flex"), v.ScrollerView.Render(v.scrollerButtons), v.ShapeSelector())),
-			Tr(Td(Table(
-				Tr(Td(Class("align-top"), v.ImageView.Build(*v.image)),
-					Td(Class("align-top pl-2"),
-						Div(Class("pb-2"), v.ImageInfosView.Build(*v.imageInfo)),
-						Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes, v.polygons, v.imageLabels, v.availableLabels)))),
-			),
-			))))
+		Group([]Node{
+			Raw(*regionLabelModal),
+			Raw(*imageLabelModal),
+			Table(
+				Tr(Div(Class("flex"), v.ScrollerView.Render(v.scrollerButtons), v.ShapeSelector())),
+				Tr(Td(Table(
+					Tr(Td(Class("align-top"), v.ImageView.Build(*v.image)),
+						Td(Class("align-top pl-2"),
+							Div(Class("pb-2"), v.ImageInfosView.Build(*v.imageInfo)),
+							Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes, v.polygons, v.imageLabels, v.availableLabels)))),
+				),
+				))),
+		}))
 	pb.Render(w)
 }
 

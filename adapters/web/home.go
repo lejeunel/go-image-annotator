@@ -9,6 +9,7 @@ import (
 func MakeHomePage(pb b.PageBuilder) Node {
 	pb.SetTitle("Home")
 	pb.SetActive(b.HomePageActive)
+	pb.SetContent(Text("Welcome."))
 	return pb.Build()
 }
 

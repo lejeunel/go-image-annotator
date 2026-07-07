@@ -54,6 +54,6 @@ func NewListImagesPresenter(w http.ResponseWriter, baseURL url.URL, pb b.PageBui
 		ListRenderer: NewListRenderer(
 			*pb.SetTitle("Images"),
 			baseURL,
-			b.NoPageActive, w),
+			w),
 	}
 }

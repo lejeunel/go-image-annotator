@@ -33,7 +33,7 @@ func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request) {
 func NewListLabelsPresenter(w http.ResponseWriter, p b.PageBuilder) ListLabelsPresenter {
 	baseURL, _ := url.Parse("/labels")
 	return ListLabelsPresenter{
-		ListRenderer: NewListRenderer(*p.SetTitle("Labels"), *baseURL,
-			b.LabelsPageActive, w),
+		ListRenderer: NewListRenderer(*p.SetTitle("Labels").SetActive(b.LabelsPageActive), *baseURL,
+			w),
 	}
 }

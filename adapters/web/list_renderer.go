@@ -13,9 +13,8 @@ import (
 
 type ListRenderer struct {
 	b.PageBuilder
-	ActivePage b.ActivePage
-	ListURL    url.URL
-	Writer     io.Writer
+	ListURL url.URL
+	Writer  io.Writer
 }
 
 func (p ListRenderer) RenderSuccess(table html.MyTable, pagination pagination.Pagination, header *Node) {
@@ -27,15 +26,15 @@ func (p ListRenderer) RenderSuccess(table html.MyTable, pagination pagination.Pa
 	} else {
 		cat = content
 	}
-	p.PageBuilder.SetContent(cat).SetActive(p.ActivePage).Render(p.Writer)
+	p.PageBuilder.SetContent(cat).Render(p.Writer)
 }
 
 func (p ListRenderer) Error(err error) {
 	p.SetError(err).Render(p.Writer)
 }
 
-func NewListRenderer(pageBuilder b.PageBuilder, listURL url.URL, page b.ActivePage, w io.Writer) ListRenderer {
+func NewListRenderer(pageBuilder b.PageBuilder, listURL url.URL, w io.Writer) ListRenderer {
 	return ListRenderer{PageBuilder: pageBuilder, ListURL: listURL,
-		ActivePage: page, Writer: w}
+		Writer: w}
 
 }

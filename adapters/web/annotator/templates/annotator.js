@@ -171,10 +171,8 @@ document.addEventListener('alpine:init', () => {
             annotator.on('selectionChanged', (annotations) => {
             });
             annotator.on('mouseEnterAnnotation', (annotation) => {
-                // console.log('Mouse entered: ' + annotation.id);
             });
             annotator.on('mouseLeaveAnnotation', (annotation) => {
-                // console.log('Mouse left: ' + annotation.id);
             });
         },
 
