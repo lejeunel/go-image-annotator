@@ -23,15 +23,16 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	s.User.Create.Execute(
 		r.Context(), req, p.NewCreatePresenter(w, s.Logger))
 }
-
 func (s *Server) WhoAmI(w http.ResponseWriter, r *http.Request) {
 	user := u.IdentityFromContext(r.Context())
 
 	if user != nil {
 		json.WriteJSON(w, 200, UserIdentity{
-			Id:     user.Id,
-			Groups: user.Groups,
-			Roles:  user.Roles})
+			Id:      user.Id,
+			Groups:  user.Groups,
+			Roles:   user.Roles,
+			IsAdmin: user.IsAdmin,
+		})
 		return
 	}
 	http.Error(w, "failed fetching user's identity", http.StatusBadRequest)

@@ -196,8 +196,11 @@ type UserIdentity struct {
 	Groups []string `json:"groups"`
 
 	// Id Id of the user
-	Id    string   `json:"id"`
-	Roles []string `json:"roles"`
+	Id string `json:"id"`
+
+	// IsAdmin whether user has admin privileges
+	IsAdmin bool     `json:"is_admin"`
+	Roles   []string `json:"roles"`
 }
 
 // ListCollectionsParams defines parameters for ListCollections.

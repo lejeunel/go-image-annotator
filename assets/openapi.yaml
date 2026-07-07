@@ -360,7 +360,7 @@ paths:
   /labels:
     get:
       summary: List labels
-      description: Returns all pets from the system that the user has access to
+      description: Returns all labels
       operationId: listLabels
       tags: [Label]
       parameters:
@@ -654,6 +654,7 @@ components:
         - id
         - roles
         - groups
+        - is_admin
       properties:
         id:
           type: string
@@ -666,6 +667,10 @@ components:
           type: array
           items:
             type: string
+        is_admin:
+          type: boolean
+          description: whether user has admin privileges
+        
     Label:
       properties:
         name:
