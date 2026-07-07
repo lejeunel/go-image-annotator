@@ -16,11 +16,11 @@ import (
 type App struct {
 	Itrs           Interactors
 	SessionManager s.MySessionManager
-	i.AuthHandler
+	i.OAuthHandler
 	a.Annotator
 }
 
-func NewApp(itrs Interactors, sm s.MySessionManager, ip i.AuthHandler, an a.Annotator) App {
+func NewApp(itrs Interactors, sm s.MySessionManager, ip i.OAuthHandler, an a.Annotator) App {
 	return App{itrs, sm, ip, an}
 }
 

@@ -35,21 +35,28 @@ func DecodeAndSplitPersonalAccessToken(input string) (*APIToken, error) {
 	return &APIToken{userId, apiToken}, nil
 }
 
+type TokenHasher interface {
+	Hash(token string) []byte
+}
+
 type Interface interface {
 	Generate() (*tk.Token, error)
-	Hash(token string) []byte
 	Verify(string, []byte) bool
+	TokenHasher
 }
 
-type TokenGenerator struct {
+type TokenService struct {
 	Length int
+	TokenHasher
 }
 
-func New(length int) TokenGenerator {
-	return TokenGenerator{Length: length}
+func New(length int) TokenService {
+	return TokenService{
+		Length:      length,
+		TokenHasher: NewSHA256Hasher()}
 }
 
-func (g TokenGenerator) Generate() (*tk.Token, error) {
+func (g TokenService) Generate() (*tk.Token, error) {
 	buf := make([]byte, g.Length)
 	if _, err := rand.Read(buf); err != nil {
 		return nil, err
@@ -63,11 +70,18 @@ func (g TokenGenerator) Generate() (*tk.Token, error) {
 		Hash:  sum,
 	}, nil
 }
-func (g TokenGenerator) Verify(token string, storedHash []byte) bool {
+func (g TokenService) Verify(token string, storedHash []byte) bool {
 	computed := sha256.Sum256([]byte(token))
 	return subtle.ConstantTimeCompare(computed[:], storedHash) == 1
 }
-func (g TokenGenerator) Hash(token string) []byte {
+
+type SHA256Hasher struct{}
+
+func NewSHA256Hasher() SHA256Hasher {
+	return SHA256Hasher{}
+}
+
+func (h SHA256Hasher) Hash(token string) []byte {
 	sum := sha256.Sum256([]byte(token))
 	return sum[:]
 }

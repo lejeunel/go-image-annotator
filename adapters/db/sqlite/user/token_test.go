@@ -33,8 +33,20 @@ func TestSetForgottenPasswordTokenHash(t *testing.T) {
 	expiresAt := time.Now()
 	err := repo.AddForgottenPasswordState(hash, userId, expiresAt)
 	assert.NoError(t, err)
-	r, err := repo.FindForgottenPassword(hash)
+	r, err := repo.FindResetPasswordState(hash)
 	assert.NoError(t, err)
 	assert.Equal(t, userId, r.Id)
 	assert.True(t, r.ExpiresAt.Equal(expiresAt))
+}
+
+func TestDeleteForgottenPasswordTokens(t *testing.T) {
+	repo := NewTestSQLiteUserRepo()
+	CreateUser(repo, userId)
+	hash := []byte("hello")
+	expiresAt := time.Now()
+	repo.AddForgottenPasswordState(hash, userId, expiresAt)
+	err := repo.DeleteForgottenPasswordTokens(userId)
+	assert.NoError(t, err)
+	_, err = repo.FindResetPasswordState(hash)
+	assert.ErrorIs(t, err, e.ErrNotFound)
 }

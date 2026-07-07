@@ -45,12 +45,7 @@ type UserMenuEntry struct {
 	URL  string
 }
 
-func MakeLoginOrUserBadge(user *u.User) Node {
-	if user == nil {
-		return A(Href("/login/google"),
-			Class("rounded-radius bg-primary border border-primary px-4 py-2 text-center text-sm font-medium tracking-wide text-on-primary hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"),
-			Text("Login"))
-	}
+func MakeUserBadge(user *u.User) Node {
 	tUser := template.New("")
 	template.Must(tUser.ParseFS(templatesFiles, "templates/user_badge.html"))
 	var iconBuf bytes.Buffer
@@ -58,7 +53,7 @@ func MakeLoginOrUserBadge(user *u.User) Node {
 		Raw(UserIcon)).Render(&iconBuf)
 	var buf bytes.Buffer
 	entries := UserMenu{UserName: user.Id,
-		Entries: []UserMenuEntry{{"Dashboard", "/user-dashboard"}, {"Sign Out", "/logout"}},
+		Entries: []UserMenuEntry{{"Dashboard", "/user-dashboard"}, {"Sign Out", "/auth/logout"}},
 		Icon:    iconBuf.String()}
 	tUser.ExecuteTemplate(&buf, "user_badge", entries)
 	return Raw(buf.String())
@@ -141,7 +136,7 @@ func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefi
 			Li(
 				DarkModeToggle(),
 			),
-			Li(MakeLoginOrUserBadge(user)),
+			Li(MakeUserBadge(user)),
 		),
 	)
 }

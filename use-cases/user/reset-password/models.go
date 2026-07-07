@@ -1,4 +1,4 @@
-package reset_forgotten_password
+package reset_password
 
 type Request struct {
 	Token          string

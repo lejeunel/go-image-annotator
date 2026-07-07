@@ -12,7 +12,7 @@ type Config struct {
 	InitialAdminPassword                 string   `required:"true"`
 	AllowedImageFormats                  []string `default:"jpeg,png"`
 	DefaultPageSize                      int      `default:"20"`
-	TokenLength                          int      `default:"32"`
+	ApiTokenLength                       int      `default:"32"`
 	RandomPasswordLength                 int      `default:"10"`
 	ForgotPasswordTokenExpirationMinutes int      `default:"30"`
 	PasswordMinEntropy                   int      `default:"50"`

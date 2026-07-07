@@ -8,11 +8,12 @@ import (
 )
 
 func NewSQLiteInteractors(i SQLiteRepos, pageSize int, allowedImageFormats []string,
-	APItokenGenerator token.Interface, passwordGenerator token.Interface,
+	APItokenGenerator token.Interface,
+	passwordGenerator token.Interface,
 	forgotPasswordTokenGen token.Interface,
 	forgotPasswordTokenExpirationMinutes int,
 	passwordValidator pv.PasswordValidator,
-	passwordHasher token.Interface,
+	passwordHasher token.TokenHasher,
 	auth auth.Auth) a.Interactors {
 
 	return a.Interactors{

@@ -22,13 +22,18 @@ func (p *FakePresenter) Success(r Response) {
 }
 
 type FakeRepo struct {
-	Err          error
-	GotId        usr.UserId
-	GotHash      []byte
-	GotExpiresAt time.Time
-	Missing      bool
+	Err                   error
+	GotId                 usr.UserId
+	GotHash               []byte
+	GotExpiresAt          time.Time
+	Missing               bool
+	DeletedPreviousTokens bool
 }
 
+func (r *FakeRepo) DeleteForgottenPasswordTokens(usr.UserId) error {
+	r.DeletedPreviousTokens = true
+	return nil
+}
 func (r *FakeRepo) AddForgottenPasswordState(hash []byte, id usr.UserId, expires time.Time) error {
 	if r.Err != nil {
 		return r.Err

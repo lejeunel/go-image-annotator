@@ -10,7 +10,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/user/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/read"
 	rat "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
-	rfp "github.com/lejeunel/go-image-annotator/use-cases/user/reset-forgotten-password"
+	rpw "github.com/lejeunel/go-image-annotator/use-cases/user/reset-password"
 	adm "github.com/lejeunel/go-image-annotator/use-cases/user/set-admin"
 	ugr "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-group"
 	uro "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-role"
@@ -28,7 +28,7 @@ type Interactors struct {
 	UnAssignGroup            ugr.Interactor
 	SetAdmin                 adm.Interactor
 	RequestForgottenPassword fp.Interactor
-	ResetForgottenPassword   rfp.Interactor
+	ResetPassword            rpw.Interactor
 	DefaultPageSize          int
 	Authorizer               auth.Auth
 }

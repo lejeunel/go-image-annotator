@@ -5,7 +5,6 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	app "github.com/lejeunel/go-image-annotator/app"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
-	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	s "github.com/lejeunel/go-image-annotator/shared/session"
 )
 
@@ -15,7 +14,6 @@ type Server struct {
 	b.UserDashboardBuilder
 	a.Annotator
 	s.SessionManager
-	ip.AuthHandler
 	ap.AnnotationPagePresenter
 	ap.AnnotoriousPresenter
 	DefaultPageSize int
@@ -28,7 +26,6 @@ func NewServer(
 	annotationPagePresenter ap.AnnotationPagePresenter,
 	annotoriousPresenter ap.AnnotoriousPresenter,
 	sessionManager s.SessionManager,
-	identityHandler ip.AuthHandler,
 	pageSize int) *Server {
 	return &Server{
 		Interactors:             interactors,
@@ -38,7 +35,6 @@ func NewServer(
 		UserDashboardBuilder:    b.NewUserDashboardBuilder(),
 		AnnotationPagePresenter: annotationPagePresenter,
 		AnnotoriousPresenter:    annotoriousPresenter,
-		AuthHandler:             identityHandler,
 		DefaultPageSize:         pageSize,
 	}
 }

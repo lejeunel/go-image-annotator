@@ -15,25 +15,26 @@ import (
 )
 
 func NewSQLiteApp(cfg config.Config, auth auth.Auth) app.App {
-	tg := tk.New(cfg.TokenLength)
-	pg := tk.New(cfg.RandomPasswordLength)
-	pval := pv.New(cfg.PasswordMinEntropy)
+	apiTokenGen := tk.New(cfg.ApiTokenLength)
+	passwordGen := tk.New(cfg.RandomPasswordLength)
+	forgottenPasswordGen := tk.New(cfg.RandomPasswordLength)
+	passwordValidator := pv.New(cfg.PasswordMinEntropy)
 	sqldb := db.NewSQLiteDB(cfg.SQLiteDBPath)
 	repos := NewSQLiteRepos(sqldb,
 		fs.NewFileStore(cfg.ArtefactDir))
-	sessionManager := sm.NewSQLiteSessionManager(sqldb.DB, repos.User, tg)
+	sessionManager := sm.NewSQLiteSessionManager(sqldb.DB, repos.User, apiTokenGen)
 	identityProvider := ip.NewGothIdentityHandler(sessionManager)
 	scr := scroller.New(repos.Scroller)
 	itrs := NewSQLiteInteractors(
 		repos,
 		cfg.DefaultPageSize,
 		cfg.AllowedImageFormats,
-		tg,
-		pg,
-		tg,
+		apiTokenGen,
+		passwordGen,
+		forgottenPasswordGen,
 		cfg.ForgotPasswordTokenExpirationMinutes,
-		pval,
-		tg,
+		passwordValidator,
+		apiTokenGen,
 		auth)
 	annotator := a.NewAnnotator(scr, itrs.Image.Read,
 		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox,
@@ -45,7 +46,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Auth) app.App {
 	return app.App{
 		Itrs:           itrs,
 		SessionManager: sessionManager,
-		AuthHandler:    identityProvider,
+		OAuthHandler:   identityProvider,
 		Annotator:      annotator,
 	}
 

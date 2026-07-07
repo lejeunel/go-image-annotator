@@ -25,6 +25,13 @@ func TestNonExistingUserShouldFail(t *testing.T) {
 	itr.Execute(t.Context(), Request{Id: "user"}, p)
 	assert.True(t, p.GotNotFoundErr)
 }
+func TestDeletePreviousTokens(t *testing.T) {
+	repo := &FakeRepo{}
+	itr := New(repo, 1, &FakeTokenGenerator{})
+	p := &FakePresenter{}
+	itr.Execute(t.Context(), Request{Id: "user"}, p)
+	assert.True(t, repo.DeletedPreviousTokens)
+}
 
 func TestRequestForgottenPasswordToken(t *testing.T) {
 	token := "new-token"

@@ -9,7 +9,7 @@ type UserId = string
 
 type ForgotPasswordState struct {
 	Id        UserId
-	ExpiresAt time.Time
+	ExpiresAt *time.Time
 }
 
 type User struct {

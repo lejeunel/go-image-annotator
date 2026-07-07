@@ -9,7 +9,7 @@ import (
 	"github.com/markbates/goth/providers/google"
 )
 
-type AuthHandler interface {
+type OAuthHandler interface {
 	OAuthLogin(http.ResponseWriter, *http.Request)
 	Logout(http.ResponseWriter, *http.Request)
 	OAuthCallback(http.ResponseWriter, *http.Request)

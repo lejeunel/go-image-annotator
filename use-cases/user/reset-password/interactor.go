@@ -1,9 +1,10 @@
-package reset_forgotten_password
+package reset_password
 
 import (
 	"context"
 	"fmt"
 
+	"github.com/jonboulle/clockwork"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -19,16 +20,11 @@ type Interactor struct {
 	repo              Repo
 	tokenHasher       TokenHasher
 	passwordValidator PasswordValidator
+	clock             clockwork.Clock
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "resetting forgotten password"
-
-	state, err := i.repo.FindForgottenPassword(i.tokenHasher.Hash(r.Token))
-	if err != nil {
-		out.Error(fmt.Errorf("%v: finding by hash: %w", errCtx, err))
-		return
-	}
 
 	if r.FirstPassword != r.SecondPassword {
 		out.Error(fmt.Errorf("%v: checking for matching passwords: %w", errCtx, e.ErrPasswordMismatch))
@@ -38,6 +34,19 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	if err := i.passwordValidator.Validate(r.FirstPassword); err != nil {
 		out.Error(fmt.Errorf("%v: checking for password validity: %w", errCtx, e.ErrInvalidPassword))
 		return
+	}
+
+	state, err := i.repo.FindResetPasswordState(i.tokenHasher.Hash(r.Token))
+	if err != nil {
+		out.Error(fmt.Errorf("%v: finding by hash: %w", errCtx, err))
+		return
+	}
+
+	if state.ExpiresAt != nil {
+		if state.ExpiresAt.Before(i.clock.Now()) {
+			out.Error(fmt.Errorf("%v: checking for token expiration: %w", errCtx, e.ErrExpiredToken))
+			return
+		}
 	}
 
 	if err := i.repo.UpdatePassword(state.Id, i.tokenHasher.Hash(r.FirstPassword)); err != nil {
@@ -50,11 +59,18 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 type Option func(*Interactor)
 
+func WithClock(c clockwork.Clock) Option {
+	return func(i *Interactor) {
+		i.clock = c
+	}
+}
+
 func New(r Repo, tokenHasher TokenHasher, passwordValidator PasswordValidator,
 	opts ...Option) Interactor {
 	i := &Interactor{repo: r,
 		tokenHasher:       tokenHasher,
 		passwordValidator: passwordValidator,
+		clock:             clockwork.NewRealClock(),
 	}
 
 	for _, opt := range opts {

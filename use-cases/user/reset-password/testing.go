@@ -1,4 +1,4 @@
-package reset_forgotten_password
+package reset_password
 
 import (
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
@@ -23,7 +23,7 @@ type FakeRepo struct {
 	ErrOnUpdate error
 }
 
-func (r *FakeRepo) FindForgottenPassword(hash []byte) (*usr.ForgotPasswordState, error) {
+func (r *FakeRepo) FindResetPasswordState(hash []byte) (*usr.ForgotPasswordState, error) {
 	if r.Missing {
 		return nil, e.ErrNotFound
 	}

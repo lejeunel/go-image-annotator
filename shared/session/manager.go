@@ -20,7 +20,6 @@ var UserIdKey = "user-id"
 type SessionManager interface {
 	FinishOAuthLogin(context.Context, string) error
 	Logout(context.Context) error
-	MiddleWare(next http.Handler) http.Handler
 }
 
 type TokenVerifier interface {
@@ -33,8 +32,12 @@ type MySessionManager struct {
 	TokenVerifier
 }
 
-func (m MySessionManager) MiddleWare(next http.Handler) http.Handler {
-	return m.LoadAndSave(m.AuthFromSessionId(m.AuthBearerToken(next)))
+func (m MySessionManager) WebPagesMiddleWare(next http.Handler) http.Handler {
+	return m.LoadAndSave(m.AuthFromSessionId(next))
+}
+
+func (m MySessionManager) ApiMiddleWare(next http.Handler) http.Handler {
+	return m.LoadAndSave(m.AuthBearerToken(next))
 }
 func (m MySessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, error) {
 	errCtx := fmt.Errorf("inferring user's identity from bearer token")
@@ -103,6 +106,7 @@ func (m MySessionManager) FinishOAuthLogin(ctx context.Context, id string) error
 		return fmt.Errorf("%w: checking if user is registered: %w", errCtx, err)
 	}
 
+	fmt.Println("before finish oauth renew token")
 	if err := m.SessionManager.RenewToken(ctx); err != nil {
 		return fmt.Errorf("%w: renewing token: %w", errCtx, err)
 	}

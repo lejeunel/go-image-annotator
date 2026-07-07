@@ -261,7 +261,7 @@ func (r SQLiteUserRepo) AddForgottenPasswordState(hash []byte, id u.UserId, expi
 	return nil
 
 }
-func (r SQLiteUserRepo) FindForgottenPassword(hash []byte) (*u.ForgotPasswordState, error) {
+func (r SQLiteUserRepo) FindResetPasswordState(hash []byte) (*u.ForgotPasswordState, error) {
 
 	record := ForgottenPasswordStateRecord{}
 	err := r.Db.Get(&record,
@@ -276,7 +276,7 @@ func (r SQLiteUserRepo) FindForgottenPassword(hash []byte) (*u.ForgotPasswordSta
 		}
 
 	}
-	return &u.ForgotPasswordState{Id: record.Id, ExpiresAt: record.ExpiresAt}, nil
+	return &u.ForgotPasswordState{Id: record.Id, ExpiresAt: &record.ExpiresAt}, nil
 
 }
 func (r SQLiteUserRepo) UpdatePassword(id u.UserId, hash []byte) error {
@@ -286,6 +286,16 @@ func (r SQLiteUserRepo) UpdatePassword(id u.UserId, hash []byte) error {
 		return fmt.Errorf("updating password hash: %w: %w", err, e.ErrInternal)
 	}
 	return nil
+}
+
+func (r SQLiteUserRepo) DeleteForgottenPasswordTokens(id u.UserId) error {
+	query := "DELETE FROM forgot_password WHERE id=$1"
+	_, err := r.Db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("deleting forgotten password: %v: %w", err, e.ErrInternal)
+	}
+	return nil
+
 }
 func NewSQLiteUserRepo(db *sqlx.DB) SQLiteUserRepo {
 	return SQLiteUserRepo{Db: db}

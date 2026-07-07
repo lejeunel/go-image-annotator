@@ -8,5 +8,6 @@ import (
 
 type Repo interface {
 	AddForgottenPasswordState([]byte, usr.UserId, time.Time) error
+	DeleteForgottenPasswordTokens(usr.UserId) error
 	Exists(usr.UserId) (bool, error)
 }

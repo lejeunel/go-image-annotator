@@ -20,7 +20,9 @@ all: api-code css auth-valid-methods
 
 auth-valid-methods: $(VALID_AUTH_OUT)
 api-code: $(MODELS_OUT) $(SERVER_OUT)
-css: $(CSS_OUT)
+
+css:
+	tailwindcss -i $(CSS_MAIN) -o $(CSS_OUT) --minify
 
 # --- Generate models (types only) ---
 $(MODELS_OUT): $(SPEC)
@@ -41,8 +43,6 @@ $(SERVER_OUT): $(SPEC) $(MODELS_OUT)
 		-import-mapping $(MODULE)/$(MODELS_PKG):$(MODULE)/$(MODELS_PKG) \
 		$(SPEC)
 
-$(CSS_OUT): $(CSS_MAIN)
-	tailwindcss -i $(CSS_MAIN) -o $(CSS_OUT) --minify
 
 docs-dev:
 	cd docs && hugo server --gc --minify --disableFastRender --logLevel debug --baseURL http://localhost:1313

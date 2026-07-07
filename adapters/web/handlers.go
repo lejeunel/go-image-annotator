@@ -2,15 +2,12 @@ package web
 
 import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	"net/http"
 )
 
 func RegisterWebPages(mux *http.ServeMux, server Server, b b.PageBuilder) {
 	mux.Handle("/", HomePageHandlerFunc(b))
-	mux.HandleFunc("/login/{provider}", server.OAuthLogin)
-	mux.HandleFunc("/logout", server.AuthHandler.Logout)
-	mux.HandleFunc("/callback/{provider}", server.OAuthCallback)
-
 	mux.HandleFunc("/user-dashboard", server.UserDashboard)
 	mux.HandleFunc("/ui/new-api-token", server.NewAPIToken)
 
@@ -28,4 +25,12 @@ func RegisterWebPages(mux *http.ServeMux, server Server, b b.PageBuilder) {
 	mux.HandleFunc("/ui/annotate/annotations", server.GetRegionsAsJSON)
 	mux.HandleFunc("/ui/annotate/remove-annotation", server.DeleteAnnotation)
 	mux.HandleFunc("/ui/annotate/set-label", server.SetLabel)
+}
+
+func MakeOAuthMux(h ip.OAuthHandler) *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/login/{provider}", h.OAuthLogin)
+	mux.HandleFunc("/logout", h.Logout)
+	mux.HandleFunc("/callback/{provider}", h.OAuthCallback)
+	return mux
 }
