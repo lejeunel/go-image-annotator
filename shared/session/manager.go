@@ -32,11 +32,11 @@ type MySessionManager struct {
 	TokenVerifier
 }
 
-func (m MySessionManager) WebPagesMiddleWare(next http.Handler) http.Handler {
+func (m MySessionManager) AuthCookiesMiddleWare(next http.Handler) http.Handler {
 	return m.LoadAndSave(m.AuthFromSessionId(next))
 }
 
-func (m MySessionManager) ApiMiddleWare(next http.Handler) http.Handler {
+func (m MySessionManager) AuthBearerMiddleWare(next http.Handler) http.Handler {
 	return m.LoadAndSave(m.AuthBearerToken(next))
 }
 func (m MySessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, error) {

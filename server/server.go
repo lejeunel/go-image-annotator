@@ -49,12 +49,10 @@ func ApiRequireLogin(next http.Handler) http.Handler {
 	})
 }
 
-func MakeWebPagesMux(webServer web.Server, apicfg config.APIConfig,
+func MakeWebPagesMux(webServer web.Server,
 	pageBuilder b.PageBuilder) *http.ServeMux {
 	mux := http.NewServeMux()
 	web.RegisterWebPages(mux, webServer, pageBuilder)
-	web.RegisterAPIDocs(mux, apicfg.OpenAPISpecsPath, apicfg.APIDocsPath, pageBuilder)
-	as.RegisterAPISpecs(mux, apicfg.OpenAPISpecsPath)
 	return mux
 
 }
@@ -76,33 +74,32 @@ func Make(auth auth.Auth) http.Handler {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	a.MaybeCreateInitialAdmin(app.Itrs.User.Create, cfg.InitialAdminEmail, cfg.InitialAdminPassword)
 
-	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
-		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),
-		CallbackURL: "http://localhost:3000/auth/callback/google"})
-	loginPageBuilder.AddOAuthProvider("google", "/auth/login/google")
-	apiCfg := config.APIConfig{APIPath: fmt.Sprintf("/%v", cfg.APIPath),
-		APIDocsPath:      fmt.Sprintf("/%v/docs", cfg.APIPath),
-		OpenAPISpecsPath: fmt.Sprintf("/%v/openapi.yaml", cfg.APIPath)}
 	colorizer := ap.NewCyclicColorizer(ap.Palette)
 	webPagesMux := MakeWebPagesMux(
 		*web.NewServer(&app.Itrs, app.Annotator,
 			*pageBuilder, ap.NewAnnotationPagePresenter(colorizer),
 			ap.NewAnnotoriousPresenter(colorizer),
 			app.SessionManager, cfg.DefaultPageSize),
-		apiCfg,
 		*pageBuilder,
 	)
+
+	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
+		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),
+		CallbackURL: "http://localhost:3000/auth/callback/google"})
+	loginPageBuilder.AddOAuthProvider("google", "/auth/login/google")
+
 	apiMux := MakeAPIMux(*api.NewServer(&app.Itrs, *logger))
+	web.RegisterAPIDocs(apiMux, "openapi.yaml", "/docs", *pageBuilder)
+	as.RegisterAPISpecs(apiMux, "/openapi.yaml")
 	oauthMux := web.MakeOAuthMux(app.OAuthHandler)
 
 	rootMux := http.NewServeMux()
-
 	rootMux.Handle("/auth/", http.StripPrefix("/auth", app.SessionManager.LoadAndSave(oauthMux)))
 	rootMux.Handle("/login/", LoginPageHandlerFunc(*loginPageBuilder))
-
-	rootMux.Handle("/api/", http.StripPrefix("/api", app.SessionManager.ApiMiddleWare(ApiRequireLogin(apiMux))))
+	rootMux.Handle("/api/",
+		app.SessionManager.AuthBearerMiddleWare(app.SessionManager.AuthCookiesMiddleWare(ApiRequireLogin(http.StripPrefix("/api", apiMux)))))
 	as.RegisterStaticFiles(rootMux)
-	rootMux.Handle("/", app.SessionManager.WebPagesMiddleWare(WebRequireLogin(webPagesMux)))
+	rootMux.Handle("/", app.SessionManager.AuthCookiesMiddleWare(WebRequireLogin(webPagesMux)))
 
 	return rootMux
 }
