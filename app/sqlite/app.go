@@ -23,7 +23,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Auth) app.App {
 	repos := NewSQLiteRepos(sqldb,
 		fs.NewFileStore(cfg.ArtefactDir))
 	sessionManager := sm.NewSQLiteSessionManager(sqldb.DB, repos.User, apiTokenGen)
-	identityProvider := ip.NewGothIdentityHandler(sessionManager)
+	identityProvider := ip.NewAuthHandler(sessionManager)
 	scr := scroller.New(repos.Scroller)
 	itrs := NewSQLiteInteractors(
 		repos,
@@ -46,7 +46,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Auth) app.App {
 	return app.App{
 		Itrs:           itrs,
 		SessionManager: sessionManager,
-		OAuthHandler:   identityProvider,
+		AuthHandler:    identityProvider,
 		Annotator:      annotator,
 	}
 

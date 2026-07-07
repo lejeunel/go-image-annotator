@@ -11,7 +11,8 @@ import (
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	au "github.com/lejeunel/go-image-annotator/modules/token"
+	tk "github.com/lejeunel/go-image-annotator/modules/token"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	readusr "github.com/lejeunel/go-image-annotator/use-cases/user/read"
 )
 
@@ -20,16 +21,13 @@ var UserIdKey = "user-id"
 type SessionManager interface {
 	FinishOAuthLogin(context.Context, string) error
 	Logout(context.Context) error
-}
-
-type TokenVerifier interface {
-	Verify(token string, storedHash []byte) bool
+	PasswordLogin(context.Context, string, string) error
 }
 
 type MySessionManager struct {
 	*scs.SessionManager
 	readusr.Repo
-	TokenVerifier
+	tk.TokenVerifier
 }
 
 func (m MySessionManager) AuthCookiesMiddleWare(next http.Handler) http.Handler {
@@ -41,7 +39,7 @@ func (m MySessionManager) AuthBearerMiddleWare(next http.Handler) http.Handler {
 }
 func (m MySessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, error) {
 	errCtx := fmt.Errorf("inferring user's identity from bearer token")
-	token, err := au.DecodeAndSplitPersonalAccessToken(bearerToken)
+	token, err := tk.DecodeAndSplitPersonalAccessToken(bearerToken)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}
@@ -106,9 +104,30 @@ func (m MySessionManager) FinishOAuthLogin(ctx context.Context, id string) error
 		return fmt.Errorf("%w: checking if user is registered: %w", errCtx, err)
 	}
 
-	fmt.Println("before finish oauth renew token")
+	if err := m.initSession(ctx, id); err != nil {
+		return err
+	}
+	return nil
+}
+func (m MySessionManager) PasswordLogin(ctx context.Context, email, password string) error {
+	errCtx := fmt.Errorf("logging in user %v using password method", email)
+	user, err := m.Repo.Find(email)
+	if err != nil {
+		return fmt.Errorf("%w: fetching user from email: %w", errCtx, err)
+	}
+
+	if !m.TokenVerifier.Verify(password, []byte(user.HashPassword)) {
+		return fmt.Errorf("%w: matching password: %w", errCtx, e.ErrPasswordMismatch)
+	}
+	if err := m.initSession(ctx, user.Id); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MySessionManager) initSession(ctx context.Context, id string) error {
 	if err := m.SessionManager.RenewToken(ctx); err != nil {
-		return fmt.Errorf("%w: renewing token: %w", errCtx, err)
+		return fmt.Errorf("initializing session: renewing token %w", err)
 	}
 	m.SessionManager.Put(ctx, UserIdKey, id)
 	return nil
@@ -129,7 +148,7 @@ func (bw *bufferedResponseWriter) WriteHeader(code int) {
 }
 
 func NewSQLiteSessionManager(db *sql.DB, repo readusr.Repo,
-	verifier TokenVerifier) MySessionManager {
+	verifier tk.TokenVerifier) MySessionManager {
 	store := sqlite3store.New(db)
 	m := MySessionManager{SessionManager: scs.New(), Repo: repo,
 		TokenVerifier: verifier}

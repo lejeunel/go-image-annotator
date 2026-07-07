@@ -10,6 +10,19 @@ import (
 	"strings"
 )
 
+type TokenVerifier interface {
+	Verify(token string, storedHash []byte) bool
+}
+
+type TokenHasher interface {
+	Hash(token string) []byte
+}
+
+type TokenHashVerifier interface {
+	Verify(token string, storedHash []byte) bool
+	Hash(token string) []byte
+}
+
 func AppendUserToToken(user string, token string) string {
 	return user + ":" + token
 }
@@ -33,10 +46,6 @@ func DecodeAndSplitPersonalAccessToken(input string) (*APIToken, error) {
 		return nil, fmt.Errorf("splitting token")
 	}
 	return &APIToken{userId, apiToken}, nil
-}
-
-type TokenHasher interface {
-	Hash(token string) []byte
 }
 
 type Interface interface {

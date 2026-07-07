@@ -91,10 +91,11 @@ func Make(auth auth.Auth) http.Handler {
 	apiMux := MakeAPIMux(*api.NewServer(&app.Itrs, *logger))
 	web.RegisterAPIDocs(apiMux, "openapi.yaml", "/docs", *pageBuilder)
 	as.RegisterAPISpecs(apiMux, "/openapi.yaml")
-	oauthMux := web.MakeOAuthMux(app.OAuthHandler)
+	oauthMux := web.MakeAuthMux(app.AuthHandler)
 
 	rootMux := http.NewServeMux()
-	rootMux.Handle("/auth/", http.StripPrefix("/auth", app.SessionManager.LoadAndSave(oauthMux)))
+	rootMux.Handle("/auth/",
+		http.StripPrefix("/auth", app.SessionManager.LoadAndSave(oauthMux)))
 	rootMux.Handle("/login/", LoginPageHandlerFunc(*loginPageBuilder))
 	rootMux.Handle("/api/",
 		app.SessionManager.AuthBearerMiddleWare(app.SessionManager.AuthCookiesMiddleWare(ApiRequireLogin(http.StripPrefix("/api", apiMux)))))

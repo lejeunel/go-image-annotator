@@ -27,10 +27,11 @@ func RegisterWebPages(mux *http.ServeMux, server Server, b b.PageBuilder) {
 	mux.HandleFunc("/ui/annotate/set-label", server.SetLabel)
 }
 
-func MakeOAuthMux(h ip.OAuthHandler) *http.ServeMux {
+func MakeAuthMux(h ip.AuthHandler) *http.ServeMux {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/login/password", h.PasswordLogin)
 	mux.HandleFunc("/login/{provider}", h.OAuthLogin)
-	mux.HandleFunc("/logout", h.Logout)
 	mux.HandleFunc("/callback/{provider}", h.OAuthCallback)
+	mux.HandleFunc("/logout", h.Logout)
 	return mux
 }
