@@ -36,7 +36,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Auth) app.App {
 		passwordValidator,
 		apiTokenGen,
 		auth)
-	annotator := a.NewAnnotator(scr, itrs.Image.Read,
+	annotator := a.NewAnnotator(scr, itrs.Image.Find,
 		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox,
 		itrs.Annotation.AddPolygon, itrs.Annotation.UpdatePolygon,
 		itrs.Annotation.Delete,

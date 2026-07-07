@@ -8,9 +8,9 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	rd "github.com/lejeunel/go-image-annotator/modules/reader"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
-	"github.com/lejeunel/go-image-annotator/use-cases/image/read"
 )
 
 func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +24,7 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionName, imageId string) {
-	s.Image.Read.Execute(read.Request{ImageId: imageId, Collection: collectionName},
+	s.Image.Find.Execute(find.Request{ImageId: imageId, Collection: collectionName},
 		presenter.NewReadMetaPresenter(w, s.Logger))
 }
 

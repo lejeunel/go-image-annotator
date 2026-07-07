@@ -8,13 +8,13 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/delete"
+	"github.com/lejeunel/go-image-annotator/use-cases/label/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
-	"github.com/lejeunel/go-image-annotator/use-cases/label/read"
 )
 
 func (s *Server) FindLabelByName(w http.ResponseWriter, r *http.Request, name string) {
 	s.Label.Find.Execute(r.Context(),
-		read.Request{Name: name},
+		find.Request{Name: name},
 		p.NewFindPresenter(w, s.Logger))
 }
 func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {

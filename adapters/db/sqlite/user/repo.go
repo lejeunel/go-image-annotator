@@ -287,7 +287,6 @@ func (r SQLiteUserRepo) UpdatePassword(id u.UserId, hash []byte) error {
 	}
 	return nil
 }
-
 func (r SQLiteUserRepo) DeleteForgottenPasswordTokens(id u.UserId) error {
 	query := "DELETE FROM forgot_password WHERE id=$1"
 	_, err := r.Db.Exec(query, id)

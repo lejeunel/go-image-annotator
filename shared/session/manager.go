@@ -13,7 +13,7 @@ import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	readusr "github.com/lejeunel/go-image-annotator/use-cases/user/read"
+	readusr "github.com/lejeunel/go-image-annotator/use-cases/user/find"
 )
 
 var UserIdKey = "user-id"

@@ -12,7 +12,7 @@ import (
 	updpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-polygon"
 	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
-	imread "github.com/lejeunel/go-image-annotator/use-cases/image/read"
+	imread "github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 )
 
