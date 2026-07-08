@@ -40,7 +40,7 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 
 	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
 		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),
-		CallbackURL: rt.MakeOAuthCallbackURL(baseURL, port, "google")})
+		CallbackURL: rt.MakeOAuthCallbackURL(baseURL, "google")})
 	loginPageBuilder.AddOAuthProvider("google", rt.MakeOAuthLoginURL("google"))
 
 	router := chi.NewRouter()

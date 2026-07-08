@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -32,8 +31,8 @@ var Annotations = "/ui/annotate/annotations"
 var RemoveAnnotation = "/ui/annotate/remove-annotation"
 var SetLabel = "/ui/annotate/set-label"
 
-func MakeOAuthCallbackURL(baseURL string, port int, provider string) string {
-	return fmt.Sprintf("%v:%v%v/%v", baseURL, port, CallbackOAuth, provider)
+func MakeOAuthCallbackURL(baseURL string, provider string) string {
+	return baseURL + strings.ReplaceAll(CallbackOAuth, "{provider}", provider)
 }
 func MakeOAuthLoginURL(provider string) string {
 	return strings.ReplaceAll(LoginOAuth, "{provider}", provider)
