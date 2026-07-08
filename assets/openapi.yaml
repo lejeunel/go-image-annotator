@@ -33,7 +33,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /images/{image_id}:
+  /raw/{image_id}:
     get:
       summary: Read image raw-data
       description: Read raw-data of an image

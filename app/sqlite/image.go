@@ -9,6 +9,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/raw"
 )
 
 func NewSQLiteImageInteractors(repos SQLiteRepos, allowedImageFormats []string, pageSize int,
@@ -18,6 +19,7 @@ func NewSQLiteImageInteractors(repos SQLiteRepos, allowedImageFormats []string, 
 			repos.Label, repos.Annotation,
 			repos.FileStore, sha256.New(), rea.ImageSpecsDetector{}, ingest.WithAuth(auth)),
 		Find: find.New(repos.ImageStore),
+		Raw:  raw.New(repos.FileStore, repos.Image),
 		List: list.New(repos.Image, repos.ImageStore),
 	}
 }

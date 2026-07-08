@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var APIRoot = "/api/"
+var APIRoot = "/api"
 var APISpecs = "/api/openapi.yaml"
 var APIDocs = "/api/docs"
 var StaticRoot = "/static"

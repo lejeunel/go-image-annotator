@@ -283,9 +283,6 @@ type ServerInterface interface {
 	// Read image meta-data
 	// (GET /images/{collection_name}/{image_id})
 	ReadImage(w http.ResponseWriter, r *http.Request, collectionName string, imageId string)
-	// Read image raw-data
-	// (GET /images/{image_id})
-	ReadRawImage(w http.ResponseWriter, r *http.Request, imageId string)
 	// List labels
 	// (GET /labels)
 	ListLabels(w http.ResponseWriter, r *http.Request, params ListLabelsParams)
@@ -298,6 +295,9 @@ type ServerInterface interface {
 	// Find a label by name
 	// (GET /labels/{name})
 	FindLabelByName(w http.ResponseWriter, r *http.Request, name string)
+	// Read image raw-data
+	// (GET /raw/{image_id})
+	ReadRawImage(w http.ResponseWriter, r *http.Request, imageId string)
 	// Create a new user
 	// (POST /users)
 	CreateUser(w http.ResponseWriter, r *http.Request)
@@ -530,31 +530,6 @@ func (siw *ServerInterfaceWrapper) ReadImage(w http.ResponseWriter, r *http.Requ
 	handler.ServeHTTP(w, r)
 }
 
-// ReadRawImage operation middleware
-func (siw *ServerInterfaceWrapper) ReadRawImage(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "image_id" -------------
-	var imageId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "image_id", r.PathValue("image_id"), &imageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "image_id", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ReadRawImage(w, r, imageId)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
 // ListLabels operation middleware
 func (siw *ServerInterfaceWrapper) ListLabels(w http.ResponseWriter, r *http.Request) {
 
@@ -645,6 +620,31 @@ func (siw *ServerInterfaceWrapper) FindLabelByName(w http.ResponseWriter, r *htt
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.FindLabelByName(w, r, name)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ReadRawImage operation middleware
+func (siw *ServerInterfaceWrapper) ReadRawImage(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "image_id" -------------
+	var imageId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "image_id", r.PathValue("image_id"), &imageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "image_id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ReadRawImage(w, r, imageId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -810,11 +810,11 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("GET "+options.BaseURL+"/images", wrapper.ListImages)
 	m.HandleFunc("POST "+options.BaseURL+"/images", wrapper.IngestImage)
 	m.HandleFunc("GET "+options.BaseURL+"/images/{collection_name}/{image_id}", wrapper.ReadImage)
-	m.HandleFunc("GET "+options.BaseURL+"/images/{image_id}", wrapper.ReadRawImage)
 	m.HandleFunc("GET "+options.BaseURL+"/labels", wrapper.ListLabels)
 	m.HandleFunc("POST "+options.BaseURL+"/labels", wrapper.CreateLabel)
 	m.HandleFunc("DELETE "+options.BaseURL+"/labels/{name}", wrapper.DeleteLabelByName)
 	m.HandleFunc("GET "+options.BaseURL+"/labels/{name}", wrapper.FindLabelByName)
+	m.HandleFunc("GET "+options.BaseURL+"/raw/{image_id}", wrapper.ReadRawImage)
 	m.HandleFunc("POST "+options.BaseURL+"/users", wrapper.CreateUser)
 	m.HandleFunc("GET "+options.BaseURL+"/whoami", wrapper.WhoAmI)
 

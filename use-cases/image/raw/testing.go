@@ -18,16 +18,27 @@ func (f FakeFileGetter) Get(im.ImageId) (io.Reader, error) {
 		return nil, f.Err
 	}
 	return bytes.NewBuffer(f.data), nil
+}
 
+type FakeRepo struct {
+	Err         error
+	ReturnSpecs *im.ImageSpecs
+}
+
+func (r FakeRepo) GetSpecs(im.ImageId) (*im.ImageSpecs, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+	return r.ReturnSpecs, nil
 }
 
 type FakePresenter struct {
-	Got        io.Reader
+	Got        Response
 	GotSuccess bool
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) SuccessReadRawImage(r io.Reader) {
+func (p *FakePresenter) SuccessReadRawImage(r Response) {
 	p.GotSuccess = true
 	p.Got = r
 }

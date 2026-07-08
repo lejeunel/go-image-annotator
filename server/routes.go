@@ -60,7 +60,10 @@ func RouteWebPages(r chi.Router, s web.Server, home http.HandlerFunc,
 func RouteAPI(r chi.Router, apiServer api.Server, mws ...func(http.Handler) http.Handler) {
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
-		r.Handle(rt.APIRoot, api.Handler(&apiServer))
+		handler := api.HandlerWithOptions(&apiServer, api.StdHTTPServerOptions{
+			BaseURL: rt.APIRoot,
+		})
+		r.Mount(rt.APIRoot, handler)
 	})
 }
 

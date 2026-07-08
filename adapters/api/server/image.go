@@ -23,6 +23,7 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 		presenter.NewIngestPresenter(w, s.Logger))
 }
 func (s *Server) ReadRawImage(w http.ResponseWriter, r *http.Request, imageId string) {
+	s.Image.Raw.Execute(imageId, presenter.NewRawImagePresenter(w, s.Logger))
 }
 
 func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionName, imageId string) {
