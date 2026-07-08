@@ -60,5 +60,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) AssignUserToGroup(ctx context.Context) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }

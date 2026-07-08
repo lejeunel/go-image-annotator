@@ -46,5 +46,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) DeleteUser(ctx context.Context) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }

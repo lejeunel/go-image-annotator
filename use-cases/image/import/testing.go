@@ -72,5 +72,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) ImportImage(ctx context.Context, dstGroup string) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }

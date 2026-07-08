@@ -52,5 +52,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) ListUsers(ctx context.Context) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }

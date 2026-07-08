@@ -1,6 +1,7 @@
-package reset_password
+package change_password
 
 import (
+	"context"
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
@@ -58,4 +59,11 @@ func (v *FakePasswordValidator) Validate(string) error {
 		return e.ErrInvalidPassword
 	}
 	return nil
+}
+
+type FailingAuth struct {
+}
+
+func (f FailingAuth) ChangePassword(ctx context.Context, id usr.UserId) error {
+	return e.ErrAuthorization
 }

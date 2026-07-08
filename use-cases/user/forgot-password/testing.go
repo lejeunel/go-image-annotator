@@ -54,7 +54,7 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) RequestForgottenPasswordToken(ctx context.Context) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }
 
 type FakeTokenGenerator struct {

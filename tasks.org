@@ -62,3 +62,5 @@ shared/identity_provider/provider.go
 ** DONE use-case: reset-forgotten-password
 1. On reset submission, hash the incoming token and look up by hash, check expiry and "used" status.
 2. Mark the token used (or delete it) atomically with the password update.
+** DONE use-case: change password
+* TODO split ErrAuth into ErrAuthentication and ErrAuthorization

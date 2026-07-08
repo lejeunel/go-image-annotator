@@ -1,7 +1,7 @@
-package reset_password
+package change_password
 
 type Request struct {
-	Token          string
+	Id             string
 	FirstPassword  string
 	SecondPassword string
 }

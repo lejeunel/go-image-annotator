@@ -1,4 +1,4 @@
-package reset_password
+package reset_forgotten_password
 
 import (
 	"testing"

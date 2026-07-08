@@ -56,5 +56,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) UnAssignUserFromGroup(ctx context.Context) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }

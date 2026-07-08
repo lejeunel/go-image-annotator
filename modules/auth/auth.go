@@ -45,7 +45,7 @@ func (a Auth) checkForGroup(userGroups []string, neededGroup string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("checking membership to group %v: %w", neededGroup, e.ErrAuth)
+	return fmt.Errorf("checking membership to group %v: %w", neededGroup, e.ErrAuthorization)
 }
 func (a Auth) checkForRole(userRoles, allowedRoles []string) error {
 
@@ -59,7 +59,7 @@ func (a Auth) checkForRole(userRoles, allowedRoles []string) error {
 		}
 	}
 	if !gotAdequateRole {
-		return fmt.Errorf("checking for roles given allowed role set %v and assigned roles %v: %w", allowedRoles, userRoles, e.ErrAuth)
+		return fmt.Errorf("checking for roles given allowed role set %v and assigned roles %v: %w", allowedRoles, userRoles, e.ErrAuthorization)
 	}
 	return nil
 }
@@ -71,14 +71,14 @@ func (a Auth) check(ctx context.Context, method, group string) error {
 	}
 	user := u.IdentityFromContext(ctx)
 	if user == nil {
-		return fmt.Errorf("%v: fetching user info from context: %w", errCtx, e.ErrAuth)
+		return fmt.Errorf("%v: fetching user info from context: %w", errCtx, e.ErrAuthorization)
 	}
 
 	if rule.AdminOnly {
 		if user.IsAdmin {
 			return nil
 		}
-		return fmt.Errorf("%v: checking if user is admin given method is admin only: %w", errCtx, e.ErrAuth)
+		return fmt.Errorf("%v: checking if user is admin given method is admin only: %w", errCtx, e.ErrAuthorization)
 	}
 
 	if user.IsAdmin {
@@ -102,7 +102,6 @@ func (a *Auth) SetAuthRules(rules []AuthRule) *Auth {
 	}
 	return a
 }
-
 func (a Auth) CreateCollection(ctx context.Context, group string) error {
 	return a.check(ctx, "CreateCollection", group)
 }
@@ -171,4 +170,7 @@ func (a Auth) SetAdminRights(ctx context.Context) error {
 }
 func (a Auth) RequestForgottenPasswordToken(ctx context.Context) error {
 	return a.check(ctx, "RequestForgottenPasswordToken", "")
+}
+func (a Auth) ChangePassword(ctx context.Context, id u.UserId) error {
+	return a.check(ctx, "ChangePassword", "")
 }

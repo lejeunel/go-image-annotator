@@ -2,6 +2,8 @@ package sqlite
 
 import (
 	"github.com/lejeunel/go-image-annotator/modules/auth"
+	pw "github.com/lejeunel/go-image-annotator/modules/password-validator"
+	tk "github.com/lejeunel/go-image-annotator/modules/token"
 	usr "github.com/lejeunel/go-image-annotator/use-cases/user"
 	agr "github.com/lejeunel/go-image-annotator/use-cases/user/assign-group"
 	aro "github.com/lejeunel/go-image-annotator/use-cases/user/assign-role"
@@ -11,7 +13,7 @@ import (
 	fp "github.com/lejeunel/go-image-annotator/use-cases/user/forgot-password"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/list"
 	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
-	rpw "github.com/lejeunel/go-image-annotator/use-cases/user/reset-password"
+	rfpw "github.com/lejeunel/go-image-annotator/use-cases/user/reset-forgotten-password"
 	adm "github.com/lejeunel/go-image-annotator/use-cases/user/set-admin"
 	ugr "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-group"
 	uar "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-role"
@@ -21,8 +23,8 @@ func NewSQLiteUserInteractors(
 	repos SQLiteRepos,
 	ApitokenGen create.APITokenGenerator,
 	forgotPasswordTokenGen fp.TokenGenerator,
-	passwordValidator rpw.PasswordValidator,
-	passwordHasher rpw.TokenHasher,
+	passwordValidator pw.PasswordValidator,
+	passwordHasher tk.TokenHasher,
 	forgotPassworkTokenExpirationMinutes int,
 	pwGen create.PasswordGenerator,
 	auth auth.Auth) usr.Interactors {
@@ -38,6 +40,6 @@ func NewSQLiteUserInteractors(
 		UnAssignGroup:            ugr.New(repos.User, repos.Group, ugr.WithAuth(auth)),
 		SetAdmin:                 adm.New(repos.User, adm.WithAuth(auth)),
 		RequestForgottenPassword: fp.New(repos.User, forgotPassworkTokenExpirationMinutes, forgotPasswordTokenGen, fp.WithAuth(auth)),
-		ResetPassword:            rpw.New(repos.User, passwordHasher, passwordValidator),
+		ResetForgottenPassword:   rfpw.New(repos.User, passwordHasher, passwordValidator),
 	}
 }

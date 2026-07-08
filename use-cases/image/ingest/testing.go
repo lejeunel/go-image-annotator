@@ -214,5 +214,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) IngestImage(ctx context.Context, group string) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }

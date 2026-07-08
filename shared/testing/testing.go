@@ -27,7 +27,7 @@ func (p *TestingErrPresenter) Error(err error) {
 		p.GotNotFoundErr = true
 	case errors.Is(err, e.ErrDependency):
 		p.GotDependencyErr = true
-	case errors.Is(err, e.ErrAuth):
+	case errors.Is(err, e.ErrAuthorization):
 		p.GotAuthErr = true
 
 	default:

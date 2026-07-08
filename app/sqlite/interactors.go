@@ -12,7 +12,7 @@ func NewSQLiteInteractors(i SQLiteRepos, pageSize int, allowedImageFormats []str
 	passwordGenerator token.Interface,
 	forgotPasswordTokenGen token.Interface,
 	forgotPasswordTokenExpirationMinutes int,
-	passwordValidator pv.PasswordValidator,
+	passwordValidator pv.MyPasswordValidator,
 	passwordHasher token.TokenHasher,
 	auth auth.Auth) a.Interactors {
 

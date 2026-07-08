@@ -44,5 +44,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) DeleteImage(ctx context.Context, g string) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }

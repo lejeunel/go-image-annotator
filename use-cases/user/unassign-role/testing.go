@@ -44,5 +44,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) UnAssignRoleFromUser(ctx context.Context) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }

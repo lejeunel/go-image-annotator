@@ -58,5 +58,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) DeleteCollection(ctx context.Context, g string) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }

@@ -43,5 +43,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) CreateLabel(ctx context.Context) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }

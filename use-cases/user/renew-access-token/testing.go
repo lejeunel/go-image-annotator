@@ -46,7 +46,7 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) RenewToken(ctx context.Context) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }
 
 type FakeTokenGenerator struct {

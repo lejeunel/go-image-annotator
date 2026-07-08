@@ -38,7 +38,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 func (i *Interactor) authorizeDeletion(ctx context.Context, name string) error {
 	errCtx := fmt.Errorf("checking group ownership of collection with name %v is empty", name)
 	if err := i.auth.DeleteGroup(ctx); err != nil {
-		return fmt.Errorf("%w: %w", errCtx, e.ErrAuth)
+		return fmt.Errorf("%w: %w", errCtx, e.ErrAuthorization)
 	}
 	return nil
 

@@ -1,4 +1,4 @@
-package reset_password
+package change_password
 
 type OutputPort interface {
 	Success()

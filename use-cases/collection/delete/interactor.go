@@ -43,7 +43,7 @@ func (i Interactor) authorizeDeletion(ctx context.Context, name string) error {
 	}
 	if group != nil {
 		if err := i.auth.DeleteCollection(ctx, *group); err != nil {
-			return fmt.Errorf("%w: %w", errCtx, e.ErrAuth)
+			return fmt.Errorf("%w: %w", errCtx, e.ErrAuthorization)
 		}
 	}
 	return nil

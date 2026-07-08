@@ -1,16 +1,13 @@
-package reset_password
+package reset_forgotten_password
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/jonboulle/clockwork"
+	tk "github.com/lejeunel/go-image-annotator/modules/token"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
-
-type TokenHasher interface {
-	Hash(token string) []byte
-}
 
 type PasswordValidator interface {
 	Validate(password string) error
@@ -18,7 +15,7 @@ type PasswordValidator interface {
 
 type Interactor struct {
 	repo              Repo
-	tokenHasher       TokenHasher
+	tokenHasher       tk.TokenHasher
 	passwordValidator PasswordValidator
 	clock             clockwork.Clock
 }
@@ -65,7 +62,7 @@ func WithClock(c clockwork.Clock) Option {
 	}
 }
 
-func New(r Repo, tokenHasher TokenHasher, passwordValidator PasswordValidator,
+func New(r Repo, tokenHasher tk.TokenHasher, passwordValidator PasswordValidator,
 	opts ...Option) Interactor {
 	i := &Interactor{repo: r,
 		tokenHasher:       tokenHasher,

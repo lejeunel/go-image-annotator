@@ -9,5 +9,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) Annotate(ctx context.Context, g string) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }

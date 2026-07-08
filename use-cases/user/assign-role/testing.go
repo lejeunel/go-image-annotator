@@ -47,5 +47,5 @@ type FailingAuth struct {
 }
 
 func (f FailingAuth) AssignRoleToUser(ctx context.Context) error {
-	return e.ErrAuth
+	return e.ErrAuthorization
 }
