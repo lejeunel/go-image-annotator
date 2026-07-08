@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -22,8 +23,8 @@ type LoginPageBuilder struct {
 	OAuthProviders []OAuthProvider
 }
 
-func (b *LoginPageBuilder) AddOAuthProvider(name, url string) *LoginPageBuilder {
-	b.OAuthProviders = append(b.OAuthProviders, OAuthProvider{Name: name, URL: url})
+func (b *LoginPageBuilder) AddOAuthProvider(provider, url string) *LoginPageBuilder {
+	b.OAuthProviders = append(b.OAuthProviders, OAuthProvider{Name: provider, URL: url})
 	return b
 }
 func (b *LoginPageBuilder) makeContent() Node {
@@ -38,7 +39,7 @@ func (b *LoginPageBuilder) makeContent() Node {
 		Span(
 			Div(Class("flex justify-center text-gray-900 dark:text-white font-bold text-xl mt-4 mb-4"), Text(signInTitle)),
 			Form(
-				Action("/auth/login/password"),
+				Action(rt.LoginWithPassword),
 				Method("POST"),
 				Class("bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-80 mb-4"),
 				Label(For("email"), Text("Email"), Class("block text-sm font-medium text-gray-900 dark:text-white")),
@@ -48,7 +49,7 @@ func (b *LoginPageBuilder) makeContent() Node {
 				Div(Class("flex items-center justify-between"),
 					Label(For("password"), Text("Password"), Class("block text-sm font-medium text-gray-900 dark:text-white")),
 					A(Class("mt-2 block text-xs font-medium text-primary underline-offset-2 hover:underline focus:underline focus:outline-hidden dark:text-primary-dark"),
-						Href("/forgot-password"), Text("Forgot password?")),
+						Href(rt.ForgotPassword), Text("Forgot password?")),
 				),
 				Input(Type("password"), ID("password"), Name("password"), Required(),
 					Class("w-full px-3 py-2 mb-6 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")),

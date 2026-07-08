@@ -26,7 +26,7 @@ var (
 		Short: "Run server",
 		Run: func(cmd *cobra.Command, args []string) {
 			authorizer := MakeAuthorizer(authRulesPath)
-			handler := Make(authorizer)
+			handler := Make(authorizer, "http://localhost", port)
 			Serve(handler, port)
 		},
 	}

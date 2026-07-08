@@ -2,7 +2,7 @@ package server
 
 import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	rt "github.com/lejeunel/go-image-annotator/server/routes"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	"net/http"
 )
 

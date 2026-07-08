@@ -2,11 +2,11 @@ package builders
 
 import (
 	"bytes"
-	"fmt"
 	_ "strings"
 	"text/template"
 
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -53,7 +53,7 @@ func MakeUserBadge(user u.User) Node {
 		Raw(UserIcon)).Render(&iconBuf)
 	var buf bytes.Buffer
 	entries := UserMenu{UserName: user.Id,
-		Entries: []UserMenuEntry{{"Dashboard", "/user-dashboard"}, {"Sign Out", "/auth/logout"}},
+		Entries: []UserMenuEntry{{"Dashboard", rt.UserDashboard}, {"Sign Out", rt.Logout}},
 		Icon:    iconBuf.String()}
 	tUser.ExecuteTemplate(&buf, "user_badge", entries)
 	return Raw(buf.String())
@@ -116,19 +116,19 @@ func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefi
 		Ul(
 			Class("hidden items-center gap-4 md:flex"),
 			Li(
-				MakeMenuItem("Home", "/", isActivated == HomePageActive),
+				MakeMenuItem("Home", rt.Home, isActivated == HomePageActive),
 			),
 			Li(
-				MakeMenuItem("Collections", "/collections", isActivated == CollectionsPageActive),
+				MakeMenuItem("Collections", rt.Collections, isActivated == CollectionsPageActive),
 			),
 			Li(
-				MakeMenuItem("Labels", "/labels", isActivated == LabelsPageActive),
+				MakeMenuItem("Labels", rt.Labels, isActivated == LabelsPageActive),
 			),
 			Li(
 				MakeMenuItem("Documentation", docsURL, false),
 			),
 			Li(
-				MakeMenuItem("API", fmt.Sprintf("/%v/docs", apiPrefix), isActivated == APIDocsPageActive),
+				MakeMenuItem("API", rt.APIDocs, isActivated == APIDocsPageActive),
 			),
 			Li(MakeRepoButton(repoURL)),
 			Li(

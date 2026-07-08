@@ -44,7 +44,7 @@ document.addEventListener('alpine:init', () => {
             return res.json();
         },
         async setLabel(id, label) {
-            const res = await fetch(`/ui/annotate/set-label?id=${id}&label=${label}`);
+            const res = await fetch(`/ui/annotate/set-label?id=${id}&label=${label}`, {method: "POST"});
             if (!res.ok) throw new Error('Could not relabel');
         },
         async submit_label(label) {
@@ -79,13 +79,13 @@ document.addEventListener('alpine:init', () => {
         },
 
         async remove(id) {
-            const res = await fetch(`/ui/annotate/remove-annotation?id=${id}`);
+            const res = await fetch(`/ui/annotate/remove-annotation?id=${id}`, {method: 'DELETE'});
             if (!res.ok) throw new Error('Could not remove annotation');
         },
 
         async update_box(annotation) {
             const res = await fetch("/ui/annotate/update-box", {
-                method: "POST",
+                method: "PUT",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify(annotation),
             });
@@ -93,7 +93,7 @@ document.addEventListener('alpine:init', () => {
         },
         async update_polygon(annotation) {
             const res = await fetch("/ui/annotate/update-polygon", {
-                method: "POST",
+                method: "PUT",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify(annotation),
             });

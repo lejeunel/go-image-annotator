@@ -7,7 +7,7 @@ import (
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	rt "github.com/lejeunel/go-image-annotator/server/routes"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
@@ -17,11 +17,12 @@ import (
 	"github.com/lejeunel/go-image-annotator/config"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 
-	"github.com/go-chi/chi/v5"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
-func Make(auth auth.Authorizer) http.Handler {
+func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	cfg := config.Parse()
 
 	basePageBuilder := b.NewBasePageBuilder()
@@ -35,16 +36,16 @@ func Make(auth auth.Authorizer) http.Handler {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	a.MaybeCreateInitialAdmin(app.Itrs.User.Create, cfg.InitialAdminEmail, cfg.InitialAdminPassword)
 
-	router := chi.NewRouter()
-
-	colorizer := ap.NewCyclicColorizer(ap.Palette)
+	baseURL := fmt.Sprintf("%v:%v", url, port)
 
 	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
 		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),
-		CallbackURL: "http://localhost:3000/auth/callback/google"})
-	loginPageBuilder.AddOAuthProvider("google", "/auth/login/google")
+		CallbackURL: rt.MakeOAuthCallbackURL(baseURL, port, "google")})
+	loginPageBuilder.AddOAuthProvider("google", rt.MakeOAuthLoginURL("google"))
 
-	rt.RouteWebPages(
+	router := chi.NewRouter()
+	colorizer := ap.NewCyclicColorizer(ap.Palette)
+	RouteWebPages(
 		router,
 		*web.NewServer(&app.Itrs, app.Annotator,
 			*pageBuilder, ap.NewAnnotationPagePresenter(colorizer),
@@ -53,14 +54,14 @@ func Make(auth auth.Authorizer) http.Handler {
 		HomePageHandlerFunc(*pageBuilder),
 		app.SessionManager.LoadAndSave, app.SessionManager.AuthCookiesMiddleWare, WebRequireLogin,
 	)
-	rt.RouteAPI(router, *api.NewServer(&app.Itrs, *logger),
+	RouteAPI(router, *api.NewServer(&app.Itrs, *logger),
 		app.SessionManager.LoadAndSave, app.SessionManager.AuthBearerMiddleWare, app.SessionManager.AuthCookiesMiddleWare, ApiRequireLogin)
-	rt.RouteAPIDocs(router, APIDocsHandlerFunc(rt.APISpecs, *pageBuilder),
+	RouteAPIDocs(router, APIDocsHandlerFunc(rt.APISpecs, *pageBuilder),
 		app.SessionManager.LoadAndSave, app.SessionManager.AuthCookiesMiddleWare, WebRequireLogin,
 	)
-	rt.RouteAPISpecs(router)
-	rt.RouteStaticFiles(router)
-	rt.RouteAuth(router, app.AuthHandler, LoginPageHandlerFunc(*loginPageBuilder),
+	RouteAPISpecs(router)
+	RouteStaticFiles(router)
+	RouteAuth(router, app.AuthHandler, LoginPageHandlerFunc(*loginPageBuilder),
 		ForgotPasswordHandlerFunc(*forgotPasswordPageBuilder),
 		app.SessionManager.LoadAndSave)
 
