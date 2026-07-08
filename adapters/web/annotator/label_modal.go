@@ -28,9 +28,9 @@ func makeLabelModal(labels []string, kind LabelModalKind) (*string, error) {
 	var modal NewLabelModal
 	switch kind {
 	case RegionLabelModal:
-		modal = NewLabelModal{labels, true, nil, "submit_region", "regionLabelModal"}
+		modal = NewLabelModal{labels, true, nil, "submitRegion", "regionLabelModal"}
 	default:
-		modal = NewLabelModal{labels, true, nil, "submit_label", "imageLabelModal"}
+		modal = NewLabelModal{labels, true, nil, "submitImageLabel", "imageLabelModal"}
 	}
 
 	var buf bytes.Buffer

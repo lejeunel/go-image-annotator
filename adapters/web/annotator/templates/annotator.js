@@ -1,5 +1,20 @@
 {{define "annotator"}}
 
+const endpoints = {
+    fetchAnnotations : "{{.URLs.FetchAnnotations}}",
+    setLabel : "{{.URLs.SetLabel}}",
+    submitImageLabel : "{{.URLs.SubmitImageLabel}}",
+    submitBox : "{{.URLs.SubmitBox}}",
+    submitPolygon : "{{.URLs.SubmitPolygon}}",
+    removeAnnotation : "{{.URLs.RemoveAnnotation}}",
+    updateBox : "{{.URLs.UpdateBox}}",
+    updatePolygon : "{{.URLs.UpdatePolygon}}",
+};
+
+function newURLFromString(urlString) {
+    return new URL(urlString, window.location.origin)
+}
+
 document.addEventListener('alpine:init', () => {
     Alpine.store('imageLabelModal', {
         show: false,
@@ -38,21 +53,31 @@ document.addEventListener('alpine:init', () => {
     });
 
     const AnnotationAPI = {
-        async fetchAll() {
-            const res = await fetch(`/ui/annotate/annotations?id={{.ImageId}}&collection={{.Collection}}`);
+        async fetchAllAnnotations() {
+            url = newURLFromString(endpoints.fetchAnnotations)
+            url.searchParams.set("id", "{{.ImageId}}")
+            url.searchParams.set("collection", "{{.Collection}}")
+            const res = await fetch(url.toString());
             if (!res.ok) throw new Error('Could not fetch annotations');
             return res.json();
         },
-        async setLabel(id, label) {
-            const res = await fetch(`/ui/annotate/set-label?id=${id}&label=${label}`, {method: "POST"});
+        async setLabelToAnnotation(id, label) {
+            url = newURLFromString(endpoints.setLabel)
+            url.searchParams.set("id", id)
+            url.searchParams.set("label", label)
+            const res = await fetch(url.toString(), {method: "POST"});
             if (!res.ok) throw new Error('Could not relabel');
         },
-        async submit_label(label) {
-            const res = await fetch(`/ui/annotate/submit-label?image_id={{.ImageId}}&collection={{.Collection}}&label=${label}`)
-            if (!res.ok) throw new Error('Could not submit annotation');
+        async addImageLabel(label) {
+            url = newURLFromString(endpoints.submitImageLabel)
+            url.searchParams.set("label", label)
+            url.searchParams.set("image_id", "{{.ImageId}}")
+            url.searchParams.set("collection", "{{.Collection}}")
+            const res = await fetch(url.toString(), {method: "POST"})
+            if (!res.ok) throw new Error('Could not submit annotation: ' + res.message);
         },
-        async submit_box(label, annotation) {
-            const res = await fetch("/ui/annotate/submit-box", {
+        async submitBox(label, annotation) {
+            const res = await fetch(endpoints.submitBox.toString(), {
                 method: "POST",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify({
@@ -64,8 +89,8 @@ document.addEventListener('alpine:init', () => {
             });
             if (!res.ok) throw new Error('Could not submit bounding-box');
         },
-        async submit_polygon(label, annotation) {
-            const res = await fetch("/ui/annotate/submit-polygon", {
+        async submitPolygon(label, annotation) {
+            const res = await fetch(endpoints.submitPolygon.toString(), {
                 method: "POST",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify({
@@ -79,20 +104,22 @@ document.addEventListener('alpine:init', () => {
         },
 
         async remove(id) {
-            const res = await fetch(`/ui/annotate/remove-annotation?id=${id}`, {method: 'DELETE'});
+            url = newURLFromString(endpoints.removeAnnotation)
+            url.searchParams.set("id", id)
+            const res = await fetch(url.toString(), {method: 'DELETE'});
             if (!res.ok) throw new Error('Could not remove annotation');
         },
 
-        async update_box(annotation) {
-            const res = await fetch("/ui/annotate/update-box", {
+        async updateBox(annotation) {
+            const res = await fetch(endpoints.updateBox.toString(), {
                 method: "PUT",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify(annotation),
             });
             if (!res.ok) throw new Error('Could not update annotation');
         },
-        async update_polygon(annotation) {
-            const res = await fetch("/ui/annotate/update-polygon", {
+        async updatePolygon(annotation) {
+            const res = await fetch(endpoints.updatePolygon.toString(), {
                 method: "PUT",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify(annotation),
@@ -151,10 +178,10 @@ document.addEventListener('alpine:init', () => {
             annotator.on('updateAnnotation', (updated) => {
                 switch(updated.target.selector.type){
                 case "RECTANGLE":
-                    AnnotationAPI.update_box(updated);
+                    AnnotationAPI.updateBox(updated);
                     break;
                 case "POLYGON":
-                    AnnotationAPI.update_polygon(updated);
+                    AnnotationAPI.updatePolygon(updated);
                     break
                 default:
                     alert("selector type " + updated.target.selector.type + " not recognized! Should be RECTANGLE or POLYGON")
@@ -178,7 +205,7 @@ document.addEventListener('alpine:init', () => {
 
         async draw() {
             try {
-                const data = await AnnotationAPI.fetchAll();
+                const data = await AnnotationAPI.fetchAllAnnotations();
                 const annotator = Alpine.store("annotator").instance;
                 annotator.setAnnotations(data, true);
             } catch (err) {
@@ -186,9 +213,9 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        async submit_label(label) {
+        async submitImageLabel(label) {
             try {
-                await AnnotationAPI.submit_label(label);
+                await AnnotationAPI.addImageLabel(label);
                 Alpine.store("imageLabelModal").close();
                 await this.refreshUI();
 
@@ -197,13 +224,13 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        async submit_region(label) {
+        async submitRegion(label) {
             try {
                 const store = Alpine.store("annotator");
                 if (store.currentDrawingShape === "rectangle"){
-                    await AnnotationAPI.submit_box(label, store.lastCreatedAnnotation);
+                    await AnnotationAPI.submitBox(label, store.lastCreatedAnnotation);
                 } else {
-                    await AnnotationAPI.submit_polygon(label, store.lastCreatedAnnotation);
+                    await AnnotationAPI.submitPolygon(label, store.lastCreatedAnnotation);
                 }
                 Alpine.store("regionLabelModal").close();
                 await this.refreshUI();
@@ -215,7 +242,7 @@ document.addEventListener('alpine:init', () => {
 
         async relabel(id, label) {
             try {
-                await AnnotationAPI.setLabel(id, label)
+                await AnnotationAPI.setLabelToAnnotation(id, label)
                 await this.refreshList();
             } catch(err) {
                 alert(err.message)
@@ -239,7 +266,7 @@ document.addEventListener('alpine:init', () => {
         async refreshList() {
             htmx.ajax(
                 'GET',
-                `/ui/annotate/annotation-panel?id={{.ImageId}}&collection={{.Collection}}`,
+                `{{.URLs.AnnotationPanel}}?id={{.ImageId}}&collection={{.Collection}}`,
                 '#annotation-list'
             );
         },

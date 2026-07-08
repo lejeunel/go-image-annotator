@@ -64,8 +64,8 @@ shared/identity_provider/provider.go
 2. Mark the token used (or delete it) atomically with the password update.
 ** DONE use-case: change password
 * DONE split ErrAuth into ErrAuthentication and ErrAuthorization
-* TODO inject URL endpoints from server/routes.go into templates
-** TODO annotator.js
+* DONE inject URL endpoints from server/routes.go into templates
+** DONE annotator.js
 ** DONE web/builders/login_builder.go
 ** DONE web/builders/navbar.go
 ** DONE /server/server.go

@@ -16,7 +16,7 @@ const (
 	RegionPolygon
 )
 
-var smallText = "text-xs italic text-gray-500 dark:gray-500"
+var authorInfo = "text-xs italic text-gray-500 dark:gray-500 ml-1"
 
 type RegionTable struct {
 	Rows            []RegionRow
@@ -43,8 +43,8 @@ func (t *RegionTable) addRow(author, time, id, label, color string, regionKind R
 	t.Rows = append(t.Rows,
 		RegionRow{Values: []Node{
 			Div(Class("flex flex-col"),
-				Div(Class(smallText), Text(author)),
-				Div(Class(smallText), Text(time)),
+				Div(Class(authorInfo), Text(author)),
+				Div(Class(authorInfo), Text(time)),
 			),
 			Div(Class("ps-1"),
 				Raw(regionIcon),

@@ -18,8 +18,8 @@ func (r ImageLabelRow) Render() Node {
 	return Tr(Class("text-left"),
 		Td(
 			Div(Class("flex flex-col"),
-				Div(Class(smallText), Text(r.Author)),
-				Div(Class(smallText), Text(r.Time)),
+				Div(Class(authorInfo), Text(r.Author)),
+				Div(Class(authorInfo), Text(r.Time)),
 			),
 		),
 		Td(Class("ps-2 py-1"),

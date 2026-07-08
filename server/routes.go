@@ -50,7 +50,7 @@ func RouteWebPages(r chi.Router, s web.Server, home http.HandlerFunc,
 		r.Put(rt.UpdateBox, s.UpdateBox)
 		r.Post(rt.SubmitPolygon, s.SubmitPolygon)
 		r.Put(rt.UpdatePolygon, s.UpdatePolygon)
-		r.Post(rt.SubmitLabel, s.SubmitLabel)
+		r.Post(rt.SubmitImageLabel, s.SubmitLabel)
 		r.Get(rt.AnnotationPanel, s.MakeAnnotationPanel)
 		r.Get(rt.Annotations, s.GetRegionsAsJSON)
 		r.Delete(rt.RemoveAnnotation, s.DeleteAnnotation)
