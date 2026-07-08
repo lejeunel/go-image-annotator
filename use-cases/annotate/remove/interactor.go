@@ -5,7 +5,7 @@ import (
 
 	"context"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
-	sauth "github.com/lejeunel/go-image-annotator/modules/auth"
+	sauth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 )
 

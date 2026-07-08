@@ -1,4 +1,4 @@
-package auth
+package authorizer
 
 import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"

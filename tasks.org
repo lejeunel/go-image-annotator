@@ -63,4 +63,9 @@ shared/identity_provider/provider.go
 1. On reset submission, hash the incoming token and look up by hash, check expiry and "used" status.
 2. Mark the token used (or delete it) atomically with the password update.
 ** DONE use-case: change password
-* TODO split ErrAuth into ErrAuthentication and ErrAuthorization
+* DONE split ErrAuth into ErrAuthentication and ErrAuthorization
+* TODO inject URL endpoints from server/routes.go into templates
+** TODO annotator.js
+** TODO web/builders/login_builder.go
+** TODO web/builders/navbar.go
+** TODO /server/server.go

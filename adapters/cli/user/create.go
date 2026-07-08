@@ -7,7 +7,7 @@ import (
 	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
 	a "github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	uc "github.com/lejeunel/go-image-annotator/use-cases/user/create"
 )
 

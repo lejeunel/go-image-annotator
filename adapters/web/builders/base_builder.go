@@ -1,6 +1,7 @@
 package builders
 
 import (
+	"fmt"
 	"io"
 
 	. "maragu.dev/gomponents"
@@ -33,6 +34,9 @@ func (b *BasePageBuilder) SetError(err error) *BasePageBuilder {
 	return b
 }
 func (b *BasePageBuilder) Build() Node {
+	if b.Error != nil {
+		return Text(b.Error.Error())
+	}
 	return Doctype(HTML(
 		Attr("x-data", `{
 					darkMode: false,
@@ -49,7 +53,6 @@ func (b *BasePageBuilder) Build() Node {
 		Attr("x-init", "init()"),
 		Attr("x-bind:class", "{ 'dark': darkMode }"),
 		Head(
-			Title(b.Title),
 			Meta(Charset("utf-8")),
 			Meta(Name("viewport"), Content("width=device-width, initial-scale=1")),
 			Script(Raw(`
@@ -63,6 +66,7 @@ func (b *BasePageBuilder) Build() Node {
 			),
 			Link(Rel("stylesheet"), Href("https://fonts.googleapis.com/css2?family=Roboto&display=swap")),
 			Group(b.scripts),
+			Raw(fmt.Sprintf("<title>%v</title>", b.Title)),
 		),
 		Body(
 			Class("bg-white text-gray-900 dark:bg-gray-900 dark:text-white"),

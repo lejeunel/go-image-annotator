@@ -1,11 +1,11 @@
 package server
 
 import (
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	"github.com/spf13/cobra"
 )
 
-func MakeAuthorizer(path string) auth.Auth {
+func MakeAuthorizer(path string) auth.Authorizer {
 	authorizer := auth.NewDefault()
 	if authRulesPath != "" {
 		rules, err := auth.ReadAuthRulesFromPath(authRulesPath)

@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	agr "github.com/lejeunel/go-image-annotator/use-cases/user/assign-group"
 	aro "github.com/lejeunel/go-image-annotator/use-cases/user/assign-role"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
@@ -30,5 +30,5 @@ type Interactors struct {
 	RequestForgottenPassword fp.Interactor
 	ResetForgottenPassword   rfpw.Interactor
 	DefaultPageSize          int
-	Authorizer               auth.Auth
+	Authorizer               auth.Authorizer
 }

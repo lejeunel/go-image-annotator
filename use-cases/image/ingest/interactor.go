@@ -14,7 +14,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
 	"hash"
 )

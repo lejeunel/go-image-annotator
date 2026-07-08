@@ -5,7 +5,6 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
-	"net/http"
 )
 
 func APIDocsLib() Node {
@@ -27,13 +26,4 @@ func APIDocsPage(ctx context.Context, specsPath string, p b.PageBuilder) Node {
 		)))
 	p.SetActive(b.APIDocsPageActive)
 	return p.Build()
-}
-
-func RegisterAPIDocs(mux *http.ServeMux, specsPath, docsPath string, p b.PageBuilder) {
-	mux.HandleFunc(docsPath,
-		func(w http.ResponseWriter, r *http.Request) {
-			if err := APIDocsPage(r.Context(), specsPath, *p.SetActive(b.APIDocsPageActive)).Render(w); err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-		})
 }

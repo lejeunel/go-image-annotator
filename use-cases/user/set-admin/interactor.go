@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 )
 
 type Interactor struct {

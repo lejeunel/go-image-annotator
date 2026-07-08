@@ -4,7 +4,7 @@ import (
 	"github.com/jonboulle/clockwork"
 	ci "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	gi "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	"github.com/lejeunel/go-image-annotator/shared/validation"
 	clc "github.com/lejeunel/go-image-annotator/use-cases/collection"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
@@ -16,7 +16,7 @@ import (
 
 func NewSQLiteCollectionInteractors(cr ci.SQLiteCollectionRepo,
 	gr gi.SQLiteGroupRepo,
-	pageSize int, auth auth.Auth) clc.Interactors {
+	pageSize int, auth auth.Authorizer) clc.Interactors {
 	return clc.Interactors{
 		Find: find.New(cr),
 		Create: create.New(cr, gr, create.WithNameValidator(validation.NewNameValidator()),

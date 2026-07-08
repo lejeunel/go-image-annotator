@@ -2,6 +2,7 @@ package builders
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	u "github.com/lejeunel/go-image-annotator/entities/user"
@@ -32,16 +33,19 @@ func (b *PageBuilder) SetUserIdentityFromContext(ctx context.Context) *PageBuild
 	return b
 }
 func (b *PageBuilder) SetContent(c Node) *PageBuilder {
+	if b.User == nil {
+		b.BasePageBuilder.SetError(fmt.Errorf("current user has not been set"))
+		return b
+	}
 	b.BasePageBuilder.SetContent(
 		Group(
-			[]Node{MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, b.User),
+			[]Node{MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, *b.User),
 				Div(Class("grow w-full px-1 md:px-2 lg:px-4 py-10 md:py-20"),
 					Div(Class("font-bold text-xl"), Text(b.Title)),
 					c)},
 		))
 	return b
 }
-
 func (b *PageBuilder) Render(w io.Writer) {
 	b.Build().Render(w)
 

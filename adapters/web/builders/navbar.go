@@ -45,7 +45,7 @@ type UserMenuEntry struct {
 	URL  string
 }
 
-func MakeUserBadge(user *u.User) Node {
+func MakeUserBadge(user u.User) Node {
 	tUser := template.New("")
 	template.Must(tUser.ParseFS(templatesFiles, "templates/user_badge.html"))
 	var iconBuf bytes.Buffer
@@ -95,7 +95,7 @@ func DarkModeToggle() Node {
 		),
 	)
 }
-func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefix string, user *u.User) Node {
+func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefix string, user u.User) Node {
 	return Nav(
 		Attr("x-on:click.away", "mobileMenuIsOpen = false"),
 		Class("fixed top-0 z-30 hidden h-16 w-screen items-center justify-between border-outline px-10 py-2 backdrop-blur-xl md:flex dark:border-outline-dark bg-surface-alt/75 dark:bg-surface-dark-alt/75 border-b"),

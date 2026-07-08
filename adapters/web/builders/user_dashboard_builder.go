@@ -30,7 +30,7 @@ func (b *UserDashboardBuilder) SetUserIdentityFromContext(ctx context.Context) *
 
 func MakeCard(node Node) Node {
 	return Article(
-		Class("group rounded-radius flex max-w-md flex-col border border-outline bg-surface-alt p-1 text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark"),
+		Class("group rounded-radius flex max-w-md flex-col border border-outline bg-surface-alt p-1 text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark mt-6 mb-6"),
 		P(Class("text-pretty text-sm"), node),
 	)
 }
@@ -58,7 +58,7 @@ func (b *UserDashboardBuilder) Build() Node {
 			Text("Generate a secret token to authenticate your API requests. ")),
 		Raw(apiTokenFrameStr))
 
-	return Div(H2(Text("Profile")), MakeCard(profile), APIToken)
+	return Div(MakeCard(profile), APIToken)
 }
 
 func NewUserDashboardBuilder() UserDashboardBuilder {

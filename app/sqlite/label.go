@@ -2,7 +2,7 @@ package sqlite
 
 import (
 	infra "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	lbl "github.com/lejeunel/go-image-annotator/use-cases/label"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/delete"
@@ -11,7 +11,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
 )
 
-func NewSQLiteLabelInteractors(repo infra.SQLiteLabelRepo, pageSize int, auth auth.Auth) lbl.Interactors {
+func NewSQLiteLabelInteractors(repo infra.SQLiteLabelRepo, pageSize int, auth auth.Authorizer) lbl.Interactors {
 	return lbl.Interactors{
 		Find:            *find.New(repo),
 		Create:          *create.New(repo, create.WithAuth(auth)),

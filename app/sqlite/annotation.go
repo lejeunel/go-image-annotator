@@ -1,7 +1,7 @@
 package sqlite
 
 import (
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	an "github.com/lejeunel/go-image-annotator/use-cases/annotate"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
@@ -12,7 +12,7 @@ import (
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
-func NewSQLiteAnnotationInteractors(repos SQLiteRepos, auth auth.Auth) an.Interactors {
+func NewSQLiteAnnotationInteractors(repos SQLiteRepos, auth auth.Authorizer) an.Interactors {
 	return an.Interactors{
 		AddPolygon:    addpoly.New(repos.ImageStore, repos.Annotation, repos.Label, addpoly.WithAuth(auth)),
 		UpdatePolygon: updpoly.New(repos.Annotation, repos.Label, updpoly.WithAuth(auth)),

@@ -1,7 +1,7 @@
 package collection
 
 import (
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/find"
@@ -16,5 +16,5 @@ type Interactors struct {
 	List            list.Interactor
 	Update          update.Interactor
 	DefaultPageSize int
-	Authorizer      auth.Auth
+	Authorizer      auth.Authorizer
 }

@@ -1,4 +1,4 @@
-package auth
+package authorizer
 
 type AuthRule struct {
 	Method      string

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	tk "github.com/lejeunel/go-image-annotator/entities/token"
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 

@@ -6,7 +6,7 @@ import (
 
 	tk "github.com/lejeunel/go-image-annotator/entities/token"
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 

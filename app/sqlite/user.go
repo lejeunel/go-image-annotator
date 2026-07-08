@@ -1,7 +1,7 @@
 package sqlite
 
 import (
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	pw "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
 	usr "github.com/lejeunel/go-image-annotator/use-cases/user"
@@ -27,7 +27,7 @@ func NewSQLiteUserInteractors(
 	passwordHasher tk.TokenHasher,
 	forgotPassworkTokenExpirationMinutes int,
 	pwGen create.PasswordGenerator,
-	auth auth.Auth) usr.Interactors {
+	auth auth.Authorizer) usr.Interactors {
 	return usr.Interactors{
 		Find:                     find.New(repos.User, find.WithAuth(auth)),
 		Create:                   create.New(repos.User, ApitokenGen, pwGen, create.WithAuth(auth)),

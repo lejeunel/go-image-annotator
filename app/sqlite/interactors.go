@@ -2,7 +2,7 @@ package sqlite
 
 import (
 	a "github.com/lejeunel/go-image-annotator/app"
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	"github.com/lejeunel/go-image-annotator/modules/token"
 )
@@ -14,7 +14,7 @@ func NewSQLiteInteractors(i SQLiteRepos, pageSize int, allowedImageFormats []str
 	forgotPasswordTokenExpirationMinutes int,
 	passwordValidator pv.MyPasswordValidator,
 	passwordHasher token.TokenHasher,
-	auth auth.Auth) a.Interactors {
+	auth auth.Authorizer) a.Interactors {
 
 	return a.Interactors{
 		Label:      NewSQLiteLabelInteractors(i.Label, pageSize, auth),

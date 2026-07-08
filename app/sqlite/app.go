@@ -5,7 +5,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/config"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	"github.com/lejeunel/go-image-annotator/modules/scroller"
@@ -14,7 +14,7 @@ import (
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
 )
 
-func NewSQLiteApp(cfg config.Config, auth auth.Auth) app.App {
+func NewSQLiteApp(cfg config.Config, auth auth.Authorizer) app.App {
 	apiTokenGen := tk.New(cfg.ApiTokenLength)
 	passwordGen := tk.New(cfg.RandomPasswordLength)
 	forgottenPasswordGen := tk.New(cfg.RandomPasswordLength)

@@ -9,7 +9,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	sauth "github.com/lejeunel/go-image-annotator/modules/auth"
+	sauth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 )

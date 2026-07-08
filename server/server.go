@@ -6,105 +6,65 @@ import (
 	"os"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
-	"github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	rt "github.com/lejeunel/go-image-annotator/server/routes"
 
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	a "github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/app/sqlite"
-	as "github.com/lejeunel/go-image-annotator/assets"
 	"github.com/lejeunel/go-image-annotator/config"
-	u "github.com/lejeunel/go-image-annotator/entities/user"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 
+	"github.com/go-chi/chi/v5"
 	"net/http"
 )
 
-func LoginPageHandlerFunc(builder b.LoginPageBuilder) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		builder.Render(w)
-	}
-}
-func WebRequireLogin(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		user := u.IdentityFromContext(r.Context())
-		if user == nil {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-func ApiRequireLogin(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		user := u.IdentityFromContext(r.Context())
-		if user == nil {
-			http.Error(w, "authentication required", http.StatusUnauthorized)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-func MakeWebPagesMux(webServer web.Server,
-	pageBuilder b.PageBuilder) *http.ServeMux {
-	mux := http.NewServeMux()
-	web.RegisterWebPages(mux, webServer, pageBuilder)
-	return mux
-
-}
-
-func MakeAPIMux(apiServer api.Server) *http.ServeMux {
-	mux := http.NewServeMux()
-	api.HandlerFromMux(&apiServer, mux)
-	return mux
-}
-
-func Make(auth auth.Auth) http.Handler {
+func Make(auth auth.Authorizer) http.Handler {
 	cfg := config.Parse()
 
 	basePageBuilder := b.NewBasePageBuilder()
 	basePageBuilder.AddScripts(b.BaseLibs()...)
 	pageBuilder := b.NewPageBuilder(basePageBuilder, cfg.APIPath, cfg.RepoURL, cfg.DocsURL)
-	loginPageBuilder := b.NewLoginPageBuilder()
+	loginPageBuilder := b.NewLoginPageBuilder(basePageBuilder)
+	forgotPasswordPageBuilder := b.NewForgotPasswordBuilder(basePageBuilder)
 
 	app := sqlite.NewSQLiteApp(cfg, auth)
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	a.MaybeCreateInitialAdmin(app.Itrs.User.Create, cfg.InitialAdminEmail, cfg.InitialAdminPassword)
 
+	router := chi.NewRouter()
+
 	colorizer := ap.NewCyclicColorizer(ap.Palette)
-	webPagesMux := MakeWebPagesMux(
-		*web.NewServer(&app.Itrs, app.Annotator,
-			*pageBuilder, ap.NewAnnotationPagePresenter(colorizer),
-			ap.NewAnnotoriousPresenter(colorizer),
-			app.SessionManager, cfg.DefaultPageSize),
-		*pageBuilder,
-	)
 
 	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
 		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),
 		CallbackURL: "http://localhost:3000/auth/callback/google"})
 	loginPageBuilder.AddOAuthProvider("google", "/auth/login/google")
 
-	apiMux := MakeAPIMux(*api.NewServer(&app.Itrs, *logger))
-	web.RegisterAPIDocs(apiMux, "openapi.yaml", "/docs", *pageBuilder)
-	as.RegisterAPISpecs(apiMux, "/openapi.yaml")
-	oauthMux := web.MakeAuthMux(app.AuthHandler)
+	rt.RouteWebPages(
+		router,
+		*web.NewServer(&app.Itrs, app.Annotator,
+			*pageBuilder, ap.NewAnnotationPagePresenter(colorizer),
+			ap.NewAnnotoriousPresenter(colorizer),
+			app.SessionManager, cfg.DefaultPageSize),
+		HomePageHandlerFunc(*pageBuilder),
+		app.SessionManager.LoadAndSave, app.SessionManager.AuthCookiesMiddleWare, WebRequireLogin,
+	)
+	rt.RouteAPI(router, *api.NewServer(&app.Itrs, *logger),
+		app.SessionManager.LoadAndSave, app.SessionManager.AuthBearerMiddleWare, app.SessionManager.AuthCookiesMiddleWare, ApiRequireLogin)
+	rt.RouteAPIDocs(router, APIDocsHandlerFunc(rt.APISpecs, *pageBuilder),
+		app.SessionManager.LoadAndSave, app.SessionManager.AuthCookiesMiddleWare, WebRequireLogin,
+	)
+	rt.RouteAPISpecs(router)
+	rt.RouteStaticFiles(router)
+	rt.RouteAuth(router, app.AuthHandler, LoginPageHandlerFunc(*loginPageBuilder),
+		ForgotPasswordHandlerFunc(*forgotPasswordPageBuilder),
+		app.SessionManager.LoadAndSave)
 
-	rootMux := http.NewServeMux()
-	rootMux.Handle("/auth/",
-		http.StripPrefix("/auth", app.SessionManager.LoadAndSave(oauthMux)))
-	rootMux.Handle("/login/", LoginPageHandlerFunc(*loginPageBuilder))
-	rootMux.Handle("/api/",
-		app.SessionManager.AuthBearerMiddleWare(app.SessionManager.AuthCookiesMiddleWare(ApiRequireLogin(http.StripPrefix("/api", apiMux)))))
-	as.RegisterStaticFiles(rootMux)
-	rootMux.Handle("/", app.SessionManager.AuthCookiesMiddleWare(WebRequireLogin(webPagesMux)))
-
-	return rootMux
+	return router
 }
 
 func Serve(handler http.Handler, port int) {

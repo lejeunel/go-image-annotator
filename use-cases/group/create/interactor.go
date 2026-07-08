@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	g "github.com/lejeunel/go-image-annotator/entities/group"
-	auth "github.com/lejeunel/go-image-annotator/modules/auth"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
 )
