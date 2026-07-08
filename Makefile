@@ -7,7 +7,7 @@ MODELS_PKG := adapters/api/models
 SERVER_PKG := adapters/api/server
 MODELS_OUT := $(MODELS_PKG)/models.gen.go
 SERVER_OUT := $(SERVER_PKG)/server.gen.go
-VALID_AUTH_OUT := modules/auth/valid_methods.gen.go
+VALID_AUTH_OUT := modules/authorizer/valid_methods.gen.go
 
 CSS_MAIN := assets/app.css
 CSS_OUT := assets/static/styles.css
@@ -48,7 +48,7 @@ docs-dev:
 	cd docs && hugo server --gc --minify --disableFastRender --logLevel debug --baseURL http://localhost:1313
 
 $(VALID_AUTH_OUT):
-	go generate ./modules/auth
+	go generate ./modules/authorizer
 
 # --- Cleanup generated files ---
 clean:

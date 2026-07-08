@@ -22,6 +22,8 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 	s.Image.Ingest.Execute(r.Context(), NewIngestImageRequest(*body, s.Image.AllowedImageFormats),
 		presenter.NewIngestPresenter(w, s.Logger))
 }
+func (s *Server) ReadRawImage(w http.ResponseWriter, r *http.Request, imageId string) {
+}
 
 func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionName, imageId string) {
 	s.Image.Find.Execute(find.Request{ImageId: imageId, Collection: collectionName},

@@ -1,6 +1,6 @@
 package authorizer
 
-//go:generate go run ./gen -struct Auth -in auth.go -out validmethods.gen.go -pkg auth
+//go:generate go run ./gen -struct Authorizer -in authorizer.go -out validmethods.gen.go -pkg authorizer
 
 import (
 	"context"
