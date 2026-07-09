@@ -58,7 +58,7 @@ func (i *Image) AddBoundingBox(box a.BoundingBox) error {
 	return nil
 }
 func (i *Image) NumAnnotations() int {
-	return len(i.Labels) + len(i.BoundingBoxes)
+	return len(i.Labels) + len(i.BoundingBoxes) + len(i.Polygons)
 }
 func (i *Image) LabelNames() []string {
 	labelNames := []string{}

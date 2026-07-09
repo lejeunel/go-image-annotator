@@ -51,7 +51,7 @@
 </script>
 <div id="generate-zone" class="p-2">
     <button
-    class="whitespace-nowrap rounded-radius bg-warning border border-warning px-4 py-2 text-sm font-medium tracking-wide text-onWarning transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warning active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-warning dark:border-warning dark:text-onWarning dark:focus-visible:outline-warning"
+    class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm font-medium tracking-wide text-on-warning transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warning active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 cursor-pointer"
     onclick="showConfirm()">
     <span class="flex items-center">
         <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
@@ -65,7 +65,7 @@
         <p class="pt-1 pb-1">This will <span class="text-red-500 font-bold">invalidate your current token</span> immediately. Any integrations using it will stop working. Continue?</p>
         <div class="confirm-actions">
         <button
-            class="whitespace-nowrap rounded-radius bg-danger border border-danger px-4 py-2 text-sm font-medium tracking-wide text-onDanger transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-danger dark:border-danger dark:text-onDanger dark:focus-visible:outline-danger"
+            class="whitespace-nowrap rounded-radius bg-danger px-4 py-2 text-center text-sm font-medium tracking-wide text-on-danger transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 cursor-pointer"
             hx-get="/ui/new-api-token"
             hx-target="#token-result"
             hx-swap="innerHTML"
@@ -76,7 +76,7 @@
                 <div class="ml-1">Yes, generate token</div>
             </span>
         </button>
-        <button class="whitespace-nowrap rounded-radius bg-surface border border-surface px-4 py-2 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark dark:border-surface-dark dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt" onclick="cancelConfirm()">Cancel</button>
+        <button class="ml-4 whitespace-nowrap rounded-radius bg-surface border border-surface px-4 py-2 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark dark:border-surface-dark dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark cursor-pointer" onclick="cancelConfirm()">Cancel</button>
         </div>
     </div>
     </div>

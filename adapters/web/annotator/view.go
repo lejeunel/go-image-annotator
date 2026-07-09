@@ -72,8 +72,8 @@ func (v *AnnotationView) Render(w http.ResponseWriter) {
 }
 
 func (v *AnnotationView) ShapeSelector() Node {
-	classInactive := `flex items-center whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-2 py-1 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt`
-	classActive := `flex items-center whitespace-nowrap rounded-radius bg-primary border border-surface-primary px-2 py-1 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark`
+	classInactive := `flex items-center whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-2 py-1 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt cursor-pointer`
+	classActive := `flex items-center whitespace-nowrap rounded-radius bg-primary border border-surface-primary px-2 py-1 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark cursor-pointer`
 
 	return Div(
 		Attr("x-data", "{ active: 'rectangle'}"),
@@ -81,11 +81,11 @@ func (v *AnnotationView) ShapeSelector() Node {
 		Button(
 			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'rectangle', '%v': active !== 'rectangle'}`, classActive, classInactive)),
 			Attr("@click", "AnnotatorModule.drawRectangle(); active = 'rectangle';"),
-			Raw(ic.RectangleSelectorIcon), Div(Class("ml-1"), Text("Rectangle"))),
+			Raw(ic.BoundingBoxIcon), Div(Class("ml-1"), Text("Rectangle"))),
 		Button(
 			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'polygon', '%v': active !== 'polygon'}`, classActive, classInactive)),
 			Attr("@click", "AnnotatorModule.drawPolygon(); active = 'polygon';"),
-			Raw(ic.PolygonSelectorIcon), Div(Class("ml-1"), Text("Polygon"))))
+			Raw(ic.PolygonIcon), Div(Class("ml-1"), Text("Polygon"))))
 }
 
 func AnnotoriousLib() []Node {

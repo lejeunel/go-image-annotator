@@ -29,10 +29,10 @@ func (p *ActionsPanel) Build() Node {
 	res := []Node{}
 	for _, a := range p.Items {
 		res = append(res, Button(
-			// Href(a.URL),
+			Class("cursor-pointer"),
 			Attr(`hx-get="/edit-url"`),
 			Raw(a.Icon),
-			Attr(`onClick="notify('warning', 'editing/deleting', 'not implemented yet')"`)))
+			Attr(`onClick="notify('warning', 'action', 'not implemented yet')"`)))
 	}
 	return Span(Class("inline-flex items-center gap-1"), Group(res))
 }
