@@ -22,15 +22,17 @@ type ListImagesPresenter struct {
 }
 
 func (p ListImagesPresenter) Success(r list.Response) {
-	table := html.MyTable{Fields: []string{"id", "collection", "ingested", "n. annot."}}
+	table := html.MyTable{Fields: []string{"id", "collection", "ingested", "n. annot.", "actions"}}
 	for _, im := range r.Images {
 		link := rt.MakeImageURL(im.Id.String(), im.Collection.Name)
-		table.Rows = append(table.Rows,
+		actions := html.NewActionsPanel()
+		actions.SetDelete("/delete-url")
+		table.AddRow(
 			html.MyTableRow{Values: []Node{html.MakeTextLink(link, im.Id.String()),
 				Text(im.Collection.Name), Text(im.Specs.IngestedAt.Format(time.DateOnly)),
-				Text(strconv.Itoa(im.NumAnnotations()))}})
+				Text(strconv.Itoa(im.NumAnnotations())), actions.Build()}})
 	}
-	p.RenderSuccess(table, r.Pagination, nil)
+	p.RenderList(table, r.Pagination, nil)
 }
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {

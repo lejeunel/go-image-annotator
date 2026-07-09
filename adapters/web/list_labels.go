@@ -21,10 +21,10 @@ func (p ListLabelsPresenter) Success(r list.Response) {
 		actions := html.NewActionsPanel()
 		actions.SetEdit("/edit-url")
 		actions.SetDelete("/delete-url")
-		table.Rows = append(table.Rows,
+		table.AddRow(
 			html.MyTableRow{Values: []Node{Text(l.Name), Raw(l.Description), actions.Build()}})
 	}
-	p.RenderSuccess(table, r.Pagination, nil)
+	p.RenderList(table, r.Pagination, nil)
 }
 
 func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request) {

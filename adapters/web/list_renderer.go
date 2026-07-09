@@ -17,7 +17,7 @@ type ListRenderer struct {
 	Writer  io.Writer
 }
 
-func (p ListRenderer) RenderSuccess(table html.MyTable, pagination pagination.Pagination, header *Node) {
+func (p ListRenderer) RenderList(table html.MyTable, pagination pagination.Pagination, header *Node) {
 
 	content := html.MakePaginatedContent(p.ListURL, table, pagination)
 	var cat Node
