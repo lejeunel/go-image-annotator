@@ -36,7 +36,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(Response) {
+func (p *FakePresenter) SuccessDeleteImage(Response) {
 	p.GotSuccess = true
 }
 

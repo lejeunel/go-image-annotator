@@ -14,7 +14,7 @@ type List struct {
 	json.ErrorPresenter
 }
 
-func (p List) Success(r list.Response) {
+func (p List) SuccessListImages(r list.Response) {
 	response := models.ListImagesResponse{
 		Pagination: json.BuildPaginationResponse(r.Pagination),
 	}

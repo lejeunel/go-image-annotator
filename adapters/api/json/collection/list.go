@@ -14,7 +14,7 @@ type List struct {
 	json.ErrorPresenter
 }
 
-func (p List) Success(r list.Response) {
+func (p List) SuccessListCollections(r list.Response) {
 	data := []models.Collection{}
 	for _, c := range r.Collections {
 		data = append(data,

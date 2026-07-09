@@ -21,7 +21,7 @@ type ListImagesPresenter struct {
 	ListRenderer
 }
 
-func (p ListImagesPresenter) Success(r list.Response) {
+func (p ListImagesPresenter) SuccessListImages(r list.Response) {
 	table := html.MyTable{Fields: []string{"id", "collection", "ingested", "n. annot.", "actions"}}
 	for _, im := range r.Images {
 		link := rt.MakeImageURL(im.Id.String(), im.Collection.Name)

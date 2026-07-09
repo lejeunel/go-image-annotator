@@ -47,7 +47,7 @@ func (b *UserDashboardBuilder) Build() Node {
 			return r.Render()
 		}),
 	)
-	apiTokenFrame, err := templatesFiles.ReadFile("templates/api_token_frame.html")
+	apiTokenFrame, err := componentsFiles.ReadFile("components/api_token_frame.html")
 	if err != nil {
 		return Text(err.Error())
 	}

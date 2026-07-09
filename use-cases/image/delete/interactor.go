@@ -69,7 +69,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	}
 
-	out.Success(Response{})
+	out.SuccessDeleteImage(Response{})
 }
 
 func (i *Interactor) deleteBoundingBoxes(image im.Image) error {

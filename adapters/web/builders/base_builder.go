@@ -37,6 +37,13 @@ func (b *BasePageBuilder) Build() Node {
 	if b.Error != nil {
 		return Text(b.Error.Error())
 	}
+
+	notificationArea, err := componentsFiles.ReadFile("components/notifications.html")
+	if err != nil {
+		return Text(err.Error())
+	}
+	notificationAreaStr := string(notificationArea)
+	// notificationArea :=
 	return Doctype(HTML(
 		Attr("x-data", `{
 					darkMode: false,
@@ -70,7 +77,9 @@ func (b *BasePageBuilder) Build() Node {
 		),
 		Body(
 			Class("bg-white text-gray-900 dark:bg-gray-900 dark:text-white"),
-			b.Content),
+			b.Content,
+			Raw(notificationAreaStr),
+		),
 	))
 }
 func (b *BasePageBuilder) Render(w io.Writer) {

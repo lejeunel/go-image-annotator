@@ -13,7 +13,7 @@ type Update struct {
 	json.ErrorPresenter
 }
 
-func (p Update) Success(r update.Response) {
+func (p Update) SuccessUpdateCollection(r update.Response) {
 	p.Writer.WriteHeader(http.StatusOK)
 }
 

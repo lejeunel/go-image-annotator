@@ -1,6 +1,6 @@
 package update
 
 type OutputPort interface {
-	Success(Response)
+	SuccessUpdateCollection(Response)
 	Error(error)
 }

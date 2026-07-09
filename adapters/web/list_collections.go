@@ -15,7 +15,7 @@ type ListCollectionsPresenter struct {
 	ListRenderer
 }
 
-func (p ListCollectionsPresenter) Success(r list.Response) {
+func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 	table := html.MyTable{Fields: []string{"name", "description", "group", "created", "actions"}}
 	for _, c := range r.Collections {
 		var groupName string

@@ -15,6 +15,16 @@ function newURLFromString(urlString) {
     return new URL(urlString, window.location.origin)
 }
 
+function notify(variant, message, extra = {}) {
+    window.dispatchEvent(new CustomEvent("notify", {
+        detail: {
+            variant,
+            message,
+            ...extra,
+        },
+    }));
+}
+
 document.addEventListener('alpine:init', () => {
     Alpine.store('imageLabelModal', {
         show: false,
@@ -184,14 +194,12 @@ document.addEventListener('alpine:init', () => {
                     AnnotationAPI.updatePolygon(updated);
                     break
                 default:
-                    alert("selector type " + updated.target.selector.type + " not recognized! Should be RECTANGLE or POLYGON")
+                    notify("error", "selector type " + updated.target.selector.type + " not recognized! Should be RECTANGLE or POLYGON")
                 }
-
                 try {
                     this.refreshUI();
-
                 } catch (err) {
-                    alert(err.message);
+                    notify("error", err.message);
                 }
             });
 
@@ -209,7 +217,7 @@ document.addEventListener('alpine:init', () => {
                 const annotator = Alpine.store("annotator").instance;
                 annotator.setAnnotations(data, true);
             } catch (err) {
-                alert(err.message);
+                notify("error", err.message);
             }
         },
 
@@ -220,7 +228,7 @@ document.addEventListener('alpine:init', () => {
                 await this.refreshUI();
 
             } catch (err) {
-                alert(err.message);
+                notify("error", err.message);
             }
         },
 
@@ -236,7 +244,7 @@ document.addEventListener('alpine:init', () => {
                 await this.refreshUI();
 
             } catch (err) {
-                alert(err.message);
+                notify("error", err.message);
             }
         },
 
@@ -245,7 +253,7 @@ document.addEventListener('alpine:init', () => {
                 await AnnotationAPI.setLabelToAnnotation(id, label)
                 await this.refreshList();
             } catch(err) {
-                alert(err.message)
+                notify("error", err.message)
             }
         },
 
@@ -254,7 +262,7 @@ document.addEventListener('alpine:init', () => {
                 await AnnotationAPI.remove(id);
                 await this.refreshUI();
             } catch (err) {
-                alert(err.message);
+                notify("error", err.message)
             }
         },
 

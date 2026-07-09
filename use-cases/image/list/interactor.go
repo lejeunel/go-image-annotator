@@ -48,7 +48,7 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 	response := Response{Images: imageResponses,
 		Pagination: pagination.Pagination{Page: r.Page, PageSize: r.PageSize, TotalRecords: *count, TotalPages: *count / int64(r.PageSize)}}
 
-	out.Success(response)
+	out.SuccessListImages(response)
 
 }
 

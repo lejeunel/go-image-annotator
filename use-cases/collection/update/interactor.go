@@ -65,7 +65,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.Success(Response{Name: r.NewName, Description: r.NewDescription})
+	out.SuccessUpdateCollection(Response{Name: r.NewName, Description: r.NewDescription})
 }
 func (i Interactor) ensureNameExists(name string) error {
 	baseErr := fmt.Errorf("ensuring that collection with name %v exists", name)

@@ -48,3 +48,4 @@
 @source "../adapters/web/**/.go"
 @source "../adapters/web/annotator/**/.go"
 @source "../adapters/web/annotator/templates/**/.html"
+@source "../adapters/web/annotator/components/**/.html"
