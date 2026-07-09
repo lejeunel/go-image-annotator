@@ -6,6 +6,7 @@ import (
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 	. "maragu.dev/gomponents"
 )
@@ -15,7 +16,7 @@ type ListCollectionsPresenter struct {
 }
 
 func (p ListCollectionsPresenter) Success(r list.Response) {
-	table := html.MyTable{Fields: []string{"name", "description", "group", "created"}}
+	table := html.MyTable{Fields: []string{"name", "description", "group", "created", "actions"}}
 	for _, c := range r.Collections {
 		var groupName string
 		if c.Group == nil {
@@ -23,9 +24,13 @@ func (p ListCollectionsPresenter) Success(r list.Response) {
 		} else {
 			groupName = c.Group.Name
 		}
+
+		actions := html.NewActionsPanel()
+		actions.SetEdit("/edit-url")
+		actions.SetDelete("/delete-url")
 		table.Rows = append(table.Rows,
-			html.MyTableRow{Values: []Node{html.MakeTextLink("/images?collection="+c.Name, c.Name),
-				Raw(c.Description), Raw(groupName), Raw(DateTimeToStr(c.CreatedAt))}})
+			html.MyTableRow{Values: []Node{html.MakeTextLink(rt.MakeImagesURL(c.Name), c.Name),
+				Raw(c.Description), Raw(groupName), Raw(DateTimeToStr(c.CreatedAt)), actions.Build()}})
 	}
 
 	p.RenderSuccess(table, r.Pagination, nil)

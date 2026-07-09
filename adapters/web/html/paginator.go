@@ -47,6 +47,6 @@ func MakePaginator(baseURL url.URL, currentPage, lastPage, numItems, totalItems 
 			If(lastPage-1 > currentPage, MakePaginatorNumberedButton(baseURL, lastPage-1, false)),
 			If(lastPage > currentPage, MakePaginatorNumberedButton(baseURL, lastPage, false)),
 			If(currentPage < lastPage, Li(MakeNavigationButton(nextURL.String(), true, scr.ScrollNext, "Next"))),
-			Span(Class("font-light"), Text(fmt.Sprintf("Showing %v items out of %v", numItems, totalItems))),
+			Span(Class("font-light"), Text(fmt.Sprintf("Showing %v item(s) out of %v", numItems, totalItems))),
 		))
 }

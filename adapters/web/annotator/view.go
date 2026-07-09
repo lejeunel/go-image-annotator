@@ -7,6 +7,7 @@ import (
 	"embed"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -80,11 +81,11 @@ func (v *AnnotationView) ShapeSelector() Node {
 		Button(
 			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'rectangle', '%v': active !== 'rectangle'}`, classActive, classInactive)),
 			Attr("@click", "AnnotatorModule.drawRectangle(); active = 'rectangle';"),
-			Raw(RectangleSelectorIcon), Div(Class("ml-1"), Text("Rectangle"))),
+			Raw(ic.RectangleSelectorIcon), Div(Class("ml-1"), Text("Rectangle"))),
 		Button(
 			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'polygon', '%v': active !== 'polygon'}`, classActive, classInactive)),
 			Attr("@click", "AnnotatorModule.drawPolygon(); active = 'polygon';"),
-			Raw(PolygonSelectorIcon), Div(Class("ml-1"), Text("Polygon"))))
+			Raw(ic.PolygonSelectorIcon), Div(Class("ml-1"), Text("Polygon"))))
 }
 
 func AnnotoriousLib() []Node {

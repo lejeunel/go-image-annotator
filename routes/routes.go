@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -36,4 +37,12 @@ func MakeOAuthCallbackURL(baseURL string, provider string) string {
 }
 func MakeOAuthLoginURL(provider string) string {
 	return strings.ReplaceAll(LoginOAuth, "{provider}", provider)
+}
+
+func MakeImageURL(imageId, collection string) string {
+	return fmt.Sprintf("%v?id=%v&collection=%v", Image, imageId, collection)
+}
+
+func MakeImagesURL(collection string) string {
+	return fmt.Sprintf("%v?collection=%v", Images, collection)
 }

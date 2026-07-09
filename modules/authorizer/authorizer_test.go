@@ -16,7 +16,7 @@ func TestFailOnNonExistingMethod(t *testing.T) {
 	_, err := NewAuthRulesFromYaml(
 		strings.NewReader(
 			`
-rules:
+authorization-rules:
   - method: NonExistingMethod
 `,
 		))
@@ -27,7 +27,7 @@ func TestFailOnInvalidIgnoreGroupValue(t *testing.T) {
 	_, err := NewAuthRulesFromYaml(
 		strings.NewReader(
 			`
-rules:
+authorization-rules:
   - method: CreateCollection
     ignore_group: maybe... I don't know
 `,
@@ -39,7 +39,7 @@ func TestFailOnInvalidRolesValue(t *testing.T) {
 	_, err := NewAuthRulesFromYaml(
 		strings.NewReader(
 			`
-rules:
+authorization-rules:
   - method: CreateCollection
     ignore_group: maybe... I don't know
     roles: this-should-be-a-list
@@ -49,7 +49,7 @@ rules:
 }
 
 var validSpec = `
-rules:
+authorization-rules:
   - method: CreateCollection
     ignore_group: true
     admin_only: true

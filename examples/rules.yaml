@@ -1,4 +1,4 @@
-rules:
+authorization-rules:
   - method: CreateCollection
     ignore_group: true
     roles: [a-role, another-role]

@@ -17,7 +17,7 @@ type YamlConfigAuthRule struct {
 }
 
 type YamlConfigAuthRules struct {
-	Rules []YamlConfigAuthRule `yaml:"rules"`
+	Rules []YamlConfigAuthRule `yaml:"authorization-rules"`
 }
 
 func validateYamlAuthRules(rules []YamlConfigAuthRule) error {

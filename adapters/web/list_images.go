@@ -10,6 +10,7 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	list_im "github.com/lejeunel/go-image-annotator/use-cases/image/list"
@@ -23,7 +24,7 @@ type ListImagesPresenter struct {
 func (p ListImagesPresenter) Success(r list.Response) {
 	table := html.MyTable{Fields: []string{"id", "collection", "ingested", "n. annot."}}
 	for _, im := range r.Images {
-		link := fmt.Sprintf("/image?id=%v&collection=%v", im.Id.String(), im.Collection.Name)
+		link := rt.MakeImageURL(im.Id.String(), im.Collection.Name)
 		table.Rows = append(table.Rows,
 			html.MyTableRow{Values: []Node{html.MakeTextLink(link, im.Id.String()),
 				Text(im.Collection.Name), Text(im.Specs.IngestedAt.Format(time.DateOnly)),

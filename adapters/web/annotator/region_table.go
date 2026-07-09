@@ -3,6 +3,7 @@ package annotator
 import (
 	"bytes"
 	"fmt"
+	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -35,9 +36,9 @@ func (t *RegionTable) addRow(author, time, id, label, color string, regionKind R
 	var regionIcon string
 	switch regionKind {
 	case RegionBox:
-		regionIcon = MakeColoredRectangleIcon(color)
+		regionIcon = ic.MakeColoredRectangleIcon(color)
 	case RegionPolygon:
-		regionIcon = MakeColoredHexagonIcon(color)
+		regionIcon = ic.MakeColoredHexagonIcon(color)
 	}
 
 	t.Rows = append(t.Rows,
@@ -52,7 +53,7 @@ func (t *RegionTable) addRow(author, time, id, label, color string, regionKind R
 			Raw(buf.String()),
 			Div(
 				Class("flex  justify-end items-center pr-1"),
-				Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, id, TrashIcon)),
+				Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, id, ic.TrashIcon)),
 			),
 		}})
 }

@@ -2,6 +2,7 @@ package annotator
 
 import (
 	"fmt"
+	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -27,7 +28,7 @@ func (r ImageLabelRow) Render() Node {
 		),
 		Td(Div(
 			Class("flex justify-end items-center pr-1"),
-			Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, r.Id, TrashIcon)),
+			Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, r.Id, ic.TrashIcon)),
 		),
 		))
 }
@@ -51,7 +52,7 @@ func (t *ImageLabelTable) Build() Node {
 						Td(),
 						Td(Class("align-middle"),
 							Div(Class("flex items-center justify-end pr-1"),
-								Raw(fmt.Sprintf(`<a href="#" onclick="Alpine.store('imageLabelModal').open()"> %v </a>`, AddIcon)),
+								Raw(fmt.Sprintf(`<a href="#" onclick="Alpine.store('imageLabelModal').open()"> %v </a>`, ic.AddIcon)),
 							),
 						),
 					),
