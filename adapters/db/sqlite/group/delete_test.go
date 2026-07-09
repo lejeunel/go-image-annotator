@@ -53,3 +53,15 @@ func TestGroupPopulatedWithCollection(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, *isPopulated)
 }
+
+func TestCollectionWithoutGroupFailsWithNotFoundErr(t *testing.T) {
+	db := s.NewSQLiteDB(":memory:")
+	clcRepo := clcr.NewSQLiteCollectionRepo(db)
+	groupRepo := NewSQLiteGroupRepo(db)
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	clcRepo.Create(collection)
+	group, err := groupRepo.GroupOfCollection("a-collection")
+	assert.Nil(t, group)
+	assert.ErrorIs(t, err, e.ErrNotFound)
+
+}

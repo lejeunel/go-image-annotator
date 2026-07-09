@@ -1,4 +1,4 @@
-package web
+package components
 
 import (
 	"time"

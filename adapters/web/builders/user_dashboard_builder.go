@@ -2,6 +2,7 @@ package builders
 
 import (
 	"context"
+	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -28,13 +29,6 @@ func (b *UserDashboardBuilder) SetUserIdentityFromContext(ctx context.Context) *
 	return b
 }
 
-func MakeCard(node Node) Node {
-	return Article(
-		Class("group rounded-radius flex max-w-md flex-col border border-outline bg-surface-alt p-1 text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark mt-6 mb-6"),
-		P(Class("text-pretty text-sm"), node),
-	)
-}
-
 func (b *UserDashboardBuilder) Build() Node {
 	rows := []UserInfoRow{{Name: "Email", Value: b.User.Id}}
 	if b.User.IsAdmin {
@@ -58,7 +52,7 @@ func (b *UserDashboardBuilder) Build() Node {
 			Text("Generate a secret token to authenticate your API requests. ")),
 		Raw(apiTokenFrameStr))
 
-	return Div(MakeCard(profile), APIToken)
+	return Div(cmp.MakeCard(profile), APIToken)
 }
 
 func NewUserDashboardBuilder() UserDashboardBuilder {

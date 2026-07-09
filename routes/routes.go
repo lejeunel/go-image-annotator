@@ -31,6 +31,8 @@ var AnnotationPanel = "/ui/annotate/annotation-panel"
 var Annotations = "/ui/annotate/annotations"
 var RemoveAnnotation = "/ui/annotate/remove-annotation"
 var SetLabel = "/ui/annotate/set-label"
+var CreateCollectionForm = "/ui/create-collection-form"
+var CreateCollection = "/ui/create-collection"
 
 func MakeOAuthCallbackURL(baseURL string, provider string) string {
 	return baseURL + strings.ReplaceAll(CallbackOAuth, "{provider}", provider)

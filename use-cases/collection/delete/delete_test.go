@@ -41,7 +41,7 @@ func TestHandleInternalErrorOnDelete(t *testing.T) {
 
 func TestDeleteCollection(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeCollectionRepo{}, &FakeGroupRepo{})
+	itr := New(&FakeCollectionRepo{}, &FakeGroupRepo{Err: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{Name: "my-collection"}, p)
 	assert.True(t, p.GotSuccess)
 }

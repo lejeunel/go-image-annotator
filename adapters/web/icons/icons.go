@@ -26,6 +26,9 @@ var GitHubIcon = `
 //go:embed svg/user.svg
 var UserIcon string
 
+//go:embed svg/add-circle.svg
+var AddCircleIcon string
+
 //go:embed svg/add.svg
 var AddIcon string
 

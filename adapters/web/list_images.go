@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	rt "github.com/lejeunel/go-image-annotator/routes"
@@ -29,10 +29,10 @@ func (p ListImagesPresenter) SuccessListImages(r list.Response) {
 		actions.SetDelete("/delete-url")
 		table.AddRow(
 			html.MyTableRow{Values: []Node{html.MakeTextLink(link, im.Id.String()),
-				Text(im.Collection.Name), Text(im.Specs.IngestedAt.Format(time.DateOnly)),
+				Text(im.Collection.Name), Text(cmp.DateTimeToStr(im.Specs.IngestedAt)),
 				Text(strconv.Itoa(im.NumAnnotations())), actions.Build()}})
 	}
-	p.RenderList(table, r.Pagination, nil)
+	p.RenderList(nil, table, r.Pagination, nil)
 }
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {

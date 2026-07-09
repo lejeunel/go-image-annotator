@@ -1,16 +1,21 @@
 package builders
 
 import (
-	"fmt"
+	"bytes"
 	"io"
-	"strings"
+
+	_ "embed"
+	"html/template"
 
 	. "maragu.dev/gomponents"
-	. "maragu.dev/gomponents/html"
 )
+
+//go:embed templates/base.html
+var BaseHTML string
 
 type BasePageBuilder struct {
 	Title     string
+	pane      *Node
 	scripts   []Node
 	bodyExtra []string
 	Error     error
@@ -23,10 +28,8 @@ func (b *BasePageBuilder) AddScripts(scripts ...Node) *BasePageBuilder {
 	}
 	return b
 }
-func (b *BasePageBuilder) AddBodyExtra(components ...string) *BasePageBuilder {
-	for _, s := range components {
-		b.bodyExtra = append(b.bodyExtra, s)
-	}
+func (b *BasePageBuilder) SetPane(pane Node) *BasePageBuilder {
+	b.pane = &pane
 	return b
 }
 
@@ -42,51 +45,41 @@ func (b *BasePageBuilder) SetError(err error) *BasePageBuilder {
 	b.Error = err
 	return b
 }
-func (b *BasePageBuilder) Build() Node {
+
+type BaseData struct {
+	Title   string
+	Scripts template.HTML
+	Content template.HTML
+}
+
+func (b *BasePageBuilder) Render(w io.Writer) {
 	if b.Error != nil {
-		return Text(b.Error.Error())
+		Text(b.Error.Error()).Render(w)
+		return
+	}
+	baseTemplate, err := template.New("").Parse(BaseHTML)
+	if err != nil {
+		Text(err.Error()).Render(w)
+		return
 	}
 
-	return Doctype(HTML(
-		Attr("x-data", `{
-					darkMode: false,
-
-					init() {
-						this.darkMode = localStorage.getItem('dark') === 'true'
-						document.documentElement.classList.toggle('dark', this.darkMode)
-					},
-					toggleDark() {
-						this.darkMode = !this.darkMode;
-						localStorage.setItem('dark', this.darkMode);
-						document.documentElement.classList.toggle('dark', this.darkMode)
-					}}`),
-		Attr("x-init", "init()"),
-		Attr("x-bind:class", "{ 'dark': darkMode }"),
-		Head(
-			Meta(Charset("utf-8")),
-			Meta(Name("viewport"), Content("width=device-width, initial-scale=1")),
-			Script(Raw(`
-				if (localStorage.getItem('dark') === 'true') {
-					document.documentElement.classList.add('dark');
-				}
-			`)),
-			Link(
-				Rel("stylesheet"),
-				Href("/static/styles.css"),
-			),
-			Link(Rel("stylesheet"), Href("https://fonts.googleapis.com/css2?family=Roboto&display=swap")),
-			Group(b.scripts),
-			Raw(fmt.Sprintf("<title>%v</title>", b.Title)),
-		),
-		Body(
-			Class("bg-white text-gray-900 dark:bg-gray-900 dark:text-white"),
-			b.Content,
-			Raw(strings.Join(b.bodyExtra, "")),
-		),
-	))
-}
-func (b *BasePageBuilder) Render(w io.Writer) {
-	b.Build().Render(w)
+	var content bytes.Buffer
+	if err := b.Content.Render(&content); err != nil {
+		Text(err.Error()).Render(w)
+	}
+	var scripts bytes.Buffer
+	if err := Group(b.scripts).Render(&scripts); err != nil {
+		Text(err.Error()).Render(w)
+		return
+	}
+	if err := baseTemplate.ExecuteTemplate(
+		w,
+		"base",
+		BaseData{Title: b.Title,
+			Content: template.HTML(content.String()),
+			Scripts: template.HTML(scripts.String())}); err != nil {
+		Text(err.Error()).Render(w)
+	}
 
 }
 

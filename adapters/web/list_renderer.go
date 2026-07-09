@@ -17,16 +17,16 @@ type ListRenderer struct {
 	Writer  io.Writer
 }
 
-func (p ListRenderer) RenderList(table html.MyTable, pagination pagination.Pagination, header *Node) {
+func (p ListRenderer) RenderList(preamble *Node, table html.MyTable, pagination pagination.Pagination, pane *Node) {
 
 	content := html.MakePaginatedContent(p.ListURL, table, pagination)
 	var cat Node
-	if header != nil {
-		cat = Div(*header, content)
+	if preamble != nil {
+		cat = Div(*preamble, content)
 	} else {
 		cat = content
 	}
-	p.PageBuilder.SetContent(cat).Render(p.Writer)
+	p.PageBuilder.SetContent(cat, pane).Render(p.Writer)
 }
 
 func (p ListRenderer) Error(err error) {

@@ -2,8 +2,8 @@ package annotator
 
 import (
 	"fmt"
-	"time"
 
+	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
@@ -20,7 +20,7 @@ func (p *ImageInfosView) Build(info view.ImageInfo) Node {
 		html.SpecFields{Name: "mimetype", Value: info.Specs.MIMEType},
 		html.SpecFields{Name: "dimensions",
 			Value: fmt.Sprintf("%vx%v", info.Specs.Width, info.Specs.Height)},
-		html.SpecFields{Name: "ingested", Value: info.Specs.IngestedAt.Format(time.DateOnly)})
+		html.SpecFields{Name: "ingested", Value: cmp.DateTimeToStr(info.Specs.IngestedAt)})
 	return s.Render()
 
 }

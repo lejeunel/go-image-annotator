@@ -2,6 +2,7 @@ package delete
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -36,14 +37,17 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	out.Success()
 }
 func (i Interactor) authorizeDeletion(ctx context.Context, name string) error {
-	errCtx := fmt.Errorf("checking group ownership of collection with name %v is empty", name)
+	errCtx := fmt.Errorf("checking group ownership of collection with name %v", name)
 	group, err := i.groupRepo.GroupOfCollection(name)
+	if errors.Is(err, e.ErrNotFound) {
+		return nil
+	}
 	if err != nil {
-		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
+		return fmt.Errorf("%w: %w: %w", errCtx, err, e.ErrInternal)
 	}
 	if group != nil {
 		if err := i.auth.DeleteCollection(ctx, *group); err != nil {
-			return fmt.Errorf("%w: %w", errCtx, e.ErrAuthorization)
+			return fmt.Errorf("%w: %w: %w", errCtx, err, e.ErrAuthorization)
 		}
 	}
 	return nil

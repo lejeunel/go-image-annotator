@@ -3,6 +3,7 @@ package builders
 import (
 	"io"
 
+	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -24,14 +25,14 @@ func (b *ForgotPasswordBuilder) makeContent() Node {
 				Label(For("email"), Text("Email"), Class("block text-sm font-medium text-gray-900 dark:text-white")),
 				Input(Type("email"), ID("email"), Name("email"), Required(),
 					Class("w-full px-3 py-2 mb-6 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")),
-				Button(Type("submit"), Text("Submit"), Class(PasswordButtonClass)),
+				Button(Type("submit"), Text("Submit"), Class(s.PasswordButtonClass)),
 			),
 		),
 	)
 }
 func (b *ForgotPasswordBuilder) Render(w io.Writer) {
 	b.BasePageBuilder.SetContent(b.makeContent())
-	b.Build().Render(w)
+	b.Render(w)
 
 }
 

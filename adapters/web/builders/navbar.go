@@ -81,7 +81,7 @@ func DarkModeToggle() Node {
 func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefix string, user u.User) Node {
 	return Nav(
 		Attr("x-on:click.away", "mobileMenuIsOpen = false"),
-		Class("fixed top-0 z-30 hidden h-16 w-screen items-center justify-between border-outline px-10 py-2 backdrop-blur-xl md:flex dark:border-outline-dark bg-surface-alt/75 dark:bg-surface-dark-alt/75 border-b"),
+		Class("fixed top-0 z-30 hidden h-14 w-screen items-center justify-between border-outline px-10 py-2 backdrop-blur-xl md:flex dark:border-outline-dark bg-surface-alt/75 dark:bg-surface-dark-alt/75 border-b"),
 		Aria("label", "penguin ui menu"),
 
 		A(

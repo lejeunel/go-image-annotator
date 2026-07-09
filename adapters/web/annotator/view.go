@@ -8,6 +8,7 @@ import (
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
+	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -72,18 +73,15 @@ func (v *AnnotationView) Render(w http.ResponseWriter) {
 }
 
 func (v *AnnotationView) ShapeSelector() Node {
-	classInactive := `flex items-center whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-2 py-1 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt cursor-pointer`
-	classActive := `flex items-center whitespace-nowrap rounded-radius bg-primary border border-surface-primary px-2 py-1 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark cursor-pointer`
-
 	return Div(
 		Attr("x-data", "{ active: 'rectangle'}"),
 		Class("flex gap-2 pb-2"),
 		Button(
-			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'rectangle', '%v': active !== 'rectangle'}`, classActive, classInactive)),
+			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'rectangle', '%v': active !== 'rectangle'}`, s.ActivePrimaryButton, s.InactiveButton)),
 			Attr("@click", "AnnotatorModule.drawRectangle(); active = 'rectangle';"),
 			Raw(ic.BoundingBoxIcon), Div(Class("ml-1"), Text("Rectangle"))),
 		Button(
-			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'polygon', '%v': active !== 'polygon'}`, classActive, classInactive)),
+			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'polygon', '%v': active !== 'polygon'}`, s.ActivePrimaryButton, s.InactiveButton)),
 			Attr("@click", "AnnotatorModule.drawPolygon(); active = 'polygon';"),
 			Raw(ic.PolygonIcon), Div(Class("ml-1"), Text("Polygon"))))
 }
@@ -122,7 +120,7 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 							Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes, v.polygons, v.imageLabels, v.availableLabels)))),
 				),
 				))),
-		}))
+		}), nil)
 	pb.Render(w)
 }
 

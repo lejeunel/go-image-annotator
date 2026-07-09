@@ -52,7 +52,7 @@ func (t *ImageLabelTable) Build() Node {
 						Td(),
 						Td(Class("align-middle"),
 							Div(Class("flex items-center justify-end pr-1"),
-								Raw(fmt.Sprintf(`<a href="#" onclick="Alpine.store('imageLabelModal').open()"> %v </a>`, ic.AddIcon)),
+								Raw(fmt.Sprintf(`<a href="#" onclick="Alpine.store('imageLabelModal').open()"> %v </a>`, ic.AddCircleIcon)),
 							),
 						),
 					),

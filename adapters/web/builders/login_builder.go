@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"io"
 
+	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
 
-var OAuthButtonClass = "w-full whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
-var PasswordButtonClass = "w-full rounded-radius bg-success border border-success px-4 py-2 text-center text-sm font-medium tracking-wide text-on-success hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 dark:bg-success-dark dark:border-success-dark dark:text-on-success-dark dark:focus-visible:outline-success-dark"
 var signInTitle = "Sign in to ImageAnnotator"
 
 type OAuthProvider struct {
@@ -31,7 +30,7 @@ func (b *LoginPageBuilder) makeContent() Node {
 	buttons := []Node{}
 	for _, p := range b.OAuthProviders {
 		button := A(Href(p.URL),
-			Class(OAuthButtonClass),
+			Class(s.OAuthButtonClass),
 			Text(fmt.Sprintf("Continue with %v", p.Name)))
 		buttons = append(buttons, button)
 	}
@@ -53,7 +52,7 @@ func (b *LoginPageBuilder) makeContent() Node {
 				),
 				Input(Type("password"), ID("password"), Name("password"), Required(),
 					Class("w-full px-3 py-2 mb-6 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")),
-				Button(Type("submit"), Text("Login"), Class(PasswordButtonClass)),
+				Button(Type("submit"), Text("Login"), Class(s.PasswordButtonClass)),
 			),
 			Div(Class("flex items-center gap-3 my-6 mb-4"),
 				Div(Class("h-px flex-1 bg-gray-300")),
@@ -67,7 +66,7 @@ func (b *LoginPageBuilder) makeContent() Node {
 }
 func (b *LoginPageBuilder) Render(w io.Writer) {
 	b.BasePageBuilder.SetContent(b.makeContent())
-	b.Build().Render(w)
+	b.Render(w)
 
 }
 

@@ -55,6 +55,9 @@ func RouteWebPages(r chi.Router, s web.Server, home http.HandlerFunc,
 		r.Get(rt.Annotations, s.GetRegionsAsJSON)
 		r.Delete(rt.RemoveAnnotation, s.DeleteAnnotation)
 		r.Post(rt.SetLabel, s.SetLabel)
+
+		r.Get(rt.CreateCollectionForm, s.CreateCollectionForm)
+		r.Post(rt.CreateCollection, s.CreateCollection)
 	})
 }
 func RouteAPI(r chi.Router, apiServer api.Server, mws ...func(http.Handler) http.Handler) {

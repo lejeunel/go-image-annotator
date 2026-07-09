@@ -26,7 +26,6 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	cfg := config.Parse()
 
 	basePageBuilder := b.NewBasePageBuilder()
-	basePageBuilder.AddScripts(b.BaseJSDeps()...).AddBodyExtra(b.BaseBodyExtra())
 	pageBuilder := b.NewPageBuilder(basePageBuilder, rt.APIRoot, cfg.RepoURL, cfg.DocsURL)
 	loginPageBuilder := b.NewLoginPageBuilder(basePageBuilder)
 	forgotPasswordPageBuilder := b.NewForgotPasswordBuilder(basePageBuilder)

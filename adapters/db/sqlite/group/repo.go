@@ -72,7 +72,7 @@ func (r SQLiteGroupRepo) Exists(name string) (*bool, error) {
 	var exists bool
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM groups WHERE name = $1)`, name)
 	if err != nil {
-		return nil, fmt.Errorf("checking whether record exists: %v: %w", err, e.ErrInternal)
+		return nil, fmt.Errorf("checking whether group with name %v exists: %v: %w", name, err, e.ErrInternal)
 	}
 
 	return &exists, nil
@@ -130,10 +130,14 @@ func (r SQLiteGroupRepo) Count() (*int64, error) {
 }
 func (r SQLiteGroupRepo) GroupOfCollection(name string) (*string, error) {
 	var group string
+	errCtx := fmt.Errorf("retrieving group of collection with name %v", name)
 
 	err := r.Db.Get(&group, `SELECT name FROM groups WHERE id=(SELECT group_id FROM collections WHERE name=$1)`, name)
 	if err != nil {
-		return nil, fmt.Errorf("checking whether record exists: %v: %w", err, e.ErrInternal)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
+		}
+		return nil, fmt.Errorf("%w: %w: %w", errCtx, err, e.ErrInternal)
 	}
 
 	return &group, nil

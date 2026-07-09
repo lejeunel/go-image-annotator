@@ -20,13 +20,11 @@ func ForgotPasswordHandlerFunc(builder b.ForgotPasswordBuilder) http.HandlerFunc
 func HomePageHandlerFunc(pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pb.SetUserIdentityFromContext(r.Context())
-		web.MakeHomePage(pb).Render(w)
+		web.MakeHomePage(pb, w)
 	}
 }
 func APIDocsHandlerFunc(specsPath string, pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if err := web.APIDocsPage(r.Context(), specsPath, *pb.SetActive(b.APIDocsPageActive)).Render(w); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+		web.APIDocsPage(r.Context(), specsPath, *pb.SetActive(b.APIDocsPageActive), w)
 	}
 }
