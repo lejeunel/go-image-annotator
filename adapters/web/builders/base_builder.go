@@ -3,16 +3,18 @@ package builders
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
 
 type BasePageBuilder struct {
-	Title   string
-	scripts []Node
-	Error   error
-	Content Node
+	Title     string
+	scripts   []Node
+	bodyExtra []string
+	Error     error
+	Content   Node
 }
 
 func (b *BasePageBuilder) AddScripts(scripts ...Node) *BasePageBuilder {
@@ -21,6 +23,13 @@ func (b *BasePageBuilder) AddScripts(scripts ...Node) *BasePageBuilder {
 	}
 	return b
 }
+func (b *BasePageBuilder) AddBodyExtra(components ...string) *BasePageBuilder {
+	for _, s := range components {
+		b.bodyExtra = append(b.bodyExtra, s)
+	}
+	return b
+}
+
 func (b *BasePageBuilder) SetTitle(title string) *BasePageBuilder {
 	b.Title = title
 	return b
@@ -38,12 +47,6 @@ func (b *BasePageBuilder) Build() Node {
 		return Text(b.Error.Error())
 	}
 
-	notificationArea, err := componentsFiles.ReadFile("components/notifications.html")
-	if err != nil {
-		return Text(err.Error())
-	}
-	notificationAreaStr := string(notificationArea)
-	// notificationArea :=
 	return Doctype(HTML(
 		Attr("x-data", `{
 					darkMode: false,
@@ -78,7 +81,7 @@ func (b *BasePageBuilder) Build() Node {
 		Body(
 			Class("bg-white text-gray-900 dark:bg-gray-900 dark:text-white"),
 			b.Content,
-			Raw(notificationAreaStr),
+			Raw(strings.Join(b.bodyExtra, "")),
 		),
 	))
 }

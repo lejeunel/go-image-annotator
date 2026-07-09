@@ -5,7 +5,7 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func BaseLibs() []Node {
+func BaseJSDeps() []Node {
 	return []Node{
 		Raw("<style>[x-cloak] { display: none !important; }</style>"),
 		Script(
@@ -20,5 +20,25 @@ func BaseLibs() []Node {
 			Src("/static/alpine.js"),
 			Defer(),
 		),
+		Script(Raw(`
+			function notify(variant, title, message, extra = {}) {
+				window.dispatchEvent(new CustomEvent("notify", {
+					detail: {
+						variant: variant,
+						title: title,
+						message: message,
+						...extra,
+					},
+				}));
+			}
+`)),
 	}
+}
+
+func BaseBodyExtra() string {
+	notificationArea, err := componentsFiles.ReadFile("components/notifications.html")
+	if err != nil {
+		panic(err)
+	}
+	return string(notificationArea)
 }
