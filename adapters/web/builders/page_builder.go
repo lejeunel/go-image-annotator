@@ -18,11 +18,6 @@ type PageBuilder struct {
 	BasePageBuilder
 }
 
-func (b *PageBuilder) SetPane(pane Node) *PageBuilder {
-	b.BasePageBuilder.SetPane(pane)
-	return b
-}
-
 func (b *PageBuilder) SetTitle(title string) *PageBuilder {
 	b.BasePageBuilder.SetTitle(title)
 	return b

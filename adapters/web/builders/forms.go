@@ -52,7 +52,7 @@ func (b *CreateFormBuilder) AddTextField(fieldName, displayName, divId string, r
 }
 
 func (b CreateFormBuilder) Render(w io.Writer) {
-	form := Span(Class("w-full inline-flex items-center justify-end"),
+	form := Span(Class("w-full inline-flex items-center justify-start mt-2"),
 		Form(
 			Attr(fmt.Sprintf(`hx-post=%v`, b.postRoute)),
 			Attr(`hx-swap="none"`),

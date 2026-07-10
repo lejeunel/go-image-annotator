@@ -2,12 +2,16 @@ package builders
 
 import (
 	"context"
+	_ "embed"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 	"strings"
 )
+
+//go:embed components/api_token_frame.html
+var ApiTokenFrame string
 
 type UserInfoRow struct {
 	Name  string
@@ -41,16 +45,11 @@ func (b *UserDashboardBuilder) Build() Node {
 			return r.Render()
 		}),
 	)
-	apiTokenFrame, err := componentsFiles.ReadFile("components/api_token_frame.html")
-	if err != nil {
-		return Text(err.Error())
-	}
-	apiTokenFrameStr := string(apiTokenFrame)
 
 	APIToken := Div(Class("mt-2"), H3(Text("API Token")),
 		P(Class("text-sm text-on-surface dark:text-on-surface-dark"),
 			Text("Generate a secret token to authenticate your API requests. ")),
-		Raw(apiTokenFrameStr))
+		Raw(ApiTokenFrame))
 
 	return Div(cmp.MakeCard(profile), APIToken)
 }

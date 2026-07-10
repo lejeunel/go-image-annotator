@@ -10,15 +10,15 @@ type DeleteCollectionPresenter struct {
 	writer        http.ResponseWriter
 	task          string
 	okMessageFunc func(delete.Response) string
-	WebErrorPresenter
+	HTMXErrorPresenter
 }
 
 func NewDeleteCollectionPresenter(w http.ResponseWriter) DeleteCollectionPresenter {
 	task := "Deleting collection"
 	okMessageFunc := func(r delete.Response) string {
-		return fmt.Sprintf("Successfully deleted collection with name %v", r.Name)
+		return fmt.Sprintf("Successfully deleted collection %v", r.Name)
 	}
-	return DeleteCollectionPresenter{w, task, okMessageFunc, NewWebErrorPresenter(task, w)}
+	return DeleteCollectionPresenter{w, task, okMessageFunc, NewHTMXErrorPresenter(task, w)}
 }
 
 func (p DeleteCollectionPresenter) Success(r delete.Response) {

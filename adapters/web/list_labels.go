@@ -1,29 +1,31 @@
 package web
 
 import (
+	"io"
 	"net/http"
-	"net/url"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
-	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
 	. "maragu.dev/gomponents"
 )
 
 type ListLabelsPresenter struct {
-	ListRenderer
+	b.PageBuilder
+	Writer io.Writer
+	WebPageErrorPresenter
 }
 
 func (p ListLabelsPresenter) Success(r list.Response) {
-	table := html.MyTable{Fields: []string{"name", "description", "actions"}}
+	listBuilder := b.NewPaginatedListBuilder([]string{"name", "description", "actions"}, rt.Labels, r.Pagination)
 	for _, l := range r.Labels {
-		actions := html.NewActionsPanel()
+		actions := b.NewActionsPanelBuilder()
 		actions.SetEdit("/edit-url")
 		actions.SetDelete("/delete-url")
-		table.AddRow(Text(l.Name), Raw(l.Description), actions.Build())
+		listBuilder.AddRow(Text(l.Name), Raw(l.Description), actions.Build())
 	}
-	p.RenderList(nil, table, r.Pagination, nil)
+	p.PageBuilder.SetContent(listBuilder.Build(), nil)
+	p.Render(p.Writer)
 }
 
 func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request) {
@@ -34,9 +36,7 @@ func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewListLabelsPresenter(w http.ResponseWriter, p b.PageBuilder) ListLabelsPresenter {
-	baseURL, _ := url.Parse(rt.Labels)
 	return ListLabelsPresenter{
-		ListRenderer: NewListRenderer(*p.SetTitle("Labels").SetActive(b.LabelsPageActive), *baseURL,
-			w),
-	}
+		*p.SetTitle("Labels").SetActive(b.LabelsPageActive),
+		w, NewWebPageErrorPresenter(w)}
 }

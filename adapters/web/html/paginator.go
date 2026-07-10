@@ -35,17 +35,21 @@ func MakePaginatorNumberedButton(baseURL url.URL, pageNumber int, isActive bool)
 	))
 }
 
-func MakePaginator(baseURL url.URL, currentPage, lastPage, numItems, totalItems int) Node {
-	prevURL := s.URLWithQuery(baseURL, "page", strconv.Itoa(currentPage-1))
-	nextURL := s.URLWithQuery(baseURL, "page", strconv.Itoa(currentPage+1))
+func MakePaginator(baseURL string, currentPage, lastPage, numItems, totalItems int) Node {
+	parsedBaseURL, err := url.Parse(baseURL)
+	if err != nil {
+		panic(fmt.Errorf("failed parsing pagination URL %v", baseURL))
+	}
+	prevURL := s.URLWithQuery(*parsedBaseURL, "page", strconv.Itoa(currentPage-1))
+	nextURL := s.URLWithQuery(*parsedBaseURL, "page", strconv.Itoa(currentPage+1))
 	return Nav(Aria("label", "pagination"),
 		Ul(Class("flex shrink-0 items-center gap-2 text-sm font-medium"),
 			If(currentPage > 1, Li(MakeNavigationButton(prevURL.String(), true, scr.ScrollPrevious, "Previous"))),
-			If(currentPage > 1, MakePaginatorNumberedButton(baseURL, currentPage-1, false)),
-			If(lastPage > 1, MakePaginatorNumberedButton(baseURL, currentPage, true)),
+			If(currentPage > 1, MakePaginatorNumberedButton(*parsedBaseURL, currentPage-1, false)),
+			If(lastPage > 1, MakePaginatorNumberedButton(*parsedBaseURL, currentPage, true)),
 			If(lastPage-2 > currentPage, MakePaginatorEllipsis()),
-			If(lastPage-1 > currentPage, MakePaginatorNumberedButton(baseURL, lastPage-1, false)),
-			If(lastPage > currentPage, MakePaginatorNumberedButton(baseURL, lastPage, false)),
+			If(lastPage-1 > currentPage, MakePaginatorNumberedButton(*parsedBaseURL, lastPage-1, false)),
+			If(lastPage > currentPage, MakePaginatorNumberedButton(*parsedBaseURL, lastPage, false)),
 			If(currentPage < lastPage, Li(MakeNavigationButton(nextURL.String(), true, scr.ScrollNext, "Next"))),
 			Span(Class("font-light"), Text(fmt.Sprintf("Showing %v item(s) out of %v", numItems, totalItems))),
 		))

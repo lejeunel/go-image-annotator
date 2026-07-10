@@ -2,8 +2,8 @@ package web
 
 import (
 	"fmt"
+	"io"
 	"net/http"
-	"net/url"
 	"strconv"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
@@ -18,21 +18,25 @@ import (
 )
 
 type ListImagesPresenter struct {
-	ListRenderer
+	b.PageBuilder
+	Writer io.Writer
+	WebPageErrorPresenter
 }
 
 func (p ListImagesPresenter) SuccessListImages(r list.Response) {
-	table := html.MyTable{Fields: []string{"id", "collection", "ingested", "n. annot.", "actions"}}
+	listBuilder := b.NewPaginatedListBuilder([]string{"id", "collection", "ingested", "n. annot.", "actions"}, rt.Images,
+		r.Pagination)
 	for _, im := range r.Images {
 		link := rt.MakeImageURL(im.Id.String(), im.Collection.Name)
-		actions := html.NewActionsPanel()
+		actions := b.NewActionsPanelBuilder()
 		actions.SetDelete("/delete-url")
-		table.AddRow(
+		listBuilder.AddRow(
 			html.MakeTextLink(link, im.Id.String()),
 			Text(im.Collection.Name), Text(cmp.DateTimeToStr(im.Specs.IngestedAt)),
 			Text(strconv.Itoa(im.NumAnnotations())), actions.Build())
 	}
-	p.RenderList(nil, table, r.Pagination, nil)
+	p.PageBuilder.SetContent(listBuilder.Build(), nil)
+	p.Render(p.Writer)
 }
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
@@ -49,14 +53,9 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 			PageSize:   s.DefaultPageSize,
 			Page:       int64(GetPageFromRequest(r))},
 		OrderingParams: im.OrderingParams{IngestTime: true}},
-		NewListImagesPresenter(w, *r.URL, s.PageBuilder))
+		NewListImagesPresenter(w, s.PageBuilder))
 }
 
-func NewListImagesPresenter(w http.ResponseWriter, baseURL url.URL, pb b.PageBuilder) ListImagesPresenter {
-	return ListImagesPresenter{
-		ListRenderer: NewListRenderer(
-			*pb.SetTitle("Images"),
-			baseURL,
-			w),
-	}
+func NewListImagesPresenter(w http.ResponseWriter, pb b.PageBuilder) ListImagesPresenter {
+	return ListImagesPresenter{*pb.SetTitle("Images"), w, NewWebPageErrorPresenter(w)}
 }

@@ -2,6 +2,7 @@ package builders
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 
 	_ "embed"
@@ -72,6 +73,7 @@ func (b *BasePageBuilder) Render(w io.Writer) {
 		Text(err.Error()).Render(w)
 		return
 	}
+	fmt.Println(b.Title)
 	if err := baseTemplate.ExecuteTemplate(
 		w,
 		"base",

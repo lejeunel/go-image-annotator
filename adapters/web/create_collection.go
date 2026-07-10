@@ -14,7 +14,7 @@ type CreateCollectionPresenter struct {
 	writer        http.ResponseWriter
 	task          string
 	okMessageFunc func(create.Response) string
-	WebErrorPresenter
+	HTMXErrorPresenter
 }
 
 func NewCreateCollectionPresenter(w http.ResponseWriter) CreateCollectionPresenter {
@@ -22,7 +22,7 @@ func NewCreateCollectionPresenter(w http.ResponseWriter) CreateCollectionPresent
 	okMessageFunc := func(r create.Response) string {
 		return fmt.Sprintf("Successfully created collection with name %v", r.Name)
 	}
-	return CreateCollectionPresenter{w, task, okMessageFunc, NewWebErrorPresenter(task, w)}
+	return CreateCollectionPresenter{w, task, okMessageFunc, NewHTMXErrorPresenter(task, w)}
 }
 func (p CreateCollectionPresenter) Success(r create.Response) {
 	payload, _ := NotifySuccessPayload(p.task, p.okMessageFunc(r))

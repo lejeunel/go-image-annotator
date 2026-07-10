@@ -1,8 +1,8 @@
 package web
 
 import (
+	"io"
 	"net/http"
-	"net/url"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
@@ -10,15 +10,19 @@ import (
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 	. "maragu.dev/gomponents"
-	. "maragu.dev/gomponents/html"
 )
 
 type ListCollectionsPresenter struct {
-	ListRenderer
+	b.PageBuilder
+	Writer io.Writer
+	WebPageErrorPresenter
 }
 
 func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
-	table := html.MyTable{Fields: []string{"name", "description", "group", "created", "actions"}}
+	listBuilder := b.NewPaginatedListBuilder(
+		[]string{"name", "description", "group", "created", "actions"},
+		rt.Collections,
+		r.Pagination)
 	for _, c := range r.Collections {
 		var groupName string
 		if c.Group == nil {
@@ -27,15 +31,16 @@ func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 			groupName = c.Group.Name
 		}
 
-		actions := html.NewActionsPanel()
+		actions := b.NewActionsPanelBuilder()
 		actions.SetEdit("/edit-url")
 		actions.SetDelete(rt.MakeDeleteCollectionURL(c.Name))
-		table.AddRow(html.MakeTextLink(rt.MakeImagesURL(c.Name), c.Name),
+		listBuilder.AddRow(
+			html.MakeTextLink(rt.MakeImagesURL(c.Name), c.Name),
 			Raw(c.Description), Raw(groupName), Raw(cmp.DateTimeToStr(c.CreatedAt)), actions.Build())
 	}
-	button := cmp.MakeHTMXCreateButton("Create new collection", rt.CreateCollectionForm, createCollectionTargetDiv)
-	preamble := Div(ID(createCollectionTargetDiv))
-	p.RenderList(&preamble, table, r.Pagination, &button)
+	listBuilder.AddCreationButton("Create new collection", rt.CreateCollectionForm, createCollectionTargetDiv)
+	p.PageBuilder.SetContent(listBuilder.Build(), nil)
+	p.Render(p.Writer)
 }
 
 func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
@@ -44,9 +49,6 @@ func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
 		NewListCollectionsPresenter(w, s.PageBuilder))
 }
 func NewListCollectionsPresenter(w http.ResponseWriter, p b.PageBuilder) ListCollectionsPresenter {
-	baseURL, _ := url.Parse(rt.Collections)
-	return ListCollectionsPresenter{
-		ListRenderer: NewListRenderer(*p.SetTitle("Collections").SetActive(b.CollectionsPageActive), *baseURL,
-			w),
-	}
+	return ListCollectionsPresenter{*p.SetTitle("Collections").SetActive(b.CollectionsPageActive), w,
+		NewWebPageErrorPresenter(w)}
 }

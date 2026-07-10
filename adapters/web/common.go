@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 )
 
-type WebErrorPresenter struct {
+type HTMXErrorPresenter struct {
 	task   string
 	writer http.ResponseWriter
 }
 
-func (p WebErrorPresenter) Error(err error) {
+func (p HTMXErrorPresenter) Error(err error) {
 	payload, _ := json.Marshal(map[string]any{
 		"htmx-notify": map[string]string{
 			"variant": "danger",
@@ -23,6 +25,19 @@ func (p WebErrorPresenter) Error(err error) {
 	p.writer.WriteHeader(http.StatusUnprocessableEntity)
 }
 
-func NewWebErrorPresenter(t string, w http.ResponseWriter) WebErrorPresenter {
-	return WebErrorPresenter{task: t, writer: w}
+func NewHTMXErrorPresenter(t string, w http.ResponseWriter) HTMXErrorPresenter {
+	return HTMXErrorPresenter{task: t, writer: w}
+}
+
+type WebPageErrorPresenter struct {
+	b.PageBuilder
+	writer http.ResponseWriter
+}
+
+func (p WebPageErrorPresenter) Error(err error) {
+	p.PageBuilder.SetError(err).Render(p.writer)
+}
+
+func NewWebPageErrorPresenter(w http.ResponseWriter) WebPageErrorPresenter {
+	return WebPageErrorPresenter{writer: w}
 }

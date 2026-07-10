@@ -1,4 +1,4 @@
-package html
+package builders
 
 import (
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
@@ -11,21 +11,21 @@ type Item struct {
 	Icon string
 }
 
-type ActionsPanel struct {
+type ActionsPanelBuilder struct {
 	Items []Item
 }
 
-func (p *ActionsPanel) SetEdit(url string) *ActionsPanel {
+func (p *ActionsPanelBuilder) SetEdit(url string) *ActionsPanelBuilder {
 	p.Items = append(p.Items, Item{Icon: ic.EditIcon, URL: url})
 	return p
 }
 
-func (p *ActionsPanel) SetDelete(url string) *ActionsPanel {
+func (p *ActionsPanelBuilder) SetDelete(url string) *ActionsPanelBuilder {
 	p.Items = append(p.Items, Item{Icon: ic.TrashIcon, URL: url})
 	return p
 }
 
-func (p *ActionsPanel) Build() Node {
+func (p *ActionsPanelBuilder) Build() Node {
 	res := []Node{}
 	for _, a := range p.Items {
 		res = append(res, A(
@@ -36,6 +36,6 @@ func (p *ActionsPanel) Build() Node {
 	return Span(Class("inline-flex items-center gap-1"), Group(res))
 }
 
-func NewActionsPanel() ActionsPanel {
-	return ActionsPanel{}
+func NewActionsPanelBuilder() ActionsPanelBuilder {
+	return ActionsPanelBuilder{}
 }
