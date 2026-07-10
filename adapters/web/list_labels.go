@@ -21,14 +21,13 @@ func (p ListLabelsPresenter) Success(r list.Response) {
 		actions := html.NewActionsPanel()
 		actions.SetEdit("/edit-url")
 		actions.SetDelete("/delete-url")
-		table.AddRow(
-			html.MyTableRow{Values: []Node{Text(l.Name), Raw(l.Description), actions.Build()}})
+		table.AddRow(Text(l.Name), Raw(l.Description), actions.Build())
 	}
 	p.RenderList(nil, table, r.Pagination, nil)
 }
 
 func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request) {
-	s.PageBuilder.SetUserIdentityFromContext(r.Context())
+	s.PageBuilder.SetUserIdentity(r.Context())
 	s.Label.List.Execute(r.Context(),
 		list.Request{PageSize: s.DefaultPageSize, Page: int64(GetPageFromRequest(r))},
 		NewListLabelsPresenter(w, s.PageBuilder))

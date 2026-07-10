@@ -31,7 +31,7 @@ func (b *PageBuilder) SetActive(a ActivePage) *PageBuilder {
 	b.ActivePage = a
 	return b
 }
-func (b *PageBuilder) SetUserIdentityFromContext(ctx context.Context) *PageBuilder {
+func (b *PageBuilder) SetUserIdentity(ctx context.Context) *PageBuilder {
 	id := u.IdentityFromContext(ctx)
 	b.User = id
 	return b

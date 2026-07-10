@@ -28,16 +28,16 @@ func (p ListImagesPresenter) SuccessListImages(r list.Response) {
 		actions := html.NewActionsPanel()
 		actions.SetDelete("/delete-url")
 		table.AddRow(
-			html.MyTableRow{Values: []Node{html.MakeTextLink(link, im.Id.String()),
-				Text(im.Collection.Name), Text(cmp.DateTimeToStr(im.Specs.IngestedAt)),
-				Text(strconv.Itoa(im.NumAnnotations())), actions.Build()}})
+			html.MakeTextLink(link, im.Id.String()),
+			Text(im.Collection.Name), Text(cmp.DateTimeToStr(im.Specs.IngestedAt)),
+			Text(strconv.Itoa(im.NumAnnotations())), actions.Build())
 	}
 	p.RenderList(nil, table, r.Pagination, nil)
 }
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 
-	s.PageBuilder.SetUserIdentityFromContext(r.Context())
+	s.PageBuilder.SetUserIdentity(r.Context())
 	collection := r.URL.Query().Get("collection")
 	if collection == "" {
 		s.PageBuilder.SetError(fmt.Errorf("parsing url to get collection name: %w", e.ErrURLParsing))

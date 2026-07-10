@@ -19,7 +19,7 @@ func ForgotPasswordHandlerFunc(builder b.ForgotPasswordBuilder) http.HandlerFunc
 
 func HomePageHandlerFunc(pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		pb.SetUserIdentityFromContext(r.Context())
+		pb.SetUserIdentity(r.Context())
 		web.MakeHomePage(pb, w)
 	}
 }

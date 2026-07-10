@@ -18,8 +18,8 @@ func (t *MyTable) Build() gp.Node {
 		))
 }
 
-func (t *MyTable) AddRow(r MyTableRow) {
-	t.Rows = append(t.Rows, r)
+func (t *MyTable) AddRow(nodes ...gp.Node) {
+	t.Rows = append(t.Rows, MyTableRow{nodes})
 }
 
 type MyTableRow struct {

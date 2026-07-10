@@ -10,7 +10,7 @@ import (
 
 func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
 	p := s.PageBuilder
-	p.SetUserIdentityFromContext(r.Context())
+	p.SetUserIdentity(r.Context())
 	p.SetActive(b.NoPageActive)
 	udb := s.UserDashboardBuilder.SetUserIdentityFromContext(r.Context())
 	p.SetTitle("User Dashboard")

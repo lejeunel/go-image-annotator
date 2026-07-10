@@ -46,8 +46,6 @@
 		  Alpine.store('notifications').variant = evt.detail.variant;
 		  Alpine.store('notifications').title = evt.detail.title;
 		  Alpine.store('notifications').message = evt.detail.message;
-		  console.log("store:", Alpine.store('notifications'));
-		  console.log("sessionStorage:", sessionStorage);
 		  window.location.reload();
 	  });
 	</script>
@@ -66,9 +64,7 @@
 	  });
 	  document.addEventListener('alpine:initialized', () => {
 		  const notif = Alpine.store('notifications');
-		  console.log("popped notif message:", notif.message)
 		  if (notif.message) {
-			  console.log("got notification from store: " + notif.message)
 			  notify(notif.variant, notif.title, notif.message);
 			  notif.variant = notif.title = notif.message = null; // clear so it doesn't replay
 		  }

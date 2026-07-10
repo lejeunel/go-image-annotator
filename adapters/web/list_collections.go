@@ -30,8 +30,8 @@ func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 		actions := html.NewActionsPanel()
 		actions.SetEdit("/edit-url")
 		actions.SetDelete(rt.MakeDeleteCollectionURL(c.Name))
-		table.AddRow(html.MyTableRow{Values: []Node{html.MakeTextLink(rt.MakeImagesURL(c.Name), c.Name),
-			Raw(c.Description), Raw(groupName), Raw(cmp.DateTimeToStr(c.CreatedAt)), actions.Build()}})
+		table.AddRow(html.MakeTextLink(rt.MakeImagesURL(c.Name), c.Name),
+			Raw(c.Description), Raw(groupName), Raw(cmp.DateTimeToStr(c.CreatedAt)), actions.Build())
 	}
 	button := cmp.MakeHTMXCreateButton("Create new collection", rt.CreateCollectionForm, createCollectionTargetDiv)
 	preamble := Div(ID(createCollectionTargetDiv))
@@ -39,7 +39,7 @@ func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 }
 
 func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
-	s.PageBuilder.SetUserIdentityFromContext(r.Context())
+	s.PageBuilder.SetUserIdentity(r.Context())
 	s.Collection.List.Execute(r.Context(), list.Request{PageSize: s.DefaultPageSize, Page: int64(GetPageFromRequest(r))},
 		NewListCollectionsPresenter(w, s.PageBuilder))
 }

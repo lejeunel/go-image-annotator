@@ -15,7 +15,7 @@ func APIDocsLib() Node {
 
 func APIDocsPage(ctx context.Context, specsPath string, p b.PageBuilder, w io.Writer) {
 	p.AddScripts(APIDocsLib())
-	p.SetUserIdentityFromContext(ctx)
+	p.SetUserIdentity(ctx)
 	p.SetTitle("API Docs")
 	p.SetContent(Div(Class("spotlight "),
 		El("elements-api",

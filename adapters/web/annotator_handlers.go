@@ -14,7 +14,7 @@ import (
 )
 
 func (s *Server) ViewImage(w http.ResponseWriter, r *http.Request) {
-	s.PageBuilder.SetUserIdentityFromContext(r.Context())
+	s.PageBuilder.SetUserIdentity(r.Context())
 	view := aw.NewAnnotationView(s.PageBuilder)
 	s.AnnotationPagePresenter.SetView(view)
 	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"),
