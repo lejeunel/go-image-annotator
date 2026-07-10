@@ -8,20 +8,25 @@ import (
 var APIRoot = "/api"
 var APISpecs = "/api/openapi.yaml"
 var APIDocs = "/api/docs"
+
 var StaticRoot = "/static"
+
 var Login = "/auth/login"
 var LoginWithPassword = "/auth/login/password"
 var LoginOAuth = "/auth/login/{provider}"
 var CallbackOAuth = "/auth/callback/{provider}"
 var ForgotPassword = "/auth/forgot-password"
 var Logout = "/auth/logout"
+
 var UserDashboard = "/user-dashboard"
 var NewAPIToken = "/ui/new-api-token"
+
 var Home = "/"
 var Collections = "/collections"
 var Images = "/images"
 var Labels = "/labels"
 var Image = "/image"
+
 var SubmitBox = "/ui/annotate/submit-box"
 var UpdateBox = "/ui/annotate/update-box"
 var SubmitPolygon = "/ui/annotate/submit-polygon"
@@ -31,8 +36,10 @@ var AnnotationPanel = "/ui/annotate/annotation-panel"
 var Annotations = "/ui/annotate/annotations"
 var RemoveAnnotation = "/ui/annotate/remove-annotation"
 var SetLabel = "/ui/annotate/set-label"
-var CreateCollectionForm = "/ui/create-collection-form"
-var CreateCollection = "/ui/create-collection"
+
+var CreateCollectionForm = "/ui/collection/create/form"
+var CreateCollection = "/ui/collection/create"
+var DeleteCollection = "/ui/collection/delete"
 
 func MakeOAuthCallbackURL(baseURL string, provider string) string {
 	return baseURL + strings.ReplaceAll(CallbackOAuth, "{provider}", provider)
@@ -47,4 +54,9 @@ func MakeImageURL(imageId, collection string) string {
 
 func MakeImagesURL(collection string) string {
 	return fmt.Sprintf("%v?collection=%v", Images, collection)
+}
+
+func MakeDeleteCollectionURL(name string) string {
+	return fmt.Sprintf("%v?name=%v", DeleteCollection, name)
+
 }

@@ -28,11 +28,10 @@ func (p *ActionsPanel) SetDelete(url string) *ActionsPanel {
 func (p *ActionsPanel) Build() Node {
 	res := []Node{}
 	for _, a := range p.Items {
-		res = append(res, Button(
+		res = append(res, A(
 			Class("cursor-pointer"),
-			Attr(`hx-get="/edit-url"`),
-			Raw(a.Icon),
-			Attr(`onClick="notify('warning', 'action', 'not implemented yet')"`)))
+			Attr("hx-get", a.URL),
+			Raw(a.Icon)))
 	}
 	return Span(Class("inline-flex items-center gap-1"), Group(res))
 }

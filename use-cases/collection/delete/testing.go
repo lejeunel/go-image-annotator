@@ -50,7 +50,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success() {
+func (p *FakePresenter) Success(Response) {
 	p.GotSuccess = true
 }
 

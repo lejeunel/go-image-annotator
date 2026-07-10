@@ -14,27 +14,27 @@ type Interactor struct {
 	auth           Auth
 }
 
-func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	errCtx := "deleting collection"
-	if err := i.authorizeDeletion(ctx, r.Name); err != nil {
+	if err := i.authorizeDeletion(ctx, name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	if err := i.ensureExists(r.Name); err != nil {
+	if err := i.ensureExists(name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	if err := i.ensureDeletable(r.Name); err != nil {
+	if err := i.ensureDeletable(name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	if err := i.collectionRepo.Delete(r.Name); err != nil {
+	if err := i.collectionRepo.Delete(name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	out.Success()
+	out.Success(Response{Name: name})
 }
 func (i Interactor) authorizeDeletion(ctx context.Context, name string) error {
 	errCtx := fmt.Errorf("checking group ownership of collection with name %v", name)

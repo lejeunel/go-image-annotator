@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
+	"github.com/lejeunel/go-image-annotator/use-cases/collection/delete"
 )
 
 type Delete struct {
@@ -12,7 +13,7 @@ type Delete struct {
 	json.ErrorPresenter
 }
 
-func (p Delete) Success() {
+func (p Delete) Success(delete.Response) {
 	p.Writer.WriteHeader(http.StatusNoContent)
 
 }
