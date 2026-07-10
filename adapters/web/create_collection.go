@@ -38,7 +38,7 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 		Description: r.FormValue("description")}, NewCreateCollectionPresenter(w))
 }
 func (s *Server) CreateCollectionForm(w http.ResponseWriter, r *http.Request) {
-	b := bd.NewCreateFormBuilder(rt.Collection, createCollectionTargetDiv)
+	b := bd.NewHTMXCreateFormBuilder(rt.Collection, createCollectionTargetDiv)
 	b.AddTextField("name", "Name", "name", true)
 	b.AddTextField("description", "Description", "description", false)
 	b.Render(w)

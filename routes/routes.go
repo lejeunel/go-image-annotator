@@ -40,6 +40,7 @@ var SetLabel = "/ui/annotate/set-label"
 
 var Collection = "/ui/collection"
 var ConfirmDeleteCollection = "/ui/collection/confirm-delete"
+var EditCollectionForm = "/ui/collection/edit"
 var CreateCollectionForm = "/ui/collection/new"
 
 func MakeOAuthCallbackURL(baseURL string, provider string) string {
@@ -57,10 +58,13 @@ func MakeImagesURL(collection string) string {
 	return fmt.Sprintf("%v?collection=%v", Images, collection)
 }
 
-func AppendValueToQueryArgs(baseURL string, key, value string) url.URL {
-	url, _ := url.Parse(baseURL)
-	q := url.Query()
-	q.Set(key, value)
-	url.RawQuery = q.Encode()
-	return *url
+func AddQueryParams(baseURL string, params ...string) url.URL {
+	u, _ := url.Parse(baseURL)
+	q := u.Query()
+	for i := 0; i+1 < len(params); i += 2 {
+		q.Add(params[i], params[i+1])
+	}
+
+	u.RawQuery = q.Encode()
+	return *u
 }

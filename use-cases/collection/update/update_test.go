@@ -51,11 +51,11 @@ func TestUpdateCollectionWithNameAlreadyTakenShouldFail(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestUpdateCollectionWithUnchangedNameShouldSucceed(t *testing.T) {
-
+func TestUpdateCollectionWithNoGroup(t *testing.T) {
 	p := &FakePresenter{}
 	name := "name"
-	itr := New(&FakeCollectionRepo{Names: []string{name}}, &FakeGroupRepo{})
+	itr := New(&FakeCollectionRepo{Names: []string{name}},
+		&FakeGroupRepo{Err: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{Name: name, NewName: name}, p)
 	assert.True(t, p.GotSuccess)
 }

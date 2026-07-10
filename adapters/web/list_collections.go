@@ -3,7 +3,6 @@ package web
 import (
 	"io"
 	"net/http"
-	"net/url"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
@@ -33,9 +32,9 @@ func MakeListCollectionRow(c clc.Collection) tb.Row {
 
 	actions := b.NewActionsPanelBuilder()
 
-	editURL, _ := url.Parse("/edit-url")
-	actions.SetEdit(*editURL)
-	actions.SetConfirmDelete(rt.AppendValueToQueryArgs(rt.ConfirmDeleteCollection, "name", c.Name))
+	actions.SetEdit(rt.AddQueryParams(rt.EditCollectionForm,
+		"name", c.Name, "description", c.Description))
+	actions.SetConfirmDelete(rt.AddQueryParams(rt.ConfirmDeleteCollection, "name", c.Name))
 	row := tb.NewRow()
 	row.AddCell(tb.NewCell(html.MakeTextLink(rt.MakeImagesURL(c.Name), c.Name)))
 	row.AddCell(tb.NewCell(Text(c.Description)))

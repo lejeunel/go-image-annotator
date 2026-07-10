@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
@@ -35,7 +36,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	errCtx := "updating collection"
 	group, err := i.groupRepo.GroupOfCollection(r.Name)
-	if err != nil {
+	if (err != nil) && !(errors.Is(err, e.ErrNotFound)) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 

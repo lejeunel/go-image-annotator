@@ -38,6 +38,9 @@ var BoundingBoxIcon string
 //go:embed svg/polygon.svg
 var PolygonIcon string
 
+//go:embed svg/book.svg
+var BookIcon string
+
 func MakeColoredRectangleIcon(color string) string {
 	return fmt.Sprintf(`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <rect x="10" y="10" width="80" height="80" rx="10" ry="10" fill="%v" />

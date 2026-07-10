@@ -14,6 +14,9 @@ type FakeGroupRepo struct {
 }
 
 func (r *FakeGroupRepo) GroupOfCollection(string) (*string, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
 	return r.Return, nil
 }
 

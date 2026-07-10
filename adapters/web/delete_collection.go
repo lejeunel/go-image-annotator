@@ -33,7 +33,7 @@ func (s *Server) ConfirmDeleteCollection(w http.ResponseWriter, r *http.Request)
 	RenderConfirmDeleteRow(len(listCollectionsFields),
 		name,
 		"collection",
-		rt.AppendValueToQueryArgs(rt.Collection, "name", name),
+		rt.AddQueryParams(rt.Collection, "name", name),
 		w)
 }
 func (s *Server) DeleteCollection(w http.ResponseWriter, r *http.Request) {

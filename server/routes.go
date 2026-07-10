@@ -59,8 +59,10 @@ func RouteWebPages(r chi.Router, s web.Server, home http.HandlerFunc,
 		r.Get(rt.Collection, s.GetCollection)
 		r.Get(rt.CreateCollectionForm, s.CreateCollectionForm)
 		r.Get(rt.ConfirmDeleteCollection, s.ConfirmDeleteCollection)
+		r.Get(rt.EditCollectionForm, s.EditCollectionForm)
 		r.Post(rt.Collection, s.CreateCollection)
 		r.Delete(rt.Collection, s.DeleteCollection)
+		r.Put(rt.Collection, s.EditCollection)
 	})
 }
 func RouteAPI(r chi.Router, apiServer api.Server, mws ...func(http.Handler) http.Handler) {
