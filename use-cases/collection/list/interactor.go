@@ -31,7 +31,9 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	response := Response{Pagination: pagination.New(int64(r.Page), r.PageSize, *count)}
-	response.Collections = found
+	for _, f := range found {
+		response.Collections = append(response.Collections, *f)
+	}
 	out.SuccessListCollections(response)
 }
 

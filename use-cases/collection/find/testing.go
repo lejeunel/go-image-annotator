@@ -24,12 +24,12 @@ func (r *FakeRepo) FindCollectionByName(name string) (*clc.Collection, error) {
 }
 
 type FakePresenter struct {
-	Got        Response
+	Got        clc.Collection
 	GotSuccess bool
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(r Response) {
+func (p *FakePresenter) SuccessFindCollection(c clc.Collection) {
 	p.GotSuccess = true
-	p.Got = r
+	p.Got = c
 }

@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
@@ -29,11 +31,15 @@ func (p ListImagesPresenter) SuccessListImages(r list.Response) {
 	for _, im := range r.Images {
 		link := rt.MakeImageURL(im.Id.String(), im.Collection.Name)
 		actions := b.NewActionsPanelBuilder()
-		actions.SetDelete("/delete-url")
-		listBuilder.AddRow(
-			html.MakeTextLink(link, im.Id.String()),
-			Text(im.Collection.Name), Text(cmp.DateTimeToStr(im.Specs.IngestedAt)),
-			Text(strconv.Itoa(im.NumAnnotations())), actions.Build())
+
+		deleteURL, _ := url.Parse("/edit-url")
+		actions.SetConfirmDelete(*deleteURL)
+		row := tb.NewRow()
+		row.AddCell(tb.NewCell(html.MakeTextLink(link, im.Id.String())))
+		row.AddCell(tb.NewCell(Text(im.Collection.Name)))
+		row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(im.Specs.IngestedAt))))
+		row.AddCell(tb.NewCell(Text(strconv.Itoa(im.NumAnnotations()))))
+		row.AddCell(tb.NewCell(actions.Build()))
 	}
 	p.PageBuilder.SetContent(listBuilder.Build(), nil)
 	p.Render(p.Writer)

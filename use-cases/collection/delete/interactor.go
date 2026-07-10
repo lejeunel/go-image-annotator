@@ -91,5 +91,4 @@ func New(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
 		opt(i)
 	}
 	return *i
-
 }

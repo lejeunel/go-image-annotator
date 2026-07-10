@@ -10,9 +10,6 @@ import (
 	"strings"
 )
 
-//go:embed components/api_token_frame.html
-var ApiTokenFrame string
-
 type UserInfoRow struct {
 	Name  string
 	Value string
@@ -49,7 +46,7 @@ func (b *UserDashboardBuilder) Build() Node {
 	APIToken := Div(Class("mt-2"), H3(Text("API Token")),
 		P(Class("text-sm text-on-surface dark:text-on-surface-dark"),
 			Text("Generate a secret token to authenticate your API requests. ")),
-		Raw(ApiTokenFrame))
+		Raw(cmp.ApiTokenFrame))
 
 	return Div(cmp.MakeCard(profile), APIToken)
 }

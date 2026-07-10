@@ -14,12 +14,19 @@ CSS_OUT := assets/static/styles.css
 
 # ====== TARGETS ======
 
-.PHONY: all api-code clean
+.PHONY: all api-code clean build
 
-all: api-code css auth-valid-methods
+all: api-code css auth-valid-methods build
 
 auth-valid-methods: $(VALID_AUTH_OUT)
 api-code: $(MODELS_OUT) $(SERVER_OUT)
+
+build:
+	go build \
+		-ldflags "\
+			-X 'github.com/lejeunel/go-image-annotator/globals.Version=v1.2.3' \
+			-X 'github.com/lejeunel/go-image-annotator/globals.Commit=$$(git rev-parse --short HEAD)' \
+			-X 'github.com/lejeunel/go-image-annotator/globals.Date=$$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
 
 css:
 	tailwindcss -i $(CSS_MAIN) -o $(CSS_OUT) --minify

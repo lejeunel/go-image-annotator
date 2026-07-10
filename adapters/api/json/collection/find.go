@@ -6,7 +6,7 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/find"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 )
 
 type Find struct {
@@ -14,7 +14,7 @@ type Find struct {
 	json.ErrorPresenter
 }
 
-func (p Find) Success(r find.Response) {
+func (p Find) SuccessFindCollection(r clc.Collection) {
 	response := models.Collection{
 		Name:        r.Name,
 		Description: &r.Description,

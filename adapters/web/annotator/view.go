@@ -77,11 +77,11 @@ func (v *AnnotationView) ShapeSelector() Node {
 		Attr("x-data", "{ active: 'rectangle'}"),
 		Class("flex gap-2 pb-2"),
 		Button(
-			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'rectangle', '%v': active !== 'rectangle'}`, s.ActivePrimaryButton, s.InactiveButton)),
+			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'rectangle', '%v': active !== 'rectangle'}`, s.PrimaryButton, s.InactiveButton)),
 			Attr("@click", "AnnotatorModule.drawRectangle(); active = 'rectangle';"),
 			Raw(ic.BoundingBoxIcon), Div(Class("ml-1"), Text("Rectangle"))),
 		Button(
-			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'polygon', '%v': active !== 'polygon'}`, s.ActivePrimaryButton, s.InactiveButton)),
+			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'polygon', '%v': active !== 'polygon'}`, s.PrimaryButton, s.InactiveButton)),
 			Attr("@click", "AnnotatorModule.drawPolygon(); active = 'polygon';"),
 			Raw(ic.PolygonIcon), Div(Class("ml-1"), Text("Polygon"))))
 }

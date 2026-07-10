@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	"net/http"
 )
 
@@ -25,6 +26,6 @@ func HomePageHandlerFunc(pb b.PageBuilder) http.HandlerFunc {
 }
 func APIDocsHandlerFunc(specsPath string, pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		web.APIDocsPage(r.Context(), specsPath, *pb.SetActive(b.APIDocsPageActive), w)
+		web.APIDocsPage(r.Context(), specsPath, *pb.SetActive(cmp.APIDocsPageActive), w)
 	}
 }

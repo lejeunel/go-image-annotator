@@ -2,8 +2,10 @@ package web
 
 import (
 	"fmt"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/delete"
 	"net/http"
+
+	rt "github.com/lejeunel/go-image-annotator/routes"
+	"github.com/lejeunel/go-image-annotator/use-cases/collection/delete"
 )
 
 type DeleteCollectionPresenter struct {
@@ -26,13 +28,16 @@ func (p DeleteCollectionPresenter) Success(r delete.Response) {
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }
-
+func (s *Server) ConfirmDeleteCollection(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
+	RenderConfirmDeleteRow(len(listCollectionsFields),
+		name,
+		"collection",
+		rt.AppendValueToQueryArgs(rt.Collection, "name", name),
+		w)
+}
 func (s *Server) DeleteCollection(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-	name := query.Get("name")
-	if name == "" {
-		http.Error(w, "bad data", http.StatusBadRequest)
-		return
-	}
-	s.Collection.Delete.Execute(r.Context(), name, NewDeleteCollectionPresenter(w))
+	s.Collection.Delete.Execute(r.Context(),
+		r.URL.Query().Get("name"),
+		NewDeleteCollectionPresenter(w))
 }

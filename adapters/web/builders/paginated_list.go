@@ -1,6 +1,7 @@
 package builders
 
 import (
+	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	s "github.com/lejeunel/go-image-annotator/shared/pagination"
@@ -15,25 +16,25 @@ type CreationButton struct {
 }
 
 type PaginatedListBuilder struct {
-	tableBuilder   TableBuilder
+	tableBuilder   tb.TableBuilder
 	listURL        string
 	pagination     s.Pagination
 	creationButton *CreationButton
 }
 
 func NewPaginatedListBuilder(fields []string, listURL string, pagination s.Pagination) PaginatedListBuilder {
-	tableBuilder := NewTableBuilder(fields)
+	tableBuilder := tb.NewTableBuilder(fields)
 	return PaginatedListBuilder{tableBuilder, listURL, pagination, nil}
 }
 
-func (b *PaginatedListBuilder) AddRow(nodes ...Node) *PaginatedListBuilder {
-	b.tableBuilder.AddRow(nodes...)
+func (b *PaginatedListBuilder) AddRow(r tb.Row) *PaginatedListBuilder {
+	b.tableBuilder.AddRow(r)
 
 	return b
 }
 
-func (b *PaginatedListBuilder) AddCreationButton(buttonLabel string, formGetEndpoint string, formDivId string) *PaginatedListBuilder {
-	b.creationButton = &CreationButton{buttonLabel, formGetEndpoint, formDivId}
+func (b *PaginatedListBuilder) AddCreationButton(buttonLabel string, formEndpoint string, formDivId string) *PaginatedListBuilder {
+	b.creationButton = &CreationButton{buttonLabel, formEndpoint, formDivId}
 	return b
 }
 func (b *PaginatedListBuilder) Build() Node {

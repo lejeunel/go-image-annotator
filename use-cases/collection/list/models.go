@@ -11,6 +11,6 @@ type Request struct {
 }
 
 type Response struct {
-	Collections []*clc.Collection
+	Collections []clc.Collection
 	Pagination  pagination.Pagination
 }

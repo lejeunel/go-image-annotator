@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	"io"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -26,6 +27,6 @@ func APIDocsPage(ctx context.Context, specsPath string, p b.PageBuilder, w io.Wr
 			Attr("router", "hash"),
 			Attr("layout", "sidebar"),
 		)), nil)
-	p.SetActive(b.APIDocsPageActive)
+	p.SetActive(cmp.APIDocsPageActive)
 	p.Render(w)
 }

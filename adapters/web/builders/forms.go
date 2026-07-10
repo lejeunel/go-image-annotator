@@ -63,7 +63,7 @@ func (b CreateFormBuilder) Render(w io.Writer) {
 			Span(Class("flex items-center gap-2"),
 				Button(Type("submit"),
 					Text("Submit"),
-					Class(st.ActivePrimaryButton)),
+					Class(st.PrimaryButton)),
 				Button(Type("button"),
 					Text("Cancel"),
 					Class(st.InactiveButton),

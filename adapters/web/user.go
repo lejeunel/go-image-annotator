@@ -3,7 +3,7 @@ package web
 import (
 	"net/http"
 
-	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 )
@@ -11,7 +11,7 @@ import (
 func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
 	p := s.PageBuilder
 	p.SetUserIdentity(r.Context())
-	p.SetActive(b.NoPageActive)
+	p.SetActive(cmp.NoPageActive)
 	udb := s.UserDashboardBuilder.SetUserIdentityFromContext(r.Context())
 	p.SetTitle("User Dashboard")
 	p.SetContent(udb.Build(), nil)
@@ -24,5 +24,5 @@ func (s *Server) NewAPIToken(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed getting user identity", http.StatusForbidden)
 	}
 	s.Interactors.User.RenewToken.Execute(r.Context(),
-		rt.Request{Id: user.Id}, b.NewAPITokenPresenter(w))
+		rt.Request{Id: user.Id}, cmp.NewAPITokenPresenter(w))
 }

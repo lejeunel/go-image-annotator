@@ -1,4 +1,4 @@
-package builders
+package components
 
 type ActivePage int
 

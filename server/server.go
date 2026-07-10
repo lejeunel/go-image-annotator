@@ -15,6 +15,7 @@ import (
 	a "github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
+	g "github.com/lejeunel/go-image-annotator/globals"
 	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 
 	"net/http"
@@ -25,8 +26,9 @@ import (
 func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	cfg := config.Parse()
 
+	currentVersion := g.Info{Version: g.Version, Commit: g.Commit, Date: g.Date}
 	basePageBuilder := b.NewBasePageBuilder()
-	pageBuilder := b.NewPageBuilder(basePageBuilder, rt.APIRoot, cfg.RepoURL, cfg.DocsURL)
+	pageBuilder := b.NewPageBuilder(basePageBuilder, currentVersion)
 	loginPageBuilder := b.NewLoginPageBuilder(basePageBuilder)
 	forgotPasswordPageBuilder := b.NewForgotPasswordBuilder(basePageBuilder)
 

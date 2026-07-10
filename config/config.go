@@ -16,8 +16,6 @@ type Config struct {
 	RandomPasswordLength                 int      `default:"10"`
 	ForgotPasswordTokenExpirationMinutes int      `default:"30"`
 	PasswordMinEntropy                   int      `default:"50"`
-	RepoURL                              string   `default:"https://github.com/lejeunel/go-image-annotator"`
-	DocsURL                              string   `default:"https://lejeunel.github.io/go-image-annotator/"`
 }
 
 func Parse() Config {

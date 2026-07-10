@@ -1,16 +1,21 @@
-package builders
+package components
 
 import (
 	"bytes"
 	_ "strings"
 	"text/template"
 
+	_ "embed"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	g "github.com/lejeunel/go-image-annotator/globals"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
+
+//go:embed templates/user_badge.html
+var userBadgeTemplate string
 
 type NavBarActivatedItems struct {
 	Home        bool
@@ -31,7 +36,7 @@ type UserMenuEntry struct {
 
 func MakeUserBadge(user u.User) Node {
 	tUser := template.New("")
-	template.Must(tUser.ParseFS(templatesFiles, "templates/user_badge.html"))
+	template.Must(tUser.Parse(userBadgeTemplate))
 	var iconBuf bytes.Buffer
 	Raw(ic.UserIcon).Render(&iconBuf)
 	var buf bytes.Buffer
@@ -41,13 +46,17 @@ func MakeUserBadge(user u.User) Node {
 	tUser.ExecuteTemplate(&buf, "user_badge", entries)
 	return Raw(buf.String())
 }
-func MakeRepoButton(url string) Node {
-	return A(Href(url), Span(
-		Class("text-onSurface dark:text-onSurfaceDark"),
+func MakeRepoButton(repoName string, currentVersion, url string) Node {
+	return A(
 		Target("_blank"),
-		Raw(ic.GitHubIcon),
-		Attr(":class", "darkMode ? 'text-gray-300' : 'text-gray-700'"),
-	))
+		Href(url),
+		Div(
+			Class("flex items-center text-gray-400 dark:text-gray-600 gap-1"),
+			Span(Raw(ic.GitHubIcon)),
+			Span(Text(repoName)),
+			Span(Text(currentVersion)),
+		),
+	)
 }
 func MakeMenuItem(name string, url string, activated bool) Node {
 	class := "font-medium text-on-surface underline-offset-2 hover:text-primary focus:outline-hidden focus:underline dark:text-on-surface-dark dark:hover:text-primary-dark"
@@ -67,7 +76,7 @@ func DarkModeToggle() Node {
 		Attr("@click", "toggleDark()"),
 		Attr("type", "button"),
 		Class(`
-			whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-800 rounded-radius px-2 py-2 text-sm font-medium tracking-wide text-surface-dark
+			whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-800 rounded-radius px-1 py-2 text-sm font-medium tracking-wide text-surface-dark
 			transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-dark
 			active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed
 			dark:text-surface dark:focus-visible:outline-surface cursor-pointer
@@ -78,11 +87,13 @@ func DarkModeToggle() Node {
 		),
 	)
 }
+
 func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefix string, user u.User) Node {
 	return Nav(
 		Attr("x-on:click.away", "mobileMenuIsOpen = false"),
-		Class("fixed top-0 z-30 hidden h-14 w-screen items-center justify-between border-outline px-10 py-2 backdrop-blur-xl md:flex dark:border-outline-dark bg-surface-alt/75 dark:bg-surface-dark-alt/75 border-b"),
-		Aria("label", "penguin ui menu"),
+		Class(
+			"fixed top-0 z-30 hidden h-14 w-screen items-center justify-between border-outline px-10 py-2 backdrop-blur-xl md:flex dark:border-outline-dark bg-surface-alt/75 dark:bg-surface-dark-alt/75 border-b"),
+		Aria("label", "ui menu"),
 
 		A(
 			Href("/"),
@@ -110,14 +121,28 @@ func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefi
 			Li(
 				MakeMenuItem("Documentation", docsURL, false),
 			),
+
 			Li(
-				MakeMenuItem("API", rt.APIDocs, isActivated == APIDocsPageActive),
+				A(
+					Href(rt.APIDocs),
+					Class("hover:text-primary"),
+					Text("API"),
+				),
 			),
-			Li(MakeRepoButton(repoURL)),
 			Li(
 				DarkModeToggle(),
 			),
 			Li(MakeUserBadge(user)),
+		),
+	)
+}
+func MakeFooter(currentVersion g.Info) Node {
+
+	return Footer(
+		Class("fixed bottom-0 z-30 flex h-10 w-screen items-center justify-between border-t border-outline bg-surface-alt/75 px-10 backdrop-blur-xl dark:border-outline-dark dark:bg-surface-dark-alt/75"),
+		Div(
+			Class("flex items-center gap-1 text-sm"),
+			MakeRepoButton(g.PackageName, currentVersion.Version, g.RepoURL),
 		),
 	)
 }

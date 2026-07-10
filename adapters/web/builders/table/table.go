@@ -1,6 +1,9 @@
-package builders
+package table
 
 import (
+	"io"
+	"strings"
+
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -19,28 +22,43 @@ func (t TableBuilder) NumRows() int {
 
 func (t *TableBuilder) Build() Node {
 	return Div(Class("overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark"),
-		Table(Class("w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
+		Table(Class("table-fixed w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
 			TableHeader(t.fields),
 			TableBody(t.rows),
 		))
 }
 
-func (t *TableBuilder) AddRow(nodes ...Node) {
-	t.rows = append(t.rows, Row{nodes})
+func (t *TableBuilder) AddRow(r Row) {
+	t.rows = append(t.rows, r)
 }
 
 type Row struct {
-	Values []Node
+	Cells []Cell
 }
 
-func (r Row) Render() Node {
+func NewRow() Row {
+	return Row{}
+}
+
+func (r *Row) AddCell(c Cell) *Row {
+	r.Cells = append(r.Cells, c)
+	return r
+}
+
+func (r Row) Build() Node {
 	return Tr(
 		Class("even:bg-primary/5 dark:even:bg-primary-dark/10"),
-		Map(r.Values, func(node Node) Node {
-			return Td(Class("p-2"),
-				node)
+		Map(r.Cells, func(c Cell) Node {
+			return Td(
+				Class(strings.Join([]string{"p-2", c.ExtraClass}, " ")),
+				Attr(c.ExtraAttr),
+				c.Content)
 		}))
 
+}
+
+func (r Row) Render(w io.Writer) {
+	r.Build().Render(w)
 }
 
 func TableHeader(fields []string) Node {
@@ -51,9 +69,12 @@ func TableHeader(fields []string) Node {
 }
 
 func TableBody(rows []Row) Node {
-	return TBody(Class("divide-y divide-outline dark:divide-outline-dark"),
+	return TBody(
+		Class("divide-y divide-outline dark:divide-outline-dark"),
+		Attr("hx-target", "closest tr"),
+		Attr("hx-swap", "outerHTML"),
 		Map(rows, func(r Row) Node {
-			return r.Render()
+			return r.Build()
 
 		}),
 	)

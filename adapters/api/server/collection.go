@@ -7,13 +7,12 @@ import (
 	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/collection"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
 )
 
 func (s *Server) FindCollectionByName(w http.ResponseWriter, r *http.Request, name string) {
-	s.Collection.Find.Execute(r.Context(), find.Request{Name: name},
+	s.Collection.Find.Execute(r.Context(), name,
 		presenter.NewFindPresenter(w, s.Logger))
 }
 func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {

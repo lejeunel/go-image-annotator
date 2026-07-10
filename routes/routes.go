@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 )
 
@@ -37,9 +38,9 @@ var Annotations = "/ui/annotate/annotations"
 var RemoveAnnotation = "/ui/annotate/remove-annotation"
 var SetLabel = "/ui/annotate/set-label"
 
-var CreateCollectionForm = "/ui/collection/create/form"
-var CreateCollection = "/ui/collection/create"
-var DeleteCollection = "/ui/collection/delete"
+var Collection = "/ui/collection"
+var ConfirmDeleteCollection = "/ui/collection/confirm-delete"
+var CreateCollectionForm = "/ui/collection/new"
 
 func MakeOAuthCallbackURL(baseURL string, provider string) string {
 	return baseURL + strings.ReplaceAll(CallbackOAuth, "{provider}", provider)
@@ -56,7 +57,10 @@ func MakeImagesURL(collection string) string {
 	return fmt.Sprintf("%v?collection=%v", Images, collection)
 }
 
-func MakeDeleteCollectionURL(name string) string {
-	return fmt.Sprintf("%v?name=%v", DeleteCollection, name)
-
+func AppendValueToQueryArgs(baseURL string, key, value string) url.URL {
+	url, _ := url.Parse(baseURL)
+	q := url.Query()
+	q.Set(key, value)
+	url.RawQuery = q.Encode()
+	return *url
 }

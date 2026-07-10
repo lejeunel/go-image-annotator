@@ -1,6 +1,7 @@
-package builders
+package components
 
 import (
+	_ "embed"
 	"fmt"
 	au "github.com/lejeunel/go-image-annotator/modules/token"
 	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
@@ -8,6 +9,12 @@ import (
 	"io"
 	"net/http"
 )
+
+//go:embed templates/api_token_display.html
+var ApiTokenDisplay string
+
+//go:embed templates/api_token_frame.html
+var ApiTokenFrame string
 
 type APITokenPresenter struct {
 	Writer io.Writer
@@ -22,10 +29,8 @@ type TokenData struct {
 }
 
 func (p APITokenPresenter) Success(resp rt.Response) {
-	t, err := template.ParseFS(templatesFiles, "templates/api_token_display.html")
-	if err != nil {
-		p.Writer.Write([]byte(err.Error()))
-	}
+	t := template.New("")
+	template.Must(t.Parse(ApiTokenDisplay))
 	t.Execute(p.Writer,
 		TokenData{Token: au.Base64Encode(au.AppendUserToToken(resp.Id,
 			resp.PersonalAccessToken))})
