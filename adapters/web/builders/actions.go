@@ -23,9 +23,6 @@ func (p *ActionsPanelBuilder) SetEdit(url url.URL) *ActionsPanelBuilder {
 }
 
 func (p *ActionsPanelBuilder) SetConfirmDelete(url url.URL) *ActionsPanelBuilder {
-	q := url.Query()
-	q.Set("confirm", "true")
-	url.RawQuery = q.Encode()
 	p.Items = append(p.Items, Item{Icon: ic.TrashIcon, URL: url})
 	return p
 }

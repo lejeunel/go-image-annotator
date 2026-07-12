@@ -1,4 +1,4 @@
-package builders
+package form
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 
 type HTMXCreateFormBuilder struct {
 	containerId string
+	title       *string
 	FormBuilder
 }
 
@@ -18,17 +19,28 @@ func NewHTMXCreateFormBuilder(submitEndpoint string, containerId string) HTMXCre
 		FormBuilder: FormBuilder{submitEndpoint: submitEndpoint},
 		containerId: containerId}
 }
-func (b *HTMXCreateFormBuilder) AddTextField(fieldName, displayName, divId string, required bool) *HTMXCreateFormBuilder {
-	field := NewFormTextField(fieldName, displayName, divId, WithRequired())
+
+func (b *HTMXCreateFormBuilder) AddTitle(title string) *HTMXCreateFormBuilder {
+	b.title = &title
+	return b
+}
+func (b *HTMXCreateFormBuilder) AddTextField(fieldName, displayName, divId string, opts ...FormTextFieldOption) *HTMXCreateFormBuilder {
+	field := NewFormTextField(fieldName, displayName, divId, opts...)
 	b.fields = append(b.fields, field)
 	return b
 }
-
 func (b HTMXCreateFormBuilder) Render(w io.Writer) {
+	var title Node
+	if b.title != nil {
+		title = Div(Class("ml-auto flex gap-2 font-bold text-lg"),
+			Text(*b.title))
+	}
+
 	form := Span(Class("w-full inline-flex items-center justify-start mt-2"),
 		Form(
 			Attr(fmt.Sprintf(`hx-post=%v`, b.submitEndpoint)),
 			Class("bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-80 mb-4"),
+			title,
 			Map(b.fields, func(f FormField) Node {
 				return Group([]Node{f.Label(), f.Input()})
 			}),

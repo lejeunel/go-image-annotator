@@ -10,7 +10,7 @@ import (
 )
 
 func APIDocsLib() Node {
-	return Script(Src("https://unpkg.com/@stoplight/elements/web-components.min.js"))
+	return Script(Src("/static/stoplight.js"))
 
 }
 

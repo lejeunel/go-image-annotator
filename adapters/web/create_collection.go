@@ -2,7 +2,7 @@ package web
 
 import (
 	"fmt"
-	bd "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
 	"net/http"
@@ -38,8 +38,9 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 		Description: r.FormValue("description")}, NewCreateCollectionPresenter(w))
 }
 func (s *Server) CreateCollectionForm(w http.ResponseWriter, r *http.Request) {
-	b := bd.NewHTMXCreateFormBuilder(rt.Collection, createCollectionTargetDiv)
-	b.AddTextField("name", "Name", "name", true)
-	b.AddTextField("description", "Description", "description", false)
+	b := bf.NewHTMXCreateFormBuilder(rt.Collection, createCollectionTargetDiv)
+	b.AddTitle("Create a new collection")
+	b.AddTextField("name", "Name", "name", bf.WithRequired())
+	b.AddTextField("description", "Description (Optional)", "description")
 	b.Render(w)
 }

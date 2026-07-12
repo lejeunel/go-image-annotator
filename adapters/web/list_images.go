@@ -10,7 +10,6 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
-	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -35,7 +34,7 @@ func (p ListImagesPresenter) SuccessListImages(r list.Response) {
 		deleteURL, _ := url.Parse("/edit-url")
 		actions.SetConfirmDelete(*deleteURL)
 		row := tb.NewRow()
-		row.AddCell(tb.NewCell(html.MakeTextLink(link, im.Id.String())))
+		row.AddCell(tb.NewCell(cmp.MakeTextLink(link, im.Id.String())))
 		row.AddCell(tb.NewCell(Text(im.Collection.Name)))
 		row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(im.Specs.IngestedAt))))
 		row.AddCell(tb.NewCell(Text(strconv.Itoa(im.NumAnnotations()))))

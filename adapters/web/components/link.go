@@ -1,4 +1,4 @@
-package html
+package components
 
 import (
 	. "maragu.dev/gomponents"

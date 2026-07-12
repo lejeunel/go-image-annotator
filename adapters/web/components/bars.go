@@ -51,7 +51,7 @@ func MakeRepoButton(repoName string, currentVersion, url string) Node {
 		Target("_blank"),
 		Href(url),
 		Div(
-			Class("flex items-center  gap-1"),
+			Class("flex items-center gap-1"),
 			Span(Raw(ic.GitHubIcon)),
 			Span(Text(repoName)),
 			Span(Text(currentVersion)),
@@ -132,27 +132,28 @@ func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefi
 		),
 	)
 }
+func MakeDocsButton() Node {
+	return A(
+		Target("_blank"),
+		Href(g.DocsURL),
+		Div(
+			Class("flex items-center gap-1"),
+			Span(Raw(ic.BookIcon)),
+			Span(Text("Docs")),
+		),
+	)
+}
 func MakeFooter(currentVersion g.Info) Node {
 
 	return Footer(
 		Class("flex fixed bottom-0 z-30 h-8 text-xs w-screen items-center justify-end border-t border-outline bg-surface-alt/75 px-10 backdrop-blur-xl dark:border-outline-dark dark:bg-surface-dark-alt/75"),
 		Div(
-			Class("flex items-center gap-2"),
+			Class("flex items-center gap-2 text-gray-400 dark:text-gray-600 hover:text-gray-500 hover:dark:text-gray-500"),
 			Div(
-				Class("flex items-center"),
-				A(
-					Target("_blank"),
-					Href(g.DocsURL),
-					Div(
-						Class("flex items-center gap-1 text-gray-400 dark:text-gray-600 hover:text-gray-500  hover:dark:text-gray-500"),
-						Span(Raw(ic.BookIcon)),
-						Span(Text("Docs")),
-					),
-				),
+				MakeDocsButton(),
 			),
 			Div(Class("h-5 w-px bg-gray-800 dark:bg-gray-200")),
 			Div(
-				Class("text-gray-400 dark:text-gray-600 hover:text-gray-500 hover:dark:text-gray-500"),
 				MakeRepoButton(g.PackageName, currentVersion.Version, g.RepoURL),
 			),
 		),

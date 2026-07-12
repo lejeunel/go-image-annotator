@@ -3,7 +3,6 @@ package builders
 import (
 	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
-	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	s "github.com/lejeunel/go-image-annotator/shared/pagination"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -38,7 +37,7 @@ func (b *PaginatedListBuilder) AddCreationButton(buttonLabel string, formEndpoin
 	return b
 }
 func (b *PaginatedListBuilder) Build() Node {
-	paginator := html.MakePaginator(b.listURL, int(b.pagination.Page),
+	paginator := cmp.MakePaginator(b.listURL, int(b.pagination.Page),
 		int(b.pagination.TotalPages), b.tableBuilder.NumRows(), int(b.pagination.TotalRecords))
 
 	var creationPanel Node

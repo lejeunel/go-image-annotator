@@ -1,4 +1,4 @@
-package html
+package components
 
 import (
 	"github.com/lejeunel/go-image-annotator/shared/pagination"

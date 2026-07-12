@@ -7,7 +7,6 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
-	html "github.com/lejeunel/go-image-annotator/adapters/web/html"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
@@ -36,7 +35,7 @@ func MakeListCollectionRow(c clc.Collection) tb.Row {
 		"name", c.Name, "description", c.Description))
 	actions.SetConfirmDelete(rt.AddQueryParams(rt.ConfirmDeleteCollection, "name", c.Name))
 	row := tb.NewRow()
-	row.AddCell(tb.NewCell(html.MakeTextLink(rt.MakeImagesURL(c.Name), c.Name)))
+	row.AddCell(tb.NewCell(cmp.MakeTextLink(rt.MakeImagesURL(c.Name), c.Name)))
 	row.AddCell(tb.NewCell(Text(c.Description)))
 	row.AddCell(tb.NewCell(Text(groupName)))
 	row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(c.CreatedAt))))

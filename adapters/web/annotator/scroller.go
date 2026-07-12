@@ -3,7 +3,7 @@ package annotator
 import (
 	"fmt"
 
-	h "github.com/lejeunel/go-image-annotator/adapters/web/html"
+	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 
@@ -29,8 +29,8 @@ func (p *ScrollerView) Render(buttons view.ScrollerButtons) Node {
 		nextURL = MakeLink(buttons.Next.ImageId, buttons.Next.Collection)
 	}
 	return Div(Class("flex gap-2"),
-		h.MakeNavigationButton(prevURL, buttons.Prev.IsActive, scr.ScrollPrevious, "Previous"),
-		h.MakeNavigationButton(nextURL, buttons.Next.IsActive, scr.ScrollNext, "Next"),
+		cmp.MakeNavigationButton(prevURL, buttons.Prev.IsActive, scr.ScrollPrevious, "Previous"),
+		cmp.MakeNavigationButton(nextURL, buttons.Next.IsActive, scr.ScrollNext, "Next"),
 	)
 
 }

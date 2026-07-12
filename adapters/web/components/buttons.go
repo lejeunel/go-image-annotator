@@ -1,41 +1,42 @@
 package components
 
 import (
-	"fmt"
-	"net/url"
-
-	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
-	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
+	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
 
-func MakeHTMXCreateButton(text string, hxPut string, hxTarget string) Node {
-	return Div(
-		Class("m-2"),
-		Button(
-			Attr(fmt.Sprintf("hx-get=%v", hxPut)),
-			Attr(fmt.Sprintf("hx-target=#%v", hxTarget)),
-			Attr(`hx-swap=innerHTML`),
-			Class(s.PrimaryButton),
-			Span(Class("flex items-center"),
-				Raw(ic.AddIcon), Div(Class("p-1"), Text(text)),
-			)))
+func MakeClass(active bool) string {
+	if active {
+		return "flex items-center rounded-radius p-1 text-on-surface hover:text-primary dark:text-on-surface-dark dark:hover:text-primary-dark"
+	}
+	return "flex items-center rounded-radius p-1 text-gray-500 dark:text-gray-500 "
+
 }
 
-func MakeHTMXDeleteButton(text string, hxDelete url.URL) Node {
-	return Div(
-		Button(
-			Attr(fmt.Sprintf("hx-delete=%v", hxDelete.String())),
-			Attr(`hx-include="closest tr"`),
-			Class(s.DangerButton),
-			Div(Class("p-1"), Text(text))))
-}
+var leftArrow = `
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-6">
+						<path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+					</svg>
 
-func MakeHTMXAbortButton(text string, hxGet url.URL) Node {
-	return Div(
-		Button(
-			Attr(fmt.Sprintf("hx-get=%v", hxGet.String())),
-			Class(s.InvertButton),
-			Div(Class("p-1"), Text(text))))
+				`
+var rightArrow = `
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-6">
+						<path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+					</svg>
+
+				`
+
+func MakeNavigationButton(url string, active bool, direction scr.ScrollingDirection, text string) Node {
+	if direction == scr.ScrollNext {
+		return A(Href(url), Class(MakeClass(active)),
+			Text(text),
+			Raw(rightArrow),
+		)
+	}
+	return A(Href(url), Class(MakeClass(active)),
+		Raw(leftArrow),
+		Text(text),
+	)
+
 }

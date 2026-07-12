@@ -1,4 +1,4 @@
-package builders
+package form
 
 import (
 	. "maragu.dev/gomponents"

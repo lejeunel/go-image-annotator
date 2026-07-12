@@ -1,4 +1,4 @@
-package builders
+package form
 
 import (
 	"fmt"
@@ -15,6 +15,7 @@ type HTMXInlineFormBuilder struct {
 	endpoint     url.URL
 	submitMethod HTMXMethod
 	numColumns   int
+	title        *string
 	fields       []FormField
 }
 
@@ -25,16 +26,24 @@ func NewHTMXInlineFormBuilder(numColumns int, endpoint url.URL, submitMethod HTM
 		submitMethod: submitMethod,
 	}
 }
-
+func (b *HTMXInlineFormBuilder) AddTitle(title string) *HTMXInlineFormBuilder {
+	b.title = &title
+	return b
+}
 func (b *HTMXInlineFormBuilder) AddTextField(fieldName, displayName, divId string, opts ...FormTextFieldOption) *HTMXInlineFormBuilder {
 	field := NewFormTextField(fieldName, displayName, divId, opts...)
 	b.fields = append(b.fields, field)
 	return b
 }
-
 func (b HTMXInlineFormBuilder) Render(w io.Writer) {
+	var title Node
+	if b.title != nil {
+		title = Div(Class("ml-auto flex gap-2 font-bold text-lg justify-end mr-2"),
+			Text(*b.title))
+	}
 	form := Tr(
 		Td(Attr(fmt.Sprintf("colspan=%v", b.numColumns)),
+			title,
 			Form(
 				Class("flex p-2"),
 				Attr(fmt.Sprintf(`%v=%v`, b.submitMethod.String(), b.endpoint.String())),
