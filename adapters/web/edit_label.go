@@ -1,12 +1,8 @@
 package web
 
 import (
-	"fmt"
-	"net/http"
-
-	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
-	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/update"
+	"net/http"
 )
 
 type EditLabelPresenter struct {
@@ -28,14 +24,6 @@ func (p EditLabelPresenter) SuccessUpdateLabel(r update.Response) {
 	payload, _ := NotifySuccessPayload(p.task, p.okMessageFunc(r))
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
-}
-func (s *Server) EditLabelForm(w http.ResponseWriter, r *http.Request) {
-	currentName := r.URL.Query().Get("name")
-	endpoint := rt.AddQueryParams(rt.Label, "name", currentName)
-	b := bf.NewHTMXInlineFormBuilder(len(listLabelsFields), endpoint, bf.HTMXPutMethod)
-	b.AddTitle(fmt.Sprintf("Editing %v", currentName))
-	b.AddTextField("description", "Description", "description", bf.WithDefault(r.URL.Query().Get("description")))
-	b.Render(w)
 }
 func (s *Server) EditLabel(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {

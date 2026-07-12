@@ -1,10 +1,12 @@
 package web
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	l "github.com/lejeunel/go-image-annotator/entities/label"
@@ -41,10 +43,28 @@ func (p ListLabelsPresenter) SuccessFindLabel(l l.Label) {
 	MakeListLabelRow(l).Render(p.Writer)
 }
 
-func (s *Server) GetLabel(w http.ResponseWriter, r *http.Request) {
-	s.Label.Find.Execute(r.Context(),
-		r.URL.Query().Get("name"),
-		NewListLabelsPresenter(w, s.PageBuilder))
+func (s *Server) LabelTableRow(w http.ResponseWriter, r *http.Request) {
+	switch r.URL.Query().Get("mode") {
+	case "confirm-delete":
+		name := r.URL.Query().Get("name")
+		RenderConfirmDeleteRow(len(listLabelsFields),
+			name,
+			"label",
+			rt.AddQueryParams(rt.Label, "name", name),
+			rt.AddQueryParams(rt.Label, "name", name, "mode", "view"),
+			w)
+	case "edit":
+		currentName := r.URL.Query().Get("name")
+		endpoint := rt.AddQueryParams(rt.Label, "name", currentName)
+		b := bf.NewHTMXInlineFormBuilder(len(listLabelsFields), endpoint, bf.HTMXPutMethod)
+		b.AddTitle(fmt.Sprintf("Editing %v", currentName))
+		b.AddTextField("description", "Description", "description", bf.WithDefault(r.URL.Query().Get("description")))
+		b.Render(w)
+	default:
+		s.Label.Find.Execute(r.Context(),
+			r.URL.Query().Get("name"),
+			NewListLabelsPresenter(w, s.PageBuilder))
+	}
 }
 
 func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request) {
@@ -56,8 +76,8 @@ func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request) {
 
 func MakeListLabelRow(l l.Label) tb.Row {
 	actions := b.NewActionsPanelBuilder()
-	actions.SetEdit(rt.AddQueryParams(rt.EditLabelForm, "name", l.Name))
-	actions.SetConfirmDelete(rt.AddQueryParams(rt.ConfirmDeleteLabel, "name", l.Name))
+	actions.SetEdit(rt.AddQueryParams(rt.Label, "name", l.Name, "description", l.Description, "mode", "edit"))
+	actions.SetConfirmDelete(rt.AddQueryParams(rt.Label, "name", l.Name, "mode", "confirm-delete"))
 	row := tb.NewRow()
 	row.AddCell(tb.NewCell(Text(l.Name)))
 	row.AddCell(tb.NewCell(Text(l.Description)))

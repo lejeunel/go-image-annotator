@@ -1,11 +1,8 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
 
-	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
-	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
 )
 
@@ -28,15 +25,6 @@ func (p EditCollectionPresenter) SuccessUpdateCollection(r update.Response) {
 	payload, _ := NotifySuccessPayload(p.task, p.okMessageFunc(r))
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
-}
-func (s *Server) EditCollectionForm(w http.ResponseWriter, r *http.Request) {
-	currentName := r.URL.Query().Get("name")
-	endpoint := rt.AddQueryParams(rt.Collection, "name", currentName)
-	b := bf.NewHTMXInlineFormBuilder(len(listCollectionsFields), endpoint, bf.HTMXPutMethod)
-	b.AddTitle(fmt.Sprintf("Editing %v", currentName))
-	b.AddTextField("name", "Name", "name", bf.WithRequired(), bf.WithDefault(currentName))
-	b.AddTextField("description", "Description", "description", bf.WithDefault(r.URL.Query().Get("description")))
-	b.Render(w)
 }
 func (s *Server) EditCollection(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {

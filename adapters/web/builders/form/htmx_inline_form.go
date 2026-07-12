@@ -60,7 +60,7 @@ func (b HTMXInlineFormBuilder) Render(w io.Writer) {
 						Button(Type("submit"),
 							Text("Submit"),
 							Class(st.SuccessButton)),
-						cmp.MakeHTMXAbortButton("Cancel", b.endpoint),
+						cmp.MakeHTMXAbortButton("Cancel", b.endpoint.String()),
 					),
 				),
 			)),

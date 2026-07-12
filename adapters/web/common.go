@@ -48,7 +48,8 @@ func NewWebPageErrorPresenter(w http.ResponseWriter) WebPageErrorPresenter {
 	return WebPageErrorPresenter{writer: w}
 }
 
-func RenderConfirmDeleteRow(numCols int, name, resourceType string, endpoint url.URL, w io.Writer) {
+func RenderConfirmDeleteRow(numCols int, name, resourceType string,
+	deleteURL url.URL, cancelURL url.URL, w io.Writer) {
 	row := tb.NewRow()
 	row.AddCell(
 		tb.NewCell(
@@ -58,7 +59,7 @@ func RenderConfirmDeleteRow(numCols int, name, resourceType string, endpoint url
 			tb.WithCellClass("text-right"),
 		))
 	row.AddCell(tb.NewCell(Span(Class("flex items-center gap-2"),
-		cmp.MakeHTMXDeleteButton("Yes", endpoint),
-		cmp.MakeHTMXAbortButton("Cancel", endpoint))))
+		cmp.MakeHTMXDeleteButton("Yes", deleteURL.String()),
+		cmp.MakeHTMXAbortButton("Cancel", cancelURL.String()))))
 	row.Render(w)
 }

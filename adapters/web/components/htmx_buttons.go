@@ -2,7 +2,6 @@ package components
 
 import (
 	"fmt"
-	"net/url"
 
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
@@ -23,19 +22,19 @@ func MakeHTMXCreateButton(text string, hxPut string, hxTarget string) Node {
 			)))
 }
 
-func MakeHTMXDeleteButton(text string, hxDelete url.URL) Node {
+func MakeHTMXDeleteButton(text string, hxDelete string) Node {
 	return Div(
 		Button(
-			Attr(fmt.Sprintf("hx-delete=%v", hxDelete.String())),
+			Attr(fmt.Sprintf("hx-delete=%v", hxDelete)),
 			Attr(`hx-include="closest tr"`),
 			Class(s.DangerButton),
 			Div(Class("p-1"), Text(text))))
 }
 
-func MakeHTMXAbortButton(text string, hxGet url.URL) Node {
+func MakeHTMXAbortButton(text string, hxGet string) Node {
 	return Div(
 		Button(
-			Attr(fmt.Sprintf("hx-get=%v", hxGet.String())),
+			Attr(fmt.Sprintf("hx-get=%v", hxGet)),
 			Class(s.InvertButton),
 			Div(Class("p-1"), Text(text))))
 }
