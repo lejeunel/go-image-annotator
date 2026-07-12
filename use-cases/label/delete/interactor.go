@@ -13,26 +13,26 @@ type Interactor struct {
 	auth Auth
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	errCtx := "deleting label"
 	if err := i.auth.DeleteLabel(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	if err := i.isUsed(r.Name); err != nil {
+	if err := i.isUsed(name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	if err := i.exists(r.Name); err != nil {
+	if err := i.exists(name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	if err := i.repo.Delete(r.Name); err != nil {
+	if err := i.repo.Delete(name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	out.Success()
+	out.SuccessDeleteLabel(name)
 }
 func (i *Interactor) exists(name string) error {
 	errCtx := fmt.Errorf("checking whether label with name %v exists", name)

@@ -13,7 +13,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(r Response) {
+func (p *FakePresenter) SuccessListLabels(r Response) {
 	p.GotSuccess = true
 	p.Got = r
 }

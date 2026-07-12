@@ -7,15 +7,11 @@ import (
 	p "github.com/lejeunel/go-image-annotator/adapters/api/json/label"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
-	"github.com/lejeunel/go-image-annotator/use-cases/label/delete"
-	"github.com/lejeunel/go-image-annotator/use-cases/label/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
 )
 
 func (s *Server) FindLabelByName(w http.ResponseWriter, r *http.Request, name string) {
-	s.Label.Find.Execute(r.Context(),
-		find.Request{Name: name},
-		p.NewFindPresenter(w, s.Logger))
+	s.Label.Find.Execute(r.Context(), name, p.NewFindPresenter(w, s.Logger))
 }
 func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
 	body, ok := json.MustDecodeJSON[models.NewLabel](w, r)
@@ -29,9 +25,7 @@ func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
 	s.Label.Create.Execute(r.Context(), req, p.NewCreatePresenter(w, s.Logger))
 }
 func (s *Server) DeleteLabelByName(w http.ResponseWriter, r *http.Request, name string) {
-	s.Label.Delete.Execute(r.Context(),
-		delete.Request{Name: name},
-		p.NewDeletePresenter(w, s.Logger))
+	s.Label.Delete.Execute(r.Context(), name, p.NewDeletePresenter(w, s.Logger))
 }
 func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request, params ListLabelsParams) {
 	req := list.Request{Page: 1, PageSize: s.Label.DefaultPageSize}

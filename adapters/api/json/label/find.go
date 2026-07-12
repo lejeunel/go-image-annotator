@@ -3,7 +3,7 @@ package label
 import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
-	"github.com/lejeunel/go-image-annotator/use-cases/label/find"
+	l "github.com/lejeunel/go-image-annotator/entities/label"
 	"log/slog"
 	"net/http"
 )
@@ -13,7 +13,7 @@ type Find struct {
 	json.ErrorPresenter
 }
 
-func (p Find) Success(r find.Response) {
+func (p Find) SuccessFindLabel(r l.Label) {
 	response := models.Label{
 		Name:        &r.Name,
 		Description: &r.Description,

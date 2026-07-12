@@ -120,7 +120,7 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 							Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes, v.polygons, v.imageLabels, v.availableLabels)))),
 				),
 				))),
-		}), nil)
+		}))
 	pb.Render(w)
 }
 

@@ -9,14 +9,14 @@ type Interactor struct {
 	repo Repo
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	found, err := i.repo.FindLabel(r.Name)
+func (i *Interactor) Execute(ctx context.Context, name string, out OutputPort) {
+	found, err := i.repo.FindLabel(name)
 	if err != nil {
-		out.Error(fmt.Errorf("fetching label by name %v: %w", r.Name, err))
+		out.Error(fmt.Errorf("fetching label by name %v: %w", name, err))
 		return
 	}
 
-	out.Success(Response{Name: found.Name, Description: found.Description})
+	out.SuccessFindLabel(*found)
 
 }
 

@@ -47,7 +47,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.Success(Response{Name: r.Name, Description: r.NewDescription})
+	out.SuccessUpdateLabel(Response{Name: r.Name, Description: r.NewDescription})
 }
 func (i *Interactor) ensureNameExists(name string) error {
 	exists, err := i.repo.Exists(name)

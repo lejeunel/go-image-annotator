@@ -1,6 +1,7 @@
 package list
 
 import (
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
@@ -15,6 +16,6 @@ type LabelResponse struct {
 }
 
 type Response struct {
-	Labels     []LabelResponse
+	Labels     []lbl.Label
 	Pagination pagination.Pagination
 }

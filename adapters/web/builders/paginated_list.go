@@ -15,20 +15,25 @@ type CreationButton struct {
 }
 
 type PaginatedListBuilder struct {
-	tableBuilder   tb.TableBuilder
 	listURL        string
 	pagination     s.Pagination
 	creationButton *CreationButton
+	tb.TableBuilder
+	PageBuilder
 }
 
-func NewPaginatedListBuilder(fields []string, listURL string, pagination s.Pagination) PaginatedListBuilder {
+func NewPaginatedListBuilder(base PageBuilder, fields []string) PaginatedListBuilder {
 	tableBuilder := tb.NewTableBuilder(fields)
-	return PaginatedListBuilder{tableBuilder, listURL, pagination, nil}
+	return PaginatedListBuilder{TableBuilder: tableBuilder, PageBuilder: base}
+}
+func (b *PaginatedListBuilder) SetPagination(pg s.Pagination, url string) *PaginatedListBuilder {
+	b.pagination = pg
+	b.listURL = url
+	return b
 }
 
 func (b *PaginatedListBuilder) AddRow(r tb.Row) *PaginatedListBuilder {
-	b.tableBuilder.AddRow(r)
-
+	b.TableBuilder.AddRow(r)
 	return b
 }
 
@@ -36,17 +41,19 @@ func (b *PaginatedListBuilder) AddCreationButton(buttonLabel string, formEndpoin
 	b.creationButton = &CreationButton{buttonLabel, formEndpoint, formDivId}
 	return b
 }
-func (b *PaginatedListBuilder) Build() Node {
+func (b *PaginatedListBuilder) Build() *PaginatedListBuilder {
 	paginator := cmp.MakePaginator(b.listURL, int(b.pagination.Page),
-		int(b.pagination.TotalPages), b.tableBuilder.NumRows(), int(b.pagination.TotalRecords))
+		int(b.pagination.TotalPages), b.TableBuilder.NumRows(), int(b.pagination.TotalRecords))
 
 	var creationPanel Node
 	if b.creationButton != nil {
-		button := cmp.MakeHTMXCreateButton("Create new collection", b.creationButton.formGetEndpoint, b.creationButton.formDivId)
+		button := cmp.MakeHTMXCreateButton(b.creationButton.label, b.creationButton.formGetEndpoint, b.creationButton.formDivId)
 		formPlaceholder := Div(ID(b.creationButton.formDivId))
 		creationPanel = Div(button, formPlaceholder)
 
 	}
-	return Div(creationPanel, Div(Class("py-2"), paginator), b.tableBuilder.Build())
+	content := Div(creationPanel, Div(Class("py-2"), paginator), b.TableBuilder.Build())
+	b.SetContent(content)
+	return b
 
 }

@@ -26,7 +26,7 @@ func APIDocsPage(ctx context.Context, specsPath string, p b.PageBuilder, w io.Wr
 			Attr("tryItCredentialsPolicy", "include"),
 			Attr("router", "hash"),
 			Attr("layout", "sidebar"),
-		)), nil)
+		)))
 	p.SetActive(cmp.APIDocsPageActive)
 	p.Render(w)
 }

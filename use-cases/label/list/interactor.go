@@ -29,9 +29,9 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		Pagination: pagination.New(int64(r.Page), r.PageSize, count),
 	}
 	for _, f := range found {
-		response.Labels = append(response.Labels, LabelResponse{Name: f.Name, Description: f.Description})
+		response.Labels = append(response.Labels, *f)
 	}
-	out.Success(response)
+	out.SuccessListLabels(response)
 
 }
 

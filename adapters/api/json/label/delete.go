@@ -12,7 +12,7 @@ type Delete struct {
 	json.ErrorPresenter
 }
 
-func (p Delete) Success() {
+func (p Delete) SuccessDeleteLabel(string) {
 	p.Writer.WriteHeader(http.StatusNoContent)
 
 }

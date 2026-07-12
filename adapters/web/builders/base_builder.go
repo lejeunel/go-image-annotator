@@ -28,11 +28,6 @@ func (b *BasePageBuilder) AddScripts(scripts ...Node) *BasePageBuilder {
 	}
 	return b
 }
-func (b *BasePageBuilder) SetPane(pane Node) *BasePageBuilder {
-	b.pane = &pane
-	return b
-}
-
 func (b *BasePageBuilder) SetTitle(title string) *BasePageBuilder {
 	b.Title = title
 	return b

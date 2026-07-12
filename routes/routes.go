@@ -43,6 +43,11 @@ var ConfirmDeleteCollection = "/ui/collection/confirm-delete"
 var EditCollectionForm = "/ui/collection/edit"
 var CreateCollectionForm = "/ui/collection/new"
 
+var Label = "/ui/label"
+var EditLabelForm = "/ui/label/edit"
+var ConfirmDeleteLabel = "/ui/label/confirm-delete"
+var CreateLabelForm = "/ui/label/new"
+
 func MakeOAuthCallbackURL(baseURL string, provider string) string {
 	return baseURL + strings.ReplaceAll(CallbackOAuth, "{provider}", provider)
 }

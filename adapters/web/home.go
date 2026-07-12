@@ -10,6 +10,6 @@ import (
 func MakeHomePage(pb b.PageBuilder, w io.Writer) {
 	pb.SetTitle("Home")
 	pb.SetActive(cmp.HomePageActive)
-	pb.SetContent(Text("Welcome."), nil)
+	pb.SetContent(Text("Welcome."))
 	pb.Render(w)
 }

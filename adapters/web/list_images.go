@@ -19,14 +19,24 @@ import (
 )
 
 type ListImagesPresenter struct {
-	b.PageBuilder
-	Writer io.Writer
+	b.PaginatedListBuilder
+	io.Writer
 	WebPageErrorPresenter
+	collection string
+}
+
+var listImagesFields = []string{"id", "collection", "ingested", "n. annot.", "actions"}
+
+func NewListImagesPresenter(w http.ResponseWriter, p b.PageBuilder, collection string) ListImagesPresenter {
+	p.SetTitle("Image")
+	b := b.NewPaginatedListBuilder(p, listImagesFields)
+	return ListImagesPresenter{b, w, NewWebPageErrorPresenter(w), collection}
 }
 
 func (p ListImagesPresenter) SuccessListImages(r list.Response) {
-	listBuilder := b.NewPaginatedListBuilder([]string{"id", "collection", "ingested", "n. annot.", "actions"}, rt.Images,
-		r.Pagination)
+
+	baseURL := rt.AddQueryParams(rt.Images, "collection", p.collection)
+	p.SetPagination(r.Pagination, baseURL.String())
 	for _, im := range r.Images {
 		link := rt.MakeImageURL(im.Id.String(), im.Collection.Name)
 		actions := b.NewActionsPanelBuilder()
@@ -39,9 +49,9 @@ func (p ListImagesPresenter) SuccessListImages(r list.Response) {
 		row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(im.Specs.IngestedAt))))
 		row.AddCell(tb.NewCell(Text(strconv.Itoa(im.NumAnnotations()))))
 		row.AddCell(tb.NewCell(actions.Build()))
+		p.AddRow(row)
 	}
-	p.PageBuilder.SetContent(listBuilder.Build(), nil)
-	p.Render(p.Writer)
+	p.Build().Render(p.Writer)
 }
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
@@ -58,9 +68,5 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 			PageSize:   s.DefaultPageSize,
 			Page:       int64(GetPageFromRequest(r))},
 		OrderingParams: im.OrderingParams{IngestTime: true}},
-		NewListImagesPresenter(w, s.PageBuilder))
-}
-
-func NewListImagesPresenter(w http.ResponseWriter, pb b.PageBuilder) ListImagesPresenter {
-	return ListImagesPresenter{*pb.SetTitle("Images"), w, NewWebPageErrorPresenter(w)}
+		NewListImagesPresenter(w, s.PageBuilder, collection))
 }

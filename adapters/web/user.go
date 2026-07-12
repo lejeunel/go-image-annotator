@@ -14,7 +14,7 @@ func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
 	p.SetActive(cmp.NoPageActive)
 	udb := s.UserDashboardBuilder.SetUserIdentityFromContext(r.Context())
 	p.SetTitle("User Dashboard")
-	p.SetContent(udb.Build(), nil)
+	p.SetContent(udb.Build())
 	p.Render(w)
 
 }

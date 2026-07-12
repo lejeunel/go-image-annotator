@@ -9,6 +9,7 @@ import (
 	fetchall "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/label/update"
 )
 
 func NewSQLiteLabelInteractors(repo infra.SQLiteLabelRepo, pageSize int, auth auth.Authorizer) lbl.Interactors {
@@ -17,6 +18,7 @@ func NewSQLiteLabelInteractors(repo infra.SQLiteLabelRepo, pageSize int, auth au
 		Create:          *create.New(repo, create.WithAuth(auth)),
 		Delete:          *delete.New(repo, delete.WithAuth(auth)),
 		List:            *list.New(repo),
+		Update:          *update.New(repo),
 		FetchAll:        *fetchall.New(repo),
 		DefaultPageSize: pageSize,
 	}

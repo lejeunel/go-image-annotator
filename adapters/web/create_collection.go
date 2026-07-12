@@ -41,6 +41,6 @@ func (s *Server) CreateCollectionForm(w http.ResponseWriter, r *http.Request) {
 	b := bf.NewHTMXCreateFormBuilder(rt.Collection, createCollectionTargetDiv)
 	b.AddTitle("Create a new collection")
 	b.AddTextField("name", "Name", "name", bf.WithRequired())
-	b.AddTextField("description", "Description (Optional)", "description")
+	b.AddTextField("description", "Description", "description")
 	b.Render(w)
 }

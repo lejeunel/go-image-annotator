@@ -2,5 +2,5 @@ package delete
 
 type OutputPort interface {
 	Error(error)
-	Success()
+	SuccessDeleteLabel(string)
 }

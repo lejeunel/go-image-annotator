@@ -25,14 +25,14 @@ func (r *FakeRepo) FindLabel(name string) (*l.Label, error) {
 }
 
 type FakePresenter struct {
-	Got        Response
+	Got        l.Label
 	GotSuccess bool
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(r Response) {
+func (p *FakePresenter) SuccessFindLabel(l l.Label) {
 	p.GotSuccess = true
-	p.Got = r
+	p.Got = l
 }
 
 type FailingAuth struct {

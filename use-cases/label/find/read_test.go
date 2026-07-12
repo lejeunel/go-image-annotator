@@ -11,8 +11,7 @@ func TestReadNonExistingLabelShouldFail(t *testing.T) {
 	repo := &FakeRepo{Label: l.Label{Name: "my-label", Description: "a-description"}}
 	p := &FakePresenter{}
 	itr := New(repo)
-	req := Request{Name: "non-existing-label"}
-	itr.Execute(t.Context(), req, p)
+	itr.Execute(t.Context(), "non-existing-label", p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -20,7 +19,7 @@ func TestReadNonExistingLabelShouldFail(t *testing.T) {
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{Err: e.ErrInternal})
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -32,8 +31,6 @@ func TestReadLabel(t *testing.T) {
 	repo := &FakeRepo{Label: label}
 	p := &FakePresenter{}
 	itr := New(repo)
-	req := Request{Name: label.Name}
-	want := Response{Name: label.Name, Description: label.Description}
-	itr.Execute(t.Context(), req, p)
-	assert.Equal(t, want, p.Got)
+	itr.Execute(t.Context(), label.Name, p)
+	assert.Equal(t, label, p.Got)
 }
