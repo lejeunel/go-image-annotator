@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"slices"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -16,23 +15,6 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/list"
 )
-
-func appendUnique(slice []string, s string) []string {
-	if slices.Contains(slice, s) {
-		return slice
-	}
-	return append(slice, s)
-}
-
-func remove(slice []string, s string) []string {
-	result := slice[:0]
-	for _, existing := range slice {
-		if existing != s {
-			result = append(result, existing)
-		}
-	}
-	return result
-}
 
 type SQLiteUserRepo struct {
 	Db *sqlx.DB
@@ -67,6 +49,11 @@ func (r SQLiteUserRepo) Create(usr u.User) error {
 			return err
 		}
 	}
+	for _, role := range usr.Roles {
+		if err := r.AssignRole(usr.Id, role); err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
@@ -95,7 +82,16 @@ func (r SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 	}
 
 	return groups, nil
+}
+func (r SQLiteUserRepo) getRoleNames(userId string) ([]string, error) {
+	var roles []string
+	query := "SELECT name FROM roles WHERE id=(SELECT id FROM users_roles WHERE user_id=$1)"
+	err := r.Db.Select(&roles, query, userId)
+	if err != nil {
+		return nil, fmt.Errorf("fetching roles: %v: %w", err, e.ErrInternal)
+	}
 
+	return roles, nil
 }
 func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 	record := Record{}
@@ -111,13 +107,12 @@ func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 		}
 
 	}
-	var roles []string
-	err = json.Unmarshal([]byte(record.Roles), &roles)
-	if err != nil {
-		return nil, fmt.Errorf("finding user by id: unmarshaling user roles %v: %w: %w", record.Roles, err, e.ErrInternal)
-	}
 
 	groups, err := r.getGroupNames(id)
+	if err != nil {
+		return nil, err
+	}
+	roles, err := r.getRoleNames(id)
 	if err != nil {
 		return nil, err
 	}
@@ -186,53 +181,19 @@ func (r SQLiteUserRepo) List(m list.Request) ([]u.User, error) {
 
 	return objects, nil
 }
-func (r SQLiteUserRepo) getCurrentRoles(userId string) ([]string, error) {
-	var currentRoles string
-	query := "SELECT roles FROM users WHERE id=$1"
-	err := r.Db.QueryRow(query, userId).Scan(&currentRoles)
-	if err != nil {
-		return nil, fmt.Errorf("fetching currently applied roles: %v: %w", err, e.ErrInternal)
-	}
-	var roles []string
-	err = json.Unmarshal([]byte(currentRoles), &roles)
-	if err != nil {
-		return nil, fmt.Errorf("finding user by id: unmarshaling user roles %v: %w: %w", currentRoles, err, e.ErrInternal)
-	}
-	return roles, nil
-}
-func (r SQLiteUserRepo) setRoles(userId string, roles []string) error {
-	query := "UPDATE users SET roles=$2 WHERE id=$1"
-	data, err := json.Marshal(roles)
-	if err != nil {
-		return fmt.Errorf("assigning roles %v: %w: %w", roles, err, e.ErrInternal)
-	}
-	_, err = r.Db.Exec(query, userId, data)
-	if err != nil {
-		return fmt.Errorf("assigning role: %v: %w", err, e.ErrInternal)
-	}
-	return nil
-}
 func (r SQLiteUserRepo) AssignRole(userId string, role string) error {
-	currentRoles, err := r.getCurrentRoles(userId)
+	query := "INSERT INTO users_roles (user_id,role_id) VALUES ($1,(SELECT id FROM roles WHERE name=$2))"
+	_, err := r.Db.Exec(query, userId, role)
 	if err != nil {
-		return fmt.Errorf("assigning role: %w", err)
-	}
-
-	if err := r.setRoles(userId, appendUnique(currentRoles, role)); err != nil {
-		return err
+		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 }
 func (r SQLiteUserRepo) UnAssignRole(userId string, role string) error {
-	currentRoles, err := r.getCurrentRoles(userId)
+	query := "DELETE FROM users_roles WHERE user_id=$1 AND role_id=(SELECT id FROM roles WHERE name=$2)"
+	_, err := r.Db.Exec(query, userId, role)
 	if err != nil {
-		return fmt.Errorf("unassigning role: %w", err)
-	}
-	if !slices.Contains(currentRoles, role) {
-		return fmt.Errorf("unassigning role: checking for existence of role %v: %w", role, e.ErrNotFound)
-	}
-	if err := r.setRoles(userId, remove(currentRoles, role)); err != nil {
-		return err
+		return fmt.Errorf("unassigning user role: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 }

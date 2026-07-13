@@ -14,18 +14,18 @@ func TestHandleAuthError(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestDeleteNonExistingCollectionShouldFail(t *testing.T) {
+func TestDeleteNonExistingGroupShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{Missing: true})
-	itr.Execute(t.Context(), Request{Name: "my-collection"}, p)
+	itr.Execute(t.Context(), Request{Name: "my-group"}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
 
-func TestDeleteCollectionWithAssociatedResourcesShouldFail(t *testing.T) {
+func TestDeleteGroupWithAssociatedResourcesShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{IsPopulated_: true})
-	itr.Execute(t.Context(), Request{Name: "my-collection"}, p)
+	itr.Execute(t.Context(), Request{Name: "my-group"}, p)
 	assert.True(t, p.GotDependencyErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -37,9 +37,9 @@ func TestHandleInternalErrorOnDelete(t *testing.T) {
 	assert.True(t, p.GotInternalErr)
 }
 
-func TestDeleteCollection(t *testing.T) {
+func TestDeleteGroup(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{})
-	itr.Execute(t.Context(), Request{Name: "my-collection"}, p)
+	itr.Execute(t.Context(), Request{Name: "my-group"}, p)
 	assert.True(t, p.GotSuccess)
 }

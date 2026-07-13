@@ -10,7 +10,7 @@ type Interactor struct {
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	errCtx := "fetching collection"
+	errCtx := "fetching group"
 	found, err := i.repo.Find(r.Name)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))

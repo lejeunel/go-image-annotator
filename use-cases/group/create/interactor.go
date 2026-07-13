@@ -17,7 +17,7 @@ type Interactor struct {
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	errCtx := "creating collection"
+	errCtx := "creating group"
 	if err := i.auth.CreateGroup(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -47,7 +47,7 @@ func (i *Interactor) create(r Request) error {
 
 func (i *Interactor) validate(name string) error {
 	if err := i.validator.Validate(name); err != nil {
-		return fmt.Errorf("checking collection name %v: %w", name, err)
+		return fmt.Errorf("checking group name %v: %w", name, err)
 	}
 	if err := i.isDuplicate(name); err != nil {
 		return err
@@ -57,7 +57,7 @@ func (i *Interactor) validate(name string) error {
 }
 
 func (i *Interactor) isDuplicate(name string) error {
-	errBaseMsg := fmt.Sprintf("checking for duplicate collection with name %v", name)
+	errBaseMsg := fmt.Sprintf("checking for duplicate group with name %v", name)
 	alreadyExists, err := i.repo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%v: %w", errBaseMsg, e.ErrInternal)

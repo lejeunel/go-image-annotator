@@ -11,20 +11,62 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
+type FormMode int
+
+const (
+	EditMode FormMode = iota
+	CreateMode
+)
+
+func (m FormMode) Verb() string {
+	switch m {
+	case EditMode:
+		return "Editing"
+	case CreateMode:
+		return "Creating"
+	default:
+		return ""
+	}
+}
+func (m FormMode) HTMXMethod() string {
+	switch m {
+	case EditMode:
+		return "hx-put"
+	case CreateMode:
+		return "hx-post"
+	default:
+		return ""
+	}
+}
+
 type HTMXInlineFormBuilder struct {
+	resourceName string
 	endpoint     url.URL
-	submitMethod HTMXMethod
+	mode         FormMode
 	numColumns   int
 	title        *string
 	fields       []FormField
 }
+type FormOption func(*HTMXInlineFormBuilder)
 
-func NewHTMXInlineFormBuilder(numColumns int, endpoint url.URL, submitMethod HTMXMethod) HTMXInlineFormBuilder {
-	return HTMXInlineFormBuilder{
+func WithMode(m FormMode) FormOption {
+	return func(b *HTMXInlineFormBuilder) {
+		b.mode = m
+	}
+}
+
+func NewHTMXInlineFormBuilder(resourceName string, numColumns int, endpoint url.URL, opts ...FormOption) HTMXInlineFormBuilder {
+	f := &HTMXInlineFormBuilder{
+		resourceName: resourceName,
 		endpoint:     endpoint,
 		numColumns:   numColumns,
-		submitMethod: submitMethod,
+		mode:         EditMode,
 	}
+
+	for _, opt := range opts {
+		opt(f)
+	}
+	return *f
 }
 func (b *HTMXInlineFormBuilder) AddTitle(title string) *HTMXInlineFormBuilder {
 	b.title = &title
@@ -36,20 +78,20 @@ func (b *HTMXInlineFormBuilder) AddTextField(fieldName, displayName, divId strin
 	return b
 }
 func (b HTMXInlineFormBuilder) Render(w io.Writer) {
-	var title Node
-	if b.title != nil {
-		title = Div(Class("ml-auto flex gap-2 font-bold text-lg justify-end mr-2"),
-			Text(*b.title))
-	}
+
+	caption := Div(
+		Class("ml-auto flex gap-2"),
+		Div(Text(b.mode.Verb())),
+		Div(Class("font-bold"), Text(b.resourceName)))
 	form := Tr(
 		Td(Attr(fmt.Sprintf("colspan=%v", b.numColumns)),
-			title,
 			Form(
 				Class("flex p-2"),
-				Attr(fmt.Sprintf(`%v=%v`, b.submitMethod.String(), b.endpoint.String())),
+				Attr(fmt.Sprintf(`%v=%v`, b.mode.HTMXMethod(), b.endpoint.String())),
 				Attr(`hx-target="closest tr"`),
 				Attr(`hx-swap=outerHTML`),
 				Div(
+					caption,
 					Class("ml-auto flex items-center gap-2"),
 					Map(b.fields, func(f FormField) Node {
 						return Div(

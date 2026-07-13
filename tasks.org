@@ -69,3 +69,9 @@ shared/identity_provider/provider.go
 ** DONE web/builders/login_builder.go
 ** DONE web/builders/navbar.go
 ** DONE /server/server.go
+* TODO check dependency constraint for groups
+** DONE group assigned to collection should not be deletable
+** TODO group assigned to user should not be deletable
+
+* TODO check dependency constraint for roles
+** TODO role assigned to user should not be deletable

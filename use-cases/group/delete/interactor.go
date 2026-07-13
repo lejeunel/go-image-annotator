@@ -13,7 +13,7 @@ type Interactor struct {
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	errCtx := fmt.Errorf("deleting collection")
+	errCtx := fmt.Errorf("deleting group")
 	if err := i.auth.DeleteGroup(ctx); err != nil {
 		out.Error(fmt.Errorf("%w: %w", errCtx, e.ErrAuthorization))
 		return
@@ -36,7 +36,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 }
 
 func (i *Interactor) ensureDeletable(name string) error {
-	errCtx := fmt.Errorf("ensuring collection with name %v is empty", name)
+	errCtx := fmt.Errorf("ensuring group with name %v is empty", name)
 	isPopulated, err := i.repo.IsPopulated(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
@@ -48,7 +48,7 @@ func (i *Interactor) ensureDeletable(name string) error {
 }
 
 func (i *Interactor) ensureExists(name string) error {
-	errCtx := fmt.Errorf("checking whether collection with name %v exists", name)
+	errCtx := fmt.Errorf("checking whether group with name %v exists", name)
 	exists, err := i.repo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)

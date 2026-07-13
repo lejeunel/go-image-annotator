@@ -29,10 +29,6 @@ func (r *FakeRepo) Exists(n string) (*bool, error) {
 	}
 	return &exist, nil
 }
-func (r *FakeRepo) GroupOfCollection(n string) (*string, error) {
-	group := "my-group"
-	return &group, nil
-}
 
 type FakePresenter struct {
 	Got        Response
@@ -48,6 +44,6 @@ func (p *FakePresenter) Success(r Response) {
 type FailingAuth struct {
 }
 
-func (f FailingAuth) UpdateCollection(ctx context.Context, g string) error {
+func (f FailingAuth) UpdateGroup(ctx context.Context) error {
 	return e.ErrAuthorization
 }

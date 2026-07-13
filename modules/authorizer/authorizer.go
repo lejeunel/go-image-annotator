@@ -165,6 +165,18 @@ func (a Authorizer) CreateGroup(ctx context.Context) error {
 func (a Authorizer) DeleteGroup(ctx context.Context) error {
 	return a.check(ctx, "DeleteGroup", "")
 }
+func (a Authorizer) UpdateGroup(ctx context.Context) error {
+	return a.check(ctx, "UpdateGroup", "")
+}
+func (a Authorizer) CreateRole(ctx context.Context) error {
+	return a.check(ctx, "CreateRole", "")
+}
+func (a Authorizer) DeleteRole(ctx context.Context) error {
+	return a.check(ctx, "DeleteRole", "")
+}
+func (a Authorizer) UpdateRole(ctx context.Context) error {
+	return a.check(ctx, "UpdateRole", "")
+}
 func (a Authorizer) SetAdminRights(ctx context.Context) error {
 	return a.check(ctx, "SetAdminRights", "")
 }

@@ -7,6 +7,7 @@ import (
 	grp "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
 	im "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	lbl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
+	r "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
 	scr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/scroll"
 	usr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	af_store "github.com/lejeunel/go-image-annotator/modules/file-store"
@@ -22,6 +23,7 @@ type SQLiteRepos struct {
 	Annotation an.SQLiteAnnotationRepo
 	Scroller   scr.SQLiteScrollerRepo
 	Group      grp.SQLiteGroupRepo
+	Role       r.SQLiteRoleRepo
 	User       usr.SQLiteUserRepo
 	Db         *sqlx.DB
 }

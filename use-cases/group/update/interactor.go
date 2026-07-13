@@ -32,14 +32,8 @@ func New(r Repo, opts ...Option) Interactor {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
-	errCtx := "updating collection"
-	group, err := i.repo.GroupOfCollection(r.Name)
-	if err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-
-	}
-	if err := i.auth.UpdateCollection(ctx, *group); err != nil {
+	errCtx := "updating group"
+	if err := i.auth.UpdateGroup(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -66,7 +60,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 }
 
 func (i *Interactor) ensureNameExists(name string) error {
-	baseErr := fmt.Errorf("ensuring that collection with name %v exists", name)
+	baseErr := fmt.Errorf("ensuring that group with name %v exists", name)
 	exists, err := i.repo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
@@ -78,7 +72,7 @@ func (i *Interactor) ensureNameExists(name string) error {
 }
 
 func (i *Interactor) ensureNameDoesNotExist(name string) error {
-	baseErr := fmt.Errorf("ensuring that a collection with name %v does not already exist", name)
+	baseErr := fmt.Errorf("ensuring that a group with name %v does not already exist", name)
 	exists, err := i.repo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)

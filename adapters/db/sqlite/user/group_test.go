@@ -7,7 +7,6 @@ import (
 	grpr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	// e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 

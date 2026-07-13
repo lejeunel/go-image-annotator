@@ -28,6 +28,14 @@ CREATE TABLE IF NOT EXISTS groups (
 );
 CREATE UNIQUE INDEX idx_groups_name ON groups(name);
 
+CREATE TABLE IF NOT EXISTS roles (
+    id varchar(36),
+    name varchar(30) not null unique,
+    description text,
+    PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX idx_roles_name ON roles(name);
+
 CREATE TABLE IF NOT EXISTS images (
     id varchar(36),
     hash varchar(128),
@@ -85,6 +93,12 @@ CREATE TABLE IF NOT EXISTS users_groups (
   user_id varchar(36) REFERENCES users(id),
   group_id varchar(36) REFERENCES groups(id),
   PRIMARY KEY (user_id, group_id)
+);
+
+CREATE TABLE IF NOT EXISTS users_roles (
+  user_id varchar(36) REFERENCES users(id),
+  role_id varchar(36) REFERENCES roles(id),
+  PRIMARY KEY (user_id, role_id)
 );
 -- +goose Down
 

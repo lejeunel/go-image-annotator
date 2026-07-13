@@ -44,9 +44,9 @@ func (p ListLabelsPresenter) SuccessFindLabel(l l.Label) {
 }
 
 func (s *Server) LabelTableRow(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
 	switch r.URL.Query().Get("mode") {
 	case "confirm-delete":
-		name := r.URL.Query().Get("name")
 		RenderConfirmDeleteRow(len(listLabelsFields),
 			name,
 			"label",
@@ -54,15 +54,14 @@ func (s *Server) LabelTableRow(w http.ResponseWriter, r *http.Request) {
 			rt.AddQueryParams(rt.Label, "name", name, "mode", "view"),
 			w)
 	case "edit":
-		currentName := r.URL.Query().Get("name")
-		endpoint := rt.AddQueryParams(rt.Label, "name", currentName)
-		b := bf.NewHTMXInlineFormBuilder(len(listLabelsFields), endpoint, bf.HTMXPutMethod)
-		b.AddTitle(fmt.Sprintf("Editing %v", currentName))
+		b := bf.NewHTMXInlineFormBuilder(name, len(listLabelsFields),
+			rt.AddQueryParams(rt.Label, "name", name))
+		b.AddTitle(fmt.Sprintf("Editing %v", name))
 		b.AddTextField("description", "Description", "description", bf.WithDefault(r.URL.Query().Get("description")))
 		b.Render(w)
 	default:
 		s.Label.Find.Execute(r.Context(),
-			r.URL.Query().Get("name"),
+			name,
 			NewListLabelsPresenter(w, s.PageBuilder))
 	}
 }

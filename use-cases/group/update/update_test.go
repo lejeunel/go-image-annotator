@@ -14,7 +14,7 @@ func TestHandleAuthError(t *testing.T) {
 	assert.True(t, p.GotAuthErr)
 }
 
-func TestUpdateNonExistingCollectionShouldFail(t *testing.T) {
+func TestUpdateNonExistingGroupShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	non_existing_name := "non-existing-name"
 	itr := New(&FakeRepo{})
@@ -23,7 +23,7 @@ func TestUpdateNonExistingCollectionShouldFail(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestUpdateCollection(t *testing.T) {
+func TestUpdateGroup(t *testing.T) {
 	name := "name"
 	p := &FakePresenter{}
 	repo := &FakeRepo{Names: []string{name}}
@@ -36,7 +36,7 @@ func TestUpdateCollection(t *testing.T) {
 	assert.Equal(t, req.NewDescription, p.Got.Description)
 }
 
-func TestUpdateCollectionWithNameAlreadyTakenShouldFail(t *testing.T) {
+func TestUpdateGroupWithNameAlreadyTakenShouldFail(t *testing.T) {
 
 	p := &FakePresenter{}
 	name := "name"
@@ -47,7 +47,7 @@ func TestUpdateCollectionWithNameAlreadyTakenShouldFail(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestUpdateCollectionWithUnchangedNameShouldSucceed(t *testing.T) {
+func TestUpdateGroupWithUnchangedNameShouldSucceed(t *testing.T) {
 
 	p := &FakePresenter{}
 	name := "name"

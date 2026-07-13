@@ -42,17 +42,16 @@ func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 }
 
 func (s *Server) CollectionTableRow(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
 	switch r.URL.Query().Get("mode") {
 	case "edit":
-		currentName := r.URL.Query().Get("name")
-		endpoint := rt.AddQueryParams(rt.Collection, "name", currentName)
-		b := bf.NewHTMXInlineFormBuilder(len(listCollectionsFields), endpoint, bf.HTMXPutMethod)
-		b.AddTitle(fmt.Sprintf("Editing %v", currentName))
-		b.AddTextField("name", "Name", "name", bf.WithRequired(), bf.WithDefault(currentName))
+		endpoint := rt.AddQueryParams(rt.Collection, "name", name)
+		b := bf.NewHTMXInlineFormBuilder(name, len(listCollectionsFields), endpoint)
+		b.AddTitle(fmt.Sprintf("Editing %v", name))
+		b.AddTextField("name", "Name", "name", bf.WithRequired(), bf.WithDefault(name))
 		b.AddTextField("description", "Description", "description", bf.WithDefault(r.URL.Query().Get("description")))
 		b.Render(w)
 	case "confirm-delete":
-		name := r.URL.Query().Get("name")
 		RenderConfirmDeleteRow(len(listCollectionsFields),
 			name,
 			"collection",

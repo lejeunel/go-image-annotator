@@ -28,5 +28,6 @@ func NewSQLiteInteractors(i SQLiteRepos, pageSize int, allowedImageFormats []str
 			forgotPasswordTokenExpirationMinutes,
 			passwordGenerator, auth),
 		Annotation: NewSQLiteAnnotationInteractors(i, auth),
+		Group:      NewSQLiteGroupInteractors(i.Group),
 	}
 }
