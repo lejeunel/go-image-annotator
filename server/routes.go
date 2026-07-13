@@ -13,8 +13,11 @@ import (
 )
 
 func RouteAuth(r chi.Router, h ip.AuthHandler,
-	loginPage http.HandlerFunc, forgotPasswordPage http.HandlerFunc,
-	emitPasswordResetToken http.HandlerFunc,
+	loginPage http.HandlerFunc,
+	forgotPasswordForm http.HandlerFunc,
+	notifyPasswordReset http.HandlerFunc,
+	resetPasswordForm http.HandlerFunc,
+	resetPassword http.HandlerFunc,
 	sessionMiddleware func(http.Handler) http.Handler) {
 	r.Group(func(r chi.Router) {
 		r.Use(sessionMiddleware)
@@ -25,8 +28,10 @@ func RouteAuth(r chi.Router, h ip.AuthHandler,
 	})
 
 	r.Handle(rt.Login, loginPage)
-	r.Handle(rt.ForgotPasswordForm, forgotPasswordPage)
-	r.Post(rt.EmitPasswordResetToken, emitPasswordResetToken)
+	r.Handle(rt.ForgotPasswordForm, forgotPasswordForm)
+	r.Post(rt.NotifyPasswordReset, notifyPasswordReset)
+	r.Handle(rt.ResetPasswordForm, resetPasswordForm)
+	r.Post(rt.ResetPassword, resetPassword)
 }
 
 func RouteAPIDocs(r chi.Router, h http.HandlerFunc, mws ...func(http.Handler) http.Handler) {

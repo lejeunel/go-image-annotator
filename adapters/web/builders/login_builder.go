@@ -68,6 +68,6 @@ func (b *LoginPageBuilder) Render(w io.Writer) {
 	b.BasePageBuilder.SetContent(b.makeContent()).Render(w)
 }
 
-func NewLoginPageBuilder(base BasePageBuilder) *LoginPageBuilder {
-	return &LoginPageBuilder{BasePageBuilder: base}
+func NewLoginPageBuilder(base BasePageBuilder) LoginPageBuilder {
+	return LoginPageBuilder{BasePageBuilder: base}
 }

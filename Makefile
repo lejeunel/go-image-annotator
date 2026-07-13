@@ -1,4 +1,5 @@
 # ====== CONFIG ======
+VERSION := v0.1
 REPO := github.com/lejeunel/go-image-annotator
 
 SPEC := assets/openapi.yaml
@@ -25,7 +26,7 @@ api-code: $(MODELS_OUT) $(SERVER_OUT)
 build:
 	go build \
 		-ldflags "\
-			-X '$(REPO)/globals.Version=v1.2.3' \
+			-X '$(REPO)/globals.Version=$(VERSION)' \
 			-X '$(REPO)/globals.Commit=$$(git rev-parse --short HEAD)' \
 			-X '$(REPO)/globals.Date=$$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
 
@@ -71,8 +72,8 @@ alpine-persist:
 	wget https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js -O $(STATIC_DIR)/alpine-persist.js
 
 annotorious:
-	wget https://cdn.jsdelivr.net/npm/annotorious@0.6.4/annotorious.min.js -O $(STATIC_DIR)/annotorious.js
-	wget https://cdn.jsdelivr.net/npm/annotorious@0.6.4/css/annotorious.min.css -O $(STATIC_DIR)/annotorious.css
+	wget https://cdn.jsdelivr.net/npm/@annotorious/annotorious@3.8.0/dist/annotorious.js -O $(STATIC_DIR)/annotorious.js
+	wget https://cdn.jsdelivr.net/npm/@annotorious/annotorious@3.8.0/dist/annotorious.css -O $(STATIC_DIR)/annotorious.css
 
 stoplight:
 	wget https://unpkg.com/@stoplight/elements/web-components.min.js -O $(STATIC_DIR)/stoplight.js

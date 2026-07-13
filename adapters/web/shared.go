@@ -13,3 +13,13 @@ func NotifySuccessPayloadAndReload(title, message string) ([]byte, error) {
 		},
 	})
 }
+
+func NotifyError(title, message string) ([]byte, error) {
+	return json.Marshal(map[string]any{
+		"htmx-notify": map[string]string{
+			"variant": "danger",
+			"title":   title,
+			"message": message,
+		},
+	})
+}

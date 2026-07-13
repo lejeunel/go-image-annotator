@@ -31,6 +31,7 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	pageBuilder := b.NewPageBuilder(basePageBuilder, currentVersion)
 	loginPageBuilder := b.NewLoginPageBuilder(basePageBuilder)
 	forgotPasswordPageBuilder := b.NewForgotPasswordBuilder(basePageBuilder)
+	resetPasswordPageBuilder := b.NewResetPasswordBuilder(basePageBuilder)
 
 	app := sqlite.NewSQLiteApp(cfg, auth)
 
@@ -62,9 +63,13 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	)
 	RouteAPISpecs(router)
 	RouteStaticFiles(router)
-	RouteAuth(router, app.AuthHandler, LoginPageHandlerFunc(*loginPageBuilder),
-		ForgotPasswordHandlerFunc(*forgotPasswordPageBuilder),
-		web.EmitPasswordResetTokenHandlerFunc(app.Itrs.User.RequestForgottenPassword, *logger),
+	RouteAuth(router, app.AuthHandler,
+		LoginPageHandlerFunc(loginPageBuilder),
+		web.ForgotPassword(forgotPasswordPageBuilder),
+		web.NotifyPasswordReset(app.Itrs.User.RequestForgottenPassword, *logger,
+			cfg.URL+rt.ResetPasswordForm),
+		web.ResetPasswordForm(resetPasswordPageBuilder),
+		web.ResetPassword(app.Itrs.User.ResetForgottenPassword, *logger),
 		app.SessionManager.LoadAndSave)
 
 	return router

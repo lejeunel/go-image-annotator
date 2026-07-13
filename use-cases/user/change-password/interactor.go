@@ -34,7 +34,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if err := i.passwordValidator.Validate(r.FirstPassword); err != nil {
-		out.Error(fmt.Errorf("%v: checking for password validity: %w", errCtx, e.ErrInvalidPassword))
+		out.Error(fmt.Errorf("%v: checking for password validity: %w: %w", errCtx, err, e.ErrInvalidPassword))
 		return
 	}
 

@@ -13,11 +13,6 @@ func LoginPageHandlerFunc(builder b.LoginPageBuilder) http.HandlerFunc {
 		builder.Render(w)
 	}
 }
-func ForgotPasswordHandlerFunc(builder b.ForgotPasswordBuilder) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		builder.Render(w)
-	}
-}
 
 func HomePageHandlerFunc(pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

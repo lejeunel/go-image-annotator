@@ -20,7 +20,7 @@ func (b *ForgotPasswordBuilder) makeContent() Node {
 		Span(
 			Div(Class("flex justify-center text-gray-900 dark:text-white font-bold text-xl mt-4 mb-4"), Text(forgotPasswordTitle)),
 			Form(
-				Attr("hx-post", rt.EmitPasswordResetToken),
+				Attr("hx-post", rt.NotifyPasswordReset),
 				Attr("hx-swap", "outerHTML"),
 				Attr("hx-target", "this"),
 				Class("bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-80 mb-4"),
@@ -36,6 +36,6 @@ func (b *ForgotPasswordBuilder) Render(w io.Writer) {
 	b.BasePageBuilder.SetContent(b.makeContent()).Render(w)
 }
 
-func NewForgotPasswordBuilder(base BasePageBuilder) *ForgotPasswordBuilder {
-	return &ForgotPasswordBuilder{BasePageBuilder: base}
+func NewForgotPasswordBuilder(base BasePageBuilder) ForgotPasswordBuilder {
+	return ForgotPasswordBuilder{BasePageBuilder: base}
 }

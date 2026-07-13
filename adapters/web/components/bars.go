@@ -148,11 +148,11 @@ func MakeFooter(currentVersion g.Info) Node {
 	return Footer(
 		Class("flex fixed bottom-0 z-30 h-8 text-xs w-screen items-center justify-end border-t border-outline bg-surface-alt/75 px-10 backdrop-blur-xl dark:border-outline-dark dark:bg-surface-dark-alt/75"),
 		Div(
-			Class("flex items-center gap-2 text-gray-400 dark:text-gray-600 hover:text-gray-500 hover:dark:text-gray-500"),
+			Class("flex items-center gap-2 text-gray-400 dark:text-gray-400 hover:text-gray-500 hover:dark:text-gray-500"),
 			Div(
 				MakeDocsButton(),
 			),
-			Div(Class("h-5 w-px bg-gray-800 dark:bg-gray-200")),
+			Div(Class("h-5 w-px bg-gray-800 dark:bg-gray-400")),
 			Div(
 				MakeRepoButton(g.PackageName, currentVersion.Version, g.RepoURL),
 			),

@@ -1,7 +1,6 @@
 package web
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -20,13 +19,10 @@ type HTMXErrorPresenter struct {
 }
 
 func (p HTMXErrorPresenter) Error(err error) {
-	payload, _ := json.Marshal(map[string]any{
-		"htmx-notify": map[string]string{
-			"variant": "danger",
-			"title":   fmt.Sprintf("failed %v", p.task),
-			"message": err.Error(),
-		},
-	})
+	payload, _ := NotifyError(fmt.Sprintf("failed %v", p.task),
+		err.Error())
+	fmt.Println(err)
+	fmt.Println(payload)
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusUnprocessableEntity)
 }

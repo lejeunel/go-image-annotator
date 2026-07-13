@@ -75,21 +75,21 @@ func (v *AnnotationView) Render(w http.ResponseWriter) {
 func (v *AnnotationView) ShapeSelector() Node {
 	return Div(
 		Attr("x-data", "{ active: 'rectangle'}"),
-		Class("flex gap-2 pb-2"),
+		Class("flex gap-2 mb-2"),
 		Button(
 			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'rectangle', '%v': active !== 'rectangle'}`, s.PrimaryButton, s.InactiveButton)),
 			Attr("@click", "AnnotatorModule.drawRectangle(); active = 'rectangle';"),
-			Raw(ic.BoundingBoxIcon), Div(Class("ml-1"), Text("Rectangle"))),
+			Div(Class("flex items-center gap-1"), Raw(ic.BoundingBoxIcon), Div(Class("ml-1"), Text("Rectangle")))),
 		Button(
 			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'polygon', '%v': active !== 'polygon'}`, s.PrimaryButton, s.InactiveButton)),
 			Attr("@click", "AnnotatorModule.drawPolygon(); active = 'polygon';"),
-			Raw(ic.PolygonIcon), Div(Class("ml-1"), Text("Polygon"))))
+			Div(Class("flex items-center gap-1"), Raw(ic.PolygonIcon), Div(Class("ml-1"), Text("Polygon")))))
 }
 
 func AnnotoriousLib() []Node {
 	var scripts []Node
-	scripts = append(scripts, Script(Defer(), Src("/static/annotorious.js")))
 	scripts = append(scripts, Link(Href("/static/annotorious.css"), Rel("stylesheet")))
+	scripts = append(scripts, Script(Src("/static/annotorious.js")))
 	return scripts
 }
 

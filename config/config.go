@@ -10,6 +10,7 @@ type Config struct {
 	ArtefactDir                          string   `required:"true"`
 	InitialAdminEmail                    string   `required:"true"`
 	InitialAdminPassword                 string   `required:"true"`
+	URL                                  string   `required:"true"`
 	AllowedImageFormats                  []string `default:"jpeg,png"`
 	DefaultPageSize                      int      `default:"20"`
 	ApiTokenLength                       int      `default:"32"`
