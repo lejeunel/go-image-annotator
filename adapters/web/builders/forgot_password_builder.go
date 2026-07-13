@@ -4,6 +4,7 @@ import (
 	"io"
 
 	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -19,8 +20,9 @@ func (b *ForgotPasswordBuilder) makeContent() Node {
 		Span(
 			Div(Class("flex justify-center text-gray-900 dark:text-white font-bold text-xl mt-4 mb-4"), Text(forgotPasswordTitle)),
 			Form(
-				Action("/request-password-reset"),
-				Method("POST"),
+				Attr("hx-post", rt.EmitPasswordResetToken),
+				Attr("hx-swap", "outerHTML"),
+				Attr("hx-target", "this"),
 				Class("bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-80 mb-4"),
 				Label(For("email"), Text("Email"), Class("block text-sm font-medium text-gray-900 dark:text-white")),
 				Input(Type("email"), ID("email"), Name("email"), Required(),
@@ -31,9 +33,7 @@ func (b *ForgotPasswordBuilder) makeContent() Node {
 	)
 }
 func (b *ForgotPasswordBuilder) Render(w io.Writer) {
-	b.BasePageBuilder.SetContent(b.makeContent())
-	b.Render(w)
-
+	b.BasePageBuilder.SetContent(b.makeContent()).Render(w)
 }
 
 func NewForgotPasswordBuilder(base BasePageBuilder) *ForgotPasswordBuilder {

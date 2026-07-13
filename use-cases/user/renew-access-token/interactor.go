@@ -20,20 +20,20 @@ type Interactor struct {
 	auth Auth
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort) {
 	errCtx := "renewing personal access token"
 	if err := i.auth.RenewToken(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
 	}
-	exists, err := i.repo.Exists(r.Id)
+	exists, err := i.repo.Exists(userId)
 	if err != nil {
-		out.Error(fmt.Errorf("%v: checking user exists: %w", errCtx, err))
+		out.Error(fmt.Errorf("%v: checking user %v exists: %w", errCtx, userId, err))
 		return
 	}
 	if !exists {
-		out.Error(fmt.Errorf("%v: checking user exists: %w", errCtx, e.ErrNotFound))
+		out.Error(fmt.Errorf("%v: checking user %v exists: %w", errCtx, userId, e.ErrNotFound))
 		return
 	}
 
@@ -43,11 +43,11 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.repo.SetAccessTokenHash(r.Id, token.Hash); err != nil {
+	if err := i.repo.SetAccessTokenHash(userId, token.Hash); err != nil {
 		out.Error(fmt.Errorf("%v: setting token hash: %w", errCtx, err))
 		return
 	}
-	out.Success(Response{Id: r.Id, PersonalAccessToken: token.Value})
+	out.Success(Response{Id: userId, PersonalAccessToken: token.Value})
 }
 
 type Option func(*Interactor)

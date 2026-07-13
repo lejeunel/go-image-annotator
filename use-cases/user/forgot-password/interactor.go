@@ -23,24 +23,24 @@ type Interactor struct {
 	clock          clockwork.Clock
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort) {
 	errCtx := "requesting forgotten password token"
 	if err := i.auth.RequestForgottenPasswordToken(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
 	}
-	exists, err := i.repo.Exists(r.Id)
+	exists, err := i.repo.Exists(userId)
 	if err != nil {
-		out.Error(fmt.Errorf("%v: checking user exists: %w", errCtx, err))
+		out.Error(fmt.Errorf("%v: checking user %v exists: %w", errCtx, userId, err))
 		return
 	}
 	if !exists {
-		out.Error(fmt.Errorf("%v: checking user exists: %w", errCtx, e.ErrNotFound))
+		out.Error(fmt.Errorf("%v: checking user %v exists: %w", errCtx, userId, e.ErrNotFound))
 		return
 	}
 
-	if err := i.repo.DeleteForgottenPasswordTokens(r.Id); err != nil {
+	if err := i.repo.DeleteForgottenPasswordTokens(userId); err != nil {
 		out.Error(fmt.Errorf("%v: deleting previous tokens: %w", errCtx, e.ErrInternal))
 		return
 	}
@@ -52,11 +52,11 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	expiresAt := i.clock.Now().Add(time.Minute * time.Duration(i.expiresMinutes))
-	if err := i.repo.AddForgottenPasswordState(token.Hash, r.Id, expiresAt); err != nil {
+	if err := i.repo.AddForgottenPasswordState(token.Hash, userId, expiresAt); err != nil {
 		out.Error(fmt.Errorf("%v: storing token: %w", errCtx, err))
 		return
 	}
-	out.Success(Response{Id: r.Id, Email: r.Id,
+	out.Success(Response{Id: userId, Email: userId,
 		PasswordResetToken: token.Value})
 }
 

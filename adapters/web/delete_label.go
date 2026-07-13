@@ -21,7 +21,7 @@ func NewDeleteLabelPresenter(w http.ResponseWriter) DeleteLabelPresenter {
 }
 
 func (p DeleteLabelPresenter) SuccessDeleteLabel(name string) {
-	payload, _ := NotifySuccessPayload(p.task, p.okMessageFunc(name))
+	payload, _ := NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(name))
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }

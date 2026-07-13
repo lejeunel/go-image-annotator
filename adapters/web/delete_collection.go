@@ -23,7 +23,7 @@ func NewDeleteCollectionPresenter(w http.ResponseWriter) DeleteCollectionPresent
 }
 
 func (p DeleteCollectionPresenter) Success(r delete.Response) {
-	payload, _ := NotifySuccessPayload(p.task, p.okMessageFunc(r))
+	payload, _ := NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }

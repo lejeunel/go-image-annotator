@@ -5,7 +5,3 @@ type Response struct {
 	Id                 string
 	PasswordResetToken string
 }
-
-type Request struct {
-	Id string
-}

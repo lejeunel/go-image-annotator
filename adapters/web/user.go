@@ -5,7 +5,6 @@ import (
 
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 )
 
 func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
@@ -24,5 +23,5 @@ func (s *Server) NewAPIToken(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed getting user identity", http.StatusForbidden)
 	}
 	s.Interactors.User.RenewToken.Execute(r.Context(),
-		rt.Request{Id: user.Id}, cmp.NewAPITokenPresenter(w))
+		user.Id, cmp.NewAPITokenPresenter(w))
 }

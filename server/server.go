@@ -64,6 +64,7 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	RouteStaticFiles(router)
 	RouteAuth(router, app.AuthHandler, LoginPageHandlerFunc(*loginPageBuilder),
 		ForgotPasswordHandlerFunc(*forgotPasswordPageBuilder),
+		web.EmitPasswordResetTokenHandlerFunc(app.Itrs.User.RequestForgottenPassword, *logger),
 		app.SessionManager.LoadAndSave)
 
 	return router

@@ -25,7 +25,7 @@ func NewCreateLabelPresenter(w http.ResponseWriter) CreateLabelPresenter {
 	return CreateLabelPresenter{w, task, okMessageFunc, NewHTMXErrorPresenter(task, w)}
 }
 func (p CreateLabelPresenter) Success(r create.Response) {
-	payload, _ := NotifySuccessPayload(p.task, p.okMessageFunc(r))
+	payload, _ := NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }

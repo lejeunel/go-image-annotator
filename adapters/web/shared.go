@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-func NotifySuccessPayload(title, message string) ([]byte, error) {
+func NotifySuccessPayloadAndReload(title, message string) ([]byte, error) {
 	return json.Marshal(map[string]any{
 		"htmx-notify-and-reload": map[string]string{
 			"variant": "success",

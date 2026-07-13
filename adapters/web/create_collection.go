@@ -23,7 +23,7 @@ func NewCreateCollectionPresenter(w http.ResponseWriter) CreateCollectionPresent
 	return CreateCollectionPresenter{w, task, okMessageFunc, NewHTMXErrorPresenter(task, w)}
 }
 func (p CreateCollectionPresenter) Success(r create.Response) {
-	payload, _ := NotifySuccessPayload(p.task, p.okMessageFunc(r))
+	payload, _ := NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }

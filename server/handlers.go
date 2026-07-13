@@ -1,10 +1,11 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
-	"net/http"
 )
 
 func LoginPageHandlerFunc(builder b.LoginPageBuilder) http.HandlerFunc {
