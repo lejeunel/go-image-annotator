@@ -11,12 +11,12 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
+	webauth "github.com/lejeunel/go-image-annotator/adapters/web/auth"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	a "github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
 	g "github.com/lejeunel/go-image-annotator/globals"
-	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 
 	"net/http"
 
@@ -29,9 +29,6 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	currentVersion := g.Info{Version: g.Version, Commit: g.Commit, Date: g.Date}
 	basePageBuilder := b.NewBasePageBuilder()
 	pageBuilder := b.NewPageBuilder(basePageBuilder, currentVersion)
-	loginPageBuilder := b.NewLoginPageBuilder(basePageBuilder)
-	forgotPasswordPageBuilder := b.NewForgotPasswordBuilder(basePageBuilder)
-	resetPasswordPageBuilder := b.NewResetPasswordBuilder(basePageBuilder)
 
 	app := sqlite.NewSQLiteApp(cfg, auth)
 
@@ -39,11 +36,6 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	a.MaybeCreateInitialAdmin(app.Itrs.User.Create, cfg.InitialAdminEmail, cfg.InitialAdminPassword)
 
 	baseURL := fmt.Sprintf("%v:%v", url, port)
-
-	ip.SetupForGoogle(ip.OAuthProviderConfig{Key: os.Getenv("GOIA_GOOGLE_CLIENT_ID"),
-		Secret:      os.Getenv("GOIA_GOOGLE_CLIENT_SECRET"),
-		CallbackURL: rt.MakeOAuthCallbackURL(baseURL, "google")})
-	loginPageBuilder.AddOAuthProvider("google", rt.MakeOAuthLoginURL("google"))
 
 	router := chi.NewRouter()
 	colorizer := ap.NewCyclicColorizer(ap.Palette)
@@ -63,13 +55,17 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	)
 	RouteAPISpecs(router)
 	RouteStaticFiles(router)
-	RouteAuth(router, app.AuthHandler,
-		LoginPageHandlerFunc(loginPageBuilder),
-		web.ForgotPassword(forgotPasswordPageBuilder),
-		web.NotifyPasswordReset(app.Itrs.User.RequestForgottenPassword, *logger,
-			cfg.URL+rt.ResetPasswordForm),
-		web.ResetPasswordForm(resetPasswordPageBuilder),
-		web.ResetPassword(app.Itrs.User.ResetForgottenPassword, *logger),
+
+	authServer := webauth.NewAuthWebServer(
+		baseURL,
+		basePageBuilder,
+		*logger,
+		app.SessionManager,
+		app.Itrs.User.RequestForgottenPassword,
+		app.Itrs.User.ResetForgottenPassword)
+
+	RouteAuth(router,
+		authServer,
 		app.SessionManager.LoadAndSave)
 
 	return router

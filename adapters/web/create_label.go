@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
+	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 	"net/http"
@@ -14,7 +15,7 @@ type CreateLabelPresenter struct {
 	writer        http.ResponseWriter
 	task          string
 	okMessageFunc func(create.Response) string
-	HTMXErrorPresenter
+	htmx.ErrorPresenter
 }
 
 func NewCreateLabelPresenter(w http.ResponseWriter) CreateLabelPresenter {
@@ -22,10 +23,10 @@ func NewCreateLabelPresenter(w http.ResponseWriter) CreateLabelPresenter {
 	okMessageFunc := func(r create.Response) string {
 		return fmt.Sprintf("Successfully created label %v", r.Name)
 	}
-	return CreateLabelPresenter{w, task, okMessageFunc, NewHTMXErrorPresenter(task, w)}
+	return CreateLabelPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 func (p CreateLabelPresenter) Success(r create.Response) {
-	payload, _ := NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
+	payload, _ := htmx.NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }

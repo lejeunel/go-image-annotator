@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"net/http"
 )
 
@@ -9,7 +10,7 @@ type DeleteLabelPresenter struct {
 	writer        http.ResponseWriter
 	task          string
 	okMessageFunc func(string) string
-	HTMXErrorPresenter
+	htmx.ErrorPresenter
 }
 
 func NewDeleteLabelPresenter(w http.ResponseWriter) DeleteLabelPresenter {
@@ -17,11 +18,11 @@ func NewDeleteLabelPresenter(w http.ResponseWriter) DeleteLabelPresenter {
 	okMessageFunc := func(name string) string {
 		return fmt.Sprintf("Successfully deleted label %v", name)
 	}
-	return DeleteLabelPresenter{w, task, okMessageFunc, NewHTMXErrorPresenter(task, w)}
+	return DeleteLabelPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 
 func (p DeleteLabelPresenter) SuccessDeleteLabel(name string) {
-	payload, _ := NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(name))
+	payload, _ := htmx.NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(name))
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }

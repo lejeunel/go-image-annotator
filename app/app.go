@@ -3,12 +3,11 @@ package app
 import (
 	"context"
 	"errors"
-	"fmt"
+	"log/slog"
 
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	i "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	s "github.com/lejeunel/go-image-annotator/shared/session"
 	createusr "github.com/lejeunel/go-image-annotator/use-cases/user/create"
 )
@@ -16,26 +15,27 @@ import (
 type App struct {
 	Itrs           Interactors
 	SessionManager s.MySessionManager
-	i.AuthHandler
 	a.Annotator
 }
 
-func NewApp(itrs Interactors, sm s.MySessionManager, authHandler i.AuthHandler,
+func NewApp(itrs Interactors,
+	sm s.MySessionManager,
 	an a.Annotator) App {
-	return App{itrs, sm, authHandler, an}
+	return App{itrs, sm, an}
 }
 
-type Presenter struct {
+type InitialAdminPresenter struct {
+	slog.Logger
 }
 
-func (p Presenter) Success(r createusr.Response) {
-	fmt.Println("created initial admin user with id:", r.Id)
+func (p InitialAdminPresenter) Success(r createusr.Response) {
+	p.Logger.Info("created initial admin user", "id", r.Id)
 }
-func (p Presenter) Error(err error) {
+func (p InitialAdminPresenter) Error(err error) {
 	if errors.Is(err, e.ErrDuplicate) {
 		return
 	}
-	fmt.Println(fmt.Errorf("creating initial admin user: %w", err))
+	p.Logger.Error("creating initial admin user", "error", err)
 }
 
 func MaybeCreateInitialAdmin(itr createusr.Interactor, email, password string) {
@@ -43,6 +43,5 @@ func MaybeCreateInitialAdmin(itr createusr.Interactor, email, password string) {
 	itr.Execute(
 		u.AppendUserToContext(context.Background(), initAdminUser),
 		createusr.Request{Id: email, Password: &password, IsAdmin: true},
-		Presenter{})
-
+		InitialAdminPresenter{})
 }

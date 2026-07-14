@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
 	"net/http"
 )
@@ -12,7 +13,7 @@ type CreateCollectionPresenter struct {
 	writer        http.ResponseWriter
 	task          string
 	okMessageFunc func(create.Response) string
-	HTMXErrorPresenter
+	htmx.ErrorPresenter
 }
 
 func NewCreateCollectionPresenter(w http.ResponseWriter) CreateCollectionPresenter {
@@ -20,10 +21,10 @@ func NewCreateCollectionPresenter(w http.ResponseWriter) CreateCollectionPresent
 	okMessageFunc := func(r create.Response) string {
 		return fmt.Sprintf("Successfully created collection %v", r.Name)
 	}
-	return CreateCollectionPresenter{w, task, okMessageFunc, NewHTMXErrorPresenter(task, w)}
+	return CreateCollectionPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 func (p CreateCollectionPresenter) Success(r create.Response) {
-	payload, _ := NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
+	payload, _ := htmx.NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }

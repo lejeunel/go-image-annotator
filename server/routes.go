@@ -4,34 +4,30 @@ import (
 	"fmt"
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
 	"github.com/lejeunel/go-image-annotator/adapters/web"
+	auth "github.com/lejeunel/go-image-annotator/adapters/web/auth"
 	as "github.com/lejeunel/go-image-annotator/assets"
 	rt "github.com/lejeunel/go-image-annotator/routes"
-	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 
 	"github.com/go-chi/chi/v5"
 	"net/http"
 )
 
-func RouteAuth(r chi.Router, h ip.AuthHandler,
-	loginPage http.HandlerFunc,
-	forgotPasswordForm http.HandlerFunc,
-	notifyPasswordReset http.HandlerFunc,
-	resetPasswordForm http.HandlerFunc,
-	resetPassword http.HandlerFunc,
+func RouteAuth(r chi.Router,
+	s auth.Server,
 	sessionMiddleware func(http.Handler) http.Handler) {
 	r.Group(func(r chi.Router) {
 		r.Use(sessionMiddleware)
-		r.HandleFunc(rt.LoginWithPassword, h.PasswordLogin)
-		r.HandleFunc(rt.LoginOAuth, h.OAuthLogin)
-		r.HandleFunc(rt.CallbackOAuth, h.OAuthCallback)
-		r.HandleFunc(rt.Logout, h.Logout)
+		r.HandleFunc(rt.LoginWithPassword, s.PasswordLogin)
+		r.HandleFunc(rt.LoginOAuth, s.OAuthLogin)
+		r.HandleFunc(rt.CallbackOAuth, s.OAuthCallback)
+		r.HandleFunc(rt.Logout, s.Logout)
 	})
 
-	r.Handle(rt.Login, loginPage)
-	r.Handle(rt.ForgotPasswordForm, forgotPasswordForm)
-	r.Post(rt.NotifyPasswordReset, notifyPasswordReset)
-	r.Handle(rt.ResetPasswordForm, resetPasswordForm)
-	r.Post(rt.ResetPassword, resetPassword)
+	r.Get(rt.Login, s.Login)
+	r.Get(rt.ForgotPasswordForm, s.ForgotPasswordForm)
+	r.Post(rt.NotifyPasswordReset, s.NotifyPasswordReset)
+	r.Get(rt.ResetPasswordForm, s.ResetPasswordForm)
+	r.Post(rt.ResetPassword, s.ResetPassword)
 }
 
 func RouteAPIDocs(r chi.Router, h http.HandlerFunc, mws ...func(http.Handler) http.Handler) {

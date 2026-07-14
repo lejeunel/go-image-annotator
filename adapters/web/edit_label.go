@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/update"
 	"net/http"
 )
@@ -9,7 +10,7 @@ type EditLabelPresenter struct {
 	writer        http.ResponseWriter
 	task          string
 	okMessageFunc func(update.Response) string
-	HTMXErrorPresenter
+	htmx.ErrorPresenter
 }
 
 func NewEditLabelPresenter(w http.ResponseWriter) EditLabelPresenter {
@@ -17,11 +18,11 @@ func NewEditLabelPresenter(w http.ResponseWriter) EditLabelPresenter {
 	okMessageFunc := func(r update.Response) string {
 		return "Successfully updated label"
 	}
-	return EditLabelPresenter{w, task, okMessageFunc, NewHTMXErrorPresenter(task, w)}
+	return EditLabelPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 
 func (p EditLabelPresenter) SuccessUpdateLabel(r update.Response) {
-	payload, _ := NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
+	payload, _ := htmx.NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }

@@ -8,12 +8,6 @@ import (
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 )
 
-func LoginPageHandlerFunc(builder b.LoginPageBuilder) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		builder.Render(w)
-	}
-}
-
 func HomePageHandlerFunc(pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pb.SetUserIdentity(r.Context())

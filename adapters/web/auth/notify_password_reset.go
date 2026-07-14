@@ -1,4 +1,4 @@
-package web
+package auth
 
 import (
 	"log/slog"
@@ -48,10 +48,9 @@ func (p NotifyPasswordResetPresenter) redirect() {
 	Div(Text("If the provided email exists in our database, you will receive an email shortly.")).Render(p.w)
 }
 
-func NotifyPasswordReset(itr fpw.Interactor, logger slog.Logger, baseURL string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		p := NotifyPasswordResetPresenter{VoidPasswordResetNotifier{logger}, logger, w, baseURL}
-		r.ParseForm()
-		itr.Execute(r.Context(), r.FormValue("email"), p)
-	}
+func (s Server) NotifyPasswordReset(w http.ResponseWriter, r *http.Request) {
+	p := NotifyPasswordResetPresenter{VoidPasswordResetNotifier{s.Logger}, s.Logger, w,
+		s.baseURL + rt.ResetPasswordForm}
+	r.ParseForm()
+	s.requestTokenItr.Execute(r.Context(), r.FormValue("email"), p)
 }

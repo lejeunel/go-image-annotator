@@ -3,6 +3,7 @@ package web
 import (
 	"net/http"
 
+	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
 )
 
@@ -10,7 +11,7 @@ type EditCollectionPresenter struct {
 	writer        http.ResponseWriter
 	task          string
 	okMessageFunc func(update.Response) string
-	HTMXErrorPresenter
+	htmx.ErrorPresenter
 }
 
 func NewEditCollectionPresenter(w http.ResponseWriter) EditCollectionPresenter {
@@ -18,11 +19,11 @@ func NewEditCollectionPresenter(w http.ResponseWriter) EditCollectionPresenter {
 	okMessageFunc := func(r update.Response) string {
 		return "Successfully updated collection"
 	}
-	return EditCollectionPresenter{w, task, okMessageFunc, NewHTMXErrorPresenter(task, w)}
+	return EditCollectionPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 
 func (p EditCollectionPresenter) SuccessUpdateCollection(r update.Response) {
-	payload, _ := NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
+	payload, _ := htmx.NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }

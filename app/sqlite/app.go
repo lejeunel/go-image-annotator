@@ -10,7 +10,6 @@ import (
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	"github.com/lejeunel/go-image-annotator/modules/scroller"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
-	ip "github.com/lejeunel/go-image-annotator/shared/identity_provider"
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
 )
 
@@ -23,7 +22,6 @@ func NewSQLiteApp(cfg config.Config, auth auth.Authorizer) app.App {
 	repos := NewSQLiteRepos(sqldb,
 		fs.NewFileStore(cfg.ArtefactDir))
 	sessionManager := sm.NewSQLiteSessionManager(sqldb.DB, repos.User, apiTokenGen)
-	identityProvider := ip.NewAuthHandler(sessionManager)
 	scr := scroller.New(repos.Scroller)
 	itrs := NewSQLiteInteractors(
 		repos,
@@ -46,7 +44,6 @@ func NewSQLiteApp(cfg config.Config, auth auth.Authorizer) app.App {
 	return app.App{
 		Itrs:           itrs,
 		SessionManager: sessionManager,
-		AuthHandler:    identityProvider,
 		Annotator:      annotator,
 	}
 
