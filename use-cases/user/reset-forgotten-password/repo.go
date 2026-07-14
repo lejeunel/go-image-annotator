@@ -7,4 +7,5 @@ import (
 type Repo interface {
 	FindResetPasswordState([]byte) (*usr.ForgotPasswordState, error)
 	UpdatePassword(usr.UserId, []byte) error
+	DeleteForgottenPasswordTokens(usr.UserId) error
 }

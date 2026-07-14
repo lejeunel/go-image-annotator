@@ -16,11 +16,12 @@ func (p *FakePresenter) Success() {
 }
 
 type FakeRepo struct {
-	GotId       usr.UserId
-	GotHash     []byte
-	Missing     bool
-	Return      *usr.ForgotPasswordState
-	ErrOnUpdate error
+	GotId        usr.UserId
+	GotHash      []byte
+	Missing      bool
+	Return       *usr.ForgotPasswordState
+	ErrOnUpdate  error
+	DeletedToken bool
 }
 
 func (r *FakeRepo) FindResetPasswordState(hash []byte) (*usr.ForgotPasswordState, error) {
@@ -36,6 +37,11 @@ func (r *FakeRepo) UpdatePassword(id usr.UserId, hash []byte) error {
 	}
 	r.GotId = id
 	r.GotHash = hash
+	return nil
+}
+
+func (r *FakeRepo) DeleteForgottenPasswordTokens(usr.UserId) error {
+	r.DeletedToken = true
 	return nil
 }
 

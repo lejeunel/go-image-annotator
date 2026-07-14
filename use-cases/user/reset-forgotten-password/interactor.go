@@ -50,6 +50,10 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: updating password: %v, %w", errCtx, err, e.ErrInternal))
 		return
 	}
+	if err := i.repo.DeleteForgottenPasswordTokens(state.Id); err != nil {
+		out.Error(fmt.Errorf("%v: deleting token: %v, %w", errCtx, err, e.ErrInternal))
+		return
+	}
 
 	out.Success()
 }

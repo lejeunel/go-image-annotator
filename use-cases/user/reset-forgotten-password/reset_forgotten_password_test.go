@@ -78,3 +78,15 @@ func TestUpdatePassword(t *testing.T) {
 	assert.Equal(t, hash, repo.GotHash)
 	assert.Equal(t, id, repo.GotId)
 }
+
+func TestShouldDeleteTokenAfterSuccessfulUpdate(t *testing.T) {
+	p := &FakePresenter{}
+	hash := []byte("the-hash")
+	id := "user@mail.com"
+	state := u.ForgotPasswordState{Id: id}
+	repo := &FakeRepo{Return: &state}
+	itr := New(repo, &FakeTokenHasher{ReturnHash: hash}, &FakePasswordValidator{})
+	itr.Execute(t.Context(), Request{FirstPassword: "1", SecondPassword: "1"}, p)
+	assert.True(t, p.GotSuccess)
+	assert.Equal(t, true, repo.DeletedToken)
+}
