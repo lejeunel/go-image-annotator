@@ -32,7 +32,7 @@ func NewServer(
 		Annotator:               annotator,
 		SessionManager:          sessionManager,
 		PageBuilder:             pageBuilder,
-		UserDashboardBuilder:    b.NewUserDashboardBuilder(),
+		UserDashboardBuilder:    b.NewUserDashboardBuilder(pageBuilder),
 		AnnotationPagePresenter: annotationPagePresenter,
 		AnnotoriousPresenter:    annotoriousPresenter,
 		DefaultPageSize:         pageSize,

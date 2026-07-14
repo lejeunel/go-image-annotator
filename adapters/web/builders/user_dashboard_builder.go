@@ -1,13 +1,13 @@
 package builders
 
 import (
-	"context"
 	_ "embed"
+	"fmt"
+	"strings"
+
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
-	u "github.com/lejeunel/go-image-annotator/entities/user"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
-	"strings"
 )
 
 type UserInfoRow struct {
@@ -21,16 +21,14 @@ func (r UserInfoRow) Render() Node {
 }
 
 type UserDashboardBuilder struct {
-	User *u.User
+	PageBuilder
 }
 
-func (b *UserDashboardBuilder) SetUserIdentityFromContext(ctx context.Context) *UserDashboardBuilder {
-	id := u.IdentityFromContext(ctx)
-	b.User = id
-	return b
-}
-
-func (b *UserDashboardBuilder) Build() Node {
+func (b *UserDashboardBuilder) Build() *UserDashboardBuilder {
+	if b.User == nil {
+		b.SetError(fmt.Errorf("failed build user dashboard: user identity has not been set"))
+		return b
+	}
 	rows := []UserInfoRow{{Name: "Email", Value: b.User.Id}}
 	if b.User.IsAdmin {
 		rows = append(rows, UserInfoRow{Name: "Is admin", Value: "yes"})
@@ -48,9 +46,11 @@ func (b *UserDashboardBuilder) Build() Node {
 			Text("Generate a secret token to authenticate your API requests. ")),
 		Raw(cmp.ApiTokenFrame))
 
-	return Div(cmp.MakeCard(profile), APIToken)
+	content := Div(cmp.MakeCard(profile), APIToken)
+	b.SetContent(content)
+	return b
 }
 
-func NewUserDashboardBuilder() UserDashboardBuilder {
-	return UserDashboardBuilder{}
+func NewUserDashboardBuilder(b PageBuilder) UserDashboardBuilder {
+	return UserDashboardBuilder{PageBuilder: b}
 }

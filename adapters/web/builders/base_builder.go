@@ -13,6 +13,12 @@ import (
 //go:embed templates/base.html
 var BaseHTML string
 
+type BaseData struct {
+	Title   string
+	Scripts template.HTML
+	Content template.HTML
+}
+
 type BasePageBuilder struct {
 	Title     string
 	pane      *Node
@@ -40,16 +46,13 @@ func (b *BasePageBuilder) SetError(err error) *BasePageBuilder {
 	b.Error = err
 	return b
 }
-
-type BaseData struct {
-	Title   string
-	Scripts template.HTML
-	Content template.HTML
-}
-
 func (b *BasePageBuilder) Render(w io.Writer) {
 	if b.Error != nil {
 		Text(b.Error.Error()).Render(w)
+		return
+	}
+	if b.Content == nil {
+		Text("error generating page content").Render(w)
 		return
 	}
 	baseTemplate, err := template.New("").Parse(BaseHTML)

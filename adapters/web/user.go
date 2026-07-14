@@ -8,13 +8,11 @@ import (
 )
 
 func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
-	p := s.PageBuilder
-	p.SetUserIdentity(r.Context())
-	p.SetActive(cmp.NoPageActive)
-	udb := s.UserDashboardBuilder.SetUserIdentityFromContext(r.Context())
-	p.SetTitle("User Dashboard")
-	p.SetContent(udb.Build())
-	p.Render(w)
+	udb := s.UserDashboardBuilder
+	udb.SetUserIdentity(r.Context())
+	udb.SetActive(cmp.NoPageActive)
+	udb.SetTitle("User Dashboard")
+	udb.Build().Render(w)
 
 }
 func (s *Server) NewAPIToken(w http.ResponseWriter, r *http.Request) {
