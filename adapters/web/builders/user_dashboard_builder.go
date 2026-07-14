@@ -40,7 +40,6 @@ func (b *UserDashboardBuilder) Build() *UserDashboardBuilder {
 			return r.Render()
 		}),
 	)
-
 	APIToken := Div(Class("mt-2"), H3(Text("API Token")),
 		P(Class("text-sm text-on-surface dark:text-on-surface-dark"),
 			Text("Generate a secret token to authenticate your API requests. ")),

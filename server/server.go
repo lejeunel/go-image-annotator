@@ -6,13 +6,16 @@ import (
 	"os"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
+	userDashboard "github.com/lejeunel/go-image-annotator/adapters/web/user-dashboard"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
-	webauth "github.com/lejeunel/go-image-annotator/adapters/web/auth"
+	wauth "github.com/lejeunel/go-image-annotator/adapters/web/auth"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	clc "github.com/lejeunel/go-image-annotator/adapters/web/collection"
+	lbl "github.com/lejeunel/go-image-annotator/adapters/web/label"
 	a "github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
@@ -48,6 +51,9 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 		HomePageHandlerFunc(*pageBuilder),
 		app.SessionManager.LoadAndSave, app.SessionManager.AuthCookiesMiddleWare, WebRequireLogin,
 	)
+	udb := userDashboard.New(*pageBuilder, app.Itrs.User.RenewToken)
+	udb.Route(router, app.SessionManager.LoadAndSave, app.SessionManager.AuthCookiesMiddleWare, WebRequireLogin)
+
 	RouteAPI(router, *api.NewServer(&app.Itrs, *logger),
 		app.SessionManager.LoadAndSave, app.SessionManager.AuthBearerMiddleWare, app.SessionManager.AuthCookiesMiddleWare, ApiRequireLogin)
 	RouteAPIDocs(router, APIDocsHandlerFunc(rt.APISpecs, *pageBuilder),
@@ -56,16 +62,24 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	RouteAPISpecs(router)
 	RouteStaticFiles(router)
 
-	authServer := webauth.NewAuthWebServer(
+	collectionServer := clc.New(*pageBuilder, cfg.DefaultPageSize,
+		app.Itrs.Collection.Create, app.Itrs.Collection.List, app.Itrs.Collection.Update,
+		app.Itrs.Collection.Delete, app.Itrs.Collection.Find)
+	collectionServer.Route(router, app.SessionManager.LoadAndSave, app.SessionManager.AuthCookiesMiddleWare, WebRequireLogin)
+
+	labelServer := lbl.New(*pageBuilder, cfg.DefaultPageSize,
+		app.Itrs.Label.Create, app.Itrs.Label.List, app.Itrs.Label.Update,
+		app.Itrs.Label.Delete, app.Itrs.Label.Find)
+	labelServer.Route(router, app.SessionManager.LoadAndSave, app.SessionManager.AuthCookiesMiddleWare, WebRequireLogin)
+
+	authServer := wauth.New(
 		baseURL,
 		basePageBuilder,
 		*logger,
 		app.SessionManager,
 		app.Itrs.User.RequestForgottenPassword,
 		app.Itrs.User.ResetForgottenPassword)
-
-	RouteAuth(router,
-		authServer,
+	authServer.Route(router,
 		app.SessionManager.LoadAndSave)
 
 	return router

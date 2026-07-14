@@ -1,4 +1,4 @@
-package web
+package label
 
 import (
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
@@ -26,13 +26,13 @@ func (p EditLabelPresenter) SuccessUpdateLabel(r update.Response) {
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }
-func (s *Server) EditLabel(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
 
-	s.Label.Update.Execute(r.Context(),
+	s.UpdateItr.Execute(r.Context(),
 		update.Request{
 			Name:           r.URL.Query().Get("name"),
 			NewDescription: r.FormValue("description"),

@@ -4,31 +4,12 @@ import (
 	"fmt"
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
 	"github.com/lejeunel/go-image-annotator/adapters/web"
-	auth "github.com/lejeunel/go-image-annotator/adapters/web/auth"
 	as "github.com/lejeunel/go-image-annotator/assets"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 
 	"github.com/go-chi/chi/v5"
 	"net/http"
 )
-
-func RouteAuth(r chi.Router,
-	s auth.Server,
-	sessionMiddleware func(http.Handler) http.Handler) {
-	r.Group(func(r chi.Router) {
-		r.Use(sessionMiddleware)
-		r.HandleFunc(rt.LoginWithPassword, s.PasswordLogin)
-		r.HandleFunc(rt.LoginOAuth, s.OAuthLogin)
-		r.HandleFunc(rt.CallbackOAuth, s.OAuthCallback)
-		r.HandleFunc(rt.Logout, s.Logout)
-	})
-
-	r.Get(rt.Login, s.Login)
-	r.Get(rt.ForgotPasswordForm, s.ForgotPasswordForm)
-	r.Post(rt.NotifyPasswordReset, s.NotifyPasswordReset)
-	r.Get(rt.ResetPasswordForm, s.ResetPasswordForm)
-	r.Post(rt.ResetPassword, s.ResetPassword)
-}
 
 func RouteAPIDocs(r chi.Router, h http.HandlerFunc, mws ...func(http.Handler) http.Handler) {
 	mwChain := chi.Chain(mws...)
@@ -41,12 +22,8 @@ func RouteWebPages(r chi.Router, s web.Server, home http.HandlerFunc,
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
 		r.Get(rt.Home, home)
-		r.Get(rt.UserDashboard, s.UserDashboard)
-		r.Get(rt.NewAPIToken, s.NewAPIToken)
 
-		r.Get(rt.Collections, s.ListCollections)
 		r.Get(rt.Images, s.ListImages)
-		r.Get(rt.Labels, s.ListLabels)
 		r.Get(rt.Image, s.ViewImage)
 
 		r.Post(rt.SubmitBox, s.SubmitBox)
@@ -58,18 +35,6 @@ func RouteWebPages(r chi.Router, s web.Server, home http.HandlerFunc,
 		r.Get(rt.Annotations, s.GetRegionsAsJSON)
 		r.Delete(rt.RemoveAnnotation, s.DeleteAnnotation)
 		r.Post(rt.SetLabel, s.SetLabel)
-
-		r.Get(rt.Collection, s.CollectionTableRow)
-		r.Post(rt.Collection, s.CreateCollection)
-		r.Delete(rt.Collection, s.DeleteCollection)
-		r.Put(rt.Collection, s.EditCollection)
-		r.Get(rt.CreateCollectionForm, s.CreateCollectionForm)
-
-		r.Get(rt.Label, s.LabelTableRow)
-		r.Put(rt.Label, s.EditLabel)
-		r.Delete(rt.Label, s.DeleteLabel)
-		r.Post(rt.Label, s.CreateLabel)
-		r.Get(rt.CreateLabelForm, s.CreateLabelForm)
 	})
 }
 func RouteAPI(r chi.Router, apiServer api.Server, mws ...func(http.Handler) http.Handler) {

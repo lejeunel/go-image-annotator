@@ -1,4 +1,4 @@
-package web
+package collection
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
+	e "github.com/lejeunel/go-image-annotator/adapters/web/error"
+	pg "github.com/lejeunel/go-image-annotator/adapters/web/pagination"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
@@ -20,13 +22,13 @@ var listCollectionsFields = []string{"name", "description", "group", "created", 
 type ListCollectionsPresenter struct {
 	b.PaginatedListBuilder
 	Writer io.Writer
-	WebPageErrorPresenter
+	e.WebPageErrorPresenter
 }
 
 func NewListCollectionsPresenter(w http.ResponseWriter, p b.PageBuilder) ListCollectionsPresenter {
 	p.SetTitle("Collections").SetActive(cmp.CollectionsPageActive)
 	b := b.NewPaginatedListBuilder(p, listCollectionsFields)
-	return ListCollectionsPresenter{b, w, NewWebPageErrorPresenter(w)}
+	return ListCollectionsPresenter{b, w, e.NewErrorPresenter(w)}
 }
 func (p ListCollectionsPresenter) SuccessFindCollection(c clc.Collection) {
 	MakeListCollectionRow(c).Render(p.Writer)
@@ -41,7 +43,7 @@ func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 	p.Build().Render(p.Writer)
 }
 
-func (s *Server) CollectionTableRow(w http.ResponseWriter, r *http.Request) {
+func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
 	switch r.URL.Query().Get("mode") {
 	case "edit":
@@ -52,29 +54,29 @@ func (s *Server) CollectionTableRow(w http.ResponseWriter, r *http.Request) {
 		b.AddTextField("description", "Description", "description", bf.WithDefault(r.URL.Query().Get("description")))
 		b.Render(w)
 	case "confirm-delete":
-		RenderConfirmDeleteRow(len(listCollectionsFields),
+		b.RenderConfirmDeleteRow(len(listCollectionsFields),
 			name,
 			"collection",
 			rt.AddQueryParams(rt.Collection, "name", name),
 			rt.AddQueryParams(rt.Collection, "name", name, "mode", "view"),
 			w)
 	default:
-		s.Collection.Find.Execute(r.Context(),
+		s.FindItr.Execute(r.Context(),
 			r.URL.Query().Get("name"),
 			NewListCollectionsPresenter(w, s.PageBuilder))
 	}
 
 }
-func (s *Server) CreateCollectionForm(w http.ResponseWriter, r *http.Request) {
+func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b := bf.NewHTMXCreateFormBuilder(rt.Collection, createCollectionTargetDiv)
 	b.AddTitle("Create a new collection")
 	b.AddTextField("name", "Name", "name", bf.WithRequired())
 	b.AddTextField("description", "Description", "description")
 	b.Render(w)
 }
-func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
+func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
-	s.Collection.List.Execute(r.Context(), list.Request{PageSize: s.DefaultPageSize, Page: int64(GetPageFromRequest(r))},
+	s.ListItr.Execute(r.Context(), list.Request{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
 		NewListCollectionsPresenter(w, s.PageBuilder))
 }
 

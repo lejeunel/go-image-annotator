@@ -1,11 +1,11 @@
-package web
+package pagination
 
 import (
 	"net/http"
 	"strconv"
 )
 
-func GetPageFromRequest(r *http.Request) int {
+func GetPageFromRequest(r *http.Request) int64 {
 	pageStr := r.URL.Query().Get("page")
 
 	if pageStr == "" {
@@ -17,5 +17,5 @@ func GetPageFromRequest(r *http.Request) int {
 		return 1
 	}
 
-	return page
+	return int64(page)
 }

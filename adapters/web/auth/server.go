@@ -22,7 +22,7 @@ type Server struct {
 	baseURL          string
 }
 
-func NewAuthWebServer(
+func New(
 	baseURL string,
 	basePageBuilder b.BasePageBuilder,
 	logger slog.Logger,

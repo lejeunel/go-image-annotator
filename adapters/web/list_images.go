@@ -10,6 +10,8 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
+	ew "github.com/lejeunel/go-image-annotator/adapters/web/error"
+	pg "github.com/lejeunel/go-image-annotator/adapters/web/pagination"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -21,7 +23,7 @@ import (
 type ListImagesPresenter struct {
 	b.PaginatedListBuilder
 	io.Writer
-	WebPageErrorPresenter
+	ew.WebPageErrorPresenter
 	collection string
 }
 
@@ -30,7 +32,7 @@ var listImagesFields = []string{"id", "collection", "ingested", "n. annot.", "ac
 func NewListImagesPresenter(w http.ResponseWriter, p b.PageBuilder, collection string) ListImagesPresenter {
 	p.SetTitle("Image")
 	b := b.NewPaginatedListBuilder(p, listImagesFields)
-	return ListImagesPresenter{b, w, NewWebPageErrorPresenter(w), collection}
+	return ListImagesPresenter{b, w, ew.NewErrorPresenter(w), collection}
 }
 
 func (p ListImagesPresenter) SuccessListImages(r list.Response) {
@@ -66,7 +68,7 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 		FilteringParams: im.FilteringParams{
 			Collection: &collection,
 			PageSize:   s.DefaultPageSize,
-			Page:       int64(GetPageFromRequest(r))},
+			Page:       pg.GetPageFromRequest(r)},
 		OrderingParams: im.OrderingParams{IngestTime: true}},
 		NewListImagesPresenter(w, s.PageBuilder, collection))
 }

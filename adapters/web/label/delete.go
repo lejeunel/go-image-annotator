@@ -1,4 +1,4 @@
-package web
+package label
 
 import (
 	"fmt"
@@ -26,8 +26,8 @@ func (p DeleteLabelPresenter) SuccessDeleteLabel(name string) {
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }
-func (s *Server) DeleteLabel(w http.ResponseWriter, r *http.Request) {
-	s.Label.Delete.Execute(r.Context(),
+func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
+	s.DeleteItr.Execute(r.Context(),
 		r.URL.Query().Get("name"),
 		NewDeleteLabelPresenter(w))
 }

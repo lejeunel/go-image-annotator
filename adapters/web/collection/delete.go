@@ -1,4 +1,4 @@
-package web
+package collection
 
 import (
 	"fmt"
@@ -28,8 +28,8 @@ func (p DeleteCollectionPresenter) Success(r delete.Response) {
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }
-func (s *Server) DeleteCollection(w http.ResponseWriter, r *http.Request) {
-	s.Collection.Delete.Execute(r.Context(),
+func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
+	s.DeleteItr.Execute(r.Context(),
 		r.URL.Query().Get("name"),
 		NewDeleteCollectionPresenter(w))
 }

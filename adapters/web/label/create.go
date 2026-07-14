@@ -1,4 +1,4 @@
-package web
+package label
 
 import (
 	"fmt"
@@ -30,15 +30,15 @@ func (p CreateLabelPresenter) Success(r create.Response) {
 	p.writer.Header().Set("HX-Trigger", string(payload))
 	p.writer.WriteHeader(http.StatusOK)
 }
-func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
-	s.Label.Create.Execute(r.Context(), create.Request{Name: r.FormValue("name"),
+	s.CreateItr.Execute(r.Context(), create.Request{Name: r.FormValue("name"),
 		Description: r.FormValue("description")}, NewCreateLabelPresenter(w))
 }
-func (s *Server) CreateLabelForm(w http.ResponseWriter, r *http.Request) {
+func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b := bf.NewHTMXCreateFormBuilder(rt.Label, createLabelTargetDiv)
 	b.AddTitle("Create a new label")
 	b.AddTextField("name", "Name", "name", bf.WithRequired())
