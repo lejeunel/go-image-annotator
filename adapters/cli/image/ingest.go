@@ -10,14 +10,15 @@ import (
 	s "github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	ing "github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
+	ingm "github.com/lejeunel/go-image-annotator/modules/ingester"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 )
 
 type IngestPresenter struct {
 	cli.ErrorPresenter
 }
 
-func (p *IngestPresenter) Success(r ing.Response) {
+func (p *IngestPresenter) Success(r ingm.Response) {
 	fmt.Println("ingested image with id:", r.ImageId)
 }
 
@@ -34,14 +35,14 @@ func IngestDirectory(dir, collection string) {
 	}
 }
 
-func ingestImage(itr *ing.Interactor, dir string, entry os.DirEntry, collection string) {
+func ingestImage(itr *ingest.Interactor, dir string, entry os.DirEntry, collection string) {
 	if !entry.IsDir() {
 		f, err := os.Open(filepath.Join(dir, entry.Name()))
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		itr.Execute(context.Background(), ing.Request{Collection: collection, Reader: f}, &IngestPresenter{})
+		itr.Execute(context.Background(), ingm.Request{Collection: collection, Reader: f}, &IngestPresenter{})
 	}
 
 }

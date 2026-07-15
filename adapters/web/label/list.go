@@ -44,7 +44,6 @@ func (p ListLabelsPresenter) SuccessListLabels(r list.Response) {
 func (p ListLabelsPresenter) SuccessFindLabel(l l.Label) {
 	MakeListLabelRow(l).Render(p.Writer)
 }
-
 func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
 	switch r.URL.Query().Get("mode") {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
-	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
+	ig "github.com/lejeunel/go-image-annotator/modules/ingester"
 )
 
 type Ingest struct {
@@ -14,7 +14,7 @@ type Ingest struct {
 	json.ErrorPresenter
 }
 
-func (p Ingest) Success(r ingest.Response) {
+func (p Ingest) Success(r ig.Response) {
 	id := r.ImageId.String()
 	response := models.ImageIngestionResponse{
 		Id: &id,

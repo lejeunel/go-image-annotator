@@ -1,13 +1,17 @@
 package sqlite
 
 import (
+	"crypto/sha256"
+
 	db "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	"github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/config"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
+	ig "github.com/lejeunel/go-image-annotator/modules/ingester"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
+	rea "github.com/lejeunel/go-image-annotator/modules/reader"
 	"github.com/lejeunel/go-image-annotator/modules/scroller"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
@@ -19,10 +23,11 @@ func NewSQLiteApp(cfg config.Config, auth auth.Authorizer) app.App {
 	forgottenPasswordGen := tk.New(cfg.RandomPasswordLength)
 	passwordValidator := pv.New(cfg.PasswordMinEntropy)
 	sqldb := db.NewSQLiteDB(cfg.SQLiteDBPath)
-	repos := NewSQLiteRepos(sqldb,
-		fs.NewFileStore(cfg.ArtefactDir))
+	fileStore := fs.NewFileStore(cfg.ArtefactDir)
+	repos := NewSQLiteRepos(sqldb, fileStore)
 	sessionManager := sm.NewSQLiteSessionManager(sqldb.DB, repos.User, apiTokenGen)
 	scr := scroller.New(repos.Scroller)
+	ingester := ig.New(repos.Image, repos.Collection, repos.Label, repos.Annotation, fileStore, sha256.New(), rea.ImageSpecsDetector{})
 	itrs := NewSQLiteInteractors(
 		repos,
 		cfg.DefaultPageSize,
@@ -33,6 +38,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Authorizer) app.App {
 		cfg.ForgotPasswordTokenExpirationMinutes,
 		passwordValidator,
 		apiTokenGen,
+		ingester,
 		auth)
 	annotator := a.NewAnnotator(scr, itrs.Image.Find,
 		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox,

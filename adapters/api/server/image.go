@@ -6,10 +6,11 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/image"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	ig "github.com/lejeunel/go-image-annotator/modules/ingester"
 	rd "github.com/lejeunel/go-image-annotator/modules/reader"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
-	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 )
 
@@ -47,25 +48,25 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 	s.Image.List.Execute(req, presenter.NewListPresenter(w, s.Logger))
 }
 
-func NewIngestImageRequest(req models.NewImage, allowedImageFormats []string) ingest.Request {
+func NewIngestImageRequest(req models.NewImage, allowedImageFormats []string) ig.Request {
 
-	ingestReq := ingest.Request{Collection: req.Collection, Reader: rd.NewBase64ImageDecoder(allowedImageFormats, req.Data)}
+	ingestReq := ig.Request{Collection: req.Collection, Reader: rd.NewBase64ImageDecoder(allowedImageFormats, req.Data)}
 	appendLabelsToIngestImageRequest(&ingestReq, req.Labels)
 	appendBoundingBoxesToIngestImageRequest(&ingestReq, req.BoundingBoxes)
 	return ingestReq
 }
 
-func appendBoundingBoxesToIngestImageRequest(req *ingest.Request, boxes *[]models.NewBoundingBox) {
+func appendBoundingBoxesToIngestImageRequest(req *ig.Request, boxes *[]models.NewBoundingBox) {
 	if boxes != nil {
 		for _, box := range *boxes {
 			req.BoundingBoxes = append(req.BoundingBoxes,
-				ingest.BoundingBoxRequest{Xc: box.Xc, Yc: box.Yc,
+				an.BoundingBoxRequest{Xc: box.Xc, Yc: box.Yc,
 					Width: box.Width, Height: box.Height})
 		}
 	}
 }
 
-func appendLabelsToIngestImageRequest(req *ingest.Request, labels *[]string) {
+func appendLabelsToIngestImageRequest(req *ig.Request, labels *[]string) {
 	if labels != nil {
 		req.Labels = *labels
 	}

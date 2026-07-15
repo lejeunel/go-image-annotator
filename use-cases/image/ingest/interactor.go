@@ -2,46 +2,31 @@ package ingest
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 
-	"github.com/jonboulle/clockwork"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
-
-	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
-	"hash"
+	ing "github.com/lejeunel/go-image-annotator/modules/ingester"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type IImageSpecsDetector interface {
 	Detect(io.Reader) (*im.ImageSpecs, io.Reader, error)
 }
 
+type Ingester interface {
+	Ingest() error
+}
+
 type Interactor struct {
-	Hasher             hash.Hash
-	ImageRepo          ImageRepo
-	CollectionRepo     CollectionRepo
-	AnnotationRepo     AnnotationRepo
-	LabelRepo          LabelRepo
-	ArtefactRepo       ast.Interface
-	ImageSpecsDetector IImageSpecsDetector
-	auth               Auth
-	clock              clockwork.Clock
+	ingester ing.Interface
+	auth     Auth
+	repo     CollectionRepo
 }
-
 type Option func(*Interactor)
-
-func WithClock(c clockwork.Clock) Option {
-	return func(i *Interactor) {
-		i.clock = c
-	}
-}
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
@@ -49,15 +34,9 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(imageRepo ImageRepo, collectionRepo CollectionRepo,
-	labelRepo LabelRepo, annotationRepo AnnotationRepo,
-	fileStore ast.Interface, hasher hash.Hash, specsDetector IImageSpecsDetector, opts ...Option) *Interactor {
-	i := &Interactor{ImageRepo: imageRepo, CollectionRepo: collectionRepo,
-		AnnotationRepo: annotationRepo, LabelRepo: labelRepo,
-		ArtefactRepo: fileStore, Hasher: hasher,
-		ImageSpecsDetector: specsDetector,
-		auth:               auth.NewVoidAuth(),
-		clock:              clockwork.NewRealClock(),
+func New(ingester ing.Interface, repo CollectionRepo, opts ...Option) *Interactor {
+	i := &Interactor{ingester: ingester,
+		auth: auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -65,8 +44,8 @@ func New(imageRepo ImageRepo, collectionRepo CollectionRepo,
 	return i
 }
 
-func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	errCtx := "ingesting image"
+func (i Interactor) Execute(ctx context.Context, r ing.Request, out OutputPort) {
+	errCtx := fmt.Errorf("ingesting image")
 	collection, err := i.findCollectionByName(r.Collection)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
@@ -80,162 +59,28 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	imageId := im.NewImageId()
-	image, err := i.buildImage(imageId, *collection, r.Labels, r.BoundingBoxes)
+	user := u.IdentityFromContext(ctx)
+	if user == nil {
+		out.Error(fmt.Errorf("%w: extracting user identity failed from context: %w", errCtx, e.ErrAuthentication))
+		return
+	}
+	response, err := i.ingester.Ingest(ing.Request{UserId: user.Id, Collection: collection.Name, Labels: r.Labels,
+		BoundingBoxes: r.BoundingBoxes, Reader: r.Reader})
 	if err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		out.Error(fmt.Errorf("%w: %w", errCtx, err))
 		return
 	}
 
-	specs, reader, err := i.ImageSpecsDetector.Detect(r.Reader)
-	if err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-
-	}
-
-	hash, err := i.ingestRawData(imageId, reader)
-	if err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-
-	specs.IngestedAt = i.clock.Now()
-	if err := i.ingestImage(ctx, image, *hash, *specs); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		i.ImageRepo.Delete(image.Id)
-		i.ArtefactRepo.Delete(image.Id)
-		return
-	}
-
-	out.Success(NewIngestionResponse(image))
-
-}
-func (i *Interactor) ingestRawData(id im.ImageId, reader io.Reader) (*[]byte, error) {
-
-	tee := io.TeeReader(reader, i.Hasher)
-	hash := i.Hasher.Sum(nil)
-
-	if err := i.ensureDuplicateImageDoesNotExists(hash); err != nil {
-		return nil, err
-	}
-
-	if err := i.ArtefactRepo.Store(id, tee); err != nil {
-		return nil, err
-	}
-
-	return &hash, nil
-
-}
-
-func (i *Interactor) buildImage(id im.ImageId, collection clc.Collection, labelNames []string,
-	bboxes []BoundingBoxRequest) (*im.Image, error) {
-	image := im.NewImage(id, collection)
-
-	if err := i.appendLabels(&image, labelNames); err != nil {
-		return nil, err
-	}
-
-	if err := i.appendBoundingBoxes(&image, bboxes); err != nil {
-		return nil, err
-	}
-
-	return &image, nil
-
-}
-
-func (i Interactor) appendLabels(image *im.Image, labelNames []string) error {
-	for _, labelName := range labelNames {
-		label, err := i.findLabelByName(labelName)
-		if err != nil {
-			return err
-		}
-		if err := image.AddLabel(*label); err != nil {
-			return err
-		}
-	}
-	return nil
-
-}
-func (i Interactor) appendBoundingBoxes(image *im.Image, bboxes []BoundingBoxRequest) error {
-	baseErr := fmt.Errorf("appending bounding boxes")
-	for _, bbox := range bboxes {
-		label, err := i.findLabelByName(bbox.Label)
-		if err != nil {
-			return fmt.Errorf("%w: %w", baseErr, err)
-		}
-		box_ := a.NewBoundingBox(a.NewAnnotationId(), bbox.Xc, bbox.Yc, bbox.Width, bbox.Height, *label)
-		if err := image.AddBoundingBox(box_); err != nil {
-			return fmt.Errorf("%w: %w", baseErr, err)
-		}
-	}
-	return nil
-
-}
-
-func (i Interactor) ingestImage(ctx context.Context, image *im.Image, hash []byte, specs im.ImageSpecs) error {
-	now := i.clock.Now()
-
-	var authorId u.UserId
-	author := u.IdentityFromContext(ctx)
-	if author != nil {
-		authorId = author.Id
-	}
-
-	if err := i.ImageRepo.AddImage(image.Id, hash, specs); err != nil {
-		return fmt.Errorf("adding image: %w", err)
-	}
-
-	if err := i.ImageRepo.AddToCollection(image.Id, image.Collection.Id); err != nil {
-		return fmt.Errorf("adding image to collection: %w", err)
-	}
-
-	for _, label := range image.Labels {
-		if err := i.AnnotationRepo.AddImageLabel(image.Id, image.Collection.Id, label, &authorId, &now); err != nil {
-			return fmt.Errorf("adding image label to collection: %w", err)
-		}
-	}
-
-	for _, box := range image.BoundingBoxes {
-		if err := i.AnnotationRepo.AddBoundingBox(image.Id, image.Collection.Id, box, &authorId, &now); err != nil {
-			return fmt.Errorf("adding bounding box: %w", err)
-		}
-	}
-	return nil
+	out.Success(*response)
 
 }
 
 func (i Interactor) findCollectionByName(name string) (*clc.Collection, error) {
-	collection, err := i.CollectionRepo.FindCollectionByName(name)
+	collection, err := i.repo.FindCollectionByName(name)
 	baseErr := fmt.Errorf("finding collection with name %v", name)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", baseErr, err)
 	}
 	return collection, nil
 
-}
-
-func (i Interactor) findLabelByName(name string) (*lbl.Label, error) {
-	baseErr := fmt.Errorf("fetching label by name %v", name)
-	label, err := i.LabelRepo.FindLabel(name)
-	if err != nil {
-		return nil, fmt.Errorf("%w: %w", baseErr, err)
-	}
-	return label, nil
-
-}
-
-func (i Interactor) ensureDuplicateImageDoesNotExists(hash []byte) error {
-
-	baseErr := fmt.Errorf("ensuring that duplicate image does not exist using hash")
-	duplicateId, err := i.ImageRepo.FindImageIdByHash(hash)
-	if duplicateId != nil {
-		return fmt.Errorf("%w: found duplicate image with id %v: %w", baseErr, *duplicateId, e.ErrDuplicate)
-
-	}
-
-	if errors.Is(err, e.ErrNotFound) {
-		return nil
-	}
-	return err
 }

@@ -2,37 +2,30 @@ package ingest
 
 import (
 	"bytes"
-	"context"
 	"io"
 	"time"
 
+	"github.com/jonboulle/clockwork"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	ing "github.com/lejeunel/go-image-annotator/modules/ingester"
+	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
-type TestingIngester struct{}
-
-func (i TestingIngester) Ingest(ing.Request) (*ing.Response, error) {
-	return nil, nil
-}
-
-func NewTestingIngester() TestingIngester {
-	return TestingIngester{}
-}
-
-func NewTestingInteractor(repo CollectionRepo, opts ...Option) *Interactor {
-	i := &Interactor{
-		ingester: NewTestingIngester(),
-		auth:     auth.NewVoidAuth(),
-		repo:     repo,
+func NewTestingIngester(opts ...Option) *Ingester {
+	i := &Ingester{
+		ImageRepo:          &FakeImageRepo{},
+		CollectionRepo:     &FakeCollectionRepo{},
+		LabelRepo:          &FakeLabelRepo{},
+		AnnotationRepo:     &FakeAnnotationRepo{},
+		ArtefactRepo:       &ast.FakeStore{},
+		Hasher:             &FakeHasher{},
+		ImageSpecsDetector: &FakeSpecsDetector{},
+		clock:              clockwork.NewFakeClock(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -60,17 +53,6 @@ func (f *FakeHasher) Size() int {
 
 func (f *FakeHasher) BlockSize() int {
 	return 1
-}
-
-type FakePresenter struct {
-	Got        *ing.Response
-	GotSuccess bool
-	t.TestingErrPresenter
-}
-
-func (p *FakePresenter) Success(r ing.Response) {
-	p.Got = &r
-	p.GotSuccess = true
 }
 
 type FakeCollectionRepo struct {
@@ -211,11 +193,4 @@ func (d *FakeSpecsDetector) Detect(r io.Reader) (*im.ImageSpecs, io.Reader, erro
 	}
 	return &d.Return, r, nil
 
-}
-
-type FailingAuth struct {
-}
-
-func (f FailingAuth) IngestImage(ctx context.Context, group string) error {
-	return e.ErrAuthorization
 }

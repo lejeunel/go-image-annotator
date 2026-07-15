@@ -1,0 +1,5 @@
+#+title: Resources
+
+https://www.alexedwards.net/blog/how-i-use-htmx-with-go
+https://nesv.github.io/golang/2014/02/25/worker-queues-in-go.html
+

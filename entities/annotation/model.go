@@ -113,6 +113,14 @@ type BoundingBoxResponse struct {
 	Height float32
 }
 
+type BoundingBoxRequest struct {
+	Label  string
+	Xc     float32
+	Yc     float32
+	Width  float32
+	Height float32
+}
+
 type BoundingBoxUpdatables struct {
 	LabelId lbl.LabelId
 	Xc      float32
