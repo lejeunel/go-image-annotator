@@ -35,10 +35,10 @@ func TestRetrieveTaskSpecification(t *testing.T) {
 	p := &FakePresenter{}
 	userId := "user@mail.com"
 	itr.Execute(CreateCtxWithUserId(t.Context(), userId), Request{}, p)
-	assert.NotNil(t, p.GotTask)
-	assert.Equal(t, task.CollectionCloneTask, p.GotTask.Type)
-	assert.Equal(t, task.PendingTask, p.GotTask.State)
-	assert.Equal(t, userId, p.GotTask.Issuer)
+	assert.NotNil(t, p.Got)
+	assert.Equal(t, task.CollectionCloneTask, p.Got.Type)
+	assert.Equal(t, task.PendingTask, p.Got.State)
+	assert.Equal(t, userId, p.Got.Issuer)
 	assert.True(t, p.GotSuccess)
 }
 func TestHandleClonerErr(t *testing.T) {

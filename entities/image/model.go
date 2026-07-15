@@ -57,6 +57,10 @@ func (i *Image) AddBoundingBox(box a.BoundingBox) error {
 	i.BoundingBoxes = append(i.BoundingBoxes, box)
 	return nil
 }
+func (i *Image) AddPolygon(polygon a.Polygon) error {
+	i.Polygons = append(i.Polygons, polygon)
+	return nil
+}
 func (i *Image) NumAnnotations() int {
 	return len(i.Labels) + len(i.BoundingBoxes) + len(i.Polygons)
 }

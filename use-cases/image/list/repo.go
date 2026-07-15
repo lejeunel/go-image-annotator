@@ -5,6 +5,6 @@ import (
 )
 
 type Repo interface {
-	List(im.FilteringParams, im.OrderingParams) ([]im.BaseImage, error)
+	Slice(im.FilteringParams, im.PaginationParams, im.OrderingParams) ([]im.BaseImage, error)
 	Count(im.CountingParams) (*int64, error)
 }

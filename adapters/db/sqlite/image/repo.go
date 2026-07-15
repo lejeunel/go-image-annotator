@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"iter"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -60,46 +61,34 @@ func (r SQLiteImageRepo) Count(f im.CountingParams) (*int64, error) {
 	return &count, nil
 
 }
-func (r SQLiteImageRepo) list(f im.FilteringParams, o im.OrderingParams) ([]ListRow, error) {
-	q := sq.StatementBuilder.Select(
-		"ic.image_id,ic.collection_id,i.ingested_at,c.name").From(
-		"images_collections AS ic").Join(
-		"images AS i ON ic.image_id=i.id").Join(
-		"collections AS c ON ic.collection_id=c.id")
-	q = q.Limit(uint64(f.PageSize)).Offset((uint64(f.Page-1) * uint64(f.PageSize)))
+func (r SQLiteImageRepo) Slice(f im.FilteringParams, p im.PaginationParams, o im.OrderingParams) ([]im.BaseImage, error) {
 
-	if f.Collection != nil {
-		q = q.Where(fmt.Sprintf("collection_id=(SELECT id FROM collections WHERE name='%v')", *f.Collection))
-	}
-
-	if o.IngestTime {
-		q = q.OrderBy("i.ingested_at")
-	}
-
-	q = q.OrderBy("ic.image_id")
-	sql, args, err := q.ToSql()
-	if err != nil {
-		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
-	}
-	records := []ListRow{}
-	if err := r.Db.Select(&records, sql, args...); err != nil {
-		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
-	}
-	return records, nil
-}
-
-func (r SQLiteImageRepo) List(f im.FilteringParams, o im.OrderingParams) ([]im.BaseImage, error) {
-
-	rows, err := r.list(f, o)
+	images, err := r.list(f, p, o)
 	if err != nil {
 		return nil, err
 	}
-	objects := []im.BaseImage{}
-	for _, r := range rows {
-		objects = append(objects, im.BaseImage{ImageId: r.ImageId, Collection: r.Name})
+	return images, nil
+}
+func (r SQLiteImageRepo) Iterate(f im.FilteringParams, pageSize int) iter.Seq2[im.BaseImage, error] {
+	return func(yield func(im.BaseImage, error) bool) {
+		var after *im.ImageId
+		for {
+			page, next, err := r.sliceAfterId(f, pageSize, after)
+			if err != nil {
+				yield(im.BaseImage{}, err)
+				return
+			}
+			for _, img := range page {
+				if !yield(img, nil) {
+					return // consumer stopped early
+				}
+			}
+			if len(page) < pageSize {
+				return // last page
+			}
+			after = next
+		}
 	}
-
-	return objects, nil
 }
 func (r SQLiteImageRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc.CollectionId) (bool, error) {
 	var count int64
@@ -170,6 +159,68 @@ func (r SQLiteImageRepo) RemoveImageFromCollection(imageId im.ImageId, collectio
 		return fmt.Errorf("removing image from image to collection junction table: %v: %w", err, e.ErrInternal)
 	}
 	return nil
+}
+func (r SQLiteImageRepo) makeBaseQuery(f im.FilteringParams, pageSize int) sq.SelectBuilder {
+	q := sq.StatementBuilder.Select(
+		"ic.image_id,ic.collection_id,i.ingested_at,c.name").From(
+		"images_collections AS ic").Join(
+		"images AS i ON ic.image_id=i.id").Join(
+		"collections AS c ON ic.collection_id=c.id")
+	q = q.Limit(uint64(pageSize))
+
+	if f.Collection != nil {
+		q = q.Where("collection_id=(SELECT id FROM collections WHERE name=?)", *f.Collection)
+	}
+
+	return q
+
+}
+func (r SQLiteImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, error) {
+	sql, args, err := q.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
+	}
+	records := []ListRow{}
+	if err := r.Db.Select(&records, sql, args...); err != nil {
+		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
+	}
+	images := []im.BaseImage{}
+	for _, r := range records {
+		images = append(images, im.BaseImage{ImageId: r.ImageId, Collection: r.Name})
+	}
+	return images, nil
+}
+func (r SQLiteImageRepo) list(f im.FilteringParams, p im.PaginationParams, o im.OrderingParams) ([]im.BaseImage, error) {
+	q := r.makeBaseQuery(f, p.PageSize)
+	q = q.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
+
+	if o.IngestTime {
+		q = q.OrderBy("i.ingested_at")
+	}
+
+	q = q.OrderBy("ic.image_id")
+	images, err := r.fetchBaseImages(q)
+	if err != nil {
+		return nil, err
+	}
+	return images, nil
+}
+func (r SQLiteImageRepo) sliceAfterId(f im.FilteringParams, pageSize int, after *im.ImageId) ([]im.BaseImage, *im.ImageId, error) {
+	q := r.makeBaseQuery(f, pageSize)
+	q = q.OrderBy("ic.image_id")
+	if after != nil {
+		q = q.Where(sq.Gt{"ic.image_id": after})
+	}
+
+	images, err := r.fetchBaseImages(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	var next *im.ImageId
+	if len(images) > 0 {
+		next = &images[len(images)-1].ImageId
+	}
+	return images, next, nil
 }
 
 func NewSQLiteImageRepo(db *sqlx.DB) SQLiteImageRepo {

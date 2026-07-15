@@ -66,9 +66,10 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 	}
 	s.Image.List.Execute(list_im.Request{
 		FilteringParams: im.FilteringParams{
-			Collection: &collection,
-			PageSize:   s.DefaultPageSize,
-			Page:       pg.GetPageFromRequest(r)},
+			Collection: &collection},
+		PaginationParams: im.PaginationParams{
+			PageSize: s.DefaultPageSize,
+			Page:     pg.GetPageFromRequest(r)},
 		OrderingParams: im.OrderingParams{IngestTime: true}},
 		NewListImagesPresenter(w, s.PageBuilder, collection))
 }

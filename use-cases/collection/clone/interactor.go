@@ -48,7 +48,6 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	specs := t.NewSpecs(t.NewTaskId(), user.Id, t.CollectionCloneTask)
 	task := t.NewCloneTask(t.NewTaskId(), user.Id,
 		r.Source, r.Destination, t.WithDeepClone())
 	if err := i.Cloner.Clone(task); err != nil {
@@ -56,5 +55,5 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.SuccessSubmitCloneTask(specs)
+	out.SuccessSubmitCloneTask(Response{Id: task.TaskId, Issuer: task.Issuer, Type: t.CollectionCloneTask, State: t.PendingTask})
 }

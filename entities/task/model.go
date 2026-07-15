@@ -16,19 +16,9 @@ const (
 	PendingTask TaskState = iota
 )
 
-type TaskSpecs struct {
-	Id     TaskId
-	Issuer u.UserId
-	Type   TaskType
-	State  TaskState
-}
-
-func NewSpecs(id TaskId, user u.UserId, t TaskType) TaskSpecs {
-	return TaskSpecs{Id: id, Issuer: user, Type: t, State: PendingTask}
-}
-
 type CloneTask struct {
-	TaskSpecs
+	TaskId
+	Issuer      u.UserId
 	Source      string
 	Destination string
 	Deep        bool
@@ -43,7 +33,7 @@ func WithDeepClone() Option {
 }
 
 func NewCloneTask(id TaskId, user u.UserId, src, dst string, opts ...Option) CloneTask {
-	cloneTask := &CloneTask{TaskSpecs: NewSpecs(id, user, CollectionCloneTask), Source: src, Destination: dst}
+	cloneTask := &CloneTask{id, user, src, dst, false}
 
 	for _, opt := range opts {
 		opt(cloneTask)

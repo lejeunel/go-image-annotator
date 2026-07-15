@@ -9,13 +9,9 @@ type WorkerPool interface {
 	Submit(func())
 }
 
-type TaskFuncBuilder interface {
-	Build(task.CloneTask) (func(), error)
-}
-
 type Cloner struct {
-	WorkerPool
-	TaskFuncBuilder
+	pool            WorkerPool
+	taskFuncBuilder TaskFuncBuilder
 }
 
 func New(pool WorkerPool, taskFuncBuilder TaskFuncBuilder) Cloner {
@@ -24,10 +20,10 @@ func New(pool WorkerPool, taskFuncBuilder TaskFuncBuilder) Cloner {
 
 func (c Cloner) Clone(t task.CloneTask) error {
 	errCtx := fmt.Errorf("cloning collection")
-	fn, err := c.TaskFuncBuilder.Build(t)
+	fn, err := c.taskFuncBuilder.Build(t)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, err)
 	}
-	c.WorkerPool.Submit(fn)
+	c.pool.Submit(fn)
 	return nil
 }

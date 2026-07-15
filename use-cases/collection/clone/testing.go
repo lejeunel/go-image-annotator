@@ -21,13 +21,13 @@ func (c *FakeCloner) Clone(task t.CloneTask) error {
 }
 
 type FakePresenter struct {
-	GotTask    *t.TaskSpecs
+	Got        Response
 	GotSuccess bool
 	testing.TestingErrPresenter
 }
 
-func (p *FakePresenter) SuccessSubmitCloneTask(t t.TaskSpecs) {
-	p.GotTask = &t
+func (p *FakePresenter) SuccessSubmitCloneTask(r Response) {
+	p.Got = r
 	p.GotSuccess = true
 }
 

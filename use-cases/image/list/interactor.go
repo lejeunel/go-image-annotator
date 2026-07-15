@@ -21,13 +21,13 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 	errCtx := "listing images"
 
 	if r.PageSize == 0 {
-		r.FilteringParams.PageSize = i.DefaultPageSize
+		r.PageSize = i.DefaultPageSize
 	}
 	if r.Page == 0 {
-		r.FilteringParams.Page = 1
+		r.Page = 1
 	}
 
-	baseImages, err := i.repo.List(r.FilteringParams, r.OrderingParams)
+	baseImages, err := i.repo.Slice(r.FilteringParams, r.PaginationParams, r.OrderingParams)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

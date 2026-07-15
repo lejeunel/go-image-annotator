@@ -6,25 +6,27 @@ import (
 )
 
 type FakeRepo struct {
-	GotFilters  im.FilteringParams
-	GotOrdering im.OrderingParams
-	Err         error
-	Count_      int64
-	ErrOnList   bool
-	ErrOnCount  bool
+	GotFilters    im.FilteringParams
+	GotPagination im.PaginationParams
+	GotOrdering   im.OrderingParams
+	Err           error
+	Count_        int64
+	ErrOnList     bool
+	ErrOnCount    bool
 }
 
-func (r *FakeRepo) List(f im.FilteringParams, o im.OrderingParams) ([]im.BaseImage, error) {
+func (r *FakeRepo) Slice(f im.FilteringParams, p im.PaginationParams, o im.OrderingParams) ([]im.BaseImage, error) {
 	if r.ErrOnList {
 		return nil, r.Err
 	}
 
 	r.GotFilters = f
+	r.GotPagination = p
 	r.GotOrdering = o
 
 	result := []im.BaseImage{}
 	collectionName := "a-collection"
-	for range f.PageSize {
+	for range p.PageSize {
 		result = append(result,
 			im.BaseImage{
 				Collection: collectionName,

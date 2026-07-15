@@ -13,7 +13,7 @@ func TestHandleNotFoundErrOnList(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{ErrOnList: true, Err: e.ErrNotFound},
 		&st.FakeImageStore{})
-	itr.Execute(Request{FilteringParams: im.FilteringParams{PageSize: 1}}, p)
+	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: im.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -22,7 +22,7 @@ func TestPaginationParamsFallbackToDefault(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{},
 		&st.FakeImageStore{})
-	itr.Execute(Request{FilteringParams: im.FilteringParams{PageSize: 0, Page: 0}}, p)
+	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: im.PaginationParams{PageSize: 0, Page: 0}}, p)
 	assert.True(t, p.GotSuccess)
 }
 
@@ -30,7 +30,7 @@ func TestHandleInternalErrOnList(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{ErrOnList: true, Err: e.ErrInternal},
 		&st.FakeImageStore{})
-	itr.Execute(Request{FilteringParams: im.FilteringParams{PageSize: 1}}, p)
+	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: im.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -38,7 +38,7 @@ func TestHandleInternalErrOnList(t *testing.T) {
 func TestHandleInternalErrOnImageBuild(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{}, &st.FakeImageStore{Err: e.ErrInternal})
-	itr.Execute(Request{FilteringParams: im.FilteringParams{PageSize: 1}}, p)
+	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: im.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -46,7 +46,7 @@ func TestHandleInternalErrOnImageBuild(t *testing.T) {
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal}, &st.FakeImageStore{})
-	itr.Execute(Request{FilteringParams: im.FilteringParams{PageSize: 1}}, p)
+	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: im.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -55,7 +55,7 @@ func TestListImages(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{}
 	itr := New(repo, &st.FakeImageStore{})
-	r := Request{FilteringParams: im.FilteringParams{PageSize: 1}}
+	r := Request{FilteringParams: im.FilteringParams{}, PaginationParams: im.PaginationParams{PageSize: 1}}
 	itr.Execute(r, p)
 	assert.Equal(t, r.PageSize, len(p.Got.Images))
 }
@@ -64,7 +64,7 @@ func TestPaginationMetaData(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{Count_: 10}
 	itr := New(repo, &st.FakeImageStore{})
-	r := Request{FilteringParams: im.FilteringParams{Page: 1, PageSize: 2}}
+	r := Request{FilteringParams: im.FilteringParams{}, PaginationParams: im.PaginationParams{Page: 1, PageSize: 2}}
 	itr.Execute(r, p)
 	pg := p.Got.Pagination
 	assert.Equal(t, pg.Page, r.Page, "page")
@@ -77,11 +77,11 @@ func TestQueryPaginationParams(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{}
 	itr := New(repo, &st.FakeImageStore{})
-	r := Request{FilteringParams: im.FilteringParams{Page: 1, PageSize: 2}}
+	r := Request{FilteringParams: im.FilteringParams{}, PaginationParams: im.PaginationParams{Page: 1, PageSize: 2}}
 	itr.Execute(r, p)
-	f := repo.GotFilters
-	assert.Equal(t, int(f.Page), int(r.Page), "page")
-	assert.Equal(t, f.PageSize, r.PageSize, "page size")
+	pg := repo.GotPagination
+	assert.Equal(t, int(pg.Page), int(r.Page), "page")
+	assert.Equal(t, pg.PageSize, r.PageSize, "page size")
 }
 
 func TestQueryOrderingParams(t *testing.T) {
@@ -90,7 +90,7 @@ func TestQueryOrderingParams(t *testing.T) {
 	itr := New(repo, &st.FakeImageStore{})
 	ord := im.OrderingParams{IngestTime: true}
 
-	r := Request{FilteringParams: im.FilteringParams{PageSize: 1}, OrderingParams: ord}
+	r := Request{FilteringParams: im.FilteringParams{}, PaginationParams: im.PaginationParams{PageSize: 1}, OrderingParams: ord}
 	itr.Execute(r, p)
 	assert.Equal(t, ord, repo.GotOrdering)
 }
