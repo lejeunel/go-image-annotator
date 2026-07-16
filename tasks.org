@@ -75,4 +75,6 @@ shared/identity_provider/provider.go
 
 * DONE check dependency constraint for roles
 ** DONE role assigned to user should not be deletable
-* TODO add polygons from ingester
+* TODO add polygons in ingester
+* TODO clean-up all testing.go files in use-cases
+Factorize into use-cases/fakes

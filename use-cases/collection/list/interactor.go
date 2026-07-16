@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lejeunel/go-image-annotator/shared/pagination"
+	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type Interactor struct {
 	repo Repo
 }
 
-func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, r pa.PaginationParams, out OutputPort) {
 	errCtx := "listing collections"
-	if err := pagination.Validate(r.Page, r.PageSize); err != nil {
+	if err := pa.Validate(r.Page, r.PageSize); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -30,7 +30,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	response := Response{Pagination: pagination.New(int64(r.Page), r.PageSize, *count)}
+	response := Response{Pagination: pa.New(int64(r.Page), r.PageSize, *count)}
 	for _, f := range found {
 		response.Collections = append(response.Collections, *f)
 	}

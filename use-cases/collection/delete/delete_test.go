@@ -2,13 +2,14 @@ package delete
 
 import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestHandleAuthError(t *testing.T) {
 	group := "a-group"
-	itr := New(&FakeCollectionRepo{}, &FakeGroupRepo{Return: &group},
+	itr := New(&fk.CollectionRepo{}, &fk.GroupRepo{Return: group},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "", p)
@@ -18,7 +19,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestDeleteNonExistingCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeCollectionRepo{Missing: true}, &FakeGroupRepo{})
+	itr := New(&fk.CollectionRepo{}, &fk.GroupRepo{})
 	itr.Execute(t.Context(), "my-collection", p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -26,7 +27,8 @@ func TestDeleteNonExistingCollectionShouldFail(t *testing.T) {
 
 func TestDeleteCollectionWithAssociatedResourcesShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeCollectionRepo{IsPopulated_: true}, &FakeGroupRepo{})
+	itr := New(&fk.CollectionRepo{ExistingNames: []string{"my-collection"},
+		IsPopulated_: true}, &fk.GroupRepo{})
 	itr.Execute(t.Context(), "my-collection", p)
 	assert.True(t, p.GotDependencyErr)
 	assert.False(t, p.GotSuccess)
@@ -34,14 +36,16 @@ func TestDeleteCollectionWithAssociatedResourcesShouldFail(t *testing.T) {
 
 func TestHandleInternalErrorOnDelete(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeCollectionRepo{ErrOnDelete: true, Err: e.ErrInternal}, &FakeGroupRepo{})
-	itr.Execute(t.Context(), "", p)
+	itr := New(&fk.CollectionRepo{ExistingNames: []string{"my-collection"},
+		ErrOnDelete: e.ErrInternal}, &fk.GroupRepo{})
+	itr.Execute(t.Context(), "my-collection", p)
 	assert.True(t, p.GotInternalErr)
 }
 
 func TestDeleteCollection(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeCollectionRepo{}, &FakeGroupRepo{Err: e.ErrNotFound})
+	itr := New(&fk.CollectionRepo{ExistingNames: []string{"my-collection"}},
+		&fk.GroupRepo{ErrOnGetGroupOfCollection: e.ErrNotFound})
 	itr.Execute(t.Context(), "my-collection", p)
 	assert.True(t, p.GotSuccess)
 }

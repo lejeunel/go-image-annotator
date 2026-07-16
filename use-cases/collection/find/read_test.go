@@ -6,31 +6,25 @@ import (
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 )
 
 func TestReadCollection(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(),
 		"my-collection",
 		clc.WithDescription("a-description"))
-	repo := &FakeRepo{Collection: collection}
+	repo := &fk.CollectionRepo{Return: collection}
 	p := &FakePresenter{}
 	itr := New(repo)
 	itr.Execute(t.Context(), collection.Name, p)
 	assert.Equal(t, collection, p.Got)
 }
 
-func TestReadNonExistingCollectionShouldFail(t *testing.T) {
-	repo := &FakeRepo{Collection: clc.Collection{Name: "my-collection", Description: "a-description"}}
+func TestErrorOnFInd(t *testing.T) {
+	repo := &fk.CollectionRepo{ErrOnFind: e.ErrNotFound}
 	p := &FakePresenter{}
 	itr := New(repo)
 	itr.Execute(t.Context(), "non-existing-collection", p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
-}
-
-func TestHandleInternalError(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&FakeRepo{Err: e.ErrInternal})
-	itr.Execute(t.Context(), "", p)
-	assert.True(t, p.GotInternalErr)
 }

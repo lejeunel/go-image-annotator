@@ -12,8 +12,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
+	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type SQLiteCollectionRepo struct {
@@ -87,7 +86,7 @@ func (r SQLiteCollectionRepo) Delete(name string) error {
 	}
 	return nil
 }
-func (r SQLiteCollectionRepo) Update(m update.Model) error {
+func (r SQLiteCollectionRepo) Update(m clc.UpdateModel) error {
 	query := "UPDATE collections SET name=$1,description=$2 WHERE name=$3"
 	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
 
@@ -121,7 +120,7 @@ func (r SQLiteCollectionRepo) Count() (*int64, error) {
 
 	return &count, nil
 }
-func (r SQLiteCollectionRepo) List(m list.Request) ([]*clc.Collection, error) {
+func (r SQLiteCollectionRepo) List(m pa.PaginationParams) ([]*clc.Collection, error) {
 	q := sq.StatementBuilder.Select(`id,name,description,created_at,group_id`).From("collections")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()

@@ -186,3 +186,6 @@ func (a Authorizer) RequestForgottenPasswordToken(ctx context.Context) error {
 func (a Authorizer) ChangePassword(ctx context.Context, id u.UserId) error {
 	return a.check(ctx, "ChangePassword", "")
 }
+func (a Authorizer) CloneCollection(ctx context.Context, group string) error {
+	return a.check(ctx, "CloneCollection", "")
+}

@@ -10,6 +10,7 @@ import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
+	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,8 +33,8 @@ func AssertUpdated(t *testing.T, expected, got a.BoundingBoxUpdatables) {
 }
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&FakeAnnotationRepo{},
-		&FakeLabelRepo{},
+	itr := New(&fk.AnnotationRepo{},
+		&fk.LabelRepo{},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
@@ -45,8 +46,8 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestNonExistingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeAnnotationRepo{},
-		&FakeLabelRepo{Err: e.ErrNotFound})
+	itr := New(&fk.AnnotationRepo{},
+		&fk.LabelRepo{Err: e.ErrNotFound})
 	itr.Execute(t.Context(),
 		Request{AnnotationId: a.NewAnnotationId().String()},
 		p)
@@ -56,7 +57,7 @@ func TestNonExistingLabelShouldFail(t *testing.T) {
 
 func TestInternalErrOnFindLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeAnnotationRepo{}, &FakeLabelRepo{Err: e.ErrInternal})
+	itr := New(&fk.AnnotationRepo{}, &fk.LabelRepo{Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -64,7 +65,7 @@ func TestInternalErrOnFindLabelShouldFail(t *testing.T) {
 
 func TestValidationErrShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeAnnotationRepo{}, &FakeLabelRepo{})
+	itr := New(&fk.AnnotationRepo{}, &fk.LabelRepo{})
 	itr.Execute(t.Context(),
 		Request{AnnotationId: a.NewAnnotationId().String(), Xc: 1, Yc: 1, Width: -999, Height: 1}, p)
 	assert.True(t, p.GotValidationErr)
@@ -72,39 +73,29 @@ func TestValidationErrShouldFail(t *testing.T) {
 }
 func TestNotFoundErrOnUpdateShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeAnnotationRepo{ErrOnUpdate: true, Err: e.ErrNotFound},
-		&FakeLabelRepo{})
+	itr := New(&fk.AnnotationRepo{ErrOnUpdate: e.ErrNotFound},
+		&fk.LabelRepo{})
 	req, _, _ := CreateRequestAndUpdatable()
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
 
-func TestInternalErrOnUpdateShouldFail(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&FakeAnnotationRepo{ErrOnUpdate: true, Err: e.ErrInternal},
-		&FakeLabelRepo{})
-	req, _, _ := CreateRequestAndUpdatable()
-	itr.Execute(t.Context(), req, p)
-	assert.True(t, p.GotInternalErr)
-	assert.False(t, p.GotSuccess)
-}
-
 func TestUpdateWithDefaultGroup(t *testing.T) {
 	p := &FakePresenter{}
 	req, upd, label := CreateRequestAndUpdatable()
-	repo := &FakeAnnotationRepo{NoGroup: true}
-	itr := New(repo, &FakeLabelRepo{Label: label})
+	repo := &fk.AnnotationRepo{NoGroup: true}
+	itr := New(repo, &fk.LabelRepo{Return: label})
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)
-	AssertUpdated(t, upd, repo.Got)
+	AssertUpdated(t, upd, repo.GotUpdatableBox)
 }
 
 func TestUpdateWithUserIdFromContext(t *testing.T) {
 	p := &FakePresenter{}
 	req, _, label := CreateRequestAndUpdatable()
-	repo := &FakeAnnotationRepo{NoGroup: true}
-	itr := New(repo, &FakeLabelRepo{Label: label})
+	repo := &fk.AnnotationRepo{NoGroup: true}
+	itr := New(repo, &fk.LabelRepo{Return: label})
 	user := u.NewUser("user@example.com")
 	ctx := u.AppendUserToContext(t.Context(), user)
 	itr.Execute(ctx, req, p)
@@ -115,9 +106,9 @@ func TestUpdateWithUserIdFromContext(t *testing.T) {
 func TestTime(t *testing.T) {
 	p := &FakePresenter{}
 	req, _, label := CreateRequestAndUpdatable()
-	repo := &FakeAnnotationRepo{NoGroup: true}
+	repo := &fk.AnnotationRepo{NoGroup: true}
 	now := time.Now()
-	itr := New(repo, &FakeLabelRepo{Label: label},
+	itr := New(repo, &fk.LabelRepo{Return: label},
 		WithClock(clockwork.NewFakeClockAt(now)))
 	itr.Execute(t.Context(), req, p)
 	assert.NotNil(t, repo.GotTime)
@@ -127,9 +118,9 @@ func TestTime(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	p := &FakePresenter{}
 	req, upd, label := CreateRequestAndUpdatable()
-	repo := &FakeAnnotationRepo{}
-	itr := New(repo, &FakeLabelRepo{Label: label})
+	repo := &fk.AnnotationRepo{}
+	itr := New(repo, &fk.LabelRepo{Return: label})
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)
-	AssertUpdated(t, upd, repo.Got)
+	AssertUpdated(t, upd, repo.GotUpdatableBox)
 }

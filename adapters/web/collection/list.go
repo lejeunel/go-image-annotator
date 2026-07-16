@@ -13,6 +13,7 @@ import (
 	pg "github.com/lejeunel/go-image-annotator/adapters/web/pagination"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	rt "github.com/lejeunel/go-image-annotator/routes"
+	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 	. "maragu.dev/gomponents"
 )
@@ -76,7 +77,7 @@ func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
-	s.ListItr.Execute(r.Context(), list.Request{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
+	s.ListItr.Execute(r.Context(), pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
 		NewListCollectionsPresenter(w, s.PageBuilder))
 }
 

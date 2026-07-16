@@ -9,7 +9,7 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
+	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,10 +19,9 @@ func CreateTestRequest() Request {
 }
 
 func TestHandleAuthError(t *testing.T) {
-	lbl := lbl.NewLabel(lbl.NewLabelId(), "my-label")
-	itr := New(&FakeAnnotationRepo{Returns: &lbl},
-		&FakeLabelRepo{},
-		WithAuth(auth.FailingAuth{}))
+	itr := New(&fk.AnnotationRepo{},
+		&fk.LabelRepo{},
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), CreateTestRequest(), p)
 	assert.True(t, p.GotAuthErr)
@@ -31,7 +30,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestHandleErrOnFindLabel(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeAnnotationRepo{}, &FakeLabelRepo{Err: e.ErrNotFound})
+	itr := New(&fk.AnnotationRepo{}, &fk.LabelRepo{Err: e.ErrNotFound})
 	itr.Execute(t.Context(), CreateTestRequest(), p)
 	assert.False(t, p.GotSuccess)
 	assert.ErrorIs(t, p.GotErr, e.ErrNotFound)
@@ -40,8 +39,8 @@ func TestHandleErrOnFindLabel(t *testing.T) {
 func TestHandleErrOnUpdateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
-	itr := New(&FakeAnnotationRepo{Err: e.ErrNotFound, ErrOnUpdate: true},
-		&FakeLabelRepo{Returns: &label})
+	itr := New(&fk.AnnotationRepo{ErrOnUpdate: e.ErrNotFound},
+		&fk.LabelRepo{Return: label})
 	itr.Execute(t.Context(), CreateTestRequest(), p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -50,8 +49,8 @@ func TestHandleErrOnUpdateLabel(t *testing.T) {
 func TestAddUserIdFromContext(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
-	repo := &FakeAnnotationRepo{}
-	itr := New(repo, &FakeLabelRepo{Returns: &newLabel})
+	repo := &fk.AnnotationRepo{}
+	itr := New(repo, &fk.LabelRepo{Return: newLabel})
 	user := u.NewUser("user@example.com")
 	ctx := u.AppendUserToContext(t.Context(), user)
 	itr.Execute(ctx, CreateTestRequest(), p)
@@ -62,9 +61,9 @@ func TestAddUserIdFromContext(t *testing.T) {
 func TestTime(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
-	repo := &FakeAnnotationRepo{}
+	repo := &fk.AnnotationRepo{}
 	now := time.Now()
-	itr := New(repo, &FakeLabelRepo{Returns: &newLabel},
+	itr := New(repo, &fk.LabelRepo{Return: newLabel},
 		WithClock(clockwork.NewFakeClockAt(now)))
 	itr.Execute(t.Context(), CreateTestRequest(), p)
 	assert.NotNil(t, repo.GotTime)
@@ -74,8 +73,8 @@ func TestTime(t *testing.T) {
 func TestUpdateLabelNoGroup(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
-	repo := &FakeAnnotationRepo{NoGroup: true}
-	itr := New(repo, &FakeLabelRepo{Returns: &newLabel})
+	repo := &fk.AnnotationRepo{NoGroup: true}
+	itr := New(repo, &fk.LabelRepo{Return: newLabel})
 	req := CreateTestRequest()
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, req.AnnotationId, repo.UpdatedAnnotationId.String())
@@ -85,8 +84,8 @@ func TestUpdateLabelNoGroup(t *testing.T) {
 func TestUpdateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
-	repo := &FakeAnnotationRepo{}
-	itr := New(repo, &FakeLabelRepo{Returns: &newLabel})
+	repo := &fk.AnnotationRepo{}
+	itr := New(repo, &fk.LabelRepo{Return: newLabel})
 	req := CreateTestRequest()
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, req.AnnotationId, repo.UpdatedAnnotationId.String())

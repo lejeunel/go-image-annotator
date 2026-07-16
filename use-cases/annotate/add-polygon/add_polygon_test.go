@@ -13,6 +13,7 @@ import (
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
+	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,8 +27,8 @@ func TestHandleAuthError(t *testing.T) {
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	image.Collection.Group = &group
 	itr := New(&st.FakeImageStore{Return: &image},
-		&FakeAnnotationRepo{},
-		&FakeLabelRepo{},
+		&fk.AnnotationRepo{},
+		&fk.LabelRepo{},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
@@ -40,8 +41,8 @@ func TestHandleAuthError(t *testing.T) {
 func TestErrOnImageRetrievalShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&st.FakeImageStore{Err: e.ErrInternal},
-		&FakeAnnotationRepo{},
-		&FakeLabelRepo{})
+		&fk.AnnotationRepo{},
+		&fk.LabelRepo{})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -50,8 +51,8 @@ func TestErrOnImageRetrievalShouldFail(t *testing.T) {
 func TestErrOnFindLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&st.FakeImageStore{},
-		&FakeAnnotationRepo{},
-		&FakeLabelRepo{Err: e.ErrInternal},
+		&fk.AnnotationRepo{},
+		&fk.LabelRepo{Err: e.ErrInternal},
 	)
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotInternalErr)
@@ -67,8 +68,8 @@ func CreateTestAddPolygonRequest() Request {
 func TestErrOnAddPolygonShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&st.FakeImageStore{},
-		&FakeAnnotationRepo{ErrOnAdd: true, Err: e.ErrInternal},
-		&FakeLabelRepo{})
+		&fk.AnnotationRepo{ErrOnAddPoly: true, Err: e.ErrInternal},
+		&fk.LabelRepo{})
 	itr.Execute(t.Context(), CreateTestAddPolygonRequest(), p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -76,9 +77,9 @@ func TestErrOnAddPolygonShouldFail(t *testing.T) {
 
 func TestAddUserIdFromContext(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeAnnotationRepo{}
+	repo := &fk.AnnotationRepo{}
 	itr := New(&st.FakeImageStore{}, repo,
-		&FakeLabelRepo{})
+		&fk.LabelRepo{})
 	user := u.NewUser("user@example.com")
 	ctx := u.AppendUserToContext(t.Context(), user)
 	itr.Execute(ctx, CreateTestAddPolygonRequest(), p)
@@ -88,11 +89,11 @@ func TestAddUserIdFromContext(t *testing.T) {
 
 func TestTime(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeAnnotationRepo{}
+	repo := &fk.AnnotationRepo{}
 	now := time.Now()
 	itr := New(&st.FakeImageStore{},
 		repo,
-		&FakeLabelRepo{},
+		&fk.LabelRepo{},
 		WithClock(clockwork.NewFakeClockAt(now)))
 	itr.Execute(t.Context(), CreateTestAddPolygonRequest(), p)
 	assert.NotNil(t, repo.GotTime)
@@ -101,14 +102,14 @@ func TestTime(t *testing.T) {
 
 func TestAddPolygon(t *testing.T) {
 	p := &FakePresenter{}
-	repo := FakeAnnotationRepo{}
+	repo := fk.AnnotationRepo{}
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	image := im.NewImage(im.NewImageId(), collection)
 	req := CreateTestAddPolygonRequest()
 	req.ImageId = image.Id.String()
 	itr := New(&st.FakeImageStore{Return: &image},
 		&repo,
-		&FakeLabelRepo{},
+		&fk.LabelRepo{},
 	)
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)

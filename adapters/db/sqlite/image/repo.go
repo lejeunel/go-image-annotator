@@ -13,6 +13,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"time"
 )
 
@@ -61,7 +62,7 @@ func (r SQLiteImageRepo) Count(f im.CountingParams) (*int64, error) {
 	return &count, nil
 
 }
-func (r SQLiteImageRepo) Slice(f im.FilteringParams, p im.PaginationParams, o im.OrderingParams) ([]im.BaseImage, error) {
+func (r SQLiteImageRepo) Slice(f im.FilteringParams, p pa.PaginationParams, o im.OrderingParams) ([]im.BaseImage, error) {
 
 	images, err := r.list(f, p, o)
 	if err != nil {
@@ -190,7 +191,7 @@ func (r SQLiteImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, er
 	}
 	return images, nil
 }
-func (r SQLiteImageRepo) list(f im.FilteringParams, p im.PaginationParams, o im.OrderingParams) ([]im.BaseImage, error) {
+func (r SQLiteImageRepo) list(f im.FilteringParams, p pa.PaginationParams, o im.OrderingParams) ([]im.BaseImage, error) {
 	q := r.makeBaseQuery(f, p.PageSize)
 	q = q.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
 

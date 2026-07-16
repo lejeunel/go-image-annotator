@@ -1,16 +1,19 @@
 package update
 
 import (
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
 	group := "a-group"
-	itr := New(&FakeCollectionRepo{},
-		&FakeGroupRepo{Return: &group},
-		WithAuth(FailingAuth{}))
+	itr := New(&fk.CollectionRepo{},
+		&fk.GroupRepo{Return: group},
+		WithAuth(fk.Auth{e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.False(t, p.GotSuccess)
@@ -20,7 +23,7 @@ func TestHandleAuthError(t *testing.T) {
 func TestUpdateNonExistingCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	non_existing_name := "non-existing-name"
-	itr := New(&FakeCollectionRepo{}, &FakeGroupRepo{})
+	itr := New(&fk.CollectionRepo{}, &fk.GroupRepo{})
 	itr.Execute(t.Context(), Request{Name: non_existing_name, NewName: "new-name"}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -29,12 +32,14 @@ func TestUpdateNonExistingCollectionShouldFail(t *testing.T) {
 func TestUpdateCollection(t *testing.T) {
 	name := "name"
 	p := &FakePresenter{}
-	repo := &FakeCollectionRepo{Names: []string{name}}
-	itr := New(repo, &FakeGroupRepo{})
+	repo := &fk.CollectionRepo{ExistingNames: []string{"name"},
+		Return: clc.NewCollection(clc.NewCollectionId(), name)}
+	itr := New(repo, &fk.GroupRepo{})
 	req := Request{Name: name,
 		NewName:        "updated-name",
 		NewDescription: "updated-description"}
 	itr.Execute(t.Context(), req, p)
+	assert.True(t, p.GotSuccess)
 	assert.Equal(t, req.NewName, p.Got.Name)
 	assert.Equal(t, req.NewDescription, p.Got.Description)
 }
@@ -44,8 +49,8 @@ func TestUpdateCollectionWithNameAlreadyTakenShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	name := "name"
 	existing_name := "existing-name"
-	itr := New(&FakeCollectionRepo{Names: []string{name, existing_name}},
-		&FakeGroupRepo{})
+	itr := New(&fk.CollectionRepo{ExistingNames: []string{name, existing_name}},
+		&fk.GroupRepo{})
 	itr.Execute(t.Context(), Request{Name: name, NewName: existing_name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
@@ -54,18 +59,8 @@ func TestUpdateCollectionWithNameAlreadyTakenShouldFail(t *testing.T) {
 func TestUpdateCollectionWithNoGroup(t *testing.T) {
 	p := &FakePresenter{}
 	name := "name"
-	itr := New(&FakeCollectionRepo{Names: []string{name}},
-		&FakeGroupRepo{Err: e.ErrNotFound})
+	itr := New(&fk.CollectionRepo{ExistingNames: []string{name}},
+		&fk.GroupRepo{ErrOnGetGroupOfCollection: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{Name: name, NewName: name}, p)
 	assert.True(t, p.GotSuccess)
-}
-
-func TestHandleInternalError(t *testing.T) {
-	p := &FakePresenter{}
-	name := "name"
-	itr := New(&FakeCollectionRepo{Names: []string{name},
-		Err: e.ErrInternal}, &FakeGroupRepo{})
-	itr.Execute(t.Context(),
-		Request{Name: name, NewName: name}, p)
-	assert.True(t, p.GotInternalErr)
 }

@@ -10,6 +10,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	ig "github.com/lejeunel/go-image-annotator/modules/ingester"
 	rd "github.com/lejeunel/go-image-annotator/modules/reader"
+	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 )
@@ -36,7 +37,7 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 	req := list.Request{
 		FilteringParams: im.FilteringParams{
 			Collection: params.Collection},
-		PaginationParams: im.PaginationParams{
+		PaginationParams: pa.PaginationParams{
 			PageSize: s.Image.DefaultPageSize,
 		},
 		OrderingParams: im.OrderingParams{IngestTime: true}}

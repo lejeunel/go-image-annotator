@@ -40,3 +40,9 @@ func WithGroup(g g.Group) Option {
 		c.Group = &g
 	}
 }
+
+type UpdateModel struct {
+	Name           string
+	NewName        string
+	NewDescription string
+}

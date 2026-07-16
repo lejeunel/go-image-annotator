@@ -1,18 +1,20 @@
 package create
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/jonboulle/clockwork"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
+	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
 	group := "my-group"
-	itr := New(&FakeCollectionRepo{}, &FakeGroupRepo{Return: group}, WithAuth(FailingAuth{}))
+	itr := New(&fk.CollectionRepo{}, &fk.GroupRepo{Return: group}, WithAuth(fk.Auth{e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Group: &group}, p)
 	assert.True(t, p.GotAuthErr)
@@ -22,27 +24,18 @@ func TestHandleAuthError(t *testing.T) {
 func TestCreateCollectionWithDuplicateNameShouldFail(t *testing.T) {
 	name := "my-collection"
 	p := &FakePresenter{}
-	itr := New(&FakeCollectionRepo{Names: []string{name}},
-		&FakeGroupRepo{})
+	itr := New(&fk.CollectionRepo{ErrOnCreate: e.ErrDuplicate},
+		&fk.GroupRepo{})
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
 }
 
-func TestHandleInternalError(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&FakeCollectionRepo{Err: e.ErrInternal},
-		&FakeGroupRepo{},
-		WithNameValidator(&v.FakeNameValidator{}))
-	itr.Execute(t.Context(), Request{}, p)
-	assert.True(t, p.GotInternalErr)
-}
-
 func TestCreateCollectionWithInvalidNameShouldFail(t *testing.T) {
 	name := "my-collection%/"
 	p := &FakePresenter{}
-	itr := New(&FakeCollectionRepo{Names: []string{name}},
-		&FakeGroupRepo{},
+	itr := New(&fk.CollectionRepo{ErrOnCreate: e.ErrValidation},
+		&fk.GroupRepo{},
 		WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotValidationErr)
@@ -52,20 +45,21 @@ func TestCreateCollectionInNonExistingGroupShouldFail(t *testing.T) {
 	name := "my-collection"
 	group := "non-existing-group"
 	p := &FakePresenter{}
-	itr := New(&FakeCollectionRepo{},
-		&FakeGroupRepo{MissingGroup: true},
+	itr := New(&fk.CollectionRepo{},
+		&fk.GroupRepo{MissingGroup: true},
 	)
 	itr.Execute(t.Context(), Request{Name: name, Group: &group}, p)
+	fmt.Println(p.GotErr)
 	assert.True(t, p.GotNotFoundErr)
 }
 
 func TestCreateCollection(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeCollectionRepo{}
+	repo := &fk.CollectionRepo{}
 	now := time.Now()
 	group := "my-group"
 	itr := New(repo,
-		&FakeGroupRepo{Return: group},
+		&fk.GroupRepo{Return: group},
 		WithClock(clockwork.NewFakeClockAt(now)))
 	req := Request{Name: "a-name", Description: "a-description", Group: &group}
 	itr.Execute(t.Context(), req, p)

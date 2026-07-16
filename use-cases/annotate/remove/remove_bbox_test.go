@@ -6,11 +6,12 @@ import (
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
+	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&FakeRepo{},
+	itr := New(&fk.AnnotationRepo{},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
@@ -22,7 +23,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestNonExistingBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{Err: e.ErrNotFound})
+	itr := New(&fk.AnnotationRepo{Err: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{Id: a.NewAnnotationId().String()}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -30,7 +31,7 @@ func TestNonExistingBoxShouldFail(t *testing.T) {
 
 func TestInternalErrShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{Err: e.ErrInternal})
+	itr := New(&fk.AnnotationRepo{Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -38,20 +39,20 @@ func TestInternalErrShouldFail(t *testing.T) {
 
 func TestRemoveBoxWithNoGroup(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeRepo{NoGroup: true}
+	repo := &fk.AnnotationRepo{NoGroup: true}
 	itr := New(repo)
 	annotationId := a.NewAnnotationId()
 	itr.Execute(t.Context(), Request{Id: annotationId.String()}, p)
 	assert.True(t, p.GotSuccess)
-	assert.Equal(t, annotationId, repo.Got)
+	assert.Equal(t, annotationId, repo.GotRemovedAnnotation)
 }
 
 func TestRemoveBox(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeRepo{}
+	repo := &fk.AnnotationRepo{}
 	itr := New(repo)
 	annotationId := a.NewAnnotationId()
 	itr.Execute(t.Context(), Request{Id: annotationId.String()}, p)
 	assert.True(t, p.GotSuccess)
-	assert.Equal(t, annotationId, repo.Got)
+	assert.Equal(t, annotationId, repo.GotRemovedAnnotation)
 }

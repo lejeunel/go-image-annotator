@@ -15,6 +15,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	list_im "github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	. "maragu.dev/gomponents"
@@ -67,7 +68,7 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 	s.Image.List.Execute(list_im.Request{
 		FilteringParams: im.FilteringParams{
 			Collection: &collection},
-		PaginationParams: im.PaginationParams{
+		PaginationParams: pa.PaginationParams{
 			PageSize: s.DefaultPageSize,
 			Page:     pg.GetPageFromRequest(r)},
 		OrderingParams: im.OrderingParams{IngestTime: true}},

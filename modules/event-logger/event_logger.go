@@ -1,31 +1,24 @@
 package event_logger
 
 import (
-	t "github.com/lejeunel/go-image-annotator/entities/task"
-	u "github.com/lejeunel/go-image-annotator/entities/user"
+	e "github.com/lejeunel/go-image-annotator/entities/event"
 	"sync"
-	"time"
 )
 
-type Event struct {
-	Timestamp time.Time
-	TaskId    t.TaskId
-	Issuer    u.UserId
-	Type      t.TaskType
-	State     t.TaskState
-	Extra     map[string]string
+type Interface interface {
+	Log(e.Event)
 }
 
 type EventLogger struct {
 	mu     sync.RWMutex
-	events []Event
+	events []e.Event
 }
 
 func New(maxNumEvents int) *EventLogger {
-	return &EventLogger{events: make([]Event, 0, maxNumEvents)}
+	return &EventLogger{events: make([]e.Event, 0, maxNumEvents)}
 }
 
-func (l *EventLogger) Log(e Event) {
+func (l *EventLogger) Log(e e.Event) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.events = append(l.events, e)
@@ -33,10 +26,10 @@ func (l *EventLogger) Log(e Event) {
 
 // AllLIFO returns a copy of events newest-first, safe to range over
 // without holding the lock.
-func (l *EventLogger) AllLIFO() []Event {
+func (l *EventLogger) AllLIFO() []e.Event {
 	l.mu.RLock()
 	n := len(l.events)
-	out := make([]Event, n)
+	out := make([]e.Event, n)
 	for i, e := range l.events {
 		out[n-1-i] = e // reverse while copying, single pass
 	}

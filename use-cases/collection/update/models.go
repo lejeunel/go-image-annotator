@@ -10,9 +10,3 @@ type Response struct {
 	Name        string
 	Description string
 }
-
-type Model struct {
-	Name           string
-	NewName        string
-	NewDescription string
-}

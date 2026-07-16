@@ -26,3 +26,8 @@ func Validate(page int64, pageSize int) error {
 	}
 	return nil
 }
+
+type PaginationParams struct {
+	PageSize int
+	Page     int64
+}

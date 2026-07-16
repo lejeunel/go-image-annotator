@@ -13,6 +13,7 @@ import (
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
+	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,8 +26,8 @@ func TestHandleAuthError(t *testing.T) {
 	image := CreateImage()
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	image.Collection.Group = &group
-	itr := New(&FakeAnnotationRepo{},
-		&FakeLabelRepo{},
+	itr := New(&fk.AnnotationRepo{},
+		&fk.LabelRepo{},
 		&st.FakeImageStore{Return: &image},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
@@ -37,8 +38,8 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestHandleNotFoundErrOnImageRetrieval(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeAnnotationRepo{},
-		&FakeLabelRepo{},
+	itr := New(&fk.AnnotationRepo{},
+		&fk.LabelRepo{},
 		&st.FakeImageStore{Err: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -47,8 +48,8 @@ func TestHandleNotFoundErrOnImageRetrieval(t *testing.T) {
 
 func TestHandleInternalErrOnImageRetrieval(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeAnnotationRepo{},
-		&FakeLabelRepo{},
+	itr := New(&fk.AnnotationRepo{},
+		&fk.LabelRepo{},
 		&st.FakeImageStore{Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.True(t, p.GotInternalErr)
@@ -58,8 +59,8 @@ func TestHandleInternalErrOnImageRetrieval(t *testing.T) {
 func TestAssignNonExistingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	image := CreateImage()
-	itr := New(&FakeAnnotationRepo{},
-		&FakeLabelRepo{Err: e.ErrNotFound},
+	itr := New(&fk.AnnotationRepo{},
+		&fk.LabelRepo{Err: e.ErrNotFound},
 		&st.FakeImageStore{Return: &image})
 	itr.Execute(t.Context(), Request{image.Id.String(), image.Collection.Name, "a-label"}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -68,8 +69,8 @@ func TestAssignNonExistingLabelShouldFail(t *testing.T) {
 func TestAddUserIdFromContext(t *testing.T) {
 	p := &FakePresenter{}
 	image := CreateImage()
-	repo := &FakeAnnotationRepo{}
-	itr := New(repo, &FakeLabelRepo{}, &st.FakeImageStore{Return: &image})
+	repo := &fk.AnnotationRepo{}
+	itr := New(repo, &fk.LabelRepo{}, &st.FakeImageStore{Return: &image})
 	user := u.NewUser("user@example.com")
 	ctx := u.AppendUserToContext(t.Context(), user)
 	itr.Execute(ctx, Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
@@ -79,9 +80,9 @@ func TestAddUserIdFromContext(t *testing.T) {
 func TestTime(t *testing.T) {
 	p := &FakePresenter{}
 	image := CreateImage()
-	repo := &FakeAnnotationRepo{}
+	repo := &fk.AnnotationRepo{}
 	now := time.Now()
-	itr := New(repo, &FakeLabelRepo{},
+	itr := New(repo, &fk.LabelRepo{},
 		&st.FakeImageStore{Return: &image}, WithClock(clockwork.NewFakeClockAt(now)))
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.NotNil(t, repo.GotTime)
@@ -95,9 +96,9 @@ func TestAssignLabelToImage(t *testing.T) {
 	req := Request{ImageId: image.Id.String(),
 		Collection: image.Collection.Name,
 		Label:      label.Name}
-	repo := &FakeAnnotationRepo{}
+	repo := &fk.AnnotationRepo{}
 	itr := New(repo,
-		&FakeLabelRepo{ReturnLabel: label},
+		&fk.LabelRepo{Return: label},
 		&st.FakeImageStore{Return: &image})
 	itr.Execute(t.Context(), req, p)
 	resp := p.Got

@@ -1,53 +1,8 @@
 package assign_label
 
 import (
-	an "github.com/lejeunel/go-image-annotator/entities/annotation"
-	clc "github.com/lejeunel/go-image-annotator/entities/collection"
-	im "github.com/lejeunel/go-image-annotator/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator/entities/label"
-	u "github.com/lejeunel/go-image-annotator/entities/user"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
-	"time"
 )
-
-type FakeLabelRepo struct {
-	Err         error
-	ReturnLabel lbl.Label
-}
-
-func (r *FakeLabelRepo) FindLabel(string) (*lbl.Label, error) {
-	if r.Err != nil {
-		return nil, r.Err
-	}
-	return &r.ReturnLabel, nil
-}
-
-type FakeAnnotationRepo struct {
-	Err            error
-	ErrOnAddLabel  bool
-	ErrOnFindLabel bool
-	MissingLabel   bool
-
-	AddedLabelId        lbl.LabelId
-	AddedOnImageId      im.ImageId
-	AddedOnCollectionId clc.CollectionId
-
-	GotUserId *u.UserId
-	GotTime   *time.Time
-}
-
-func (r *FakeAnnotationRepo) AddImageLabel(imageId im.ImageId, collectionId clc.CollectionId, imageLabel an.ImageLabel, userId *u.UserId, t *time.Time) error {
-	if r.ErrOnAddLabel {
-		return r.Err
-	}
-	r.AddedLabelId = imageLabel.Label.Id
-	r.AddedOnImageId = imageId
-	r.AddedOnCollectionId = collectionId
-	r.GotUserId = userId
-	r.GotTime = t
-	return nil
-
-}
 
 type FakePresenter struct {
 	Got        Response

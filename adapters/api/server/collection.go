@@ -6,8 +6,8 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/collection"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
 )
 
@@ -31,7 +31,7 @@ func (s *Server) DeleteCollectionByName(w http.ResponseWriter, r *http.Request, 
 
 }
 func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request, params ListCollectionsParams) {
-	req := list.Request{Page: 1, PageSize: s.Collection.DefaultPageSize}
+	req := pa.PaginationParams{Page: 1, PageSize: s.Collection.DefaultPageSize}
 	if p := params.Page; p != nil {
 		req.Page = *p
 	}

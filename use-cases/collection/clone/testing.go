@@ -1,24 +1,51 @@
 package clone
 
 import (
-	"context"
-	t "github.com/lejeunel/go-image-annotator/entities/task"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
+	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
+	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	testing "github.com/lejeunel/go-image-annotator/shared/testing"
+	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
+	"iter"
+	"time"
 )
 
-type FakeCloner struct {
-	Err     error
-	GotTask t.CloneTask
-}
+type FakeImageRepo struct{}
 
-func (c *FakeCloner) Clone(task t.CloneTask) error {
-	if c.Err != nil {
-		return c.Err
-	}
-	c.GotTask = task
+func (r *FakeImageRepo) AddToCollection(im.ImageId, clc.CollectionId) error {
 	return nil
 }
+
+func (r *FakeImageRepo) Iterate(im.FilteringParams, int) iter.Seq2[im.BaseImage, error] {
+	return nil
+}
+
+type FakeCollectionRepo struct{}
+
+func (r *FakeCollectionRepo) Create(clc.Collection) error {
+	return nil
+}
+func (r *FakeCollectionRepo) Exists(string) (bool, error) {
+	return false, nil
+}
+
+type FakeAnnotationRepo struct{}
+
+func (r *FakeAnnotationRepo) AddImageLabel(im.ImageId, clc.CollectionId, a.ImageLabel, *u.UserId, *time.Time) error {
+	return nil
+}
+func (r *FakeAnnotationRepo) AddBoundingBox(im.ImageId, clc.CollectionId, a.BoundingBox, *u.UserId, *time.Time) error {
+	return nil
+}
+func (r *FakeAnnotationRepo) AddPolygon(im.ImageId, clc.CollectionId, a.Polygon, *u.UserId, *time.Time) error {
+	return nil
+}
+
+type FakeImageStore struct{}
+type FakeEventLogger struct{}
 
 type FakePresenter struct {
 	Got        Response
@@ -31,9 +58,6 @@ func (p *FakePresenter) SuccessSubmitCloneTask(r Response) {
 	p.GotSuccess = true
 }
 
-type FailingAuth struct {
-}
-
-func (f FailingAuth) CloneCollection(ctx context.Context, g string) error {
-	return e.ErrAuthorization
+func NewTestingCloner() Interactor {
+	return New(&FakeImageRepo{}, &FakeCollectionRepo{}, &FakeAnnotationRepo{}, &fk.GroupRepo{}, &st.FakeImageStore{}, &el.FakeEventLogger{})
 }
