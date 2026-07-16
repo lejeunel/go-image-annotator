@@ -8,6 +8,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -119,13 +120,14 @@ func TestAddBoundingBox(t *testing.T) {
 	repo := fk.AnnotationRepo{}
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	image := im.NewImage(im.NewImageId(), collection)
+	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	req := Request{ImageId: image.Id.String(), Collection: collection.Name,
-		Label: "a-label", Xc: float32(1.0), Yc: float32(1.0), Width: float32(3.0),
+		Label: label.Name, Xc: float32(1.0), Yc: float32(1.0), Width: float32(3.0),
 		Height: float32(3.0), Angle: float32(32)}
 
 	itr := New(&st.FakeImageStore{Return: &image},
 		&repo,
-		&fk.LabelRepo{},
+		&fk.LabelRepo{Return: label},
 	)
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)

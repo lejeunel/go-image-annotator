@@ -9,6 +9,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -105,11 +106,12 @@ func TestAddPolygon(t *testing.T) {
 	repo := fk.AnnotationRepo{}
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	image := im.NewImage(im.NewImageId(), collection)
+	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	req := CreateTestAddPolygonRequest()
 	req.ImageId = image.Id.String()
 	itr := New(&st.FakeImageStore{Return: &image},
 		&repo,
-		&fk.LabelRepo{},
+		&fk.LabelRepo{Return: label},
 	)
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)
