@@ -23,7 +23,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestNonExistingBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.AnnotationRepo{Err: e.ErrNotFound})
+	itr := New(&fk.AnnotationRepo{ErrOnRemoveAnnotation: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{Id: a.NewAnnotationId().String()}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
