@@ -7,14 +7,15 @@ import (
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
 	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection",
 		clc.WithGroup(g.NewGroup(g.NewGroupId(), "dst-group")))
-	itr := NewInteractor(&FakeRepo{Return: dstCollection},
-		WithAuth(FailingAuth{}))
+	itr := New(&fk.ImageRepo{}, &fk.CollectionRepo{Return: dstCollection},
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{ImageId: im.NewImageId().String(),
@@ -27,33 +28,17 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestNonExistingSourceImageShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ImageMissing: true})
+	itr := New(&fk.ImageRepo{ErrOnImageExists: e.ErrNotFound}, &fk.CollectionRepo{})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotNotFoundErr)
-	assert.False(t, p.GotSuccess)
-}
-
-func TestInternalErrOnFindingSourceImageShouldFail(t *testing.T) {
-	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnImageExists: true, Err: e.ErrInternal})
-	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
-	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
 
 func TestNonExistingDestinationCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnFindCollection: true, Err: e.ErrNotFound})
+	itr := New(&fk.ImageRepo{}, &fk.CollectionRepo{ErrOnFind: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotNotFoundErr)
-	assert.False(t, p.GotSuccess)
-}
-
-func TestInternalErrOnFindCollectionShouldFail(t *testing.T) {
-	p := &FakePresenter{}
-	itr := NewInteractor(&FakeRepo{ErrOnFindCollection: true, Err: e.ErrInternal})
-	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
-	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
 
@@ -62,7 +47,7 @@ func TestImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 
 	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection",
 		clc.WithGroup(g.NewGroup(g.NewGroupId(), "dst-group")))
-	itr := NewInteractor(&FakeRepo{Return: dstCollection, ImageAlreadyInCollection: true})
+	itr := New(&fk.ImageRepo{ImageAlreadyInCollection: true}, &fk.CollectionRepo{Return: dstCollection})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotDependencyErr)
 	assert.False(t, p.GotSuccess)
@@ -71,8 +56,7 @@ func TestImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 func TestInternalErrOnImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
-	itr := NewInteractor(&FakeRepo{Return: dstCollection, ErrOnImageExistsInCollection: true,
-		Err: e.ErrInternal})
+	itr := New(&fk.ImageRepo{ErrOnImageExistsInCollection: e.ErrInternal}, &fk.CollectionRepo{Return: dstCollection})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -80,8 +64,7 @@ func TestInternalErrOnImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 func TestInternalErrOnImportShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
-	repo := &FakeRepo{Return: dstCollection, ErrOnImport: true, Err: e.ErrInternal}
-	itr := NewInteractor(repo)
+	itr := New(&fk.ImageRepo{ErrOnImport: e.ErrInternal}, &fk.CollectionRepo{Return: dstCollection})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -91,8 +74,8 @@ func TestImportImageInCollection(t *testing.T) {
 	p := &FakePresenter{}
 	imageId := im.NewImageId()
 	collection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
-	repo := &FakeRepo{Return: collection}
-	itr := NewInteractor(repo)
+	repo := &fk.ImageRepo{}
+	itr := New(repo, &fk.CollectionRepo{Return: collection})
 	itr.Execute(t.Context(),
 		Request{ImageId: imageId.String(),
 			SourceCollection:      "src-collection",

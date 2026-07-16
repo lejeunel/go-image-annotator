@@ -5,9 +5,12 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
-type Repo interface {
+type ImageRepo interface {
 	ImageExists(im.ImageId) (bool, error)
-	FindCollectionByName(string) (*clc.Collection, error)
 	ImageExistsInCollection(im.ImageId, clc.CollectionId) (bool, error)
 	AddToCollection(im.ImageId, clc.CollectionId) error
+}
+
+type CollectionRepo interface {
+	FindCollectionByName(string) (*clc.Collection, error)
 }

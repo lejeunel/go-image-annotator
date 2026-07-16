@@ -11,7 +11,8 @@ import (
 )
 
 type Interactor struct {
-	repo Repo
+	ImageRepo
+	CollectionRepo
 	auth Auth
 }
 
@@ -23,8 +24,8 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(repo Repo, opts ...Option) *Interactor {
-	i := &Interactor{repo: repo,
+func New(imr ImageRepo, c CollectionRepo, opts ...Option) *Interactor {
+	i := &Interactor{ImageRepo: imr, CollectionRepo: c,
 		auth: auth.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
@@ -63,7 +64,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.repo.AddToCollection(imageId, dstCollection.Id); err != nil {
+	if err := i.ImageRepo.AddToCollection(imageId, dstCollection.Id); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -76,7 +77,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 func (i Interactor) ensureImageDoesNotAlreadyExistInCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
 
 	errCtx := fmt.Errorf("ensuring that source image does not already exist in destination collection")
-	alreadyExists, err := i.repo.ImageExistsInCollection(imageId, collectionId)
+	alreadyExists, err := i.ImageRepo.ImageExistsInCollection(imageId, collectionId)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, err)
 	}
@@ -87,7 +88,7 @@ func (i Interactor) ensureImageDoesNotAlreadyExistInCollection(imageId im.ImageI
 }
 func (i Interactor) ensureSourceImageExists(id im.ImageId) error {
 	errCtx := fmt.Errorf("ensuring that source image exists")
-	exists, err := i.repo.ImageExists(id)
+	exists, err := i.ImageRepo.ImageExists(id)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, err)
 	}
@@ -100,7 +101,7 @@ func (i Interactor) ensureSourceImageExists(id im.ImageId) error {
 func (i Interactor) findCollection(name string) (*clc.Collection, error) {
 
 	errCtx := fmt.Errorf("fetching collection %v", name)
-	collection, err := i.repo.FindCollectionByName(name)
+	collection, err := i.CollectionRepo.FindCollectionByName(name)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}

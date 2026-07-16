@@ -27,3 +27,6 @@ func (f Auth) Annotate(ctx context.Context, g string) error {
 func (f Auth) DeleteImage(ctx context.Context, g string) error {
 	return f.Err
 }
+func (f Auth) ImportImage(ctx context.Context, dstGroup string) error {
+	return f.Err
+}
