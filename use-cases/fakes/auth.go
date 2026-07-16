@@ -23,3 +23,7 @@ func (f Auth) CloneCollection(ctx context.Context, g string) error {
 func (f Auth) Annotate(ctx context.Context, g string) error {
 	return f.Err
 }
+
+func (f Auth) DeleteImage(ctx context.Context, g string) error {
+	return f.Err
+}

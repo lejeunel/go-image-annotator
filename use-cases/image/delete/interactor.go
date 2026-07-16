@@ -11,8 +11,9 @@ import (
 
 type Interactor struct {
 	store st.Interface
-	repo  Repo
-	auth  Auth
+	ImageRepo
+	AnnotationRepo
+	auth Auth
 }
 
 type Option func(*Interactor)
@@ -23,9 +24,10 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func NewInteractor(store st.Interface, repo Repo, opts ...Option) *Interactor {
-	i := &Interactor{store: store, repo: repo,
-		auth: auth.NewVoidAuth()}
+func New(store st.Interface, r ImageRepo, a AnnotationRepo, opts ...Option) *Interactor {
+	i := &Interactor{store: store, ImageRepo: r,
+		AnnotationRepo: a,
+		auth:           auth.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -63,7 +65,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.repo.RemoveImageFromCollection(image.Id, image.Collection.Id); err != nil {
+	if err := i.ImageRepo.RemoveImageFromCollection(image.Id, image.Collection.Id); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
@@ -75,7 +77,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 func (i *Interactor) deleteBoundingBoxes(image im.Image) error {
 	baseErr := fmt.Errorf("deleting bounding box annotations")
 	for _, box := range image.BoundingBoxes {
-		if err := i.repo.RemoveAnnotation(image.Id, image.Collection.Id, box.Id); err != nil {
+		if err := i.AnnotationRepo.RemoveAnnotation(box.Id); err != nil {
 			return fmt.Errorf("%w: %w", baseErr, err)
 		}
 	}
@@ -86,7 +88,7 @@ func (i *Interactor) deleteBoundingBoxes(image im.Image) error {
 func (i *Interactor) deleteLabels(image im.Image) error {
 	baseErr := fmt.Errorf("deleting image labels")
 	for _, label := range image.Labels {
-		if err := i.repo.RemoveAnnotation(image.Id, image.Collection.Id, label.Id); err != nil {
+		if err := i.AnnotationRepo.RemoveAnnotation(label.Id); err != nil {
 			return fmt.Errorf("%w: %w", baseErr, err)
 		}
 	}

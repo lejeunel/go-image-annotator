@@ -11,24 +11,25 @@ import (
 )
 
 type AnnotationRepo struct {
-	Err                  error
-	ErrOnAddPoly         bool
-	ErrOnAddLabel        bool
-	ErrOnUpdate          error
-	GotImageId           im.ImageId
-	GotCollectionId      clc.CollectionId
-	GotUserId            *u.UserId
-	GotTime              *time.Time
-	GotBox               a.BoundingBox
-	GotPolygon           a.Polygon
-	AddedLabelId         lbl.LabelId
-	AddedOnImageId       im.ImageId
-	AddedOnCollectionId  clc.CollectionId
-	GotUpdatableBox      a.BoundingBoxUpdatables
-	GotUpdatablePoly     a.PolygonUpdatables
-	GotRemovedAnnotation a.AnnotationId
-	UpdatedAnnotationId  a.AnnotationId
-	UpdatedLabelId       lbl.LabelId
+	Err                   error
+	ErrOnAddPoly          bool
+	ErrOnAddLabel         bool
+	ErrOnUpdate           error
+	GotImageId            im.ImageId
+	GotCollectionId       clc.CollectionId
+	GotUserId             *u.UserId
+	GotTime               *time.Time
+	GotBox                a.BoundingBox
+	GotPolygon            a.Polygon
+	AddedLabelId          lbl.LabelId
+	AddedOnImageId        im.ImageId
+	AddedOnCollectionId   clc.CollectionId
+	GotUpdatableBox       a.BoundingBoxUpdatables
+	GotUpdatablePoly      a.PolygonUpdatables
+	GotRemovedAnnotation  a.AnnotationId
+	ErrOnRemoveAnnotation error
+	UpdatedAnnotationId   a.AnnotationId
+	UpdatedLabelId        lbl.LabelId
 
 	NoGroup bool
 }
@@ -99,8 +100,8 @@ func (r *AnnotationRepo) UpdatePolygon(id a.AnnotationId, u a.PolygonUpdatables,
 }
 
 func (r *AnnotationRepo) RemoveAnnotation(annotationId a.AnnotationId) error {
-	if r.Err != nil {
-		return r.Err
+	if r.ErrOnRemoveAnnotation != nil {
+		return r.ErrOnRemoveAnnotation
 	}
 	r.GotRemovedAnnotation = annotationId
 	return nil

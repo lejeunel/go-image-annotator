@@ -6,7 +6,9 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
-type Repo interface {
+type ImageRepo interface {
 	RemoveImageFromCollection(im.ImageId, clc.CollectionId) error
-	RemoveAnnotation(im.ImageId, clc.CollectionId, a.AnnotationId) error
+}
+type AnnotationRepo interface {
+	RemoveAnnotation(a.AnnotationId) error
 }
