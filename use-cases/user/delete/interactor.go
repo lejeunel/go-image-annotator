@@ -14,18 +14,18 @@ type Interactor struct {
 	auth Auth
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	errCtx := "creating user"
+func (i *Interactor) Execute(ctx context.Context, id string, out OutputPort) {
+	errCtx := "deleting user"
 	if err := i.auth.DeleteUser(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	if err := i.exists(r.Id); err != nil {
+	if err := i.exists(id); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	if err := i.repo.Delete(r.Id); err != nil {
+	if err := i.repo.Delete(id); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

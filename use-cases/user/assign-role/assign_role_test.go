@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&FakeRepo{},
-		WithAuth(FailingAuth{}))
+	itr := New(&fk.UserRepo{},
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotAuthErr)
@@ -18,7 +19,7 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestMissingUserShouldFail(t *testing.T) {
-	itr := New(&FakeRepo{Missing: true})
+	itr := New(&fk.UserRepo{Missing: true})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user@example.com", Role: "a-role"}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -26,7 +27,7 @@ func TestMissingUserShouldFail(t *testing.T) {
 }
 
 func TestHandleErrorOnFindUser(t *testing.T) {
-	itr := New(&FakeRepo{Err: e.ErrInternal})
+	itr := New(&fk.UserRepo{ErrOnFind: e.ErrInternal})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -37,7 +38,7 @@ func TestAssignUserRoleAlreadyAssignedDoesNothing(t *testing.T) {
 	roles := []string{"a-role"}
 	user := usr.NewUser("user@example.com",
 		usr.WithRoles(roles))
-	repo := &FakeRepo{Return: &user}
+	repo := &fk.UserRepo{Return: &user}
 	itr := New(repo)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Role: "a-role"}, p)
@@ -51,7 +52,7 @@ func TestAssignUser(t *testing.T) {
 		usr.WithRoles([]string{"a-role"}))
 	newGroup := "new-role"
 	updatedRoles := []string{"a-role", newGroup}
-	repo := &FakeRepo{Return: &user}
+	repo := &fk.UserRepo{Return: &user}
 	itr := New(repo)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Role: newGroup}, p)
