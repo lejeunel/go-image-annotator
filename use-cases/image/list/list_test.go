@@ -5,7 +5,6 @@ import (
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
-	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/stretchr/testify/assert"
@@ -14,7 +13,7 @@ import (
 func TestHandleNotFoundErrOnList(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.ImageRepo{ErrOnList: e.ErrNotFound},
-		&st.FakeImageStore{})
+		&fk.ImageStore{})
 	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -23,7 +22,7 @@ func TestHandleNotFoundErrOnList(t *testing.T) {
 func TestPaginationParamsFallbackToDefault(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.ImageRepo{},
-		&st.FakeImageStore{})
+		&fk.ImageStore{})
 	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 0, Page: 0}}, p)
 	assert.True(t, p.GotSuccess)
 }
@@ -31,7 +30,7 @@ func TestPaginationParamsFallbackToDefault(t *testing.T) {
 func TestHandleInternalErrOnList(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.ImageRepo{ErrOnList: e.ErrInternal},
-		&st.FakeImageStore{})
+		&fk.ImageStore{})
 	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -39,7 +38,7 @@ func TestHandleInternalErrOnList(t *testing.T) {
 
 func TestHandleInternalErrOnImageBuild(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.ImageRepo{}, &st.FakeImageStore{Err: e.ErrInternal})
+	itr := New(&fk.ImageRepo{}, &fk.ImageStore{Err: e.ErrInternal})
 	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -47,7 +46,7 @@ func TestHandleInternalErrOnImageBuild(t *testing.T) {
 
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.ImageRepo{ErrOnCount: e.ErrInternal}, &st.FakeImageStore{})
+	itr := New(&fk.ImageRepo{ErrOnCount: e.ErrInternal}, &fk.ImageStore{})
 	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -56,7 +55,7 @@ func TestHandleInternalErrOnCount(t *testing.T) {
 func TestListImages(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.ImageRepo{}
-	itr := New(repo, &st.FakeImageStore{})
+	itr := New(repo, &fk.ImageStore{})
 	r := Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 1}}
 	itr.Execute(r, p)
 	assert.Equal(t, r.PageSize, len(p.Got.Images))
@@ -65,7 +64,7 @@ func TestListImages(t *testing.T) {
 func TestPaginationMetaData(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.ImageRepo{Count_: 10}
-	itr := New(repo, &st.FakeImageStore{})
+	itr := New(repo, &fk.ImageStore{})
 	r := Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{Page: 1, PageSize: 2}}
 	itr.Execute(r, p)
 	pg := p.Got.Pagination
@@ -78,7 +77,7 @@ func TestPaginationMetaData(t *testing.T) {
 func TestQueryPaginationParams(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.ImageRepo{}
-	itr := New(repo, &st.FakeImageStore{})
+	itr := New(repo, &fk.ImageStore{})
 	r := Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{Page: 1, PageSize: 2}}
 	itr.Execute(r, p)
 	pg := repo.GotPagination
@@ -89,7 +88,7 @@ func TestQueryPaginationParams(t *testing.T) {
 func TestQueryOrderingParams(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.ImageRepo{}
-	itr := New(repo, &st.FakeImageStore{})
+	itr := New(repo, &fk.ImageStore{})
 	ord := im.OrderingParams{IngestTime: true}
 
 	r := Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 1}, OrderingParams: ord}

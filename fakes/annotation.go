@@ -11,28 +11,36 @@ import (
 )
 
 type AnnotationRepo struct {
-	Err                   error
-	ErrOnAddPoly          error
-	ErrOnAddLabel         error
-	ErrOnAddBoundingBox   error
-	ErrOnUpdate           error
-	GotImageId            im.ImageId
-	GotCollectionId       clc.CollectionId
-	GotUserId             *u.UserId
-	GotTime               *time.Time
-	GotBox                a.BoundingBox
-	GotPolygon            a.Polygon
-	AddedLabelId          lbl.LabelId
-	AddedOnImageId        im.ImageId
-	AddedOnCollectionId   clc.CollectionId
-	GotUpdatableBox       a.BoundingBoxUpdatables
-	GotUpdatablePoly      a.PolygonUpdatables
-	GotRemovedAnnotation  a.AnnotationId
-	ErrOnRemoveAnnotation error
-	UpdatedAnnotationId   a.AnnotationId
-	UpdatedLabelId        lbl.LabelId
-	NumBoundingBoxesAdded int
-	NumImageLabelsAdded   int
+	Err                    error
+	ErrOnAddPoly           error
+	ErrOnAddLabel          error
+	ErrOnAddBoundingBox    error
+	ErrOnUpdate            error
+	ErrOnFindPolygons      error
+	ErrOnFindBoundingBoxes error
+	ErrOnFindImageLabels   error
+	ErrOnGetSpecs          error
+	GotImageId             im.ImageId
+	GotCollectionId        clc.CollectionId
+	GotUserId              *u.UserId
+	GotTime                *time.Time
+	GotBox                 a.BoundingBox
+	GotPolygon             a.Polygon
+	AddedLabelId           lbl.LabelId
+	AddedOnImageId         im.ImageId
+	AddedOnCollectionId    clc.CollectionId
+	GotUpdatableBox        a.BoundingBoxUpdatables
+	GotUpdatablePoly       a.PolygonUpdatables
+	GotRemovedAnnotation   a.AnnotationId
+	ErrOnRemoveAnnotation  error
+	UpdatedAnnotationId    a.AnnotationId
+	UpdatedLabelId         lbl.LabelId
+	NumBoundingBoxesAdded  int
+	NumImageLabelsAdded    int
+	Labels                 []a.ImageLabel
+	BoundingBoxes          []a.BoundingBox
+	Polygons               []a.Polygon
+	Specs                  im.ImageSpecs
 
 	NoGroup bool
 }
@@ -121,4 +129,41 @@ func (r *AnnotationRepo) UpdateLabelOfAnnotation(annotationId a.AnnotationId, la
 	r.GotUserId = userId
 	r.GotTime = t
 	return nil
+}
+
+func (r *AnnotationRepo) FindBoundingBoxes(imageId im.ImageId, collectionId clc.CollectionId) ([]a.BoundingBox, error) {
+	if r.ErrOnFindBoundingBoxes != nil {
+		return nil, r.ErrOnFindBoundingBoxes
+	}
+	if r.BoundingBoxes != nil {
+		return r.BoundingBoxes, nil
+	}
+	return nil, nil
+}
+
+func (r *AnnotationRepo) FindPolygons(imageId im.ImageId, collectionId clc.CollectionId) ([]a.Polygon, error) {
+	if r.ErrOnFindPolygons != nil {
+		return nil, r.ErrOnFindPolygons
+	}
+	if r.Polygons != nil {
+		return r.Polygons, nil
+	}
+	return nil, nil
+}
+
+func (r *AnnotationRepo) FindImageLabels(imageId im.ImageId, collectionId clc.CollectionId) ([]a.ImageLabel, error) {
+	if r.ErrOnFindImageLabels != nil {
+		return nil, r.ErrOnFindImageLabels
+	}
+	if r.Labels != nil {
+		return r.Labels, nil
+	}
+	return nil, nil
+}
+
+func (r *AnnotationRepo) GetSpecs(imageId im.ImageId) (*im.ImageSpecs, error) {
+	if r.ErrOnGetSpecs != nil {
+		return nil, r.Err
+	}
+	return &r.Specs, nil
 }

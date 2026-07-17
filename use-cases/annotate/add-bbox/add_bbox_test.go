@@ -11,7 +11,6 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
-	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"github.com/stretchr/testify/assert"
@@ -26,7 +25,7 @@ func TestHandleAuthError(t *testing.T) {
 	image := CreateImage()
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	image.Collection.Group = &group
-	itr := New(&st.FakeImageStore{Return: &image},
+	itr := New(&fk.ImageStore{Return: &image},
 		&fk.AnnotationRepo{},
 		&fk.LabelRepo{},
 		WithAuth(auth.FailingAuth{}))
@@ -40,7 +39,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestErrOnImageRetrievalShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{Err: e.ErrInternal},
+	itr := New(&fk.ImageStore{Err: e.ErrInternal},
 		&fk.AnnotationRepo{},
 		&fk.LabelRepo{})
 	itr.Execute(t.Context(),
@@ -52,7 +51,7 @@ func TestErrOnImageRetrievalShouldFail(t *testing.T) {
 
 func TestErrOnFindLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{},
+	itr := New(&fk.ImageStore{},
 		&fk.AnnotationRepo{},
 		&fk.LabelRepo{ErrOnFind: e.ErrInternal},
 	)
@@ -71,7 +70,7 @@ func CreateTestAddBoxRequest() Request {
 
 func TestValidationErrShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{}, &fk.AnnotationRepo{},
+	itr := New(&fk.ImageStore{}, &fk.AnnotationRepo{},
 		&fk.LabelRepo{})
 	req := CreateTestAddBoxRequest()
 	req.Width = -999
@@ -82,7 +81,7 @@ func TestValidationErrShouldFail(t *testing.T) {
 
 func TestInternalErrOnAddBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{},
+	itr := New(&fk.ImageStore{},
 		&fk.AnnotationRepo{ErrOnAddBoundingBox: e.ErrInternal},
 		&fk.LabelRepo{})
 	itr.Execute(t.Context(), CreateTestAddBoxRequest(), p)
@@ -93,7 +92,7 @@ func TestInternalErrOnAddBoxShouldFail(t *testing.T) {
 func TestAddUserIdFromContext(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.AnnotationRepo{}
-	itr := New(&st.FakeImageStore{}, repo,
+	itr := New(&fk.ImageStore{}, repo,
 		&fk.LabelRepo{})
 	user := u.NewUser("user@example.com")
 	ctx := u.AppendUserToContext(t.Context(), user)
@@ -106,7 +105,7 @@ func TestTime(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.AnnotationRepo{}
 	now := time.Now()
-	itr := New(&st.FakeImageStore{},
+	itr := New(&fk.ImageStore{},
 		repo,
 		&fk.LabelRepo{},
 		WithClock(clockwork.NewFakeClockAt(now)))
@@ -125,7 +124,7 @@ func TestAddBoundingBox(t *testing.T) {
 		Label: label.Name, Xc: float32(1.0), Yc: float32(1.0), Width: float32(3.0),
 		Height: float32(3.0), Angle: float32(32)}
 
-	itr := New(&st.FakeImageStore{Return: &image},
+	itr := New(&fk.ImageStore{Return: &image},
 		&repo,
 		&fk.LabelRepo{Return: label},
 	)

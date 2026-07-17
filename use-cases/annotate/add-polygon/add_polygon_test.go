@@ -12,7 +12,6 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
-	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +26,7 @@ func TestHandleAuthError(t *testing.T) {
 	image := CreateImage()
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	image.Collection.Group = &group
-	itr := New(&st.FakeImageStore{Return: &image},
+	itr := New(&fk.ImageStore{Return: &image},
 		&fk.AnnotationRepo{},
 		&fk.LabelRepo{},
 		WithAuth(auth.FailingAuth{}))
@@ -41,7 +40,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestErrOnImageRetrievalShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{Err: e.ErrInternal},
+	itr := New(&fk.ImageStore{Err: e.ErrInternal},
 		&fk.AnnotationRepo{},
 		&fk.LabelRepo{})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
@@ -51,7 +50,7 @@ func TestErrOnImageRetrievalShouldFail(t *testing.T) {
 
 func TestErrOnFindLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{},
+	itr := New(&fk.ImageStore{},
 		&fk.AnnotationRepo{},
 		&fk.LabelRepo{ErrOnFind: e.ErrInternal},
 	)
@@ -68,7 +67,7 @@ func CreateTestAddPolygonRequest() Request {
 
 func TestErrOnAddPolygonShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{},
+	itr := New(&fk.ImageStore{},
 		&fk.AnnotationRepo{ErrOnAddPoly: e.ErrInternal},
 		&fk.LabelRepo{})
 	itr.Execute(t.Context(), CreateTestAddPolygonRequest(), p)
@@ -79,7 +78,7 @@ func TestErrOnAddPolygonShouldFail(t *testing.T) {
 func TestAddUserIdFromContext(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.AnnotationRepo{}
-	itr := New(&st.FakeImageStore{}, repo,
+	itr := New(&fk.ImageStore{}, repo,
 		&fk.LabelRepo{})
 	user := u.NewUser("user@example.com")
 	ctx := u.AppendUserToContext(t.Context(), user)
@@ -92,7 +91,7 @@ func TestTime(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.AnnotationRepo{}
 	now := time.Now()
-	itr := New(&st.FakeImageStore{},
+	itr := New(&fk.ImageStore{},
 		repo,
 		&fk.LabelRepo{},
 		WithClock(clockwork.NewFakeClockAt(now)))
@@ -109,7 +108,7 @@ func TestAddPolygon(t *testing.T) {
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	req := CreateTestAddPolygonRequest()
 	req.ImageId = image.Id.String()
-	itr := New(&st.FakeImageStore{Return: &image},
+	itr := New(&fk.ImageStore{Return: &image},
 		&repo,
 		&fk.LabelRepo{Return: label},
 	)

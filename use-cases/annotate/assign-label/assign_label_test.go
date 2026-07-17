@@ -11,7 +11,6 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
-	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +27,7 @@ func TestHandleAuthError(t *testing.T) {
 	image.Collection.Group = &group
 	itr := New(&fk.AnnotationRepo{},
 		&fk.LabelRepo{},
-		&st.FakeImageStore{Return: &image},
+		&fk.ImageStore{Return: &image},
 		WithAuth(auth.FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
@@ -40,7 +39,7 @@ func TestHandleNotFoundErrOnImageRetrieval(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.AnnotationRepo{},
 		&fk.LabelRepo{},
-		&st.FakeImageStore{Err: e.ErrNotFound})
+		&fk.ImageStore{Err: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -50,7 +49,7 @@ func TestHandleInternalErrOnImageRetrieval(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.AnnotationRepo{},
 		&fk.LabelRepo{},
-		&st.FakeImageStore{Err: e.ErrInternal})
+		&fk.ImageStore{Err: e.ErrInternal})
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -61,7 +60,7 @@ func TestAssignNonExistingLabelShouldFail(t *testing.T) {
 	image := CreateImage()
 	itr := New(&fk.AnnotationRepo{},
 		&fk.LabelRepo{ErrOnFind: e.ErrNotFound},
-		&st.FakeImageStore{Return: &image})
+		&fk.ImageStore{Return: &image})
 	itr.Execute(t.Context(), Request{image.Id.String(), image.Collection.Name, "a-label"}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -70,7 +69,7 @@ func TestAddUserIdFromContext(t *testing.T) {
 	p := &FakePresenter{}
 	image := CreateImage()
 	repo := &fk.AnnotationRepo{}
-	itr := New(repo, &fk.LabelRepo{}, &st.FakeImageStore{Return: &image})
+	itr := New(repo, &fk.LabelRepo{}, &fk.ImageStore{Return: &image})
 	user := u.NewUser("user@example.com")
 	ctx := u.AppendUserToContext(t.Context(), user)
 	itr.Execute(ctx, Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
@@ -83,7 +82,7 @@ func TestTime(t *testing.T) {
 	repo := &fk.AnnotationRepo{}
 	now := time.Now()
 	itr := New(repo, &fk.LabelRepo{},
-		&st.FakeImageStore{Return: &image}, WithClock(clockwork.NewFakeClockAt(now)))
+		&fk.ImageStore{Return: &image}, WithClock(clockwork.NewFakeClockAt(now)))
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.NotNil(t, repo.GotTime)
 	assert.Equal(t, now, *repo.GotTime)
@@ -99,7 +98,7 @@ func TestAssignLabelToImage(t *testing.T) {
 	repo := &fk.AnnotationRepo{}
 	itr := New(repo,
 		&fk.LabelRepo{Return: label},
-		&st.FakeImageStore{Return: &image})
+		&fk.ImageStore{Return: &image})
 	itr.Execute(t.Context(), req, p)
 	resp := p.Got
 	assert.Equal(t, resp.Label, req.Label, "label")

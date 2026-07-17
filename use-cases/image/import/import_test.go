@@ -47,7 +47,7 @@ func TestImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 
 	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection",
 		clc.WithGroup(g.NewGroup(g.NewGroupId(), "dst-group")))
-	itr := New(&fk.ImageRepo{ImageAlreadyInCollection: true}, &fk.CollectionRepo{Return: dstCollection})
+	itr := New(&fk.ImageRepo{ImageIsInCollection: true}, &fk.CollectionRepo{Return: dstCollection})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotDependencyErr)
 	assert.False(t, p.GotSuccess)

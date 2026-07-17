@@ -9,7 +9,6 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
-	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +18,7 @@ func TestHandleAuthError(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection",
 		clc.WithGroup(group))
 	image := im.NewImage(im.NewImageId(), collection)
-	itr := New(&st.FakeImageStore{Return: &image}, &fk.ImageRepo{},
+	itr := New(&fk.ImageStore{Return: &image}, &fk.ImageRepo{},
 		&fk.AnnotationRepo{},
 		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
@@ -32,7 +31,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestNonExistingResourceShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{Err: e.ErrNotFound}, &fk.ImageRepo{}, &fk.AnnotationRepo{})
+	itr := New(&fk.ImageStore{Err: e.ErrNotFound}, &fk.ImageRepo{}, &fk.AnnotationRepo{})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -40,7 +39,7 @@ func TestNonExistingResourceShouldFail(t *testing.T) {
 
 func TestHandleInternalErr(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&st.FakeImageStore{Err: e.ErrInternal}, &fk.ImageRepo{}, &fk.AnnotationRepo{})
+	itr := New(&fk.ImageStore{Err: e.ErrInternal}, &fk.ImageRepo{}, &fk.AnnotationRepo{})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -51,7 +50,7 @@ func TestDeleteNonExistingLabelShouldFail(t *testing.T) {
 	id := im.NewImageId()
 	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	image.AddLabel(lbl.NewLabel(lbl.NewLabelId(), "a-label"))
-	itr := New(&st.FakeImageStore{Return: &image},
+	itr := New(&fk.ImageStore{Return: &image},
 		&fk.ImageRepo{}, &fk.AnnotationRepo{ErrOnRemoveAnnotation: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -65,7 +64,7 @@ func TestDeleteNonExistingBoxShouldFail(t *testing.T) {
 	box := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1,
 		lbl.NewLabel(lbl.NewLabelId(), "a-label"))
 	image.AddBoundingBox(box)
-	itr := New(&st.FakeImageStore{Return: &image},
+	itr := New(&fk.ImageStore{Return: &image},
 		&fk.ImageRepo{}, &fk.AnnotationRepo{ErrOnRemoveAnnotation: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -78,7 +77,7 @@ func TestHandleInternalErrOnDeleteBoxes(t *testing.T) {
 	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
 	box := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, lbl.NewLabel(lbl.NewLabelId(), "a-label"))
 	image.AddBoundingBox(box)
-	itr := New(&st.FakeImageStore{Return: &image},
+	itr := New(&fk.ImageStore{Return: &image},
 		&fk.ImageRepo{}, &fk.AnnotationRepo{ErrOnRemoveAnnotation: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -89,7 +88,7 @@ func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	id := im.NewImageId()
 	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
-	itr := New(&st.FakeImageStore{Return: &image},
+	itr := New(&fk.ImageStore{Return: &image},
 		&fk.ImageRepo{ErrOnRemoveImage: e.ErrInternal}, &fk.AnnotationRepo{})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -100,7 +99,7 @@ func TestRemoveImageFromCollection(t *testing.T) {
 	p := &FakePresenter{}
 	id := im.NewImageId()
 	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
-	itr := New(&st.FakeImageStore{Return: &image},
+	itr := New(&fk.ImageStore{Return: &image},
 		&fk.ImageRepo{}, &fk.AnnotationRepo{})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotSuccess)

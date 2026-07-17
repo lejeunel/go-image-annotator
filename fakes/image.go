@@ -20,7 +20,7 @@ type ImageRepo struct {
 	ErrOnCount                   error
 	ImportedImageId              im.ImageId
 	ImportedIntoCollectionId     clc.CollectionId
-	ImageAlreadyInCollection     bool
+	ImageIsInCollection          bool
 	GotFilters                   im.FilteringParams
 	GotPagination                pa.PaginationParams
 	GotOrdering                  im.OrderingParams
@@ -50,7 +50,7 @@ func (r *ImageRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc
 	if r.ErrOnImageExistsInCollection != nil {
 		return false, r.ErrOnImageExistsInCollection
 	}
-	if r.ImageAlreadyInCollection {
+	if r.ImageIsInCollection {
 		return true, nil
 	}
 	return false, nil

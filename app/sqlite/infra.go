@@ -42,8 +42,7 @@ func NewSQLiteRepos(db *sqlx.DB, fstore af_store.Interface) SQLiteRepos {
 	lbrepo := lbl.NewSQLiteLabelRepo(db)
 	grprepo := grp.NewSQLiteGroupRepo(db)
 	usrrepo := usr.NewSQLiteUserRepo(db)
-	imstorerepo := SQLiteImageStoreRepo{imrepo, clrepo, lbrepo, anrepo}
-	imstore := im_store.New(imstorerepo, fstore)
+	imstore := im_store.New(imrepo, clrepo, anrepo, fstore)
 	scrrepo := scr.NewSQLiteScrollerRepo(db)
 	return SQLiteRepos{
 		Image:      imrepo,
