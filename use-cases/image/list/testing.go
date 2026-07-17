@@ -1,49 +1,8 @@
 package list
 
 import (
-	im "github.com/lejeunel/go-image-annotator/entities/image"
-	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
-
-type FakeRepo struct {
-	GotFilters    im.FilteringParams
-	GotPagination pa.PaginationParams
-	GotOrdering   im.OrderingParams
-	Err           error
-	Count_        int64
-	ErrOnList     bool
-	ErrOnCount    bool
-}
-
-func (r *FakeRepo) Slice(f im.FilteringParams, p pa.PaginationParams, o im.OrderingParams) ([]im.BaseImage, error) {
-	if r.ErrOnList {
-		return nil, r.Err
-	}
-
-	r.GotFilters = f
-	r.GotPagination = p
-	r.GotOrdering = o
-
-	result := []im.BaseImage{}
-	collectionName := "a-collection"
-	for range p.PageSize {
-		result = append(result,
-			im.BaseImage{
-				Collection: collectionName,
-				ImageId:    im.NewImageId()})
-	}
-
-	return result, nil
-
-}
-func (r *FakeRepo) Count(f im.CountingParams) (*int64, error) {
-	if r.ErrOnCount {
-		return nil, r.Err
-	}
-	return &r.Count_, nil
-
-}
 
 type FakePresenter struct {
 	Got        Response

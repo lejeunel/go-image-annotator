@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
-	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 

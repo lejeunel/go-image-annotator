@@ -6,8 +6,8 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -64,7 +64,7 @@ func TestInternalErrOnImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 func TestInternalErrOnImportShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
-	itr := New(&fk.ImageRepo{ErrOnImport: e.ErrInternal}, &fk.CollectionRepo{Return: dstCollection})
+	itr := New(&fk.ImageRepo{ErrOnAddToCollection: e.ErrInternal}, &fk.CollectionRepo{Return: dstCollection})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)

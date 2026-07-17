@@ -3,12 +3,13 @@ package delete
 import (
 	"testing"
 
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&FakeRepo{}, WithAuth(FailingAuth{}))
+	itr := New(&fk.LabelRepo{}, WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotAuthErr)
@@ -17,7 +18,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestDeleteLabelWithAssociatedResourcesShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{IsUsed_: true})
+	itr := New(&fk.LabelRepo{IsUsed_: true})
 	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotDependencyErr)
 	assert.False(t, p.GotSuccess)
@@ -25,7 +26,7 @@ func TestDeleteLabelWithAssociatedResourcesShouldFail(t *testing.T) {
 
 func TestHandleInternalErrOnIsUsed(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{Err: e.ErrInternal, ErrOnIsUsed: true})
+	itr := New(&fk.LabelRepo{ErrOnIsUsed: e.ErrInternal})
 	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -33,7 +34,7 @@ func TestHandleInternalErrOnIsUsed(t *testing.T) {
 
 func TestHandleInternalErrOnExists(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{Err: e.ErrInternal, ErrOnExists: true})
+	itr := New(&fk.LabelRepo{ErrOnExists: e.ErrInternal})
 	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -41,23 +42,15 @@ func TestHandleInternalErrOnExists(t *testing.T) {
 
 func TestDeletingMissingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{IsMissing: true})
-	itr.Execute(t.Context(), "", p)
+	itr := New(&fk.LabelRepo{})
+	itr.Execute(t.Context(), "a-label", p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
 
 func TestDeleteLabel(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{})
+	itr := New(&fk.LabelRepo{ExistingNames: []string{"my-label"}})
 	itr.Execute(t.Context(), "my-label", p)
 	assert.True(t, p.GotSuccess)
-}
-
-func TestHandleInternalError(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&FakeRepo{Err: e.ErrInternal})
-	itr.Execute(t.Context(), "", p)
-	assert.True(t, p.GotInternalErr)
-	assert.False(t, p.GotSuccess)
 }

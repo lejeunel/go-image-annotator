@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 

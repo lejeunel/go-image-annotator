@@ -21,3 +21,8 @@ func WithDescription(d string) Option {
 		l.Description = d
 	}
 }
+
+type UpdatableModel struct {
+	Name           string
+	NewDescription string
+}

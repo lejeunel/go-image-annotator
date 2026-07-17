@@ -12,8 +12,9 @@ import (
 
 type AnnotationRepo struct {
 	Err                   error
-	ErrOnAddPoly          bool
-	ErrOnAddLabel         bool
+	ErrOnAddPoly          error
+	ErrOnAddLabel         error
+	ErrOnAddBoundingBox   error
 	ErrOnUpdate           error
 	GotImageId            im.ImageId
 	GotCollectionId       clc.CollectionId
@@ -30,25 +31,28 @@ type AnnotationRepo struct {
 	ErrOnRemoveAnnotation error
 	UpdatedAnnotationId   a.AnnotationId
 	UpdatedLabelId        lbl.LabelId
+	NumBoundingBoxesAdded int
+	NumImageLabelsAdded   int
 
 	NoGroup bool
 }
 
 func (r *AnnotationRepo) AddBoundingBox(imageId im.ImageId, collectionId clc.CollectionId, box a.BoundingBox, userId *u.UserId, t *time.Time) error {
-	if r.ErrOnAddPoly {
-		return r.Err
+	if r.ErrOnAddBoundingBox != nil {
+		return r.ErrOnAddBoundingBox
 	}
 	r.GotImageId = imageId
 	r.GotCollectionId = collectionId
 	r.GotBox = box
 	r.GotUserId = userId
 	r.GotTime = t
+	r.NumBoundingBoxesAdded += 1
 	return nil
 }
 
 func (r *AnnotationRepo) AddPolygon(imageId im.ImageId, collectionId clc.CollectionId, poly a.Polygon, userId *u.UserId, t *time.Time) error {
-	if r.ErrOnAddPoly {
-		return r.Err
+	if r.ErrOnAddPoly != nil {
+		return r.ErrOnAddPoly
 	}
 	r.GotImageId = imageId
 	r.GotCollectionId = collectionId
@@ -59,14 +63,15 @@ func (r *AnnotationRepo) AddPolygon(imageId im.ImageId, collectionId clc.Collect
 }
 
 func (r *AnnotationRepo) AddImageLabel(imageId im.ImageId, collectionId clc.CollectionId, imageLabel a.ImageLabel, userId *u.UserId, t *time.Time) error {
-	if r.ErrOnAddLabel {
-		return r.Err
+	if r.ErrOnAddLabel != nil {
+		return r.ErrOnAddLabel
 	}
 	r.AddedLabelId = imageLabel.Label.Id
 	r.AddedOnImageId = imageId
 	r.AddedOnCollectionId = collectionId
 	r.GotUserId = userId
 	r.GotTime = t
+	r.NumImageLabelsAdded += 1
 	return nil
 
 }

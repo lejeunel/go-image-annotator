@@ -10,10 +10,10 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
-	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -60,7 +60,7 @@ func TestAssignNonExistingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	image := CreateImage()
 	itr := New(&fk.AnnotationRepo{},
-		&fk.LabelRepo{Err: e.ErrNotFound},
+		&fk.LabelRepo{ErrOnFind: e.ErrNotFound},
 		&st.FakeImageStore{Return: &image})
 	itr.Execute(t.Context(), Request{image.Id.String(), image.Collection.Name, "a-label"}, p)
 	assert.True(t, p.GotNotFoundErr)

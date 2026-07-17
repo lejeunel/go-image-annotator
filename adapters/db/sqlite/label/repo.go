@@ -10,8 +10,7 @@ import (
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
-	"github.com/lejeunel/go-image-annotator/use-cases/label/update"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type SQLiteLabelRepo struct {
@@ -71,7 +70,7 @@ func (r SQLiteLabelRepo) Count() (int64, error) {
 
 	return count, nil
 }
-func (r SQLiteLabelRepo) List(m list.Request) ([]*lbl.Label, error) {
+func (r SQLiteLabelRepo) List(m pag.PaginationParams) ([]*lbl.Label, error) {
 	q := sq.StatementBuilder.Select("id,name,description").From("labels")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
@@ -103,7 +102,7 @@ func (r SQLiteLabelRepo) FetchAll() ([]string, error) {
 
 	return names, nil
 }
-func (r SQLiteLabelRepo) Update(m update.Model) error {
+func (r SQLiteLabelRepo) Update(m lbl.UpdatableModel) error {
 	query := "UPDATE labels SET description=$1 WHERE name=$2"
 	_, err := r.Db.Exec(query, m.NewDescription, m.Name)
 

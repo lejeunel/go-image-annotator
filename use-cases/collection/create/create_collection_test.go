@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/jonboulle/clockwork"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
-	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -42,7 +43,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.repo.Update(Model{Name: r.Name, NewDescription: r.NewDescription}); err != nil {
+	if err := i.repo.Update(lbl.UpdatableModel{Name: r.Name, NewDescription: r.NewDescription}); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

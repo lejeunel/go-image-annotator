@@ -9,9 +9,9 @@ import (
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
-	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -44,7 +44,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestErrOnFindLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.AnnotationRepo{}, &fk.LabelRepo{Err: e.ErrInternal})
+	itr := New(&fk.AnnotationRepo{}, &fk.LabelRepo{ErrOnFind: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)

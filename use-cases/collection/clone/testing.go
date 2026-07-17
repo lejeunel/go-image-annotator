@@ -5,10 +5,10 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	testing "github.com/lejeunel/go-image-annotator/shared/testing"
-	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"iter"
 	"time"
 )

@@ -13,6 +13,7 @@ import (
 	pg "github.com/lejeunel/go-image-annotator/adapters/web/pagination"
 	l "github.com/lejeunel/go-image-annotator/entities/label"
 	rt "github.com/lejeunel/go-image-annotator/routes"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
 	. "maragu.dev/gomponents"
 )
@@ -69,7 +70,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
 	s.ListItr.Execute(r.Context(),
-		list.Request{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
+		pag.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
 		NewListLabelsPresenter(w, s.PageBuilder))
 }
 

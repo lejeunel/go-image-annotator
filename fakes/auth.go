@@ -30,3 +30,31 @@ func (f Auth) DeleteImage(ctx context.Context, g string) error {
 func (f Auth) ImportImage(ctx context.Context, dstGroup string) error {
 	return f.Err
 }
+
+func (f Auth) IngestImage(ctx context.Context, group string) error {
+	return f.Err
+}
+
+func (f Auth) CreateLabel(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) DeleteLabel(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) FetchAllLabels(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) ReadLabel(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) ListLabels(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) UpdateLabel(ctx context.Context) error {
+	return f.Err
+}

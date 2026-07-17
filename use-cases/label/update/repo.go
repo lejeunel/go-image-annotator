@@ -1,7 +1,10 @@
 package update
 
-// Update label repo
+import (
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+)
+
 type Repo interface {
-	Update(Model) error
+	Update(lbl.UpdatableModel) error
 	Exists(string) (bool, error)
 }

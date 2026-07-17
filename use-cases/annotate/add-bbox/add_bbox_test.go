@@ -10,10 +10,10 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
-	fk "github.com/lejeunel/go-image-annotator/use-cases/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -54,7 +54,7 @@ func TestErrOnFindLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&st.FakeImageStore{},
 		&fk.AnnotationRepo{},
-		&fk.LabelRepo{Err: e.ErrInternal},
+		&fk.LabelRepo{ErrOnFind: e.ErrInternal},
 	)
 	itr.Execute(t.Context(),
 		Request{ImageId: im.NewImageId().String()},
@@ -83,7 +83,7 @@ func TestValidationErrShouldFail(t *testing.T) {
 func TestInternalErrOnAddBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&st.FakeImageStore{},
-		&fk.AnnotationRepo{ErrOnAddPoly: true, Err: e.ErrInternal},
+		&fk.AnnotationRepo{ErrOnAddBoundingBox: e.ErrInternal},
 		&fk.LabelRepo{})
 	itr.Execute(t.Context(), CreateTestAddBoxRequest(), p)
 	assert.True(t, p.GotInternalErr)

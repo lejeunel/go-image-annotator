@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
@@ -12,7 +13,7 @@ import (
 
 func TestHandleNotFoundErrOnList(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{ErrOnList: true, Err: e.ErrNotFound},
+	itr := New(&fk.ImageRepo{ErrOnList: e.ErrNotFound},
 		&st.FakeImageStore{})
 	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -21,7 +22,7 @@ func TestHandleNotFoundErrOnList(t *testing.T) {
 
 func TestPaginationParamsFallbackToDefault(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{},
+	itr := New(&fk.ImageRepo{},
 		&st.FakeImageStore{})
 	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 0, Page: 0}}, p)
 	assert.True(t, p.GotSuccess)
@@ -29,7 +30,7 @@ func TestPaginationParamsFallbackToDefault(t *testing.T) {
 
 func TestHandleInternalErrOnList(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{ErrOnList: true, Err: e.ErrInternal},
+	itr := New(&fk.ImageRepo{ErrOnList: e.ErrInternal},
 		&st.FakeImageStore{})
 	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotInternalErr)
@@ -38,7 +39,7 @@ func TestHandleInternalErrOnList(t *testing.T) {
 
 func TestHandleInternalErrOnImageBuild(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{}, &st.FakeImageStore{Err: e.ErrInternal})
+	itr := New(&fk.ImageRepo{}, &st.FakeImageStore{Err: e.ErrInternal})
 	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -46,7 +47,7 @@ func TestHandleInternalErrOnImageBuild(t *testing.T) {
 
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{ErrOnCount: true, Err: e.ErrInternal}, &st.FakeImageStore{})
+	itr := New(&fk.ImageRepo{ErrOnCount: e.ErrInternal}, &st.FakeImageStore{})
 	itr.Execute(Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 1}}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -54,7 +55,7 @@ func TestHandleInternalErrOnCount(t *testing.T) {
 
 func TestListImages(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeRepo{}
+	repo := &fk.ImageRepo{}
 	itr := New(repo, &st.FakeImageStore{})
 	r := Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{PageSize: 1}}
 	itr.Execute(r, p)
@@ -63,7 +64,7 @@ func TestListImages(t *testing.T) {
 
 func TestPaginationMetaData(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeRepo{Count_: 10}
+	repo := &fk.ImageRepo{Count_: 10}
 	itr := New(repo, &st.FakeImageStore{})
 	r := Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{Page: 1, PageSize: 2}}
 	itr.Execute(r, p)
@@ -76,7 +77,7 @@ func TestPaginationMetaData(t *testing.T) {
 
 func TestQueryPaginationParams(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeRepo{}
+	repo := &fk.ImageRepo{}
 	itr := New(repo, &st.FakeImageStore{})
 	r := Request{FilteringParams: im.FilteringParams{}, PaginationParams: pa.PaginationParams{Page: 1, PageSize: 2}}
 	itr.Execute(r, p)
@@ -87,7 +88,7 @@ func TestQueryPaginationParams(t *testing.T) {
 
 func TestQueryOrderingParams(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &FakeRepo{}
+	repo := &fk.ImageRepo{}
 	itr := New(repo, &st.FakeImageStore{})
 	ord := im.OrderingParams{IngestTime: true}
 
