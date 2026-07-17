@@ -1,37 +1,8 @@
 package create
 
 import (
-	"slices"
-
-	"context"
-	rl "github.com/lejeunel/go-image-annotator/entities/role"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
-
-type FakeRepo struct {
-	Err   error
-	Names []string
-	Got   *rl.Role
-}
-
-func (r *FakeRepo) Create(role rl.Role) error {
-	if r.Err != nil {
-		return r.Err
-	}
-
-	r.Got = &role
-	return nil
-}
-
-func (r *FakeRepo) Exists(name string) (*bool, error) {
-	var exist = true
-	if slices.Contains(r.Names, name) {
-		return &exist, nil
-	}
-	exist = false
-	return &exist, nil
-}
 
 type FakePresenter struct {
 	Got        Response
@@ -42,11 +13,4 @@ type FakePresenter struct {
 func (p *FakePresenter) Success(r Response) {
 	p.GotSuccess = true
 	p.Got = r
-}
-
-type FailingAuth struct {
-}
-
-func (f FailingAuth) CreateRole(ctx context.Context) error {
-	return e.ErrAuthorization
 }

@@ -2,7 +2,7 @@ package role
 
 import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	l "github.com/lejeunel/go-image-annotator/use-cases/role/list"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -24,7 +24,7 @@ func TestCount(t *testing.T) {
 func TestInternalErrOnListShouldFail(t *testing.T) {
 	repo := NewTestSQLiteRoleRepo()
 	repo.Db.Close()
-	_, err := repo.List(l.Request{})
+	_, err := repo.List(pag.PaginationParams{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
@@ -32,7 +32,7 @@ func TestList(t *testing.T) {
 	repo := NewTestSQLiteRoleRepo()
 	CreateRole(repo, "a-role")
 	CreateRole(repo, "another-role")
-	cs, err := repo.List(l.Request{Page: 1, PageSize: 2})
+	cs, err := repo.List(pag.PaginationParams{Page: 1, PageSize: 2})
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(cs))
 	assert.False(t, cs[0].Name == cs[1].Name)

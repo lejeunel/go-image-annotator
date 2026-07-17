@@ -1,8 +1,8 @@
 package role
 
 import (
+	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	u "github.com/lejeunel/go-image-annotator/use-cases/role/update"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -10,7 +10,7 @@ import (
 func TestInternalErrOnUpdateShouldFail(t *testing.T) {
 	repo := NewTestSQLiteRoleRepo()
 	repo.Db.Close()
-	err := repo.Update(u.Model{})
+	err := repo.Update(rl.UpdatableModel{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
@@ -19,7 +19,7 @@ func TestUpdate(t *testing.T) {
 	role, _ := CreateRole(repo, "a-role")
 	newName := "new-role-name"
 	newDesc := "new-description"
-	err := repo.Update(u.Model{Name: role.Name, NewName: newName, NewDescription: newDesc})
+	err := repo.Update(rl.UpdatableModel{Name: role.Name, NewName: newName, NewDescription: newDesc})
 	assert.NoError(t, err)
 	r, err := repo.Find(newName)
 	assert.NoError(t, err)

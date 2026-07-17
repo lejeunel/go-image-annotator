@@ -13,23 +13,23 @@ type Interactor struct {
 	auth Auth
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	errCtx := fmt.Errorf("deleting role")
 	if err := i.auth.DeleteRole(ctx); err != nil {
 		out.Error(fmt.Errorf("%w: %w", errCtx, e.ErrAuthorization))
 		return
 	}
 
-	if err := i.ensureExists(r.Name); err != nil {
+	if err := i.ensureExists(name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	if err := i.ensureDeletable(r.Name); err != nil {
+	if err := i.ensureDeletable(name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	if err := i.repo.Delete(r.Name); err != nil {
+	if err := i.repo.Delete(name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

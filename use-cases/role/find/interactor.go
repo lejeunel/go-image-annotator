@@ -9,9 +9,9 @@ type Interactor struct {
 	repo Repo
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	errCtx := "fetching role"
-	found, err := i.repo.Find(r.Name)
+	found, err := i.repo.Find(name)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

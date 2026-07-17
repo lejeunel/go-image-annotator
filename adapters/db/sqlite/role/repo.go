@@ -11,8 +11,7 @@ import (
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	ro "github.com/lejeunel/go-image-annotator/entities/role"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/use-cases/role/list"
-	"github.com/lejeunel/go-image-annotator/use-cases/role/update"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type SQLiteRoleRepo struct {
@@ -76,7 +75,7 @@ func (r SQLiteRoleRepo) Delete(name string) error {
 	}
 	return nil
 }
-func (r SQLiteRoleRepo) Update(m update.Model) error {
+func (r SQLiteRoleRepo) Update(m ro.UpdatableModel) error {
 	query := "UPDATE roles SET name=$1,description=$2 WHERE name=$3"
 	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
 
@@ -112,7 +111,7 @@ func (r SQLiteRoleRepo) Count() (*int64, error) {
 
 	return &count, nil
 }
-func (r SQLiteRoleRepo) List(m list.Request) ([]*ro.Role, error) {
+func (r SQLiteRoleRepo) List(m pag.PaginationParams) ([]*ro.Role, error) {
 	q := sq.StatementBuilder.Select(`id,name,description`).From("roles")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()

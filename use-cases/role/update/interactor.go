@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -52,7 +53,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	}
 
-	if err := i.repo.Update(Model{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription}); err != nil {
+	if err := i.repo.Update(rl.UpdatableModel{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription}); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

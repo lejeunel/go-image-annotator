@@ -39,8 +39,9 @@ func TestUpdateLabel(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.LabelRepo{ErrOnUpdate: e.ErrInternal})
-	itr.Execute(t.Context(), Request{}, p)
+	itr := New(&fk.LabelRepo{ExistingNames: []string{"a-label"},
+		ErrOnUpdate: e.ErrInternal})
+	itr.Execute(t.Context(), Request{Name: "a-label"}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }

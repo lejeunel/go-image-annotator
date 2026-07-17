@@ -58,3 +58,15 @@ func (f Auth) ListLabels(ctx context.Context) error {
 func (f Auth) UpdateLabel(ctx context.Context) error {
 	return f.Err
 }
+
+func (f Auth) CreateRole(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) DeleteRole(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) UpdateRole(ctx context.Context) error {
+	return f.Err
+}
