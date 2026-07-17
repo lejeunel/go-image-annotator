@@ -1,21 +1,24 @@
 package renew_token
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	fk "github.com/lejeunel/go-image-annotator/fakes"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&FakeRepo{}, &FakeTokenGenerator{},
-		WithAuth(FailingAuth{}))
+	itr := New(&fk.UserRepo{}, &fk.Tokenizer{},
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }
 func TestNonExistingUserShouldFail(t *testing.T) {
-	repo := &FakeRepo{Missing: true}
-	itr := New(repo, &FakeTokenGenerator{})
+	repo := &fk.UserRepo{Missing: true}
+	itr := New(repo, &fk.Tokenizer{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "user", p)
 	assert.True(t, p.GotNotFoundErr)
@@ -24,8 +27,8 @@ func TestNonExistingUserShouldFail(t *testing.T) {
 func TestCreateWithTokenHash(t *testing.T) {
 	token := "new-token"
 	hash := []byte("new-hash")
-	repo := &FakeRepo{}
-	itr := New(repo, &FakeTokenGenerator{Token: token, Hash_: hash})
+	repo := &fk.UserRepo{ExistingIds: []string{"user"}}
+	itr := New(repo, &fk.Tokenizer{ReturnValue: token, ReturnHash: hash})
 	p := &FakePresenter{}
 	id := "user"
 	itr.Execute(t.Context(), id, p)

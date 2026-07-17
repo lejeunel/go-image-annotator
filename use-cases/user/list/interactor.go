@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	"github.com/lejeunel/go-image-annotator/shared/pagination"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type Interactor struct {
@@ -13,7 +13,7 @@ type Interactor struct {
 	auth Auth
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, r pag.PaginationParams, out OutputPort) {
 	errCtx := "listing users"
 
 	if err := i.auth.ListUsers(ctx); err != nil {
@@ -33,7 +33,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	response := Response{
-		Pagination: pagination.New(int64(r.Page), r.PageSize, count),
+		Pagination: pag.New(int64(r.Page), r.PageSize, count),
 	}
 	for _, f := range found {
 		response.Users = append(response.Users, UserResponse{Id: f.Id, Groups: f.Groups, Roles: f.Roles})

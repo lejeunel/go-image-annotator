@@ -3,12 +3,13 @@ package set_admin
 import (
 	"testing"
 
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&FakeRepo{}, WithAuth(FailingAuth{}))
+	itr := New(&fk.UserRepo{}, WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "user@example.com", true, p)
 	assert.True(t, p.GotAuthErr)
@@ -16,7 +17,7 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestHandleErrorOnSet(t *testing.T) {
-	itr := New(&FakeRepo{Err: e.ErrInternal})
+	itr := New(&fk.UserRepo{ErrOnSetAdmin: e.ErrInternal})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "user@example.com", true, p)
 	assert.True(t, p.GotInternalErr)
@@ -24,11 +25,11 @@ func TestHandleErrorOnSet(t *testing.T) {
 }
 
 func TestSetAdmin(t *testing.T) {
-	repo := &FakeRepo{}
+	repo := &fk.UserRepo{}
 	itr := New(repo)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "user@example.com", true, p)
 	assert.True(t, p.GotSuccess)
 	assert.True(t, p.Got.IsAdmin)
-	assert.True(t, repo.GotValue)
+	assert.True(t, repo.GotSetAdmin)
 }

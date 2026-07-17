@@ -91,3 +91,31 @@ func (f Auth) CreateUser(ctx context.Context) error {
 func (f Auth) DeleteUser(ctx context.Context) error {
 	return f.Err
 }
+
+func (f Auth) FindUser(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) RequestForgottenPasswordToken(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) ListUsers(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) RenewToken(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) SetAdminRights(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) UnAssignUserFromGroup(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) UnAssignRoleFromUser(ctx context.Context) error {
+	return f.Err
+}

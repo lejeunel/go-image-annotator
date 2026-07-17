@@ -4,13 +4,14 @@ import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	"testing"
 
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&FakeRepo{},
-		WithAuth(FailingAuth{}))
+	itr := New(&fk.UserRepo{},
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotAuthErr)
@@ -19,7 +20,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&FakeRepo{Err: e.ErrInternal})
+	itr := New(&fk.UserRepo{ErrOnFind: e.ErrInternal})
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -31,7 +32,7 @@ func TestFindUser(t *testing.T) {
 	user := u.NewUser("the-user-id",
 		u.WithGroups(groups),
 		u.WithRoles(roles))
-	repo := &FakeRepo{Return: &user}
+	repo := &fk.UserRepo{Return: &user}
 	p := &FakePresenter{}
 	itr := New(repo)
 	req := Request{Id: user.Id}

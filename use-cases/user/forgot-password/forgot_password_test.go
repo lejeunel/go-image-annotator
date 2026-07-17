@@ -5,29 +5,31 @@ import (
 	"time"
 
 	"github.com/jonboulle/clockwork"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&FakeRepo{},
+	itr := New(&fk.UserRepo{},
 		1,
-		&FakeTokenGenerator{},
-		WithAuth(FailingAuth{}))
+		&fk.Tokenizer{},
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }
 func TestNonExistingUserShouldFail(t *testing.T) {
-	repo := &FakeRepo{Missing: true}
-	itr := New(repo, 1, &FakeTokenGenerator{})
+	repo := &fk.UserRepo{Missing: true}
+	itr := New(repo, 1, &fk.Tokenizer{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "user", p)
 	assert.True(t, p.GotNotFoundErr)
 }
 func TestDeletePreviousTokens(t *testing.T) {
-	repo := &FakeRepo{}
-	itr := New(repo, 1, &FakeTokenGenerator{})
+	repo := &fk.UserRepo{ExistingIds: []string{"user"}}
+	itr := New(repo, 1, &fk.Tokenizer{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "user", p)
 	assert.True(t, repo.DeletedPreviousTokens)
@@ -37,12 +39,12 @@ func TestRequestForgottenPasswordToken(t *testing.T) {
 	token := "new-token"
 	hash := []byte("new-hash")
 	expiresInMinutes := 1
-	repo := &FakeRepo{}
+	repo := &fk.UserRepo{ExistingIds: []string{"user"}}
 
 	now := time.Now()
 	itr := New(repo,
 		expiresInMinutes,
-		&FakeTokenGenerator{Token: token, Hash_: hash},
+		&fk.Tokenizer{ReturnValue: token, ReturnHash: hash},
 		WithClock(clockwork.NewFakeClockAt(now)))
 	p := &FakePresenter{}
 	email := "user"

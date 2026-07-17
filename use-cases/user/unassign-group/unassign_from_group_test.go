@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&FakeUserRepo{}, &FakeGroupRepo{},
-		WithAuth(FailingAuth{}))
+	itr := New(&fk.UserRepo{}, &fk.GroupRepo{},
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotAuthErr)
@@ -18,7 +19,7 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestMissingUserShouldFail(t *testing.T) {
-	itr := New(&FakeUserRepo{Missing: true}, &FakeGroupRepo{})
+	itr := New(&fk.UserRepo{Missing: true}, &fk.GroupRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user@example.com", Group: "my-group"}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -26,7 +27,7 @@ func TestMissingUserShouldFail(t *testing.T) {
 }
 
 func TestMissingGroupShouldFail(t *testing.T) {
-	itr := New(&FakeUserRepo{}, &FakeGroupRepo{Missing: true})
+	itr := New(&fk.UserRepo{}, &fk.GroupRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user@example.com", Group: "my-group"}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -34,9 +35,9 @@ func TestMissingGroupShouldFail(t *testing.T) {
 }
 
 func TestHandleErrorOnFindUser(t *testing.T) {
-	itr := New(&FakeUserRepo{Err: e.ErrInternal}, &FakeGroupRepo{})
+	itr := New(&fk.UserRepo{ErrOnFind: e.ErrInternal}, &fk.GroupRepo{ExistingNames: []string{"my-group"}})
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(), Request{Group: "my-group"}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -44,8 +45,8 @@ func TestHandleErrorOnFindUser(t *testing.T) {
 func TestUnAssignUserWhoIsNotAssignedHasNoEffect(t *testing.T) {
 	group := "a-group"
 	user := usr.NewUser("user@example.com")
-	repo := &FakeUserRepo{Return: &user}
-	itr := New(repo, &FakeGroupRepo{})
+	repo := &fk.UserRepo{Return: &user}
+	itr := New(repo, &fk.GroupRepo{ExistingNames: []string{group}})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Group: group}, p)
 	assert.True(t, p.GotSuccess)
@@ -56,11 +57,11 @@ func TestUnAssignUser(t *testing.T) {
 	group := "a-group"
 	user := usr.NewUser("user@example.com",
 		usr.WithGroups([]string{group}))
-	repo := &FakeUserRepo{Return: &user}
-	itr := New(repo, &FakeGroupRepo{})
+	repo := &fk.UserRepo{Return: &user}
+	itr := New(repo, &fk.GroupRepo{ExistingNames: []string{group}})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Group: group}, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, 0, len(p.Got.Groups))
-	assert.Equal(t, group, *repo.GotUnassignedGroup)
+	assert.Equal(t, group, repo.GotUnassignedGroup)
 }

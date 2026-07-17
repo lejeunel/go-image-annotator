@@ -13,7 +13,7 @@ import (
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/use-cases/user/list"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type SQLiteUserRepo struct {
@@ -161,7 +161,7 @@ func (r SQLiteUserRepo) Count() (int64, error) {
 
 	return count, nil
 }
-func (r SQLiteUserRepo) List(m list.Request) ([]u.User, error) {
+func (r SQLiteUserRepo) List(m pag.PaginationParams) ([]u.User, error) {
 	q := sq.StatementBuilder.Select("id").From("users")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
