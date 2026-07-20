@@ -53,7 +53,7 @@ func (t *RegionTable) addRow(author, time, id, label, color string, regionKind R
 			Raw(buf.String()),
 			Div(
 				Class("flex  justify-end items-center pr-1"),
-				Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, id, ic.TrashIcon)),
+				Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, id, ic.Trash)),
 			),
 		}})
 }

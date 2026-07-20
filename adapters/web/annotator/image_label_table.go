@@ -28,7 +28,7 @@ func (r ImageLabelRow) Render() Node {
 		),
 		Td(Div(
 			Class("flex justify-end items-center pr-1"),
-			Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, r.Id, ic.TrashIcon)),
+			Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, r.Id, ic.Trash)),
 		),
 		))
 }
@@ -52,7 +52,7 @@ func (t *ImageLabelTable) Build() Node {
 						Td(),
 						Td(Class("align-middle"),
 							Div(Class("flex items-center justify-end pr-1"),
-								Raw(fmt.Sprintf(`<a href="#" onclick="Alpine.store('imageLabelModal').open()"> %v </a>`, ic.AddCircleIcon)),
+								Raw(fmt.Sprintf(`<a href="#" onclick="Alpine.store('imageLabelModal').open()"> %v </a>`, ic.AddCircle)),
 							),
 						),
 					),

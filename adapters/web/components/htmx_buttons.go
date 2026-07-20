@@ -18,7 +18,7 @@ func MakeHTMXCreateButton(text string, hxPut string, hxTarget string) Node {
 			Attr(`hx-swap=innerHTML`),
 			Class(s.PrimaryButton),
 			Span(Class("flex items-center"),
-				Raw(ic.AddIcon), Div(Class("p-1"), Text(text)),
+				Raw(ic.Add), Div(Class("p-1"), Text(text)),
 			)))
 }
 

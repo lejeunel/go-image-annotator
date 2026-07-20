@@ -18,12 +18,12 @@ type ActionsPanelBuilder struct {
 }
 
 func (p *ActionsPanelBuilder) SetEdit(url url.URL) *ActionsPanelBuilder {
-	p.Items = append(p.Items, Item{Icon: ic.EditIcon, URL: url})
+	p.Items = append(p.Items, Item{Icon: ic.Edit, URL: url})
 	return p
 }
 
 func (p *ActionsPanelBuilder) SetConfirmDelete(url url.URL) *ActionsPanelBuilder {
-	p.Items = append(p.Items, Item{Icon: ic.TrashIcon, URL: url})
+	p.Items = append(p.Items, Item{Icon: ic.Trash, URL: url})
 	return p
 }
 

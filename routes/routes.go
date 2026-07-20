@@ -48,6 +48,11 @@ var CreateCollectionForm = "/ui/collection/new"
 var Label = "/ui/label"
 var CreateLabelForm = "/ui/label/new"
 
+var AdminUsers = "/admin/users"
+var AdminGroups = "/admin/groups"
+var AdminRoles = "/admin/roles"
+var AdminPolicies = "/admin/policies"
+
 func MakeOAuthCallbackURL(baseURL string, provider string) string {
 	return baseURL + strings.ReplaceAll(CallbackOAuth, "{provider}", provider)
 }

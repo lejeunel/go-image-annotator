@@ -20,8 +20,6 @@ type Server struct {
 func (s *Server) Admin(w http.ResponseWriter, r *http.Request) {
 	pb := s.AdminPageBuilder
 	pb.SetUserIdentity(r.Context())
-	pb.SetActive(cmp.NoPageActive)
-	pb.SetTitle("Admin")
 	pb.Build().Render(w)
 
 }

@@ -1,9 +1,7 @@
 package builders
 
 import (
-	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
-	s "github.com/lejeunel/go-image-annotator/shared/pagination"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -15,26 +13,14 @@ type CreationButton struct {
 }
 
 type PaginatedListBuilder struct {
-	listURL        string
-	pagination     s.Pagination
 	creationButton *CreationButton
-	tb.TableBuilder
+	PaginableTableBuilder
 	PageBuilder
 }
 
 func NewPaginatedListBuilder(base PageBuilder, fields []string) PaginatedListBuilder {
-	tableBuilder := tb.NewTableBuilder(fields)
-	return PaginatedListBuilder{TableBuilder: tableBuilder, PageBuilder: base}
-}
-func (b *PaginatedListBuilder) SetPagination(pg s.Pagination, url string) *PaginatedListBuilder {
-	b.pagination = pg
-	b.listURL = url
-	return b
-}
-
-func (b *PaginatedListBuilder) AddRow(r tb.Row) *PaginatedListBuilder {
-	b.TableBuilder.AddRow(r)
-	return b
+	return PaginatedListBuilder{PaginableTableBuilder: NewPaginableTableBuilder(fields),
+		PageBuilder: base}
 }
 
 func (b *PaginatedListBuilder) AddCreationButton(buttonLabel string, formEndpoint string, formDivId string) *PaginatedListBuilder {
@@ -52,7 +38,7 @@ func (b *PaginatedListBuilder) Build() *PaginatedListBuilder {
 		creationPanel = Div(button, formPlaceholder)
 
 	}
-	content := Div(creationPanel, Div(Class("py-2"), paginator), b.TableBuilder.Build())
+	content := Div(creationPanel, Div(Class("py-2"), paginator), b.PaginableTableBuilder.Build())
 	b.SetContent(content)
 	return b
 

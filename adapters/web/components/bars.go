@@ -38,7 +38,7 @@ func MakeUserBadge(user u.User) Node {
 	tUser := template.New("")
 	template.Must(tUser.Parse(userBadgeTemplate))
 	var iconBuf bytes.Buffer
-	Raw(ic.UserIcon).Render(&iconBuf)
+	Raw(ic.UserCircle).Render(&iconBuf)
 	var buf bytes.Buffer
 	menu := UserMenu{UserName: user.Id, Icon: iconBuf.String()}
 	menu.Entries = append(menu.Entries, UserMenuEntry{"Dashboard", rt.UserDashboard})
@@ -55,7 +55,7 @@ func MakeRepoButton(repoName string, currentVersion, url string) Node {
 		Href(url),
 		Div(
 			Class("flex items-center gap-1"),
-			Span(Raw(ic.GitHubIcon)),
+			Span(Raw(ic.GitHub)),
 			Span(Text(repoName)),
 			Span(Text(currentVersion)),
 		),
@@ -85,7 +85,7 @@ func DarkModeToggle() Node {
 			dark:text-surface dark:focus-visible:outline-surface cursor-pointer
 		`),
 		Span(
-			Attr("x-html", "darkMode ? `"+ic.SunIcon+"` : `"+ic.MoonIcon+"`"),
+			Attr("x-html", "darkMode ? `"+ic.Sun+"` : `"+ic.Moon+"`"),
 			Attr(":class", "darkMode ? 'text-gray-300' : 'text-gray-700'"),
 		),
 	)
@@ -140,7 +140,7 @@ func MakeDocsButton() Node {
 		Href(g.DocsURL),
 		Div(
 			Class("flex items-center gap-1"),
-			Span(Raw(ic.BookIcon)),
+			Span(Raw(ic.Book)),
 			Span(Text("Docs")),
 		),
 	)
