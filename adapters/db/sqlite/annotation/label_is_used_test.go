@@ -1,24 +1,28 @@
 package annotation
 
 import (
+	"testing"
+
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestInternalErrOnLabelIsUsedShouldFail(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	imLabel := a.NewImageLabel(label)
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, imLabel, nil, nil)
-	repos.Annotation.Db.Close()
+	db.Close()
 	_, err := repos.Label.IsUsed(label.Name)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestLabelIsUsedbyAnnotation(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	imLabel := a.NewImageLabel(label)
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, imLabel, nil, nil)

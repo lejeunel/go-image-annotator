@@ -3,6 +3,7 @@ package annotation
 import (
 	"testing"
 
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -11,26 +12,29 @@ import (
 var TestingPolygonPoints = a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}}
 
 func TestInternalErrOnAddPolygonShouldFail(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
-	repos.Annotation.Db.Close()
+	db.Close()
 	err := repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestInternalErrOnFindPolygonShouldFail(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
 	repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
-	repos.Annotation.Db.Close()
+	db.Close()
 	_, err := repos.Annotation.FindPolygons(image.Id, collection.Id)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestAddPolygon(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	labelName := "a-label"
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", labelName, nil)
 	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)

@@ -12,7 +12,7 @@ import (
 )
 
 type ImageRepo interface {
-	Iterate(im.FilteringParams, int) iter.Seq2[im.BaseImage, error]
+	Iterate(im.Filtering, int) iter.Seq2[im.BaseImage, error]
 	AddToCollection(im.ImageId, clc.CollectionId) error
 }
 type CollectionRepo interface {

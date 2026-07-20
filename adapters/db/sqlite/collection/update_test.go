@@ -1,21 +1,24 @@
 package collection
 
 import (
+	"testing"
+
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestInternalErrOnCollectionUpdateShouldFail(t *testing.T) {
-	repo := NewTestSQLiteCollectionRepo()
-	repo.Db.Close()
+	db := s.NewInMemory()
+	repo := NewSQLiteCollectionRepo(db)
+	db.Close()
 	err := repo.Update(clc.UpdateModel{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestUpdateCollection(t *testing.T) {
-	repo := NewTestSQLiteCollectionRepo()
+	repo := NewSQLiteCollectionRepo(s.NewInMemory())
 	collection, _ := CreateCollection(repo, "a-collection")
 	newName := "new-collection-name"
 	newDesc := "new-description"

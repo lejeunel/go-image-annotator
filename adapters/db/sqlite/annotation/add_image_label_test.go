@@ -1,32 +1,36 @@
 package annotation
 
 import (
+	"testing"
+	"time"
+
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestInternalErrOnAddLabelShouldFail(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
-	repos.Annotation.Db.Close()
+	db.Close()
 	err := repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label), nil, nil)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestInternalErrOnFindImageLabels(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	image, collection, _ := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
-	repos.Annotation.Db.Close()
+	db.Close()
 	_, err := repos.Annotation.FindImageLabels(image.Id, collection.Id)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestAddAndRetrieveImageLabels(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	repos := NewAnnotationTestRepos(s.NewInMemory())
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 
 	user := u.NewUser("user@example.com")

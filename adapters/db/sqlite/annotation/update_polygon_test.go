@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
@@ -12,11 +13,12 @@ import (
 )
 
 func TestErrOnUpdateShouldFail(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
 	repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
-	repos.Annotation.Db.Close()
+	db.Close()
 	err := repos.Annotation.UpdatePolygon(polygon.Id,
 		a.PolygonUpdatables{LabelId: label.Id, Points: a.Points{Coordinates: [][2]float32{{0, 0}, {3, 3}}}}, nil, nil)
 
@@ -24,7 +26,7 @@ func TestErrOnUpdateShouldFail(t *testing.T) {
 }
 
 func TestUpdatePolygon(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	repos := NewAnnotationTestRepos(s.NewInMemory())
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
 	repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)

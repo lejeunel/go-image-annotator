@@ -1,24 +1,27 @@
 package annotation
 
 import (
+	"testing"
+
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestInternalErrOnRemoveAnnotationShouldFail(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	annotationId := a.NewAnnotationId()
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label), nil, nil)
-	repos.Annotation.Db.Close()
+	db.Close()
 	err := repos.Annotation.RemoveAnnotation(annotationId)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestRemoveAnnotation(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	repos := NewAnnotationTestRepos(s.NewInMemory())
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	annotationId := a.NewAnnotationId()
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label), nil, nil)
@@ -27,15 +30,16 @@ func TestRemoveAnnotation(t *testing.T) {
 }
 
 func TestInternalErrOnRemoveImageLabelShouldFail(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
-	repos.Annotation.Db.Close()
+	db.Close()
 	err := repos.Annotation.RemoveImageLabel(image.Id, collection.Id, label.Id)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestRemoveImageLabel(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	repos := NewAnnotationTestRepos(s.NewInMemory())
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label), nil, nil)
 	err := repos.Annotation.RemoveImageLabel(image.Id, collection.Id, label.Id)

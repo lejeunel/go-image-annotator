@@ -125,7 +125,7 @@ func TestNextIngestedImageInCollection(t *testing.T) {
 	r, err := repos.Scroller.GetAdjacent(ids[0],
 		scr.NewCriteria(
 			scr.WithCollection(collection.Name),
-			scr.WithOrdering(im.OrderingParams{IngestTime: true})),
+			scr.WithOrdering(im.Ordering{IngestTime: true})),
 		scr.ScrollNext)
 	assert.NoError(t, err)
 	assert.Equal(t, ids[1], r.ImageId)
@@ -138,7 +138,7 @@ func TestPreviousIngestedImageInCollection(t *testing.T) {
 	r, err := repos.Scroller.GetAdjacent(ids[2],
 		scr.NewCriteria(
 			scr.WithCollection(collection.Name),
-			scr.WithOrdering(im.OrderingParams{IngestTime: true})),
+			scr.WithOrdering(im.Ordering{IngestTime: true})),
 		scr.ScrollPrevious)
 	assert.NoError(t, err)
 	assert.Equal(t, ids[1], r.ImageId)

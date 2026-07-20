@@ -7,8 +7,7 @@ import (
 	"errors"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jmoiron/sqlx"
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	adb "github.com/lejeunel/go-image-annotator/adapters/db"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -16,7 +15,7 @@ import (
 )
 
 type SQLiteCollectionRepo struct {
-	Db *sqlx.DB
+	Db adb.Querier
 }
 
 type Row struct {
@@ -141,10 +140,6 @@ func (r SQLiteCollectionRepo) List(m pa.PaginationParams) ([]*clc.Collection, er
 	return objects, nil
 }
 
-func NewSQLiteCollectionRepo(db *sqlx.DB) SQLiteCollectionRepo {
+func NewSQLiteCollectionRepo(db adb.Querier) SQLiteCollectionRepo {
 	return SQLiteCollectionRepo{Db: db}
-}
-
-func NewTestSQLiteCollectionRepo() SQLiteCollectionRepo {
-	return NewSQLiteCollectionRepo(s.NewSQLiteDB(":memory:"))
 }

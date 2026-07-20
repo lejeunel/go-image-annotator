@@ -1,35 +1,40 @@
 package label
 
 import (
+	"testing"
+
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestInternalErrOnLabelCountShouldFail(t *testing.T) {
-	repo := NewTestSQLiteLabelRepo()
-	repo.Db.Close()
+	db := s.NewInMemory()
+	repo := NewSQLiteLabelRepo(db)
+	db.Close()
 	_, err := repo.Count()
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestCountLabels(t *testing.T) {
-	repo := NewTestSQLiteLabelRepo()
+	repo := NewSQLiteLabelRepo(s.NewInMemory())
 	CreateLabel(repo, "a-label")
 	count, _ := repo.Count()
 	assert.Equal(t, 1, int(count))
 }
 
 func TestInternalErrOnLabelListShouldFail(t *testing.T) {
-	repo := NewTestSQLiteLabelRepo()
-	repo.Db.Close()
+	db := s.NewInMemory()
+	repo := NewSQLiteLabelRepo(db)
+	db.Close()
 	_, err := repo.List(pag.PaginationParams{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestListLabels(t *testing.T) {
-	repo := NewTestSQLiteLabelRepo()
+	db := s.NewInMemory()
+	repo := NewSQLiteLabelRepo(db)
 	CreateLabel(repo, "a-label")
 	CreateLabel(repo, "another-label")
 	labels, err := repo.List(pag.PaginationParams{Page: 1, PageSize: 2})

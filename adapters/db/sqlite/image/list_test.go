@@ -37,9 +37,10 @@ func NewImageListingTestRepos() ImageListingTestingRepos {
 }
 
 func TestInternalErrOnImageListShouldFail(t *testing.T) {
-	repo := NewTestSQLiteImageRepo()
-	repo.Db.Close()
-	_, err := repo.Slice(im.FilteringParams{}, pa.PaginationParams{}, im.OrderingParams{})
+	db := s.NewInMemory()
+	repo := NewSQLiteImageRepo(db)
+	db.Close()
+	_, err := repo.Slice(im.Filtering{}, pa.PaginationParams{}, im.Ordering{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
@@ -52,7 +53,7 @@ func TestListOneImage(t *testing.T) {
 	repos.Image.AddImage(image.Id, nil, im.ImageSpecs{})
 	repos.Image.AddToCollection(image.Id, collection.Id)
 
-	r, _ := repos.Image.Slice(im.FilteringParams{}, pa.PaginationParams{PageSize: 2, Page: 1}, im.OrderingParams{})
+	r, _ := repos.Image.Slice(im.Filtering{}, pa.PaginationParams{PageSize: 2, Page: 1}, im.Ordering{})
 	assert.Equal(t, 1, len(r))
 }
 
@@ -62,7 +63,7 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 	firstImage, firstCollection := CreateSingleImageCollection(repos, "first-collection")
 	CreateSingleImageCollection(repos, "second-collection")
 
-	r, _ := repos.Image.Slice(im.FilteringParams{Collection: &firstCollection.Name}, pa.PaginationParams{PageSize: 2, Page: 1}, im.OrderingParams{})
+	r, _ := repos.Image.Slice(im.Filtering{Collection: &firstCollection.Name}, pa.PaginationParams{PageSize: 2, Page: 1}, im.Ordering{})
 	assert.Equal(t, 1, len(r))
 	images := r
 	assert.True(t, images[0].ImageId == firstImage.Id)
@@ -86,7 +87,7 @@ func TestListImagesOrderedById(t *testing.T) {
 	CreateImageInCollectionFromString(repos.Image, collection, "11111111-1111-1111-1111-111111111111")
 	image0 := CreateImageInCollectionFromString(repos.Image, collection, "00000000-0000-0000-0000-000000000000")
 
-	r, _ := repos.Image.Slice(im.FilteringParams{}, pa.PaginationParams{PageSize: 2, Page: 1}, im.OrderingParams{})
+	r, _ := repos.Image.Slice(im.Filtering{}, pa.PaginationParams{PageSize: 2, Page: 1}, im.Ordering{})
 	got := r[0].ImageId
 	assert.Equal(t, image0.Id, got)
 }
@@ -104,7 +105,7 @@ func TestListImagesOrderedByIngestTime(t *testing.T) {
 	repos.Image.AddToCollection(firstImage.Id, collection.Id)
 	repos.Image.AddToCollection(secondImage.Id, collection.Id)
 
-	r, err := repos.Image.Slice(im.FilteringParams{}, pa.PaginationParams{PageSize: 2, Page: 1}, im.OrderingParams{IngestTime: true})
+	r, err := repos.Image.Slice(im.Filtering{}, pa.PaginationParams{PageSize: 2, Page: 1}, im.Ordering{IngestTime: true})
 	assert.NoError(t, err)
 	assert.Equal(t, r[0].ImageId, firstImage.Id)
 	assert.Equal(t, r[1].ImageId, secondImage.Id)
@@ -119,7 +120,7 @@ func TestIterateImages(t *testing.T) {
 	im1 := CreateImageInCollectionFromString(repos.Image, collection, "11111111-1111-1111-1111-111111111111")
 
 	res := []im.BaseImage{}
-	for batch, err := range repos.Image.Iterate(im.FilteringParams{}, 1) {
+	for batch, err := range repos.Image.Iterate(im.Filtering{}, 1) {
 		assert.NoError(t, err)
 		res = append(res, batch)
 	}

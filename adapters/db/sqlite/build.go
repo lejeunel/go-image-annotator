@@ -78,6 +78,10 @@ func ApplyMigrations(ctx context.Context, provider *goose.Provider, direction st
 	return nil
 }
 
+func NewInMemory() *sqlx.DB {
+	return NewSQLiteDB(":memory:")
+}
+
 func NewSQLiteDB(path string) *sqlx.DB {
 	db := NewSQLiteConnection(path)
 	m, err := NewMigrationProvider(db.DB)

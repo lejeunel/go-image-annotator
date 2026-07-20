@@ -23,12 +23,22 @@ type IImageSpecsDetector interface {
 type Interface interface {
 	Ingest(Request) (*Response, error)
 }
+
+type Repos struct {
+	ImageRepo
+	LabelRepo
+	CollectionRepo
+	AnnotationRepo
+}
+type UnitOfWork interface {
+	// RunInTx runs fn inside a single transaction. Every store
+	// in the Repos value executes against that transaction.
+	RunInTx(fn func(Repos) error) error
+}
 type Ingester struct {
-	Hasher             hash.Hash
-	ImageRepo          ImageRepo
-	CollectionRepo     CollectionRepo
-	AnnotationRepo     AnnotationRepo
-	LabelRepo          LabelRepo
+	Hasher hash.Hash
+	Repos
+	UnitOfWork
 	ArtefactRepo       ast.Interface
 	ImageSpecsDetector IImageSpecsDetector
 	clock              clockwork.Clock
@@ -42,11 +52,12 @@ func WithClock(c clockwork.Clock) Option {
 	}
 }
 
-func New(imageRepo ImageRepo, collectionRepo CollectionRepo,
-	labelRepo LabelRepo, annotationRepo AnnotationRepo,
+func New(imr ImageRepo, clr CollectionRepo,
+	lr LabelRepo, ar AnnotationRepo, uow UnitOfWork,
 	fileStore ast.Interface, hasher hash.Hash, specsDetector IImageSpecsDetector, opts ...Option) *Ingester {
-	i := &Ingester{ImageRepo: imageRepo, CollectionRepo: collectionRepo,
-		AnnotationRepo: annotationRepo, LabelRepo: labelRepo,
+	i := &Ingester{
+		Repos:        Repos{imr, lr, clr, ar},
+		UnitOfWork:   uow,
 		ArtefactRepo: fileStore, Hasher: hasher,
 		ImageSpecsDetector: specsDetector,
 		clock:              clockwork.NewRealClock(),
@@ -82,9 +93,13 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 	}
 
 	specs.IngestedAt = i.clock.Now()
-	if err := i.ingestImage(r.UserId, image, *hash, *specs); err != nil {
-		i.ImageRepo.Delete(image.Id)
-		i.ArtefactRepo.Delete(image.Id)
+	if err := i.UnitOfWork.RunInTx(func(tx Repos) error {
+		if err := i.ingestImage(tx, r.UserId, image, *hash, *specs); err != nil {
+			i.ArtefactRepo.Delete(image.Id)
+			return err
+		}
+		return nil
+	}); err != nil {
 		return nil, fmt.Errorf("%v: %w", errCtx, err)
 	}
 
@@ -153,25 +168,25 @@ func (i Ingester) appendBoundingBoxes(image *im.Image, bboxes []a.BoundingBoxReq
 
 }
 
-func (i Ingester) ingestImage(authorId u.UserId, image *im.Image, hash []byte, specs im.ImageSpecs) error {
+func (i Ingester) ingestImage(tx Repos, authorId u.UserId, image *im.Image, hash []byte, specs im.ImageSpecs) error {
 	now := i.clock.Now()
 
-	if err := i.ImageRepo.AddImage(image.Id, hash, specs); err != nil {
+	if err := tx.ImageRepo.AddImage(image.Id, hash, specs); err != nil {
 		return fmt.Errorf("adding image: %w", err)
 	}
 
-	if err := i.ImageRepo.AddToCollection(image.Id, image.Collection.Id); err != nil {
+	if err := tx.ImageRepo.AddToCollection(image.Id, image.Collection.Id); err != nil {
 		return fmt.Errorf("adding image to collection: %w", err)
 	}
 
 	for _, label := range image.Labels {
-		if err := i.AnnotationRepo.AddImageLabel(image.Id, image.Collection.Id, label, &authorId, &now); err != nil {
+		if err := tx.AnnotationRepo.AddImageLabel(image.Id, image.Collection.Id, label, &authorId, &now); err != nil {
 			return fmt.Errorf("adding image label to collection: %w", err)
 		}
 	}
 
 	for _, box := range image.BoundingBoxes {
-		if err := i.AnnotationRepo.AddBoundingBox(image.Id, image.Collection.Id, box, &authorId, &now); err != nil {
+		if err := tx.AnnotationRepo.AddBoundingBox(image.Id, image.Collection.Id, box, &authorId, &now); err != nil {
 			return fmt.Errorf("adding bounding box: %w", err)
 		}
 	}
@@ -205,7 +220,6 @@ func (i Ingester) ensureDuplicateImageDoesNotExists(hash []byte) error {
 	duplicateId, err := i.ImageRepo.FindImageIdByHash(hash)
 	if duplicateId != nil {
 		return fmt.Errorf("%w: found duplicate image with id %v: %w", baseErr, *duplicateId, e.ErrDuplicate)
-
 	}
 
 	if errors.Is(err, e.ErrNotFound) {

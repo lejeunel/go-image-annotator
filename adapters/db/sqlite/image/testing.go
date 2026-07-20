@@ -1,14 +1,13 @@
 package image
 
 import (
-	r "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	"github.com/jmoiron/sqlx"
 	c "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
-func MakeRepos() (SQLiteImageRepo, c.SQLiteCollectionRepo) {
-	db := r.NewSQLiteDB(":memory:")
+func MakeRepos(db *sqlx.DB) (SQLiteImageRepo, c.SQLiteCollectionRepo) {
 	return NewSQLiteImageRepo(db), c.NewSQLiteCollectionRepo(db)
 }
 

@@ -90,16 +90,34 @@ CREATE TABLE users (
 );
 
 CREATE TABLE IF NOT EXISTS users_groups (
-  user_id varchar(36) REFERENCES users(id),
+  user_id varchar(60) REFERENCES users(id),
   group_id varchar(36) REFERENCES groups(id),
   PRIMARY KEY (user_id, group_id)
 );
 
 CREATE TABLE IF NOT EXISTS users_roles (
-  user_id varchar(36) REFERENCES users(id),
+  user_id varchar(60) REFERENCES users(id),
   role_id varchar(36) REFERENCES roles(id),
   PRIMARY KEY (user_id, role_id)
 );
+
+CREATE TABLE IF NOT EXISTS tasks (
+  id varchar(36) PRIMARY KEY,
+  user_id varchar(60) REFERENCES users(id),
+  created_at DATETIME,
+  type_ varchar(60)
+);
+CREATE INDEX tasks_user_id_idx ON tasks(user_id);
+
+CREATE TABLE IF NOT EXISTS events (
+  task_id varchar(36) REFERENCES tasks(id),
+  time DATETIME,
+  error TEXT,
+  state varchar(20),
+  extra TEXT
+);
+CREATE INDEX events_task_id_idx ON events(task_id);
+
 -- +goose Down
 
 DROP TABLE labels;
@@ -108,4 +126,10 @@ DROP TABLE images_collections;
 DROP TABLE images;
 DROP TABLE annotations;
 DROP TABLE sessions;
+DROP TABLE forgot_password;
 DROP TABLE groups;
+DROP TABLE users;
+DROP TABLE users_roles;
+DROP TABLE users_groups;
+DROP TABLE tasks;
+DROP TABLE events;

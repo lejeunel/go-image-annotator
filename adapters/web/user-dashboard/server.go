@@ -13,7 +13,17 @@ import (
 
 type Server struct {
 	b.UserDashboardBuilder
+	b.AdminPageBuilder
 	RenewAPITokenItr rat.Interactor
+}
+
+func (s *Server) Admin(w http.ResponseWriter, r *http.Request) {
+	pb := s.AdminPageBuilder
+	pb.SetUserIdentity(r.Context())
+	pb.SetActive(cmp.NoPageActive)
+	pb.SetTitle("Admin")
+	pb.Build().Render(w)
+
 }
 
 func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +32,6 @@ func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
 	udb.SetActive(cmp.NoPageActive)
 	udb.SetTitle("User Dashboard")
 	udb.Build().Render(w)
-
 }
 func (s *Server) NewAPIToken(w http.ResponseWriter, r *http.Request) {
 	user := u.IdentityFromContext(r.Context())
@@ -37,10 +46,11 @@ func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
 		r.Get(rt.UserDashboard, s.UserDashboard)
+		r.Get(rt.Admin, s.Admin)
 		r.Get(rt.NewAPIToken, s.NewAPIToken)
 	})
 }
 
 func New(pb b.PageBuilder, i rat.Interactor) Server {
-	return Server{b.NewUserDashboardBuilder(pb), i}
+	return Server{b.NewUserDashboardBuilder(pb), b.NewAdminPageBuilder(pb), i}
 }

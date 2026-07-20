@@ -12,14 +12,15 @@ import (
 )
 
 func TestInternalErrOnCreateShouldFail(t *testing.T) {
-	repo := NewTestSQLiteCollectionRepo()
-	repo.Db.Close()
+	db := s.NewInMemory()
+	repo := NewSQLiteCollectionRepo(db)
+	db.Close()
 	_, err := CreateCollection(repo, "a-collection")
 	assert.ErrorIs(t, err, e.ErrInternal, "expected internal error")
 }
 
 func TestCreate(t *testing.T) {
-	_, err := CreateCollection(NewTestSQLiteCollectionRepo(), "a-collection")
+	_, err := CreateCollection(NewSQLiteCollectionRepo(s.NewInMemory()), "a-collection")
 	assert.NoError(t, err, "expected no error on create but got")
 }
 

@@ -1,7 +1,7 @@
 package annotation
 
 import (
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	"github.com/jmoiron/sqlx"
 	sc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	sg "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
 	si "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
@@ -24,8 +24,7 @@ type AnnotationTestingRepos struct {
 	User       su.SQLiteUserRepo
 }
 
-func NewAnnotationTestRepos() AnnotationTestingRepos {
-	db := s.NewSQLiteDB(":memory:")
+func NewAnnotationTestRepos(db *sqlx.DB) AnnotationTestingRepos {
 	return AnnotationTestingRepos{
 		Image:      si.NewSQLiteImageRepo(db),
 		Collection: sc.NewSQLiteCollectionRepo(db),

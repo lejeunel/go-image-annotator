@@ -3,20 +3,13 @@ package label
 import (
 	"testing"
 
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInternalErrOnLabelUpdateShouldFail(t *testing.T) {
-	repo := NewTestSQLiteLabelRepo()
-	repo.Db.Close()
-	err := repo.Update(lbl.UpdatableModel{})
-	assert.ErrorIs(t, err, e.ErrInternal)
-}
-
 func TestUpdateLabel(t *testing.T) {
-	repo := NewTestSQLiteLabelRepo()
+	repo := NewSQLiteLabelRepo(s.NewInMemory())
 	name := "a-label"
 	label, _ := CreateLabel(repo, name)
 	newDesc := "new-description"

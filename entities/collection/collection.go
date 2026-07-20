@@ -1,7 +1,9 @@
 package collection
 
 import (
+	"github.com/google/uuid"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
+	uuidw "github.com/lejeunel/go-image-annotator/shared/uuid"
 	"time"
 )
 
@@ -45,4 +47,12 @@ type UpdateModel struct {
 	Name           string
 	NewName        string
 	NewDescription string
+}
+
+type CollectionId struct {
+	uuidw.UUIDWrapper[CollectionId]
+}
+
+func NewCollectionId() CollectionId {
+	return CollectionId{uuidw.UUIDWrapper[CollectionId]{UUID: uuid.New()}}
 }

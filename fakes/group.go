@@ -7,16 +7,16 @@ import (
 )
 
 type GroupRepo struct {
-	MissingGroup              bool
 	ErrOnGetGroupOfCollection error
 	ErrOnExists               error
+	ErrOnFind                 error
 	Return                    string
 	ExistingNames             []string
 }
 
 func (r *GroupRepo) Find(name string) (*grp.Group, error) {
-	if r.MissingGroup {
-		return nil, e.ErrNotFound
+	if r.ErrOnFind != nil {
+		return nil, r.ErrOnFind
 	}
 
 	return &grp.Group{Name: r.Return}, nil

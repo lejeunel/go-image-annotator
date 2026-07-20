@@ -3,6 +3,7 @@ package label
 import (
 	"testing"
 
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -18,14 +19,15 @@ func CreateLabel(repo SQLiteLabelRepo, name string) (*lbl.Label, error) {
 }
 
 func TestInternalErrOnCreateShouldFail(t *testing.T) {
-	repo := NewTestSQLiteLabelRepo()
-	repo.Db.Close()
+	db := s.NewInMemory()
+	repo := NewSQLiteLabelRepo(db)
+	db.Close()
 	_, err := CreateLabel(repo, "a-label")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestCreateAddsCount(t *testing.T) {
-	repo := NewTestSQLiteLabelRepo()
+	repo := NewSQLiteLabelRepo(s.NewInMemory())
 	_, err := CreateLabel(repo, "a-label")
 	assert.NoError(t, err)
 	count, err := repo.Count()

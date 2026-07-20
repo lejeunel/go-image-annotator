@@ -23,6 +23,7 @@ var ResetPassword = "/auth/reset-password"
 var Logout = "/auth/logout"
 
 var UserDashboard = "/user-dashboard"
+var Admin = "/admin"
 var NewAPIToken = "/ui/new-api-token"
 
 var Home = "/"

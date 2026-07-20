@@ -40,10 +40,13 @@ func MakeUserBadge(user u.User) Node {
 	var iconBuf bytes.Buffer
 	Raw(ic.UserIcon).Render(&iconBuf)
 	var buf bytes.Buffer
-	entries := UserMenu{UserName: user.Id,
-		Entries: []UserMenuEntry{{"Dashboard", rt.UserDashboard}, {"Sign Out", rt.Logout}},
-		Icon:    iconBuf.String()}
-	tUser.ExecuteTemplate(&buf, "user_badge", entries)
+	menu := UserMenu{UserName: user.Id, Icon: iconBuf.String()}
+	menu.Entries = append(menu.Entries, UserMenuEntry{"Dashboard", rt.UserDashboard})
+	if user.IsAdmin {
+		menu.Entries = append(menu.Entries, UserMenuEntry{"Admin", rt.Admin})
+	}
+	menu.Entries = append(menu.Entries, UserMenuEntry{"Sign out", rt.Logout})
+	tUser.ExecuteTemplate(&buf, "user_badge", menu)
 	return Raw(buf.String())
 }
 func MakeRepoButton(repoName string, currentVersion, url string) Node {
@@ -87,7 +90,6 @@ func DarkModeToggle() Node {
 		),
 	)
 }
-
 func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefix string, user u.User) Node {
 	return Nav(
 		Attr("x-on:click.away", "mobileMenuIsOpen = false"),

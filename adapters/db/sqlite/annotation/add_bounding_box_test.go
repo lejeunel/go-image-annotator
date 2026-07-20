@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -11,26 +12,29 @@ import (
 )
 
 func TestInternalErrOnAddBBoxShouldFail(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	bbox := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, label)
-	repos.Annotation.Db.Close()
+	db.Close()
 	err := repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox, nil, nil)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestInternalErrOnFindBBoxShouldFail(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	bbox := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, label)
 	repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox, nil, nil)
-	repos.Annotation.Db.Close()
+	db.Close()
 	_, err := repos.Annotation.FindBoundingBoxes(image.Id, collection.Id)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestAddBoundingBox(t *testing.T) {
-	repos := NewAnnotationTestRepos()
+	db := s.NewInMemory()
+	repos := NewAnnotationTestRepos(db)
 	labelName := "a-label"
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", labelName, nil)
 	bbox := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, label,

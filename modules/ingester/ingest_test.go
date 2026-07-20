@@ -15,79 +15,90 @@ import (
 )
 
 func TestNonExistingCollectionShouldFail(t *testing.T) {
-	ing := NewTestingIngester()
-	ing.CollectionRepo = &fk.CollectionRepo{ErrOnFind: e.ErrNotFound}
+	repos := NewTestingRepos()
+	repos.CollectionRepo = &fk.CollectionRepo{ErrOnFind: e.ErrNotFound}
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{})
 	assert.Error(t, err)
 }
 
 func TestHandleArtefactRepoError(t *testing.T) {
-	ing := NewTestingIngester()
-	ing.CollectionRepo = &fk.CollectionRepo{ErrOnFind: e.ErrInternal}
+	repos := NewTestingRepos()
+	repos.CollectionRepo = &fk.CollectionRepo{ErrOnFind: e.ErrInternal}
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{})
 	assert.Error(t, err)
 }
 
 func TestNonExistingLabelShouldFail(t *testing.T) {
-	ing := NewTestingIngester()
-	ing.LabelRepo = &fk.LabelRepo{ErrOnFind: e.ErrNotFound}
+	repos := NewTestingRepos()
+	repos.LabelRepo = &fk.LabelRepo{ErrOnFind: e.ErrNotFound}
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{Labels: []string{"a-label"}})
 	assert.Error(t, err)
 }
 
 func TestHandleLabelExistsInternalErr(t *testing.T) {
-	ing := NewTestingIngester()
-	ing.LabelRepo = &fk.LabelRepo{ErrOnFind: e.ErrInternal}
+	repos := NewTestingRepos()
+	repos.LabelRepo = &fk.LabelRepo{ErrOnFind: e.ErrInternal}
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{Labels: []string{"a-label"}})
 	assert.Error(t, err)
 }
 
 func TestHandleIngestionInternalErr(t *testing.T) {
-	ing := NewTestingIngester()
-	ing.ImageRepo = &fk.ImageRepo{ErrOnAddToCollection: e.ErrInternal}
+	repos := NewTestingRepos()
+	repos.ImageRepo = &fk.ImageRepo{ErrOnAddToCollection: e.ErrInternal}
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{Reader: &fk.ImageReader{}})
 	assert.Error(t, err)
 }
 
 func TestHandleAddLabelInternalErr(t *testing.T) {
-	ing := NewTestingIngester()
-	ing.AnnotationRepo = &fk.AnnotationRepo{ErrOnAddLabel: e.ErrInternal}
+	repos := NewTestingRepos()
+	repos.AnnotationRepo = &fk.AnnotationRepo{ErrOnAddLabel: e.ErrInternal}
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{Labels: []string{"a-label"}, Reader: &fk.ImageReader{}})
 	assert.Error(t, err)
 }
 
 func TestAddImageDuplicateHashShouldFail(t *testing.T) {
-	ing := NewTestingIngester()
-	ing.ImageRepo = &fk.ImageRepo{HashAlreadyExists: true}
+	repos := NewTestingRepos()
+	repos.ImageRepo = &fk.ImageRepo{HashAlreadyExists: true}
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{Reader: &fk.ImageReader{}})
 	assert.ErrorIs(t, err, e.ErrDuplicate)
 }
 
 func TestHandleDuplicateHashInternalErr(t *testing.T) {
-	ing := NewTestingIngester()
-	ing.ImageRepo = &fk.ImageRepo{ErrOnFindHash: e.ErrInternal}
+	repos := NewTestingRepos()
+	repos.ImageRepo = &fk.ImageRepo{ErrOnFindHash: e.ErrInternal}
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{Reader: &fk.ImageReader{}})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestNonExistingBBoxLabelShouldFail(t *testing.T) {
-	ing := NewTestingIngester()
-	ing.LabelRepo = &fk.LabelRepo{ErrOnFind: e.ErrNotFound}
+	repos := NewTestingRepos()
+	repos.LabelRepo = &fk.LabelRepo{ErrOnFind: e.ErrNotFound}
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{BoundingBoxes: []a.BoundingBoxRequest{{Label: "a-label"}},
 		Reader: &fk.ImageReader{}})
 	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestHandleBoundingBoxValidationError(t *testing.T) {
-	ing := NewTestingIngester()
+	repos := NewTestingRepos()
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{BoundingBoxes: []a.BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: -2, Height: -4}},
 		Reader: &fk.ImageReader{}})
 	assert.ErrorIs(t, err, e.ErrValidation)
 }
 
 func TestHandleAddBoundingBoxInternalErr(t *testing.T) {
-	ing := NewTestingIngester()
-	ing.AnnotationRepo = &fk.AnnotationRepo{ErrOnAddBoundingBox: e.ErrInternal}
+	repos := NewTestingRepos()
+	repos.AnnotationRepo = &fk.AnnotationRepo{ErrOnAddBoundingBox: e.ErrInternal}
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{BoundingBoxes: []a.BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: 2, Height: 4}},
 		Reader: &fk.ImageReader{}})
 	assert.ErrorIs(t, err, e.ErrInternal)
@@ -95,19 +106,18 @@ func TestHandleAddBoundingBoxInternalErr(t *testing.T) {
 
 func TestInternalErrOnAddLabelMustDeleteImage(t *testing.T) {
 	fileStore := &fk.FileStore{}
-	imageRepo := &fk.ImageRepo{}
-	ing := NewTestingIngester()
+	repos := NewTestingRepos()
+	repos.AnnotationRepo = &fk.AnnotationRepo{ErrOnAddLabel: e.ErrInternal}
+	ing := NewTestingIngester(repos)
 	ing.ArtefactRepo = fileStore
-	ing.ImageRepo = imageRepo
-	ing.AnnotationRepo = &fk.AnnotationRepo{ErrOnAddLabel: e.ErrInternal}
 	ing.Ingest(Request{Labels: []string{"a-label"}, Reader: &fk.ImageReader{}})
-	assert.Equal(t, 1, imageRepo.NumDeletedImages)
 	assert.Equal(t, 1, fileStore.NumDeletedImages)
 }
 
 func TestCorrectDataIsStored(t *testing.T) {
+	repos := NewTestingRepos()
 	artefactRepo := &fk.FileStore{}
-	ing := NewTestingIngester()
+	ing := NewTestingIngester(repos)
 	ing.ArtefactRepo = artefactRepo
 	data := []byte("the-data")
 	ing.Ingest(Request{Reader: &fk.ImageReader{Buffer: *bytes.NewBuffer(data)}})
@@ -115,36 +125,40 @@ func TestCorrectDataIsStored(t *testing.T) {
 }
 
 func TestAddBoundingBoxToImage(t *testing.T) {
-	annotationRepo := &fk.AnnotationRepo{}
-	ing := NewTestingIngester()
-	ing.AnnotationRepo = annotationRepo
+	repos := NewTestingRepos()
+	anRepo := &fk.AnnotationRepo{}
+	repos.AnnotationRepo = anRepo
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{BoundingBoxes: []a.BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: 2, Height: 4}},
 		Reader: &fk.ImageReader{}})
 	assert.NoError(t, err)
-	assert.Equal(t, 1, annotationRepo.NumBoundingBoxesAdded)
+	assert.Equal(t, 1, anRepo.NumBoundingBoxesAdded)
 }
 
 func TestInternalErrOnAddImageShouldFail(t *testing.T) {
-	ing := NewTestingIngester()
-	ing.ImageRepo = &fk.ImageRepo{ErrOnAddImage: e.ErrInternal}
+	repos := NewTestingRepos()
+	repos.ImageRepo = &fk.ImageRepo{ErrOnAddImage: e.ErrInternal}
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{Labels: []string{"a-label"}, Reader: &fk.ImageReader{}})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestAddImageWithHash(t *testing.T) {
-	ing := NewTestingIngester()
+	repos := NewTestingRepos()
+	imageRepo := &fk.ImageRepo{}
+	repos.ImageRepo = imageRepo
+	ing := NewTestingIngester(repos)
 	hash := []byte("the-hash")
 	ing.Hasher = &fk.Hasher{Sum_: hash}
-	imageRepo := &fk.ImageRepo{}
-	ing.ImageRepo = imageRepo
 	ing.Ingest(Request{Reader: &fk.ImageReader{}})
 	assert.True(t, bytes.Equal(imageRepo.GotHash, hash))
 }
 
 func TestAddImageLabel(t *testing.T) {
-	ing := NewTestingIngester()
+	repos := NewTestingRepos()
 	annotationRepo := &fk.AnnotationRepo{}
-	ing.AnnotationRepo = annotationRepo
+	repos.AnnotationRepo = annotationRepo
+	ing := NewTestingIngester(repos)
 	_, err := ing.Ingest(Request{Labels: []string{"a-label"},
 		Reader: &fk.ImageReader{}})
 	assert.NoError(t, err)
@@ -152,16 +166,18 @@ func TestAddImageLabel(t *testing.T) {
 }
 
 func TestValidationErrOnImageMIMETypeInferShouldFail(t *testing.T) {
-	ing := NewTestingIngester()
+	repos := NewTestingRepos()
+	ing := NewTestingIngester(repos)
 	ing.ImageSpecsDetector = &fk.SpecsDetector{Err: e.ErrValidation}
 	_, err := ing.Ingest(Request{Reader: &fk.ImageReader{}})
 	assert.ErrorIs(t, err, e.ErrValidation)
 }
 
 func TestShouldAddMIMEType(t *testing.T) {
+	repos := NewTestingRepos()
 	imageRepo := &fk.ImageRepo{}
-	ing := NewTestingIngester()
-	ing.ImageRepo = imageRepo
+	repos.ImageRepo = imageRepo
+	ing := NewTestingIngester(repos)
 	specs := im.ImageSpecs{MIMEType: "image/jpeg"}
 	ing.ImageSpecsDetector = &fk.SpecsDetector{Return: specs}
 	ing.Ingest(Request{Reader: &fk.ImageReader{}})
@@ -169,20 +185,22 @@ func TestShouldAddMIMEType(t *testing.T) {
 }
 
 func TestCollectionWithoutGroup(t *testing.T) {
-	ing := NewTestingIngester()
+	repos := NewTestingRepos()
+	ing := NewTestingIngester(repos)
 	ing.CollectionRepo = &fk.CollectionRepo{Return: clc.NewCollection(clc.NewCollectionId(), "a-collection")}
 	_, err := ing.Ingest(Request{Reader: &fk.ImageReader{}})
 	assert.NoError(t, err)
 }
 
 func TestShouldStoreIngestionTime(t *testing.T) {
-	imageRepo := &fk.ImageRepo{}
-	ing := NewTestingIngester()
-	ing.ImageRepo = imageRepo
+	repos := NewTestingRepos()
+	imRepo := &fk.ImageRepo{}
+	repos.ImageRepo = imRepo
+	ing := NewTestingIngester(repos)
 	specs := im.ImageSpecs{MIMEType: "image/jpeg"}
 	now := time.Now()
 	ing.clock = clockwork.NewFakeClockAt(now)
 	ing.ImageSpecsDetector = &fk.SpecsDetector{Return: specs}
 	ing.Ingest(Request{Reader: &fk.ImageReader{}})
-	assert.Equal(t, now, imageRepo.GotSpecs.IngestedAt)
+	assert.Equal(t, now, imRepo.GotSpecs.IngestedAt)
 }

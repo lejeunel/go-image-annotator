@@ -6,15 +6,14 @@ import (
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jmoiron/sqlx"
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	adb "github.com/lejeunel/go-image-annotator/adapters/db"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type SQLiteLabelRepo struct {
-	Db *sqlx.DB
+	Db adb.Querier
 }
 
 type LabelRecord struct {
@@ -135,10 +134,6 @@ func (r SQLiteLabelRepo) IsUsed(name string) (*bool, error) {
 
 }
 
-func NewSQLiteLabelRepo(db *sqlx.DB) SQLiteLabelRepo {
+func NewSQLiteLabelRepo(db adb.Querier) SQLiteLabelRepo {
 	return SQLiteLabelRepo{Db: db}
-}
-
-func NewTestSQLiteLabelRepo() SQLiteLabelRepo {
-	return NewSQLiteLabelRepo(s.NewSQLiteDB(":memory:"))
 }

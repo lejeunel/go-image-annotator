@@ -8,8 +8,7 @@ import (
 	"iter"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jmoiron/sqlx"
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	adb "github.com/lejeunel/go-image-annotator/adapters/db"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -18,7 +17,7 @@ import (
 )
 
 type SQLiteImageRepo struct {
-	Db *sqlx.DB
+	Db adb.Querier
 }
 
 type ListRow struct {
@@ -44,7 +43,7 @@ func (r SQLiteImageRepo) AddToCollection(imageId im.ImageId, collectionId clc.Co
 
 	return nil
 }
-func (r SQLiteImageRepo) Count(f im.CountingParams) (*int64, error) {
+func (r SQLiteImageRepo) Count(f im.Filtering) (*int64, error) {
 	var count int64
 
 	var query string
@@ -62,7 +61,7 @@ func (r SQLiteImageRepo) Count(f im.CountingParams) (*int64, error) {
 	return &count, nil
 
 }
-func (r SQLiteImageRepo) Slice(f im.FilteringParams, p pa.PaginationParams, o im.OrderingParams) ([]im.BaseImage, error) {
+func (r SQLiteImageRepo) Slice(f im.Filtering, p pa.PaginationParams, o im.Ordering) ([]im.BaseImage, error) {
 
 	images, err := r.list(f, p, o)
 	if err != nil {
@@ -70,7 +69,7 @@ func (r SQLiteImageRepo) Slice(f im.FilteringParams, p pa.PaginationParams, o im
 	}
 	return images, nil
 }
-func (r SQLiteImageRepo) Iterate(f im.FilteringParams, pageSize int) iter.Seq2[im.BaseImage, error] {
+func (r SQLiteImageRepo) Iterate(f im.Filtering, pageSize int) iter.Seq2[im.BaseImage, error] {
 	return func(yield func(im.BaseImage, error) bool) {
 		var after *im.ImageId
 		for {
@@ -161,7 +160,7 @@ func (r SQLiteImageRepo) RemoveImageFromCollection(imageId im.ImageId, collectio
 	}
 	return nil
 }
-func (r SQLiteImageRepo) makeBaseQuery(f im.FilteringParams, pageSize int) sq.SelectBuilder {
+func (r SQLiteImageRepo) makeBaseQuery(f im.Filtering, pageSize int) sq.SelectBuilder {
 	q := sq.StatementBuilder.Select(
 		"ic.image_id,ic.collection_id,i.ingested_at,c.name").From(
 		"images_collections AS ic").Join(
@@ -191,7 +190,7 @@ func (r SQLiteImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, er
 	}
 	return images, nil
 }
-func (r SQLiteImageRepo) list(f im.FilteringParams, p pa.PaginationParams, o im.OrderingParams) ([]im.BaseImage, error) {
+func (r SQLiteImageRepo) list(f im.Filtering, p pa.PaginationParams, o im.Ordering) ([]im.BaseImage, error) {
 	q := r.makeBaseQuery(f, p.PageSize)
 	q = q.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
 
@@ -206,7 +205,7 @@ func (r SQLiteImageRepo) list(f im.FilteringParams, p pa.PaginationParams, o im.
 	}
 	return images, nil
 }
-func (r SQLiteImageRepo) sliceAfterId(f im.FilteringParams, pageSize int, after *im.ImageId) ([]im.BaseImage, *im.ImageId, error) {
+func (r SQLiteImageRepo) sliceAfterId(f im.Filtering, pageSize int, after *im.ImageId) ([]im.BaseImage, *im.ImageId, error) {
 	q := r.makeBaseQuery(f, pageSize)
 	q = q.OrderBy("ic.image_id")
 	if after != nil {
@@ -224,10 +223,6 @@ func (r SQLiteImageRepo) sliceAfterId(f im.FilteringParams, pageSize int, after 
 	return images, next, nil
 }
 
-func NewSQLiteImageRepo(db *sqlx.DB) SQLiteImageRepo {
+func NewSQLiteImageRepo(db adb.Querier) SQLiteImageRepo {
 	return SQLiteImageRepo{Db: db}
-}
-
-func NewTestSQLiteImageRepo() SQLiteImageRepo {
-	return NewSQLiteImageRepo(s.NewSQLiteDB(":memory:"))
 }

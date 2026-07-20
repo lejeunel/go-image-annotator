@@ -46,7 +46,7 @@ func TestCreateCollectionInNonExistingGroupShouldFail(t *testing.T) {
 	group := "non-existing-group"
 	p := &FakePresenter{}
 	itr := New(&fk.CollectionRepo{},
-		&fk.GroupRepo{MissingGroup: true},
+		&fk.GroupRepo{ErrOnFind: e.ErrNotFound},
 	)
 	itr.Execute(t.Context(), Request{Name: name, Group: &group}, p)
 	fmt.Println(p.GotErr)

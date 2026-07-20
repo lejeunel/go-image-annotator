@@ -1,13 +1,9 @@
 package image
 
-type OrderingParams struct {
+type Ordering struct {
 	IngestTime bool
 }
 
-type FilteringParams struct {
-	Collection *string
-}
-
-type CountingParams struct {
+type Filtering struct {
 	Collection *string
 }

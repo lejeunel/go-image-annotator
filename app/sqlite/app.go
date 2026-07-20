@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 
 	db "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	uow "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/unit-of-work"
 	"github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/config"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
@@ -27,7 +28,9 @@ func NewSQLiteApp(cfg config.Config, auth auth.Authorizer) app.App {
 	repos := NewSQLiteRepos(sqldb, fileStore)
 	sessionManager := sm.NewSQLiteSessionManager(sqldb.DB, repos.User, apiTokenGen)
 	scr := scroller.New(repos.Scroller)
-	ingester := ig.New(repos.Image, repos.Collection, repos.Label, repos.Annotation, fileStore, sha256.New(), rea.ImageSpecsDetector{})
+	ingester := ig.New(repos.Image, repos.Collection, repos.Label, repos.Annotation,
+		uow.NewIngestionUoW(sqldb),
+		fileStore, sha256.New(), rea.ImageSpecsDetector{})
 	itrs := NewSQLiteInteractors(
 		repos,
 		cfg.DefaultPageSize,

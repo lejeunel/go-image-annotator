@@ -1,35 +1,39 @@
 package collection
 
 import (
+	"testing"
+
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestInternalErrOnCollectionCountShouldFail(t *testing.T) {
-	repo := NewTestSQLiteCollectionRepo()
-	repo.Db.Close()
+	db := s.NewInMemory()
+	repo := NewSQLiteCollectionRepo(db)
+	db.Close()
 	_, err := repo.Count()
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestCountCollections(t *testing.T) {
-	repo := NewTestSQLiteCollectionRepo()
+	repo := NewSQLiteCollectionRepo(s.NewInMemory())
 	CreateCollection(repo, "a-collection")
 	count, _ := repo.Count()
 	assert.Equal(t, 1, int(*count))
 }
 
 func TestInternalErrOnCollectionListShouldFail(t *testing.T) {
-	repo := NewTestSQLiteCollectionRepo()
-	repo.Db.Close()
+	db := s.NewInMemory()
+	repo := NewSQLiteCollectionRepo(db)
+	db.Close()
 	_, err := repo.List(pa.PaginationParams{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestListCollections(t *testing.T) {
-	repo := NewTestSQLiteCollectionRepo()
+	repo := NewSQLiteCollectionRepo(s.NewInMemory())
 	CreateCollection(repo, "a-collection")
 	CreateCollection(repo, "another-collection")
 	cs, err := repo.List(pa.PaginationParams{Page: 1, PageSize: 2})

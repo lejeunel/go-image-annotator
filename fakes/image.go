@@ -1,6 +1,9 @@
 package fake
 
 import (
+	"iter"
+	"slices"
+
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
@@ -18,18 +21,20 @@ type ImageRepo struct {
 	ErrOnDeleteImage             error
 	ErrOnFindHash                error
 	ErrOnCount                   error
-	ImportedImageId              im.ImageId
-	ImportedIntoCollectionId     clc.CollectionId
+	ErrOnIterate                 error
+	AddedImageId                 im.ImageId
+	AddedIntoCollectionId        clc.CollectionId
 	ImageIsInCollection          bool
-	GotFilters                   im.FilteringParams
+	GotFilters                   im.Filtering
 	GotPagination                pa.PaginationParams
-	GotOrdering                  im.OrderingParams
+	GotOrdering                  im.Ordering
 	GotHash                      []byte
 	GotSpecs                     im.ImageSpecs
 	ReturnSpecs                  im.ImageSpecs
 	NumDeletedImages             int
 	HashAlreadyExists            bool
 	Count_                       int64
+	IterateBaseImages            []im.BaseImage
 }
 
 func (r *ImageRepo) RemoveImageFromCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
@@ -60,11 +65,11 @@ func (r *ImageRepo) AddToCollection(imageId im.ImageId, collectionId clc.Collect
 	if r.ErrOnAddToCollection != nil {
 		return r.ErrOnAddToCollection
 	}
-	r.ImportedImageId = imageId
-	r.ImportedIntoCollectionId = collectionId
+	r.AddedImageId = imageId
+	r.AddedIntoCollectionId = collectionId
 	return nil
 }
-func (r *ImageRepo) Slice(f im.FilteringParams, p pa.PaginationParams, o im.OrderingParams) ([]im.BaseImage, error) {
+func (r *ImageRepo) Slice(f im.Filtering, p pa.PaginationParams, o im.Ordering) ([]im.BaseImage, error) {
 	if r.ErrOnList != nil {
 		return nil, r.ErrOnList
 	}
@@ -112,7 +117,7 @@ func (r *ImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	}
 	return nil, nil
 }
-func (r *ImageRepo) Count(f im.CountingParams) (*int64, error) {
+func (r *ImageRepo) Count(f im.Filtering) (*int64, error) {
 	if r.ErrOnCount != nil {
 		return nil, r.ErrOnCount
 	}
@@ -125,4 +130,14 @@ func (r ImageRepo) GetSpecs(im.ImageId) (*im.ImageSpecs, error) {
 		return nil, r.ErrOnGetSpecs
 	}
 	return &r.ReturnSpecs, nil
+}
+
+func (r ImageRepo) Iterate(f im.Filtering, pageSize int) iter.Seq2[im.BaseImage, error] {
+	return func(yield func(im.BaseImage, error) bool) {
+		for img := range slices.Values(r.IterateBaseImages) {
+			if !yield(img, nil) {
+				return
+			}
+		}
+	}
 }

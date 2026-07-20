@@ -4,28 +4,30 @@ import (
 	"testing"
 	"time"
 
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRetrieveNonExistingShouldFail(t *testing.T) {
-	repo := NewTestSQLiteCollectionRepo()
+	repo := NewSQLiteCollectionRepo(s.NewInMemory())
 	CreateCollection(repo, "a-collection")
 	_, err := repo.FindCollectionByName("non-existing-collection")
 	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestInternalErrOnFindShouldFail(t *testing.T) {
-	repo := NewTestSQLiteCollectionRepo()
+	db := s.NewInMemory()
+	repo := NewSQLiteCollectionRepo(db)
 	CreateCollection(repo, "a-collection")
-	repo.Db.Close()
+	db.Close()
 	_, err := repo.FindCollectionByName("a-collection")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestRetrieve(t *testing.T) {
-	repo := NewTestSQLiteCollectionRepo()
+	repo := NewSQLiteCollectionRepo(s.NewInMemory())
 	c := clc.NewCollection(clc.NewCollectionId(), "a-collection",
 		clc.WithDescription("a-description"),
 		clc.WithCreatedAt(time.Now()))

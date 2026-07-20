@@ -16,5 +16,4 @@ type Response struct {
 	Id     t.TaskId
 	Issuer u.UserId
 	Type   t.TaskType
-	State  t.TaskState
 }

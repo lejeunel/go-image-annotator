@@ -33,7 +33,7 @@ func (a *Annotator) Init(ctx context.Context, imageId string, collection string,
 	oim imread.OutputPort, olbl fetchlbl.OutputPort, oscr scr.OutputPort) {
 	a.scroller.Init(imageId, oscr,
 		scr.WithCollection(collection),
-		scr.WithOrdering(im.OrderingParams{IngestTime: true}))
+		scr.WithOrdering(im.Ordering{IngestTime: true}))
 	a.ReadImage(imageId, collection, oim)
 	a.labelFetcher.Execute(ctx, olbl)
 }

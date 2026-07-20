@@ -27,13 +27,13 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 		r.Page = 1
 	}
 
-	baseImages, err := i.repo.Slice(r.FilteringParams, r.PaginationParams, r.OrderingParams)
+	baseImages, err := i.repo.Slice(r.Filtering, r.PaginationParams, r.Ordering)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	count, err := i.repo.Count(im.CountingParams{Collection: r.FilteringParams.Collection})
+	count, err := i.repo.Count(im.Filtering{Collection: r.Filtering.Collection})
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

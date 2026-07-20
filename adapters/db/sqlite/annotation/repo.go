@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jmoiron/sqlx"
+	adb "github.com/lejeunel/go-image-annotator/adapters/db"
 	sl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	c "github.com/lejeunel/go-image-annotator/entities/collection"
@@ -18,7 +18,7 @@ import (
 )
 
 type SQLiteAnnotationRepo struct {
-	Db *sqlx.DB
+	Db adb.Querier
 }
 
 type AnnotationRow struct {
@@ -303,6 +303,6 @@ func (r SQLiteAnnotationRepo) GroupOfAnnotation(id a.AnnotationId) (*string, err
 	}
 	return &group, nil
 }
-func NewSQLiteAnnotationRepo(db *sqlx.DB) SQLiteAnnotationRepo {
+func NewSQLiteAnnotationRepo(db adb.Querier) SQLiteAnnotationRepo {
 	return SQLiteAnnotationRepo{Db: db}
 }
