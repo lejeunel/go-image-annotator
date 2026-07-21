@@ -27,7 +27,7 @@ type ListLabelsPresenter struct {
 }
 
 func NewListLabelsPresenter(w http.ResponseWriter, p b.PageBuilder) ListLabelsPresenter {
-	p.SetTitle("Labels").SetActive(cmp.LabelsPageActive)
+	p.SetTitle("Labels").SetActiveSection(cmp.LabelsPageActive)
 	b := b.NewPaginatedListBuilder(p, listLabelsFields)
 	return ListLabelsPresenter{b, w, e.NewErrorPresenter(w)}
 }

@@ -39,7 +39,7 @@ func (b *PaginatedListBuilder) Build() *PaginatedListBuilder {
 
 	}
 	content := Div(creationPanel, Div(Class("py-2"), paginator), b.PaginableTableBuilder.Build())
-	b.SetContent(content)
+	b.PageBuilder.SetContent(content)
 	return b
 
 }

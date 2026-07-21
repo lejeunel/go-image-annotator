@@ -1,10 +1,9 @@
-package web
+package image
 
 import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strconv"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
@@ -16,6 +15,7 @@ import (
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
+	find_im "github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	list_im "github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	. "maragu.dev/gomponents"
@@ -36,28 +36,36 @@ func NewListImagesPresenter(w http.ResponseWriter, p b.PageBuilder, collection s
 	return ListImagesPresenter{b, w, ew.NewErrorPresenter(w), collection}
 }
 
+func makeImageRow(image im.Image) tb.Row {
+	link := rt.MakeAnnotateImageURL(image.Id.String(), image.Collection.Name)
+	actions := b.NewActionsPanelBuilder()
+	actions.SetConfirmDelete(rt.AddQueryParams(rt.Image, "id", image.Id.String(),
+		"collection", image.Collection.Name,
+		"mode", "confirm-delete"))
+	row := tb.NewRow()
+	row.AddCell(tb.NewCell(cmp.MakeTextLink(link, image.Id.String())))
+	row.AddCell(tb.NewCell(Text(image.Collection.Name)))
+	row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(image.Specs.IngestedAt))))
+	row.AddCell(tb.NewCell(Text(strconv.Itoa(image.NumAnnotations()))))
+	row.AddCell(tb.NewCell(actions.Build()))
+	return row
+
+}
+func (p ListImagesPresenter) SuccessReadImage(image im.Image) {
+	makeImageRow(image).Render(p.Writer)
+}
+
 func (p ListImagesPresenter) SuccessListImages(r list.Response) {
 
 	baseURL := rt.AddQueryParams(rt.Images, "collection", p.collection)
 	p.SetPagination(r.Pagination, baseURL.String())
 	for _, im := range r.Images {
-		link := rt.MakeImageURL(im.Id.String(), im.Collection.Name)
-		actions := b.NewActionsPanelBuilder()
-
-		deleteURL, _ := url.Parse("/edit-url")
-		actions.SetConfirmDelete(*deleteURL)
-		row := tb.NewRow()
-		row.AddCell(tb.NewCell(cmp.MakeTextLink(link, im.Id.String())))
-		row.AddCell(tb.NewCell(Text(im.Collection.Name)))
-		row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(im.Specs.IngestedAt))))
-		row.AddCell(tb.NewCell(Text(strconv.Itoa(im.NumAnnotations()))))
-		row.AddCell(tb.NewCell(actions.Build()))
-		p.AddRow(row)
+		p.AddRow(makeImageRow(im))
 	}
 	p.Build().Render(p.Writer)
 }
 
-func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
+func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 
 	s.PageBuilder.SetUserIdentity(r.Context())
 	collection := r.URL.Query().Get("collection")
@@ -65,7 +73,7 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 		s.PageBuilder.SetError(fmt.Errorf("parsing url to get collection name: %w", e.ErrURLParsing))
 		s.PageBuilder.Render(w)
 	}
-	s.Image.List.Execute(list_im.Request{
+	s.ListItr.Execute(list_im.Request{
 		Filtering: im.Filtering{
 			Collection: &collection},
 		PaginationParams: pa.PaginationParams{
@@ -73,4 +81,25 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request) {
 			Page:     pg.GetPageFromRequest(r)},
 		Ordering: im.Ordering{IngestTime: true}},
 		NewListImagesPresenter(w, s.PageBuilder, collection))
+}
+
+func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	collection := r.URL.Query().Get("collection")
+	switch r.URL.Query().Get("mode") {
+	case "confirm-delete":
+		b.RenderConfirmDeleteRow(len(listImagesFields),
+			id,
+			"image",
+			rt.AddQueryParams(rt.Image, "id", id, "collection", collection),
+			rt.AddQueryParams(rt.Image, "id", id, "collection", collection, "mode", "view"),
+			w)
+	default:
+		s.FindItr.Execute(
+			find_im.Request{
+				ImageId:    id,
+				Collection: collection,
+			},
+			NewListImagesPresenter(w, s.PageBuilder, collection))
+	}
 }

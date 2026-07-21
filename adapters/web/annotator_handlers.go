@@ -13,7 +13,7 @@ import (
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
-func (s *Server) ViewImage(w http.ResponseWriter, r *http.Request) {
+func (s *Server) AnnotateImage(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
 	view := aw.NewAnnotationView(s.PageBuilder)
 	s.AnnotationPagePresenter.SetView(view)

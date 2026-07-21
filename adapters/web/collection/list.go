@@ -27,7 +27,7 @@ type ListCollectionsPresenter struct {
 }
 
 func NewListCollectionsPresenter(w http.ResponseWriter, p b.PageBuilder) ListCollectionsPresenter {
-	p.SetTitle("Collections").SetActive(cmp.CollectionsPageActive)
+	p.SetTitle("Collections").SetActiveSection(cmp.CollectionsPageActive)
 	b := b.NewPaginatedListBuilder(p, listCollectionsFields)
 	return ListCollectionsPresenter{b, w, e.NewErrorPresenter(w)}
 }

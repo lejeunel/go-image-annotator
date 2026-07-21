@@ -30,7 +30,7 @@ func (b *PageBuilder) SetTitle(title string) *PageBuilder {
 	b.BasePageBuilder.SetTitle(title)
 	return b
 }
-func (b *PageBuilder) SetActive(a cmp.ActivePage) *PageBuilder {
+func (b *PageBuilder) SetActiveSection(a cmp.ActivePage) *PageBuilder {
 	b.ActivePage = a
 	return b
 }

@@ -27,6 +27,6 @@ func APIDocsPage(ctx context.Context, specsPath string, p b.PageBuilder, w io.Wr
 			Attr("router", "hash"),
 			Attr("layout", "sidebar"),
 		)))
-	p.SetActive(cmp.APIDocsPageActive)
+	p.SetActiveSection(cmp.APIDocsPageActive)
 	p.Render(w)
 }

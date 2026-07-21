@@ -23,8 +23,7 @@ func RouteWebPages(r chi.Router, s web.Server, home http.HandlerFunc,
 		r.Use(mws...)
 		r.Get(rt.Home, home)
 
-		r.Get(rt.Images, s.ListImages)
-		r.Get(rt.Image, s.ViewImage)
+		r.Get(rt.AnnotateImage, s.AnnotateImage)
 
 		r.Post(rt.SubmitBox, s.SubmitBox)
 		r.Put(rt.UpdateBox, s.UpdateBox)

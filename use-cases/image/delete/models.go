@@ -5,4 +5,7 @@ type Request struct {
 	Collection string
 }
 
-type Response struct{}
+type Response struct {
+	ImageId    string
+	Collection string
+}

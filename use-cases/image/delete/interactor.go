@@ -24,14 +24,14 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(store st.Interface, r ImageRepo, a AnnotationRepo, opts ...Option) *Interactor {
+func New(store st.Interface, r ImageRepo, a AnnotationRepo, opts ...Option) Interactor {
 	i := &Interactor{store: store, ImageRepo: r,
 		AnnotationRepo: a,
 		auth:           auth.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
 	}
-	return i
+	return *i
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
@@ -71,7 +71,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	}
 
-	out.SuccessDeleteImage(Response{})
+	out.SuccessDeleteImage(Response{ImageId: image.Id.String(), Collection: image.Collection.Name})
 }
 
 func (i *Interactor) deleteBoundingBoxes(image im.Image) error {

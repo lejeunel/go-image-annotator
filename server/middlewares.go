@@ -6,6 +6,22 @@ import (
 	"net/http"
 )
 
+// Middleware is the standard net/http middleware signature.
+type Middleware func(http.Handler) http.Handler
+
+// Chain composes multiple middlewares into a single one.
+// They are applied in the order given, i.e. Chain(A, B, C)(h) == A(B(C(h))),
+// meaning A runs first on the way in.
+func Chain(mws ...Middleware) Middleware {
+	return func(final http.Handler) http.Handler {
+		h := final
+		for i := len(mws) - 1; i >= 0; i-- {
+			h = mws[i](h)
+		}
+		return h
+	}
+}
+
 func ApiRequireLogin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
