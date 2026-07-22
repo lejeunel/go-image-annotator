@@ -3,7 +3,6 @@ package user
 import (
 	"database/sql"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -34,12 +33,8 @@ type ForgottenPasswordStateRecord struct {
 }
 
 func (r SQLiteUserRepo) Create(usr u.User) error {
-	roles, err := json.Marshal(usr.Roles)
-	if err != nil {
-		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
-	}
-	query := "INSERT INTO users (id,roles,is_admin,api_token_hash,password_hash) VALUES ($1,$2,$3,$4,$5)"
-	_, err = r.Db.Exec(query, usr.Id, roles, usr.IsAdmin, hex.EncodeToString(usr.HashPAT), hex.EncodeToString(usr.HashPassword))
+	query := "INSERT INTO users (id,is_admin,api_token_hash,password_hash) VALUES ($1,$2,$3,$4)"
+	_, err := r.Db.Exec(query, usr.Id, usr.IsAdmin, hex.EncodeToString(usr.HashPAT), hex.EncodeToString(usr.HashPassword))
 	if err != nil {
 		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
 	}
@@ -93,10 +88,34 @@ func (r SQLiteUserRepo) getRoleNames(userId string) ([]string, error) {
 
 	return roles, nil
 }
+func (r SQLiteUserRepo) recordToEntity(rec Record) (*u.User, error) {
+	groups, err := r.getGroupNames(rec.Id)
+	if err != nil {
+		return nil, err
+	}
+	roles, err := r.getRoleNames(rec.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	patHash, err := hex.DecodeString(rec.ApiTokenHash)
+	if err != nil {
+		return nil, err
+	}
+	pwHash, err := hex.DecodeString(rec.PasswordHash)
+	if err != nil {
+		return nil, err
+	}
+
+	user := u.NewUser(rec.Id, u.WithRoles(roles), u.WithGroups(groups),
+		u.WithAdmin(rec.IsAdmin), u.WithHashedPersonalAccessToken(patHash),
+		u.WithHashedPassword(pwHash))
+	return &user, nil
+}
 func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 	record := Record{}
 	err := r.Db.Get(&record,
-		"SELECT id,roles,is_admin,api_token_hash,password_hash FROM users WHERE id=$1", id)
+		"SELECT id,is_admin,api_token_hash,password_hash FROM users WHERE id=$1", id)
 
 	if err != nil {
 		switch {
@@ -105,31 +124,13 @@ func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 		default:
 			return nil, fmt.Errorf("finding user by id: %v: %w", err, e.ErrInternal)
 		}
-
 	}
-
-	groups, err := r.getGroupNames(id)
-	if err != nil {
-		return nil, err
-	}
-	roles, err := r.getRoleNames(id)
+	user, err := r.recordToEntity(record)
 	if err != nil {
 		return nil, err
 	}
 
-	patHash, err := hex.DecodeString(record.ApiTokenHash)
-	if err != nil {
-		return nil, err
-	}
-	pwHash, err := hex.DecodeString(record.PasswordHash)
-	if err != nil {
-		return nil, err
-	}
-
-	user := u.NewUser(record.Id, u.WithRoles(roles), u.WithGroups(groups),
-		u.WithAdmin(record.IsAdmin), u.WithHashedPersonalAccessToken(patHash),
-		u.WithHashedPassword(pwHash))
-	return &user, nil
+	return user, nil
 }
 func (r SQLiteUserRepo) Delete(id string) error {
 	_, err := r.Db.Exec("DELETE FROM users WHERE id=$1", id)
@@ -162,7 +163,7 @@ func (r SQLiteUserRepo) Count() (int64, error) {
 	return count, nil
 }
 func (r SQLiteUserRepo) List(m pag.PaginationParams) ([]u.User, error) {
-	q := sq.StatementBuilder.Select("id").From("users")
+	q := sq.StatementBuilder.Select("id,is_admin,api_token_hash,password_hash").From("users")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
 	if err != nil {
@@ -173,13 +174,16 @@ func (r SQLiteUserRepo) List(m pag.PaginationParams) ([]u.User, error) {
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
 
-	objects := []u.User{}
-	for _, r := range records {
-		user := u.NewUser(r.Id)
-		objects = append(objects, user)
+	users := []u.User{}
+	for _, rec := range records {
+		user, err := r.recordToEntity(rec)
+		if err != nil {
+			return nil, fmt.Errorf("converting user records to domain objects: %v: %w", err, e.ErrInternal)
+		}
+		users = append(users, *user)
 	}
 
-	return objects, nil
+	return users, nil
 }
 func (r SQLiteUserRepo) AssignRole(userId string, role string) error {
 	query := "INSERT INTO users_roles (user_id,role_id) VALUES ($1,(SELECT id FROM roles WHERE name=$2))"

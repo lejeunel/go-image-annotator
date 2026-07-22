@@ -34,11 +34,9 @@ func (i *Interactor) Execute(ctx context.Context, r pag.PaginationParams, out Ou
 
 	response := Response{
 		Pagination: pag.New(int64(r.Page), r.PageSize, count),
+		Users:      found,
 	}
-	for _, f := range found {
-		response.Users = append(response.Users, UserResponse{Id: f.Id, Groups: f.Groups, Roles: f.Roles})
-	}
-	out.Success(response)
+	out.SuccessListUsers(response)
 
 }
 

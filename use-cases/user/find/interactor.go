@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 )
 
@@ -12,20 +13,19 @@ type Interactor struct {
 	auth Auth
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, id u.UserId, out OutputPort) {
 	errCtx := "fetching user"
 	if err := i.auth.FindUser(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	found, err := i.repo.Find(r.Id)
+	found, err := i.repo.Find(id)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	out.Success(Response{Id: found.Id, Groups: found.Groups,
-		Roles: found.Roles})
+	out.SuccessFindUser(*found)
 
 }
 

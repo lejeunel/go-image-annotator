@@ -16,7 +16,7 @@ type DeleteCollectionPresenter struct {
 }
 
 func NewDeleteCollectionPresenter(w http.ResponseWriter) DeleteCollectionPresenter {
-	task := "Deleting collection"
+	task := "deleting collection"
 	okMessageFunc := func(r delete.Response) string {
 		return fmt.Sprintf("Successfully deleted collection %v", r.Name)
 	}

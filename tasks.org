@@ -82,3 +82,5 @@ Factorize into use-cases/fakes
 https://rednafi.com/go/repo-txn-uow/
 Upon error, only the raw data should be deleted,
 and the database should be rolled-back
+* DONE forbid deleting user who is yourself
+this will lock yourself out...

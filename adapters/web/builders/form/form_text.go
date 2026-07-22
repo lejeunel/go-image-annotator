@@ -33,7 +33,7 @@ func NewFormTextField(fieldName, displayName, divId string, opts ...FormTextFiel
 	return *f
 }
 
-func (f FormTextField) Label() Node {
+func (f FormTextField) label() Node {
 	displayName := f.displayName
 	if !f.required {
 		displayName = displayName + " (Optional)"
@@ -41,16 +41,16 @@ func (f FormTextField) Label() Node {
 	return Label(For(f.fieldName), Text(displayName), Class("block text-sm font-medium text-gray-900 dark:text-white"))
 }
 
-func (f FormTextField) Input() Node {
+func (f FormTextField) input() Node {
 	var value string
 	if f.value != nil {
 		value = *f.value
 	}
 	return Input(Type("text"), ID(f.divId), Name(f.fieldName), If(f.required, Required()), Value(value),
-		Class("w-full px-3 py-2 mb-6 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"))
+		Class("w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"))
 }
 
-type FormField interface {
-	Label() Node
-	Input() Node
+func (f FormTextField) Build() Node {
+	return Group([]Node{f.label(), f.input()})
+
 }

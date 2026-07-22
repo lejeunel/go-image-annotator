@@ -41,7 +41,7 @@ func (b *ResetPasswordBuilder) SetToken(token string) {
 	b.token = token
 }
 func (b *ResetPasswordBuilder) Render(w io.Writer) {
-	b.BasePageBuilder.SetContent(b.makeContent()).Render(w)
+	b.BasePageBuilder.SetFrameContent(b.makeContent()).Render(w)
 }
 
 func NewResetPasswordBuilder(base BasePageBuilder) ResetPasswordBuilder {

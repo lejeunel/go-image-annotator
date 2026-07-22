@@ -31,7 +31,7 @@ type ListImagesPresenter struct {
 var listImagesFields = []string{"id", "collection", "ingested", "n. annot.", "actions"}
 
 func NewListImagesPresenter(w http.ResponseWriter, p b.PageBuilder, collection string) ListImagesPresenter {
-	p.SetTitle("Image")
+	p.SetTitle("Image").SetHTMLTitle("Image")
 	b := b.NewPaginatedListBuilder(p, listImagesFields)
 	return ListImagesPresenter{b, w, ew.NewErrorPresenter(w), collection}
 }

@@ -96,7 +96,7 @@ func (b HTMXInlineFormBuilder) Render(w io.Writer) {
 					Map(b.fields, func(f FormField) Node {
 						return Div(
 							Class("flex flex-col gap-1"),
-							Group([]Node{f.Label(), f.Input()}))
+							f.Build())
 					}),
 					Div(Class("ml-auto flex gap-2"),
 						Button(Type("submit"),

@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func CreateUser(repo SQLiteUserRepo, id string) (*u.User, error) {
-	user := u.NewUser(id)
+func CreateUser(repo SQLiteUserRepo, id string, opts ...u.Option) (*u.User, error) {
+	user := u.NewUser(id, opts...)
 	if err := repo.Create(user); err != nil {
 		return nil, err
 	}

@@ -33,7 +33,7 @@ func (b *ForgotPasswordBuilder) makeContent() Node {
 	)
 }
 func (b *ForgotPasswordBuilder) Render(w io.Writer) {
-	b.BasePageBuilder.SetContent(b.makeContent()).Render(w)
+	b.BasePageBuilder.SetFrameContent(b.makeContent()).Render(w)
 }
 
 func NewForgotPasswordBuilder(base BasePageBuilder) ForgotPasswordBuilder {

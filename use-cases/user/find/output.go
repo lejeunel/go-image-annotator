@@ -1,6 +1,10 @@
 package find
 
+import (
+	u "github.com/lejeunel/go-image-annotator/entities/user"
+)
+
 type OutputPort interface {
-	Success(Response)
+	SuccessFindUser(u.User)
 	Error(error)
 }

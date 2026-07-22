@@ -1,16 +1,11 @@
 package list
 
 import (
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
-type UserResponse struct {
-	Id     string
-	Groups []string
-	Roles  []string
-}
-
 type Response struct {
-	Users      []UserResponse
+	Users      []u.User
 	Pagination pagination.Pagination
 }

@@ -9,25 +9,22 @@ import (
 )
 
 type SidebarEntry struct {
-	icon     string
-	label    string
-	url      string
-	isActive bool
+	Icon     string
+	Label    string
+	Url      string
+	IsActive bool
 }
 
-func NewSidebarEntry(icon, label, url string) SidebarEntry {
-	return SidebarEntry{icon, label, url, false}
-}
 func (e *SidebarEntry) SetActive(value bool) {
-	e.isActive = value
+	e.IsActive = value
 }
 
 func (e SidebarEntry) Render(w io.Writer) {
 	aClass := "flex items-center rounded-radius gap-2 px-2 py-1.5 text-sm font-medium text-on-surface underline-offset-2 hover:bg-primary/5 hover:text-on-surface-strong focus-visible:underline focus:outline-hidden dark:text-on-surface-dark dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong"
-	if e.isActive {
+	if e.IsActive {
 		aClass = "flex items-center rounded-radius gap-2 bg-primary/10 px-2 py-1.5 text-sm font-medium text-on-surface-strong underline-offset-2 focus-visible:underline focus:outline-hidden dark:bg-primary-dark/10 dark:text-on-surface-dark-strong"
 	}
-	A(Href(e.url), Class(aClass), Raw(e.icon), Span(Text(e.label))).Render(w)
+	A(Href(e.Url), Class(aClass), Raw(e.Icon), Span(Text(e.Label))).Render(w)
 }
 
 type Sidebar struct {
@@ -39,17 +36,9 @@ type Sidebar struct {
 func NewSidebar(title string) Sidebar {
 	return Sidebar{Title: title, Entries: make(map[string]SidebarEntry)}
 }
-func (s *Sidebar) Activate(name string) {
-	entry, ok := s.Entries[name]
-	if !ok {
-		return
-	}
-	entry.isActive = true
-	s.Entries[name] = entry
-}
 
-func (s *Sidebar) AddEntry(name, icon, url string) *Sidebar {
-	s.Entries[name] = NewSidebarEntry(icon, name, url)
+func (s *Sidebar) AddEntry(name, icon, url string, isActive bool) *Sidebar {
+	s.Entries[name] = SidebarEntry{Icon: icon, Label: name, Url: url, IsActive: isActive}
 	s.entriesNames = append(s.entriesNames, name)
 	return s
 }

@@ -14,6 +14,7 @@ type TestingErrPresenter struct {
 	GotDependencyErr  bool
 	GotErr            error
 	GotAuthErr        bool
+	GotForbiddenErr   bool
 }
 
 func (p *TestingErrPresenter) Error(err error) {
@@ -29,6 +30,8 @@ func (p *TestingErrPresenter) Error(err error) {
 		p.GotDependencyErr = true
 	case errors.Is(err, e.ErrAuthorization):
 		p.GotAuthErr = true
+	case errors.Is(err, e.ErrForbiddenOp):
+		p.GotForbiddenErr = true
 
 	default:
 		p.GotInternalErr = true

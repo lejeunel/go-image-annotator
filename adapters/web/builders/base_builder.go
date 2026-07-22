@@ -14,13 +14,14 @@ import (
 var BaseHTML string
 
 type BaseData struct {
-	Title   string
-	Scripts template.HTML
-	Content template.HTML
+	HTMLTitle string
+	Scripts   template.HTML
+	Content   template.HTML
 }
 
 type BasePageBuilder struct {
 	Title     string
+	HTMLTitle string
 	pane      *Node
 	scripts   []Node
 	bodyExtra []string
@@ -38,7 +39,12 @@ func (b *BasePageBuilder) SetTitle(title string) *BasePageBuilder {
 	b.Title = title
 	return b
 }
-func (b *BasePageBuilder) SetContent(c Node) *BasePageBuilder {
+
+func (b *BasePageBuilder) SetHTMLTitle(title string) *BasePageBuilder {
+	b.HTMLTitle = title
+	return b
+}
+func (b *BasePageBuilder) SetFrameContent(c Node) *BasePageBuilder {
 	b.Content = c
 	return b
 }
@@ -73,7 +79,7 @@ func (b *BasePageBuilder) Render(w io.Writer) {
 	if err := baseTemplate.ExecuteTemplate(
 		w,
 		"base",
-		BaseData{Title: b.Title,
+		BaseData{HTMLTitle: b.HTMLTitle,
 			Content: template.HTML(content.String()),
 			Scripts: template.HTML(scripts.String())}); err != nil {
 		Text(err.Error()).Render(w)

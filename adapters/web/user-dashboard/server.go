@@ -20,7 +20,7 @@ func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
 	udb := s.UserDashboardBuilder
 	udb.SetUserIdentity(r.Context())
 	udb.SetActiveSection(cmp.NoPageActive)
-	udb.SetTitle("User Dashboard")
+	udb.SetTitle("User Dashboard").SetHTMLTitle("Dashboard")
 	udb.Build().Render(w)
 }
 func (s *Server) NewAPIToken(w http.ResponseWriter, r *http.Request) {

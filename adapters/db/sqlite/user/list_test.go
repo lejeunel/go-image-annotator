@@ -1,10 +1,12 @@
 package user
 
 import (
+	"testing"
+
+	"github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestInternalErrOnCountShouldFail(t *testing.T) {
@@ -31,9 +33,10 @@ func TestInternalErrOnListShouldFail(t *testing.T) {
 func TestList(t *testing.T) {
 	repo := NewTestSQLiteUserRepo()
 	CreateUser(repo, "user@example.com")
-	CreateUser(repo, "another-user@example.com")
+	CreateUser(repo, "another-user@example.com", user.WithAdmin(true))
 	users, err := repo.List(pag.PaginationParams{Page: 1, PageSize: 2})
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(users))
 	assert.False(t, users[0].Id == users[1].Id)
+	assert.True(t, users[1].IsAdmin)
 }

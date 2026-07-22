@@ -5,6 +5,7 @@ import (
 
 	"context"
 
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -25,11 +26,22 @@ func (i *Interactor) Execute(ctx context.Context, id string, out OutputPort) {
 		return
 	}
 
+	currentUser := u.IdentityFromContext(ctx)
+	if currentUser == nil {
+		out.Error(fmt.Errorf("%v: fetching user from context: %w", errCtx, e.ErrInternal))
+		return
+	}
+
+	if currentUser.Id == id {
+		out.Error(fmt.Errorf("%v: attempting to delete user %v while logged-in as %v: %w", errCtx, id, currentUser.Id, e.ErrForbiddenOp))
+		return
+	}
+
 	if err := i.repo.Delete(id); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	out.Success()
+	out.SuccessDeleteUser(id)
 }
 func (i *Interactor) exists(name string) error {
 	errCtx := fmt.Errorf("checking whether user with id %v exists", name)

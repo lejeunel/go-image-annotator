@@ -39,7 +39,6 @@ func ingestImage(itr *ingest.Interactor, dir string, entry os.DirEntry, collecti
 	if !entry.IsDir() {
 		f, err := os.Open(filepath.Join(dir, entry.Name()))
 		if err != nil {
-			fmt.Println(err)
 			return
 		}
 		itr.Execute(context.Background(), ingm.Request{Collection: collection, Reader: f}, &IngestPresenter{})

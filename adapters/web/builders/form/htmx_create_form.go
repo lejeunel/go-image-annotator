@@ -24,11 +24,6 @@ func (b *HTMXCreateFormBuilder) AddTitle(title string) *HTMXCreateFormBuilder {
 	b.title = &title
 	return b
 }
-func (b *HTMXCreateFormBuilder) AddTextField(fieldName, displayName, divId string, opts ...FormTextFieldOption) *HTMXCreateFormBuilder {
-	field := NewFormTextField(fieldName, displayName, divId, opts...)
-	b.fields = append(b.fields, field)
-	return b
-}
 func (b HTMXCreateFormBuilder) Render(w io.Writer) {
 	var title Node
 	if b.title != nil {
@@ -42,7 +37,7 @@ func (b HTMXCreateFormBuilder) Render(w io.Writer) {
 			Class("bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-80 mb-4"),
 			title,
 			Map(b.fields, func(f FormField) Node {
-				return Group([]Node{f.Label(), f.Input()})
+				return Group([]Node{Div(Class("mb-3"), f.Build())})
 			}),
 			Span(Class("flex items-center gap-2"),
 				Button(Type("submit"),

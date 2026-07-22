@@ -1,6 +1,6 @@
 package list
 
 type OutputPort interface {
-	Success(Response)
+	SuccessListUsers(Response)
 	Error(error)
 }

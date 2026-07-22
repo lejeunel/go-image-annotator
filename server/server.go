@@ -12,6 +12,7 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	adm "github.com/lejeunel/go-image-annotator/adapters/web/admin"
+	admusr "github.com/lejeunel/go-image-annotator/adapters/web/admin/user"
 	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
 	wauth "github.com/lejeunel/go-image-annotator/adapters/web/auth"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
@@ -53,33 +54,34 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	RouteWebPages(
 		router,
 		*web.NewServer(&app.Itrs, app.Annotator,
-			*pageBuilder, ap.NewAnnotationPagePresenter(colorizer),
+			pageBuilder, ap.NewAnnotationPagePresenter(colorizer),
 			ap.NewAnnotoriousPresenter(colorizer),
 			app.SessionManager, cfg.DefaultPageSize),
-		HomePageHandlerFunc(*pageBuilder),
+		HomePageHandlerFunc(pageBuilder),
 		webAuth,
 	)
-	udb := userDashboard.New(*pageBuilder, app.Itrs.User.RenewToken)
+	udb := userDashboard.New(pageBuilder, app.Itrs.User.RenewToken)
 	udb.Route(router, webAuth)
 
 	RouteAPI(router, *api.NewServer(&app.Itrs, *logger),
 		app.SessionManager.LoadAndSave, app.SessionManager.AuthBearerMiddleWare, app.SessionManager.AuthCookiesMiddleWare, ApiRequireLogin)
-	RouteAPIDocs(router, APIDocsHandlerFunc(rt.APISpecs, *pageBuilder), webAuth)
+	RouteAPIDocs(router, APIDocsHandlerFunc(rt.APISpecs, pageBuilder), webAuth)
 	RouteAPISpecs(router)
 	RouteStaticFiles(router)
 
-	collectionServer := clc.New(*pageBuilder, cfg.DefaultPageSize,
+	collectionServer := clc.New(pageBuilder, cfg.DefaultPageSize,
 		app.Itrs.Collection.Create, app.Itrs.Collection.List, app.Itrs.Collection.Update,
 		app.Itrs.Collection.Delete, app.Itrs.Collection.Find)
 	collectionServer.Route(router, webAuth)
 
-	imagesServer := im.New(*pageBuilder, cfg.DefaultPageSize, app.Itrs.Image.List, app.Itrs.Image.Delete, app.Itrs.Image.Find)
+	imagesServer := im.New(pageBuilder, cfg.DefaultPageSize, app.Itrs.Image.List, app.Itrs.Image.Delete, app.Itrs.Image.Find)
 	imagesServer.Route(router, webAuth)
 
-	adminServer := adm.New(*pageBuilder)
-	adminServer.Route(router, webAuth)
+	adminPageBuilder := adm.NewPageBuilder(pageBuilder)
+	adminUserServer := admusr.New(adminPageBuilder, app.Itrs.User, cfg.DefaultPageSize)
+	adminUserServer.Route(router, webAuth)
 
-	labelServer := lbl.New(*pageBuilder, cfg.DefaultPageSize,
+	labelServer := lbl.New(pageBuilder, cfg.DefaultPageSize,
 		app.Itrs.Label.Create, app.Itrs.Label.List, app.Itrs.Label.Update,
 		app.Itrs.Label.Delete, app.Itrs.Label.Find)
 	labelServer.Route(router, webAuth)

@@ -13,7 +13,7 @@ func TestHandleAuthError(t *testing.T) {
 	itr := New(&fk.UserRepo{},
 		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -21,7 +21,7 @@ func TestHandleAuthError(t *testing.T) {
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.UserRepo{ErrOnFind: e.ErrInternal})
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -35,8 +35,7 @@ func TestFindUser(t *testing.T) {
 	repo := &fk.UserRepo{Return: &user}
 	p := &FakePresenter{}
 	itr := New(repo)
-	req := Request{Id: user.Id}
-	itr.Execute(t.Context(), req, p)
+	itr.Execute(t.Context(), user.Id, p)
 
 	want := Response{Id: user.Id, Groups: groups, Roles: roles}
 	assert.Equal(t, want, p.Got)

@@ -27,7 +27,7 @@ type ListCollectionsPresenter struct {
 }
 
 func NewListCollectionsPresenter(w http.ResponseWriter, p b.PageBuilder) ListCollectionsPresenter {
-	p.SetTitle("Collections").SetActiveSection(cmp.CollectionsPageActive)
+	p.SetTitle("Collections").SetHTMLTitle("Collections").SetActiveSection(cmp.CollectionsPageActive)
 	b := b.NewPaginatedListBuilder(p, listCollectionsFields)
 	return ListCollectionsPresenter{b, w, e.NewErrorPresenter(w)}
 }
@@ -66,7 +66,6 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 			r.URL.Query().Get("name"),
 			NewListCollectionsPresenter(w, s.PageBuilder))
 	}
-
 }
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b := bf.NewHTMXCreateFormBuilder(rt.Collection, createCollectionTargetDiv)

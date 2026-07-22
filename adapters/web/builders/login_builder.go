@@ -65,7 +65,7 @@ func (b *LoginPageBuilder) makeContent() Node {
 	)
 }
 func (b *LoginPageBuilder) Render(w io.Writer) {
-	b.BasePageBuilder.SetContent(b.makeContent()).Render(w)
+	b.BasePageBuilder.SetFrameContent(b.makeContent()).Render(w)
 }
 
 func NewLoginPageBuilder(base BasePageBuilder) LoginPageBuilder {
