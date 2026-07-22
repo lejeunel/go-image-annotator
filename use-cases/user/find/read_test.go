@@ -1,8 +1,9 @@
 package find
 
 import (
-	u "github.com/lejeunel/go-image-annotator/entities/user"
 	"testing"
+
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -36,7 +37,5 @@ func TestFindUser(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(repo)
 	itr.Execute(t.Context(), user.Id, p)
-
-	want := Response{Id: user.Id, Groups: groups, Roles: roles}
-	assert.Equal(t, want, p.Got)
+	assert.Equal(t, user, p.Got)
 }

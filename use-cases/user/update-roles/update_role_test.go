@@ -10,7 +10,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&fk.UserRepo{},
+	itr := New(&fk.UserRepo{}, &fk.RoleRepo{},
 		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
@@ -19,7 +19,7 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestMissingUserShouldFail(t *testing.T) {
-	itr := New(&fk.UserRepo{Missing: true})
+	itr := New(&fk.UserRepo{Missing: true}, &fk.RoleRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user@example.com", Roles: []string{"a-role"}}, p)
 	assert.True(t, p.GotNotFoundErr)
@@ -27,7 +27,7 @@ func TestMissingUserShouldFail(t *testing.T) {
 }
 
 func TestHandleErrorOnFindUser(t *testing.T) {
-	itr := New(&fk.UserRepo{ErrOnFind: e.ErrInternal})
+	itr := New(&fk.UserRepo{ErrOnFind: e.ErrInternal}, &fk.RoleRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -38,25 +38,27 @@ func TestAssignUserRoleAlreadyAssignedDoesNothing(t *testing.T) {
 	roles := []string{"a-role"}
 	user := usr.NewUser("user@example.com",
 		usr.WithRoles(roles))
-	repo := &fk.UserRepo{Return: &user}
-	itr := New(repo)
+	usrRepo := &fk.UserRepo{Return: &user}
+	roleRepo := &fk.RoleRepo{ExistingNames: []string{"a-role"}}
+	itr := New(usrRepo, roleRepo)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Roles: []string{"a-role"}}, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, roles, p.Got.Roles)
-	assert.Nil(t, repo.GotNewRole)
+	assert.Nil(t, usrRepo.GotNewRole)
 }
 
-func TestAssignUser(t *testing.T) {
+func TestAssignRoles(t *testing.T) {
 	user := usr.NewUser("user@example.com",
 		usr.WithRoles([]string{"a-role"}))
-	newGroup := "new-role"
-	updatedRoles := []string{"a-role", newGroup}
-	repo := &fk.UserRepo{Return: &user}
-	itr := New(repo)
+	newRole := "a-new-role"
+	updatedRoles := []string{newRole}
+	usrRepo := &fk.UserRepo{Return: &user}
+	roleRepo := &fk.RoleRepo{ExistingNames: []string{"a-role", "a-new-role"}}
+	itr := New(usrRepo, roleRepo)
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: user.Id, Roles: []string{newGroup}}, p)
+	itr.Execute(t.Context(), Request{Id: user.Id, Roles: []string{newRole}}, p)
 	assert.True(t, p.GotSuccess)
-	assert.Equal(t, updatedRoles, p.Got.Roles)
-	assert.Equal(t, newGroup, *repo.GotNewRole)
+	assert.Equal(t, updatedRoles, usrRepo.SetRoles_)
+	assert.Equal(t, user.Id, usrRepo.SetRolesToUser)
 }

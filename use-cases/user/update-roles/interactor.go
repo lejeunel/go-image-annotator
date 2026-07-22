@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type Interactor struct {
@@ -25,14 +26,14 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	for _, g := range r.Roles {
-		exists, err := i.roleRepo.Exists(g)
+	for _, role := range r.Roles {
+		exists, err := i.roleRepo.Exists(role)
 		if err != nil {
-			out.Error(fmt.Errorf("%v: checking whether role %v exists: %w", errCtx, g, err))
+			out.Error(fmt.Errorf("%v: checking whether role %v exists: %w", errCtx, role, err))
 			return
 		}
 		if !*exists {
-			out.Error(fmt.Errorf("%v: checking whether role %v exists: %w", errCtx, g, err))
+			out.Error(fmt.Errorf("%v: checking whether role %v exists: %w", errCtx, role, e.ErrNotFound))
 			return
 		}
 	}
@@ -51,9 +52,11 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(r UserRepo, opts ...Option) Interactor {
-	i := &Interactor{userRepo: r,
-		auth: auth.NewVoidAuth(),
+func New(ur UserRepo, rr RoleRepo, opts ...Option) Interactor {
+	i := &Interactor{
+		userRepo: ur,
+		roleRepo: rr,
+		auth:     auth.NewVoidAuth(),
 	}
 
 	for _, opt := range opts {

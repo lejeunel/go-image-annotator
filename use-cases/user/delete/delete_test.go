@@ -35,8 +35,10 @@ func TestDeletingMyselfShouldFail(t *testing.T) {
 
 func TestDeleteUser(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.UserRepo{ExistingIds: []string{"user@example.com"}})
-	itr.Execute(t.Context(), "user@example.com", p)
+	user := u.NewUser("admin@mail.com")
+	userToDelete := u.NewUser("user@example.com")
+	itr := New(&fk.UserRepo{ExistingIds: []string{user.Id, userToDelete.Id}})
+	itr.Execute(u.AppendUserToContext(t.Context(), user), userToDelete.Id, p)
 	assert.True(t, p.GotSuccess)
 }
 

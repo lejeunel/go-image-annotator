@@ -32,7 +32,7 @@ func NewSQLiteUserInteractors(
 		Delete:                   delete.New(repos.User, delete.WithAuth(auth)),
 		List:                     list.New(repos.User, list.WithAuth(auth)),
 		RenewToken:               rt.New(repos.User, ApitokenGen, rt.WithAuth(auth)),
-		UpdateRole:               uro.New(repos.User, uro.WithAuth(auth)),
+		UpdateRole:               uro.New(repos.User, repos.Role, uro.WithAuth(auth)),
 		UpdateGroup:              ugr.New(repos.User, repos.Group, ugr.WithAuth(auth)),
 		SetAdmin:                 adm.New(repos.User, adm.WithAuth(auth)),
 		RequestForgottenPassword: fp.New(repos.User, forgotPassworkTokenExpirationMinutes, forgotPasswordTokenGen, fp.WithAuth(auth)),
