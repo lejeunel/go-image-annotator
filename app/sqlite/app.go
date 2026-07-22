@@ -20,7 +20,7 @@ import (
 
 func NewSQLiteApp(cfg config.Config, auth auth.Authorizer) app.App {
 	apiTokenGen := tk.New(cfg.ApiTokenLength)
-	passwordGen := tk.New(cfg.RandomPasswordLength)
+	passwordTokenizer := tk.New(cfg.RandomPasswordLength)
 	forgottenPasswordGen := tk.New(cfg.RandomPasswordLength)
 	passwordValidator := pv.New(cfg.PasswordMinEntropy)
 	sqldb := db.NewSQLiteDB(cfg.SQLiteDBPath)
@@ -36,11 +36,12 @@ func NewSQLiteApp(cfg config.Config, auth auth.Authorizer) app.App {
 		cfg.DefaultPageSize,
 		cfg.AllowedImageFormats,
 		apiTokenGen,
-		passwordGen,
+		passwordTokenizer,
 		forgottenPasswordGen,
 		cfg.ForgotPasswordTokenExpirationMinutes,
 		passwordValidator,
 		apiTokenGen,
+		passwordTokenizer,
 		ingester,
 		auth)
 	annotator := a.NewAnnotator(scr, itrs.Image.Find,

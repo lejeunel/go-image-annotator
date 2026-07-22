@@ -11,10 +11,10 @@ func (s *Server) Route(r chi.Router,
 	sessionMiddleware func(http.Handler) http.Handler) {
 	r.Group(func(r chi.Router) {
 		r.Use(sessionMiddleware)
-		r.HandleFunc(rt.LoginWithPassword, s.PasswordLogin)
 		r.HandleFunc(rt.LoginOAuth, s.OAuthLogin)
 		r.HandleFunc(rt.CallbackOAuth, s.OAuthCallback)
 		r.HandleFunc(rt.Logout, s.Logout)
+		r.Post(rt.Login, s.PasswordLogin)
 	})
 
 	r.Get(rt.Login, s.Login)

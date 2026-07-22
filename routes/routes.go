@@ -13,7 +13,6 @@ var APIDocs = "/api/docs"
 var StaticRoot = "/static"
 
 var Login = "/auth/login"
-var LoginWithPassword = "/auth/login/password"
 var LoginOAuth = "/auth/login/{provider}"
 var CallbackOAuth = "/auth/callback/{provider}"
 var ForgotPasswordForm = "/auth/forgot-password"
@@ -24,6 +23,7 @@ var Logout = "/auth/logout"
 
 var UserDashboard = "/user-dashboard"
 var NewAPIToken = "/ui/new-api-token"
+var ChangePassword = "/change-password"
 
 var Home = "/"
 var Collections = "/collections"

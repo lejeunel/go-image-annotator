@@ -16,6 +16,8 @@ func HomePageHandlerFunc(pb b.PageBuilder) http.HandlerFunc {
 }
 func APIDocsHandlerFunc(specsPath string, pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		web.APIDocsPage(r.Context(), specsPath, *pb.SetActiveSection(cmp.APIDocsPageActive), w)
+		web.APIDocsPage(r.Context(), specsPath,
+			*pb.SetActiveSection(cmp.APIDocsPageActive).SetHTMLTitle("API docs"),
+			w)
 	}
 }

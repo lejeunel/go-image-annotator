@@ -60,7 +60,7 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 		HomePageHandlerFunc(pageBuilder),
 		webAuth,
 	)
-	udb := userDashboard.New(pageBuilder, app.Itrs.User.RenewToken)
+	udb := userDashboard.New(pageBuilder, app.Itrs.User.RenewToken, app.Itrs.User.ChangePassword)
 	udb.Route(router, webAuth)
 
 	RouteAPI(router, *api.NewServer(&app.Itrs, *logger),

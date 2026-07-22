@@ -3,7 +3,7 @@ package builders
 import (
 	"io"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
+	st "github.com/lejeunel/go-image-annotator/adapters/web/styles"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -26,13 +26,13 @@ func (b *ResetPasswordBuilder) makeContent() Node {
 				Attr("hx-swap", "outerHTML"),
 				Attr("hx-target", "this"),
 				Class("bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-80 mb-4"),
-				Label(For("New password"), Text("New password"), Class("block text-sm font-medium text-gray-900 dark:text-white")),
+				Label(For("New password"), Text("New password"), Class(st.FormLabel)),
 				Input(Type("password"), ID("password"), Name("password"), Required(),
-					Class("w-full px-3 py-2 mb-6 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")),
-				Label(For("New password (repeat)"), Text("New password (repeat)"), Class("block text-sm font-medium text-gray-900 dark:text-white")),
+					Class(st.FormInput)),
+				Label(For("New password (repeat)"), Text("New password (repeat)"), Class(st.FormLabel)),
 				Input(Type("password"), ID("password-repeat"), Name("password-repeat"), Required(),
-					Class("w-full px-3 py-2 mb-6 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")),
-				Button(Type("submit"), Text("Submit"), Class(s.PasswordButtonClass)),
+					Class(st.FormInput)),
+				Button(Type("submit"), Text("Submit"), Class(st.PasswordButtonClass)),
 			),
 		),
 	)

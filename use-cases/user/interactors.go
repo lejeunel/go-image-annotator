@@ -2,6 +2,7 @@ package user
 
 import (
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	cpw "github.com/lejeunel/go-image-annotator/use-cases/user/change-password"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/find"
@@ -25,6 +26,7 @@ type Interactors struct {
 	SetAdmin                 adm.Interactor
 	RequestForgottenPassword fp.Interactor
 	ResetForgottenPassword   rfpw.Interactor
+	ChangePassword           cpw.Interactor
 	DefaultPageSize          int
 	Authorizer               auth.Authorizer
 }

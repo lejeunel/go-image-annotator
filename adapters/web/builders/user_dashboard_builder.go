@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
+	st "github.com/lejeunel/go-image-annotator/adapters/web/styles"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -40,12 +42,28 @@ func (b *UserDashboardBuilder) Build() *UserDashboardBuilder {
 			return r.Render()
 		}),
 	)
-	APIToken := Div(Class("mt-2"), H3(Text("API Token")),
+	APIToken := Div(Class("mt-2"), H3(Text("API token")),
 		P(Class("text-sm text-on-surface dark:text-on-surface-dark"),
 			Text("Generate a secret token to authenticate your API requests. ")),
 		Raw(cmp.ApiTokenFrame))
 
-	content := Div(cmp.MakeCard(profile), APIToken)
+	changePassword := Div(Class("mt-2"), H3(Text("Reset password")),
+		cmp.MakeCard(Form(
+			Attr(fmt.Sprintf(`hx-post=%v`, rt.ChangePassword)),
+			Class("bg-surface-alt/50 dark:bg-surface-dark-alt/50 p-4 rounded-lg shadow-md mb-4"),
+			Label(For("Current password"), Text("Current password"), Class(st.FormLabel)),
+			Input(Type("password"), ID("password-current"), Name("password-current"), Required(), Class(st.FormInput)),
+			Label(For("New password"), Text("New password"), Class(st.FormLabel)),
+			Input(Type("password"), ID("password"), Name("password"), Required(), Class(st.FormInput)),
+			Label(For("New password (repeat)"), Text("New password (repeat)"), Class(st.FormLabel)),
+			Input(Type("password"), ID("password-repeat"), Name("password-repeat"), Required(), Class(st.FormInput)),
+			Button(Type("submit"),
+				Text("Submit"),
+				Class(st.SuccessButton)),
+		),
+		))
+
+	content := Div(cmp.MakeCard(profile), APIToken, changePassword)
 	b.SetContent(content)
 	return b
 }

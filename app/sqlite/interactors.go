@@ -15,6 +15,7 @@ func NewSQLiteInteractors(i SQLiteRepos, pageSize int, allowedImageFormats []str
 	forgotPasswordTokenExpirationMinutes int,
 	passwordValidator pv.MyPasswordValidator,
 	passwordHasher token.TokenHasher,
+	passwordVerifier token.Interface,
 	ingester ing.Interface,
 	auth auth.Authorizer) a.Interactors {
 
@@ -27,6 +28,7 @@ func NewSQLiteInteractors(i SQLiteRepos, pageSize int, allowedImageFormats []str
 			forgotPasswordTokenGen,
 			passwordValidator,
 			passwordHasher,
+			passwordVerifier,
 			forgotPasswordTokenExpirationMinutes,
 			passwordGenerator, auth),
 		Annotation: NewSQLiteAnnotationInteractors(i, auth),

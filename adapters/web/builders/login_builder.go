@@ -38,8 +38,7 @@ func (b *LoginPageBuilder) makeContent() Node {
 		Span(
 			Div(Class("flex justify-center text-gray-900 dark:text-white font-bold text-xl mt-4 mb-4"), Text(signInTitle)),
 			Form(
-				Action(rt.LoginWithPassword),
-				Method("POST"),
+				Attr(fmt.Sprintf("hx-post=%v", rt.Login)),
 				Class("bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-80 mb-4"),
 				Label(For("email"), Text("Email"), Class("block text-sm font-medium text-gray-900 dark:text-white")),
 				Input(Type("email"), ID("email"), Name("email"), Required(),

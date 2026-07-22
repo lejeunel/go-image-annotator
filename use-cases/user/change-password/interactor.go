@@ -9,13 +9,14 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-type TokenHasher interface {
+type TokenVerifier interface {
 	Hash(token string) []byte
+	Verify(string, []byte) bool
 }
 
 type Interactor struct {
 	repo              Repo
-	tokenHasher       TokenHasher
+	tokenVerifier     TokenVerifier
 	passwordValidator pw.PasswordValidator
 	auth              Auth
 }
@@ -25,6 +26,17 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	if err := i.auth.ChangePassword(ctx, r.Id); err != nil {
 		out.Error(fmt.Errorf("%v: checking authorization: %w", errCtx, err))
+		return
+	}
+
+	user, err := i.repo.Find(r.Id)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: retrieving user info: %w", errCtx, err))
+		return
+	}
+
+	if ok := i.tokenVerifier.Verify(r.CurrentPassword, user.HashPassword); !ok {
+		out.Error(fmt.Errorf("%v: verifying current password: %w", errCtx, e.ErrInvalidPassword))
 		return
 	}
 
@@ -38,7 +50,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.repo.UpdatePassword(r.Id, i.tokenHasher.Hash(r.FirstPassword)); err != nil {
+	if err := i.repo.UpdatePassword(r.Id, i.tokenVerifier.Hash(r.FirstPassword)); err != nil {
 		out.Error(fmt.Errorf("%v: updating password: %v, %w", errCtx, err, e.ErrInternal))
 		return
 	}
@@ -54,10 +66,10 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(r Repo, tokenHasher TokenHasher, passwordValidator pw.PasswordValidator,
+func New(r Repo, tokenHasher TokenVerifier, passwordValidator pw.PasswordValidator,
 	opts ...Option) Interactor {
 	i := &Interactor{repo: r,
-		tokenHasher:       tokenHasher,
+		tokenVerifier:     tokenHasher,
 		passwordValidator: passwordValidator,
 		auth:              auth.NewVoidAuth(),
 	}

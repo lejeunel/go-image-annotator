@@ -3,6 +3,8 @@ package auth
 import (
 	"net/http"
 
+	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/markbates/goth/gothic"
 )
 
@@ -17,14 +19,16 @@ func (s Server) PasswordLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := r.FormValue("email")
-	password := r.FormValue("password")
-
-	if err := s.SessionManager.PasswordLogin(r.Context(), email, password); err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+	if err := s.SessionManager.PasswordLogin(
+		r.Context(),
+		r.FormValue("email"),
+		r.FormValue("password")); err != nil {
+		pl, _ := htmx.NotifyError("Login password", "wrong password")
+		w.Header().Set("HX-Trigger", string(pl))
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	w.Header().Set("HX-Redirect", rt.Home)
 }
 func (s Server) Login(w http.ResponseWriter, r *http.Request) {
 	s.LoginPageBuilder.Render(w)
