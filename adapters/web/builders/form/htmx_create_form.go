@@ -34,7 +34,7 @@ func (b HTMXCreateFormBuilder) Render(w io.Writer) {
 	form := Span(Class("w-full inline-flex items-center justify-start mt-2"),
 		Form(
 			Attr(fmt.Sprintf(`hx-post=%v`, b.submitEndpoint)),
-			Class("bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-80 mb-4"),
+			Class("bg-surface-alt/50 dark:bg-surface-dark-alt/50 p-8 rounded-lg shadow-md w-80 mb-4"),
 			title,
 			Map(b.fields, func(f FormField) Node {
 				return Group([]Node{Div(Class("mb-3"), f.Build())})
@@ -45,7 +45,7 @@ func (b HTMXCreateFormBuilder) Render(w io.Writer) {
 					Class(st.SuccessButton)),
 				Button(Type("button"),
 					Text("Cancel"),
-					Class(st.InactiveButton),
+					Class(st.AbortButton),
 					Attr(`hx-on:click`, fmt.Sprintf(`document.getElementById('%v').innerHTML=''`, b.containerId))),
 			),
 		))

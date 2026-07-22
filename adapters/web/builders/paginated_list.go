@@ -2,9 +2,10 @@ package builders
 
 import (
 	"bytes"
+	"io"
+
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	"github.com/yuin/goldmark"
-	"io"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )

@@ -46,7 +46,7 @@ func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 	}
 	p.AddCreationButton("Create", rt.CreateCollectionForm, createCollectionTargetDiv)
 	p.AddMarkdownPreamble(preamble)
-	p.Build().Render(p.Writer)
+	p.Render(p.Writer)
 }
 
 func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {

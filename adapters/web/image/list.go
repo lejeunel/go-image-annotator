@@ -62,7 +62,7 @@ func (p ListImagesPresenter) SuccessListImages(r list.Response) {
 	for _, im := range r.Images {
 		p.AddRow(makeImageRow(im))
 	}
-	p.Build().Render(p.Writer)
+	p.Render(p.Writer)
 }
 
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {

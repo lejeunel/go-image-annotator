@@ -37,7 +37,7 @@ func (p ListUsersPresenter) SuccessListUsers(r list.Response) {
 		row := MakeListUserRow(user)
 		p.AddRow(row)
 	}
-	p.Build().Render(p.Writer)
+	p.Render(p.Writer)
 }
 func (p ListUsersPresenter) SuccessFindUser(user u.User) {
 	MakeListUserRow(user).Render(p.Writer)
@@ -46,7 +46,7 @@ func (p ListUsersPresenter) SuccessFindUser(user u.User) {
 func (s *Server) ListUsers(w http.ResponseWriter, r *http.Request) {
 	s.Page.SetUserIdentity(r.Context()).SetHTMLTitle("Users").SetTitle("Users")
 	s.Page.ActivateSidebarEntry(UserPage)
-	s.Page.AddCreationButton("Create new user", rt.CreateUserForm, createUserTargetDiv)
+	s.Page.AddCreationButton("Create", rt.CreateUserForm, createUserTargetDiv)
 	s.Users.List.Execute(r.Context(), pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
 		NewListUsersPresenter(w, s.Page))
 }
