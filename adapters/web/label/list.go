@@ -1,6 +1,7 @@
 package label
 
 import (
+	_ "embed"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,6 +20,9 @@ import (
 )
 
 var listLabelsFields = []string{"name", "description", "actions"}
+
+//go:embed preamble.md
+var preamble string
 
 type ListLabelsPresenter struct {
 	b.PaginatedListBuilder
@@ -40,6 +44,7 @@ func (p ListLabelsPresenter) SuccessListLabels(r list.Response) {
 	}
 
 	p.AddCreationButton("Create new label", rt.CreateLabelForm, createLabelTargetDiv)
+	p.AddMarkdownPreamble(preamble)
 	p.Build().Render(p.Writer)
 }
 func (p ListLabelsPresenter) SuccessFindLabel(l l.Label) {

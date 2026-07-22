@@ -77,7 +77,6 @@ func (b *PageBuilder) SetContent(content Node) *PageBuilder {
 	if b.Title != "" {
 		content = Div(Div(Class("font-bold text-xl"), Text(b.Title)),
 			content)
-
 	}
 
 	if len(b.SidebarEntries) > 0 {

@@ -1,6 +1,7 @@
 package collection
 
 import (
+	_ "embed"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,6 +20,9 @@ import (
 )
 
 var listCollectionsFields = []string{"name", "description", "group", "created", "actions"}
+
+//go:embed preamble.md
+var preamble string
 
 type ListCollectionsPresenter struct {
 	b.PaginatedListBuilder
@@ -41,6 +45,7 @@ func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 		p.AddRow(row)
 	}
 	p.AddCreationButton("Create new collection", rt.CreateCollectionForm, createCollectionTargetDiv)
+	p.AddMarkdownPreamble(preamble)
 	p.Build().Render(p.Writer)
 }
 

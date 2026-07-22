@@ -14,14 +14,12 @@ STATIC_DIR := assets/static
 CSS_MAIN := assets/app.css
 CSS_OUT := $(STATIC_DIR)/styles.css
 
-# ====== TARGETS ======
-
-.PHONY: all api-code clean build
+.PHONY: all api-code clean build node-deps build-ci
 
 all: api-code auth-valid-methods htmx alpine alpine-persist alpine-focus annotorious stoplight css build
 
-auth-valid-methods: $(VALID_AUTH_OUT)
-api-code: $(MODELS_OUT) $(SERVER_OUT)
+node-deps:
+	npm ci
 
 build:
 	go build \
@@ -30,10 +28,18 @@ build:
 			-X '$(REPO)/globals.Commit=$$(git rev-parse --short HEAD)' \
 			-X '$(REPO)/globals.Date=$$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
 
+build-ci:
+	$(MAKE) node-deps
+	$(MAKE) build
+
 css:
 	tailwindcss -i $(CSS_MAIN) -o $(CSS_OUT) --minify
 
-# --- Generate models (types only) ---
+auth-valid-methods: $(VALID_AUTH_OUT)
+
+api-code: $(MODELS_OUT) $(SERVER_OUT)
+
+
 $(MODELS_OUT): $(SPEC)
 	mkdir -p $(MODELS_PKG)
 	$(OAPI) \
@@ -42,7 +48,6 @@ $(MODELS_OUT): $(SPEC)
 		-o $(MODELS_OUT) \
 		$(SPEC)
 
-# --- Generate server (interfaces only, using models) ---
 $(SERVER_OUT): $(SPEC) $(MODELS_OUT)
 	mkdir -p $(SERVER_PKG)
 	$(OAPI) \
@@ -79,6 +84,5 @@ stoplight:
 	wget https://unpkg.com/@stoplight/elements/web-components.min.js -O $(STATIC_DIR)/stoplight.js
 	wget https://unpkg.com/@stoplight/elements/styles.min.css -O $(STATIC_DIR)/stoplight.css
 
-# --- Cleanup generated files ---
 clean:
 	rm -f $(MODELS_OUT) $(SERVER_OUT) $(CSS_OUT) $(VALID_AUTH_OUT)

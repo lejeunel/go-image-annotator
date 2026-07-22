@@ -6,3 +6,4 @@
 /.direnv/
 /.envrc
 /assets/static
+/node_modules
