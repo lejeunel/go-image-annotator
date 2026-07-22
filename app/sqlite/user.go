@@ -5,8 +5,6 @@ import (
 	pw "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
 	usr "github.com/lejeunel/go-image-annotator/use-cases/user"
-	agr "github.com/lejeunel/go-image-annotator/use-cases/user/assign-group"
-	aro "github.com/lejeunel/go-image-annotator/use-cases/user/assign-role"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/find"
@@ -15,8 +13,8 @@ import (
 	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 	rfpw "github.com/lejeunel/go-image-annotator/use-cases/user/reset-forgotten-password"
 	adm "github.com/lejeunel/go-image-annotator/use-cases/user/set-admin"
-	ugr "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-group"
-	uar "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-role"
+	ugr "github.com/lejeunel/go-image-annotator/use-cases/user/update-groups"
+	uro "github.com/lejeunel/go-image-annotator/use-cases/user/update-roles"
 )
 
 func NewSQLiteUserInteractors(
@@ -34,10 +32,8 @@ func NewSQLiteUserInteractors(
 		Delete:                   delete.New(repos.User, delete.WithAuth(auth)),
 		List:                     list.New(repos.User, list.WithAuth(auth)),
 		RenewToken:               rt.New(repos.User, ApitokenGen, rt.WithAuth(auth)),
-		AssignRole:               aro.New(repos.User, aro.WithAuth(auth)),
-		UnAssignRole:             uar.New(repos.User, uar.WithAuth(auth)),
-		AssignGroup:              agr.New(repos.User, repos.Group, agr.WithAuth(auth)),
-		UnAssignGroup:            ugr.New(repos.User, repos.Group, ugr.WithAuth(auth)),
+		UpdateRole:               uro.New(repos.User, uro.WithAuth(auth)),
+		UpdateGroup:              ugr.New(repos.User, repos.Group, ugr.WithAuth(auth)),
 		SetAdmin:                 adm.New(repos.User, adm.WithAuth(auth)),
 		RequestForgottenPassword: fp.New(repos.User, forgotPassworkTokenExpirationMinutes, forgotPasswordTokenGen, fp.WithAuth(auth)),
 		ResetForgottenPassword:   rfpw.New(repos.User, passwordHasher, passwordValidator),

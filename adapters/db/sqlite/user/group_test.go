@@ -11,7 +11,7 @@ import (
 )
 
 func TestRetrieveUserWithNoGroup(t *testing.T) {
-	repo := NewTestSQLiteUserRepo()
+	repo := NewSQLiteUserRepo(s.NewInMemory())
 	CreateUser(repo, userId)
 	r, _ := repo.Find(userId)
 	assert.Equal(t, 0, len(r.Groups))
@@ -19,7 +19,7 @@ func TestRetrieveUserWithNoGroup(t *testing.T) {
 
 func TestCreateUserWithOneGroup(t *testing.T) {
 	group := g.NewGroup(g.NewGroupId(), "a-group")
-	db := s.NewSQLiteDB(":memory:")
+	db := s.NewInMemory()
 	userRepo := NewSQLiteUserRepo(db)
 	groupRepo := grpr.NewSQLiteGroupRepo(db)
 	groupRepo.Create(group)
@@ -31,29 +31,22 @@ func TestCreateUserWithOneGroup(t *testing.T) {
 	assert.Equal(t, 1, len(r.Groups))
 }
 
-func TestAssignSameGroupTwice(t *testing.T) {
-	group := g.NewGroup(g.NewGroupId(), "a-group")
-	db := s.NewSQLiteDB(":memory:")
+func TestAssignToNewGroup(t *testing.T) {
+	db := s.NewInMemory()
 	userRepo := NewSQLiteUserRepo(db)
 	groupRepo := grpr.NewSQLiteGroupRepo(db)
-	groupRepo.Create(group)
-	user := u.NewUser(userId)
-	userRepo.Create(user)
-	userRepo.AssignToGroup(user.Id, group.Name)
-	userRepo.AssignToGroup(user.Id, group.Name)
-	r, _ := userRepo.Find(user.Id)
-	assert.Equal(t, 1, len(r.Groups))
-}
 
-func TestUnAssignGroup(t *testing.T) {
 	group := g.NewGroup(g.NewGroupId(), "a-group")
-	db := s.NewSQLiteDB(":memory:")
-	userRepo := NewSQLiteUserRepo(db)
-	groupRepo := grpr.NewSQLiteGroupRepo(db)
 	groupRepo.Create(group)
 	user := u.NewUser(userId, u.WithGroups([]string{group.Name}))
 	userRepo.Create(user)
-	userRepo.UnAssignFromGroup(user.Id, group.Name)
+
+	newGroup := g.NewGroup(g.NewGroupId(), "a-new-group")
+	groupRepo.Create(newGroup)
+
+	err := userRepo.SetGroups(user.Id, []string{newGroup.Name})
+	assert.NoError(t, err)
 	r, _ := userRepo.Find(user.Id)
-	assert.Equal(t, 0, len(r.Groups))
+	assert.Equal(t, 1, len(r.Groups))
+	assert.Equal(t, newGroup.Name, r.Groups[0])
 }

@@ -1,4 +1,4 @@
-package assign_group
+package update_group
 
 type Response struct {
 	Id     string
@@ -6,6 +6,6 @@ type Response struct {
 }
 
 type Request struct {
-	Id    string
-	Group string
+	Id     string
+	Groups []string
 }

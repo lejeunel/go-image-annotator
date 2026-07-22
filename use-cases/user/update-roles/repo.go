@@ -1,12 +1,12 @@
-package assign_group
+package update_role
 
 import usr "github.com/lejeunel/go-image-annotator/entities/user"
 
 type UserRepo interface {
 	Find(string) (*usr.User, error)
-	AssignToGroup(string, string) error
+	SetRoles(usr.UserId, []string) error
 }
 
-type GroupRepo interface {
+type RoleRepo interface {
 	Exists(string) (*bool, error)
 }

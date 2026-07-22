@@ -9,7 +9,6 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
@@ -38,39 +37,37 @@ func (r SQLiteUserRepo) Create(usr u.User) error {
 	if err != nil {
 		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
 	}
-
-	for _, g := range usr.Groups {
-		if err := r.AssignToGroup(usr.Id, g); err != nil {
-			return err
-		}
+	if err := r.SetGroups(usr.Id, usr.Groups); err != nil {
+		return err
 	}
-	for _, role := range usr.Roles {
-		if err := r.AssignRole(usr.Id, role); err != nil {
-			return err
-		}
+	if err := r.SetRoles(usr.Id, usr.Roles); err != nil {
+		return err
 	}
 
 	return nil
 }
-func (r SQLiteUserRepo) AssignToGroup(user string, group string) error {
-	query := "INSERT INTO users_groups (user_id,group_id) VALUES ($1,(SELECT id FROM groups WHERE name=$2))"
-	_, err := r.Db.Exec(query, user, group)
+func (r SQLiteUserRepo) SetGroups(user u.UserId, groups []string) error {
+	_, err := r.Db.Exec(
+		"DELETE FROM users_groups WHERE user_id=$1;",
+		user,
+	)
 	if err != nil {
-		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf("deleting user groups: %v: %w", err, e.ErrInternal)
 	}
-	return nil
-}
-func (r SQLiteUserRepo) UnAssignFromGroup(user string, group string) error {
-	query := "DELETE FROM users_groups WHERE user_id=$1 AND group_id=(SELECT id FROM groups WHERE name=$2)"
-	_, err := r.Db.Exec(query, user, group)
-	if err != nil {
-		return fmt.Errorf("unassigning user from group: %v: %w", err, e.ErrInternal)
+
+	for _, group := range groups {
+		_, err = r.Db.Exec(
+			"INSERT INTO users_groups (user_id, group_id) SELECT $1, id FROM groups WHERE name=$2",
+			user, group)
+		if err != nil {
+			return fmt.Errorf("inserting group %q: %v: %w", group, err, e.ErrInternal)
+		}
 	}
 	return nil
 }
 func (r SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 	var groups []string
-	query := "SELECT name FROM groups WHERE id=(SELECT id FROM users_groups WHERE user_id=$1)"
+	query := "SELECT name FROM groups WHERE id=(SELECT group_id FROM users_groups WHERE user_id=$1)"
 	err := r.Db.Select(&groups, query, userId)
 	if err != nil {
 		return nil, fmt.Errorf("fetching groups: %v: %w", err, e.ErrInternal)
@@ -185,19 +182,22 @@ func (r SQLiteUserRepo) List(m pag.PaginationParams) ([]u.User, error) {
 
 	return users, nil
 }
-func (r SQLiteUserRepo) AssignRole(userId string, role string) error {
-	query := "INSERT INTO users_roles (user_id,role_id) VALUES ($1,(SELECT id FROM roles WHERE name=$2))"
-	_, err := r.Db.Exec(query, userId, role)
+func (r SQLiteUserRepo) SetRoles(userId string, roles []string) error {
+	_, err := r.Db.Exec(
+		"DELETE FROM users_roles WHERE user_id=$1;",
+		userId,
+	)
 	if err != nil {
-		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf("deleting user groups: %v: %w", err, e.ErrInternal)
 	}
-	return nil
-}
-func (r SQLiteUserRepo) UnAssignRole(userId string, role string) error {
-	query := "DELETE FROM users_roles WHERE user_id=$1 AND role_id=(SELECT id FROM roles WHERE name=$2)"
-	_, err := r.Db.Exec(query, userId, role)
-	if err != nil {
-		return fmt.Errorf("unassigning user role: %v: %w", err, e.ErrInternal)
+
+	for _, role := range roles {
+		_, err = r.Db.Exec(
+			"INSERT INTO users_roles (user_id, role_id) SELECT $1, id FROM roles WHERE name=$2",
+			userId, role)
+		if err != nil {
+			return fmt.Errorf("inserting role %q: %v: %w", role, err, e.ErrInternal)
+		}
 	}
 	return nil
 }
@@ -263,8 +263,4 @@ func (r SQLiteUserRepo) DeleteForgottenPasswordTokens(id u.UserId) error {
 }
 func NewSQLiteUserRepo(db *sqlx.DB) SQLiteUserRepo {
 	return SQLiteUserRepo{Db: db}
-}
-
-func NewTestSQLiteUserRepo() SQLiteUserRepo {
-	return NewSQLiteUserRepo(s.NewSQLiteDB(":memory:"))
 }

@@ -10,8 +10,6 @@ import (
 
 type UserRepo struct {
 	ErrOnFind                      error
-	ErrOnAssignToGroup             error
-	ErrOnAssignRole                error
 	ErrOnCreate                    error
 	ErrOnUpdatePassword            error
 	ErrOnDelete                    error
@@ -20,8 +18,8 @@ type UserRepo struct {
 	ErrOnList                      error
 	ErrOnSetAccessTokenHash        error
 	ErrOnSetAdmin                  error
-	ErrOnUnassignFromGroup         error
-	ErrOnUnAssignRole              error
+	ErrOnSetGroups                 error
+	ErrOnSetRoles                  error
 	Missing                        bool
 	Return                         *usr.User
 	GotNewGroup                    *string
@@ -35,8 +33,11 @@ type UserRepo struct {
 	GotExpiresAt                   time.Time
 	Count_                         int64
 	GotSetAdmin                    bool
-	GotUnassignedGroup             string
 	GotUnassignedRole              string
+	SetGroups_                     []string
+	SetRoles_                      []string
+	SetGroupsToUser                usr.UserId
+	SetRolesToUser                 usr.UserId
 }
 
 func (r *UserRepo) Find(id string) (*usr.User, error) {
@@ -47,20 +48,6 @@ func (r *UserRepo) Find(id string) (*usr.User, error) {
 		return nil, r.ErrOnFind
 	}
 	return r.Return, nil
-}
-func (r *UserRepo) AssignToGroup(id string, group string) error {
-	if r.ErrOnAssignToGroup != nil {
-		return r.ErrOnAssignToGroup
-	}
-	r.GotNewGroup = &group
-	return nil
-}
-func (r *UserRepo) AssignRole(id string, role string) error {
-	if r.ErrOnAssignRole != nil {
-		return r.ErrOnAssignRole
-	}
-	r.GotNewRole = &role
-	return nil
 }
 func (r *UserRepo) FindResetPasswordState(hash []byte) (*usr.ForgotPasswordState, error) {
 	if r.Missing {
@@ -148,18 +135,22 @@ func (r *UserRepo) SetAdmin(id usr.UserId, value bool) error {
 	return nil
 }
 
-func (r *UserRepo) UnAssignFromGroup(id string, group string) error {
-	if r.ErrOnUnassignFromGroup != nil {
-		return r.ErrOnUnassignFromGroup
+func (r *UserRepo) SetGroups(id usr.UserId, groups []string) error {
+	if r.ErrOnSetGroups != nil {
+		return r.ErrOnSetGroups
 	}
-	r.GotUnassignedGroup = group
+	r.SetGroups_ = groups
+	r.SetGroupsToUser = id
 	return nil
+
 }
 
-func (r *UserRepo) UnAssignRole(id string, role string) error {
-	if r.ErrOnUnAssignRole != nil {
-		return r.ErrOnUnAssignRole
+func (r *UserRepo) SetRoles(id usr.UserId, roles []string) error {
+	if r.ErrOnSetRoles != nil {
+		return r.ErrOnSetRoles
 	}
-	r.GotUnassignedRole = role
+	r.SetRoles_ = roles
+	r.SetRolesToUser = id
 	return nil
+
 }

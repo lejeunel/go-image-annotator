@@ -189,3 +189,11 @@ func (a Authorizer) ChangePassword(ctx context.Context, id u.UserId) error {
 func (a Authorizer) CloneCollection(ctx context.Context, group string) error {
 	return a.check(ctx, "CloneCollection", "")
 }
+
+func (a Authorizer) UpdateGroups(ctx context.Context) error {
+	return a.check(ctx, "UpdateGroups", "")
+}
+
+func (a Authorizer) UpdateRoles(ctx context.Context) error {
+	return a.check(ctx, "UpdateRoles", "")
+}

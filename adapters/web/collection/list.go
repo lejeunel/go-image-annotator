@@ -44,7 +44,7 @@ func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 		row := MakeListCollectionRow(c)
 		p.AddRow(row)
 	}
-	p.AddCreationButton("Create new collection", rt.CreateCollectionForm, createCollectionTargetDiv)
+	p.AddCreationButton("Create", rt.CreateCollectionForm, createCollectionTargetDiv)
 	p.AddMarkdownPreamble(preamble)
 	p.Build().Render(p.Writer)
 }

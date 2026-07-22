@@ -1,4 +1,4 @@
-package assign_group
+package update_group
 
 import (
 	"testing"
@@ -23,7 +23,7 @@ func TestMissingUserShouldFail(t *testing.T) {
 	itr := New(&fk.UserRepo{Missing: true},
 		&fk.GroupRepo{ExistingNames: []string{"my-group"}})
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user@example.com", Group: "my-group"}, p)
+	itr.Execute(t.Context(), Request{Id: "user@example.com", Groups: []string{"my-group"}}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -31,7 +31,7 @@ func TestMissingUserShouldFail(t *testing.T) {
 func TestMissingGroupShouldFail(t *testing.T) {
 	itr := New(&fk.UserRepo{}, &fk.GroupRepo{})
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user@example.com", Group: "my-group"}, p)
+	itr.Execute(t.Context(), Request{Id: "user@example.com", Groups: []string{"my-group"}}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -39,7 +39,7 @@ func TestMissingGroupShouldFail(t *testing.T) {
 func TestHandleErrorOnFindUser(t *testing.T) {
 	itr := New(&fk.UserRepo{ErrOnFind: e.ErrInternal}, &fk.GroupRepo{ExistingNames: []string{"my-group"}})
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Group: "my-group"}, p)
+	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -51,22 +51,21 @@ func TestAssignUserWhoIsAlreadyAssignedHasNoEffect(t *testing.T) {
 	repo := &fk.UserRepo{Return: &user}
 	itr := New(repo, &fk.GroupRepo{ExistingNames: []string{"a-group"}})
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: user.Id, Group: "a-group"}, p)
+	itr.Execute(t.Context(), Request{Id: user.Id, Groups: []string{"a-group"}}, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, groups, p.Got.Groups)
 	assert.Nil(t, repo.GotNewGroup)
 }
 
-func TestAssignUser(t *testing.T) {
+func TestUpdateGroups(t *testing.T) {
 	user := usr.NewUser("user@example.com",
 		usr.WithGroups([]string{"a-group"}))
-	newGroup := "new-group"
-	updatedGroups := []string{"a-group", newGroup}
 	repo := &fk.UserRepo{Return: &user}
-	itr := New(repo, &fk.GroupRepo{ExistingNames: []string{"a-group", "new-group"}})
+	itr := New(repo, &fk.GroupRepo{ExistingNames: []string{"a-group", "new-group", "another-new-group"}})
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: user.Id, Group: newGroup}, p)
+	newGroups := []string{"new-group", "another-new-group"}
+	itr.Execute(t.Context(), Request{Id: user.Id, Groups: newGroups}, p)
 	assert.True(t, p.GotSuccess)
-	assert.Equal(t, updatedGroups, p.Got.Groups)
-	assert.Equal(t, newGroup, *repo.GotNewGroup)
+	assert.Equal(t, newGroups, repo.SetGroups_)
+	assert.Equal(t, user.Id, repo.SetGroupsToUser)
 }

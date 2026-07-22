@@ -1,4 +1,4 @@
-package assign_role
+package update_role
 
 import (
 	"testing"
@@ -21,7 +21,7 @@ func TestHandleAuthError(t *testing.T) {
 func TestMissingUserShouldFail(t *testing.T) {
 	itr := New(&fk.UserRepo{Missing: true})
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user@example.com", Role: "a-role"}, p)
+	itr.Execute(t.Context(), Request{Id: "user@example.com", Roles: []string{"a-role"}}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -41,7 +41,7 @@ func TestAssignUserRoleAlreadyAssignedDoesNothing(t *testing.T) {
 	repo := &fk.UserRepo{Return: &user}
 	itr := New(repo)
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: user.Id, Role: "a-role"}, p)
+	itr.Execute(t.Context(), Request{Id: user.Id, Roles: []string{"a-role"}}, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, roles, p.Got.Roles)
 	assert.Nil(t, repo.GotNewRole)
@@ -55,7 +55,7 @@ func TestAssignUser(t *testing.T) {
 	repo := &fk.UserRepo{Return: &user}
 	itr := New(repo)
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: user.Id, Role: newGroup}, p)
+	itr.Execute(t.Context(), Request{Id: user.Id, Roles: []string{newGroup}}, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, updatedRoles, p.Got.Roles)
 	assert.Equal(t, newGroup, *repo.GotNewRole)

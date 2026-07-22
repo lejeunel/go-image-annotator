@@ -1,9 +1,8 @@
-package assign_group
+package update_group
 
 import (
 	"context"
 	"fmt"
-	"slices"
 
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 )
@@ -16,33 +15,34 @@ type Interactor struct {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "assigning group to user"
-	if err := i.auth.AssignUserToGroup(ctx); err != nil {
+	if err := i.auth.UpdateGroups(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	exists, err := i.groupRepo.Exists(r.Group)
+	_, err := i.userRepo.Find(r.Id)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	if !*exists {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+
+	for _, g := range r.Groups {
+		exists, err := i.groupRepo.Exists(g)
+		if err != nil {
+			out.Error(fmt.Errorf("%v: checking whether group %v exists: %w", errCtx, g, err))
+			return
+		}
+		if !*exists {
+			out.Error(fmt.Errorf("%v: checking whether group %v exists: %w", errCtx, g, err))
+			return
+		}
+	}
+
+	if err := i.userRepo.SetGroups(r.Id, r.Groups); err != nil {
+		out.Error(fmt.Errorf("%v: applying groups %v: %w", errCtx, r.Groups, err))
 		return
 	}
-	user, err := i.userRepo.Find(r.Id)
-	if err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-	if slices.Contains(user.Groups, r.Group) {
-		out.Success(Response{Id: r.Id, Groups: user.Groups})
-		return
-	}
-	if err := i.userRepo.AssignToGroup(r.Id, r.Group); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-	out.Success(Response{Id: r.Id, Groups: append(user.Groups, r.Group)})
+
+	out.SuccessUpdateGroups(Response{Id: r.Id, Groups: r.Groups})
 }
 
 type Option func(*Interactor)

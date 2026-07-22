@@ -119,3 +119,11 @@ func (f Auth) UnAssignUserFromGroup(ctx context.Context) error {
 func (f Auth) UnAssignRoleFromUser(ctx context.Context) error {
 	return f.Err
 }
+
+func (f Auth) UpdateGroups(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) UpdateRoles(ctx context.Context) error {
+	return f.Err
+}

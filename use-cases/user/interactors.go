@@ -2,8 +2,6 @@ package user
 
 import (
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	agr "github.com/lejeunel/go-image-annotator/use-cases/user/assign-group"
-	aro "github.com/lejeunel/go-image-annotator/use-cases/user/assign-role"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/find"
@@ -12,8 +10,8 @@ import (
 	rat "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 	rfpw "github.com/lejeunel/go-image-annotator/use-cases/user/reset-forgotten-password"
 	adm "github.com/lejeunel/go-image-annotator/use-cases/user/set-admin"
-	ugr "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-group"
-	uro "github.com/lejeunel/go-image-annotator/use-cases/user/unassign-role"
+	ugr "github.com/lejeunel/go-image-annotator/use-cases/user/update-groups"
+	uro "github.com/lejeunel/go-image-annotator/use-cases/user/update-roles"
 )
 
 type Interactors struct {
@@ -22,10 +20,8 @@ type Interactors struct {
 	Delete                   delete.Interactor
 	List                     list.Interactor
 	RenewToken               rat.Interactor
-	AssignRole               aro.Interactor
-	UnAssignRole             uro.Interactor
-	AssignGroup              agr.Interactor
-	UnAssignGroup            ugr.Interactor
+	UpdateGroup              ugr.Interactor
+	UpdateRole               uro.Interactor
 	SetAdmin                 adm.Interactor
 	RequestForgottenPassword fp.Interactor
 	ResetForgottenPassword   rfpw.Interactor

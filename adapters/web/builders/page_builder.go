@@ -61,7 +61,6 @@ func (b *PageBuilder) ActivateSidebarEntry(name string) *PageBuilder {
 	b.SidebarEntries[name] = m
 	return b
 }
-
 func (b *PageBuilder) AddSidebarEntry(name, icon, url string, isActive bool) *PageBuilder {
 	b.SidebarEntries = maps.Clone(b.SidebarEntries)
 	b.SidebarEntries[name] = cmp.SidebarEntry{Label: name, Icon: icon, Url: url, IsActive: isActive}

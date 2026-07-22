@@ -5,19 +5,20 @@ import (
 	"testing"
 	"time"
 
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestInternalErrOnSetTokenShouldFail(t *testing.T) {
-	repo := NewTestSQLiteUserRepo()
+	repo := NewSQLiteUserRepo(s.NewInMemory())
 	repo.Db.Close()
 	err := repo.SetAccessTokenHash(userId, []byte(""))
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestSetAPIAccessTokenHash(t *testing.T) {
-	repo := NewTestSQLiteUserRepo()
+	repo := NewSQLiteUserRepo(s.NewInMemory())
 	CreateUser(repo, userId)
 	hash := []byte("hello")
 	err := repo.SetAccessTokenHash(userId, hash)
@@ -27,7 +28,7 @@ func TestSetAPIAccessTokenHash(t *testing.T) {
 }
 
 func TestSetForgottenPasswordTokenHash(t *testing.T) {
-	repo := NewTestSQLiteUserRepo()
+	repo := NewSQLiteUserRepo(s.NewInMemory())
 	CreateUser(repo, userId)
 	hash := []byte("hello")
 	expiresAt := time.Now()
@@ -40,7 +41,7 @@ func TestSetForgottenPasswordTokenHash(t *testing.T) {
 }
 
 func TestDeleteForgottenPasswordTokens(t *testing.T) {
-	repo := NewTestSQLiteUserRepo()
+	repo := NewSQLiteUserRepo(s.NewInMemory())
 	CreateUser(repo, userId)
 	hash := []byte("hello")
 	expiresAt := time.Now()

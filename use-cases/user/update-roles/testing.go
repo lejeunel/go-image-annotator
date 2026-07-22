@@ -1,4 +1,4 @@
-package unassign_group
+package update_role
 
 import (
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
@@ -10,7 +10,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(r Response) {
+func (p *FakePresenter) SuccessUpdateRoles(r Response) {
 	p.GotSuccess = true
 	p.Got = r
 }

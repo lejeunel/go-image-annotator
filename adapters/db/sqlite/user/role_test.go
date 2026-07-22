@@ -13,14 +13,14 @@ import (
 var userId = "user@example.com"
 
 func TestRetrieveUserWithNoRole(t *testing.T) {
-	repo := NewTestSQLiteUserRepo()
+	repo := NewSQLiteUserRepo(s.NewInMemory())
 	CreateUser(repo, userId)
 	r, _ := repo.Find(userId)
 	assert.Equal(t, 0, len(r.Roles))
 }
 
 func TestCreateUserWithOneRole(t *testing.T) {
-	db := s.NewSQLiteDB(":memory:")
+	db := s.NewInMemory()
 	repo := NewSQLiteUserRepo(db)
 	roleRepo := roleRepo.NewSQLiteRoleRepo(db)
 	user := u.NewUser(userId, u.WithRoles([]string{"a-role"}))
@@ -31,39 +31,27 @@ func TestCreateUserWithOneRole(t *testing.T) {
 }
 
 func TestAssignRoleToExistingUser(t *testing.T) {
-	db := s.NewSQLiteDB(":memory:")
+	db := s.NewInMemory()
 	repo := NewSQLiteUserRepo(db)
 	roleRepo := roleRepo.NewSQLiteRoleRepo(db)
 	CreateUser(repo, userId)
 	roleRepo.Create(r.NewRole(r.NewRoleId(), "a-role"))
-	err := repo.AssignRole(userId, "a-role")
+	err := repo.SetRoles(userId, []string{"a-role"})
 	assert.NoError(t, err)
 	r, err := repo.Find(userId)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(r.Roles))
 }
 
-func TestAssignSameRoleTwice(t *testing.T) {
-	db := s.NewSQLiteDB(":memory:")
+func TestAssignNewRoles(t *testing.T) {
+	db := s.NewInMemory()
 	repo := NewSQLiteUserRepo(db)
 	CreateUser(repo, userId)
 	roleRepo := roleRepo.NewSQLiteRoleRepo(db)
 	roleRepo.Create(r.NewRole(r.NewRoleId(), "a-role"))
-	err := repo.AssignRole(userId, "a-role")
-	err = repo.AssignRole(userId, "a-role")
+	roleRepo.Create(r.NewRole(r.NewRoleId(), "another-role"))
+	err := repo.SetRoles(userId, []string{"a-role", "another-role"})
 	r, err := repo.Find(userId)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(r.Roles))
-}
-
-func TestUnAssignRole(t *testing.T) {
-	db := s.NewSQLiteDB(":memory:")
-	repo := NewSQLiteUserRepo(db)
-	CreateUser(repo, userId)
-	roleRepo := roleRepo.NewSQLiteRoleRepo(db)
-	roleRepo.Create(r.NewRole(r.NewRoleId(), "a-role"))
-	repo.AssignRole(userId, "a-role")
-	repo.UnAssignRole(userId, "a-role")
-	r, _ := repo.Find(userId)
-	assert.Equal(t, 0, len(r.Roles))
+	assert.Equal(t, 2, len(r.Roles))
 }

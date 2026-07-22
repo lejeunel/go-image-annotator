@@ -1,10 +1,10 @@
-package unassign_group
+package update_group
 
 import usr "github.com/lejeunel/go-image-annotator/entities/user"
 
 type UserRepo interface {
-	Find(string) (*usr.User, error)
-	UnAssignFromGroup(string, string) error
+	Find(usr.UserId) (*usr.User, error)
+	SetGroups(usr.UserId, []string) error
 }
 
 type GroupRepo interface {
