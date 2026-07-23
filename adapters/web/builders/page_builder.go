@@ -98,6 +98,7 @@ func (b *PageBuilder) Render(w io.Writer) {
 		header = Div(header, Div(Class("font-bold text-2xl"), Text(b.Title)))
 	}
 	if b.preamble != "" {
+		fmt.Println("got preamble!")
 		header = Div(header, Article(Class("prose dark:prose-invert max-w-none"), Raw(b.preamble)))
 	}
 
@@ -113,18 +114,17 @@ func (b *PageBuilder) Render(w io.Writer) {
 			Nav(Attr("x-cloak"),
 				Class(`fixed left-0 top-14 z-20 flex h-svh w-60 shrink-0 flex-col border-r border-outline bg-surface-alt p-4 transition-transform duration-300
                       dark:border-outline-dark dark:bg-surface-dark-alt`), Raw(bufSidebar.String())),
-			Div(Class("ml-60"), b.content),
+			Div(Class("ml-60 px-4 py-18"), header, b.content),
 		)
+	} else {
+		b.content = Div(Class("grow w-full px-4 py-18"), header, b.content)
 	}
 
 	b.BasePageBuilder.SetFrameContent(
 		Group(
 			[]Node{
 				cmp.MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, *b.User, rt.UserDashboard),
-				Div(Class("grow w-full px-1 px-4 py-18"),
-					header,
-					b.content,
-				),
+				b.content,
 				cmp.MakeFooter(b.Version),
 			},
 		))
