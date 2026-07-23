@@ -51,6 +51,15 @@
 	  });
 	</script>
     <script>
+	  document.addEventListener('htmx-notify-and-redirect', (evt) => {
+		  Alpine.store('notifications').variant = evt.detail.variant;
+		  Alpine.store('notifications').title = evt.detail.title;
+		  Alpine.store('notifications').message = evt.detail.message;
+          // console.log(evt.detail.redirect);
+          window.location = evt.detail.redirect;
+	  });
+	</script>
+    <script>
 	  document.addEventListener('htmx-notify', (evt) => {
 		  notify(evt.detail.variant, evt.detail.title, evt.detail.message);
 	  });

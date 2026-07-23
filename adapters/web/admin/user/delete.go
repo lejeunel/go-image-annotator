@@ -24,9 +24,7 @@ func NewDeleteUserPresenter(w http.ResponseWriter) DeleteUserPresenter {
 }
 
 func (p DeleteUserPresenter) SuccessDeleteUser(id u.UserId) {
-	payload, _ := htmx.NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(id))
-	p.writer.Header().Set("HX-Trigger", string(payload))
-	p.writer.WriteHeader(http.StatusOK)
+	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(id))
 }
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	s.Users.Delete.Execute(r.Context(),

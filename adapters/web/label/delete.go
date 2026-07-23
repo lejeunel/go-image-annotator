@@ -22,9 +22,7 @@ func NewDeleteLabelPresenter(w http.ResponseWriter) DeleteLabelPresenter {
 }
 
 func (p DeleteLabelPresenter) SuccessDeleteLabel(name string) {
-	payload, _ := htmx.NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(name))
-	p.writer.Header().Set("HX-Trigger", string(payload))
-	p.writer.WriteHeader(http.StatusOK)
+	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(name))
 }
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	s.DeleteItr.Execute(r.Context(),

@@ -22,6 +22,10 @@ type LoginPageBuilder struct {
 	OAuthProviders []OAuthProvider
 }
 
+func NewLoginPageBuilder(base BasePageBuilder) LoginPageBuilder {
+	return LoginPageBuilder{BasePageBuilder: *base.SetHTMLTitle("Login")}
+}
+
 func (b *LoginPageBuilder) AddOAuthProvider(provider, url string) *LoginPageBuilder {
 	b.OAuthProviders = append(b.OAuthProviders, OAuthProvider{Name: provider, URL: url})
 	return b
@@ -65,8 +69,4 @@ func (b *LoginPageBuilder) makeContent() Node {
 }
 func (b *LoginPageBuilder) Render(w io.Writer) {
 	b.BasePageBuilder.SetFrameContent(b.makeContent()).Render(w)
-}
-
-func NewLoginPageBuilder(base BasePageBuilder) LoginPageBuilder {
-	return LoginPageBuilder{BasePageBuilder: base}
 }

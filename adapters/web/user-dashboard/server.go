@@ -74,7 +74,5 @@ func NewChangePasswordPresenter(w http.ResponseWriter) ChangePasswordPresenter {
 	return ChangePasswordPresenter{w, task, htmx.NewErrorPresenter(task, w)}
 }
 func (p ChangePasswordPresenter) Success() {
-	payload, _ := htmx.NotifySuccessPayloadAndReload(p.task, "Successfully changed password")
-	p.writer.Header().Set("HX-Trigger", string(payload))
-	p.writer.WriteHeader(http.StatusOK)
+	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, "Successfully changed password")
 }

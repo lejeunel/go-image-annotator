@@ -24,9 +24,7 @@ func NewCreateUserPresenter(w http.ResponseWriter) CreateUserPresenter {
 	return CreateUserPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 func (p CreateUserPresenter) Success(r create.Response) {
-	payload, _ := htmx.NotifySuccessPayloadAndReload(p.task, p.okMessageFunc(r))
-	p.writer.Header().Set("HX-Trigger", string(payload))
-	p.writer.WriteHeader(http.StatusOK)
+	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
