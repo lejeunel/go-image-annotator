@@ -49,6 +49,10 @@ func TestCreateAdmin(t *testing.T) {
 	r, err := repo.Find("admin")
 	assert.NoError(t, err)
 	assert.Equal(t, true, r.IsAdmin)
+
+	numAdmin, err := repo.CountAdmins()
+	assert.NoError(t, err)
+	assert.Equal(t, int64(1), numAdmin)
 }
 
 func TestSetAdmin(t *testing.T) {

@@ -32,6 +32,7 @@ type UserRepo struct {
 	DeletedPreviousTokens          bool
 	GotExpiresAt                   time.Time
 	Count_                         int64
+	CountAdmins_                   int64
 	GotSetAdmin                    bool
 	GotUnassignedRole              string
 	SetGroups_                     []string
@@ -152,5 +153,10 @@ func (r *UserRepo) SetRoles(id usr.UserId, roles []string) error {
 	r.SetRoles_ = roles
 	r.SetRolesToUser = id
 	return nil
+
+}
+
+func (r *UserRepo) CountAdmins() (int64, error) {
+	return r.CountAdmins_, nil
 
 }

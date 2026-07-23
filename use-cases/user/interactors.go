@@ -10,9 +10,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/user/list"
 	rat "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 	rfpw "github.com/lejeunel/go-image-annotator/use-cases/user/reset-forgotten-password"
-	adm "github.com/lejeunel/go-image-annotator/use-cases/user/set-admin"
-	ugr "github.com/lejeunel/go-image-annotator/use-cases/user/update-groups"
-	uro "github.com/lejeunel/go-image-annotator/use-cases/user/update-roles"
+	upr "github.com/lejeunel/go-image-annotator/use-cases/user/update-privileges"
 )
 
 type Interactors struct {
@@ -21,9 +19,7 @@ type Interactors struct {
 	Delete                   delete.Interactor
 	List                     list.Interactor
 	RenewToken               rat.Interactor
-	UpdateGroup              ugr.Interactor
-	UpdateRole               uro.Interactor
-	SetAdmin                 adm.Interactor
+	UpdatePrivileges         upr.Interactor
 	RequestForgottenPassword fp.Interactor
 	ResetForgottenPassword   rfpw.Interactor
 	ChangePassword           cpw.Interactor

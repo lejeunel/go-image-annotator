@@ -14,7 +14,7 @@ func TestInternalErrOnDeleteShouldFail(t *testing.T) {
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
-func TestDeleteLabel(t *testing.T) {
+func TestDeleteUser(t *testing.T) {
 	repo := NewSQLiteUserRepo(s.NewInMemory())
 	user, _ := CreateUser(repo, "user@example.com")
 	err := repo.Delete(user.Id)

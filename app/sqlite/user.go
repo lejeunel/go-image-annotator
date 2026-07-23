@@ -13,9 +13,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/user/list"
 	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 	rfpw "github.com/lejeunel/go-image-annotator/use-cases/user/reset-forgotten-password"
-	adm "github.com/lejeunel/go-image-annotator/use-cases/user/set-admin"
-	ugr "github.com/lejeunel/go-image-annotator/use-cases/user/update-groups"
-	uro "github.com/lejeunel/go-image-annotator/use-cases/user/update-roles"
+	upr "github.com/lejeunel/go-image-annotator/use-cases/user/update-privileges"
 )
 
 func NewSQLiteUserInteractors(
@@ -34,9 +32,7 @@ func NewSQLiteUserInteractors(
 		Delete:                   delete.New(repos.User, delete.WithAuth(auth)),
 		List:                     list.New(repos.User, list.WithAuth(auth)),
 		RenewToken:               rt.New(repos.User, ApitokenGen, rt.WithAuth(auth)),
-		UpdateRole:               uro.New(repos.User, repos.Role, uro.WithAuth(auth)),
-		UpdateGroup:              ugr.New(repos.User, repos.Group, ugr.WithAuth(auth)),
-		SetAdmin:                 adm.New(repos.User, adm.WithAuth(auth)),
+		UpdatePrivileges:         upr.New(repos.User, repos.Group, repos.Role, upr.WithAuth(auth)),
 		RequestForgottenPassword: fp.New(repos.User, forgotPassworkTokenExpirationMinutes, forgotPasswordTokenGen, fp.WithAuth(auth)),
 		ResetForgottenPassword:   rfpw.New(repos.User, passwordHasher, passwordValidator),
 		ChangePassword:           cpw.New(repos.User, passwordVerifier, passwordValidator, cpw.WithAuth(auth)),

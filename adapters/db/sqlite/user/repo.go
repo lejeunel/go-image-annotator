@@ -259,6 +259,16 @@ func (r SQLiteUserRepo) DeleteForgottenPasswordTokens(id u.UserId) error {
 		return fmt.Errorf("deleting forgotten password: %v: %w", err, e.ErrInternal)
 	}
 	return nil
+}
+func (r SQLiteUserRepo) CountAdmins() (int64, error) {
+	var count int64
+	query := "SELECT COUNT(*) FROM users WHERE is_admin=true;"
+	err := r.Db.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("counting admins: %v: %w", err, e.ErrInternal)
+	}
+
+	return count, nil
 
 }
 func NewSQLiteUserRepo(db *sqlx.DB) SQLiteUserRepo {

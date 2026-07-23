@@ -72,14 +72,6 @@ func (f Auth) UpdateRole(ctx context.Context) error {
 	return f.Err
 }
 
-func (f Auth) AssignUserToGroup(ctx context.Context) error {
-	return f.Err
-}
-
-func (f Auth) AssignRoleToUser(ctx context.Context) error {
-	return f.Err
-}
-
 func (f Auth) ChangePassword(ctx context.Context, id u.UserId) error {
 	return f.Err
 }
@@ -108,22 +100,6 @@ func (f Auth) RenewToken(ctx context.Context) error {
 	return f.Err
 }
 
-func (f Auth) SetAdminRights(ctx context.Context) error {
-	return f.Err
-}
-
-func (f Auth) UnAssignUserFromGroup(ctx context.Context) error {
-	return f.Err
-}
-
-func (f Auth) UnAssignRoleFromUser(ctx context.Context) error {
-	return f.Err
-}
-
-func (f Auth) UpdateGroups(ctx context.Context) error {
-	return f.Err
-}
-
-func (f Auth) UpdateRoles(ctx context.Context) error {
+func (f Auth) UpdateUserPrivileges(ctx context.Context) error {
 	return f.Err
 }

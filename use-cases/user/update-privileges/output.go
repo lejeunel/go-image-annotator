@@ -1,6 +1,6 @@
-package set_admin
+package update
 
 type OutputPort interface {
-	Success(Response)
+	SuccessUpdate(Response)
 	Error(error)
 }

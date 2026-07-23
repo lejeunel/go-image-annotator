@@ -177,9 +177,6 @@ func (a Authorizer) DeleteRole(ctx context.Context) error {
 func (a Authorizer) UpdateRole(ctx context.Context) error {
 	return a.check(ctx, "UpdateRole", "")
 }
-func (a Authorizer) SetAdminRights(ctx context.Context) error {
-	return a.check(ctx, "SetAdminRights", "")
-}
 func (a Authorizer) RequestForgottenPasswordToken(ctx context.Context) error {
 	return a.check(ctx, "RequestForgottenPasswordToken", "")
 }
@@ -190,10 +187,6 @@ func (a Authorizer) CloneCollection(ctx context.Context, group string) error {
 	return a.check(ctx, "CloneCollection", "")
 }
 
-func (a Authorizer) UpdateGroups(ctx context.Context) error {
-	return a.check(ctx, "UpdateGroups", "")
-}
-
-func (a Authorizer) UpdateRoles(ctx context.Context) error {
-	return a.check(ctx, "UpdateRoles", "")
+func (a Authorizer) UpdateUserPrivileges(ctx context.Context) error {
+	return a.check(ctx, "UpdateUserPrivileges", "")
 }

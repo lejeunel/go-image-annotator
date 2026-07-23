@@ -35,9 +35,6 @@ var AdminGroups = "/admin/groups"
 var AdminRoles = "/admin/roles"
 var AdminPolicies = "/admin/policies"
 
-var User = "/ui/user"
-var CreateUserForm = "/ui/user/new"
-
 func MakeOAuthCallbackURL(baseURL string, provider string) string {
 	return baseURL + strings.ReplaceAll(CallbackOAuth, "{provider}", provider)
 }

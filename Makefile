@@ -16,7 +16,7 @@ CSS_OUT := $(STATIC_DIR)/styles.css
 
 .PHONY: all api-code clean build node-deps build-ci
 
-all: api-code auth-valid-methods htmx alpine alpine-persist alpine-focus annotorious stoplight css build
+all: api-code auth-valid-methods htmx alpine alpine-persist alpine-anchor alpine-focus annotorious stoplight css build
 
 node-deps:
 	npm ci
@@ -75,6 +75,9 @@ alpine-focus:
 
 alpine-persist:
 	wget https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js -O $(STATIC_DIR)/alpine-persist.js
+
+alpine-anchor:
+	wget https://cdn.jsdelivr.net/npm/@alpinejs/anchor@3.x.x/dist/cdn.min.js -O $(STATIC_DIR)/alpine-anchor.js
 
 annotorious:
 	wget https://cdn.jsdelivr.net/npm/@annotorious/annotorious@3.8.0/dist/annotorious.js -O $(STATIC_DIR)/annotorious.js

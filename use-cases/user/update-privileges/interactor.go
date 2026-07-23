@@ -1,4 +1,4 @@
-package update_role
+package update
 
 import (
 	"context"
@@ -9,23 +9,54 @@ import (
 )
 
 type Interactor struct {
-	userRepo UserRepo
-	roleRepo RoleRepo
-	auth     Auth
+	userRepo  UserRepo
+	groupRepo GroupRepo
+	roleRepo  RoleRepo
+	auth      Auth
+}
+
+func New(ur UserRepo, gr GroupRepo, rr RoleRepo, opts ...Option) Interactor {
+	i := &Interactor{userRepo: ur,
+		groupRepo: gr,
+		roleRepo:  rr,
+		auth:      auth.NewVoidAuth(),
+	}
+
+	for _, opt := range opts {
+		opt(i)
+	}
+	return *i
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	errCtx := "creating user"
-	if err := i.auth.UpdateRoles(ctx); err != nil {
+	errCtx := "assigning group to user"
+	if err := i.auth.UpdateUserPrivileges(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
-
 	}
 	_, err := i.userRepo.Find(r.Id)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
+
+	for _, g := range r.Groups {
+		exists, err := i.groupRepo.Exists(g)
+		if err != nil {
+			out.Error(fmt.Errorf("%v: checking whether group %v exists: %w", errCtx, g, err))
+			return
+		}
+		if !*exists {
+			out.Error(fmt.Errorf("%v: checking whether group %v exists: %w", errCtx, g, err))
+			return
+		}
+	}
+
+	if err := i.userRepo.SetGroups(r.Id, r.Groups); err != nil {
+		out.Error(fmt.Errorf("%v: applying groups %v: %w", errCtx, r.Groups, err))
+		return
+	}
+
 	for _, role := range r.Roles {
 		exists, err := i.roleRepo.Exists(role)
 		if err != nil {
@@ -41,7 +72,8 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: applying roles %v: %w", errCtx, r.Roles, err))
 		return
 	}
-	out.SuccessUpdateRoles(Response{Id: r.Id, Roles: r.Roles})
+
+	out.SuccessUpdate(Response{Id: r.Id, Groups: r.Groups})
 }
 
 type Option func(*Interactor)
@@ -50,17 +82,4 @@ func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
 		i.auth = a
 	}
-}
-
-func New(ur UserRepo, rr RoleRepo, opts ...Option) Interactor {
-	i := &Interactor{
-		userRepo: ur,
-		roleRepo: rr,
-		auth:     auth.NewVoidAuth(),
-	}
-
-	for _, opt := range opts {
-		opt(i)
-	}
-	return *i
 }
