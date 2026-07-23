@@ -6,17 +6,20 @@ import (
 	"net/http"
 )
 
+var Collection = "/ui/collection"
+var CreateCollectionForm = "/ui/collection/new"
+
 func (s *Server) Route(r chi.Router,
 	mws ...func(http.Handler) http.Handler) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
 		r.Get(rt.Collections, s.List)
-		r.Get(rt.Collection, s.TableRow)
-		r.Post(rt.Collection, s.Create)
-		r.Delete(rt.Collection, s.Delete)
-		r.Put(rt.Collection, s.Edit)
-		r.Get(rt.CreateCollectionForm, s.CreateForm)
+		r.Get(Collection, s.TableRow)
+		r.Post(Collection, s.Create)
+		r.Delete(Collection, s.Delete)
+		r.Put(Collection, s.Edit)
+		r.Get(CreateCollectionForm, s.CreateForm)
 
 	})
 }

@@ -21,33 +21,13 @@ var ResetPasswordForm = "/auth/reset-password-form"
 var ResetPassword = "/auth/reset-password"
 var Logout = "/auth/logout"
 
-var UserDashboard = "/user-dashboard"
-var NewAPIToken = "/ui/new-api-token"
-var ChangePassword = "/change-password"
-
 var Home = "/"
 var Collections = "/collections"
 var Images = "/images"
 var Labels = "/labels"
-
-var AnnotateImage = "/ui/annotate/image"
-var SubmitBox = "/ui/annotate/submit-box"
-var UpdateBox = "/ui/annotate/update-box"
-var SubmitPolygon = "/ui/annotate/submit-polygon"
-var UpdatePolygon = "/ui/annotate/update-polygon"
-var SubmitImageLabel = "/ui/annotate/submit-label"
-var AnnotationPanel = "/ui/annotate/annotation-panel"
-var Annotations = "/ui/annotate/annotations"
-var RemoveAnnotation = "/ui/annotate/remove-annotation"
-var SetLabel = "/ui/annotate/set-label"
+var UserDashboard = "/user-dashboard"
 
 var Image = "/ui/image"
-
-var Collection = "/ui/collection"
-var CreateCollectionForm = "/ui/collection/new"
-
-var Label = "/ui/label"
-var CreateLabelForm = "/ui/label/new"
 
 var Admin = "/admin"
 var AdminUsers = "/admin/users"
@@ -65,8 +45,8 @@ func MakeOAuthLoginURL(provider string) string {
 	return strings.ReplaceAll(LoginOAuth, "{provider}", provider)
 }
 
-func MakeAnnotateImageURL(imageId, collection string) string {
-	return fmt.Sprintf("%v?id=%v&collection=%v", AnnotateImage, imageId, collection)
+func MakeAnnotateImageURL(baseURL, imageId, collection string) string {
+	return fmt.Sprintf("%v?id=%v&collection=%v", baseURL, imageId, collection)
 }
 
 func MakeImagesURL(collection string) string {

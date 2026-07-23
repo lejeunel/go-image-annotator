@@ -26,7 +26,7 @@ func (r SQLiteLabelRepo) Create(l lbl.Label) error {
 	query := "INSERT INTO labels (id, name, description) VALUES ($1,$2,$3)"
 	_, err := r.Db.Exec(query, l.Id.String(), l.Name, l.Description)
 	if err != nil {
-		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf("inserting label record: %v: %w", err, e.ErrInternal)
 	}
 
 	return nil

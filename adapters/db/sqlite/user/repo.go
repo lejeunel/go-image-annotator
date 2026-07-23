@@ -35,7 +35,7 @@ func (r SQLiteUserRepo) Create(usr u.User) error {
 	query := "INSERT INTO users (id,is_admin,api_token_hash,password_hash) VALUES ($1,$2,$3,$4)"
 	_, err := r.Db.Exec(query, usr.Id, usr.IsAdmin, hex.EncodeToString(usr.HashPAT), hex.EncodeToString(usr.HashPassword))
 	if err != nil {
-		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf("inserting user record: %v: %w", err, e.ErrInternal)
 	}
 	if err := r.SetGroups(usr.Id, usr.Groups); err != nil {
 		return err
@@ -221,7 +221,7 @@ func (r SQLiteUserRepo) AddForgottenPasswordState(hash []byte, id u.UserId, expi
 	query := "INSERT INTO forgot_password (token_hash,id,expires_at) VALUES ($1,$2,$3)"
 	_, err := r.Db.Exec(query, hex.EncodeToString(hash), id, expiresAt)
 	if err != nil {
-		return fmt.Errorf("inserting record: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf("inserting user record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 

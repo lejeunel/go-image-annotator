@@ -11,6 +11,7 @@ import (
 func HomePageHandlerFunc(pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pb.SetUserIdentity(r.Context())
+		pb.SetHTMLTitle("Home")
 		web.MakeHomePage(pb, w)
 	}
 }

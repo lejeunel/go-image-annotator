@@ -1,4 +1,4 @@
-package web
+package annotator
 
 import (
 	"encoding/json"
@@ -6,16 +6,40 @@ import (
 	"io"
 	"net/http"
 
-	aw "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
 	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	a "github.com/lejeunel/go-image-annotator/modules/annotator"
+	s "github.com/lejeunel/go-image-annotator/shared/session"
 	assign_label "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
+type Server struct {
+	b.PageBuilder
+	a.Annotator
+	s.SessionManager
+	ap.AnnotationPagePresenter
+	ap.AnnotoriousPresenter
+}
+
+func NewServer(
+	annotator a.Annotator,
+	pageBuilder b.PageBuilder,
+	sessionManager s.SessionManager) *Server {
+	colorizer := ap.NewCyclicColorizer(ap.Palette)
+	return &Server{
+		Annotator:               annotator,
+		SessionManager:          sessionManager,
+		PageBuilder:             pageBuilder,
+		AnnotationPagePresenter: ap.NewAnnotationPagePresenter(colorizer),
+		AnnotoriousPresenter:    ap.NewAnnotoriousPresenter(colorizer),
+	}
+}
+
 func (s *Server) AnnotateImage(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
-	view := aw.NewAnnotationView(s.PageBuilder)
+	view := NewAnnotationView(s.PageBuilder)
 	s.AnnotationPagePresenter.SetView(view)
 	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"),
 		s.AnnotationPagePresenter,
@@ -24,7 +48,7 @@ func (s *Server) AnnotateImage(w http.ResponseWriter, r *http.Request) {
 	view.Render(w)
 }
 func (s *Server) MakeAnnotationPanel(w http.ResponseWriter, r *http.Request) {
-	view := aw.NewAnnotationView(s.PageBuilder)
+	view := NewAnnotationView(s.PageBuilder)
 	s.AnnotationPagePresenter.SetView(view)
 	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"),
 		s.AnnotationPagePresenter,

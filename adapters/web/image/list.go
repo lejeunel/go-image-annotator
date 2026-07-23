@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	an "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
@@ -37,7 +38,7 @@ func NewListImagesPresenter(w http.ResponseWriter, p b.PageBuilder, collection s
 }
 
 func makeImageRow(image im.Image) tb.Row {
-	link := rt.MakeAnnotateImageURL(image.Id.String(), image.Collection.Name)
+	link := rt.MakeAnnotateImageURL(an.AnnotateImage, image.Id.String(), image.Collection.Name)
 	actions := b.NewActionsPanelBuilder()
 	actions.SetConfirmDelete(rt.AddQueryParams(rt.Image, "id", image.Id.String(),
 		"collection", image.Collection.Name,

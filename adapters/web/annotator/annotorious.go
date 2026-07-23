@@ -2,7 +2,6 @@ package annotator
 
 import (
 	"bytes"
-	rt "github.com/lejeunel/go-image-annotator/routes"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 	"text/template"
@@ -28,15 +27,15 @@ type AnnotatorURLs = struct {
 }
 
 var annotatorURLs = AnnotatorURLs{
-	rt.Annotations,
-	rt.SetLabel,
-	rt.SubmitImageLabel,
-	rt.SubmitBox,
-	rt.SubmitPolygon,
-	rt.UpdateBox,
-	rt.UpdatePolygon,
-	rt.RemoveAnnotation,
-	rt.AnnotationPanel}
+	Annotations,
+	SetLabel,
+	SubmitImageLabel,
+	SubmitBox,
+	SubmitPolygon,
+	UpdateBox,
+	UpdatePolygon,
+	RemoveAnnotation,
+	AnnotationPanel}
 
 func MakeAnnotoriousScript(imageId string, collection string) (*Node, error) {
 	tAnnot, err := template.New("annotator").ParseFS(templatesFiles, "templates/annotator.js")

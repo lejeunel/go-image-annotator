@@ -4,7 +4,6 @@ import (
 	"fmt"
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
-	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 	"net/http"
 )
@@ -37,7 +36,7 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		Description: r.FormValue("description")}, NewCreateLabelPresenter(w))
 }
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXCreateFormBuilder(rt.Label, createLabelTargetDiv)
+	b := bf.NewHTMXCreateFormBuilder(Label, createLabelTargetDiv)
 	b.AddTitle("Create a new label")
 	b.AddTextField("name", "Name", "name", bf.WithRequired())
 	b.AddTextField("description", "Description", "description")

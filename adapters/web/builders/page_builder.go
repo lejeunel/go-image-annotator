@@ -97,7 +97,7 @@ func (b *PageBuilder) SetContent(content Node) *PageBuilder {
 	b.BasePageBuilder.SetFrameContent(
 		Group(
 			[]Node{
-				cmp.MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, *b.User),
+				cmp.MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, *b.User, rt.UserDashboard),
 				Div(Class("grow w-full px-1 px-4 py-18"),
 					content,
 				),

@@ -3,33 +3,27 @@ package user
 import (
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	rt "github.com/lejeunel/go-image-annotator/routes"
 	cpw "github.com/lejeunel/go-image-annotator/use-cases/user/change-password"
 	rat "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 )
 
 type Server struct {
-	b.UserDashboardBuilder
+	b.PageBuilder
 	RenewAPITokenItr  rat.Interactor
 	ChangePasswordItr cpw.Interactor
 }
 
 func New(pb b.PageBuilder, i rat.Interactor, c cpw.Interactor) Server {
-	return Server{b.NewUserDashboardBuilder(pb),
-		i, c}
+	return Server{pb, i, c}
 }
 
 func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
-	udb := s.UserDashboardBuilder
-	udb.SetUserIdentity(r.Context())
-	udb.SetActiveSection(cmp.NoPageActive)
-	udb.SetTitle("User Dashboard").SetHTMLTitle("Dashboard")
-	udb.Build().Render(w)
+	s.PageBuilder.SetUserIdentity(r.Context())
+	RenderDashboard(r.Context(), s.PageBuilder, w)
 }
 func (s *Server) NewAPIToken(w http.ResponseWriter, r *http.Request) {
 	user := u.IdentityFromContext(r.Context())
@@ -52,15 +46,6 @@ func (s *Server) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		FirstPassword: r.FormValue("password"), SecondPassword: r.FormValue("password-repeat")},
 		NewChangePasswordPresenter(w))
 
-}
-func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
-
-	r.Group(func(r chi.Router) {
-		r.Use(mws...)
-		r.Get(rt.UserDashboard, s.UserDashboard)
-		r.Get(rt.NewAPIToken, s.NewAPIToken)
-		r.Post(rt.ChangePassword, s.ChangePassword)
-	})
 }
 
 type ChangePasswordPresenter struct {

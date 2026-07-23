@@ -13,7 +13,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/web"
 	adm "github.com/lejeunel/go-image-annotator/adapters/web/admin"
 	admusr "github.com/lejeunel/go-image-annotator/adapters/web/admin/user"
-	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
+	an "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
 	wauth "github.com/lejeunel/go-image-annotator/adapters/web/auth"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	clc "github.com/lejeunel/go-image-annotator/adapters/web/collection"
@@ -50,13 +50,9 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 		WebRequireLogin,
 	)
 
-	colorizer := ap.NewCyclicColorizer(ap.Palette)
 	RouteWebPages(
 		router,
-		*web.NewServer(&app.Itrs, app.Annotator,
-			pageBuilder, ap.NewAnnotationPagePresenter(colorizer),
-			ap.NewAnnotoriousPresenter(colorizer),
-			app.SessionManager, cfg.DefaultPageSize),
+		*web.NewServer(&app.Itrs, pageBuilder, app.SessionManager, cfg.DefaultPageSize),
 		HomePageHandlerFunc(pageBuilder),
 		webAuth,
 	)
@@ -68,6 +64,9 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	RouteAPIDocs(router, APIDocsHandlerFunc(rt.APISpecs, pageBuilder), webAuth)
 	RouteAPISpecs(router)
 	RouteStaticFiles(router)
+
+	annotatorServer := an.NewServer(app.Annotator, pageBuilder, app.SessionManager)
+	annotatorServer.Route(router, webAuth)
 
 	collectionServer := clc.New(pageBuilder, cfg.DefaultPageSize,
 		app.Itrs.Collection.Create, app.Itrs.Collection.List, app.Itrs.Collection.Update,

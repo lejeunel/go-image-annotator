@@ -38,7 +38,7 @@ func (r SQLiteImageRepo) AddToCollection(imageId im.ImageId, collectionId clc.Co
 	query := "INSERT INTO images_collections (image_id, collection_id) VALUES ($1,$2)"
 	_, err := r.Db.Exec(query, imageId.String(), collectionId.String())
 	if err != nil {
-		return fmt.Errorf("inserting record into image to collection junction table: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf("inserting image record into junction table: %v: %w", err, e.ErrInternal)
 	}
 
 	return nil

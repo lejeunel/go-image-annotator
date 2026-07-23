@@ -44,7 +44,7 @@ func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 		row := MakeListCollectionRow(c)
 		p.AddRow(row)
 	}
-	p.AddCreationButton("Create", rt.CreateCollectionForm, createCollectionTargetDiv)
+	p.AddCreationButton("Create", CreateCollectionForm, createCollectionTargetDiv)
 	p.AddMarkdownPreamble(preamble)
 	p.Render(p.Writer)
 }
@@ -53,7 +53,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
 	switch r.URL.Query().Get("mode") {
 	case "edit":
-		endpoint := rt.AddQueryParams(rt.Collection, "name", name)
+		endpoint := rt.AddQueryParams(Collection, "name", name)
 		b := bf.NewHTMXInlineFormBuilder(name, len(listCollectionsFields), endpoint)
 		b.AddTitle(fmt.Sprintf("Editing %v", name))
 		b.AddTextField("name", "Name", "name", bf.WithRequired(), bf.WithDefault(name))
@@ -63,8 +63,8 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 		b.RenderConfirmDeleteRow(len(listCollectionsFields),
 			name,
 			"collection",
-			rt.AddQueryParams(rt.Collection, "name", name),
-			rt.AddQueryParams(rt.Collection, "name", name, "mode", "view"),
+			rt.AddQueryParams(Collection, "name", name),
+			rt.AddQueryParams(Collection, "name", name, "mode", "view"),
 			w)
 	default:
 		s.FindItr.Execute(r.Context(),
@@ -73,7 +73,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXCreateFormBuilder(rt.Collection, createCollectionTargetDiv)
+	b := bf.NewHTMXCreateFormBuilder(Collection, createCollectionTargetDiv)
 	b.AddTitle("Create a new collection")
 	b.AddTextField("name", "Name", "name", bf.WithRequired())
 	b.AddTextField("description", "Description", "description")
@@ -94,9 +94,9 @@ func MakeListCollectionRow(c clc.Collection) tb.Row {
 	}
 
 	actions := b.NewActionsPanelBuilder()
-	actions.SetEdit(rt.AddQueryParams(rt.Collection,
+	actions.SetEdit(rt.AddQueryParams(Collection,
 		"name", c.Name, "description", c.Description, "mode", "edit"))
-	actions.SetConfirmDelete(rt.AddQueryParams(rt.Collection, "name", c.Name,
+	actions.SetConfirmDelete(rt.AddQueryParams(Collection, "name", c.Name,
 		"mode", "confirm-delete"))
 
 	row := tb.NewRow()

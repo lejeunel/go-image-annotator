@@ -43,7 +43,7 @@ func (p ListLabelsPresenter) SuccessListLabels(r list.Response) {
 		p.AddRow(row)
 	}
 
-	p.AddCreationButton("Create", rt.CreateLabelForm, createLabelTargetDiv)
+	p.AddCreationButton("Create", CreateLabelForm, createLabelTargetDiv)
 	p.AddMarkdownPreamble(preamble)
 	p.Render(p.Writer)
 }
@@ -57,12 +57,12 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 		b.RenderConfirmDeleteRow(len(listLabelsFields),
 			name,
 			"label",
-			rt.AddQueryParams(rt.Label, "name", name),
-			rt.AddQueryParams(rt.Label, "name", name, "mode", "view"),
+			rt.AddQueryParams(Label, "name", name),
+			rt.AddQueryParams(Label, "name", name, "mode", "view"),
 			w)
 	case "edit":
 		b := bf.NewHTMXInlineFormBuilder(name, len(listLabelsFields),
-			rt.AddQueryParams(rt.Label, "name", name))
+			rt.AddQueryParams(Label, "name", name))
 		b.AddTitle(fmt.Sprintf("Editing %v", name))
 		b.AddTextField("description", "Description", "description", bf.WithDefault(r.URL.Query().Get("description")))
 		b.Render(w)
@@ -81,8 +81,8 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 
 func MakeListLabelRow(l l.Label) tb.Row {
 	actions := b.NewActionsPanelBuilder()
-	actions.SetEdit(rt.AddQueryParams(rt.Label, "name", l.Name, "description", l.Description, "mode", "edit"))
-	actions.SetConfirmDelete(rt.AddQueryParams(rt.Label, "name", l.Name, "mode", "confirm-delete"))
+	actions.SetEdit(rt.AddQueryParams(Label, "name", l.Name, "description", l.Description, "mode", "edit"))
+	actions.SetConfirmDelete(rt.AddQueryParams(Label, "name", l.Name, "mode", "confirm-delete"))
 	row := tb.NewRow()
 	row.AddCell(tb.NewCell(Text(l.Name)))
 	row.AddCell(tb.NewCell(Text(l.Description)))
