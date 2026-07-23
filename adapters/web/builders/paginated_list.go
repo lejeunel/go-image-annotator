@@ -1,11 +1,9 @@
 package builders
 
 import (
-	"bytes"
 	"io"
 
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
-	"github.com/yuin/goldmark"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -18,7 +16,6 @@ type CreationButton struct {
 
 type PaginatedListBuilder struct {
 	creationButton *CreationButton
-	preamble       string
 	PaginableTableBuilder
 	PageBuilder
 }
@@ -43,24 +40,10 @@ func (b *PaginatedListBuilder) Render(w io.Writer) {
 		Div(Class("py-2"), paginator),
 		b.PaginableTableBuilder.Build())
 
-	if b.preamble != "" {
-		content = Div(Article(Class("prose dark:prose-invert max-w-none"), Raw(b.preamble)), content)
-	}
 	b.PageBuilder.SetContent(content)
 	b.PageBuilder.Render(w)
 }
 func (b *PaginatedListBuilder) AddCreationButton(buttonLabel string, formEndpoint string, formDivId string) *PaginatedListBuilder {
 	b.creationButton = &CreationButton{buttonLabel, formEndpoint, formDivId}
-	return b
-}
-func (b *PaginatedListBuilder) AddMarkdownPreamble(preamble string) *PaginatedListBuilder {
-
-	md := goldmark.New()
-	var buf bytes.Buffer
-	if err := md.Convert([]byte(preamble), &buf); err != nil {
-		panic(err)
-	}
-
-	b.preamble = buf.String()
 	return b
 }

@@ -14,6 +14,9 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
+//go:embed preamble.md
+var preamble string
+
 type UserInfoRow struct {
 	Name  string
 	Value string
@@ -28,7 +31,6 @@ func makeSectionTitle(title string) Node {
 	return Div(Class("text-lg font-bold"), Text(title))
 
 }
-
 func RenderDashboard(ctx context.Context, pb b.PageBuilder, w io.Writer) {
 	if pb.User == nil {
 		pb.SetError(fmt.Errorf("failed build user dashboard: user identity has not been set"))
@@ -69,9 +71,11 @@ func RenderDashboard(ctx context.Context, pb b.PageBuilder, w io.Writer) {
 
 	separator := Div(Class("h-px bg-outline dark:bg-outline-dark"))
 	content := Div(Class("flex flex-col w-120"), Div(cmp.MakeCard(profile), separator, APIToken, separator, changePassword))
-	pb.SetContent(content)
 	pb.SetUserIdentity(ctx)
 	pb.SetActiveSection(cmp.NoPageActive)
-	pb.SetTitle("User Dashboard").SetHTMLTitle("Dashboard")
+	pb.SetTitle("User Dashboard")
+	pb.SetHTMLTitle("Dashboard")
+	pb.AddMarkdownPreamble(preamble)
+	pb.SetContent(content)
 	pb.Render(w)
 }

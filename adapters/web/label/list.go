@@ -44,7 +44,7 @@ func (p ListLabelsPresenter) SuccessListLabels(r list.Response) {
 	}
 
 	p.AddCreationButton("Create", CreateLabelForm, createLabelTargetDiv)
-	p.AddMarkdownPreamble(preamble)
+	p.PaginatedListBuilder.AddMarkdownPreamble(preamble)
 	p.Render(p.Writer)
 }
 func (p ListLabelsPresenter) SuccessFindLabel(l l.Label) {

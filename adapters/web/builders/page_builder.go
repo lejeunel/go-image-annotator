@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"maps"
 
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	g "github.com/lejeunel/go-image-annotator/globals"
 	rt "github.com/lejeunel/go-image-annotator/routes"
+	"github.com/yuin/goldmark"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -24,6 +26,8 @@ type PageBuilder struct {
 	SidebarTitle        string
 	SidebarEntries      map[string]cmp.SidebarEntry
 	SidebarEntriesOrder []string
+	preamble            string
+	content             Node
 	BasePageBuilder
 }
 
@@ -67,15 +71,34 @@ func (b *PageBuilder) AddSidebarEntry(name, icon, url string, isActive bool) *Pa
 	b.SidebarEntriesOrder = append(b.SidebarEntriesOrder, name)
 	return b
 }
-func (b *PageBuilder) SetContent(content Node) *PageBuilder {
-	if b.User == nil {
-		b.BasePageBuilder.SetError(fmt.Errorf("current user has not been set"))
-		return b
+func (b *PageBuilder) AddMarkdownPreamble(preamble string) *PageBuilder {
+
+	md := goldmark.New()
+	var buf bytes.Buffer
+	if err := md.Convert([]byte(preamble), &buf); err != nil {
+		panic(err)
 	}
 
+	b.preamble = buf.String()
+	return b
+}
+func (b *PageBuilder) SetContent(content Node) *PageBuilder {
+	b.content = content
+	return b
+}
+func (b *PageBuilder) Render(w io.Writer) {
+	if b.User == nil {
+		b.BasePageBuilder.SetError(fmt.Errorf("current user has not been set"))
+		b.BasePageBuilder.Render(w)
+	}
+
+	var header Node
+
 	if b.Title != "" {
-		content = Div(Div(Class("font-bold text-xl"), Text(b.Title)),
-			content)
+		header = Div(header, Div(Class("font-bold text-2xl"), Text(b.Title)))
+	}
+	if b.preamble != "" {
+		header = Div(header, Article(Class("prose dark:prose-invert max-w-none"), Raw(b.preamble)))
 	}
 
 	if len(b.SidebarEntries) > 0 {
@@ -86,11 +109,11 @@ func (b *PageBuilder) SetContent(content Node) *PageBuilder {
 			sidebar.AddEntry(e.Label, e.Icon, e.Url, e.IsActive)
 		}
 		sidebar.Render(&bufSidebar)
-		content = Div(Class("relative flex w-full flex-col"),
+		b.content = Div(Class("relative flex w-full flex-col"),
 			Nav(Attr("x-cloak"),
 				Class(`fixed left-0 top-14 z-20 flex h-svh w-60 shrink-0 flex-col border-r border-outline bg-surface-alt p-4 transition-transform duration-300
                       dark:border-outline-dark dark:bg-surface-dark-alt`), Raw(bufSidebar.String())),
-			Div(Class("ml-60"), content),
+			Div(Class("ml-60"), b.content),
 		)
 	}
 
@@ -99,10 +122,11 @@ func (b *PageBuilder) SetContent(content Node) *PageBuilder {
 			[]Node{
 				cmp.MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, *b.User, rt.UserDashboard),
 				Div(Class("grow w-full px-1 px-4 py-18"),
-					content,
+					header,
+					b.content,
 				),
 				cmp.MakeFooter(b.Version),
 			},
 		))
-	return b
+	b.BasePageBuilder.Render(w)
 }

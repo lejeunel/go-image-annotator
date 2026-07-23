@@ -45,7 +45,7 @@ func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 		p.AddRow(row)
 	}
 	p.AddCreationButton("Create", CreateCollectionForm, createCollectionTargetDiv)
-	p.AddMarkdownPreamble(preamble)
+	p.PaginatedListBuilder.AddMarkdownPreamble(preamble)
 	p.Render(p.Writer)
 }
 
