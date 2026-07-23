@@ -36,6 +36,9 @@ func MakePaginatorNumberedButton(baseURL url.URL, pageNumber int, isActive bool)
 }
 
 func MakePaginator(baseURL string, currentPage, lastPage, numItems, totalItems int) Node {
+	if totalItems == 0 {
+		return nil
+	}
 	parsedBaseURL, err := url.Parse(baseURL)
 	if err != nil {
 		panic(fmt.Errorf("failed parsing pagination URL %v", baseURL))

@@ -21,6 +21,12 @@ func (t TableBuilder) NumRows() int {
 }
 
 func (t *TableBuilder) Build() Node {
+	if len(t.rows) == 0 {
+		return Div(Class("ml-8"),
+			Div(Class("pt-2 pb-8 text-lg italic"), Text("There is nothing here yet...")),
+			Pre(Class("font-mono whitespace-pre text-sm leading-tight"), Raw(emptyAsciiIcon)),
+		)
+	}
 	return Div(Class("overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark"),
 		Table(Class("table-fixed w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
 			TableHeader(t.fields),

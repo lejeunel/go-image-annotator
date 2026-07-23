@@ -98,7 +98,6 @@ func (b *PageBuilder) Render(w io.Writer) {
 		header = Div(header, Div(Class("font-bold text-2xl"), Text(b.Title)))
 	}
 	if b.preamble != "" {
-		fmt.Println("got preamble!")
 		header = Div(header, Article(Class("prose dark:prose-invert max-w-none"), Raw(b.preamble)))
 	}
 
