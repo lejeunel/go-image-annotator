@@ -7,8 +7,6 @@ import (
 	"net/http"
 )
 
-var createGroupTargetDiv = "create-group"
-
 type CreateGroupPresenter struct {
 	writer        http.ResponseWriter
 	task          string
@@ -31,6 +29,9 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
-	s.Groups.Create.Execute(r.Context(), create.Request{Name: r.FormValue("name"), Description: r.FormValue("description")},
+	s.Groups.Create.Execute(r.Context(),
+		create.Request{
+			Name:        r.FormValue(createNameFieldName),
+			Description: r.FormValue(createDescriptionFieldName)},
 		NewCreateGroupPresenter(w))
 }

@@ -57,12 +57,15 @@ func (b *PageBuilder) AddSidebarTitle(title string) *PageBuilder {
 	return b
 }
 func (b *PageBuilder) ActivateSidebarEntry(name string) *PageBuilder {
-	m, ok := b.SidebarEntries[name]
-	if !ok {
-		return b
+	b.SidebarEntries = maps.Clone(b.SidebarEntries)
+	for k, v := range b.SidebarEntries {
+		v.IsActive = false
+		if k == name {
+			v.IsActive = true
+		}
+		b.SidebarEntries[k] = v
+
 	}
-	m.IsActive = true
-	b.SidebarEntries[name] = m
 	return b
 }
 func (b *PageBuilder) AddSidebarEntry(name, icon, url string, isActive bool) *PageBuilder {

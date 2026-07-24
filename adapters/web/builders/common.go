@@ -12,7 +12,7 @@ import (
 )
 
 func RenderConfirmDeleteRow(numCols int, name, resourceType string,
-	deleteURL url.URL, cancelURL url.URL, w io.Writer) {
+	url url.URL, w io.Writer) {
 	row := tb.NewRow()
 	row.AddCell(
 		tb.NewCell(
@@ -22,7 +22,7 @@ func RenderConfirmDeleteRow(numCols int, name, resourceType string,
 			tb.WithCellClass("text-right"),
 		))
 	row.AddCell(tb.NewCell(Span(Class("flex items-center gap-2"),
-		cmp.MakeHTMXDeleteButton("Yes", deleteURL.String()),
-		cmp.MakeHTMXAbortButton("Cancel", cancelURL.String()))))
+		cmp.MakeHTMXDeleteButton("Yes", url.String()),
+		cmp.MakeHTMXAbortButton("Cancel", url.String()))))
 	row.Render(w)
 }

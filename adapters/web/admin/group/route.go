@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-var GroupRow = "/ui/user"
-var CreateUserForm = "/ui/user/new"
+var GroupRow = "/ui/group"
+var CreateUserForm = "/ui/group/new"
 
 func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 

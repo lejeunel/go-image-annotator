@@ -11,6 +11,7 @@ import (
 
 type Server struct {
 	b.PageBuilder
+	b.RowURL
 	DefaultPageSize int
 	ListItr         list.Interactor
 	CreateItr       create.Interactor
@@ -19,7 +20,7 @@ type Server struct {
 	FindItr         find.Interactor
 }
 
-func New(b b.PageBuilder, defaultPageSize int,
+func New(pb b.PageBuilder, defaultPageSize int,
 	c create.Interactor, l list.Interactor, u update.Interactor, d delete.Interactor, f find.Interactor) Server {
-	return Server{b, defaultPageSize, l, c, u, d, f}
+	return Server{pb, b.NewRowURL(CollectionUrl, "name"), defaultPageSize, l, c, u, d, f}
 }

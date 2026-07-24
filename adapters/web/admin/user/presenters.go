@@ -24,17 +24,18 @@ var listUsersFields = []string{"id/email", "roles", "groups", "admin", "actions"
 
 type ListPresenter struct {
 	b.PaginatedListBuilder
+	b.RowURL
 	Writer io.Writer
 	e.ErrorPresenter
 }
 
-func NewListPresenter(w http.ResponseWriter, p b.PaginatedListBuilder) ListPresenter {
-	return ListPresenter{p, w, e.NewErrorPresenter(w)}
+func NewListPresenter(w http.ResponseWriter, p b.PaginatedListBuilder, u b.RowURL) ListPresenter {
+	return ListPresenter{p, u, w, e.NewErrorPresenter(w)}
 }
 func (p ListPresenter) SuccessListUsers(r list.Response) {
 	p.SetPagination(r.Pagination, rt.AdminUsers)
 	for _, user := range r.Users {
-		row := MakeRow(user)
+		row := MakeRow(p.RowURL, user)
 		p.AddRow(row)
 	}
 
@@ -43,44 +44,43 @@ func (p ListPresenter) SuccessListUsers(r list.Response) {
 }
 
 type ViewPresenter struct {
+	b.RowURL
 	io.Writer
 	e.ErrorPresenter
 }
 
-func NewViewPresenter(w http.ResponseWriter) ViewPresenter {
-	return ViewPresenter{Writer: w, ErrorPresenter: e.NewErrorPresenter(w)}
+func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
+	return ViewPresenter{u, w, e.NewErrorPresenter(w)}
 }
 func (p ViewPresenter) SuccessFindUser(user u.User) {
-	MakeRow(user).Render(p.Writer)
+	MakeRow(p.RowURL, user).Render(p.Writer)
 }
 
 type DeletePresenter struct {
 	io.Writer
+	b.RowURL
 	e.ErrorPresenter
 }
 
-func NewDeletePresenter(w http.ResponseWriter) DeletePresenter {
-	return DeletePresenter{Writer: w, ErrorPresenter: e.NewErrorPresenter(w)}
+func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
+	return DeletePresenter{w, u, e.NewErrorPresenter(w)}
 }
 func (p DeletePresenter) SuccessFindUser(user u.User) {
 	b.RenderConfirmDeleteRow(len(listUsersFields),
-		user.Id,
-		"user",
-		rt.AddQueryParams(User, "id", user.Id),
-		rt.AddQueryParams(User, "id", user.Id, "mode", "view"),
-		p.Writer)
+		user.Id, "user", p.Url, p.Writer)
 }
 
 type EditPresenter struct {
 	io.Writer
+	b.RowURL
 	e.ErrorPresenter
 	groups []g.Group
 	roles  []r.Role
 	user   u.User
 }
 
-func NewEditPresenter(w http.ResponseWriter) EditPresenter {
-	return EditPresenter{Writer: w, ErrorPresenter: e.NewErrorPresenter(w)}
+func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
+	return EditPresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w)}
 }
 
 func (p *EditPresenter) SuccessFindUser(user u.User) {
@@ -93,8 +93,7 @@ func (p *EditPresenter) SuccessListRoles(roles []r.Role) {
 	p.roles = roles
 }
 func (p EditPresenter) Render(w io.Writer) {
-	endpoint := rt.AddQueryParams(User, "id", p.user.Id)
-	form := bf.NewHTMXInlineFormBuilder(p.user.Id, len(listUsersFields), endpoint)
+	form := bf.NewHTMXInlineFormBuilder(p.user.Id, len(listUsersFields), p.Url)
 	form.AddTitle(fmt.Sprintf("Editing %v", p.user.Id))
 	groupSelect := form.AddSelectableCombobox("Groups", "groups")
 	for _, grp := range p.groups {
@@ -107,11 +106,11 @@ func (p EditPresenter) Render(w io.Writer) {
 	form.Render(p.Writer)
 }
 
-func MakeRow(user u.User) tb.Row {
+func MakeRow(url b.RowURL, user u.User) tb.Row {
+	url.SetId(user.Id)
 	actions := b.NewActionsPanelBuilder()
-	actions.SetEdit(rt.AddQueryParams(User, "id", user.Id, "mode", "edit"))
-	actions.SetConfirmDelete(rt.AddQueryParams(User, "id", user.Id,
-		"mode", "confirm-delete"))
+	actions.SetEdit(url.SetMode(b.ModeEdit).Url)
+	actions.SetConfirmDelete(url.SetMode(b.ModeConfirmDelete).Url)
 	row := tb.NewRow()
 	row.AddCell(tb.NewCell(Text(user.Id)))
 	row.AddCell(tb.NewCell(Text(strings.Join(user.Roles, ", "))))

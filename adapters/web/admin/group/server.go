@@ -7,9 +7,12 @@ import (
 
 type Server struct {
 	Page   b.PaginatedListBuilder
+	RowUrl b.RowURL
 	Groups g.Interactors
 }
 
 func New(pb b.PageBuilder, grp g.Interactors) Server {
-	return Server{b.NewPaginatedListBuilder(pb, listGroupsFields), grp}
+	groupPage := b.NewPaginatedListBuilder(pb, listGroupsFields)
+	groupPage.ActivateSidebarEntry(GroupPageEntryName)
+	return Server{groupPage, b.NewRowURL(GroupRow, "name"), grp}
 }

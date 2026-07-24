@@ -9,11 +9,10 @@ import (
 type FormCheckboxField struct {
 	fieldName   string
 	displayName string
-	divId       string
 }
 
-func NewFormCheckboxField(fieldName, displayName, divId string) FormCheckboxField {
-	return FormCheckboxField{fieldName: fieldName, displayName: displayName, divId: divId}
+func NewFormCheckboxField(fieldName, displayName string) FormCheckboxField {
+	return FormCheckboxField{fieldName: fieldName, displayName: displayName}
 }
 
 var checkIcon = `

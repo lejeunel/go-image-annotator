@@ -8,8 +8,6 @@ import (
 	"net/http"
 )
 
-var createLabelTargetDiv = "create-label"
-
 type CreateLabelPresenter struct {
 	writer        http.ResponseWriter
 	task          string
@@ -36,9 +34,9 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		Description: r.FormValue("description")}, NewCreateLabelPresenter(w))
 }
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXCreateFormBuilder(Label, createLabelTargetDiv)
+	b := bf.NewHTMXCreateFormBuilder(LabelUrl, createLabelTargetDiv)
 	b.AddTitle("Create a new label")
-	b.AddTextField("name", "Name", "name", bf.WithRequired())
-	b.AddTextField("description", "Description", "description")
+	b.AddTextField(createNameFieldName, "Name", bf.WithRequired())
+	b.AddTextField(createDescriptionFieldName, "Description")
 	b.Render(w)
 }

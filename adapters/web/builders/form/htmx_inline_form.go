@@ -73,8 +73,8 @@ func (b *HTMXInlineFormBuilder) AddTitle(title string) *HTMXInlineFormBuilder {
 	b.title = &title
 	return b
 }
-func (b *HTMXInlineFormBuilder) AddTextField(fieldName, displayName, divId string, opts ...FormTextFieldOption) *HTMXInlineFormBuilder {
-	field := NewFormTextField(fieldName, displayName, divId, opts...)
+func (b *HTMXInlineFormBuilder) AddTextField(fieldName, displayName string, opts ...FormTextFieldOption) *HTMXInlineFormBuilder {
+	field := NewFormTextField(fieldName, displayName, opts...)
 	b.fields = append(b.fields, field)
 	return b
 }

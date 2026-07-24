@@ -21,74 +21,82 @@ var listLabelsFields = []string{"name", "description", "actions"}
 
 type ListPresenter struct {
 	b.PaginatedListBuilder
+	b.RowURL
 	io.Writer
 	e.ErrorPresenter
 }
 
-func NewListPresenter(w http.ResponseWriter, p b.PageBuilder) ListPresenter {
+func NewListPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ListPresenter {
 	p.SetTitle("Labels").SetHTMLTitle("Labels").SetActiveSection(cmp.LabelsPageActive)
 	pb := b.NewPaginatedListBuilder(p, listLabelsFields)
-	return ListPresenter{pb, w, e.NewErrorPresenter(w)}
+	return ListPresenter{pb, u, w, e.NewErrorPresenter(w)}
 }
 
 func (p ListPresenter) SuccessListLabels(r list.Response) {
 	p.SetPagination(r.Pagination, rt.Labels)
 	for _, l := range r.Labels {
-		row := MakeRow(l)
+		row := MakeRow(p.RowURL, l)
 		p.AddRow(row)
 	}
 
-	p.AddCreationButton("Create", CreateLabelForm, createLabelTargetDiv)
+	p.AddCreationButton("Create", CreateLabelFormUrl, createLabelTargetDiv)
 	p.PaginatedListBuilder.AddMarkdownPreamble(preamble)
 	p.Render(p.Writer)
 }
 
-type RowPresenter struct {
+type ViewPresenter struct {
 	io.Writer
+	b.RowURL
 	e.ErrorPresenter
-	successFindLabel func(lbl.Label)
 }
 
-func NewLabelPresenter(w http.ResponseWriter, mode string) RowPresenter {
-	p := RowPresenter{Writer: w, ErrorPresenter: e.NewErrorPresenter(w)}
-	switch mode {
-	case "edit":
-		p.successFindLabel = p.renderEditForm
-	case "confirm-delete":
-		p.successFindLabel = p.renderConfirmDelete
-	default:
-		p.successFindLabel = p.renderView
-	}
-	return p
+func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
+	return ViewPresenter{w, u, e.NewErrorPresenter(w)}
 }
 
-func (p RowPresenter) SuccessFindLabel(l lbl.Label) {
-	p.successFindLabel(l)
+func (p ViewPresenter) SuccessFindLabel(l lbl.Label) {
+	MakeRow(p.RowURL, l).Render(p.Writer)
 }
-func (p *RowPresenter) renderEditForm(l lbl.Label) {
 
-	b := bf.NewHTMXInlineFormBuilder(l.Name, len(listLabelsFields),
-		rt.AddQueryParams(Label, "name", l.Name))
+type EditPresenter struct {
+	io.Writer
+	b.RowURL
+	e.ErrorPresenter
+}
+
+func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
+	return EditPresenter{w, u, e.NewErrorPresenter(w)}
+}
+
+func (p EditPresenter) SuccessFindLabel(l lbl.Label) {
+	b := bf.NewHTMXInlineFormBuilder(l.Name, len(listLabelsFields), p.Url)
 	b.AddTitle(fmt.Sprintf("Editing %v", l.Name))
-	b.AddTextField("description", "Description", "description", bf.WithDefault(l.Description))
+	b.AddTextField("description", "Description", bf.WithDefault(l.Description))
 	b.Render(p.Writer)
 }
-func (p *RowPresenter) renderConfirmDelete(l lbl.Label) {
+
+type DeletePresenter struct {
+	io.Writer
+	b.RowURL
+	e.ErrorPresenter
+}
+
+func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
+	return DeletePresenter{w, u, e.NewErrorPresenter(w)}
+}
+func (p DeletePresenter) SuccessFindLabel(l lbl.Label) {
 	b.RenderConfirmDeleteRow(len(listLabelsFields),
 		l.Name,
 		"label",
-		rt.AddQueryParams(Label, "name", l.Name),
-		rt.AddQueryParams(Label, "name", l.Name, "mode", "view"),
+		p.Url,
 		p.Writer)
 }
-func (p *RowPresenter) renderView(l lbl.Label) {
-	MakeRow(l).Render(p.Writer)
-}
 
-func MakeRow(l lbl.Label) tb.Row {
+func MakeRow(u b.RowURL, l lbl.Label) tb.Row {
+	u.SetId(l.Name)
 	actions := b.NewActionsPanelBuilder()
-	actions.SetEdit(rt.AddQueryParams(Label, "name", l.Name, "description", l.Description, "mode", "edit"))
-	actions.SetConfirmDelete(rt.AddQueryParams(Label, "name", l.Name, "mode", "confirm-delete"))
+	actions.SetEdit(u.SetMode(b.ModeEdit).Url)
+	actions.SetConfirmDelete(u.SetMode(b.ModeConfirmDelete).Url)
 	row := tb.NewRow()
 	row.AddCell(tb.NewCell(Text(l.Name)))
 	row.AddCell(tb.NewCell(Text(l.Description)))

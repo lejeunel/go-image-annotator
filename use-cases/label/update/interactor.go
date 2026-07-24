@@ -52,7 +52,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 }
 func (i *Interactor) ensureNameExists(name string) error {
 	exists, err := i.repo.Exists(name)
-	errCtx := fmt.Errorf("checking that label %v exists", name)
+	errCtx := fmt.Errorf("checking that label with name %v exists", name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}

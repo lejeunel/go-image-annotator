@@ -7,8 +7,6 @@ import (
 	"net/http"
 )
 
-var createCollectionTargetDiv = "create-collection"
-
 type CreateCollectionPresenter struct {
 	writer        http.ResponseWriter
 	task          string
@@ -31,6 +29,7 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
-	s.CreateItr.Execute(r.Context(), create.Request{Name: r.FormValue("name"),
-		Description: r.FormValue("description")}, NewCreateCollectionPresenter(w))
+	s.CreateItr.Execute(r.Context(),
+		create.Request{Name: r.FormValue(createNameFieldName),
+			Description: r.FormValue(createDescriptionFieldName)}, NewCreateCollectionPresenter(w))
 }

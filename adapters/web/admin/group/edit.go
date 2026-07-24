@@ -36,5 +36,5 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 			NewName:        r.FormValue("name"),
 			NewDescription: r.FormValue("description"),
 		},
-		NewEditPresenter(w))
+		NewEditPresenter(w, s.RowUrl))
 }

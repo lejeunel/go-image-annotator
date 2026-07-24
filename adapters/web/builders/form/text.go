@@ -9,7 +9,6 @@ import (
 type FormTextField struct {
 	fieldName   string
 	displayName string
-	divId       string
 	value       *string
 	required    bool
 }
@@ -26,8 +25,8 @@ func WithDefault(value string) FormTextFieldOption {
 	}
 }
 
-func NewFormTextField(fieldName, displayName, divId string, opts ...FormTextFieldOption) FormTextField {
-	f := &FormTextField{fieldName: fieldName, displayName: displayName, divId: divId}
+func NewFormTextField(fieldName, displayName string, opts ...FormTextFieldOption) FormTextField {
+	f := &FormTextField{fieldName: fieldName, displayName: displayName}
 	for _, opt := range opts {
 		opt(f)
 	}
@@ -47,7 +46,7 @@ func (f FormTextField) input() Node {
 	if f.value != nil {
 		value = *f.value
 	}
-	return Input(Type("text"), ID(f.divId), Name(f.fieldName), If(f.required, Required()), Value(value),
+	return Input(Type("text"), ID(f.fieldName), Name(f.fieldName), If(f.required, Required()), Value(value),
 		Class("w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"))
 }
 

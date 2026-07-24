@@ -31,7 +31,7 @@ func NewServer(
 	return &Server{
 		Annotator:               annotator,
 		SessionManager:          sessionManager,
-		PageBuilder:             pageBuilder,
+		PageBuilder:             *pageBuilder.SetHTMLTitle("Annotate"),
 		AnnotationPagePresenter: ap.NewAnnotationPagePresenter(colorizer),
 		AnnotoriousPresenter:    ap.NewAnnotoriousPresenter(colorizer),
 	}

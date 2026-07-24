@@ -93,7 +93,6 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 			id,
 			"image",
 			rt.AddQueryParams(rt.Image, "id", id, "collection", collection),
-			rt.AddQueryParams(rt.Image, "id", id, "collection", collection, "mode", "view"),
 			w)
 	default:
 		s.FindItr.Execute(

@@ -7,8 +7,6 @@ import (
 	"net/http"
 )
 
-var createUserTargetDiv = "create-user"
-
 type CreateUserPresenter struct {
 	writer        http.ResponseWriter
 	task          string
@@ -32,9 +30,10 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var isAdmin bool
-	if r.FormValue("is_admin") == "true" {
+	if r.FormValue(createIsAdminFieldName) == "true" {
 		isAdmin = true
 	}
-	s.Users.Create.Execute(r.Context(), create.Request{Id: r.FormValue("email"), IsAdmin: isAdmin},
+	s.Users.Create.Execute(r.Context(),
+		create.Request{Id: r.FormValue(createEmailFieldName), IsAdmin: isAdmin},
 		NewCreateUserPresenter(w))
 }

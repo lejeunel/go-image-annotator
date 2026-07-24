@@ -22,87 +22,90 @@ var listCollectionsFields = []string{"name", "description", "group", "created", 
 
 type ListPresenter struct {
 	b.PaginatedListBuilder
+	b.RowURL
 	Writer io.Writer
 	e.ErrorPresenter
 }
 
-func NewListPresenter(w http.ResponseWriter, p b.PageBuilder) ListPresenter {
+func NewListPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ListPresenter {
 	p.SetTitle("Collections").SetHTMLTitle("Collections").SetActiveSection(cmp.CollectionsPageActive)
 	b := b.NewPaginatedListBuilder(p, listCollectionsFields)
-	return ListPresenter{b, w, e.NewErrorPresenter(w)}
+	return ListPresenter{b, u, w, e.NewErrorPresenter(w)}
 }
 func (p ListPresenter) SuccessListCollections(r list.Response) {
 	p.SetPagination(r.Pagination, rt.Collections)
 	for _, c := range r.Collections {
-		row := MakeRow(c)
+		row := MakeRow(p.RowURL, c)
 		p.AddRow(row)
 	}
-	p.AddCreationButton("Create", CreateCollectionForm, createCollectionTargetDiv)
+	p.AddCreationButton("Create", CreateCollectionFormUrl, createCollectionTargetDiv)
 	p.PaginatedListBuilder.AddMarkdownPreamble(preamble)
 	p.Render(p.Writer)
 }
 
-type RowPresenter struct {
+type ViewPresenter struct {
 	Writer io.Writer
+	b.RowURL
 	e.ErrorPresenter
-	successFindCollection func(clc.Collection)
 }
 
-func NewCollectionPresenter(w http.ResponseWriter, mode string) RowPresenter {
-	p := RowPresenter{Writer: w, ErrorPresenter: e.NewErrorPresenter(w)}
-	switch mode {
-	case "edit":
-		p.successFindCollection = p.renderEditForm
-	case "confirm-delete":
-		p.successFindCollection = p.renderConfirmDelete
-	default:
-		p.successFindCollection = p.renderView
-	}
-	return p
+func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
+	return ViewPresenter{w, u, e.NewErrorPresenter(w)}
 }
-func (p RowPresenter) SuccessFindCollection(c clc.Collection) {
-	p.successFindCollection(c)
-}
-func (p *RowPresenter) renderEditForm(c clc.Collection) {
-	endpoint := rt.AddQueryParams(Collection, "name", c.Name)
-	b := bf.NewHTMXInlineFormBuilder(c.Name, len(listCollectionsFields), endpoint)
-	b.AddTitle(fmt.Sprintf("Editing %v", c.Name))
-	b.AddTextField("name", "Name", "name", bf.WithRequired(), bf.WithDefault(c.Name))
-	b.AddTextField("description", "Description", "description", bf.WithDefault(c.Description))
-	b.Render(p.Writer)
-}
-func (p *RowPresenter) renderConfirmDelete(c clc.Collection) {
-	b.RenderConfirmDeleteRow(len(listCollectionsFields),
-		c.Name,
-		"collection",
-		rt.AddQueryParams(Collection, "name", c.Name),
-		rt.AddQueryParams(Collection, "name", c.Name, "mode", "view"),
-		p.Writer)
-}
-func (p *RowPresenter) renderView(c clc.Collection) {
-	MakeRow(c).Render(p.Writer)
+func (p ViewPresenter) SuccessFindCollection(c clc.Collection) {
+	MakeRow(p.RowURL, c).Render(p.Writer)
 }
 
-type EditCollectionPresenter struct {
-	writer        http.ResponseWriter
+type EditPresenter struct {
+	writer http.ResponseWriter
+	b.RowURL
 	task          string
 	okMessageFunc func(update.Response) string
 	htmx.ErrorPresenter
 }
 
-func NewEditCollectionPresenter(w http.ResponseWriter) EditCollectionPresenter {
+func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 	task := "Updating collection"
 	okMessageFunc := func(r update.Response) string {
 		return "Successfully updated collection"
 	}
-	return EditCollectionPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
+	return EditPresenter{w, u, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 
-func (p EditCollectionPresenter) SuccessUpdateCollection(r update.Response) {
+func (p EditPresenter) SuccessUpdateCollection(r update.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 
-func MakeRow(c clc.Collection) tb.Row {
+func (p EditPresenter) SuccessFindCollection(c clc.Collection) {
+	b := bf.NewHTMXInlineFormBuilder(c.Name, len(listCollectionsFields), p.Url)
+	b.AddTitle(fmt.Sprintf("Editing %v", c.Name))
+	b.AddTextField("name", "Name", bf.WithRequired(), bf.WithDefault(c.Name))
+	b.AddTextField("description", "Description", bf.WithDefault(c.Description))
+	b.Render(p.writer)
+}
+
+type DeletePresenter struct {
+	writer http.ResponseWriter
+	b.RowURL
+	task          string
+	okMessageFunc func(update.Response) string
+	htmx.ErrorPresenter
+}
+
+func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
+	task := "Deleting collection"
+	okMessageFunc := func(r update.Response) string {
+		return "Successfully deleted collection"
+	}
+	return DeletePresenter{w, u, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
+}
+
+func (p DeletePresenter) SuccessFindCollection(c clc.Collection) {
+	b.RenderConfirmDeleteRow(len(listCollectionsFields),
+		c.Name, "collection", p.Url, p.writer)
+}
+
+func MakeRow(u b.RowURL, c clc.Collection) tb.Row {
 	var groupName string
 	if c.Group == nil {
 		groupName = "n/a"
@@ -110,11 +113,10 @@ func MakeRow(c clc.Collection) tb.Row {
 		groupName = c.Group.Name
 	}
 
+	u.SetId(c.Name)
 	actions := b.NewActionsPanelBuilder()
-	actions.SetEdit(rt.AddQueryParams(Collection,
-		"name", c.Name, "description", c.Description, "mode", "edit"))
-	actions.SetConfirmDelete(rt.AddQueryParams(Collection, "name", c.Name,
-		"mode", "confirm-delete"))
+	actions.SetEdit(u.SetMode(b.ModeEdit).Url)
+	actions.SetConfirmDelete(u.SetMode(b.ModeConfirmDelete).Url)
 
 	row := tb.NewRow()
 	row.AddCell(tb.NewCell(cmp.MakeTextLink(rt.MakeImagesURL(c.Name), c.Name)))
