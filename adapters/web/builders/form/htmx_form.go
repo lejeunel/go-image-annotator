@@ -20,7 +20,7 @@ func (m HTMXMethod) String() string {
 
 type FormBuilder struct {
 	submitEndpoint string
-	fields         []FormField
+	fields         []Renderer
 }
 
 func (b *FormBuilder) AddTextField(fieldName, displayName, divId string, opts ...FormTextFieldOption) *FormBuilder {

@@ -41,6 +41,7 @@ func NewSQLiteRepos(db *sqlx.DB, fstore af_store.Interface) SQLiteRepos {
 	clrepo := clc.NewSQLiteCollectionRepo(db)
 	lbrepo := lbl.NewSQLiteLabelRepo(db)
 	grprepo := grp.NewSQLiteGroupRepo(db)
+	rlrepo := r.NewSQLiteRoleRepo(db)
 	usrrepo := usr.NewSQLiteUserRepo(db)
 	imstore := im_store.New(imrepo, clrepo, anrepo, fstore)
 	scrrepo := scr.NewSQLiteScrollerRepo(db)
@@ -53,6 +54,7 @@ func NewSQLiteRepos(db *sqlx.DB, fstore af_store.Interface) SQLiteRepos {
 		Annotation: anrepo,
 		Scroller:   scrrepo,
 		Group:      grprepo,
+		Role:       rlrepo,
 		User:       usrrepo,
 		Db:         db,
 	}

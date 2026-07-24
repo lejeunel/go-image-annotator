@@ -18,12 +18,6 @@ type App struct {
 	a.Annotator
 }
 
-func NewApp(itrs Interactors,
-	sm s.MySessionManager,
-	an a.Annotator) App {
-	return App{itrs, sm, an}
-}
-
 type InitialAdminPresenter struct {
 	slog.Logger
 }

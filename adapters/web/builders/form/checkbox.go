@@ -1,6 +1,7 @@
 package form
 
 import (
+	"io"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -21,8 +22,8 @@ var checkIcon = `
         </svg>
 `
 
-func (f FormCheckboxField) Build() Node {
-	return Label(
+func (f FormCheckboxField) Render(w io.Writer) {
+	Label(
 		For(f.fieldName),
 		Class("flex items-center gap-2 text-sm font-medium text-on-surface dark:text-on-surface-dark has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong has-disabled:cursor-not-allowed has-disabled:opacity-75"),
 		Span(Class("relative flex items-center"),
@@ -30,5 +31,5 @@ func (f FormCheckboxField) Build() Node {
 			Input(ID(f.fieldName), Type("checkbox"), Class("before:content[''] peer relative size-4 appearance-none overflow-hidden rounded-sm border border-outline bg-surface-alt before:absolute before:inset-0 checked:border-primary checked:before:bg-primary focus:outline-2 focus:outline-offset-2 focus:outline-outline-strong checked:focus:outline-primary active:outline-offset-0 disabled:cursor-not-allowed dark:border-outline-dark dark:bg-surface-dark-alt dark:checked:border-primary-dark dark:checked:before:bg-primary-dark dark:focus:outline-outline-dark-strong dark:checked:focus:outline-primary-dark")),
 			Raw(checkIcon)),
 		Span(Text(f.displayName)),
-	)
+	).Render(w)
 }

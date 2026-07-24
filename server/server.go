@@ -77,7 +77,7 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	imagesServer.Route(router, webAuth)
 
 	adminPageBuilder := adm.NewPageBuilder(pageBuilder)
-	adminUserServer := admusr.New(adminPageBuilder, app.Itrs.User, cfg.DefaultPageSize)
+	adminUserServer := admusr.New(adminPageBuilder, app.Itrs.User, app.Itrs.Group, app.Itrs.Role, cfg.DefaultPageSize)
 	adminUserServer.Route(router, webAuth)
 
 	labelServer := lbl.New(pageBuilder, cfg.DefaultPageSize,

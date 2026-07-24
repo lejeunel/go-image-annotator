@@ -1,6 +1,10 @@
 package list
 
+import (
+	g "github.com/lejeunel/go-image-annotator/entities/group"
+)
+
 type OutputPort interface {
-	Success(Response)
+	SuccessListGroups([]g.Group)
 	Error(error)
 }

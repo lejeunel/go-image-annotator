@@ -2,38 +2,27 @@ package role
 
 import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestInternalErrOnCountShouldFail(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
-	repo.Db.Close()
-	_, err := repo.Count()
-	assert.ErrorIs(t, err, e.ErrInternal)
-}
-
-func TestCount(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
-	CreateRole(repo, "a-role")
-	count, _ := repo.Count()
-	assert.Equal(t, 1, int(*count))
-}
-
 func TestInternalErrOnListShouldFail(t *testing.T) {
 	repo := NewTestSQLiteRoleRepo()
 	repo.Db.Close()
-	_, err := repo.List(pag.PaginationParams{})
+	_, err := repo.List()
 	assert.ErrorIs(t, err, e.ErrInternal)
+}
+func TestListEmpty(t *testing.T) {
+	repo := NewTestSQLiteRoleRepo()
+	_, err := repo.List()
+	assert.NoError(t, err)
 }
 
 func TestList(t *testing.T) {
 	repo := NewTestSQLiteRoleRepo()
 	CreateRole(repo, "a-role")
 	CreateRole(repo, "another-role")
-	cs, err := repo.List(pag.PaginationParams{Page: 1, PageSize: 2})
+	cs, err := repo.List()
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(cs))
-	assert.False(t, cs[0].Name == cs[1].Name)
 }

@@ -27,5 +27,5 @@ func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
 	s.ListItr.Execute(r.Context(), pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
-		NewListCollectionsPresenter(w, s.PageBuilder))
+		NewListPresenter(w, s.PageBuilder))
 }

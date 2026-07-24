@@ -25,7 +25,7 @@ import (
 type ListImagesPresenter struct {
 	b.PaginatedListBuilder
 	io.Writer
-	ew.WebPageErrorPresenter
+	ew.ErrorPresenter
 	collection string
 }
 

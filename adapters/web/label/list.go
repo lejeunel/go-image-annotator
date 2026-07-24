@@ -20,5 +20,5 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
 	s.ListItr.Execute(r.Context(),
 		pag.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
-		NewListLabelsPresenter(w, s.PageBuilder))
+		NewListPresenter(w, s.PageBuilder))
 }

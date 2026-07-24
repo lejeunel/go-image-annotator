@@ -19,22 +19,22 @@ import (
 
 var listLabelsFields = []string{"name", "description", "actions"}
 
-type ListLabelsPresenter struct {
+type ListPresenter struct {
 	b.PaginatedListBuilder
 	io.Writer
-	e.WebPageErrorPresenter
+	e.ErrorPresenter
 }
 
-func NewListLabelsPresenter(w http.ResponseWriter, p b.PageBuilder) ListLabelsPresenter {
+func NewListPresenter(w http.ResponseWriter, p b.PageBuilder) ListPresenter {
 	p.SetTitle("Labels").SetHTMLTitle("Labels").SetActiveSection(cmp.LabelsPageActive)
 	pb := b.NewPaginatedListBuilder(p, listLabelsFields)
-	return ListLabelsPresenter{pb, w, e.NewErrorPresenter(w)}
+	return ListPresenter{pb, w, e.NewErrorPresenter(w)}
 }
 
-func (p ListLabelsPresenter) SuccessListLabels(r list.Response) {
+func (p ListPresenter) SuccessListLabels(r list.Response) {
 	p.SetPagination(r.Pagination, rt.Labels)
 	for _, l := range r.Labels {
-		row := MakeListLabelRow(l)
+		row := MakeRow(l)
 		p.AddRow(row)
 	}
 
@@ -43,14 +43,14 @@ func (p ListLabelsPresenter) SuccessListLabels(r list.Response) {
 	p.Render(p.Writer)
 }
 
-type LabelPresenter struct {
+type RowPresenter struct {
 	io.Writer
-	e.WebPageErrorPresenter
+	e.ErrorPresenter
 	successFindLabel func(lbl.Label)
 }
 
-func NewLabelPresenter(w http.ResponseWriter, mode string) LabelPresenter {
-	p := LabelPresenter{Writer: w, WebPageErrorPresenter: e.NewErrorPresenter(w)}
+func NewLabelPresenter(w http.ResponseWriter, mode string) RowPresenter {
+	p := RowPresenter{Writer: w, ErrorPresenter: e.NewErrorPresenter(w)}
 	switch mode {
 	case "edit":
 		p.successFindLabel = p.renderEditForm
@@ -62,10 +62,10 @@ func NewLabelPresenter(w http.ResponseWriter, mode string) LabelPresenter {
 	return p
 }
 
-func (p LabelPresenter) SuccessFindLabel(l lbl.Label) {
+func (p RowPresenter) SuccessFindLabel(l lbl.Label) {
 	p.successFindLabel(l)
 }
-func (p *LabelPresenter) renderEditForm(l lbl.Label) {
+func (p *RowPresenter) renderEditForm(l lbl.Label) {
 
 	b := bf.NewHTMXInlineFormBuilder(l.Name, len(listLabelsFields),
 		rt.AddQueryParams(Label, "name", l.Name))
@@ -73,7 +73,7 @@ func (p *LabelPresenter) renderEditForm(l lbl.Label) {
 	b.AddTextField("description", "Description", "description", bf.WithDefault(l.Description))
 	b.Render(p.Writer)
 }
-func (p *LabelPresenter) renderConfirmDelete(l lbl.Label) {
+func (p *RowPresenter) renderConfirmDelete(l lbl.Label) {
 	b.RenderConfirmDeleteRow(len(listLabelsFields),
 		l.Name,
 		"label",
@@ -81,11 +81,11 @@ func (p *LabelPresenter) renderConfirmDelete(l lbl.Label) {
 		rt.AddQueryParams(Label, "name", l.Name, "mode", "view"),
 		p.Writer)
 }
-func (p *LabelPresenter) renderView(l lbl.Label) {
-	MakeListLabelRow(l).Render(p.Writer)
+func (p *RowPresenter) renderView(l lbl.Label) {
+	MakeRow(l).Render(p.Writer)
 }
 
-func MakeListLabelRow(l lbl.Label) tb.Row {
+func MakeRow(l lbl.Label) tb.Row {
 	actions := b.NewActionsPanelBuilder()
 	actions.SetEdit(rt.AddQueryParams(Label, "name", l.Name, "description", l.Description, "mode", "edit"))
 	actions.SetConfirmDelete(rt.AddQueryParams(Label, "name", l.Name, "mode", "confirm-delete"))

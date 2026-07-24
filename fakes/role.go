@@ -4,21 +4,19 @@ import (
 	"slices"
 
 	rl "github.com/lejeunel/go-image-annotator/entities/role"
-	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type RoleRepo struct {
 	ErrOnCreate   error
 	ErrOnDelete   error
 	ErrOnFind     error
-	ErrOnCount    error
 	ErrOnList     error
 	ErrOnUpdate   error
 	ExistingNames []string
 	Got           *rl.Role
 	IsAssigned_   bool
-	Count_        int64
 	Return        rl.Role
+	ReturnList    []rl.Role
 	GotUpdatable  rl.UpdatableModel
 }
 
@@ -66,25 +64,12 @@ func (r *RoleRepo) Find(name string) (*rl.Role, error) {
 
 }
 
-func (r *RoleRepo) Count() (*int64, error) {
-	count := int64(0)
-	if r.ErrOnCount != nil {
-		return &count, r.ErrOnCount
-	}
-	return &r.Count_, nil
-}
-
-func (r *RoleRepo) List(req pag.PaginationParams) ([]*rl.Role, error) {
+func (r *RoleRepo) List() ([]rl.Role, error) {
 	if r.ErrOnList != nil {
 		return nil, r.ErrOnList
 	}
 
-	result := []*rl.Role{}
-	for range req.PageSize {
-		c := rl.NewRole(rl.NewRoleId(), "a-role")
-		result = append(result, &c)
-	}
-	return result, nil
+	return r.ReturnList, nil
 }
 
 func (r *RoleRepo) Update(m rl.UpdatableModel) error {

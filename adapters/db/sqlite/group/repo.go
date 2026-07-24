@@ -11,7 +11,6 @@ import (
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/use-cases/group/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/group/update"
 )
 
@@ -143,9 +142,8 @@ func (r SQLiteGroupRepo) GroupOfCollection(name string) (*string, error) {
 	return &group, nil
 
 }
-func (r SQLiteGroupRepo) List(m list.Request) ([]*g.Group, error) {
+func (r SQLiteGroupRepo) List() ([]g.Group, error) {
 	q := sq.StatementBuilder.Select(`id,name,description`).From("groups")
-	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
@@ -155,10 +153,10 @@ func (r SQLiteGroupRepo) List(m list.Request) ([]*g.Group, error) {
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
 
-	objects := []*g.Group{}
+	objects := []g.Group{}
 	for _, rec := range records {
 		e := r.rowToEntity(rec)
-		objects = append(objects, &e)
+		objects = append(objects, e)
 	}
 
 	return objects, nil

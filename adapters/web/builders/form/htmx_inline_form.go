@@ -1,6 +1,7 @@
 package form
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/url"
@@ -45,7 +46,7 @@ type HTMXInlineFormBuilder struct {
 	mode         FormMode
 	numColumns   int
 	title        *string
-	fields       []FormField
+	fields       []Renderer
 }
 type FormOption func(*HTMXInlineFormBuilder)
 
@@ -77,6 +78,11 @@ func (b *HTMXInlineFormBuilder) AddTextField(fieldName, displayName, divId strin
 	b.fields = append(b.fields, field)
 	return b
 }
+func (b *HTMXInlineFormBuilder) AddSelectableCombobox(title, id string) *SelectableCombobox {
+	box := NewSelectableCombobox(title, id)
+	b.fields = append(b.fields, &box)
+	return &box
+}
 func (b HTMXInlineFormBuilder) Render(w io.Writer) {
 
 	caption := Div(
@@ -93,10 +99,12 @@ func (b HTMXInlineFormBuilder) Render(w io.Writer) {
 				Div(
 					caption,
 					Class("ml-auto flex items-center gap-2"),
-					Map(b.fields, func(f FormField) Node {
+					Map(b.fields, func(f Renderer) Node {
+						var buf bytes.Buffer
+						f.Render(&buf)
 						return Div(
 							Class("flex flex-col gap-1"),
-							f.Build())
+							Raw(buf.String()))
 					}),
 					Div(Class("ml-auto flex gap-2"),
 						Button(Type("submit"),

@@ -18,21 +18,21 @@ import (
 
 var listCollectionsFields = []string{"name", "description", "group", "created", "actions"}
 
-type ListCollectionsPresenter struct {
+type ListPresenter struct {
 	b.PaginatedListBuilder
 	Writer io.Writer
-	e.WebPageErrorPresenter
+	e.ErrorPresenter
 }
 
-func NewListCollectionsPresenter(w http.ResponseWriter, p b.PageBuilder) ListCollectionsPresenter {
+func NewListPresenter(w http.ResponseWriter, p b.PageBuilder) ListPresenter {
 	p.SetTitle("Collections").SetHTMLTitle("Collections").SetActiveSection(cmp.CollectionsPageActive)
 	b := b.NewPaginatedListBuilder(p, listCollectionsFields)
-	return ListCollectionsPresenter{b, w, e.NewErrorPresenter(w)}
+	return ListPresenter{b, w, e.NewErrorPresenter(w)}
 }
-func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
+func (p ListPresenter) SuccessListCollections(r list.Response) {
 	p.SetPagination(r.Pagination, rt.Collections)
 	for _, c := range r.Collections {
-		row := MakeListCollectionRow(c)
+		row := MakeRow(c)
 		p.AddRow(row)
 	}
 	p.AddCreationButton("Create", CreateCollectionForm, createCollectionTargetDiv)
@@ -40,14 +40,14 @@ func (p ListCollectionsPresenter) SuccessListCollections(r list.Response) {
 	p.Render(p.Writer)
 }
 
-type CollectionPresenter struct {
+type RowPresenter struct {
 	Writer io.Writer
-	e.WebPageErrorPresenter
+	e.ErrorPresenter
 	successFindCollection func(clc.Collection)
 }
 
-func NewCollectionPresenter(w http.ResponseWriter, mode string) CollectionPresenter {
-	p := CollectionPresenter{Writer: w, WebPageErrorPresenter: e.NewErrorPresenter(w)}
+func NewCollectionPresenter(w http.ResponseWriter, mode string) RowPresenter {
+	p := RowPresenter{Writer: w, ErrorPresenter: e.NewErrorPresenter(w)}
 	switch mode {
 	case "edit":
 		p.successFindCollection = p.renderEditForm
@@ -58,10 +58,10 @@ func NewCollectionPresenter(w http.ResponseWriter, mode string) CollectionPresen
 	}
 	return p
 }
-func (p CollectionPresenter) SuccessFindCollection(c clc.Collection) {
+func (p RowPresenter) SuccessFindCollection(c clc.Collection) {
 	p.successFindCollection(c)
 }
-func (p *CollectionPresenter) renderEditForm(c clc.Collection) {
+func (p *RowPresenter) renderEditForm(c clc.Collection) {
 	endpoint := rt.AddQueryParams(Collection, "name", c.Name)
 	b := bf.NewHTMXInlineFormBuilder(c.Name, len(listCollectionsFields), endpoint)
 	b.AddTitle(fmt.Sprintf("Editing %v", c.Name))
@@ -69,7 +69,7 @@ func (p *CollectionPresenter) renderEditForm(c clc.Collection) {
 	b.AddTextField("description", "Description", "description", bf.WithDefault(c.Description))
 	b.Render(p.Writer)
 }
-func (p *CollectionPresenter) renderConfirmDelete(c clc.Collection) {
+func (p *RowPresenter) renderConfirmDelete(c clc.Collection) {
 	b.RenderConfirmDeleteRow(len(listCollectionsFields),
 		c.Name,
 		"collection",
@@ -77,11 +77,11 @@ func (p *CollectionPresenter) renderConfirmDelete(c clc.Collection) {
 		rt.AddQueryParams(Collection, "name", c.Name, "mode", "view"),
 		p.Writer)
 }
-func (p *CollectionPresenter) renderView(c clc.Collection) {
-	MakeListCollectionRow(c).Render(p.Writer)
+func (p *RowPresenter) renderView(c clc.Collection) {
+	MakeRow(c).Render(p.Writer)
 }
 
-func MakeListCollectionRow(c clc.Collection) tb.Row {
+func MakeRow(c clc.Collection) tb.Row {
 	var groupName string
 	if c.Group == nil {
 		groupName = "n/a"

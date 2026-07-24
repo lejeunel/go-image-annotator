@@ -1,6 +1,7 @@
 package form
 
 import (
+	"io"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -50,7 +51,7 @@ func (f FormTextField) input() Node {
 		Class("w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"))
 }
 
-func (f FormTextField) Build() Node {
-	return Group([]Node{f.label(), f.input()})
+func (f FormTextField) Render(w io.Writer) {
+	Group([]Node{f.label(), f.input()}).Render(w)
 
 }

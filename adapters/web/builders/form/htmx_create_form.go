@@ -1,6 +1,7 @@
 package form
 
 import (
+	"bytes"
 	"fmt"
 	st "github.com/lejeunel/go-image-annotator/adapters/web/styles"
 	"io"
@@ -36,8 +37,10 @@ func (b HTMXCreateFormBuilder) Render(w io.Writer) {
 			Attr(fmt.Sprintf(`hx-post=%v`, b.submitEndpoint)),
 			Class("bg-surface-alt/50 dark:bg-surface-dark-alt/50 p-4 rounded-lg shadow-md w-80 mb-4"),
 			title,
-			Map(b.fields, func(f FormField) Node {
-				return Group([]Node{Div(Class("mb-3"), f.Build())})
+			Map(b.fields, func(f Renderer) Node {
+				var buf bytes.Buffer
+				f.Render(&buf)
+				return Group([]Node{Div(Class("mb-3"), Raw(buf.String()))})
 			}),
 			Span(Class("flex items-center gap-2"),
 				Button(Type("submit"),

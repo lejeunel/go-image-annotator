@@ -3,36 +3,22 @@ package list
 import (
 	"context"
 	"fmt"
-
-	"github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type Interactor struct {
 	repo Repo
 }
 
-func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 	errCtx := "listing groups"
-	if err := pagination.Validate(r.Page, r.PageSize); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
 
-	found, err := i.repo.List(r)
+	found, err := i.repo.List()
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	count, err := i.repo.Count()
-	if err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-
-	response := Response{Pagination: pagination.New(int64(r.Page), r.PageSize, *count)}
-	response.Groups = found
-	out.Success(response)
+	out.SuccessListGroups(found)
 }
 
 type Option func(*Interactor)

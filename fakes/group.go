@@ -10,7 +10,9 @@ type GroupRepo struct {
 	ErrOnGetGroupOfCollection error
 	ErrOnExists               error
 	ErrOnFind                 error
+	ErrOnList                 error
 	Return                    string
+	ReturnList                []grp.Group
 	ExistingNames             []string
 }
 
@@ -40,4 +42,12 @@ func (r *GroupRepo) Exists(name string) (*bool, error) {
 	}
 	res = false
 	return &res, e.ErrNotFound
+}
+
+func (r *GroupRepo) List() ([]grp.Group, error) {
+	if r.ErrOnList != nil {
+		return nil, r.ErrOnList
+	}
+
+	return r.ReturnList, nil
 }

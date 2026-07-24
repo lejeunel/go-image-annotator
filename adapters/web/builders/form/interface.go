@@ -1,9 +1,9 @@
 package form
 
 import (
-	. "maragu.dev/gomponents"
+	"io"
 )
 
-type FormField interface {
-	Build() Node
+type Renderer interface {
+	Render(io.Writer)
 }

@@ -5,6 +5,5 @@ import (
 )
 
 type Repo interface {
-	List(Request) ([]*grp.Group, error)
-	Count() (*int64, error)
+	List() ([]grp.Group, error)
 }

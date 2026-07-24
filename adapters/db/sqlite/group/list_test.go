@@ -2,7 +2,6 @@ package group
 
 import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	l "github.com/lejeunel/go-image-annotator/use-cases/group/list"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -24,7 +23,7 @@ func TestCount(t *testing.T) {
 func TestInternalErrOnListShouldFail(t *testing.T) {
 	repo := NewTestSQLiteGroupRepo()
 	repo.Db.Close()
-	_, err := repo.List(l.Request{})
+	_, err := repo.List()
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
@@ -32,7 +31,7 @@ func TestList(t *testing.T) {
 	repo := NewTestSQLiteGroupRepo()
 	CreateGroup(repo, "a-group")
 	CreateGroup(repo, "another-group")
-	cs, err := repo.List(l.Request{Page: 1, PageSize: 2})
+	cs, err := repo.List()
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(cs))
 	assert.False(t, cs[0].Name == cs[1].Name)

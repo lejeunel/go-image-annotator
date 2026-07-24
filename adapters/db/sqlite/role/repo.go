@@ -11,7 +11,6 @@ import (
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	ro "github.com/lejeunel/go-image-annotator/entities/role"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type SQLiteRoleRepo struct {
@@ -100,20 +99,8 @@ func (r SQLiteRoleRepo) IsAssigned(name string) (*bool, error) {
 
 	return &isUsed, nil
 }
-func (r SQLiteRoleRepo) Count() (*int64, error) {
-	var count int64
-
-	query := "SELECT COUNT(*) FROM roles"
-	err := r.Db.QueryRow(query).Scan(&count)
-	if err != nil {
-		return nil, fmt.Errorf("counting roles: %v: %w", err, e.ErrInternal)
-	}
-
-	return &count, nil
-}
-func (r SQLiteRoleRepo) List(m pag.PaginationParams) ([]*ro.Role, error) {
+func (r SQLiteRoleRepo) List() ([]ro.Role, error) {
 	q := sq.StatementBuilder.Select(`id,name,description`).From("roles")
-	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
@@ -123,10 +110,10 @@ func (r SQLiteRoleRepo) List(m pag.PaginationParams) ([]*ro.Role, error) {
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
 
-	objects := []*ro.Role{}
+	objects := []ro.Role{}
 	for _, rec := range records {
 		e := r.rowToEntity(rec)
-		objects = append(objects, &e)
+		objects = append(objects, e)
 	}
 
 	return objects, nil

@@ -18,5 +18,6 @@ func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 		r.Get(User, s.TableRow)
 		r.Delete(User, s.Delete)
 		r.Get(CreateUserForm, s.CreateForm)
+		r.Post(User, s.Create)
 	})
 }

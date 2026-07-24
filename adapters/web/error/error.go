@@ -5,15 +5,15 @@ import (
 	"net/http"
 )
 
-type WebPageErrorPresenter struct {
+type ErrorPresenter struct {
 	b.PageBuilder
 	writer http.ResponseWriter
 }
 
-func (p WebPageErrorPresenter) Error(err error) {
+func (p ErrorPresenter) Error(err error) {
 	p.PageBuilder.SetError(err).Render(p.writer)
 }
 
-func NewErrorPresenter(w http.ResponseWriter) WebPageErrorPresenter {
-	return WebPageErrorPresenter{writer: w}
+func NewErrorPresenter(w http.ResponseWriter) ErrorPresenter {
+	return ErrorPresenter{writer: w}
 }
