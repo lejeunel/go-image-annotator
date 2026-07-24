@@ -67,9 +67,9 @@ func main() {
 	sort.Strings(methods)
 
 	var b strings.Builder
-	fmt.Fprintf(&b, "// Code generated automatically; DO NOT EDIT.\n\npackage %s\n\nvar validMethods = map[string]struct{}{\n", *pkg)
+	fmt.Fprintf(&b, "// Code generated automatically; DO NOT EDIT.\n\npackage %s\n\nvar validMethods = []string{\n", *pkg)
 	for _, m := range methods {
-		fmt.Fprintf(&b, "\t%q: {},\n", m)
+		fmt.Fprintf(&b, "\t%q,\n", m)
 	}
 	b.WriteString("}\n")
 

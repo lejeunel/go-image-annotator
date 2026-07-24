@@ -14,7 +14,7 @@ type Create struct {
 	json.ErrorPresenter
 }
 
-func (p Create) Success(r create.Response) {
+func (p Create) SuccessCreateUser(r create.Response) {
 	response := models.User{
 		Id:     r.Id,
 		Roles:  r.Roles,

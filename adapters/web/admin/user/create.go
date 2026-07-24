@@ -21,7 +21,7 @@ func NewCreateUserPresenter(w http.ResponseWriter) CreateUserPresenter {
 	}
 	return CreateUserPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
-func (p CreateUserPresenter) Success(r create.Response) {
+func (p CreateUserPresenter) SuccessCreateUser(r create.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 func (s *Server) Create(w http.ResponseWriter, r *http.Request) {

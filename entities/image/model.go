@@ -3,6 +3,7 @@ package image
 import (
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
@@ -38,7 +39,6 @@ type Image struct {
 	Polygons      []an.Polygon
 	Reader        io.Reader
 	Hash          string
-	MIMEType      string
 }
 
 func (i *Image) AddLabel(l lbl.Label) error {
@@ -78,6 +78,9 @@ func (i *Image) BoundingBoxSummary() []an.BoundingBoxResponse {
 			an.BoundingBoxResponse{Label: bbox.Label.Name, Xc: bbox.Xc, Yc: bbox.Yc, Width: bbox.Width, Height: bbox.Height})
 	}
 	return summary
+}
+func (i Image) Filename() string {
+	return fmt.Sprintf("%v.%v", i.Id.String(), strings.Split(i.Specs.MIMEType, "/")[1])
 }
 
 func NewImage(id ImageId, collection clc.Collection) Image {

@@ -30,17 +30,18 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func Make(auth auth.Authorizer, url string, port int) http.Handler {
+func Make(url string, port int) http.Handler {
 	cfg := config.Parse()
 
 	currentVersion := g.Info{Version: g.Version, Commit: g.Commit, Date: g.Date}
 	basePageBuilder := b.NewBasePageBuilder()
 	pageBuilder := b.NewPageBuilder(basePageBuilder, currentVersion)
 
-	app := sqlite.NewSQLiteApp(cfg, auth)
+	defaultAuth := auth.NewDefault()
+	app := sqlite.NewSQLiteApp(cfg, defaultAuth)
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	a.MaybeCreateInitialAdmin(app.Itrs.User.Create, cfg.InitialAdminEmail, cfg.InitialAdminPassword)
+	a.BootstrapInitialAdmin(app.Itrs.User.Create, app.Itrs.Role.Create, cfg.InitialAdminEmail, cfg.InitialAdminPassword, *logger)
 
 	baseURL := fmt.Sprintf("%v:%v", url, port)
 

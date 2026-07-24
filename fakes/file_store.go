@@ -3,8 +3,6 @@ package fake
 import (
 	"bytes"
 	"io"
-
-	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
 type FileStore struct {
@@ -16,7 +14,7 @@ type FileStore struct {
 	GotData          []byte
 }
 
-func (r *FileStore) Store(id im.ImageId, reader io.Reader) error {
+func (r *FileStore) Store(path string, reader io.Reader) error {
 	if r.ErrOnStore != nil {
 		return r.ErrOnStore
 	}
@@ -26,12 +24,12 @@ func (r *FileStore) Store(id im.ImageId, reader io.Reader) error {
 	return nil
 }
 
-func (r *FileStore) Delete(im.ImageId) error {
+func (r *FileStore) Delete(string) error {
 	r.NumDeletedImages += 1
 	return nil
 }
 
-func (r *FileStore) Get(im.ImageId) (io.Reader, error) {
+func (r *FileStore) Get(string) (io.Reader, error) {
 	if r.ErrOnGet != nil {
 		return nil, r.ErrOnGet
 	}

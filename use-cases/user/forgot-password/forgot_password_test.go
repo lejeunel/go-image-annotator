@@ -6,20 +6,9 @@ import (
 
 	"github.com/jonboulle/clockwork"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandleAuthError(t *testing.T) {
-	itr := New(&fk.UserRepo{},
-		1,
-		&fk.Tokenizer{},
-		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), "", p)
-	assert.True(t, p.GotAuthErr)
-	assert.False(t, p.GotSuccess)
-}
 func TestNonExistingUserShouldFail(t *testing.T) {
 	repo := &fk.UserRepo{Missing: true}
 	itr := New(repo, 1, &fk.Tokenizer{})

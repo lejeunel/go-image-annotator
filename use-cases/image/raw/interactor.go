@@ -2,8 +2,10 @@ package raw
 
 import (
 	"fmt"
-	im "github.com/lejeunel/go-image-annotator/entities/image"
 	"io"
+	"strings"
+
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
 type Interface interface {
@@ -11,7 +13,7 @@ type Interface interface {
 }
 
 type FileGetter interface {
-	Get(im.ImageId) (io.Reader, error)
+	Get(string) (io.Reader, error)
 }
 
 type Repo interface {
@@ -34,14 +36,14 @@ func (i Interactor) Execute(id string, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	reader, err := i.fileGetter.Get(imageId)
-	if err != nil {
-		out.Error(fmt.Errorf("%v: fetching raw-data: %w", errCtx, err))
-		return
-	}
 	specs, err := i.repo.GetSpecs(imageId)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: fetching image specifications: %w", errCtx, err))
+		return
+	}
+	reader, err := i.fileGetter.Get(fmt.Sprintf("%v.%v", imageId.String(), strings.Split(specs.MIMEType, "/")[1]))
+	if err != nil {
+		out.Error(fmt.Errorf("%v: fetching raw-data: %w", errCtx, err))
 		return
 	}
 

@@ -10,7 +10,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(r Response) {
+func (p *FakePresenter) SuccessCreateRole(r Response) {
 	p.GotSuccess = true
 	p.Got = r
 }

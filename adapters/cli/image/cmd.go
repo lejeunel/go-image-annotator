@@ -2,6 +2,7 @@ package image
 
 import (
 	"fmt"
+	s "github.com/lejeunel/go-image-annotator/adapters/cli/shared"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +15,7 @@ var (
 			dir := args[0]
 			collection := args[1]
 			fmt.Println("ingesting directory", dir, "into collection", collection)
-			IngestDirectory(dir, collection)
+			IngestDirectory(s.AnonymousAdminCtx(), dir, collection)
 		},
 	}
 )

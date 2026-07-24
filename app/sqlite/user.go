@@ -31,10 +31,10 @@ func NewSQLiteUserInteractors(
 		Create:                   create.New(repos.User, ApitokenGen, pwGen, create.WithAuth(auth)),
 		Delete:                   delete.New(repos.User, delete.WithAuth(auth)),
 		List:                     list.New(repos.User, list.WithAuth(auth)),
-		RenewToken:               rt.New(repos.User, ApitokenGen, rt.WithAuth(auth)),
+		RenewToken:               rt.New(repos.User, ApitokenGen),
 		UpdatePrivileges:         upr.New(repos.User, repos.Group, repos.Role, upr.WithAuth(auth)),
-		RequestForgottenPassword: fp.New(repos.User, forgotPassworkTokenExpirationMinutes, forgotPasswordTokenGen, fp.WithAuth(auth)),
+		RequestForgottenPassword: fp.New(repos.User, forgotPassworkTokenExpirationMinutes, forgotPasswordTokenGen),
 		ResetForgottenPassword:   rfpw.New(repos.User, passwordHasher, passwordValidator),
-		ChangePassword:           cpw.New(repos.User, passwordVerifier, passwordValidator, cpw.WithAuth(auth)),
+		ChangePassword:           cpw.New(repos.User, passwordVerifier, passwordValidator),
 	}
 }

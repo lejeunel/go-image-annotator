@@ -84,10 +84,10 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 	specs, reader, err := i.ImageSpecsDetector.Detect(r.Reader)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", errCtx, err)
-
 	}
 
-	hash, err := i.ingestRawData(imageId, reader)
+	image.Specs = *specs
+	hash, err := i.ingestRawData(*image, reader)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", errCtx, err)
 	}
@@ -95,7 +95,7 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 	specs.IngestedAt = i.clock.Now()
 	if err := i.UnitOfWork.RunInTx(func(tx Repos) error {
 		if err := i.ingestImage(tx, r.UserId, image, *hash, *specs); err != nil {
-			i.ArtefactRepo.Delete(image.Id)
+			i.ArtefactRepo.Delete(image.Filename())
 			return err
 		}
 		return nil
@@ -106,7 +106,7 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 	return &Response{ImageId: image.Id, Collection: collection.Name}, nil
 
 }
-func (i *Ingester) ingestRawData(id im.ImageId, reader io.Reader) (*[]byte, error) {
+func (i *Ingester) ingestRawData(image im.Image, reader io.Reader) (*[]byte, error) {
 
 	tee := io.TeeReader(reader, i.Hasher)
 	hash := i.Hasher.Sum(nil)
@@ -115,7 +115,7 @@ func (i *Ingester) ingestRawData(id im.ImageId, reader io.Reader) (*[]byte, erro
 		return nil, err
 	}
 
-	if err := i.ArtefactRepo.Store(id, tee); err != nil {
+	if err := i.ArtefactRepo.Store(image.Filename(), tee); err != nil {
 		return nil, err
 	}
 

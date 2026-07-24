@@ -22,7 +22,7 @@ func (p *IngestPresenter) Success(r ingm.Response) {
 	fmt.Println("ingested image with id:", r.ImageId)
 }
 
-func IngestDirectory(dir, collection string) {
+func IngestDirectory(ctx context.Context, dir, collection string) {
 
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -31,17 +31,17 @@ func IngestDirectory(dir, collection string) {
 
 	app := s.NewSQLiteApp(config.Parse(), auth.NewVoidAuth())
 	for _, entry := range entries {
-		ingestImage(&app.Itrs.Image.Ingest, dir, entry, collection)
+		ingestImage(ctx, &app.Itrs.Image.Ingest, dir, entry, collection)
 	}
 }
 
-func ingestImage(itr *ingest.Interactor, dir string, entry os.DirEntry, collection string) {
+func ingestImage(ctx context.Context, itr *ingest.Interactor, dir string, entry os.DirEntry, collection string) {
 	if !entry.IsDir() {
 		f, err := os.Open(filepath.Join(dir, entry.Name()))
 		if err != nil {
 			return
 		}
-		itr.Execute(context.Background(), ingm.Request{Collection: collection, Reader: f}, &IngestPresenter{})
+		itr.Execute(ctx, ingm.Request{Collection: collection, Reader: f}, &IngestPresenter{})
 	}
 
 }

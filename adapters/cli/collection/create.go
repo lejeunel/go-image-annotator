@@ -19,9 +19,9 @@ func (p CreatePresenter) Success(r clc.Response) {
 	fmt.Println("created collection with name", r.Name, "and description", r.Description)
 }
 
-func Create(name string, group *string, description string) {
-	app := a.NewSQLiteApp(config.Parse(), auth.NewVoidAuth())
-	app.Itrs.Collection.Create.Execute(context.Background(),
+func Create(ctx context.Context, name string, group *string, description string) {
+	app := a.NewSQLiteApp(config.Parse(), auth.NewDefault())
+	app.Itrs.Collection.Create.Execute(ctx,
 		clc.Request{Name: name, Group: group, Description: description}, CreatePresenter{})
 
 }

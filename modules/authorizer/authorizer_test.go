@@ -1,10 +1,11 @@
 package authorizer
 
 import (
-	u "github.com/lejeunel/go-image-annotator/entities/user"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	u "github.com/lejeunel/go-image-annotator/entities/user"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFailOnIllFormed(t *testing.T) {
@@ -16,75 +17,40 @@ func TestFailOnNonExistingMethod(t *testing.T) {
 	_, err := NewAuthRulesFromYaml(
 		strings.NewReader(
 			`
-authorization-rules:
-  - method: NonExistingMethod
-`,
-		))
-	assert.Error(t, err)
-}
-
-func TestFailOnInvalidIgnoreGroupValue(t *testing.T) {
-	_, err := NewAuthRulesFromYaml(
-		strings.NewReader(
-			`
-authorization-rules:
-  - method: CreateCollection
-    ignore_group: maybe... I don't know
-`,
-		))
-	assert.Error(t, err)
-}
-
-func TestFailOnInvalidRolesValue(t *testing.T) {
-	_, err := NewAuthRulesFromYaml(
-		strings.NewReader(
-			`
-authorization-rules:
-  - method: CreateCollection
-    ignore_group: maybe... I don't know
-    roles: this-should-be-a-list
+version: 1
+rules:
+  viewer:
+    - NonExistingMethod
 `,
 		))
 	assert.Error(t, err)
 }
 
 var validSpec = `
-authorization-rules:
-  - method: CreateCollection
-    ignore_group: true
-    admin_only: true
-    roles: [a-role, another-role]
+version: 1
+rules:
+  a-role:
+    - CreateCollection
+  another-role:
+    - CreateCollection
 `
 
 func TestValidRules(t *testing.T) {
 	authRules, err := NewAuthRulesFromYaml(
 		strings.NewReader(validSpec))
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(*authRules))
-	assert.Equal(t, 2, len((*authRules)[0].Roles))
-	assert.True(t, (*authRules)[0].AdminOnly)
-	assert.True(t, (*authRules)[0].IgnoreGroup)
+	assert.Equal(t, 2, len(*authRules))
 }
 
 func TestAuthConstruction(t *testing.T) {
 	auth, err := NewFromYaml(strings.NewReader(validSpec))
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(auth.Rules))
-}
-
-func TestAuthorizeWhenNoRuleSpecified(t *testing.T) {
-	auth, err := NewFromYaml(strings.NewReader(""))
-	assert.NoError(t, err)
-	err = auth.CreateCollection(t.Context(), "")
-	assert.NoError(t, err)
+	assert.Equal(t, 2, len(auth.Rules))
 }
 
 func TestNotAuthorizedWhenRequiredRoleIsMissing(t *testing.T) {
-	auth, err := New(
-		[]AuthRule{{
-			Method:      "CreateCollection",
-			IgnoreGroup: true,
-			Roles:       []string{"a-role-that-i-dont-have"}}})
+	policies := map[string][]string{"super-role": {"CreatedCollection"}}
+	auth, err := New(policies)
 	assert.NoError(t, err)
 	ctx := u.AppendUserToContext(t.Context(), u.User{Roles: []string{"my-role"}})
 	err = auth.CreateCollection(ctx, "whatever")
@@ -92,22 +58,18 @@ func TestNotAuthorizedWhenRequiredRoleIsMissing(t *testing.T) {
 }
 
 func TestAuthorizedWhenRequiredRoleIsPresent(t *testing.T) {
-	auth, err := New(
-		[]AuthRule{{
-			Method:      "CreateCollection",
-			IgnoreGroup: true,
-			Roles:       []string{"a-role-that-i-have"}}})
+	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
+	auth, err := New(policies)
 	assert.NoError(t, err)
-	ctx := u.AppendUserToContext(t.Context(), u.User{Roles: []string{"a-role-that-i-have"}})
-	err = auth.CreateCollection(ctx, "whatever")
+	ctx := u.AppendUserToContext(t.Context(),
+		u.User{Roles: []string{"a-role-that-i-have"}, Groups: []string{"my-group"}})
+	err = auth.CreateCollection(ctx, "my-group")
 	assert.NoError(t, err)
 }
 
 func TestNotAuthorizedWhenNotInGroup(t *testing.T) {
-	auth, err := New(
-		[]AuthRule{{
-			Method: "CreateCollection",
-			Roles:  []string{"a-role-that-i-have"}}})
+	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
+	auth, err := New(policies)
 	assert.NoError(t, err)
 	ctx := u.AppendUserToContext(t.Context(), u.User{Roles: []string{"a-role-that-i-have"},
 		Groups: []string{"group-of-losers"}})
@@ -116,10 +78,8 @@ func TestNotAuthorizedWhenNotInGroup(t *testing.T) {
 }
 
 func TestAuthorizedWhenMemberOfGroup(t *testing.T) {
-	auth, err := New(
-		[]AuthRule{{
-			Method: "CreateCollection",
-			Roles:  []string{"a-role-that-i-have"}}})
+	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
+	auth, err := New(policies)
 	assert.NoError(t, err)
 	ctx := u.AppendUserToContext(t.Context(), u.User{Roles: []string{"a-role-that-i-have"},
 		Groups: []string{"group-of-chads"}})
@@ -127,54 +87,18 @@ func TestAuthorizedWhenMemberOfGroup(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestAuthorizedWhenNeededGroupIsVoid(t *testing.T) {
-	auth, err := New(
-		[]AuthRule{{
-			Method: "CreateCollection",
-			Roles:  []string{"a-role-that-i-have"}}})
-	assert.NoError(t, err)
-	ctx := u.AppendUserToContext(t.Context(), u.User{Roles: []string{"a-role-that-i-have"}})
-	err = auth.CreateCollection(ctx, "")
-	assert.NoError(t, err)
-}
-
 func TestAppendSetOfRules(t *testing.T) {
+	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
 	auth := NewVoidAuth()
-	auth.SetAuthRules(
-		[]AuthRule{{
-			Method: "CreateCollection",
-			Roles:  []string{"a-role-that-i-have"}}})
+	auth.SetAuthRules(policies)
 	err := auth.CreateCollection(t.Context(), "")
 	assert.Error(t, err)
 }
-func TestAdminOnlyFailsWhenNotAdmin(t *testing.T) {
-	auth, _ := New(
-		[]AuthRule{{
-			Method:    "CreateUser",
-			AdminOnly: true}})
-	ctx := u.AppendUserToContext(t.Context(),
-		u.NewUser("admin@example.com"))
-	err := auth.CreateUser(ctx)
-	assert.Error(t, err)
-}
-
-func TestAdminOnly(t *testing.T) {
-	auth, _ := New(
-		[]AuthRule{{
-			Method:    "CreateUser",
-			AdminOnly: true}})
-	ctx := u.AppendUserToContext(t.Context(),
-		u.NewUser("admin@example.com", u.WithRoles([]string{"admin"})))
-	err := auth.CreateUser(ctx)
-	assert.NoError(t, err)
-}
 
 func TestAdminDoesNotNeedRoleNorGroup(t *testing.T) {
-	auth, _ := New(
-		[]AuthRule{{
-			Method: "Annotate",
-			Roles:  []string{"a-role-that-i-dont-have"},
-		}})
+	policies := map[string][]string{"a-role-that-i-dont-have": {"CreateCollection"},
+		"admin": {"*"}}
+	auth, _ := New(policies)
 	ctx := u.AppendUserToContext(t.Context(),
 		u.NewUser("admin@example.com", u.WithRoles([]string{"admin"})))
 	err := auth.Annotate(ctx, "a-group-i-am-not-member-of")

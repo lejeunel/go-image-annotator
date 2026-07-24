@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -21,11 +20,11 @@ func NewFileStore(baseDir string) FileStore {
 	return FileStore{baseDir: baseDir}
 }
 
-func (r FileStore) filePath(id im.ImageId) string {
-	return filepath.Join(r.baseDir, fmt.Sprintf("%s", id.String()))
+func (r FileStore) filePath(path string) string {
+	return filepath.Join(r.baseDir, fmt.Sprintf("%s", path))
 }
-func (r FileStore) Store(id im.ImageId, reader io.Reader) error {
-	path := r.filePath(id)
+func (r FileStore) Store(path string, reader io.Reader) error {
+	path = r.filePath(path)
 
 	f, err := os.Create(path)
 	if err != nil {
@@ -35,8 +34,8 @@ func (r FileStore) Store(id im.ImageId, reader io.Reader) error {
 	_, err = io.Copy(f, reader)
 	return err
 }
-func (r FileStore) Delete(id im.ImageId) error {
-	path := r.filePath(id)
+func (r FileStore) Delete(path string) error {
+	path = r.filePath(path)
 	if err := os.Remove(path); err != nil {
 		if os.IsNotExist(err) {
 			return fmt.Errorf("artefact not found: %w", err)
@@ -45,8 +44,8 @@ func (r FileStore) Delete(id im.ImageId) error {
 	}
 	return nil
 }
-func (r FileStore) Get(id im.ImageId) (io.Reader, error) {
-	path := r.filePath(id)
+func (r FileStore) Get(path string) (io.Reader, error) {
+	path = r.filePath(path)
 	reader, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {

@@ -25,7 +25,7 @@ func (p AnnotationPagePresenter) SuccessInitScroller(s scr.ScrollerState) {
 }
 func (p AnnotationPagePresenter) SuccessReadImage(im im.Image) {
 	p.View.SetImageInfo(v.NewImageInfo(im.Id, im.Collection.Name, im.Specs))
-	p.View.SetImage(v.NewImage(im.Id, im.Reader, im.Collection.Name, im.MIMEType))
+	p.View.SetImage(v.NewImage(im.Id, im.Reader, im.Collection.Name, im.Specs.MIMEType))
 	p.View.SetAnnotations(MakeBoundingBoxes(im.BoundingBoxes, p.Colorizer),
 		MakePolygons(im.Polygons, p.Colorizer),
 		MakeImageLabels(im.Labels))

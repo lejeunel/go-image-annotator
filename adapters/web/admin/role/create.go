@@ -21,7 +21,7 @@ func NewCreateRolePresenter(w http.ResponseWriter) CreateRolePresenter {
 	}
 	return CreateRolePresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
-func (p CreateRolePresenter) Success(r create.Response) {
+func (p CreateRolePresenter) SuccessCreateRole(r create.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 func (s *Server) Create(w http.ResponseWriter, r *http.Request) {

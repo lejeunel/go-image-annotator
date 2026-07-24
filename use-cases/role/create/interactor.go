@@ -33,7 +33,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.Success(Response{Name: r.Name, Description: r.Description})
+	out.SuccessCreateRole(Response{Name: r.Name, Description: r.Description})
 }
 
 func (i *Interactor) create(r Request) error {

@@ -2,6 +2,7 @@ package image_store
 
 import (
 	"fmt"
+	"strings"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
@@ -52,7 +53,7 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 		return nil, fmt.Errorf("fetching image specs: %w", err)
 	}
 
-	reader, err := s.fileStore.Get(base.ImageId)
+	reader, err := s.fileStore.Get(fmt.Sprintf("%v.%v", base.ImageId, strings.Split(specs.MIMEType, "/")[1]))
 	if err != nil {
 		return nil, fmt.Errorf("fetching raw data: %w", err)
 	}

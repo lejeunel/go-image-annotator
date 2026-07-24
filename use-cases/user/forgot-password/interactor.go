@@ -7,7 +7,6 @@ import (
 	"time"
 
 	tk "github.com/lejeunel/go-image-annotator/entities/token"
-	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -19,17 +18,11 @@ type Interactor struct {
 	repo           Repo
 	expiresMinutes int
 	tokenGenerator TokenGenerator
-	auth           Auth
 	clock          clockwork.Clock
 }
 
 func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort) {
 	errCtx := "requesting forgotten password token"
-	if err := i.auth.RequestForgottenPasswordToken(ctx); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-
-	}
 	exists, err := i.repo.Exists(userId)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: checking user %v exists: %w", errCtx, userId, err))
@@ -62,12 +55,6 @@ func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort)
 
 type Option func(*Interactor)
 
-func WithAuth(a Auth) Option {
-	return func(i *Interactor) {
-		i.auth = a
-	}
-}
-
 func WithClock(c clockwork.Clock) Option {
 	return func(i *Interactor) {
 		i.clock = c
@@ -76,7 +63,6 @@ func WithClock(c clockwork.Clock) Option {
 
 func New(r Repo, expiresMinutes int, g TokenGenerator, opts ...Option) Interactor {
 	i := &Interactor{repo: r,
-		auth:           auth.NewVoidAuth(),
 		tokenGenerator: g,
 		expiresMinutes: expiresMinutes,
 		clock:          clockwork.NewRealClock(),

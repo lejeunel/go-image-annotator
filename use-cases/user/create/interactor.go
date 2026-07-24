@@ -64,7 +64,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	out.Success(Response{
+	out.SuccessCreateUser(Response{
 		Id:     user.Id,
 		Groups: user.Groups,
 		Roles:  user.Roles})

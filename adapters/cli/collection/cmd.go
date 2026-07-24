@@ -1,6 +1,7 @@
 package collection
 
 import (
+	s "github.com/lejeunel/go-image-annotator/adapters/cli/shared"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +18,7 @@ var (
 			if cmd.Flags().Changed("group") {
 				groupPtr = &group
 			}
-			Create(name, groupPtr, description)
+			Create(s.AnonymousAdminCtx(), name, groupPtr, description)
 		},
 	}
 )

@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	ri "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	r "github.com/lejeunel/go-image-annotator/use-cases/role"
 	"github.com/lejeunel/go-image-annotator/use-cases/role/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/role/delete"
@@ -10,12 +11,12 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/role/update"
 )
 
-func NewSQLiteRoleInteractors(repo ri.SQLiteRoleRepo) r.Interactors {
+func NewSQLiteRoleInteractors(repo ri.SQLiteRoleRepo, a auth.Authorizer) r.Interactors {
 	return r.Interactors{
 		Find:   find.New(repo),
-		Create: create.New(repo),
-		Delete: delete.New(repo),
+		Create: create.New(repo, create.WithAuth(a)),
+		Delete: delete.New(repo, delete.WithAuth(a)),
 		List:   list.New(repo),
-		Update: update.New(repo),
+		Update: update.New(repo, update.WithAuth(a)),
 	}
 }

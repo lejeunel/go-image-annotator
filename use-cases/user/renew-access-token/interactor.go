@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	tk "github.com/lejeunel/go-image-annotator/entities/token"
-	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -16,17 +15,10 @@ type TokenGenerator interface {
 type Interactor struct {
 	repo           Repo
 	tokenGenerator TokenGenerator
-
-	auth Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort) {
 	errCtx := "renewing personal access token"
-	if err := i.auth.RenewToken(ctx); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-
-	}
 	exists, err := i.repo.Exists(userId)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: checking user %v exists: %w", errCtx, userId, err))
@@ -52,15 +44,8 @@ func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort)
 
 type Option func(*Interactor)
 
-func WithAuth(a Auth) Option {
-	return func(i *Interactor) {
-		i.auth = a
-	}
-}
-
 func New(r Repo, g TokenGenerator, opts ...Option) Interactor {
 	i := &Interactor{repo: r,
-		auth:           auth.NewVoidAuth(),
 		tokenGenerator: g,
 	}
 

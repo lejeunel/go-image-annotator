@@ -2,32 +2,30 @@ package authorizer
 
 import (
 	"fmt"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"gopkg.in/yaml.v2"
 	"io"
 	"os"
+	"slices"
 	"strings"
+
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"gopkg.in/yaml.v2"
 )
 
-type YamlConfigAuthRule struct {
-	Method      string   `yaml:"method"`
-	IgnoreGroup bool     `yaml:"ignore_group"`
-	Roles       []string `yaml:"roles"`
-	AdminOnly   bool     `yaml:"admin_only"`
+type YamlPolicies struct {
+	Version int                 `yaml:"version"`
+	Rules   map[string][]string `yaml:"rules"`
 }
 
-type YamlConfigAuthRules struct {
-	Rules []YamlConfigAuthRule `yaml:"authorization-rules"`
-}
+type Policies map[string][]string
 
-func validateYamlAuthRules(rules []YamlConfigAuthRule) error {
+func validateYamlPolicies(cfg YamlPolicies) error {
 	invalidNames := []string{}
-	for _, r := range rules {
-		_, ok := validMethods[r.Method]
-		if !ok {
-			invalidNames = append(invalidNames, r.Method)
+	for _, methods := range cfg.Rules {
+		for _, method := range methods {
+			if !slices.Contains(validMethods, method) {
+				invalidNames = append(invalidNames, method)
+			}
 		}
-
 	}
 	if len(invalidNames) > 0 {
 		return fmt.Errorf("checking for validity of method names: got invalid names: %v: %w",
@@ -36,38 +34,38 @@ func validateYamlAuthRules(rules []YamlConfigAuthRule) error {
 	return nil
 }
 
-func NewAuthRulesFromYaml(r io.Reader) (*[]AuthRule, error) {
+func NewAuthRulesFromYaml(r io.Reader) (*Policies, error) {
 	errCtx := "loading authorization rules from yaml file"
 	data, err := io.ReadAll(r)
 	if err != nil {
 		panic(fmt.Errorf("%v: %w", errCtx, err))
 	}
-	var yamlAuthRules YamlConfigAuthRules
+	var yamlAuthRules YamlPolicies
 	if err := yaml.Unmarshal(data, &yamlAuthRules); err != nil {
 		return nil, fmt.Errorf("%v: %w: %w", errCtx, err, e.ErrValidation)
 	}
-	if err := validateYamlAuthRules(yamlAuthRules.Rules); err != nil {
+	if err := validateYamlPolicies(yamlAuthRules); err != nil {
 		return nil, fmt.Errorf("%v: %w", errCtx, err)
 	}
 
-	rules := []AuthRule{}
-	for _, r := range yamlAuthRules.Rules {
-		rules = append(rules, AuthRule{
-			Method:      r.Method,
-			IgnoreGroup: r.IgnoreGroup,
-			Roles:       r.Roles,
-			AdminOnly:   r.AdminOnly,
-		},
-		)
+	rules := make(Policies)
+	for role, methods := range yamlAuthRules.Rules {
+		for _, method := range methods {
+			if !slices.Contains(validMethods, method) {
+				return nil, fmt.Errorf("%v: %w", errCtx, err)
+
+			}
+			rules[role] = append(rules[role], method)
+		}
 	}
 
 	return &rules, nil
 }
 
-func ReadAuthRulesFromPath(path string) (*[]AuthRule, error) {
-	voidRules := []AuthRule{}
+func ReadAuthRulesFromPath(path string) (*Policies, error) {
+	voidPolicies := Policies{}
 	if path == "" {
-		return &voidRules, nil
+		return &voidPolicies, nil
 	}
 	errCtx := fmt.Errorf("parsing authentication specifications from file %v", path)
 	_, err := os.Stat(path)
@@ -87,7 +85,7 @@ func ReadAuthRulesFromPath(path string) (*[]AuthRule, error) {
 		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}
 	if rules == nil {
-		return &voidRules, nil
+		return &voidPolicies, nil
 	}
 	return rules, nil
 

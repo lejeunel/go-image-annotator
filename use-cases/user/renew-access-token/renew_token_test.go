@@ -4,18 +4,9 @@ import (
 	"testing"
 
 	fk "github.com/lejeunel/go-image-annotator/fakes"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandleAuthError(t *testing.T) {
-	itr := New(&fk.UserRepo{}, &fk.Tokenizer{},
-		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), "", p)
-	assert.True(t, p.GotAuthErr)
-	assert.False(t, p.GotSuccess)
-}
 func TestNonExistingUserShouldFail(t *testing.T) {
 	repo := &fk.UserRepo{Missing: true}
 	itr := New(repo, &fk.Tokenizer{})

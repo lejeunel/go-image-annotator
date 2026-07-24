@@ -1,6 +1,6 @@
 package create
 
 type OutputPort interface {
-	Success(Response)
+	SuccessCreateRole(Response)
 	Error(error)
 }

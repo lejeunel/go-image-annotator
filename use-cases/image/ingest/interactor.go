@@ -36,6 +36,7 @@ func WithAuth(a Auth) Option {
 
 func New(ingester ing.Interface, repo CollectionRepo, opts ...Option) *Interactor {
 	i := &Interactor{ingester: ingester,
+		repo: repo,
 		auth: auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
