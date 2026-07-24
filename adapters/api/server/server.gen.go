@@ -147,11 +147,11 @@ type NewLabel struct {
 
 // NewUser defines model for NewUser.
 type NewUser struct {
-	// Id Id of the new user
-	Id string `json:"id"`
+	Groups *[]string `json:"groups,omitempty"`
 
-	// IsAdmin Give admin privileges to new user
-	IsAdmin *bool `json:"is_admin,omitempty"`
+	// Id Id of the new user
+	Id    string    `json:"id"`
+	Roles *[]string `json:"roles,omitempty"`
 }
 
 // Pagination defines model for Pagination.
@@ -193,23 +193,11 @@ type UpdateCollection struct {
 
 // User defines model for User.
 type User struct {
-	// Id Name of the user
-	Id string `json:"id"`
-
-	// IsAdmin Is the user admin?
-	IsAdmin *bool `json:"is_admin,omitempty"`
-}
-
-// UserIdentity defines model for UserIdentity.
-type UserIdentity struct {
 	Groups []string `json:"groups"`
 
 	// Id Id of the user
-	Id string `json:"id"`
-
-	// IsAdmin whether user has admin privileges
-	IsAdmin bool     `json:"is_admin"`
-	Roles   []string `json:"roles"`
+	Id    string   `json:"id"`
+	Roles []string `json:"roles"`
 }
 
 // ListCollectionsParams defines parameters for ListCollections.

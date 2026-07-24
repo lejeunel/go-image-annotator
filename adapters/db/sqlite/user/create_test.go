@@ -4,6 +4,10 @@ import (
 	"testing"
 
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	grr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
+	rlr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
+	g "github.com/lejeunel/go-image-annotator/entities/group"
+	r "github.com/lejeunel/go-image-annotator/entities/role"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -41,30 +45,6 @@ func TestNoCreatedUserDoNotExist(t *testing.T) {
 	assert.False(t, exists)
 }
 
-func TestCreateAdmin(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
-	user := u.NewUser("admin", u.WithAdmin(true))
-	err := repo.Create(user)
-	assert.NoError(t, err)
-	r, err := repo.Find("admin")
-	assert.NoError(t, err)
-	assert.Equal(t, true, r.IsAdmin)
-
-	numAdmin, err := repo.CountAdmins()
-	assert.NoError(t, err)
-	assert.Equal(t, int64(1), numAdmin)
-}
-
-func TestSetAdmin(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
-	user := u.NewUser("admin")
-	repo.Create(user)
-	err := repo.SetAdmin(user.Id, true)
-	assert.NoError(t, err)
-	r, _ := repo.Find(user.Id)
-	assert.True(t, r.IsAdmin)
-}
-
 func TestPersonalAccessTokenHash(t *testing.T) {
 	hash := []byte("pat-hash")
 	repo := NewSQLiteUserRepo(s.NewInMemory())
@@ -85,4 +65,28 @@ func TestPasswordHash(t *testing.T) {
 	r, err := repo.Find("user@example.com")
 	assert.NoError(t, err)
 	assert.Equal(t, hash, r.HashPassword)
+}
+
+func TestCreateAdminInGroup(t *testing.T) {
+	db := s.NewInMemory()
+	repo := NewSQLiteUserRepo(db)
+
+	roleRepo := rlr.NewSQLiteRoleRepo(db)
+	role := r.NewRole(r.NewRoleId(), "admin")
+	roleRepo.Create(role)
+
+	groupRepo := grr.NewSQLiteGroupRepo(db)
+	group := g.NewGroup(g.NewGroupId(), "my-group")
+	groupRepo.Create(group)
+
+	user := u.NewUser("user@example.com",
+		u.WithRoles([]string{"admin"}),
+		u.WithGroups([]string{"my-group"}))
+	err := repo.Create(user)
+	assert.NoError(t, err)
+	r, err := repo.Find("user@example.com")
+	assert.NoError(t, err)
+	assert.Contains(t, r.Roles, "admin")
+	assert.Contains(t, r.Groups, "my-group")
+
 }

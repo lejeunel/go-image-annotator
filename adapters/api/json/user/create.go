@@ -16,8 +16,9 @@ type Create struct {
 
 func (p Create) Success(r create.Response) {
 	response := models.User{
-		Id:      r.Id,
-		IsAdmin: &r.IsAdmin,
+		Id:     r.Id,
+		Roles:  r.Roles,
+		Groups: r.Groups,
 	}
 
 	json.WriteJSON(p.Writer, 200, response)

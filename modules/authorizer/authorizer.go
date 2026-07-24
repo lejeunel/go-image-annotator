@@ -75,13 +75,13 @@ func (a Authorizer) check(ctx context.Context, method, group string) error {
 	}
 
 	if rule.AdminOnly {
-		if user.IsAdmin {
+		if user.IsAdmin() {
 			return nil
 		}
 		return fmt.Errorf("%v: checking if user is admin given method is admin only: %w", errCtx, e.ErrAuthorization)
 	}
 
-	if user.IsAdmin {
+	if user.IsAdmin() {
 		return nil
 	}
 

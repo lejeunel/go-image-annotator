@@ -42,7 +42,7 @@ func MakeUserBadge(user u.User, dashboardURL string) Node {
 	var buf bytes.Buffer
 	menu := UserMenu{UserName: user.Id, Icon: iconBuf.String()}
 	menu.Entries = append(menu.Entries, UserMenuEntry{"Dashboard", dashboardURL})
-	if user.IsAdmin {
+	if user.IsAdmin() {
 		menu.Entries = append(menu.Entries, UserMenuEntry{"Admin", rt.AdminUrl})
 	}
 	menu.Entries = append(menu.Entries, UserMenuEntry{"Sign out", rt.LogoutUrl})

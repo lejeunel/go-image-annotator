@@ -16,8 +16,11 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req := create.Request{Id: body.Id}
-	if *body.IsAdmin {
-		req.IsAdmin = *body.IsAdmin
+	if body.Roles != nil {
+		req.Roles = *body.Roles
+	}
+	if body.Groups != nil {
+		req.Groups = *body.Groups
 	}
 
 	s.User.Create.Execute(
@@ -27,11 +30,10 @@ func (s *Server) WhoAmI(w http.ResponseWriter, r *http.Request) {
 	user := u.IdentityFromContext(r.Context())
 
 	if user != nil {
-		json.WriteJSON(w, 200, UserIdentity{
-			Id:      user.Id,
-			Groups:  user.Groups,
-			Roles:   user.Roles,
-			IsAdmin: user.IsAdmin,
+		json.WriteJSON(w, 200, User{
+			Id:     user.Id,
+			Groups: user.Groups,
+			Roles:  user.Roles,
 		})
 		return
 	}

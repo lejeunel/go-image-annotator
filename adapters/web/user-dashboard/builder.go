@@ -38,7 +38,7 @@ func RenderDashboard(ctx context.Context, pb b.PageBuilder, w io.Writer) {
 		return
 	}
 	rows := []UserInfoRow{{Name: "Email", Value: pb.User.Id}}
-	if pb.User.IsAdmin {
+	if pb.User.IsAdmin() {
 		rows = append(rows, UserInfoRow{Name: "Is admin", Value: "yes"})
 	}
 	rows = append(rows, UserInfoRow{Name: "Groups", Value: strings.Join(pb.User.Groups, ", ")})

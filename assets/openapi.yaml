@@ -26,7 +26,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserIdentity'
+                $ref: '#/components/schemas/User'
         default:
           description: unexpected error
           content:
@@ -493,16 +493,6 @@ components:
           type: integer
           format: int64
           description: total number of pages
-    User:
-      required:
-        - id
-      properties:
-        id:
-          type: string
-          description: Name of the user
-        is_admin:
-          type: boolean
-          description: Is the user admin?
     Collection:
       required:
         - name
@@ -675,26 +665,19 @@ components:
         id:
           type: string
           description: Id of the new user
-        is_admin: 
-          type: boolean
-          description: Give admin privileges to new user
-          default: false
-    NewCollection:
-      required:
-        - name
-      properties:
-        name:
-          type: string
-          description: Name of the collection
-        description:
-          type: string
-          description: Description of the collection
-    UserIdentity:
+        roles:
+          type: array
+          items:
+            type: string
+        groups:
+          type: array
+          items:
+            type: string
+    User:
       required:
         - id
-        - roles
         - groups
-        - is_admin
+        - roles
       properties:
         id:
           type: string
@@ -707,10 +690,16 @@ components:
           type: array
           items:
             type: string
-        is_admin:
-          type: boolean
-          description: whether user has admin privileges
-        
+    NewCollection:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the collection
+        description:
+          type: string
+          description: Description of the collection
     Label:
       properties:
         name:

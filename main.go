@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/lejeunel/go-image-annotator/adapters/cli/collection"
 	"github.com/lejeunel/go-image-annotator/adapters/cli/image"
-	"github.com/lejeunel/go-image-annotator/adapters/cli/user"
 	"github.com/lejeunel/go-image-annotator/server"
 	"github.com/spf13/cobra"
 	"os"
@@ -32,5 +31,4 @@ func init() {
 	rootCmd.AddCommand(server.Cmd)
 	rootCmd.AddCommand(image.IngestDirCmd)
 	rootCmd.AddCommand(collection.CreateCmd)
-	rootCmd.AddCommand(user.CreateCmd)
 }

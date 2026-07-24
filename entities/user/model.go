@@ -2,8 +2,11 @@ package user
 
 import (
 	"context"
+	"slices"
 	"time"
 )
+
+var UserContextKey = "user"
 
 type UserId = string
 
@@ -18,10 +21,7 @@ type User struct {
 	HashPassword []byte
 	Roles        []string
 	Groups       []string
-	IsAdmin      bool
 }
-
-var UserContextKey = "user"
 
 func NewUser(id UserId, opts ...Option) User {
 	l := &User{Id: id}
@@ -29,6 +29,10 @@ func NewUser(id UserId, opts ...Option) User {
 		opt(l)
 	}
 	return *l
+}
+
+func (u User) IsAdmin() bool {
+	return slices.Contains(u.Roles, "admin")
 }
 
 type Option func(*User)
@@ -48,14 +52,6 @@ func WithHashedPassword(h []byte) Option {
 func WithGroups(groups []string) Option {
 	return func(l *User) {
 		l.Groups = groups
-	}
-}
-
-func WithAdmin(admin bool) Option {
-	return func(l *User) {
-		if admin {
-			l.IsAdmin = true
-		}
 	}
 }
 

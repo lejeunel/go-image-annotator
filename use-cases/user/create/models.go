@@ -1,12 +1,14 @@
 package create
 
 type Response struct {
-	Id      string
-	IsAdmin bool
+	Id     string
+	Groups []string
+	Roles  []string
 }
 
 type Request struct {
 	Id       string
-	IsAdmin  bool
+	Roles    []string
+	Groups   []string
 	Password *string
 }

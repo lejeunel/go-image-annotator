@@ -59,14 +59,15 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 	user := usr.NewUser(r.Id, usr.WithHashedPersonalAccessToken(token.Hash),
 		usr.WithHashedPassword(passwordHash),
-		usr.WithAdmin(r.IsAdmin))
+		usr.WithGroups(r.Groups), usr.WithRoles(r.Roles))
 	if err := i.repo.Create(user); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	out.Success(Response{
-		Id:      r.Id,
-		IsAdmin: r.IsAdmin})
+		Id:     user.Id,
+		Groups: user.Groups,
+		Roles:  user.Roles})
 }
 func (i *Interactor) checkDuplicate(id string) error {
 	errBaseMsg := "checking for duplicate user with id %v: %w"

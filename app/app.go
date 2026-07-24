@@ -33,9 +33,10 @@ func (p InitialAdminPresenter) Error(err error) {
 }
 
 func MaybeCreateInitialAdmin(itr createusr.Interactor, email, password string) {
-	initAdminUser := u.NewUser("admin", u.WithAdmin(true))
+	roles := []string{"admin"}
+	initAdminUser := u.NewUser("admin", u.WithRoles(roles))
 	itr.Execute(
 		u.AppendUserToContext(context.Background(), initAdminUser),
-		createusr.Request{Id: email, Password: &password, IsAdmin: true},
+		createusr.Request{Id: email, Password: &password, Roles: roles},
 		InitialAdminPresenter{})
 }

@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"slices"
-	"strconv"
 	"strings"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
@@ -20,7 +19,7 @@ import (
 	. "maragu.dev/gomponents"
 )
 
-var listUsersFields = []string{"id/email", "roles", "groups", "admin", "actions"}
+var listUsersFields = []string{"id/email", "roles", "groups", "actions"}
 
 type ListPresenter struct {
 	b.PaginatedListBuilder
@@ -115,7 +114,6 @@ func MakeRow(url b.RowURL, user u.User) tb.Row {
 	row.AddCell(tb.NewCell(Text(user.Id)))
 	row.AddCell(tb.NewCell(Text(strings.Join(user.Roles, ", "))))
 	row.AddCell(tb.NewCell(Text(strings.Join(user.Groups, ", "))))
-	row.AddCell(tb.NewCell(Text(strconv.FormatBool(user.IsAdmin))))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row
 

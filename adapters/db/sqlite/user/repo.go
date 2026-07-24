@@ -21,7 +21,6 @@ type SQLiteUserRepo struct {
 type Record struct {
 	Id           string `db:"id"`
 	Roles        string `db:"roles"`
-	IsAdmin      bool   `db:"is_admin"`
 	ApiTokenHash string `db:"api_token_hash"`
 	PasswordHash string `db:"password_hash"`
 }
@@ -32,8 +31,8 @@ type ForgottenPasswordStateRecord struct {
 }
 
 func (r SQLiteUserRepo) Create(usr u.User) error {
-	query := "INSERT INTO users (id,is_admin,api_token_hash,password_hash) VALUES ($1,$2,$3,$4)"
-	_, err := r.Db.Exec(query, usr.Id, usr.IsAdmin, hex.EncodeToString(usr.HashPAT), hex.EncodeToString(usr.HashPassword))
+	query := "INSERT INTO users (id,api_token_hash,password_hash) VALUES ($1,$2,$3)"
+	_, err := r.Db.Exec(query, usr.Id, hex.EncodeToString(usr.HashPAT), hex.EncodeToString(usr.HashPassword))
 	if err != nil {
 		return fmt.Errorf("inserting user record: %v: %w", err, e.ErrInternal)
 	}
@@ -56,11 +55,38 @@ func (r SQLiteUserRepo) SetGroups(user u.UserId, groups []string) error {
 	}
 
 	for _, group := range groups {
-		_, err = r.Db.Exec(
+		res, err := r.Db.Exec(
 			"INSERT INTO users_groups (user_id, group_id) SELECT $1, id FROM groups WHERE name=$2",
 			user, group)
+		n, err := res.RowsAffected()
 		if err != nil {
-			return fmt.Errorf("inserting group %q: %v: %w", group, err, e.ErrInternal)
+			return fmt.Errorf("assigning group %v to user %v: %v: %w", group, user, err, e.ErrInternal)
+		}
+		if n == 0 {
+			return fmt.Errorf("assigning group %v to user %v: checking whether group was added: %w", group, user, e.ErrInternal)
+		}
+	}
+	return nil
+}
+func (r SQLiteUserRepo) SetRoles(userId string, roles []string) error {
+	_, err := r.Db.Exec(
+		"DELETE FROM users_roles WHERE user_id=$1;",
+		userId,
+	)
+	if err != nil {
+		return fmt.Errorf("deleting user groups: %v: %w", err, e.ErrInternal)
+	}
+
+	for _, role := range roles {
+		res, err := r.Db.Exec(
+			"INSERT INTO users_roles (user_id, role_id) SELECT $1, id FROM roles WHERE name=$2",
+			userId, role)
+		n, err := res.RowsAffected()
+		if err != nil {
+			return fmt.Errorf("inserting role %v to user %v: %v: %w", role, userId, err, e.ErrInternal)
+		}
+		if n == 0 {
+			return fmt.Errorf("inserting role %v to user %v: checking whether role was added: %w", role, userId, e.ErrInternal)
 		}
 	}
 	return nil
@@ -105,14 +131,14 @@ func (r SQLiteUserRepo) recordToEntity(rec Record) (*u.User, error) {
 	}
 
 	user := u.NewUser(rec.Id, u.WithRoles(roles), u.WithGroups(groups),
-		u.WithAdmin(rec.IsAdmin), u.WithHashedPersonalAccessToken(patHash),
+		u.WithHashedPersonalAccessToken(patHash),
 		u.WithHashedPassword(pwHash))
 	return &user, nil
 }
 func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 	record := Record{}
 	err := r.Db.Get(&record,
-		"SELECT id,is_admin,api_token_hash,password_hash FROM users WHERE id=$1", id)
+		"SELECT id,api_token_hash,password_hash FROM users WHERE id=$1", id)
 
 	if err != nil {
 		switch {
@@ -160,7 +186,7 @@ func (r SQLiteUserRepo) Count() (int64, error) {
 	return count, nil
 }
 func (r SQLiteUserRepo) List(m pag.PaginationParams) ([]u.User, error) {
-	q := sq.StatementBuilder.Select("id,is_admin,api_token_hash,password_hash").From("users")
+	q := sq.StatementBuilder.Select("id,api_token_hash,password_hash").From("users")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
 	if err != nil {
@@ -181,33 +207,6 @@ func (r SQLiteUserRepo) List(m pag.PaginationParams) ([]u.User, error) {
 	}
 
 	return users, nil
-}
-func (r SQLiteUserRepo) SetRoles(userId string, roles []string) error {
-	_, err := r.Db.Exec(
-		"DELETE FROM users_roles WHERE user_id=$1;",
-		userId,
-	)
-	if err != nil {
-		return fmt.Errorf("deleting user groups: %v: %w", err, e.ErrInternal)
-	}
-
-	for _, role := range roles {
-		_, err = r.Db.Exec(
-			"INSERT INTO users_roles (user_id, role_id) SELECT $1, id FROM roles WHERE name=$2",
-			userId, role)
-		if err != nil {
-			return fmt.Errorf("inserting role %q: %v: %w", role, err, e.ErrInternal)
-		}
-	}
-	return nil
-}
-func (r SQLiteUserRepo) SetAdmin(userId string, value bool) error {
-	query := "UPDATE users SET is_admin=$2 WHERE id=$1"
-	_, err := r.Db.Exec(query, userId, value)
-	if err != nil {
-		return fmt.Errorf("setting admin right to %v : %v: %w", value, err, e.ErrInternal)
-	}
-	return nil
 }
 func (r SQLiteUserRepo) SetAccessTokenHash(userId u.UserId, hash []byte) error {
 	query := "UPDATE users SET api_token_hash=$2 WHERE id=$1"
@@ -262,7 +261,7 @@ func (r SQLiteUserRepo) DeleteForgottenPasswordTokens(id u.UserId) error {
 }
 func (r SQLiteUserRepo) CountAdmins() (int64, error) {
 	var count int64
-	query := "SELECT COUNT(*) FROM users WHERE is_admin=true;"
+	query := `SELECT COUNT(*) FROM users_roles WHERE role_id=(SELECT id FROM roles WHERE name="admin");`
 	err := r.Db.QueryRow(query).Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("counting admins: %v: %w", err, e.ErrInternal)

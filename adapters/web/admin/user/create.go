@@ -29,11 +29,7 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
-	var isAdmin bool
-	if r.FormValue(createIsAdminFieldName) == "true" {
-		isAdmin = true
-	}
 	s.Users.Create.Execute(r.Context(),
-		create.Request{Id: r.FormValue(createEmailFieldName), IsAdmin: isAdmin},
+		create.Request{Id: r.FormValue(createEmailFieldName)},
 		NewCreateUserPresenter(w))
 }

@@ -68,11 +68,13 @@ func TestCreateWithPassword(t *testing.T) {
 	assert.Equal(t, hash, repo.Created.HashPassword)
 }
 
-func TestCreateAdmin(t *testing.T) {
+func TestCreateWithRolesAndGroups(t *testing.T) {
+	roles := []string{"a-role"}
+	groups := []string{"a-group"}
 	repo := &fk.UserRepo{}
 	itr := New(repo, &fk.Tokenizer{}, &fk.Tokenizer{})
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user", IsAdmin: true}, p)
-	assert.True(t, repo.Created.IsAdmin)
-	assert.True(t, p.Got.IsAdmin)
+	itr.Execute(t.Context(), Request{Id: "user", Roles: roles, Groups: groups}, p)
+	assert.Equal(t, roles, repo.Created.Roles)
+	assert.Equal(t, groups, repo.Created.Groups)
 }

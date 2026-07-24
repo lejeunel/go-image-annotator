@@ -164,7 +164,7 @@ func TestAdminOnly(t *testing.T) {
 			Method:    "CreateUser",
 			AdminOnly: true}})
 	ctx := u.AppendUserToContext(t.Context(),
-		u.NewUser("admin@example.com", u.WithAdmin(true)))
+		u.NewUser("admin@example.com", u.WithRoles([]string{"admin"})))
 	err := auth.CreateUser(ctx)
 	assert.NoError(t, err)
 }
@@ -176,7 +176,7 @@ func TestAdminDoesNotNeedRoleNorGroup(t *testing.T) {
 			Roles:  []string{"a-role-that-i-dont-have"},
 		}})
 	ctx := u.AppendUserToContext(t.Context(),
-		u.NewUser("admin@example.com", u.WithAdmin(true)))
+		u.NewUser("admin@example.com", u.WithRoles([]string{"admin"})))
 	err := auth.Annotate(ctx, "a-group-i-am-not-member-of")
 	assert.NoError(t, err)
 }

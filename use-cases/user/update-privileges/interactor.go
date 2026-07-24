@@ -29,7 +29,7 @@ func New(ur UserRepo, gr GroupRepo, rr RoleRepo, opts ...Option) Interactor {
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	errCtx := "assigning group to user"
+	errCtx := "updating user"
 	if err := i.auth.UpdateUserPrivileges(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -47,7 +47,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 			return
 		}
 		if !*exists {
-			out.Error(fmt.Errorf("%v: checking whether group %v exists: %w", errCtx, g, err))
+			out.Error(fmt.Errorf("%v: checking whether group %v exists: %w", errCtx, g, e.ErrNotFound))
 			return
 		}
 	}
