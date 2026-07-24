@@ -50,7 +50,7 @@ func (p NotifyPasswordResetPresenter) redirect() {
 
 func (s Server) NotifyPasswordReset(w http.ResponseWriter, r *http.Request) {
 	p := NotifyPasswordResetPresenter{VoidPasswordResetNotifier{s.Logger}, s.Logger, w,
-		s.baseURL + rt.ResetPasswordForm}
+		s.baseURL + rt.ResetPasswordFormUrl}
 	r.ParseForm()
 	s.requestTokenItr.Execute(r.Context(), r.FormValue("email"), p)
 }

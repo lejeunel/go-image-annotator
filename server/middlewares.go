@@ -39,7 +39,7 @@ func WebRequireLogin(next http.Handler) http.Handler {
 
 		user := u.IdentityFromContext(r.Context())
 		if user == nil {
-			http.Redirect(w, r, rt.Login, http.StatusFound)
+			http.Redirect(w, r, rt.LoginPageUrl, http.StatusFound)
 			return
 		}
 		next.ServeHTTP(w, r)

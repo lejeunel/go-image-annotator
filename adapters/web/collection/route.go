@@ -11,7 +11,7 @@ func (s *Server) Route(r chi.Router,
 
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
-		r.Get(rt.Collections, s.List)
+		r.Get(rt.CollectionsUrl, s.List)
 		r.Get(CollectionUrl, s.TableRow)
 		r.Post(CollectionUrl, s.Create)
 		r.Delete(CollectionUrl, s.Delete)

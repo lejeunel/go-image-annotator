@@ -42,7 +42,7 @@ func (b *LoginPageBuilder) makeContent() Node {
 		Span(
 			Div(Class("flex justify-center text-gray-900 dark:text-white font-bold text-xl mt-4 mb-4"), Text(signInTitle)),
 			Form(
-				Attr(fmt.Sprintf("hx-post=%v", rt.Login)),
+				Attr(fmt.Sprintf("hx-post=%v", rt.LoginPageUrl)),
 				Class("bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-80 mb-4"),
 				Label(For("email"), Text("Email"), Class("block text-sm font-medium text-gray-900 dark:text-white")),
 				Input(Type("email"), ID("email"), Name("email"), Required(),
@@ -51,7 +51,7 @@ func (b *LoginPageBuilder) makeContent() Node {
 				Div(Class("flex items-center justify-between"),
 					Label(For("password"), Text("Password"), Class("block text-sm font-medium text-gray-900 dark:text-white")),
 					A(Class("mt-2 block text-xs font-medium text-primary underline-offset-2 hover:underline focus:underline focus:outline-hidden dark:text-primary-dark"),
-						Href(rt.ForgotPasswordForm), Text("Forgot password?")),
+						Href(rt.ForgotPasswordFormUrl), Text("Forgot password?")),
 				),
 				Input(Type("password"), ID("password"), Name("password"), Required(),
 					Class("w-full px-3 py-2 mb-6 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")),

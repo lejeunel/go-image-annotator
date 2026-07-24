@@ -40,7 +40,7 @@ func NewListImagesPresenter(w http.ResponseWriter, p b.PageBuilder, collection s
 func makeImageRow(image im.Image) tb.Row {
 	link := rt.MakeAnnotateImageURL(an.AnnotateImage, image.Id.String(), image.Collection.Name)
 	actions := b.NewActionsPanelBuilder()
-	actions.SetConfirmDelete(rt.AddQueryParams(rt.Image, "id", image.Id.String(),
+	actions.SetConfirmDelete(rt.AddQueryParams(ImageRow, "id", image.Id.String(),
 		"collection", image.Collection.Name,
 		"mode", "confirm-delete"))
 	row := tb.NewRow()
@@ -58,7 +58,7 @@ func (p ListImagesPresenter) SuccessReadImage(image im.Image) {
 
 func (p ListImagesPresenter) SuccessListImages(r list.Response) {
 
-	baseURL := rt.AddQueryParams(rt.Images, "collection", p.collection)
+	baseURL := rt.AddQueryParams(rt.ImagesUrl, "collection", p.collection)
 	p.SetPagination(r.Pagination, baseURL.String())
 	for _, im := range r.Images {
 		p.AddRow(makeImageRow(im))
@@ -92,7 +92,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 		b.RenderConfirmDeleteRow(len(listImagesFields),
 			id,
 			"image",
-			rt.AddQueryParams(rt.Image, "id", id, "collection", collection),
+			rt.AddQueryParams(ImageRow, "id", id, "collection", collection),
 			w)
 	default:
 		s.FindItr.Execute(

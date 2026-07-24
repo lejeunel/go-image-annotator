@@ -32,7 +32,7 @@ type PageBuilder struct {
 }
 
 func NewPageBuilder(base BasePageBuilder, version g.Info) PageBuilder {
-	return PageBuilder{BasePageBuilder: base, APIPath: rt.APIRoot, RepoURL: g.RepoURL, DocsURL: g.DocsURL,
+	return PageBuilder{BasePageBuilder: base, APIPath: rt.APIRootUrl, RepoURL: g.RepoURL, DocsURL: g.DocsURL,
 		Version: version, SidebarEntries: make(map[string]cmp.SidebarEntry)}
 }
 func (b *PageBuilder) SetHTMLTitle(title string) *PageBuilder {
@@ -125,7 +125,7 @@ func (b *PageBuilder) Render(w io.Writer) {
 	b.BasePageBuilder.SetFrameContent(
 		Group(
 			[]Node{
-				cmp.MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, *b.User, rt.UserDashboard),
+				cmp.MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, *b.User, rt.UserDashboardUrl),
 				b.content,
 				cmp.MakeFooter(b.Version),
 			},

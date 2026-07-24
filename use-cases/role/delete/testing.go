@@ -9,6 +9,6 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success() {
+func (p *FakePresenter) SuccessDeleteRole(name string) {
 	p.GotSuccess = true
 }

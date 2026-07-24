@@ -11,15 +11,15 @@ func (s *Server) Route(r chi.Router,
 	sessionMiddleware func(http.Handler) http.Handler) {
 	r.Group(func(r chi.Router) {
 		r.Use(sessionMiddleware)
-		r.HandleFunc(rt.LoginOAuth, s.OAuthLogin)
-		r.HandleFunc(rt.CallbackOAuth, s.OAuthCallback)
-		r.HandleFunc(rt.Logout, s.Logout)
-		r.Post(rt.Login, s.PasswordLogin)
+		r.HandleFunc(rt.LoginOAuthUrl, s.OAuthLogin)
+		r.HandleFunc(rt.CallbackOAuthUrl, s.OAuthCallback)
+		r.HandleFunc(rt.LogoutUrl, s.Logout)
+		r.Post(rt.LoginPageUrl, s.PasswordLogin)
 	})
 
-	r.Get(rt.Login, s.Login)
-	r.Get(rt.ForgotPasswordForm, s.ForgotPasswordForm)
-	r.Post(rt.NotifyPasswordReset, s.NotifyPasswordReset)
-	r.Get(rt.ResetPasswordForm, s.ResetPasswordForm)
-	r.Post(rt.ResetPassword, s.ResetPassword)
+	r.Get(rt.LoginPageUrl, s.Login)
+	r.Get(rt.ForgotPasswordFormUrl, s.ForgotPasswordForm)
+	r.Post(rt.NotifyPasswordResetUrl, s.NotifyPasswordReset)
+	r.Get(rt.ResetPasswordFormUrl, s.ResetPasswordForm)
+	r.Post(rt.ResetPasswordUrl, s.ResetPassword)
 }

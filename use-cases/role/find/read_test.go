@@ -15,7 +15,7 @@ func TestRead(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(repo)
 	itr.Execute(t.Context(), role.Name, p)
-	assert.Equal(t, Response{Name: role.Name}, p.Got)
+	assert.Equal(t, role.Name, p.Got.Name)
 }
 
 func TestHandleInternalError(t *testing.T) {

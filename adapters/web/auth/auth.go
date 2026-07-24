@@ -29,7 +29,7 @@ func (s Server) PasswordLogin(w http.ResponseWriter, r *http.Request) {
 		// w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
-	htmx.NotifySuccessPayloadAndRedirect(w, "Login", fmt.Sprintf("Successfully logged-in as %v", email), rt.Home)
+	htmx.NotifySuccessPayloadAndRedirect(w, "Login", fmt.Sprintf("Successfully logged-in as %v", email), rt.HomePageUrl)
 }
 func (s Server) Login(w http.ResponseWriter, r *http.Request) {
 	s.LoginPageBuilder.Render(w)

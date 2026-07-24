@@ -18,9 +18,9 @@ func NewPageBuilder(pb b.PageBuilder) b.PageBuilder {
 
 	pb.SetActiveSection(cmp.NoPageActive)
 	pb.AddSidebarTitle("Admin")
-	pb.AddSidebarEntry(usr.UserSidebarEntryName, icons.User, rt.AdminUsers, false)
-	pb.AddSidebarEntry(GroupPage, icons.Group, rt.AdminGroups, false)
-	pb.AddSidebarEntry(RolePage, icons.Rocket, rt.AdminRoles, false)
-	pb.AddSidebarEntry(PolicyPage, icons.Shield, rt.AdminPolicies, false)
+	pb.AddSidebarEntry(usr.UserSidebarEntryName, icons.User, rt.AdminUsersUrl, false)
+	pb.AddSidebarEntry(GroupPage, icons.Group, rt.AdminGroupsUrl, false)
+	pb.AddSidebarEntry(RolePage, icons.Rocket, rt.AdminRolesUrl, false)
+	pb.AddSidebarEntry(PolicyPage, icons.Shield, rt.AdminPoliciesUrl, false)
 	return pb
 }

@@ -12,7 +12,7 @@ import (
 
 func RouteAPIDocs(r chi.Router, h http.HandlerFunc, mws ...func(http.Handler) http.Handler) {
 	mwChain := chi.Chain(mws...)
-	r.Method(http.MethodGet, rt.APIDocs, mwChain.HandlerFunc(h))
+	r.Method(http.MethodGet, rt.APIDocsUrl, mwChain.HandlerFunc(h))
 }
 
 func RouteWebPages(r chi.Router, home http.HandlerFunc,
@@ -20,21 +20,21 @@ func RouteWebPages(r chi.Router, home http.HandlerFunc,
 
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
-		r.Get(rt.Home, home)
+		r.Get(rt.HomePageUrl, home)
 	})
 }
 func RouteAPI(r chi.Router, apiServer api.Server, mws ...func(http.Handler) http.Handler) {
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
 		handler := api.HandlerWithOptions(&apiServer, api.StdHTTPServerOptions{
-			BaseURL: rt.APIRoot,
+			BaseURL: rt.APIRootUrl,
 		})
-		r.Mount(rt.APIRoot, handler)
+		r.Mount(rt.APIRootUrl, handler)
 	})
 }
 
 func RouteAPISpecs(r chi.Router) {
-	r.HandleFunc(rt.APISpecs,
+	r.HandleFunc(rt.APISpecsUrl,
 		func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/yaml")
 			w.Write(as.Openapiyaml)
@@ -43,5 +43,5 @@ func RouteAPISpecs(r chi.Router) {
 
 func RouteStaticFiles(r chi.Router) {
 	fs := http.FileServer(http.Dir("assets/static"))
-	r.Handle(fmt.Sprintf("%v/*", rt.StaticRoot), http.StripPrefix(rt.StaticRoot, fs))
+	r.Handle(fmt.Sprintf("%v/*", rt.StaticRootUrl), http.StripPrefix(rt.StaticRootUrl, fs))
 }

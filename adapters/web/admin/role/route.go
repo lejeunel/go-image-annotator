@@ -1,4 +1,4 @@
-package user
+package role
 
 import (
 	"github.com/go-chi/chi/v5"
@@ -6,15 +6,15 @@ import (
 	"net/http"
 )
 
-var NewAPIToken = "/ui/new-api-token"
-var ChangePassword = "/change-password"
-
 func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
-		r.Get(rt.UserDashboardUrl, s.UserDashboard)
-		r.Get(NewAPIToken, s.NewAPIToken)
-		r.Post(ChangePassword, s.ChangePassword)
+		r.Get(rt.AdminRolesUrl, s.ListRoles)
+		r.Get(RoleRowUrl, s.TableRow)
+		r.Delete(RoleRowUrl, s.Delete)
+		r.Put(RoleRowUrl, s.Edit)
+		r.Get(CreateRoleForm, s.CreateForm)
+		r.Post(RoleRowUrl, s.Create)
 	})
 }

@@ -33,7 +33,7 @@ func NewListPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ListPr
 }
 
 func (p ListPresenter) SuccessListLabels(r list.Response) {
-	p.SetPagination(r.Pagination, rt.Labels)
+	p.SetPagination(r.Pagination, rt.LabelsUrl)
 	for _, l := range r.Labels {
 		row := MakeRow(p.RowURL, l)
 		p.AddRow(row)

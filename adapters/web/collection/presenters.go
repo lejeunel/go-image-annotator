@@ -33,7 +33,7 @@ func NewListPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ListPr
 	return ListPresenter{b, u, w, e.NewErrorPresenter(w)}
 }
 func (p ListPresenter) SuccessListCollections(r list.Response) {
-	p.SetPagination(r.Pagination, rt.Collections)
+	p.SetPagination(r.Pagination, rt.CollectionsUrl)
 	for _, c := range r.Collections {
 		row := MakeRow(p.RowURL, c)
 		p.AddRow(row)

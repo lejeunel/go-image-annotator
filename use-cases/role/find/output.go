@@ -1,6 +1,10 @@
 package find
 
+import (
+	r "github.com/lejeunel/go-image-annotator/entities/role"
+)
+
 type OutputPort interface {
 	Error(error)
-	Success(Response)
+	SuccessFindRole(r.Role)
 }

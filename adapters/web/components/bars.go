@@ -43,9 +43,9 @@ func MakeUserBadge(user u.User, dashboardURL string) Node {
 	menu := UserMenu{UserName: user.Id, Icon: iconBuf.String()}
 	menu.Entries = append(menu.Entries, UserMenuEntry{"Dashboard", dashboardURL})
 	if user.IsAdmin {
-		menu.Entries = append(menu.Entries, UserMenuEntry{"Admin", rt.Admin})
+		menu.Entries = append(menu.Entries, UserMenuEntry{"Admin", rt.AdminUrl})
 	}
-	menu.Entries = append(menu.Entries, UserMenuEntry{"Sign out", rt.Logout})
+	menu.Entries = append(menu.Entries, UserMenuEntry{"Sign out", rt.LogoutUrl})
 	tUser.ExecuteTemplate(&buf, "user_badge", menu)
 	return Raw(buf.String())
 }
@@ -112,17 +112,17 @@ func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefi
 		Ul(
 			Class("hidden items-center gap-4 md:flex"),
 			Li(
-				MakeMenuItem("Home", rt.Home, isActivated == HomePageActive),
+				MakeMenuItem("Home", rt.HomePageUrl, isActivated == HomePageActive),
 			),
 			Li(
-				MakeMenuItem("Collections", rt.Collections, isActivated == CollectionsPageActive),
+				MakeMenuItem("Collections", rt.CollectionsUrl, isActivated == CollectionsPageActive),
 			),
 			Li(
-				MakeMenuItem("Labels", rt.Labels, isActivated == LabelsPageActive),
+				MakeMenuItem("Labels", rt.LabelsUrl, isActivated == LabelsPageActive),
 			),
 			Li(
 				A(
-					Href(rt.APIDocs),
+					Href(rt.APIDocsUrl),
 					Class("hover:text-primary"),
 					Text("API"),
 				),

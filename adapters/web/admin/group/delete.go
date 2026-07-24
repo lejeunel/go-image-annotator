@@ -5,20 +5,19 @@ import (
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
-	u "github.com/lejeunel/go-image-annotator/entities/user"
 )
 
 type DeleteGroupPresenter struct {
 	writer        http.ResponseWriter
 	task          string
-	okMessageFunc func(u.UserId) string
+	okMessageFunc func(string) string
 	htmx.ErrorPresenter
 }
 
 func NewDeleteGroupPresenter(w http.ResponseWriter) DeleteGroupPresenter {
 	task := "deleting group"
-	okMessageFunc := func(id u.UserId) string {
-		return fmt.Sprintf("Successfully deleted group %v", id)
+	okMessageFunc := func(name string) string {
+		return fmt.Sprintf("Successfully deleted group %v", name)
 	}
 	return DeleteGroupPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }

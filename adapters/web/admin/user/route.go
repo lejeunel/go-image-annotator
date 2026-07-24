@@ -10,8 +10,8 @@ func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
-		r.Get(rt.Admin, s.ListUsers)
-		r.Get(rt.AdminUsers, s.ListUsers)
+		r.Get(rt.AdminUrl, s.ListUsers)
+		r.Get(rt.AdminUsersUrl, s.ListUsers)
 		r.Get(UserUrl, s.TableRow)
 		r.Delete(UserUrl, s.Delete)
 		r.Get(CreateUserFormUrl, s.CreateForm)

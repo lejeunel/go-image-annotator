@@ -1,4 +1,4 @@
-package group
+package role
 
 import (
 	_ "embed"
@@ -11,10 +11,10 @@ import (
 //go:embed preamble.md
 var preamble string
 
-func (s *Server) ListGroups(w http.ResponseWriter, r *http.Request) {
-	s.Page.SetUserIdentity(r.Context()).SetHTMLTitle("Groups").SetTitle("Groups")
-	s.Page.AddCreationButton("Create", CreateUserFormUrl, createGroupTargetDiv)
-	s.Groups.List.Execute(r.Context(), NewListPresenter(w, s.Page, s.RowUrl))
+func (s *Server) ListRoles(w http.ResponseWriter, r *http.Request) {
+	s.Page.SetUserIdentity(r.Context()).SetHTMLTitle("Roles").SetTitle("Roles")
+	s.Page.AddCreationButton("Create", CreateRoleForm, createRoleTargetDiv)
+	s.Roles.List.Execute(r.Context(), NewListPresenter(w, s.Page, s.RowUrl))
 }
 
 func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
@@ -22,16 +22,16 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	s.RowUrl.SetId(name)
 	switch r.URL.Query().Get("mode") {
 	case b.ModeEdit.String():
-		s.Groups.Find.Execute(r.Context(), name, NewEditPresenter(w, s.RowUrl))
+		s.Roles.Find.Execute(r.Context(), name, NewEditPresenter(w, s.RowUrl))
 	case b.ModeConfirmDelete.String():
-		s.Groups.Find.Execute(r.Context(), name, NewDeletePresenter(w, s.RowUrl))
+		s.Roles.Find.Execute(r.Context(), name, NewDeletePresenter(w, s.RowUrl))
 	default:
-		s.Groups.Find.Execute(r.Context(), name, NewViewPresenter(w, s.RowUrl))
+		s.Roles.Find.Execute(r.Context(), name, NewViewPresenter(w, s.RowUrl))
 	}
 }
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXCreateFormBuilder(GroupRowUrl, createGroupTargetDiv)
-	b.AddTitle("Create a new group")
+	b := bf.NewHTMXCreateFormBuilder(RoleRowUrl, createRoleTargetDiv)
+	b.AddTitle("Create a new role")
 	b.AddTextField(createNameFieldName, "Name", bf.WithRequired())
 	b.AddTextField(createDescriptionFieldName, "Description")
 	b.Render(w)

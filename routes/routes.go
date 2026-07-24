@@ -6,40 +6,40 @@ import (
 	"strings"
 )
 
-var APIRoot = "/api"
-var APISpecs = "/api/openapi.yaml"
-var APIDocs = "/api/docs"
+const (
+	APIRootUrl  = "/api"
+	APISpecsUrl = "/api/openapi.yaml"
+	APIDocsUrl  = "/api/docs"
 
-var StaticRoot = "/static"
+	StaticRootUrl = "/static"
 
-var Login = "/auth/login"
-var LoginOAuth = "/auth/login/{provider}"
-var CallbackOAuth = "/auth/callback/{provider}"
-var ForgotPasswordForm = "/auth/forgot-password"
-var NotifyPasswordReset = "/auth/notify-password-reset"
-var ResetPasswordForm = "/auth/reset-password-form"
-var ResetPassword = "/auth/reset-password"
-var Logout = "/auth/logout"
+	LoginPageUrl           = "/auth/login"
+	LoginOAuthUrl          = "/auth/login/{provider}"
+	CallbackOAuthUrl       = "/auth/callback/{provider}"
+	ForgotPasswordFormUrl  = "/auth/forgot-password"
+	NotifyPasswordResetUrl = "/auth/notify-password-reset"
+	ResetPasswordFormUrl   = "/auth/reset-password-form"
+	ResetPasswordUrl       = "/auth/reset-password"
+	LogoutUrl              = "/auth/logout"
 
-var Home = "/"
-var Collections = "/collections"
-var Images = "/images"
-var Labels = "/labels"
-var UserDashboard = "/user-dashboard"
+	HomePageUrl      = "/"
+	CollectionsUrl   = "/collections"
+	ImagesUrl        = "/images"
+	LabelsUrl        = "/labels"
+	UserDashboardUrl = "/user-dashboard"
 
-var Image = "/ui/image"
-
-var Admin = "/admin"
-var AdminUsers = "/admin/users"
-var AdminGroups = "/admin/groups"
-var AdminRoles = "/admin/roles"
-var AdminPolicies = "/admin/policies"
+	AdminUrl         = "/admin"
+	AdminUsersUrl    = "/admin/users"
+	AdminGroupsUrl   = "/admin/groups"
+	AdminRolesUrl    = "/admin/roles"
+	AdminPoliciesUrl = "/admin/policies"
+)
 
 func MakeOAuthCallbackURL(baseURL string, provider string) string {
-	return baseURL + strings.ReplaceAll(CallbackOAuth, "{provider}", provider)
+	return baseURL + strings.ReplaceAll(CallbackOAuthUrl, "{provider}", provider)
 }
 func MakeOAuthLoginURL(provider string) string {
-	return strings.ReplaceAll(LoginOAuth, "{provider}", provider)
+	return strings.ReplaceAll(LoginOAuthUrl, "{provider}", provider)
 }
 
 func MakeAnnotateImageURL(baseURL, imageId, collection string) string {
@@ -47,7 +47,7 @@ func MakeAnnotateImageURL(baseURL, imageId, collection string) string {
 }
 
 func MakeImagesURL(collection string) string {
-	return fmt.Sprintf("%v?collection=%v", Images, collection)
+	return fmt.Sprintf("%v?collection=%v", ImagesUrl, collection)
 }
 
 func AddQueryParams(baseURL string, params ...string) url.URL {

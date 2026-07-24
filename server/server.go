@@ -12,6 +12,7 @@ import (
 
 	adm "github.com/lejeunel/go-image-annotator/adapters/web/admin"
 	admgrp "github.com/lejeunel/go-image-annotator/adapters/web/admin/group"
+	admrl "github.com/lejeunel/go-image-annotator/adapters/web/admin/role"
 	admusr "github.com/lejeunel/go-image-annotator/adapters/web/admin/user"
 	an "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
 	wauth "github.com/lejeunel/go-image-annotator/adapters/web/auth"
@@ -57,7 +58,7 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 
 	RouteAPI(router, *api.NewServer(&app.Itrs, *logger),
 		app.SessionManager.LoadAndSave, app.SessionManager.AuthBearerMiddleWare, app.SessionManager.AuthCookiesMiddleWare, ApiRequireLogin)
-	RouteAPIDocs(router, APIDocsHandlerFunc(rt.APISpecs, pageBuilder), webAuth)
+	RouteAPIDocs(router, APIDocsHandlerFunc(rt.APISpecsUrl, pageBuilder), webAuth)
 	RouteAPISpecs(router)
 	RouteStaticFiles(router)
 
@@ -77,6 +78,8 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 	adminUserServer.Route(router, webAuth)
 	adminGroupServer := admgrp.New(adminPageBuilder, app.Itrs.Group)
 	adminGroupServer.Route(router, webAuth)
+	adminRoleServer := admrl.New(adminPageBuilder, app.Itrs.Role)
+	adminRoleServer.Route(router, webAuth)
 
 	labelServer := lbl.New(pageBuilder, cfg.DefaultPageSize,
 		app.Itrs.Label.Create, app.Itrs.Label.List, app.Itrs.Label.Update,

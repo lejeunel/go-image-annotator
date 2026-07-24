@@ -17,7 +17,7 @@ func (i *Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 		return
 	}
 
-	out.Success(Response{Name: found.Name, Description: found.Description})
+	out.SuccessFindRole(*found)
 
 }
 

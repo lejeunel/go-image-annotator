@@ -33,7 +33,7 @@ func (i *Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	out.Success()
+	out.SuccessDeleteRole(name)
 }
 
 func (i *Interactor) ensureDeletable(name string) error {

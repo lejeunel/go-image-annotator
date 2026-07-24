@@ -20,7 +20,7 @@ type PasswordResetPresenter struct {
 
 func (p PasswordResetPresenter) Success() {
 	Div(P(Text("Password changed successfully!")),
-		P(Text("Proceed to "), cmp.MakeTextLink(rt.Home, "login"), Text("."))).Render(p.w)
+		P(Text("Proceed to "), cmp.MakeTextLink(rt.HomePageUrl, "login"), Text("."))).Render(p.w)
 }
 func (p PasswordResetPresenter) Error(err error) {
 	p.ErrorPresenter.Error(err)

@@ -6,18 +6,15 @@ import (
 	"net/http"
 )
 
-var GroupRow = "/ui/group"
-var CreateUserForm = "/ui/group/new"
-
 func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
-		r.Get(rt.AdminGroups, s.ListGroups)
-		r.Get(GroupRow, s.TableRow)
-		r.Delete(GroupRow, s.Delete)
-		r.Put(GroupRow, s.Edit)
-		r.Get(CreateUserForm, s.CreateForm)
-		r.Post(GroupRow, s.Create)
+		r.Get(rt.AdminGroupsUrl, s.ListGroups)
+		r.Get(GroupRowUrl, s.TableRow)
+		r.Delete(GroupRowUrl, s.Delete)
+		r.Put(GroupRowUrl, s.Edit)
+		r.Get(CreateUserFormUrl, s.CreateForm)
+		r.Post(GroupRowUrl, s.Create)
 	})
 }

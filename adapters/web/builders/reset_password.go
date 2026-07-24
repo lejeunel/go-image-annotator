@@ -17,7 +17,7 @@ type ResetPasswordBuilder struct {
 }
 
 func (b *ResetPasswordBuilder) makeContent() Node {
-	endpoint := rt.AddQueryParams(rt.ResetPassword, "token", b.token)
+	endpoint := rt.AddQueryParams(rt.ResetPasswordUrl, "token", b.token)
 	return Div(Class("flex justify-center"),
 		Span(
 			Div(Class("flex justify-center text-gray-900 dark:text-white font-bold text-xl mt-4 mb-4"), Text(resetPasswordTitle)),

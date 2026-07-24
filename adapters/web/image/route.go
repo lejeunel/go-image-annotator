@@ -12,8 +12,8 @@ func (s *Server) Route(r chi.Router,
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
 
-		r.Get(rt.Images, s.List)
-		r.Get(rt.Image, s.TableRow)
-		r.Delete(rt.Image, s.Delete)
+		r.Get(rt.ImagesUrl, s.List)
+		r.Get(ImageRow, s.TableRow)
+		r.Delete(ImageRow, s.Delete)
 	})
 }
