@@ -26,6 +26,6 @@ func (p DeleteLabelPresenter) SuccessDeleteLabel(name string) {
 }
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	s.DeleteItr.Execute(r.Context(),
-		r.URL.Query().Get("name"),
+		r.URL.Query().Get(resourceUrlFieldName),
 		NewDeleteLabelPresenter(w))
 }

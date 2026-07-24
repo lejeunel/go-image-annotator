@@ -5,4 +5,5 @@ const (
 	createNameFieldName        = "name"
 	createDescriptionFieldName = "description"
 	createGroupTargetDiv       = "create-user"
+	resourceUrlFieldName       = "name"
 )

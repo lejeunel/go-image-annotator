@@ -22,5 +22,5 @@ type Server struct {
 
 func New(pb b.PageBuilder, defaultPageSize int,
 	c create.Interactor, l list.Interactor, u update.Interactor, d delete.Interactor, f find.Interactor) Server {
-	return Server{pb, b.NewRowURL(CollectionUrl, "name"), defaultPageSize, l, c, u, d, f}
+	return Server{pb, b.NewRowURL(CollectionUrl, resourceUrlFieldName), defaultPageSize, l, c, u, d, f}
 }

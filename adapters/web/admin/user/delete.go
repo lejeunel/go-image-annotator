@@ -28,6 +28,6 @@ func (p DeleteUserPresenter) SuccessDeleteUser(id u.UserId) {
 }
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	s.Users.Delete.Execute(r.Context(),
-		r.URL.Query().Get("id"),
+		r.URL.Query().Get(resourceUrlFieldName),
 		NewDeleteUserPresenter(w))
 }

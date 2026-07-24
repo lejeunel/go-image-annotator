@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
-	"github.com/lejeunel/go-image-annotator/adapters/web"
 	as "github.com/lejeunel/go-image-annotator/assets"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 
@@ -16,7 +15,7 @@ func RouteAPIDocs(r chi.Router, h http.HandlerFunc, mws ...func(http.Handler) ht
 	r.Method(http.MethodGet, rt.APIDocs, mwChain.HandlerFunc(h))
 }
 
-func RouteWebPages(r chi.Router, s web.Server, home http.HandlerFunc,
+func RouteWebPages(r chi.Router, home http.HandlerFunc,
 	mws ...func(http.Handler) http.Handler) {
 
 	r.Group(func(r chi.Router) {

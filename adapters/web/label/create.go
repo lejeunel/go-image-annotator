@@ -30,8 +30,8 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
-	s.CreateItr.Execute(r.Context(), create.Request{Name: r.FormValue("name"),
-		Description: r.FormValue("description")}, NewCreateLabelPresenter(w))
+	s.CreateItr.Execute(r.Context(), create.Request{Name: r.FormValue(createNameFieldName),
+		Description: r.FormValue(createDescriptionFieldName)}, NewCreateLabelPresenter(w))
 }
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b := bf.NewHTMXCreateFormBuilder(LabelUrl, createLabelTargetDiv)

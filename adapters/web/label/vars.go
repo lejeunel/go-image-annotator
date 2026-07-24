@@ -6,4 +6,5 @@ const (
 	createDescriptionFieldName = "description"
 	LabelUrl                   = "/ui/label"
 	CreateLabelFormUrl         = "/ui/label/new"
+	resourceUrlFieldName       = "name"
 )

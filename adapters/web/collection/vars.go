@@ -6,4 +6,5 @@ const (
 	CreateCollectionFormUrl    = "/ui/collection/new"
 	createNameFieldName        = "name"
 	createDescriptionFieldName = "description"
+	resourceUrlFieldName       = "name"
 )

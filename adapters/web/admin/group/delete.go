@@ -28,6 +28,6 @@ func (p DeleteGroupPresenter) SuccessDeleteGroup(name string) {
 }
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	s.Groups.Delete.Execute(r.Context(),
-		r.URL.Query().Get("name"),
+		r.URL.Query().Get(resourceUrlFieldName),
 		NewDeleteGroupPresenter(w))
 }

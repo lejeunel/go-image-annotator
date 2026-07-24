@@ -13,7 +13,7 @@ import (
 var preamble string
 
 func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
-	name := r.URL.Query().Get("name")
+	name := r.URL.Query().Get(resourceUrlFieldName)
 	s.RowURL.SetId(name)
 	switch r.URL.Query().Get("mode") {
 	case b.ModeEdit.String():

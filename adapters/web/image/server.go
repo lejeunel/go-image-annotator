@@ -15,7 +15,7 @@ type Server struct {
 	FindItr         find.Interactor
 }
 
-func New(b b.PageBuilder, defaultPageSize int,
+func New(pb b.PageBuilder, defaultPageSize int,
 	l list.Interactor, d delete.Interactor, f find.Interactor) Server {
-	return Server{b, defaultPageSize, l, d, f}
+	return Server{pb, defaultPageSize, l, d, f}
 }

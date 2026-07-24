@@ -16,13 +16,13 @@ var preamble string
 func (s *Server) ListUsers(w http.ResponseWriter, r *http.Request) {
 	s.Page.SetUserIdentity(r.Context()).SetHTMLTitle("Users").SetTitle("Users")
 	s.Page.ActivateSidebarEntry(UserSidebarEntryName)
-	s.Page.AddCreationButton("Create", CreateUserForm, createUserTargetDiv)
+	s.Page.AddCreationButton("Create", CreateUserFormUrl, createUserTargetDiv)
 	s.Users.List.Execute(r.Context(), pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
 		NewListPresenter(w, s.Page, s.RowUrl))
 }
 
 func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	id := r.URL.Query().Get(resourceUrlFieldName)
 	s.RowUrl.SetId(id)
 	switch r.URL.Query().Get("mode") {
 	case b.ModeEdit.String():
@@ -38,7 +38,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXCreateFormBuilder(User, createUserTargetDiv)
+	b := bf.NewHTMXCreateFormBuilder(UserUrl, createUserTargetDiv)
 	b.AddTitle("Create a new User")
 	b.AddTextField(createEmailFieldName, "Email", bf.WithRequired())
 	b.AddCheckbox(createIsAdminFieldName, "Admin")

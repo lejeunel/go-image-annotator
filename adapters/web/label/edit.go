@@ -32,7 +32,7 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 
 	s.UpdateItr.Execute(r.Context(),
 		update.Request{
-			Name:           r.URL.Query().Get("name"),
+			Name:           r.URL.Query().Get(resourceUrlFieldName),
 			NewDescription: r.FormValue("description"),
 		},
 		NewEditLabelPresenter(w))

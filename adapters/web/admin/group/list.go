@@ -18,7 +18,7 @@ func (s *Server) ListGroups(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
-	name := r.URL.Query().Get("name")
+	name := r.URL.Query().Get(resourceUrlFieldName)
 	s.RowUrl.SetId(name)
 	switch r.URL.Query().Get("mode") {
 	case b.ModeEdit.String():

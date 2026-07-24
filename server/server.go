@@ -10,7 +10,6 @@ import (
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 
-	"github.com/lejeunel/go-image-annotator/adapters/web"
 	adm "github.com/lejeunel/go-image-annotator/adapters/web/admin"
 	admgrp "github.com/lejeunel/go-image-annotator/adapters/web/admin/group"
 	admusr "github.com/lejeunel/go-image-annotator/adapters/web/admin/user"
@@ -51,12 +50,8 @@ func Make(auth auth.Authorizer, url string, port int) http.Handler {
 		WebRequireLogin,
 	)
 
-	RouteWebPages(
-		router,
-		*web.NewServer(&app.Itrs, pageBuilder, app.SessionManager, cfg.DefaultPageSize),
-		HomePageHandlerFunc(pageBuilder),
-		webAuth,
-	)
+	RouteWebPages(router, HomePageHandlerFunc(pageBuilder), webAuth)
+
 	udb := userDashboard.New(pageBuilder, app.Itrs.User.RenewToken, app.Itrs.User.ChangePassword)
 	udb.Route(router, webAuth)
 

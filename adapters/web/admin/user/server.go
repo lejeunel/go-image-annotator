@@ -19,5 +19,5 @@ type Server struct {
 func New(pb b.PageBuilder, usr u.Interactors, grp g.Interactors, rl r.Interactors, defaultPageSize int) Server {
 	userPage := b.NewPaginatedListBuilder(pb, listUsersFields)
 	userPage.ActivateSidebarEntry(UserSidebarEntryName)
-	return Server{userPage, b.NewRowURL(User, "id"), usr, rl, grp, defaultPageSize}
+	return Server{userPage, b.NewRowURL(UserUrl, "id"), usr, rl, grp, defaultPageSize}
 }

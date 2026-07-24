@@ -86,10 +86,7 @@ func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
 }
 func (p DeletePresenter) SuccessFindLabel(l lbl.Label) {
 	b.RenderConfirmDeleteRow(len(listLabelsFields),
-		l.Name,
-		"label",
-		p.Url,
-		p.Writer)
+		l.Name, "label", p.Url, p.Writer)
 }
 
 func MakeRow(u b.RowURL, l lbl.Label) tb.Row {

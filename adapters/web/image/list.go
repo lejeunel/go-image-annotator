@@ -88,7 +88,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	collection := r.URL.Query().Get("collection")
 	switch r.URL.Query().Get("mode") {
-	case "confirm-delete":
+	case b.ModeConfirmDelete.String():
 		b.RenderConfirmDeleteRow(len(listImagesFields),
 			id,
 			"image",

@@ -14,9 +14,9 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 
 	s.UpdateItr.Execute(r.Context(),
 		update.Request{
-			Name:           r.URL.Query().Get("name"),
-			NewName:        r.FormValue("name"),
-			NewDescription: r.FormValue("description"),
+			Name:           r.URL.Query().Get(resourceUrlFieldName),
+			NewName:        r.FormValue(createNameFieldName),
+			NewDescription: r.FormValue(createDescriptionFieldName),
 		},
 		NewEditPresenter(w, s.RowURL))
 }
