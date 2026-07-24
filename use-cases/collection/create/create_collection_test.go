@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jonboulle/clockwork"
+	g "github.com/lejeunel/go-image-annotator/entities/group"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	v "github.com/lejeunel/go-image-annotator/shared/validation"
@@ -14,7 +15,9 @@ import (
 
 func TestHandleAuthError(t *testing.T) {
 	group := "my-group"
-	itr := New(&fk.CollectionRepo{}, &fk.GroupRepo{Return: group}, WithAuth(fk.Auth{e.ErrAuthorization}))
+	itr := New(&fk.CollectionRepo{},
+		&fk.GroupRepo{Return: g.NewGroup(g.NewGroupId(), "a-group")},
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Group: &group}, p)
 	assert.True(t, p.GotAuthErr)
@@ -57,11 +60,11 @@ func TestCreateCollection(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.CollectionRepo{}
 	now := time.Now()
-	group := "my-group"
+	group := g.NewGroup(g.NewGroupId(), "my-group")
 	itr := New(repo,
 		&fk.GroupRepo{Return: group},
 		WithClock(clockwork.NewFakeClockAt(now)))
-	req := Request{Name: "a-name", Description: "a-description", Group: &group}
+	req := Request{Name: "a-name", Description: "a-description", Group: &group.Name}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, req.Name, repo.Got.Name)
 	assert.Equal(t, *req.Group, repo.Got.Group.Name)

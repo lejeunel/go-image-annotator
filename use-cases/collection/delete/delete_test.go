@@ -8,8 +8,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	group := "a-group"
-	itr := New(&fk.CollectionRepo{}, &fk.GroupRepo{Return: group},
+	itr := New(&fk.CollectionRepo{}, &fk.GroupRepo{},
 		WithAuth(FailingAuth{}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "", p)

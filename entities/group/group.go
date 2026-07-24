@@ -34,3 +34,9 @@ type GroupId struct {
 func NewGroupId() GroupId {
 	return GroupId{uuidw.UUIDWrapper[GroupId]{UUID: uuid.New()}}
 }
+
+type UpdateModel struct {
+	Name           string
+	NewName        string
+	NewDescription string
+}

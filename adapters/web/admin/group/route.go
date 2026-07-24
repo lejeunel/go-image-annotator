@@ -1,4 +1,4 @@
-package user
+package group
 
 import (
 	"github.com/go-chi/chi/v5"
@@ -6,19 +6,18 @@ import (
 	"net/http"
 )
 
-var User = "/ui/user"
+var GroupRow = "/ui/user"
 var CreateUserForm = "/ui/user/new"
 
 func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
-		r.Get(rt.Admin, s.ListUsers)
-		r.Get(rt.AdminUsers, s.ListUsers)
-		r.Get(User, s.TableRow)
-		r.Delete(User, s.Delete)
+		r.Get(rt.AdminGroups, s.ListGroups)
+		r.Get(GroupRow, s.TableRow)
+		r.Delete(GroupRow, s.Delete)
+		r.Put(GroupRow, s.Edit)
 		r.Get(CreateUserForm, s.CreateForm)
-		r.Post(User, s.Create)
-		r.Put(User, s.Edit)
+		r.Post(GroupRow, s.Create)
 	})
 }

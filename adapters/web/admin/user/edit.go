@@ -15,14 +15,14 @@ type EditUserPresenter struct {
 }
 
 func NewEditUserPresenter(w http.ResponseWriter) EditUserPresenter {
-	task := "Updating collection"
+	task := "Updating user"
 	okMessageFunc := func(r update.Response) string {
-		return "Successfully updated collection"
+		return "Successfully updated user"
 	}
 	return EditUserPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 
-func (p EditUserPresenter) SuccessUpdateCollection(r update.Response) {
+func (p EditUserPresenter) SuccessUpdate(r update.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	g "github.com/lejeunel/go-image-annotator/entities/group"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -48,15 +49,14 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
-
 	}
 
-	if err := i.repo.Update(Model{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription}); err != nil {
+	if err := i.repo.Update(g.UpdateModel{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription}); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	out.Success(Response{Name: r.NewName, Description: r.NewDescription})
+	out.SuccessUpdateGroup(Response{Name: r.NewName, Description: r.NewDescription})
 }
 
 func (i *Interactor) ensureNameExists(name string) error {

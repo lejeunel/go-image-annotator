@@ -1,8 +1,8 @@
 package group
 
 import (
+	grp "github.com/lejeunel/go-image-annotator/entities/group"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	u "github.com/lejeunel/go-image-annotator/use-cases/group/update"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -10,7 +10,7 @@ import (
 func TestInternalErrOnUpdateShouldFail(t *testing.T) {
 	repo := NewTestSQLiteGroupRepo()
 	repo.Db.Close()
-	err := repo.Update(u.Model{})
+	err := repo.Update(grp.UpdateModel{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
@@ -19,7 +19,7 @@ func TestUpdate(t *testing.T) {
 	group, _ := CreateGroup(repo, "a-group")
 	newName := "new-group-name"
 	newDesc := "new-description"
-	err := repo.Update(u.Model{Name: group.Name, NewName: newName, NewDescription: newDesc})
+	err := repo.Update(grp.UpdateModel{Name: group.Name, NewName: newName, NewDescription: newDesc})
 	assert.NoError(t, err)
 	r, err := repo.Find(newName)
 	assert.NoError(t, err)

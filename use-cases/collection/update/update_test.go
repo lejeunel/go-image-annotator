@@ -4,16 +4,16 @@ import (
 	"testing"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	g "github.com/lejeunel/go-image-annotator/entities/group"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	group := "a-group"
 	itr := New(&fk.CollectionRepo{},
-		&fk.GroupRepo{Return: group},
-		WithAuth(fk.Auth{e.ErrAuthorization}))
+		&fk.GroupRepo{Return: g.NewGroup(g.NewGroupId(), "a-group")},
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.False(t, p.GotSuccess)

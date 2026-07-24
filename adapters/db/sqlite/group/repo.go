@@ -11,7 +11,6 @@ import (
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/use-cases/group/update"
 )
 
 type SQLiteGroupRepo struct {
@@ -84,7 +83,7 @@ func (r SQLiteGroupRepo) Delete(name string) error {
 	}
 	return nil
 }
-func (r SQLiteGroupRepo) Update(m update.Model) error {
+func (r SQLiteGroupRepo) Update(m g.UpdateModel) error {
 	query := "UPDATE groups SET name=$1,description=$2 WHERE name=$3"
 	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
 

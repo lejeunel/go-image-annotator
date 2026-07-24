@@ -45,7 +45,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success() {
+func (p *FakePresenter) SuccessDeleteGroup(string) {
 	p.GotSuccess = true
 }
 

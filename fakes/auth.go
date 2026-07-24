@@ -103,3 +103,7 @@ func (f Auth) RenewToken(ctx context.Context) error {
 func (f Auth) UpdateUserPrivileges(ctx context.Context) error {
 	return f.Err
 }
+
+func (f Auth) UpdateGroup(ctx context.Context) error {
+	return f.Err
+}

@@ -1,0 +1,15 @@
+package group
+
+import (
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	g "github.com/lejeunel/go-image-annotator/use-cases/group"
+)
+
+type Server struct {
+	Page   b.PaginatedListBuilder
+	Groups g.Interactors
+}
+
+func New(pb b.PageBuilder, grp g.Interactors) Server {
+	return Server{b.NewPaginatedListBuilder(pb, listGroupsFields), grp}
+}

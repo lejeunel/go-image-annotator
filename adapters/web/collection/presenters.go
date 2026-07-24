@@ -10,9 +10,11 @@ import (
 	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	e "github.com/lejeunel/go-image-annotator/adapters/web/error"
+	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
 	. "maragu.dev/gomponents"
 )
 
@@ -79,6 +81,25 @@ func (p *RowPresenter) renderConfirmDelete(c clc.Collection) {
 }
 func (p *RowPresenter) renderView(c clc.Collection) {
 	MakeRow(c).Render(p.Writer)
+}
+
+type EditCollectionPresenter struct {
+	writer        http.ResponseWriter
+	task          string
+	okMessageFunc func(update.Response) string
+	htmx.ErrorPresenter
+}
+
+func NewEditCollectionPresenter(w http.ResponseWriter) EditCollectionPresenter {
+	task := "Updating collection"
+	okMessageFunc := func(r update.Response) string {
+		return "Successfully updated collection"
+	}
+	return EditCollectionPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
+}
+
+func (p EditCollectionPresenter) SuccessUpdateCollection(r update.Response) {
+	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 
 func MakeRow(c clc.Collection) tb.Row {
