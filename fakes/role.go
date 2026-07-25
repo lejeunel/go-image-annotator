@@ -13,7 +13,7 @@ type RoleRepo struct {
 	ErrOnList     error
 	ErrOnUpdate   error
 	ExistingNames []string
-	Created           *rl.Role
+	Created       []rl.Role
 	IsAssigned_   bool
 	Return        rl.Role
 	ReturnList    []rl.Role
@@ -25,7 +25,7 @@ func (r *RoleRepo) Create(role rl.Role) error {
 		return r.ErrOnCreate
 	}
 
-	r.Created = &role
+	r.Created = append(r.Created, role)
 	return nil
 }
 

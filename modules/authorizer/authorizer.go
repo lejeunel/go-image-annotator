@@ -8,24 +8,25 @@ import (
 	"io"
 	"slices"
 
+	p "github.com/lejeunel/go-image-annotator/entities/policy"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type Authorizer struct {
-	Rules Policies
+	Rules p.Policies
 }
 
 func NewDefault() Authorizer {
-	r := Authorizer{Rules: make(Policies)}
-	return *r.SetAuthRules(DefaultPolicies)
+	r := Authorizer{Rules: make(p.Policies)}
+	return *r.SetAuthRules(p.DefaultPolicies)
 }
 
 func NewVoidAuth() Authorizer {
-	return Authorizer{Rules: make(Policies)}
+	return Authorizer{Rules: make(p.Policies)}
 }
 
-func New(rules Policies) (*Authorizer, error) {
+func New(rules p.Policies) (*Authorizer, error) {
 	return &Authorizer{rules}, nil
 }
 
@@ -75,7 +76,7 @@ func (a Authorizer) check(ctx context.Context, method string, group *string) err
 	}
 	return nil
 }
-func (a *Authorizer) SetAuthRules(rules Policies) *Authorizer {
+func (a *Authorizer) SetAuthRules(rules p.Policies) *Authorizer {
 	a.Rules = rules
 	return a
 }

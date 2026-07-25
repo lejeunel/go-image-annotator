@@ -49,6 +49,6 @@ func TestCreate(t *testing.T) {
 	itr := New(repo)
 	req := Request{Name: "a-role", Description: "a-description"}
 	itr.Execute(t.Context(), req, p)
-	assert.Equal(t, repo.Created.Name, req.Name)
-	assert.Equal(t, repo.Created.Description, req.Description)
+	assert.Equal(t, repo.Created[0].Name, req.Name)
+	assert.Equal(t, repo.Created[0].Description, req.Description)
 }

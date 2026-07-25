@@ -37,10 +37,15 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	adminRole := rl.NewRole(rl.NewRoleId(), "admin")
-	if err := i.RoleRepo.Create(adminRole); err != nil {
-		out.Error(fmt.Errorf("%w: creating admin role: %v: %w", errCtx, err, e.ErrInternal))
-		return
+	for _, defaultRole := range rl.DefaultRoleNames {
+		if err := i.RoleRepo.Create(
+			rl.NewRole(
+				rl.NewRoleId(),
+				defaultRole.Name,
+				rl.WithDescription(defaultRole.Description))); err != nil {
+			out.Error(fmt.Errorf("%w: creating role %v: %v: %w", errCtx, defaultRole.Name, err, e.ErrInternal))
+			return
+		}
 	}
 
 	if err := i.PasswordValidator.Validate(r.InitialAdminPassword); err != nil {

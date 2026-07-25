@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"testing"
 
+	r "github.com/lejeunel/go-image-annotator/entities/role"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,13 +16,13 @@ func TestShouldSucceedIfAdminRoleExists(t *testing.T) {
 	assert.True(t, p.GotSuccess)
 }
 
-func TestShouldCreateAdminRoleIfNotExists(t *testing.T) {
+func TestShouldCreateDefaultRoles(t *testing.T) {
 	roleRepo := &fk.RoleRepo{}
 	itr := New(&fk.UserRepo{}, roleRepo, &fk.Tokenizer{}, &fk.Validator{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.NotNil(t, roleRepo.Created)
-	assert.Equal(t, "admin", roleRepo.Created.Name)
+	assert.Equal(t, len(r.DefaultRoleNames), len(roleRepo.Created))
 }
 func TestInvalidPassword(t *testing.T) {
 	itr := New(&fk.UserRepo{}, &fk.RoleRepo{},

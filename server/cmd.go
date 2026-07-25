@@ -5,9 +5,8 @@ import (
 )
 
 var (
-	port          int
-	authRulesPath string
-	Cmd           = &cobra.Command{
+	port int
+	Cmd  = &cobra.Command{
 		Use:   "serve",
 		Short: "Run server",
 		Run: func(cmd *cobra.Command, args []string) {

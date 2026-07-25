@@ -73,19 +73,22 @@ func TestCreateAdminInGroup(t *testing.T) {
 
 	roleRepo := rlr.NewSQLiteRoleRepo(db)
 	role := r.NewRole(r.NewRoleId(), "admin")
+	anotherRole := r.NewRole(r.NewRoleId(), "another-role")
 	roleRepo.Create(role)
+	roleRepo.Create(anotherRole)
 
 	groupRepo := grr.NewSQLiteGroupRepo(db)
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	groupRepo.Create(group)
 
 	user := u.NewUser("user@example.com",
-		u.WithRoles([]string{"admin"}),
-		u.WithGroups([]string{"my-group"}))
+		u.WithRoles([]string{role.Name}),
+		u.WithGroups([]string{group.Name}))
 	err := repo.Create(user)
 	assert.NoError(t, err)
 	r, err := repo.Find("user@example.com")
 	assert.NoError(t, err)
+	assert.Equal(t, 1, len(r.Roles))
 	assert.Contains(t, r.Roles, "admin")
 	assert.Contains(t, r.Groups, "my-group")
 

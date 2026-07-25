@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	p "github.com/lejeunel/go-image-annotator/entities/policy"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -15,8 +16,6 @@ type YamlPolicies struct {
 	Version int                 `yaml:"version"`
 	Rules   map[string][]string `yaml:"rules"`
 }
-
-type Policies map[string][]string
 
 func validateYamlPolicies(cfg YamlPolicies) error {
 	invalidNames := []string{}
@@ -34,7 +33,7 @@ func validateYamlPolicies(cfg YamlPolicies) error {
 	return nil
 }
 
-func NewAuthRulesFromYaml(r io.Reader) (*Policies, error) {
+func NewAuthRulesFromYaml(r io.Reader) (*p.Policies, error) {
 	errCtx := "loading authorization rules from yaml file"
 	data, err := io.ReadAll(r)
 	if err != nil {
@@ -48,7 +47,7 @@ func NewAuthRulesFromYaml(r io.Reader) (*Policies, error) {
 		return nil, fmt.Errorf("%v: %w", errCtx, err)
 	}
 
-	rules := make(Policies)
+	rules := make(p.Policies)
 	for role, methods := range yamlAuthRules.Rules {
 		for _, method := range methods {
 			if !slices.Contains(validMethods, method) {
@@ -62,8 +61,8 @@ func NewAuthRulesFromYaml(r io.Reader) (*Policies, error) {
 	return &rules, nil
 }
 
-func ReadAuthRulesFromPath(path string) (*Policies, error) {
-	voidPolicies := Policies{}
+func ReadAuthRulesFromPath(path string) (*p.Policies, error) {
+	voidPolicies := p.Policies{}
 	if path == "" {
 		return &voidPolicies, nil
 	}

@@ -1,4 +1,6 @@
-package authorizer
+package policy
+
+type Policies map[string][]string
 
 var DefaultPolicies = Policies{
 	"viewer":            {},
