@@ -84,7 +84,6 @@ func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 func (p EditPresenter) SuccessFindRole(role r.Role) {
 	b := bf.NewHTMXInlineFormBuilder(role.Name, len(listRolesFields), p.Url)
 	b.AddTitle(fmt.Sprintf("Editing %v", role.Name))
-	b.AddTextField("name", "Name", bf.WithRequired(), bf.WithDefault(role.Name))
 	b.AddTextField("description", "Description", bf.WithDefault(role.Description))
 	b.Render(p.writer)
 

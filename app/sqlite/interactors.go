@@ -34,5 +34,6 @@ func NewSQLiteInteractors(i SQLiteRepos, pageSize int, allowedImageFormats []str
 		Annotation: NewSQLiteAnnotationInteractors(i, auth),
 		Group:      NewSQLiteGroupInteractors(i.Group, auth),
 		Role:       NewSQLiteRoleInteractors(i.Role, auth),
+		Bootstrap:  NewSQLiteBootstrapInteractor(i.User, i.Role, passwordHasher, passwordValidator),
 	}
 }

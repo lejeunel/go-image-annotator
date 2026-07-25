@@ -64,7 +64,7 @@ func TestCreateWithPassword(t *testing.T) {
 	)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user", Password: &password}, p)
-	assert.Equal(t, password, pwGenerator.GotToken)
+	assert.Equal(t, password, pwGenerator.Hashed)
 	assert.Equal(t, hash, repo.Created.HashPassword)
 }
 

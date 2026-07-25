@@ -132,7 +132,7 @@ func (r SQLiteUserRepo) recordToEntity(rec Record) (*u.User, error) {
 
 	user := u.NewUser(rec.Id, u.WithRoles(roles), u.WithGroups(groups),
 		u.WithHashedPersonalAccessToken(patHash),
-		u.WithHashedPassword(pwHash))
+		u.WithPasswordHash(pwHash))
 	return &user, nil
 }
 func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {

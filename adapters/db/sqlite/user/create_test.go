@@ -60,7 +60,7 @@ func TestPasswordHash(t *testing.T) {
 	hash := []byte("password-hash")
 	repo := NewSQLiteUserRepo(s.NewInMemory())
 	user := u.NewUser("user@example.com",
-		u.WithHashedPassword(hash))
+		u.WithPasswordHash(hash))
 	repo.Create(user)
 	r, err := repo.Find("user@example.com")
 	assert.NoError(t, err)

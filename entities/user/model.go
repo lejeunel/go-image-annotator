@@ -43,7 +43,7 @@ func WithHashedPersonalAccessToken(h []byte) Option {
 	}
 }
 
-func WithHashedPassword(h []byte) Option {
+func WithPasswordHash(h []byte) Option {
 	return func(l *User) {
 		l.HashPassword = h
 	}

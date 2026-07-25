@@ -10,7 +10,7 @@ type Validator struct {
 
 func (v *Validator) Validate(string) error {
 	if v.Invalid {
-		return e.ErrInvalidPassword
+		return e.ErrValidation
 	}
 	return nil
 }

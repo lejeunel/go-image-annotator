@@ -2,6 +2,7 @@ package app
 
 import (
 	an "github.com/lejeunel/go-image-annotator/use-cases/annotate"
+	bst "github.com/lejeunel/go-image-annotator/use-cases/bootstrap"
 	clc "github.com/lejeunel/go-image-annotator/use-cases/collection"
 	grp "github.com/lejeunel/go-image-annotator/use-cases/group"
 	im "github.com/lejeunel/go-image-annotator/use-cases/image"
@@ -18,4 +19,5 @@ type Interactors struct {
 	Group      grp.Interactors
 	Role       rl.Interactors
 	User       usr.Interactors
+	Bootstrap  bst.Interactor
 }

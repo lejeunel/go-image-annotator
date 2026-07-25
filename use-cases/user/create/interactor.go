@@ -58,7 +58,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 	user := usr.NewUser(r.Id, usr.WithHashedPersonalAccessToken(token.Hash),
-		usr.WithHashedPassword(passwordHash),
+		usr.WithPasswordHash(passwordHash),
 		usr.WithGroups(r.Groups), usr.WithRoles(r.Roles))
 	if err := i.repo.Create(user); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))

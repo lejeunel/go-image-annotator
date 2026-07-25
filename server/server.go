@@ -41,7 +41,7 @@ func Make(url string, port int) http.Handler {
 	app := sqlite.NewSQLiteApp(cfg, defaultAuth)
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	a.BootstrapInitialAdmin(app.Itrs.User.Create, app.Itrs.Role.Create, cfg.InitialAdminEmail, cfg.InitialAdminPassword, *logger)
+	a.BootstrapInitialAdmin(app.Itrs.Bootstrap, cfg.InitialAdminEmail, cfg.InitialAdminPassword, *logger)
 
 	baseURL := fmt.Sprintf("%v:%v", url, port)
 

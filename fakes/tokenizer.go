@@ -5,14 +5,14 @@ import (
 )
 
 type Tokenizer struct {
-	GotToken    string
+	Hashed      string
 	ReturnHash  []byte
 	ReturnValue string
 	FailVerify  bool
 }
 
 func (t *Tokenizer) Hash(token string) []byte {
-	t.GotToken = token
+	t.Hashed = token
 	return t.ReturnHash
 }
 
@@ -21,7 +21,7 @@ func (t Tokenizer) Generate() (*tk.Token, error) {
 }
 
 func (t *Tokenizer) Verify(token string, hash []byte) bool {
-	t.GotToken = token
+	t.Hashed = token
 	if t.FailVerify {
 		return false
 	}

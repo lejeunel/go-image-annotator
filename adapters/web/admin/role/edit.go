@@ -30,10 +30,11 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
+	name := r.URL.Query().Get(resourceUrlFieldName)
 	s.Roles.Update.Execute(r.Context(),
 		update.Request{
-			Name:           r.URL.Query().Get(resourceUrlFieldName),
-			NewName:        r.FormValue("name"),
+			Name:           name,
+			NewName:        name,
 			NewDescription: r.FormValue("description"),
 		},
 		NewEditPresenter(w, s.RowUrl))
