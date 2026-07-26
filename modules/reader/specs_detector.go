@@ -29,7 +29,7 @@ func formatToMIME(format string) string {
 
 type ImageSpecsDetector struct{}
 
-func (d ImageSpecsDetector) Detect(r io.Reader) (*im.ImageSpecs, io.Reader, error) {
+func (d ImageSpecsDetector) Detect(r io.Reader) (*im.Specs, io.Reader, error) {
 	// Read a small prefix (DecodeConfig does not need the full file)
 	var buf bytes.Buffer
 	tee := io.TeeReader(r, &buf)
@@ -43,7 +43,7 @@ func (d ImageSpecsDetector) Detect(r io.Reader) (*im.ImageSpecs, io.Reader, erro
 	// first the consumed bytes, then the remaining original reader
 	newReader := io.MultiReader(&buf, r)
 
-	return &im.ImageSpecs{
+	return &im.Specs{
 		MIMEType: formatToMIME(format),
 		Width:    cfg.Width, Height: cfg.Height}, newReader, nil
 }

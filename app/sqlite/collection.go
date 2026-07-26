@@ -16,7 +16,7 @@ import (
 
 func NewSQLiteCollectionInteractors(cr ci.SQLiteCollectionRepo,
 	gr gi.SQLiteGroupRepo,
-	pageSize int, auth auth.Authorizer) clc.Interactors {
+	pageSize int, auth auth.Interface) clc.Interactors {
 	return clc.Interactors{
 		Find: find.New(cr),
 		Create: create.New(cr, gr, create.WithNameValidator(validation.NewNameValidator()),

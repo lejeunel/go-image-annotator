@@ -17,6 +17,6 @@ type CollectionRepo interface {
 }
 
 type ImageRepo interface {
-	GetSpecs(im.ImageId) (*im.ImageSpecs, error)
+	GetSpecs(im.ImageId) (*im.Specs, error)
 	ImageExistsInCollection(im.ImageId, clc.CollectionId) (bool, error)
 }

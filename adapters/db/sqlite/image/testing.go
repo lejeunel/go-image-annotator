@@ -16,7 +16,7 @@ func AddToCollection(imRepo SQLiteImageRepo, clcRepo c.SQLiteCollectionRepo,
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	clcRepo.Create(collection)
 	imageId := im.NewImageId()
-	imRepo.AddImage(imageId, nil, im.ImageSpecs{})
+	imRepo.AddImage(imageId, nil, im.Specs{})
 
 	return &imageId, &collection.Id, imRepo.AddToCollection(imageId, collection.Id)
 }

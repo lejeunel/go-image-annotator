@@ -7,10 +7,10 @@ import (
 
 type SpecsDetector struct {
 	Err    error
-	Return im.ImageSpecs
+	Return im.Specs
 }
 
-func (d *SpecsDetector) Detect(r io.Reader) (*im.ImageSpecs, io.Reader, error) {
+func (d *SpecsDetector) Detect(r io.Reader) (*im.Specs, io.Reader, error) {
 	if d.Err != nil {
 		return nil, nil, d.Err
 	}

@@ -18,7 +18,7 @@ import (
 )
 
 type IImageSpecsDetector interface {
-	Detect(io.Reader) (*im.ImageSpecs, io.Reader, error)
+	Detect(io.Reader) (*im.Specs, io.Reader, error)
 }
 type Interface interface {
 	Ingest(Request) (*Response, error)
@@ -168,7 +168,7 @@ func (i Ingester) appendBoundingBoxes(image *im.Image, bboxes []a.BoundingBoxReq
 
 }
 
-func (i Ingester) ingestImage(tx Repos, authorId u.UserId, image *im.Image, hash []byte, specs im.ImageSpecs) error {
+func (i Ingester) ingestImage(tx Repos, authorId u.UserId, image *im.Image, hash []byte, specs im.Specs) error {
 	now := i.clock.Now()
 
 	if err := tx.ImageRepo.AddImage(image.Id, hash, specs); err != nil {

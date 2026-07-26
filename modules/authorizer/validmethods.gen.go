@@ -4,8 +4,6 @@ package authorizer
 
 var validMethods = []string{
 	"Annotate",
-	"AssignRoleToUser",
-	"AssignUserToGroup",
 	"CloneCollection",
 	"CreateCollection",
 	"CreateGroup",
@@ -22,8 +20,6 @@ var validMethods = []string{
 	"ImportImage",
 	"IngestImage",
 	"ListUsers",
-	"UnAssignRoleFromUser",
-	"UnAssignUserFromGroup",
 	"UpdateCollection",
 	"UpdateGroup",
 	"UpdateLabel",

@@ -16,7 +16,7 @@ func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
 	collectionId := clc.NewCollectionId()
 	clcRepo.Create(clc.NewCollection(collectionId, "a-collection"))
 	imageId := im.NewImageId()
-	imRepo.AddImage(imageId, nil, im.ImageSpecs{})
+	imRepo.AddImage(imageId, nil, im.Specs{})
 
 	imRepo.AddToCollection(imageId, collectionId)
 	db.Close()
@@ -29,7 +29,7 @@ func TestRemoveImageFromCollection(t *testing.T) {
 	collectionId := clc.NewCollectionId()
 	clcRepo.Create(clc.NewCollection(collectionId, "a-collection"))
 	imageId := im.NewImageId()
-	imRepo.AddImage(imageId, nil, im.ImageSpecs{})
+	imRepo.AddImage(imageId, nil, im.Specs{})
 
 	imRepo.AddToCollection(imageId, collectionId)
 	err := imRepo.RemoveImageFromCollection(imageId, collectionId)

@@ -93,6 +93,7 @@ func (b *PageBuilder) Render(w io.Writer) {
 	if b.User == nil {
 		b.BasePageBuilder.SetError(fmt.Errorf("current user has not been set"))
 		b.BasePageBuilder.Render(w)
+		return
 	}
 
 	var header Node

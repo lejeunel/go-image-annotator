@@ -2,7 +2,6 @@ package collection
 
 import (
 	"context"
-	"fmt"
 
 	cli "github.com/lejeunel/go-image-annotator/adapters/cli"
 	a "github.com/lejeunel/go-image-annotator/app/sqlite"
@@ -16,12 +15,13 @@ type CreatePresenter struct {
 }
 
 func (p CreatePresenter) Success(r clc.Response) {
-	fmt.Println("created collection with name", r.Name, "and description", r.Description)
+	p.Logger.Info("created collection", "name", r.Name, "description", r.Description)
 }
 
 func Create(ctx context.Context, name string, group *string, description string) {
 	app := a.NewSQLiteApp(config.Parse(), auth.NewDefault())
 	app.Itrs.Collection.Create.Execute(ctx,
-		clc.Request{Name: name, Group: group, Description: description}, CreatePresenter{})
+		clc.Request{Name: name, Group: group, Description: description},
+		CreatePresenter{cli.NewErrorPresenter()})
 
 }

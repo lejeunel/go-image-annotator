@@ -22,8 +22,10 @@ type InitialAdminPresenter struct {
 	slog.Logger
 }
 
-func (p InitialAdminPresenter) SuccessBootstrap() {
-	p.Logger.Info("successfully bootstrapped application with initial admin")
+func (p InitialAdminPresenter) SuccessBootstrap(r bst.Response) {
+	if !r.Skipped {
+		p.Logger.Info("successfully bootstrapped application with initial admin")
+	}
 }
 func (p InitialAdminPresenter) Error(err error) {
 	p.Logger.Error("failed bootstrapping application", "error", err)

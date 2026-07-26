@@ -28,7 +28,7 @@ type ImageLabel struct {
 type ImageInfo struct {
 	Id         string
 	Collection string
-	Specs      im.ImageSpecs
+	Specs      im.Specs
 }
 
 type Annotation struct {
@@ -69,7 +69,7 @@ type Image struct {
 	Annotations Annotations
 }
 
-func NewImageInfo(imageId im.ImageId, collection string, specs im.ImageSpecs) ImageInfo {
+func NewImageInfo(imageId im.ImageId, collection string, specs im.Specs) ImageInfo {
 	return ImageInfo{Id: imageId.String(), Collection: collection, Specs: specs}
 }
 

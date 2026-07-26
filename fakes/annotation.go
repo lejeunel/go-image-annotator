@@ -41,7 +41,7 @@ type AnnotationRepo struct {
 	Labels                 []a.ImageLabel
 	BoundingBoxes          []a.BoundingBox
 	Polygons               []a.Polygon
-	Specs                  im.ImageSpecs
+	Specs                  im.Specs
 
 	NoGroup bool
 }
@@ -163,7 +163,7 @@ func (r *AnnotationRepo) FindImageLabels(imageId im.ImageId, collectionId clc.Co
 	return nil, nil
 }
 
-func (r *AnnotationRepo) GetSpecs(imageId im.ImageId) (*im.ImageSpecs, error) {
+func (r *AnnotationRepo) GetSpecs(imageId im.ImageId) (*im.Specs, error) {
 	if r.ErrOnGetSpecs != nil {
 		return nil, r.Err
 	}

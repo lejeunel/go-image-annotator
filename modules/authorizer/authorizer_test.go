@@ -89,7 +89,7 @@ func TestAuthorizedWhenMemberOfGroup(t *testing.T) {
 
 func TestAppendSetOfRules(t *testing.T) {
 	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
-	auth := NewVoidAuth()
+	auth := NewDefault()
 	auth.SetAuthRules(policies)
 	err := auth.CreateCollection(t.Context(), "")
 	assert.Error(t, err)

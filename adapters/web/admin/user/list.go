@@ -15,7 +15,7 @@ var preamble string
 
 func (s *Server) ListUsers(w http.ResponseWriter, r *http.Request) {
 	s.Page.SetUserIdentity(r.Context()).SetHTMLTitle("Users").SetTitle("Users")
-	s.Page.ActivateSidebarEntry(UserSidebarEntryName)
+	s.Page.ActivateSidebarEntry(PageName)
 	s.Page.AddCreationButton("Create", CreateUserFormUrl, createUserTargetDiv)
 	s.Users.List.Execute(r.Context(), pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
 		NewListPresenter(w, s.Page, s.RowUrl))

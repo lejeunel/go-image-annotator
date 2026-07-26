@@ -39,7 +39,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 	if *adminExists {
-		out.SuccessBootstrap()
+		out.SuccessBootstrap(Response{Skipped: true})
 		return
 	}
 
@@ -77,5 +77,5 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.SuccessBootstrap()
+	out.SuccessBootstrap(Response{Skipped: false})
 }

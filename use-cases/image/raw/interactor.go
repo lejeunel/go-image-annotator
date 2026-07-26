@@ -17,7 +17,7 @@ type FileGetter interface {
 }
 
 type Repo interface {
-	GetSpecs(im.ImageId) (*im.ImageSpecs, error)
+	GetSpecs(im.ImageId) (*im.Specs, error)
 }
 
 type Interactor struct {
@@ -47,5 +47,5 @@ func (i Interactor) Execute(id string, out OutputPort) {
 		return
 	}
 
-	out.SuccessReadRawImage(Response{Reader: reader, ImageSpecs: *specs})
+	out.SuccessReadRawImage(Response{Reader: reader, Specs: *specs})
 }

@@ -11,5 +11,5 @@ type Request struct {
 
 type Response struct {
 	io.Reader
-	im.ImageSpecs
+	im.Specs
 }

@@ -24,7 +24,7 @@ func NewSQLiteImageInteractors(
 	imfs fs.Interface,
 	ingester ingm.Interface,
 	pageSize int,
-	auth auth.Authorizer) im.Interactors {
+	auth auth.Interface) im.Interactors {
 	return im.Interactors{
 		Ingest: *ingest.New(ingester, clr, ingest.WithAuth(auth)),
 		Find:   find.New(ims),

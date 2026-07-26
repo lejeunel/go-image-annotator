@@ -2,6 +2,7 @@ package ingester
 
 import (
 	"github.com/jonboulle/clockwork"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 )
 
@@ -29,7 +30,7 @@ func NewTestingIngester(repos Repos, opts ...Option) *Ingester {
 		Repos:              repos,
 		UnitOfWork:         &memUoW{repos},
 		ArtefactRepo:       &fk.FileStore{},
-		ImageSpecsDetector: &fk.SpecsDetector{},
+		ImageSpecsDetector: &fk.SpecsDetector{Return: im.Specs{MIMEType: "image/jpeg"}},
 		clock:              clockwork.NewFakeClock(),
 	}
 	for _, opt := range opts {

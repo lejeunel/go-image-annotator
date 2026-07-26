@@ -8,12 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShouldSucceedIfAdminRoleExists(t *testing.T) {
+func TestNoopIfAdminRoleExists(t *testing.T) {
 	roleRepo := &fk.RoleRepo{ExistingNames: []string{"admin"}}
 	itr := New(&fk.UserRepo{}, roleRepo, &fk.FileStore{}, &fk.Tokenizer{}, &fk.Validator{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotSuccess)
+	assert.True(t, p.Got.Skipped)
 }
 
 func TestShouldCreateDefaultRoles(t *testing.T) {

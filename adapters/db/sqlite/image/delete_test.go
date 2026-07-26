@@ -20,7 +20,7 @@ func TestHandleInternalErrOnDeleteImage(t *testing.T) {
 func TestDeleteImage(t *testing.T) {
 	repo := NewSQLiteImageRepo(s.NewInMemory())
 	id := im.NewImageId()
-	repo.AddImage(id, nil, im.ImageSpecs{})
+	repo.AddImage(id, nil, im.Specs{})
 	err := repo.Delete(id)
 	assert.NoError(t, err)
 }

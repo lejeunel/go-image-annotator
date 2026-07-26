@@ -28,7 +28,7 @@ import (
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
 )
 
-func NewSQLiteApp(cfg config.Config, auth auth.Authorizer) app.App {
+func NewSQLiteApp(cfg config.Config, auth auth.Interface) app.App {
 	apiTokenGen := tk.New(cfg.ApiTokenLength)
 	passwordTokenizer := tk.New(cfg.RandomPasswordLength)
 	forgottenPasswordGen := tk.New(cfg.RandomPasswordLength)

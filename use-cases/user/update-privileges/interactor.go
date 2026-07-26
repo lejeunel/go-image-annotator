@@ -31,6 +31,7 @@ func New(ur UserRepo, gr GroupRepo, rr RoleRepo, opts ...Option) Interactor {
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "updating user"
 	if err := i.auth.UpdateUserPrivileges(ctx); err != nil {
+		fmt.Println("HERE")
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

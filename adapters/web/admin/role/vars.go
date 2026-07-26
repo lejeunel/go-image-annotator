@@ -1,7 +1,7 @@
 package role
 
 const (
-	RolePageEntryName          = "Roles"
+	PageName                   = "Roles"
 	createNameFieldName        = "name"
 	createDescriptionFieldName = "description"
 	createRoleTargetDiv        = "create-role"

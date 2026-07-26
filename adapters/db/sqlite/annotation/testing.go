@@ -56,7 +56,7 @@ func CreateAnnotableImage(repos AnnotationTestingRepos, collectionName string, l
 	repos.Label.Create(label)
 	repos.Collection.Create(collection)
 	image := im.NewImage(im.NewImageId(), collection)
-	repos.Image.AddImage(image.Id, nil, im.ImageSpecs{})
+	repos.Image.AddImage(image.Id, nil, im.Specs{})
 	repos.Image.AddToCollection(image.Id, collection.Id)
 
 	return image, collection, label

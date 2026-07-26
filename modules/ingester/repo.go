@@ -24,7 +24,7 @@ type AnnotationRepo interface {
 }
 
 type ImageRepo interface {
-	AddImage(im.ImageId, []byte, im.ImageSpecs) error
+	AddImage(im.ImageId, []byte, im.Specs) error
 	AddToCollection(im.ImageId, clc.CollectionId) error
 	FindImageIdByHash([]byte) (*im.ImageId, error)
 	Delete(im.ImageId) error

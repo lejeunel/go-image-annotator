@@ -11,7 +11,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/role/update"
 )
 
-func NewSQLiteRoleInteractors(repo ri.SQLiteRoleRepo, a auth.Authorizer) r.Interactors {
+func NewSQLiteRoleInteractors(repo ri.SQLiteRoleRepo, a auth.Interface) r.Interactors {
 	return r.Interactors{
 		Find:   find.New(repo),
 		Create: create.New(repo, create.WithAuth(a)),

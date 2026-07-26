@@ -12,6 +12,7 @@ import (
 
 	adm "github.com/lejeunel/go-image-annotator/adapters/web/admin"
 	admgrp "github.com/lejeunel/go-image-annotator/adapters/web/admin/group"
+	admpl "github.com/lejeunel/go-image-annotator/adapters/web/admin/policy"
 	admrl "github.com/lejeunel/go-image-annotator/adapters/web/admin/role"
 	admusr "github.com/lejeunel/go-image-annotator/adapters/web/admin/user"
 	an "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
@@ -80,6 +81,8 @@ func Make(url string, port int) http.Handler {
 	adminGroupServer.Route(router, webAuth)
 	adminRoleServer := admrl.New(adminPageBuilder, app.Itrs.Role)
 	adminRoleServer.Route(router, webAuth)
+	adminPolicyServer := admpl.New(adminPageBuilder)
+	adminPolicyServer.Route(router, webAuth)
 
 	labelServer := lbl.New(pageBuilder, cfg.DefaultPageSize,
 		app.Itrs.Label.Create, app.Itrs.Label.List, app.Itrs.Label.Update,

@@ -6,9 +6,11 @@ import (
 
 type FakePresenter struct {
 	GotSuccess bool
+	Got        Response
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) SuccessBootstrap() {
+func (p *FakePresenter) SuccessBootstrap(r Response) {
 	p.GotSuccess = true
+	p.Got = r
 }

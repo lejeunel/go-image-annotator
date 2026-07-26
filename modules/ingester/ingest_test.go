@@ -178,7 +178,7 @@ func TestShouldAddMIMEType(t *testing.T) {
 	imageRepo := &fk.ImageRepo{}
 	repos.ImageRepo = imageRepo
 	ing := NewTestingIngester(repos)
-	specs := im.ImageSpecs{MIMEType: "image/jpeg"}
+	specs := im.Specs{MIMEType: "image/jpeg"}
 	ing.ImageSpecsDetector = &fk.SpecsDetector{Return: specs}
 	ing.Ingest(Request{Reader: &fk.ImageReader{}})
 	assert.Equal(t, specs.MIMEType, imageRepo.GotSpecs.MIMEType)
@@ -197,7 +197,7 @@ func TestShouldStoreIngestionTime(t *testing.T) {
 	imRepo := &fk.ImageRepo{}
 	repos.ImageRepo = imRepo
 	ing := NewTestingIngester(repos)
-	specs := im.ImageSpecs{MIMEType: "image/jpeg"}
+	specs := im.Specs{MIMEType: "image/jpeg"}
 	now := time.Now()
 	ing.clock = clockwork.NewFakeClockAt(now)
 	ing.ImageSpecsDetector = &fk.SpecsDetector{Return: specs}

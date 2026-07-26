@@ -30,7 +30,7 @@ func NewSQLiteUserInteractors(
 	passwordVerifier cpw.TokenVerifier,
 	forgotPassworkTokenExpirationMinutes int,
 	pwGen create.PasswordGenerator,
-	auth auth.Authorizer) usr.Interactors {
+	auth auth.Interface) usr.Interactors {
 	return usr.Interactors{
 		Find:                     find.New(userRepo, find.WithAuth(auth)),
 		Create:                   create.New(userRepo, ApitokenGen, pwGen, create.WithAuth(auth)),

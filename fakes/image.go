@@ -29,8 +29,8 @@ type ImageRepo struct {
 	GotPagination                pa.PaginationParams
 	GotOrdering                  im.Ordering
 	GotHash                      []byte
-	GotSpecs                     im.ImageSpecs
-	ReturnSpecs                  im.ImageSpecs
+	GotSpecs                     im.Specs
+	ReturnSpecs                  *im.Specs
 	NumDeletedImages             int
 	HashAlreadyExists            bool
 	Count_                       int64
@@ -90,7 +90,7 @@ func (r *ImageRepo) Slice(f im.Filtering, p pa.PaginationParams, o im.Ordering) 
 	return result, nil
 
 }
-func (r *ImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.ImageSpecs) error {
+func (r *ImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.Specs) error {
 	if r.ErrOnAddImage != nil {
 		return r.ErrOnAddImage
 	}
@@ -125,11 +125,11 @@ func (r *ImageRepo) Count(f im.Filtering) (*int64, error) {
 
 }
 
-func (r ImageRepo) GetSpecs(im.ImageId) (*im.ImageSpecs, error) {
+func (r ImageRepo) GetSpecs(im.ImageId) (*im.Specs, error) {
 	if r.ErrOnGetSpecs != nil {
 		return nil, r.ErrOnGetSpecs
 	}
-	return &r.ReturnSpecs, nil
+	return r.ReturnSpecs, nil
 }
 
 func (r ImageRepo) Iterate(f im.Filtering, pageSize int) iter.Seq2[im.BaseImage, error] {

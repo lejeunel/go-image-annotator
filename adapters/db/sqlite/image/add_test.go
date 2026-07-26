@@ -15,7 +15,7 @@ func TestAddSpecs(t *testing.T) {
 	imRepo, _ := MakeRepos(s.NewInMemory())
 	id := im.NewImageId()
 
-	specs := im.ImageSpecs{MIMEType: "the-mimetype", Width: 15, Height: 10}
+	specs := im.Specs{MIMEType: "the-mimetype", Width: 15, Height: 10}
 	imRepo.AddImage(id, nil, specs)
 	r, err := imRepo.GetSpecs(id)
 	assert.NoError(t, err)
@@ -75,7 +75,7 @@ func TestCreatedAt(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	clcRepo.Create(collection)
 	imageId := im.NewImageId()
-	err := imRepo.AddImage(imageId, nil, im.ImageSpecs{IngestedAt: now})
+	err := imRepo.AddImage(imageId, nil, im.Specs{IngestedAt: now})
 	assert.NoError(t, err)
 	specs, err := imRepo.GetSpecs(imageId)
 	assert.NoError(t, err)

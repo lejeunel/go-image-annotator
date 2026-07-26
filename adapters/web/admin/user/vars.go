@@ -3,7 +3,7 @@ package user
 const (
 	UserUrl                = "/ui/user"
 	CreateUserFormUrl      = "/ui/user/new"
-	UserSidebarEntryName   = "Users"
+	PageName               = "Users"
 	createEmailFieldName   = "email"
 	createIsAdminFieldName = "is_admin"
 	createUserTargetDiv    = "create-user"

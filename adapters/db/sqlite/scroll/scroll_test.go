@@ -43,7 +43,7 @@ func TestShouldFailWhenImageDoesNotExist(t *testing.T) {
 func TestImageMustExist(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	id := im.NewImageId()
-	repos.Image.AddImage(id, nil, im.ImageSpecs{})
+	repos.Image.AddImage(id, nil, im.Specs{})
 	err := repos.Scroller.ImageMustExist(id)
 	assert.NoError(t, err)
 }
@@ -64,7 +64,7 @@ func TestShouldFailWhenNoImage(t *testing.T) {
 func TestGettingAdjacentImageWhenSingleImageShouldFail(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	id, _ := im.NewImageIdFromString("00000000-0000-0000-0000-000000000000")
-	repos.Image.AddImage(id, nil, im.ImageSpecs{})
+	repos.Image.AddImage(id, nil, im.Specs{})
 	_, err := repos.Scroller.GetAdjacent(id, scr.NewCriteria(), scr.ScrollPrevious)
 	assert.ErrorIs(t, err, e.ErrNotFound)
 }
@@ -89,8 +89,8 @@ func TestNextImageInCollection(t *testing.T) {
 	repos.Collection.Create(collection)
 	firstId, _ := im.NewImageIdFromString(FakeUUIDFromInt(0))
 	secondId, _ := im.NewImageIdFromString(FakeUUIDFromInt(1))
-	repos.Image.AddImage(firstId, []byte("first-hash"), im.ImageSpecs{})
-	repos.Image.AddImage(secondId, []byte("second-hash"), im.ImageSpecs{})
+	repos.Image.AddImage(firstId, []byte("first-hash"), im.Specs{})
+	repos.Image.AddImage(secondId, []byte("second-hash"), im.Specs{})
 	repos.Image.AddToCollection(firstId, collection.Id)
 	repos.Image.AddToCollection(secondId, collection.Id)
 
@@ -110,7 +110,7 @@ func CreateImagesWithIngestTime(repos SQLiteScrollerRepos, num int) ([]im.ImageI
 	for n := range num {
 		id := im.NewImageId()
 		repos.Image.AddImage(id, fmt.Append([]byte{}, n),
-			im.ImageSpecs{IngestedAt: now.Add(time.Duration(n) * time.Hour)})
+			im.Specs{IngestedAt: now.Add(time.Duration(n) * time.Hour)})
 		repos.Image.AddToCollection(id, collection.Id)
 		ids = append(ids, id)
 	}

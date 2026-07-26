@@ -23,7 +23,7 @@ type BaseImage struct {
 	Collection string
 }
 
-type ImageSpecs struct {
+type Specs struct {
 	MIMEType   string
 	Width      int
 	Height     int
@@ -33,7 +33,7 @@ type ImageSpecs struct {
 type Image struct {
 	Id            ImageId
 	Collection    clc.Collection
-	Specs         ImageSpecs
+	Specs         Specs
 	Labels        []an.ImageLabel
 	BoundingBoxes []an.BoundingBox
 	Polygons      []an.Polygon

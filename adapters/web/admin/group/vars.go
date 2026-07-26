@@ -1,7 +1,7 @@
 package group
 
 const (
-	GroupPageEntryName         = "Groups"
+	PageName                   = "Groups"
 	createNameFieldName        = "name"
 	createDescriptionFieldName = "description"
 	createGroupTargetDiv       = "create-group"

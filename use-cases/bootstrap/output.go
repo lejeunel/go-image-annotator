@@ -1,6 +1,6 @@
 package bootstrap
 
 type OutputPort interface {
-	SuccessBootstrap()
+	SuccessBootstrap(Response)
 	Error(error)
 }

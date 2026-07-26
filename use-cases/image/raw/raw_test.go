@@ -13,7 +13,8 @@ import (
 
 func TestHandleErrorOnGetRaw(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.FileStore{ErrOnGet: e.ErrNotFound}, &fk.ImageRepo{})
+	itr := New(&fk.FileStore{ErrOnGet: e.ErrNotFound},
+		&fk.ImageRepo{ReturnSpecs: &im.Specs{MIMEType: "image/jpeg"}})
 	itr.Execute(im.NewImageId().String(), p)
 	assert.ErrorIs(t, p.GotErr, e.ErrNotFound)
 	assert.False(t, p.GotSuccess)
@@ -30,12 +31,12 @@ func TestHandleErrorOnGetSpecs(t *testing.T) {
 func TestReadRawImage(t *testing.T) {
 	p := &FakePresenter{}
 	data := []byte("the-data")
-	specs := im.ImageSpecs{MIMEType: "the-type"}
-	itr := New(&fk.FileStore{Data: data}, &fk.ImageRepo{ReturnSpecs: specs})
+	specs := im.Specs{MIMEType: "image/jpeg"}
+	itr := New(&fk.FileStore{Data: data}, &fk.ImageRepo{ReturnSpecs: &specs})
 	itr.Execute(im.NewImageId().String(), p)
 	assert.True(t, p.GotSuccess)
 	r, err := io.ReadAll(p.Got)
 	assert.NoError(t, err)
 	assert.True(t, bytes.Equal(data, r))
-	assert.Equal(t, specs.MIMEType, p.Got.ImageSpecs.MIMEType)
+	assert.Equal(t, specs.MIMEType, p.Got.Specs.MIMEType)
 }

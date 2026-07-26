@@ -13,7 +13,7 @@ func TestRetrieveImageIdByHash(t *testing.T) {
 	repo := NewSQLiteImageRepo(s.NewInMemory())
 	imageId := im.NewImageId()
 	hash := []byte("the-hash")
-	err := repo.AddImage(imageId, hash, im.ImageSpecs{})
+	err := repo.AddImage(imageId, hash, im.Specs{})
 	assert.NoError(t, err)
 
 	existingId, err := repo.FindImageIdByHash(hash)
@@ -24,7 +24,7 @@ func TestRetrieveImageIdByHash(t *testing.T) {
 func TestRetrieveImageIdByNonExistingHashShouldFail(t *testing.T) {
 	repo := NewSQLiteImageRepo(s.NewInMemory())
 	imageId := im.NewImageId()
-	repo.AddImage(imageId, nil, im.ImageSpecs{})
+	repo.AddImage(imageId, nil, im.Specs{})
 	_, err := repo.FindImageIdByHash([]byte("non-existing-hash"))
 	assert.ErrorIs(t, err, e.ErrNotFound)
 }

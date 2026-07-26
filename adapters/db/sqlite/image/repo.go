@@ -110,7 +110,7 @@ func (r SQLiteImageRepo) ImageExists(imageId im.ImageId) (bool, error) {
 
 	return count > 0, nil
 }
-func (r SQLiteImageRepo) GetSpecs(imageId im.ImageId) (*im.ImageSpecs, error) {
+func (r SQLiteImageRepo) GetSpecs(imageId im.ImageId) (*im.Specs, error) {
 	errCtx := "finding image specification"
 	var row SpecsRow
 	err := r.Db.Get(&row, "SELECT mimetype,width,height,ingested_at FROM images WHERE id = $1", imageId)
@@ -122,9 +122,9 @@ func (r SQLiteImageRepo) GetSpecs(imageId im.ImageId) (*im.ImageSpecs, error) {
 			return nil, fmt.Errorf("%v: %v: %w", errCtx, err, e.ErrInternal)
 		}
 	}
-	return &im.ImageSpecs{MIMEType: row.MIMEType, Width: row.Width, Height: row.Height, IngestedAt: row.IngestedAt}, nil
+	return &im.Specs{MIMEType: row.MIMEType, Width: row.Width, Height: row.Height, IngestedAt: row.IngestedAt}, nil
 }
-func (r SQLiteImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.ImageSpecs) error {
+func (r SQLiteImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.Specs) error {
 	query := "INSERT INTO images (id, hash, mimetype, width, height, ingested_at) VALUES ($1,$2,$3,$4,$5,$6)"
 	_, err := r.Db.Exec(query, imageId.String(), hex.EncodeToString(hash), specs.MIMEType,
 		specs.Width, specs.Height, specs.IngestedAt)

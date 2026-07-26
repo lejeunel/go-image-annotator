@@ -1,7 +1,5 @@
 package authorizer
 
-//go:generate go run ./gen -struct Authorizer -in authorizer.go -out validmethods.gen.go -pkg authorizer
-
 import (
 	"context"
 	"fmt"
@@ -20,10 +18,6 @@ type Authorizer struct {
 func NewDefault() Authorizer {
 	r := Authorizer{Rules: make(p.Policies)}
 	return *r.SetAuthRules(p.DefaultPolicies)
-}
-
-func NewVoidAuth() Authorizer {
-	return Authorizer{Rules: make(p.Policies)}
 }
 
 func New(rules p.Policies) (*Authorizer, error) {
@@ -115,18 +109,6 @@ func (a Authorizer) CreateUser(ctx context.Context) error {
 }
 func (a Authorizer) DeleteUser(ctx context.Context) error {
 	return a.check(ctx, "DeleteUser", nil)
-}
-func (a Authorizer) AssignUserToGroup(ctx context.Context) error {
-	return a.check(ctx, "AssignUserToGroup", nil)
-}
-func (a Authorizer) UnAssignUserFromGroup(ctx context.Context) error {
-	return a.check(ctx, "UnAssignUserFromGroup", nil)
-}
-func (a Authorizer) AssignRoleToUser(ctx context.Context) error {
-	return a.check(ctx, "AssignRoleToUser", nil)
-}
-func (a Authorizer) UnAssignRoleFromUser(ctx context.Context) error {
-	return a.check(ctx, "UnAssignRoleFromUser", nil)
 }
 func (a Authorizer) ListUsers(ctx context.Context) error {
 	return a.check(ctx, "ListUsers", nil)

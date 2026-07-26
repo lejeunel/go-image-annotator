@@ -14,7 +14,7 @@ import (
 )
 
 type IImageSpecsDetector interface {
-	Detect(io.Reader) (*im.ImageSpecs, io.Reader, error)
+	Detect(io.Reader) (*im.Specs, io.Reader, error)
 }
 
 type Ingester interface {

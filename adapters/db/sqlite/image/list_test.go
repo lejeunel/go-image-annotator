@@ -23,7 +23,7 @@ func CreateSingleImageCollection(repos ImageListingTestingRepos, collectionName 
 	repos.Collection.Create(collection)
 	imageId := im.NewImageId()
 	image := im.NewImage(imageId, collection)
-	repos.Image.AddImage(image.Id, nil, im.ImageSpecs{})
+	repos.Image.AddImage(image.Id, nil, im.Specs{})
 	repos.Image.AddToCollection(image.Id, collection.Id)
 	return image, collection
 }
@@ -50,7 +50,7 @@ func TestListOneImage(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	repos.Collection.Create(collection)
 	image := im.NewImage(im.NewImageId(), collection)
-	repos.Image.AddImage(image.Id, nil, im.ImageSpecs{})
+	repos.Image.AddImage(image.Id, nil, im.Specs{})
 	repos.Image.AddToCollection(image.Id, collection.Id)
 
 	r, _ := repos.Image.Slice(im.Filtering{}, pa.PaginationParams{PageSize: 2, Page: 1}, im.Ordering{})
@@ -73,7 +73,7 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 func CreateImageInCollectionFromString(repo SQLiteImageRepo, collection clc.Collection, imageId string) im.Image {
 	id, _ := im.NewImageIdFromString(imageId)
 	image := im.NewImage(id, collection)
-	repo.AddImage(image.Id, []byte(image.Id.String()), im.ImageSpecs{})
+	repo.AddImage(image.Id, []byte(image.Id.String()), im.Specs{})
 	repo.AddToCollection(image.Id, collection.Id)
 	return image
 
@@ -100,8 +100,8 @@ func TestListImagesOrderedByIngestTime(t *testing.T) {
 	secondId, _ := im.NewImageIdFromString("00000000-0000-0000-0000-000000000000")
 	firstImage := im.NewImage(firstId, collection)
 	secondImage := im.NewImage(secondId, collection)
-	repos.Image.AddImage(firstImage.Id, []byte("first-hash"), im.ImageSpecs{IngestedAt: time.Now()})
-	repos.Image.AddImage(secondImage.Id, []byte("second-hash"), im.ImageSpecs{IngestedAt: time.Now()})
+	repos.Image.AddImage(firstImage.Id, []byte("first-hash"), im.Specs{IngestedAt: time.Now()})
+	repos.Image.AddImage(secondImage.Id, []byte("second-hash"), im.Specs{IngestedAt: time.Now()})
 	repos.Image.AddToCollection(firstImage.Id, collection.Id)
 	repos.Image.AddToCollection(secondImage.Id, collection.Id)
 

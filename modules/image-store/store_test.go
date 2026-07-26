@@ -57,9 +57,10 @@ func TestFindImageGivesCorrectAnnotations(t *testing.T) {
 	polygons := []a.Polygon{{Id: a.NewAnnotationId(), Label: label}}
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 
-	s := New(&fk.ImageRepo{ImageIsInCollection: true}, &fk.CollectionRepo{ExistingNames: []string{collection.Name},
-		Return: collection}, &fk.AnnotationRepo{Labels: labels,
-		BoundingBoxes: bboxes, Polygons: polygons}, &fk.FileStore{Data: []byte("test-data")})
+	s := New(&fk.ImageRepo{ImageIsInCollection: true, ReturnSpecs: &im.Specs{MIMEType: "image/jpeg"}},
+		&fk.CollectionRepo{ExistingNames: []string{collection.Name},
+			Return: collection}, &fk.AnnotationRepo{Labels: labels,
+			BoundingBoxes: bboxes, Polygons: polygons}, &fk.FileStore{Data: []byte("test-data")})
 	image, err := s.Find(im.BaseImage{ImageId: im.NewImageId(),
 		Collection: collection.Name})
 	assert.NoError(t, err)
@@ -72,7 +73,9 @@ func TestFindImageGivesCorrectAnnotations(t *testing.T) {
 func TestImageReaderGivesCorrectBytes(t *testing.T) {
 	data := []byte("test-data")
 
-	s := New(&fk.ImageRepo{ImageIsInCollection: true}, &fk.CollectionRepo{ExistingNames: []string{"the-collection"}},
+	s := New(&fk.ImageRepo{ImageIsInCollection: true,
+		ReturnSpecs: &im.Specs{MIMEType: "image/jpeg"}},
+		&fk.CollectionRepo{ExistingNames: []string{"the-collection"}},
 		&fk.AnnotationRepo{}, &fk.FileStore{Data: data})
 	image, _ := s.Find(im.BaseImage{ImageId: im.NewImageId(),
 		Collection: "the-collection"})
@@ -82,10 +85,12 @@ func TestImageReaderGivesCorrectBytes(t *testing.T) {
 
 func TestRetrieveSpecs(t *testing.T) {
 	now := time.Now()
-	s := New(&fk.ImageRepo{ImageIsInCollection: true, ReturnSpecs: im.ImageSpecs{IngestedAt: now}},
+	specs := im.Specs{IngestedAt: now, MIMEType: "image/jpeg"}
+	s := New(&fk.ImageRepo{ImageIsInCollection: true,
+		ReturnSpecs: &specs},
 		&fk.CollectionRepo{ExistingNames: []string{"the-collection"}}, &fk.AnnotationRepo{},
 		&fk.FileStore{})
 	image, _ := s.Find(im.BaseImage{ImageId: im.NewImageId(),
 		Collection: "the-collection"})
-	assert.Equal(t, image.Specs.IngestedAt, now)
+	assert.Equal(t, specs.IngestedAt, image.Specs.IngestedAt)
 }

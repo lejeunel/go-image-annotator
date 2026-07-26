@@ -25,14 +25,14 @@ func isFirstLetterCapitalized(s string) bool {
 }
 
 func main() {
-	structName := flag.String("struct", "", "name of the struct to extract methods from")
-	in := flag.String("in", "", "source file containing the struct's methods")
+	ifaceName := flag.String("iface", "", "name of the interface to extract methods from")
+	in := flag.String("in", "", "source file containing the interface declaration")
 	out := flag.String("out", "", "output file")
 	pkg := flag.String("pkg", "", "package name for generated file")
 	flag.Parse()
 
-	if *structName == "" || *in == "" || *out == "" || *pkg == "" {
-		fmt.Fprintln(os.Stderr, "struct, in, out, and pkg flags are all required")
+	if *ifaceName == "" || *in == "" || *out == "" || *pkg == "" {
+		fmt.Fprintln(os.Stderr, "iface, in, out, and pkg flags are all required")
 		os.Exit(1)
 	}
 
@@ -43,27 +43,54 @@ func main() {
 		os.Exit(1)
 	}
 
-	var methods []string
+	var target *ast.InterfaceType
 	for _, decl := range node.Decls {
-		fn, ok := decl.(*ast.FuncDecl)
-		if !ok || fn.Recv == nil || len(fn.Recv.List) == 0 {
-			continue // a plain function, not a method
-		}
-		if !isFirstLetterCapitalized(fn.Name.Name) {
+		gen, ok := decl.(*ast.GenDecl)
+		if !ok || gen.Tok != token.TYPE {
 			continue
 		}
-		if slices.Contains(SkipMethods, fn.Name.Name) {
-			continue
+		for _, spec := range gen.Specs {
+			ts, ok := spec.(*ast.TypeSpec)
+			if !ok || ts.Name.Name != *ifaceName {
+				continue
+			}
+			it, ok := ts.Type.(*ast.InterfaceType)
+			if !ok {
+				fmt.Fprintf(os.Stderr, "%q is not an interface type in %s\n", *ifaceName, *in)
+				os.Exit(1)
+			}
+			target = it
 		}
-		if recvTypeName(fn.Recv.List[0].Type) == *structName {
-			methods = append(methods, fn.Name.Name)
+	}
+	if target == nil {
+		fmt.Fprintf(os.Stderr, "interface %q not found in %s\n", *ifaceName, *in)
+		os.Exit(1)
+	}
+
+	var methods []string
+	if target.Methods != nil {
+		for _, field := range target.Methods.List {
+			if len(field.Names) == 0 {
+				continue // embedded interface; deliberately not followed
+			}
+			for _, n := range field.Names {
+				methodName := n.Name
+				if !isFirstLetterCapitalized(methodName) {
+					continue
+				}
+				if slices.Contains(SkipMethods, methodName) {
+					continue
+				}
+				methods = append(methods, methodName)
+			}
 		}
 	}
 
 	if len(methods) == 0 {
-		fmt.Fprintf(os.Stderr, "no methods found on struct %q in %s\n", *structName, *in)
+		fmt.Fprintf(os.Stderr, "no methods found on interface %q in %s\n", *ifaceName, *in)
 		os.Exit(1)
 	}
+
 	sort.Strings(methods)
 
 	var b strings.Builder
@@ -76,23 +103,5 @@ func main() {
 	if err := os.WriteFile(*out, []byte(b.String()), 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "write error: %v\n", err)
 		os.Exit(1)
-	}
-}
-
-// recvTypeName extracts the base type name from a receiver expression,
-// handling value receivers (T), pointer receivers (*T), and generic
-// receivers (T[X]) / (*T[X]).
-func recvTypeName(expr ast.Expr) string {
-	switch t := expr.(type) {
-	case *ast.Ident:
-		return t.Name
-	case *ast.StarExpr:
-		return recvTypeName(t.X)
-	case *ast.IndexExpr:
-		return recvTypeName(t.X)
-	case *ast.IndexListExpr:
-		return recvTypeName(t.X)
-	default:
-		return ""
 	}
 }

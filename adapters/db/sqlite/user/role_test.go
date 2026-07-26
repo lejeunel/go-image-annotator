@@ -50,7 +50,7 @@ func TestAssignNewRoles(t *testing.T) {
 	roleRepo := roleRepo.NewSQLiteRoleRepo(db)
 	roleRepo.Create(r.NewRole(r.NewRoleId(), "a-role"))
 	roleRepo.Create(r.NewRole(r.NewRoleId(), "another-role"))
-	err := repo.SetRoles(userId, []string{"a-role", "another-role"})
+	repo.SetRoles(userId, []string{"a-role", "another-role"})
 	r, err := repo.Find(userId)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(r.Roles))
