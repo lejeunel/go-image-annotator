@@ -1,4 +1,4 @@
-package app
+package interactors
 
 import (
 	an "github.com/lejeunel/go-image-annotator/use-cases/annotate"

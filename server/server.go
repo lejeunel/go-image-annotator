@@ -32,13 +32,12 @@ import (
 
 func Make(url string, port int) http.Handler {
 	cfg := config.Parse()
+	defaultAuth := auth.NewDefault()
+	app := sqlite.NewSQLiteApp(cfg, defaultAuth)
 
 	currentVersion := g.Info{Version: g.Version, Commit: g.Commit, Date: g.Date}
 	basePageBuilder := b.NewBasePageBuilder()
 	pageBuilder := b.NewPageBuilder(basePageBuilder, currentVersion)
-
-	defaultAuth := auth.NewDefault()
-	app := sqlite.NewSQLiteApp(cfg, defaultAuth)
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	a.BootstrapInitialAdmin(app.Itrs.Bootstrap, cfg.InitialAdminEmail, cfg.InitialAdminPassword, *logger)

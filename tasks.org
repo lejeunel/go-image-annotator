@@ -84,3 +84,4 @@ Upon error, only the raw data should be deleted,
 and the database should be rolled-back
 * DONE forbid deleting user who is yourself
 this will lock yourself out...
+* TODO bootstrap interactor should clean-up on fail (transaction-like)

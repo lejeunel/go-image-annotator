@@ -1,6 +1,9 @@
 package sqlite
 
 import (
+	sqlitegrp "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
+	sqliterol "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
+	sqliteusr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	pw "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
@@ -17,7 +20,9 @@ import (
 )
 
 func NewSQLiteUserInteractors(
-	repos SQLiteRepos,
+	userRepo sqliteusr.SQLiteUserRepo,
+	grpRepo sqlitegrp.SQLiteGroupRepo,
+	roleRepo sqliterol.SQLiteRoleRepo,
 	ApitokenGen create.APITokenGenerator,
 	forgotPasswordTokenGen fp.TokenGenerator,
 	passwordValidator pw.PasswordValidator,
@@ -27,14 +32,14 @@ func NewSQLiteUserInteractors(
 	pwGen create.PasswordGenerator,
 	auth auth.Authorizer) usr.Interactors {
 	return usr.Interactors{
-		Find:                     find.New(repos.User, find.WithAuth(auth)),
-		Create:                   create.New(repos.User, ApitokenGen, pwGen, create.WithAuth(auth)),
-		Delete:                   delete.New(repos.User, delete.WithAuth(auth)),
-		List:                     list.New(repos.User, list.WithAuth(auth)),
-		RenewToken:               rt.New(repos.User, ApitokenGen),
-		UpdatePrivileges:         upr.New(repos.User, repos.Group, repos.Role, upr.WithAuth(auth)),
-		RequestForgottenPassword: fp.New(repos.User, forgotPassworkTokenExpirationMinutes, forgotPasswordTokenGen),
-		ResetForgottenPassword:   rfpw.New(repos.User, passwordHasher, passwordValidator),
-		ChangePassword:           cpw.New(repos.User, passwordVerifier, passwordValidator),
+		Find:                     find.New(userRepo, find.WithAuth(auth)),
+		Create:                   create.New(userRepo, ApitokenGen, pwGen, create.WithAuth(auth)),
+		Delete:                   delete.New(userRepo, delete.WithAuth(auth)),
+		List:                     list.New(userRepo, list.WithAuth(auth)),
+		RenewToken:               rt.New(userRepo, ApitokenGen),
+		UpdatePrivileges:         upr.New(userRepo, grpRepo, roleRepo, upr.WithAuth(auth)),
+		RequestForgottenPassword: fp.New(userRepo, forgotPassworkTokenExpirationMinutes, forgotPasswordTokenGen),
+		ResetForgottenPassword:   rfpw.New(userRepo, passwordHasher, passwordValidator),
+		ChangePassword:           cpw.New(userRepo, passwordVerifier, passwordValidator),
 	}
 }

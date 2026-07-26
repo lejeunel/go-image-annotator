@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 
+	itrs "github.com/lejeunel/go-image-annotator/app/interactors"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
 	s "github.com/lejeunel/go-image-annotator/shared/session"
@@ -12,7 +13,7 @@ import (
 )
 
 type App struct {
-	Itrs           Interactors
+	Itrs           itrs.Interactors
 	SessionManager s.MySessionManager
 	a.Annotator
 }
@@ -30,7 +31,7 @@ func (p InitialAdminPresenter) Error(err error) {
 }
 
 func BootstrapInitialAdmin(itr bst.Interactor, email, password string, logger slog.Logger) {
-	user := u.NewUser("bootstrapper", u.WithRoles([]string{"admin"}))
+	user := u.NewUser("anonymous", u.WithRoles([]string{"admin"}))
 	ctx := u.AppendUserToContext(context.Background(), user)
 	pres := InitialAdminPresenter{logger}
 	itr.Execute(ctx, bst.Request{InitialAdminEmail: email, InitialAdminPassword: password}, pres)

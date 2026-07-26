@@ -3,6 +3,7 @@ package authorizer
 import (
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"slices"
 	"strings"
@@ -29,6 +30,20 @@ func validateYamlPolicies(cfg YamlPolicies) error {
 	if len(invalidNames) > 0 {
 		return fmt.Errorf("checking for validity of method names: got invalid names: %v: %w",
 			invalidNames, e.ErrValidation)
+	}
+	return nil
+}
+
+func MarshalPolicies(policies p.Policies, w io.Writer) error {
+	out := YamlPolicies{Version: 1, Rules: make(map[string][]string)}
+	maps.Copy(out.Rules, policies)
+	buf, err := yaml.Marshal(out)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(buf)
+	if err != nil {
+		return err
 	}
 	return nil
 }

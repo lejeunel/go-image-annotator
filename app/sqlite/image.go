@@ -1,7 +1,12 @@
 package sqlite
 
 import (
+	anrepo "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/annotation"
+	clrepo "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
+	imrepo "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
+	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
 	ingm "github.com/lejeunel/go-image-annotator/modules/ingester"
 	im "github.com/lejeunel/go-image-annotator/use-cases/image"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/delete"
@@ -11,13 +16,20 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/image/raw"
 )
 
-func NewSQLiteImageInteractors(repos SQLiteRepos, ingester ingm.Interface, pageSize int,
+func NewSQLiteImageInteractors(
+	imr imrepo.SQLiteImageRepo,
+	clr clrepo.SQLiteCollectionRepo,
+	anr anrepo.SQLiteAnnotationRepo,
+	ims ims.ImageStore,
+	imfs fs.Interface,
+	ingester ingm.Interface,
+	pageSize int,
 	auth auth.Authorizer) im.Interactors {
 	return im.Interactors{
-		Ingest: *ingest.New(ingester, repos.Collection, ingest.WithAuth(auth)),
-		Find:   find.New(repos.ImageStore),
-		Raw:    raw.New(repos.FileStore, repos.Image),
-		List:   list.New(repos.Image, repos.ImageStore),
-		Delete: delete.New(repos.ImageStore, repos.Image, repos.Annotation),
+		Ingest: *ingest.New(ingester, clr, ingest.WithAuth(auth)),
+		Find:   find.New(ims),
+		Raw:    raw.New(imfs, imr),
+		List:   list.New(imr, ims),
+		Delete: delete.New(ims, imr, anr),
 	}
 }

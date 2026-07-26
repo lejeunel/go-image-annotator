@@ -1,7 +1,11 @@
 package sqlite
 
 import (
+	anr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/annotation"
+	imr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
+	lbr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
 	an "github.com/lejeunel/go-image-annotator/use-cases/annotate"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
@@ -12,14 +16,18 @@ import (
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
-func NewSQLiteAnnotationInteractors(repos SQLiteRepos, auth auth.Authorizer) an.Interactors {
+func NewSQLiteAnnotationInteractors(ims ims.ImageStore,
+	imr imr.SQLiteImageRepo,
+	lbr lbr.SQLiteLabelRepo,
+	anr anr.SQLiteAnnotationRepo,
+	auth auth.Authorizer) an.Interactors {
 	return an.Interactors{
-		AddPolygon:    addpoly.New(repos.ImageStore, repos.Annotation, repos.Label, addpoly.WithAuth(auth)),
-		UpdatePolygon: updpoly.New(repos.Annotation, repos.Label, updpoly.WithAuth(auth)),
-		AddBox:        addbox.New(repos.ImageStore, repos.Annotation, repos.Label, addbox.WithAuth(auth)),
-		UpdateBox:     updbox.New(repos.Annotation, repos.Label, updbox.WithAuth(auth)),
-		Delete:        remano.New(repos.Annotation, remano.WithAuth(auth)),
-		UpdateLabel:   updlbl.New(repos.Annotation, repos.Label, updlbl.WithAuth(auth)),
-		AddImageLabel: addlbl.New(repos.Annotation, repos.Label, repos.ImageStore, addlbl.WithAuth(auth)),
+		AddPolygon:    addpoly.New(ims, anr, lbr, addpoly.WithAuth(auth)),
+		UpdatePolygon: updpoly.New(anr, lbr, updpoly.WithAuth(auth)),
+		AddBox:        addbox.New(ims, anr, lbr, addbox.WithAuth(auth)),
+		UpdateBox:     updbox.New(anr, lbr, updbox.WithAuth(auth)),
+		Delete:        remano.New(anr, remano.WithAuth(auth)),
+		UpdateLabel:   updlbl.New(anr, lbr, updlbl.WithAuth(auth)),
+		AddImageLabel: addlbl.New(anr, lbr, ims, addlbl.WithAuth(auth)),
 	}
 }

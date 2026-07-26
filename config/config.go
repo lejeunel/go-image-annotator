@@ -6,8 +6,7 @@ import (
 )
 
 type Config struct {
-	SQLiteDBPath                         string   `required:"true"`
-	ArtefactDir                          string   `required:"true"`
+	ArtefactPath                         string   `required:"true"`
 	InitialAdminEmail                    string   `required:"true"`
 	InitialAdminPassword                 string   `required:"true"`
 	URL                                  string   `required:"true"`

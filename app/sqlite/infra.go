@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	an "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/annotation"
 	clc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
@@ -11,31 +12,26 @@ import (
 	scr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/scroll"
 	usr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	af_store "github.com/lejeunel/go-image-annotator/modules/file-store"
+	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	im_store "github.com/lejeunel/go-image-annotator/modules/image-store"
 )
 
-type SQLiteRepos struct {
-	Image      im.SQLiteImageRepo
-	Collection clc.SQLiteCollectionRepo
-	Label      lbl.SQLiteLabelRepo
-	ImageStore im_store.ImageStore
-	FileStore  af_store.Interface
-	Annotation an.SQLiteAnnotationRepo
-	Scroller   scr.SQLiteScrollerRepo
-	Group      grp.SQLiteGroupRepo
-	Role       r.SQLiteRoleRepo
-	User       usr.SQLiteUserRepo
-	Db         *sqlx.DB
+type LocalFSInfra struct {
+	Image           im.SQLiteImageRepo
+	Collection      clc.SQLiteCollectionRepo
+	Label           lbl.SQLiteLabelRepo
+	ImageStore      im_store.ImageStore
+	ImageFileStore  af_store.Interface
+	PolicyFileStore af_store.Interface
+	Annotation      an.SQLiteAnnotationRepo
+	Scroller        scr.SQLiteScrollerRepo
+	Group           grp.SQLiteGroupRepo
+	Role            r.SQLiteRoleRepo
+	User            usr.SQLiteUserRepo
+	Db              *sqlx.DB
 }
 
-type SQLiteImageStoreRepo struct {
-	im.SQLiteImageRepo
-	clc.SQLiteCollectionRepo
-	lbl.SQLiteLabelRepo
-	an.SQLiteAnnotationRepo
-}
-
-func NewSQLiteRepos(db *sqlx.DB, fstore af_store.Interface) SQLiteRepos {
+func NewLocalFSInfra(db *sqlx.DB, basePath string) LocalFSInfra {
 	imrepo := im.NewSQLiteImageRepo(db)
 	anrepo := an.NewSQLiteAnnotationRepo(db)
 	clrepo := clc.NewSQLiteCollectionRepo(db)
@@ -43,20 +39,23 @@ func NewSQLiteRepos(db *sqlx.DB, fstore af_store.Interface) SQLiteRepos {
 	grprepo := grp.NewSQLiteGroupRepo(db)
 	rlrepo := r.NewSQLiteRoleRepo(db)
 	usrrepo := usr.NewSQLiteUserRepo(db)
-	imstore := im_store.New(imrepo, clrepo, anrepo, fstore)
+	imageFileStore := fs.NewFileStore(fmt.Sprintf("%v/%v", basePath, "images"))
+	policyFileStore := fs.NewFileStore(fmt.Sprintf("%v/%v", basePath, "assets"))
+	imstore := im_store.New(imrepo, clrepo, anrepo, imageFileStore)
 	scrrepo := scr.NewSQLiteScrollerRepo(db)
-	return SQLiteRepos{
-		Image:      imrepo,
-		Collection: clrepo,
-		Label:      lbrepo,
-		ImageStore: imstore,
-		FileStore:  fstore,
-		Annotation: anrepo,
-		Scroller:   scrrepo,
-		Group:      grprepo,
-		Role:       rlrepo,
-		User:       usrrepo,
-		Db:         db,
+	return LocalFSInfra{
+		Image:           imrepo,
+		Collection:      clrepo,
+		Label:           lbrepo,
+		ImageStore:      imstore,
+		ImageFileStore:  imageFileStore,
+		PolicyFileStore: policyFileStore,
+		Annotation:      anrepo,
+		Scroller:        scrrepo,
+		Group:           grprepo,
+		Role:            rlrepo,
+		User:            usrrepo,
+		Db:              db,
 	}
 
 }
