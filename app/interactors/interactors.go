@@ -7,6 +7,7 @@ import (
 	grp "github.com/lejeunel/go-image-annotator/use-cases/group"
 	im "github.com/lejeunel/go-image-annotator/use-cases/image"
 	lbl "github.com/lejeunel/go-image-annotator/use-cases/label"
+	pl "github.com/lejeunel/go-image-annotator/use-cases/policy"
 	rl "github.com/lejeunel/go-image-annotator/use-cases/role"
 	usr "github.com/lejeunel/go-image-annotator/use-cases/user"
 )
@@ -20,4 +21,5 @@ type Interactors struct {
 	Role       rl.Interactors
 	User       usr.Interactors
 	Bootstrap  bst.Interactor
+	Policy     pl.Interactors
 }

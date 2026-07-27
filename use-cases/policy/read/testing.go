@@ -1,17 +1,16 @@
-package find
+package read
 
 import (
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
-	"io"
 )
 
 type FakePresenter struct {
-	Got        []byte
+	Got        string
 	GotSuccess bool
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) SuccessReadPolicy(r io.Reader) {
+func (p *FakePresenter) SuccessReadPolicy(policies string) {
 	p.GotSuccess = true
-	p.Got, _ = io.ReadAll(r)
+	p.Got = policies
 }

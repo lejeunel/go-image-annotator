@@ -6,6 +6,7 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/alexedwards/scs/sqlite3store v0.0.0-20251002162104-209de6e426de
 	github.com/alexedwards/scs/v2 v2.9.0
+	github.com/go-chi/chi/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/jonboulle/clockwork v0.5.0
@@ -15,6 +16,9 @@ require (
 	github.com/pressly/goose/v3 v3.27.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
+	github.com/wagslane/go-password-validator v0.3.0
+	github.com/yuin/goldmark v1.8.4
+	gopkg.in/yaml.v3 v3.0.1
 	maragu.dev/gomponents v1.2.0
 	modernc.org/sqlite v1.51.0
 )
@@ -24,7 +28,6 @@ require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/go-chi/chi/v5 v5.2.2 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/pprof v0.0.0-20260402051712-545e8a4df936 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
@@ -42,15 +45,11 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/wagslane/go-password-validator v0.3.0 // indirect
-	github.com/yuin/goldmark v1.8.4 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/tools v0.44.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/libc v1.72.3 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect

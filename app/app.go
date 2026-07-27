@@ -14,8 +14,16 @@ import (
 
 type App struct {
 	Itrs           itrs.Interactors
-	SessionManager s.MySessionManager
+	SessionManager s.SessionManager
 	a.Annotator
+}
+
+func NewApp(itrs itrs.Interactors, sm s.SessionManager, an a.Annotator) App {
+	return App{
+		Itrs:           itrs,
+		SessionManager: sm,
+		Annotator:      an,
+	}
 }
 
 type InitialAdminPresenter struct {

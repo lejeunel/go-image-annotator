@@ -29,4 +29,5 @@ type Interface interface {
 	UpdateRole(ctx context.Context) error
 	CloneCollection(ctx context.Context, group string) error
 	UpdateUserPrivileges(ctx context.Context) error
+	ReadPolicies(ctx context.Context) error
 }

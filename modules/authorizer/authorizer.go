@@ -137,7 +137,9 @@ func (a Authorizer) UpdateRole(ctx context.Context) error {
 func (a Authorizer) CloneCollection(ctx context.Context, group string) error {
 	return a.check(ctx, "CloneCollection", nil)
 }
-
 func (a Authorizer) UpdateUserPrivileges(ctx context.Context) error {
 	return a.check(ctx, "UpdateUserPrivileges", nil)
+}
+func (a Authorizer) ReadPolicies(ctx context.Context) error {
+	return a.check(ctx, "ReadPolicies", nil)
 }

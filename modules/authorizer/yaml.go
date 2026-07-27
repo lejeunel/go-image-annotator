@@ -10,7 +10,7 @@ import (
 
 	p "github.com/lejeunel/go-image-annotator/entities/policy"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type YamlPolicies struct {
@@ -37,15 +37,13 @@ func validateYamlPolicies(cfg YamlPolicies) error {
 func MarshalPolicies(policies p.Policies, w io.Writer) error {
 	out := YamlPolicies{Version: 1, Rules: make(map[string][]string)}
 	maps.Copy(out.Rules, policies)
-	buf, err := yaml.Marshal(out)
-	if err != nil {
-		return err
-	}
-	_, err = w.Write(buf)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	enc := yaml.NewEncoder(w)
+	defer enc.Close()
+
+	enc.SetIndent(4)
+
+	return enc.Encode(out)
 }
 
 func NewAuthRulesFromYaml(r io.Reader) (*p.Policies, error) {

@@ -1,4 +1,4 @@
-package find
+package read
 
 import (
 	"context"
@@ -30,12 +30,17 @@ func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 
 	r, err := i.Store.Get(p.DefaultPolicyFileName)
 	if err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		out.Error(fmt.Errorf("%v: fetching policy asset: %w", errCtx, err))
 		return
 	}
 
-	out.SuccessReadPolicy(r)
+	policies, err := io.ReadAll(r)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: reading policy assets: %w", errCtx, err))
+		return
+	}
 
+	out.SuccessReadPolicy(string(policies))
 }
 
 type Option func(*Interactor)

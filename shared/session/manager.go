@@ -18,26 +18,20 @@ import (
 
 var UserIdKey = "user-id"
 
-type SessionManager interface {
-	FinishOAuthLogin(context.Context, string) error
-	Logout(context.Context) error
-	PasswordLogin(context.Context, string, string) error
-}
-
-type MySessionManager struct {
+type SessionManager struct {
 	*scs.SessionManager
 	readusr.Repo
 	tk.TokenVerifier
 }
 
-func (m MySessionManager) AuthCookiesMiddleWare(next http.Handler) http.Handler {
+func (m SessionManager) AuthCookiesMiddleWare(next http.Handler) http.Handler {
 	return m.LoadAndSave(m.AuthFromSessionId(next))
 }
 
-func (m MySessionManager) AuthBearerMiddleWare(next http.Handler) http.Handler {
+func (m SessionManager) AuthBearerMiddleWare(next http.Handler) http.Handler {
 	return m.LoadAndSave(m.AuthBearerToken(next))
 }
-func (m MySessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, error) {
+func (m SessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, error) {
 	errCtx := fmt.Errorf("inferring user's identity from bearer token")
 	token, err := tk.DecodeAndSplitPersonalAccessToken(bearerToken)
 	if err != nil {
@@ -52,7 +46,7 @@ func (m MySessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User,
 	}
 	return user, nil
 }
-func (m MySessionManager) AuthBearerToken(next http.Handler) http.Handler {
+func (m SessionManager) AuthBearerToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
@@ -74,7 +68,7 @@ func (m MySessionManager) AuthBearerToken(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
-func (m MySessionManager) AuthFromSessionId(next http.Handler) http.Handler {
+func (m SessionManager) AuthFromSessionId(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		id := m.GetString(r.Context(), UserIdKey)
@@ -92,13 +86,13 @@ func (m MySessionManager) AuthFromSessionId(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
-func (m MySessionManager) Logout(ctx context.Context) error {
+func (m SessionManager) Logout(ctx context.Context) error {
 	if err := m.SessionManager.RenewToken(ctx); err != nil {
 		return err
 	}
 	return m.SessionManager.Clear(ctx)
 }
-func (m MySessionManager) FinishOAuthLogin(ctx context.Context, id string) error {
+func (m SessionManager) FinishOAuthLogin(ctx context.Context, id string) error {
 	errCtx := fmt.Errorf("logging in user %v", id)
 	if _, err := m.Repo.Find(id); err != nil {
 		return fmt.Errorf("%w: checking if user is registered: %w", errCtx, err)
@@ -109,7 +103,7 @@ func (m MySessionManager) FinishOAuthLogin(ctx context.Context, id string) error
 	}
 	return nil
 }
-func (m MySessionManager) PasswordLogin(ctx context.Context, email, password string) error {
+func (m SessionManager) PasswordLogin(ctx context.Context, email, password string) error {
 	errCtx := fmt.Errorf("logging in user %v using password method", email)
 	user, err := m.Repo.Find(email)
 	if err != nil {
@@ -124,8 +118,7 @@ func (m MySessionManager) PasswordLogin(ctx context.Context, email, password str
 	}
 	return nil
 }
-
-func (m MySessionManager) initSession(ctx context.Context, id string) error {
+func (m SessionManager) initSession(ctx context.Context, id string) error {
 	if err := m.SessionManager.RenewToken(ctx); err != nil {
 		return fmt.Errorf("initializing session: renewing token %w", err)
 	}
@@ -148,9 +141,9 @@ func (bw *bufferedResponseWriter) WriteHeader(code int) {
 }
 
 func NewSQLiteSessionManager(db *sql.DB, repo readusr.Repo,
-	verifier tk.TokenVerifier) MySessionManager {
+	verifier tk.TokenVerifier) SessionManager {
 	store := sqlite3store.New(db)
-	m := MySessionManager{SessionManager: scs.New(), Repo: repo,
+	m := SessionManager{SessionManager: scs.New(), Repo: repo,
 		TokenVerifier: verifier}
 	m.Store = store
 	return m

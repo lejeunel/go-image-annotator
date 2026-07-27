@@ -51,14 +51,16 @@ func Make(url string, port int) http.Handler {
 		app.SessionManager.AuthCookiesMiddleWare,
 		WebRequireLogin,
 	)
+	apiAuth := Chain(
+		app.SessionManager.LoadAndSave, app.SessionManager.AuthBearerMiddleWare, app.SessionManager.AuthCookiesMiddleWare, ApiRequireLogin,
+	)
 
 	RouteWebPages(router, HomePageHandlerFunc(pageBuilder), webAuth)
 
 	udb := userDashboard.New(pageBuilder, app.Itrs.User.RenewToken, app.Itrs.User.ChangePassword)
 	udb.Route(router, webAuth)
 
-	RouteAPI(router, *api.NewServer(&app.Itrs, *logger),
-		app.SessionManager.LoadAndSave, app.SessionManager.AuthBearerMiddleWare, app.SessionManager.AuthCookiesMiddleWare, ApiRequireLogin)
+	RouteAPI(router, *api.NewServer(&app.Itrs, *logger), apiAuth)
 	RouteAPIDocs(router, APIDocsHandlerFunc(rt.APISpecsUrl, pageBuilder), webAuth)
 	RouteAPISpecs(router)
 	RouteStaticFiles(router)
@@ -81,7 +83,7 @@ func Make(url string, port int) http.Handler {
 	adminGroupServer.Route(router, webAuth)
 	adminRoleServer := admrl.New(adminPageBuilder, app.Itrs.Role)
 	adminRoleServer.Route(router, webAuth)
-	adminPolicyServer := admpl.New(adminPageBuilder)
+	adminPolicyServer := admpl.New(adminPageBuilder, app.Itrs.Policy)
 	adminPolicyServer.Route(router, webAuth)
 
 	labelServer := lbl.New(pageBuilder, cfg.DefaultPageSize,

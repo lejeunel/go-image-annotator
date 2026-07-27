@@ -1,10 +1,6 @@
-package find
-
-import (
-	"io"
-)
+package read
 
 type OutputPort interface {
 	Error(error)
-	SuccessReadPolicy(io.Reader)
+	SuccessReadPolicy(string)
 }

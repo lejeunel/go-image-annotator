@@ -67,6 +67,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface) app.App {
 		Group:      NewSQLiteGroupInteractors(grprepo, auth),
 		Role:       NewSQLiteRoleInteractors(rlrepo, auth),
 		Bootstrap:  NewSQLiteBootstrapInteractor(usrrepo, rlrepo, policyFileStore, passwordTokenizer, passwordValidator),
+		Policy:     NewSQLitePolicyInteractors(policyFileStore, auth),
 	}
 	annotator := a.NewAnnotator(scr, itrs.Image.Find,
 		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox,
@@ -75,10 +76,5 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface) app.App {
 		itrs.Label.FetchAll, itrs.Annotation.UpdateLabel,
 		itrs.Annotation.AddImageLabel)
 
-	return app.App{
-		Itrs:           itrs,
-		SessionManager: sessionManager,
-		Annotator:      annotator,
-	}
-
+	return app.NewApp(itrs, sessionManager, annotator)
 }

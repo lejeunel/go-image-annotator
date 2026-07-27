@@ -3,7 +3,10 @@ package policy
 import (
 	_ "embed"
 	"github.com/go-chi/chi/v5"
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	e "github.com/lejeunel/go-image-annotator/adapters/web/error"
 	rt "github.com/lejeunel/go-image-annotator/routes"
+	"io"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 	"net/http"
@@ -20,11 +23,27 @@ func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 	})
 }
 
+type ViewPresenter struct {
+	b.PageBuilder
+	io.Writer
+	e.ErrorPresenter
+}
+
+func NewViewPresenter(w http.ResponseWriter, p b.PageBuilder) ViewPresenter {
+	return ViewPresenter{p, w, e.NewErrorPresenter(w)}
+}
+func (p ViewPresenter) SuccessReadPolicy(policies string) {
+	p.AddMarkdownPreamble(preamble)
+	p.SetContent(
+		Textarea(
+			Class(`w-120 h-90 rounded-lg border-2 border-blue-500 p-3
+         focus:outline-none focus:ring-2 focus:ring-blue-400
+         resize-none`),
+			Text(policies)))
+	p.Render(p.Writer)
+}
+
 func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 	s.Page.SetUserIdentity(r.Context())
-	// TODO find current policy using interactor and append to textarea
-
-	s.Page.AddMarkdownPreamble(preamble)
-	s.Page.SetContent(Textarea(Text("hello")))
-	s.Page.Render(w)
+	s.Itrs.Read.Execute(r.Context(), NewViewPresenter(w, s.Page))
 }

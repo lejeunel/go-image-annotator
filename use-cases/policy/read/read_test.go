@@ -1,4 +1,4 @@
-package find
+package read
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -29,5 +29,5 @@ func TestReadPolicy(t *testing.T) {
 	itr := New(&fk.FileStore{Data: data})
 	itr.Execute(t.Context(), p)
 	assert.True(t, p.GotSuccess)
-	assert.Equal(t, data, p.Got)
+	assert.Equal(t, string(data), p.Got)
 }
