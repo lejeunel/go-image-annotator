@@ -10,5 +10,6 @@ type Server struct {
 
 func New(pb b.PageBuilder) Server {
 	pb.ActivateSidebarEntry(PageName)
+	pb.SetHTMLTitle("Policies").SetTitle("Policies")
 	return Server{pb}
 }

@@ -1,1 +1,1 @@
-*Roles allow to specify what actions are allowed by users who bear them.*
+*Policies determine the correspondance between roles and method, i.e. which role can perform what actions.*

@@ -89,3 +89,7 @@ func (a VoidAuthorizer) CloneCollection(ctx context.Context, group string) error
 func (a VoidAuthorizer) UpdateUserPrivileges(ctx context.Context) error {
 	return nil
 }
+
+func (a VoidAuthorizer) ReadPolicies(ctx context.Context) error {
+	return nil
+}

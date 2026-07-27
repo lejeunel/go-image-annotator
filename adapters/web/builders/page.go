@@ -97,6 +97,7 @@ func (b *PageBuilder) Render(w io.Writer) {
 	}
 
 	var header Node
+	var content Node
 
 	if b.Title != "" {
 		header = Div(header, Div(Class("font-bold text-2xl"), Text(b.Title)))
@@ -113,21 +114,21 @@ func (b *PageBuilder) Render(w io.Writer) {
 			sidebar.AddEntry(e.Label, e.Icon, e.Url, e.IsActive)
 		}
 		sidebar.Render(&bufSidebar)
-		b.content = Div(Class("relative flex w-full flex-col"),
+		content = Div(Class("relative flex w-full flex-col"),
 			Nav(Attr("x-cloak"),
 				Class(`fixed left-0 top-14 z-20 flex h-svh w-60 shrink-0 flex-col border-r border-outline bg-surface-alt p-4 transition-transform duration-300
                       dark:border-outline-dark dark:bg-surface-dark-alt`), Raw(bufSidebar.String())),
 			Div(Class("ml-60 px-4 py-18"), header, b.content),
 		)
 	} else {
-		b.content = Div(Class("grow w-full px-4 py-18"), header, b.content)
+		content = Div(Class("grow w-full px-4 py-18"), header, b.content)
 	}
 
 	b.BasePageBuilder.SetFrameContent(
 		Group(
 			[]Node{
 				cmp.MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, *b.User, rt.UserDashboardUrl),
-				b.content,
+				content,
 				cmp.MakeFooter(b.Version),
 			},
 		))
