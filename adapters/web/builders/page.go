@@ -27,6 +27,7 @@ type PageBuilder struct {
 	SidebarEntries      map[string]cmp.SidebarEntry
 	SidebarEntriesOrder []string
 	preamble            string
+	postamble           string
 	content             Node
 	BasePageBuilder
 }
@@ -74,15 +75,20 @@ func (b *PageBuilder) AddSidebarEntry(name, icon, url string, isActive bool) *Pa
 	b.SidebarEntriesOrder = append(b.SidebarEntriesOrder, name)
 	return b
 }
-func (b *PageBuilder) AddMarkdownPreamble(preamble string) *PageBuilder {
-
+func (b *PageBuilder) markdownToHTML(data string) string {
 	md := goldmark.New()
 	var buf bytes.Buffer
-	if err := md.Convert([]byte(preamble), &buf); err != nil {
+	if err := md.Convert([]byte(data), &buf); err != nil {
 		panic(err)
 	}
-
-	b.preamble = buf.String()
+	return buf.String()
+}
+func (b *PageBuilder) AddMarkdownPreamble(md string) *PageBuilder {
+	b.preamble = b.markdownToHTML(md)
+	return b
+}
+func (b *PageBuilder) AddMarkdownPostamble(md string) *PageBuilder {
+	b.postamble = b.markdownToHTML(md)
 	return b
 }
 func (b *PageBuilder) SetContent(content Node) *PageBuilder {
@@ -96,14 +102,21 @@ func (b *PageBuilder) Render(w io.Writer) {
 		return
 	}
 
-	var header Node
 	var content Node
 
 	if b.Title != "" {
-		header = Div(header, Div(Class("font-bold text-2xl"), Text(b.Title)))
+		content = Div(content, Div(Class("font-bold text-2xl"), Text(b.Title)))
 	}
+
 	if b.preamble != "" {
-		header = Div(header, Article(Class("prose dark:prose-invert max-w-none"), Raw(b.preamble)))
+		content = Div(content, Div(Class("flex flex-col w-150"), Article(Class("prose dark:prose-invert max-w-none mb-4"), Raw(b.preamble))))
+	}
+
+	content = Div(content, b.content)
+
+	if b.postamble != "" {
+		content = Div(content, Div(Class("flex flex-col w-150 mt-4"), cmp.Separator,
+			Article(Class("prose dark:prose-invert max-w-none"), Raw(b.postamble))))
 	}
 
 	if len(b.SidebarEntries) > 0 {
@@ -118,10 +131,10 @@ func (b *PageBuilder) Render(w io.Writer) {
 			Nav(Attr("x-cloak"),
 				Class(`fixed left-0 top-14 z-20 flex h-svh w-60 shrink-0 flex-col border-r border-outline bg-surface-alt p-4 transition-transform duration-300
                       dark:border-outline-dark dark:bg-surface-dark-alt`), Raw(bufSidebar.String())),
-			Div(Class("ml-60 px-4 py-18"), header, b.content),
+			Div(Class("ml-60 px-4 py-18"), content),
 		)
 	} else {
-		content = Div(Class("grow w-full px-4 py-18"), header, b.content)
+		content = Div(Class("grow w-full px-4 py-18"), content)
 	}
 
 	b.BasePageBuilder.SetFrameContent(

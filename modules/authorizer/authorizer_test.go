@@ -33,19 +33,15 @@ rules:
     - CreateCollection
   another-role:
     - CreateCollection
+  admin:
+    - "*"
 `
 
 func TestValidRules(t *testing.T) {
 	authRules, err := NewAuthRulesFromYaml(
 		strings.NewReader(validSpec))
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(*authRules))
-}
-
-func TestAuthConstruction(t *testing.T) {
-	auth, err := NewFromYaml(strings.NewReader(validSpec))
-	assert.NoError(t, err)
-	assert.Equal(t, 2, len(auth.Rules))
+	assert.Equal(t, 3, len(*authRules))
 }
 
 func TestNotAuthorizedWhenRequiredRoleIsMissing(t *testing.T) {

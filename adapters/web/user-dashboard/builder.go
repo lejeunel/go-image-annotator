@@ -69,8 +69,7 @@ func RenderDashboard(ctx context.Context, pb b.PageBuilder, w io.Writer) {
 		),
 		))
 
-	separator := Div(Class("h-px bg-outline dark:bg-outline-dark"))
-	content := Div(Class("flex flex-col w-120"), Div(cmp.MakeCard(profile), separator, APIToken, separator, changePassword))
+	content := Div(Class("flex flex-col w-120"), Div(cmp.MakeCard(profile), cmp.Separator, APIToken, cmp.Separator, changePassword))
 	pb.SetUserIdentity(ctx)
 	pb.SetActiveSection(cmp.NoPageActive)
 	pb.SetTitle("User Dashboard")

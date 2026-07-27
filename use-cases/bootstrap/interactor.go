@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	p "github.com/lejeunel/go-image-annotator/entities/policy"
 	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	a "github.com/lejeunel/go-image-annotator/modules/authorizer"
@@ -68,11 +67,11 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	var buf bytes.Buffer
-	if err := a.MarshalPolicies(p.DefaultPolicies, &buf); err != nil {
+	if err := a.MarshalPolicies(a.DefaultPolicies, &buf); err != nil {
 		out.Error(fmt.Errorf("%w: generating default yaml policies: %v: %w", errCtx, err, e.ErrInternal))
 		return
 	}
-	if err := i.FileStore.Store(p.DefaultPolicyFileName, &buf); err != nil {
+	if err := i.FileStore.Store(a.DefaultPolicyFileName, &buf); err != nil {
 		out.Error(fmt.Errorf("%w: writing default yaml policies: %v: %w", errCtx, err, e.ErrInternal))
 		return
 	}

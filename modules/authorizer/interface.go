@@ -7,6 +7,7 @@ import (
 )
 
 type Interface interface {
+	SetAuthRules(rules Policies)
 	CreateCollection(ctx context.Context, group string) error
 	DeleteCollection(ctx context.Context, group string) error
 	UpdateCollection(ctx context.Context, group string) error
@@ -30,4 +31,5 @@ type Interface interface {
 	CloneCollection(ctx context.Context, group string) error
 	UpdateUserPrivileges(ctx context.Context) error
 	ReadPolicies(ctx context.Context) error
+	SetPolicies(ctx context.Context) error
 }

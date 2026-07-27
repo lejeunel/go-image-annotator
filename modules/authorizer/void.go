@@ -10,6 +10,8 @@ func NewVoidAuth() VoidAuthorizer {
 	return VoidAuthorizer{}
 }
 
+func (a VoidAuthorizer) SetAuthRules(rules Policies) {}
+
 func (a VoidAuthorizer) CreateCollection(ctx context.Context, group string) error {
 	return nil
 }
@@ -91,5 +93,9 @@ func (a VoidAuthorizer) UpdateUserPrivileges(ctx context.Context) error {
 }
 
 func (a VoidAuthorizer) ReadPolicies(ctx context.Context) error {
+	return nil
+}
+
+func (a VoidAuthorizer) SetPolicies(ctx context.Context) error {
 	return nil
 }

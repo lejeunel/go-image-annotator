@@ -2,7 +2,7 @@
 
 package authorizer
 
-var validMethods = []string{
+var ValidMethods = []string{
 	"Annotate",
 	"CloneCollection",
 	"CreateCollection",
@@ -20,9 +20,12 @@ var validMethods = []string{
 	"ImportImage",
 	"IngestImage",
 	"ListUsers",
+	"ReadPolicies",
+	"SetPolicies",
 	"UpdateCollection",
 	"UpdateGroup",
 	"UpdateLabel",
 	"UpdateRole",
 	"UpdateUserPrivileges",
+	"*",
 }

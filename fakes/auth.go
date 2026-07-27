@@ -3,10 +3,16 @@ package fake
 import (
 	"context"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	a "github.com/lejeunel/go-image-annotator/modules/authorizer"
 )
 
 type Auth struct {
-	Err error
+	Err      error
+	GotRules *a.Policies
+}
+
+func (f *Auth) SetAuthRules(rules a.Policies) {
+	f.GotRules = &rules
 }
 
 func (f Auth) CreateCollection(ctx context.Context, g string) error {
@@ -109,5 +115,9 @@ func (f Auth) UpdateGroup(ctx context.Context) error {
 }
 
 func (f Auth) ReadPolicies(ctx context.Context) error {
+	return f.Err
+}
+
+func (f Auth) SetPolicies(ctx context.Context) error {
 	return f.Err
 }

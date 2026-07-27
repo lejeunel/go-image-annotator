@@ -1,5 +1,8 @@
 package policy
 
 const (
-	PageName = "Policies"
+	PageName                 = "Policies"
+	SetPolicyFormUrl         = "/ui/policy"
+	DefaultPolicyDownloadUrl = "/ui/policy/default"
+	PolicyFieldName          = "policy"
 )

@@ -3,8 +3,7 @@ package read
 import (
 	"context"
 	"fmt"
-	p "github.com/lejeunel/go-image-annotator/entities/policy"
-	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	a "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	"io"
 )
 
@@ -28,7 +27,7 @@ func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 		return
 	}
 
-	r, err := i.Store.Get(p.DefaultPolicyFileName)
+	r, err := i.Store.Get(a.DefaultPolicyFileName)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: fetching policy asset: %w", errCtx, err))
 		return
@@ -52,7 +51,7 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Store, opts ...Option) Interactor {
-	i := &Interactor{r, auth.NewVoidAuth()}
+	i := &Interactor{r, a.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
 	}

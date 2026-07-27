@@ -5,10 +5,8 @@ import (
 	"io"
 	"maps"
 	"os"
-	"slices"
 	"strings"
 
-	p "github.com/lejeunel/go-image-annotator/entities/policy"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"gopkg.in/yaml.v3"
 )
@@ -18,23 +16,7 @@ type YamlPolicies struct {
 	Rules   map[string][]string `yaml:"rules"`
 }
 
-func validateYamlPolicies(cfg YamlPolicies) error {
-	invalidNames := []string{}
-	for _, methods := range cfg.Rules {
-		for _, method := range methods {
-			if !slices.Contains(validMethods, method) {
-				invalidNames = append(invalidNames, method)
-			}
-		}
-	}
-	if len(invalidNames) > 0 {
-		return fmt.Errorf("checking for validity of method names: got invalid names: %v: %w",
-			invalidNames, e.ErrValidation)
-	}
-	return nil
-}
-
-func MarshalPolicies(policies p.Policies, w io.Writer) error {
+func MarshalPolicies(policies Policies, w io.Writer) error {
 	out := YamlPolicies{Version: 1, Rules: make(map[string][]string)}
 	maps.Copy(out.Rules, policies)
 
@@ -46,7 +28,7 @@ func MarshalPolicies(policies p.Policies, w io.Writer) error {
 	return enc.Encode(out)
 }
 
-func NewAuthRulesFromYaml(r io.Reader) (*p.Policies, error) {
+func NewAuthRulesFromYaml(r io.Reader) (*Policies, error) {
 	errCtx := "loading authorization rules from yaml file"
 	data, err := io.ReadAll(r)
 	if err != nil {
@@ -56,26 +38,21 @@ func NewAuthRulesFromYaml(r io.Reader) (*p.Policies, error) {
 	if err := yaml.Unmarshal(data, &yamlAuthRules); err != nil {
 		return nil, fmt.Errorf("%v: %w: %w", errCtx, err, e.ErrValidation)
 	}
-	if err := validateYamlPolicies(yamlAuthRules); err != nil {
-		return nil, fmt.Errorf("%v: %w", errCtx, err)
-	}
-
-	rules := make(p.Policies)
+	rules := make(Policies)
 	for role, methods := range yamlAuthRules.Rules {
 		for _, method := range methods {
-			if !slices.Contains(validMethods, method) {
-				return nil, fmt.Errorf("%v: %w", errCtx, err)
-
-			}
 			rules[role] = append(rules[role], method)
 		}
+	}
+	if err := rules.Validate(); err != nil {
+		return nil, fmt.Errorf("%v: %w", errCtx, err)
 	}
 
 	return &rules, nil
 }
 
-func ReadAuthRulesFromPath(path string) (*p.Policies, error) {
-	voidPolicies := p.Policies{}
+func ReadAuthRulesFromPath(path string) (*Policies, error) {
+	voidPolicies := Policies{}
 	if path == "" {
 		return &voidPolicies, nil
 	}
