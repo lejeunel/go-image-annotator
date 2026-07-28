@@ -35,6 +35,7 @@ func NewSQLiteCollectionInteractors(
 	logger slog.Logger,
 	pageSize int, auth auth.Interface) clc.Interactors {
 	deleteRepos := delete.Repos{ImageRepo: ir, CollectionRepo: cr, AnnotationRepo: ar}
+	cloneRepos := clone.Repos{ImageRepo: ir, CollectionRepo: cr, AnnotationRepo: ar}
 	return clc.Interactors{
 		Find: find.New(cr),
 		Create: create.New(cr, gr, create.WithNameValidator(validation.NewNameValidator()),
@@ -43,6 +44,6 @@ func NewSQLiteCollectionInteractors(
 			q.NewJobQueue(), el, logger, delete.WithAuth(auth)),
 		List:   list.New(cr),
 		Update: update.New(cr, gr, update.WithAuth(auth)),
-		Clone:  clone.New(ir, cr, ar, gr, ims, el, logger, q.NewJobQueue()),
+		Clone:  clone.New(cloneRepos, tra.NewCloneCollectionTransactor(db), gr, ims, el, logger, q.NewJobQueue()),
 	}
 }

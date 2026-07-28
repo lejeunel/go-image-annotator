@@ -22,13 +22,17 @@ func (s *Server) Clone(w http.ResponseWriter, r *http.Request) {
 		withAnnotations = true
 	}
 
+	source := r.URL.Query().Get(resourceUrlFieldName)
 	s.CloneItr.Execute(r.Context(),
 		clone.Request{
-			Source:      r.URL.Query().Get(resourceUrlFieldName),
+			Source:      source,
 			Destination: r.FormValue(cloneNameFieldName),
 			Deep:        withAnnotations,
 		},
 		NewClonePresenter(w, s.RowURL))
+
+	s.FindItr.Execute(r.Context(), source,
+		NewViewPresenter(w, s.RowURL))
 }
 
 type ClonePresenter struct {
@@ -56,5 +60,5 @@ func (p ClonePresenter) SuccessFindCollection(c clc.Collection) {
 }
 
 func (p ClonePresenter) SuccessSubmitCloneTask(r clone.Response) {
-	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
+	htmx.NotifySuccessPayload(p.writer, p.task, p.okMessageFunc(r))
 }

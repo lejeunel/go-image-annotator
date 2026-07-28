@@ -5,16 +5,17 @@ import (
 	an "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/annotation"
 	clc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	im "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
-	lbl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
-	in "github.com/lejeunel/go-image-annotator/modules/ingester"
+	cl "github.com/lejeunel/go-image-annotator/use-cases/collection/clone"
 )
 
-type IngestionTransactor struct{ db *sqlx.DB }
+type CloneCollectionTransactor struct{ db *sqlx.DB }
 
-func NewIngestionTransactor(db *sqlx.DB) *IngestionTransactor { return &IngestionTransactor{db: db} }
+func NewCloneCollectionTransactor(db *sqlx.DB) *CloneCollectionTransactor {
+	return &CloneCollectionTransactor{db: db}
+}
 
-func (u *IngestionTransactor) RunInTx(
-	fn func(in.Repos) error) error {
+func (u *CloneCollectionTransactor) RunInTx(
+	fn func(cl.Repos) error) error {
 
 	tx, err := u.db.Beginx()
 	if err != nil {
@@ -22,9 +23,8 @@ func (u *IngestionTransactor) RunInTx(
 	}
 	defer tx.Rollback()
 
-	stores := in.Repos{
+	stores := cl.Repos{
 		ImageRepo:      im.NewSQLiteImageRepo(tx),
-		LabelRepo:      lbl.NewSQLiteLabelRepo(tx),
 		CollectionRepo: clc.NewSQLiteCollectionRepo(tx),
 		AnnotationRepo: an.NewSQLiteAnnotationRepo(tx),
 	}

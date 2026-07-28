@@ -1,4 +1,4 @@
-*Policies determine the correspondance between roles and method, i.e. which role can perform what actions.*
+*Policies specify which method are allowed for a given role.*
 
 ### Instructions
 
@@ -13,5 +13,4 @@ the form:
             - ...
 
 See below for an exhaustive list of valid methods. You may also use "*" as wildcard.
-The default policies can be downloaded [here]({{ .DefaultPoliciesURL }})
-
+For reference, the default policies can be downloaded [here]({{ .DefaultPoliciesURL }})

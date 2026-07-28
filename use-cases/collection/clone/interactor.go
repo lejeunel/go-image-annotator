@@ -21,10 +21,19 @@ import (
 	"github.com/lejeunel/go-image-annotator/modules/job-queue"
 )
 
-type Interactor struct {
+type Transactor interface {
+	RunInTx(fn func(Repos) error) error
+}
+
+type Repos struct {
 	ImageRepo
 	CollectionRepo
 	AnnotationRepo
+}
+
+type Interactor struct {
+	Repos
+	Transactor
 	GroupRepo
 	Store       st.Interface
 	EventLogger event_logger.Interface
@@ -34,10 +43,10 @@ type Interactor struct {
 	JobQueue job_queue.Interface
 }
 
-func New(i ImageRepo, c CollectionRepo, a AnnotationRepo, g GroupRepo,
+func New(r Repos, tra Transactor, g GroupRepo,
 	s st.Interface, l event_logger.Interface, logger slog.Logger, j job_queue.Interface,
 	opts ...Option) Interactor {
-	itr := &Interactor{i, c, a, g, s, l, auth.NewVoidAuth(), clockwork.NewRealClock(), logger, j}
+	itr := &Interactor{r, tra, g, s, l, auth.NewVoidAuth(), clockwork.NewRealClock(), logger, j}
 	for _, opt := range opts {
 		opt(itr)
 	}
@@ -148,45 +157,45 @@ func (i *Interactor) runTask(task t.Task, source string, destination string, gro
 	}
 
 	for baseImage, err := range i.ImageRepo.Iterate(im.Filtering{Collection: &source}, 1) {
-		if err != nil {
-			err = fmt.Errorf("%w: iterating on images: %w", errCtx, err)
+		if err := i.Transactor.RunInTx(func(tx Repos) error {
+			if err != nil {
+				return fmt.Errorf("%w: iterating on images: %w", errCtx, err)
+			}
+			image, err := i.Store.Find(baseImage)
+			if err != nil {
+				return fmt.Errorf("%w: finding source image: %w", errCtx, err)
+			}
+			if err := i.ImageRepo.AddToCollection(image.Id, dst.Id); err != nil {
+				return fmt.Errorf("%w: adding image to collection: %w", errCtx, err)
+			}
+
+			if deep {
+				for _, label := range image.Labels {
+					label.Id = a.NewAnnotationId()
+					if err := i.AnnotationRepo.AddImageLabel(image.Id, dst.Id, label, label.Author, label.Time); err != nil {
+						return fmt.Errorf("%w: adding image label: %w", errCtx, err)
+					}
+				}
+
+				for _, box := range image.BoundingBoxes {
+					box.Id = a.NewAnnotationId()
+					if err := i.AnnotationRepo.AddBoundingBox(image.Id, dst.Id, box, box.Author, box.Time); err != nil {
+						return fmt.Errorf("%w: adding bounding boxes: %w", errCtx, err)
+					}
+				}
+				for _, poly := range image.Polygons {
+					poly.Id = a.NewAnnotationId()
+					if err := i.AnnotationRepo.AddPolygon(image.Id, dst.Id, poly, poly.Author, poly.Time); err != nil {
+						return fmt.Errorf("%w: adding polygons: %w", errCtx, err)
+					}
+				}
+
+			}
+			return nil
+		}); err != nil {
 			i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()})
 			i.Logger.Error(err.Error())
 			return
-		}
-		image, err := i.Store.Find(baseImage)
-		if err != nil {
-			i.LogError(task.Id, fmt.Errorf("%w: finding source image: %w", errCtx, err))
-			return
-		}
-		if err := i.ImageRepo.AddToCollection(image.Id, dst.Id); err != nil {
-			i.LogError(task.Id, fmt.Errorf("%w: adding image to collection: %w", errCtx, err))
-			return
-		}
-
-		if deep {
-			for _, label := range image.Labels {
-				label.Id = a.NewAnnotationId()
-				if err := i.AnnotationRepo.AddImageLabel(image.Id, dst.Id, label, label.Author, label.Time); err != nil {
-					i.LogError(task.Id, fmt.Errorf("%w: adding image label: %w", errCtx, err))
-					return
-				}
-			}
-
-			for _, box := range image.BoundingBoxes {
-				box.Id = a.NewAnnotationId()
-				if err := i.AnnotationRepo.AddBoundingBox(image.Id, dst.Id, box, box.Author, box.Time); err != nil {
-					i.LogError(task.Id, fmt.Errorf("%w: adding bounding boxes: %w", errCtx, err))
-					return
-				}
-			}
-			for _, poly := range image.Polygons {
-				poly.Id = a.NewAnnotationId()
-				if err := i.AnnotationRepo.AddPolygon(image.Id, dst.Id, poly, poly.Author, poly.Time); err != nil {
-					i.LogError(task.Id, fmt.Errorf("%w: adding polygons: %w", errCtx, err))
-					return
-				}
-			}
 
 		}
 	}

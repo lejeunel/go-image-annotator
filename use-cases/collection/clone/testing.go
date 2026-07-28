@@ -16,7 +16,20 @@ func (p *FakePresenter) SuccessSubmitCloneTask(r Response) {
 	p.GotSuccess = true
 }
 
+type TestingTransactor struct {
+	Repos
+}
+
+func (m *TestingTransactor) RunInTx(
+	fn func(Repos) error) error {
+	return fn(m.Repos)
+}
+
 func NewTestingCloner() Interactor {
-	return New(&fk.ImageRepo{}, &fk.CollectionRepo{}, &fk.AnnotationRepo{}, &fk.GroupRepo{},
+	repos := Repos{&fk.ImageRepo{}, &fk.CollectionRepo{}, &fk.AnnotationRepo{}}
+	return New(
+		repos,
+		&TestingTransactor{repos},
+		&fk.GroupRepo{},
 		&fk.ImageStore{}, &fk.EventLogger{}, fk.NewLogger(), &fk.JobQueue{})
 }

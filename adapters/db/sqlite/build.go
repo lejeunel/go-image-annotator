@@ -4,14 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"embed"
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	goose "github.com/pressly/goose/v3"
 	"io/fs"
 	_ "modernc.org/sqlite"
+	"net/url"
 	"os"
 	"path/filepath"
-	"time"
 )
 
 //go:embed migrations/*.sql
@@ -22,28 +21,33 @@ func NewSQLiteConnection(path string) *sqlx.DB {
 	if err != nil {
 		panic(err)
 	}
-	db, err := sqlx.Open("sqlite", fmt.Sprintf("file:%s?_time_format=sqlite", path))
-	if err != nil {
-		panic(err)
+	q := url.Values{
+		"_time_format": {"sqlite"},
+		"_pragma": {
+			"foreign_keys(ON)",
+			"journal_mode(WAL)",
+			"synchronous(NORMAL)",
+			"busy_timeout(5000)",
+			"journal_size_limit(1000000)",
+			"mmap_size(30000000000)",
+			"cache_size(-2000)",
+		},
 	}
-	db.SetMaxOpenConns(25)
-	db.SetMaxIdleConns(25)
-	db.SetConnMaxLifetime(5 * time.Minute)
-	setPragma(db.DB, "foreign_keys", "ON")
-	setPragma(db.DB, "journal_mode", "WAL")
-	setPragma(db.DB, "synchronous", "NORMAL")
-	setPragma(db.DB, "busy_timeout", "5000")
-	setPragma(db.DB, "journal_size_limit", "1000000")
-	setPragma(db.DB, "mmap_size", "30000000000")
-	setPragma(db.DB, "cache_size", "-2000")
-	return db
-}
 
-func setPragma(db *sql.DB, pragma, value string) {
-	_, err := db.Exec("PRAGMA " + pragma + "=" + value)
+	u := url.URL{
+		Scheme:   "file",
+		Path:     path,
+		RawQuery: q.Encode(),
+	}
+
+	db, err := sqlx.Open("sqlite", u.String())
 	if err != nil {
 		panic(err)
 	}
+	db.SetMaxOpenConns(4)
+	db.SetMaxIdleConns(4)
+
+	return db
 }
 
 func NewMigrationProvider(db *sql.DB) (*goose.Provider, error) {

@@ -95,34 +95,35 @@ func (i *Interactor) runTask(task t.Task, collection clc.Collection) {
 		return
 	}
 
-	if err := i.Transactor.RunInTx(func(tx Repos) error {
-		for baseImage, err := range i.ImageRepo.Iterate(im.Filtering{Collection: &collection.Name}, 1) {
+	for baseImage, err := range i.ImageRepo.Iterate(im.Filtering{Collection: &collection.Name}, 1) {
+		if err := i.Transactor.RunInTx(func(tx Repos) error {
 			if err != nil {
 				return fmt.Errorf("%w: iterating on images: %w", errCtx, err)
 			}
-			if err := i.AnnotationRepo.RemoveAllAnnotations(baseImage.ImageId, collection.Name); err != nil {
+			if err := tx.AnnotationRepo.RemoveAllAnnotations(baseImage.ImageId, collection.Name); err != nil {
 				return fmt.Errorf("%w: deleting annotations: %w", errCtx, err)
 			}
-			if err := i.ImageRepo.RemoveImageFromCollection(baseImage.ImageId, collection.Id); err != nil {
+			if err := tx.ImageRepo.RemoveImageFromCollection(baseImage.ImageId, collection.Id); err != nil {
 				return fmt.Errorf("%w: adding image to collection: %w", errCtx, err)
 			}
 
-			isUsed, err := i.ImageRepo.IsUsed(baseImage.ImageId)
+			isUsed, err := tx.ImageRepo.IsUsed(baseImage.ImageId)
 			if err != nil {
 				return fmt.Errorf("%w: checking whether image %v is used in another collection: %w", errCtx, baseImage.ImageId, err)
 			}
 			if !*isUsed {
 				i.ImageStore.DeleteAsset(baseImage.ImageId)
 			}
+			return nil
+		}); err != nil {
+			i.EventLogger.AddEvent(task.Id, ev.Event{Time: i.Clock.Now(), State: ev.FailedTask, Error: err.Error()})
+			i.Logger.Error(err.Error())
+			return
 		}
+	}
 
-		if err := i.CollectionRepo.Delete(collection.Name); err != nil {
-			return fmt.Errorf("%w: deleting collection: %w", errCtx, err)
-		}
-		return nil
-
-	}); err != nil {
-		i.Logger.Error(err.Error())
+	if err := i.CollectionRepo.Delete(collection.Name); err != nil {
+		i.Logger.Error(fmt.Errorf("%w: deleting collection: %w", errCtx, err).Error())
 		return
 	}
 

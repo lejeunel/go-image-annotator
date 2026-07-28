@@ -27,7 +27,7 @@ func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
 }
 
 func (p DeletePresenter) SuccessDeleteCollection(r delete.Response) {
-	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
+	htmx.NotifySuccessPayload(p.writer, p.task, p.okMessageFunc(r))
 }
 
 func (p DeletePresenter) SuccessFindCollection(c clc.Collection) {
@@ -35,7 +35,9 @@ func (p DeletePresenter) SuccessFindCollection(c clc.Collection) {
 		c.Name, "collection", p.Url, p.writer)
 }
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
-	s.DeleteItr.Execute(r.Context(),
-		r.URL.Query().Get(resourceUrlFieldName),
+	name := r.URL.Query().Get(resourceUrlFieldName)
+	s.DeleteItr.Execute(r.Context(), name,
 		NewDeletePresenter(w, s.RowURL))
+	s.FindItr.Execute(r.Context(), name,
+		NewViewPresenter(w, s.RowURL))
 }

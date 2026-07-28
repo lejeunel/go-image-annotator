@@ -27,7 +27,7 @@ type AnnotationRepo struct {
 	GotTime                   *time.Time
 	GotBox                    a.BoundingBox
 	GotPolygon                a.Polygon
-	AddedAnnotationId         a.AnnotationId
+	AddedAnnotationId         *a.AnnotationId
 	AddedLabelId              lbl.LabelId
 	AddedOnImageId            im.ImageId
 	AddedOnCollectionId       clc.CollectionId
@@ -77,7 +77,7 @@ func (r *AnnotationRepo) AddImageLabel(imageId im.ImageId, collectionId clc.Coll
 	if r.ErrOnAddLabel != nil {
 		return r.ErrOnAddLabel
 	}
-	r.AddedAnnotationId = imageLabel.Id
+	r.AddedAnnotationId = &imageLabel.Id
 	r.AddedLabelId = imageLabel.Label.Id
 	r.AddedOnImageId = imageId
 	r.AddedOnCollectionId = collectionId
