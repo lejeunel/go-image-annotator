@@ -38,6 +38,11 @@ func (i *Interactor) Execute(ctx context.Context, policies string, out OutputPor
 
 	i.Auth.SetAuthRules(*rules)
 
+	if err := i.Store.Store(a.DefaultPolicyFileName, strings.NewReader(policies)); err != nil {
+		out.Error(fmt.Errorf("%v: reading rules from yaml payload: %w", errCtx, err))
+		return
+	}
+
 	out.SuccessSetPolicy(string(policies))
 }
 

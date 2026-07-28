@@ -39,15 +39,16 @@ rules:
 func TestSetNewRules(t *testing.T) {
 	a := &fk.Auth{}
 	p := &FakePresenter{}
-	itr := New(&fk.FileStore{}, a)
-	itr.Execute(t.Context(),
-		`
+	fs := &fk.FileStore{}
+	itr := New(fs, a)
+	data := `
 version: 1
 rules:
     admin:
         - CreateCollection
-`,
-		p)
+`
+	itr.Execute(t.Context(), data, p)
 	assert.NotNil(t, a.GotRules)
 	assert.Contains(t, *a.GotRules, "admin")
+	assert.Equal(t, string(fs.GotData), data)
 }
