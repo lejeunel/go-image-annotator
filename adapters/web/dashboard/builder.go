@@ -1,4 +1,4 @@
-package user
+package dashboard
 
 import (
 	"context"
@@ -70,10 +70,7 @@ func RenderDashboard(ctx context.Context, pb b.PageBuilder, w io.Writer) {
 		))
 
 	content := Div(Class("flex flex-col w-120"), Div(cmp.MakeCard(profile), cmp.Separator, APIToken, cmp.Separator, changePassword))
-	pb.SetUserIdentity(ctx)
 	pb.SetActiveSection(cmp.NoPageActive)
-	pb.SetTitle("User Dashboard")
-	pb.SetHTMLTitle("Dashboard")
 	pb.AddMarkdownPreamble(preamble)
 	pb.SetContent(content)
 	pb.Render(w)

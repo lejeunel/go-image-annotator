@@ -1,4 +1,4 @@
-package user
+package dashboard
 
 import (
 	"github.com/go-chi/chi/v5"
@@ -13,7 +13,8 @@ func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
-		r.Get(rt.UserDashboardUrl, s.UserDashboard)
+		r.Get(rt.DashboardUrl, s.UserDashboard)
+		r.Get(CredentialsUrl, s.UserDashboard)
 		r.Get(NewAPIToken, s.NewAPIToken)
 		r.Post(ChangePassword, s.ChangePassword)
 	})

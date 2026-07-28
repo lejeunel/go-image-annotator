@@ -29,6 +29,9 @@ var GitHub = `
 //go:embed svg/user-circle.svg
 var UserCircle string
 
+//go:embed svg/key.svg
+var Key string
+
 //go:embed svg/user.svg
 var User string
 

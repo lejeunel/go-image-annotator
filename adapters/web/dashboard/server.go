@@ -1,4 +1,4 @@
-package user
+package dashboard
 
 import (
 	"net/http"
@@ -6,6 +6,7 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
+	"github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	cpw "github.com/lejeunel/go-image-annotator/use-cases/user/change-password"
 	rat "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
@@ -18,11 +19,15 @@ type Server struct {
 }
 
 func New(pb b.PageBuilder, i rat.Interactor, c cpw.Interactor) Server {
+	pb.AddSidebarEntry(CredentialsPageName, icons.Key, CredentialsUrl, false)
 	return Server{pb, i, c}
 }
 
 func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
-	s.PageBuilder.SetUserIdentity(r.Context())
+	s.SetUserIdentity(r.Context())
+	s.SetTitle(CredentialsPageName)
+	s.ActivateSidebarEntry(CredentialsPageName)
+	s.SetHTMLTitle(CredentialsPageName)
 	RenderDashboard(r.Context(), s.PageBuilder, w)
 }
 func (s *Server) NewAPIToken(w http.ResponseWriter, r *http.Request) {

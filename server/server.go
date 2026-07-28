@@ -6,7 +6,7 @@ import (
 	"os"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
-	userDashboard "github.com/lejeunel/go-image-annotator/adapters/web/user-dashboard"
+	userDashboard "github.com/lejeunel/go-image-annotator/adapters/web/dashboard"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 

@@ -22,11 +22,11 @@ const (
 	ResetPasswordUrl       = "/auth/reset-password"
 	LogoutUrl              = "/auth/logout"
 
-	HomePageUrl      = "/"
-	CollectionsUrl   = "/collections"
-	ImagesUrl        = "/images"
-	LabelsUrl        = "/labels"
-	UserDashboardUrl = "/user-dashboard"
+	HomePageUrl    = "/"
+	CollectionsUrl = "/collections"
+	ImagesUrl      = "/images"
+	LabelsUrl      = "/labels"
+	DashboardUrl   = "/dashboard"
 
 	AdminUrl         = "/admin"
 	AdminUsersUrl    = "/admin/users"

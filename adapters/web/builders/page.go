@@ -140,7 +140,7 @@ func (b *PageBuilder) Render(w io.Writer) {
 	b.BasePageBuilder.SetFrameContent(
 		Group(
 			[]Node{
-				cmp.MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, *b.User, rt.UserDashboardUrl),
+				cmp.MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, *b.User, rt.DashboardUrl),
 				content,
 				cmp.MakeFooter(b.Version),
 			},
