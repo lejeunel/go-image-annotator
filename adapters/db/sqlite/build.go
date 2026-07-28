@@ -64,7 +64,11 @@ func NewMigrationProvider(db *sql.DB) (*goose.Provider, error) {
 
 }
 
-func ApplyMigrations(ctx context.Context, provider *goose.Provider, direction string) error {
+func ApplyMigrations(ctx context.Context, db *sql.DB, direction string) error {
+	provider, err := NewMigrationProvider(db)
+	if err != nil {
+		panic(err)
+	}
 	switch direction {
 	case "up":
 		_, err := provider.Up(ctx)
@@ -83,18 +87,20 @@ func ApplyMigrations(ctx context.Context, provider *goose.Provider, direction st
 }
 
 func NewInMemory() *sqlx.DB {
-	return NewSQLiteDB(":memory:")
+	db, err := sqlx.Open("sqlite", ":memory:?cache=shared&_pragma=foreign_keys(1)")
+	if err != nil {
+		panic(err)
+	}
+	if err := ApplyMigrations(context.Background(), db.DB, "up"); err != nil {
+		panic(err)
+	}
+	return db
 }
 
 func NewSQLiteDB(path string) *sqlx.DB {
 	db := NewSQLiteConnection(path)
-	m, err := NewMigrationProvider(db.DB)
-	if err != nil {
-		panic(err)
-	}
-	if err := ApplyMigrations(context.Background(), m, "up"); err != nil {
+	if err := ApplyMigrations(context.Background(), db.DB, "up"); err != nil {
 		panic(err)
 	}
 	return db
-
 }

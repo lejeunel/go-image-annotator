@@ -22,7 +22,6 @@ func New(pb b.PageBuilder, i rat.Interactor, c cpw.Interactor) Server {
 	pb.AddSidebarEntry(CredentialsPageName, icons.Key, CredentialsUrl, false)
 	return Server{pb, i, c}
 }
-
 func (s *Server) UserDashboard(w http.ResponseWriter, r *http.Request) {
 	s.SetUserIdentity(r.Context())
 	s.SetTitle(CredentialsPageName)

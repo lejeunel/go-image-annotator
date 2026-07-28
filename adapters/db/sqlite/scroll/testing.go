@@ -18,7 +18,7 @@ type SQLiteScrollerRepos struct {
 }
 
 func NewTestScrollerRepos() SQLiteScrollerRepos {
-	db := s.NewSQLiteDB(":memory:")
+	db := s.NewInMemory()
 	return SQLiteScrollerRepos{
 		Scroller:   NewSQLiteScrollerRepo(db),
 		Image:      imsql.NewSQLiteImageRepo(db),

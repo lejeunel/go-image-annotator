@@ -124,5 +124,5 @@ func NewSQLiteRoleRepo(db *sqlx.DB) SQLiteRoleRepo {
 }
 
 func NewTestSQLiteRoleRepo() SQLiteRoleRepo {
-	return NewSQLiteRoleRepo(s.NewSQLiteDB(":memory:"))
+	return NewSQLiteRoleRepo(s.NewInMemory())
 }

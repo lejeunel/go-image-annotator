@@ -166,5 +166,5 @@ func NewSQLiteGroupRepo(db *sqlx.DB) SQLiteGroupRepo {
 }
 
 func NewTestSQLiteGroupRepo() SQLiteGroupRepo {
-	return NewSQLiteGroupRepo(s.NewSQLiteDB(":memory:"))
+	return NewSQLiteGroupRepo(s.NewInMemory())
 }

@@ -72,7 +72,15 @@ func TestRemoveImageFromCollection(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
 	image := im.NewImage(im.NewImageId(), collection)
 	imRepo := &fk.ImageRepo{IterateBaseImages: []im.BaseImage{{ImageId: image.Id, Collection: collection.Name}}}
-	itr.ImageRepo = imRepo
+	repos := Repos{
+		CollectionRepo: &fk.CollectionRepo{
+			Return: collection},
+		ImageRepo:      imRepo,
+		AnnotationRepo: &fk.AnnotationRepo{},
+	}
+	transactor := &TestingTransactor{repos}
+	itr.Transactor = transactor
+	itr.Repos = repos
 	p := &FakePresenter{}
 	itr.Execute(ctx, "my-collection", p)
 	assert.Equal(t, image.Id, imRepo.RemovedImageId)
@@ -84,11 +92,18 @@ func TestRemoveAllAnnotations(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
 	image := im.NewImage(im.NewImageId(), collection)
 	imRepo := &fk.ImageRepo{IterateBaseImages: []im.BaseImage{{ImageId: image.Id, Collection: collection.Name}}}
-	imageStore := &fk.ImageStore{}
-	itr.ImageRepo = imRepo
-	itr.ImageStore = imageStore
 	anRepo := &fk.AnnotationRepo{}
-	itr.AnnotationRepo = anRepo
+	repos := Repos{
+		CollectionRepo: &fk.CollectionRepo{
+			Return: collection},
+		ImageRepo:      imRepo,
+		AnnotationRepo: anRepo,
+	}
+	transactor := &TestingTransactor{repos}
+	itr.Transactor = transactor
+	itr.Repos = repos
+	imageStore := &fk.ImageStore{}
+	itr.ImageStore = imageStore
 	p := &FakePresenter{}
 	itr.Execute(ctx, "my-collection", p)
 	assert.True(t, anRepo.RemovedAllAnnotations)

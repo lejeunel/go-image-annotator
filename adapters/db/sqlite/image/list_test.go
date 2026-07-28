@@ -29,7 +29,7 @@ func CreateSingleImageCollection(repos ImageListingTestingRepos, collectionName 
 }
 
 func NewImageListingTestRepos() ImageListingTestingRepos {
-	db := s.NewSQLiteDB(":memory:")
+	db := s.NewInMemory()
 	return ImageListingTestingRepos{
 		Image:      NewSQLiteImageRepo(db),
 		Collection: sc.NewSQLiteCollectionRepo(db),

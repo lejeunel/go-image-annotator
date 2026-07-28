@@ -25,7 +25,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestCreateCollectionInGroup(t *testing.T) {
-	db := s.NewSQLiteDB(":memory:")
+	db := s.NewInMemory()
 	groupRepo := grr.NewSQLiteGroupRepo(db)
 	collectionRepo := NewSQLiteCollectionRepo(db)
 	group := grp.NewGroup(grp.NewGroupId(), "a-group")

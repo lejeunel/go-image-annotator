@@ -43,7 +43,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestGroupPopulatedWithCollection(t *testing.T) {
-	db := s.NewSQLiteDB(":memory:")
+	db := s.NewInMemory()
 	clcRepo := clcr.NewSQLiteCollectionRepo(db)
 	groupRepo := NewSQLiteGroupRepo(db)
 	group, _ := CreateGroup(groupRepo, "a-group")
@@ -55,7 +55,7 @@ func TestGroupPopulatedWithCollection(t *testing.T) {
 }
 
 func TestCollectionWithoutGroupFailsWithNotFoundErr(t *testing.T) {
-	db := s.NewSQLiteDB(":memory:")
+	db := s.NewInMemory()
 	clcRepo := clcr.NewSQLiteCollectionRepo(db)
 	groupRepo := NewSQLiteGroupRepo(db)
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")

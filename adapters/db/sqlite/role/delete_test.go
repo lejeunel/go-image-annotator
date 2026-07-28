@@ -43,7 +43,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestRoleUsedByUser(t *testing.T) {
-	db := s.NewSQLiteDB(":memory:")
+	db := s.NewInMemory()
 	usrRepo := usrRepo.NewSQLiteUserRepo(db)
 	roleRepo := NewSQLiteRoleRepo(db)
 	role, _ := CreateRole(roleRepo, "a-role")
