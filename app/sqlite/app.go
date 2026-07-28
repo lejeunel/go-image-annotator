@@ -3,9 +3,12 @@ package sqlite
 import (
 	"crypto/sha256"
 	"fmt"
+	"log/slog"
+
 	db "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	an "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/annotation"
 	clc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
+	ev "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/event"
 	grp "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
 	im "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	lbl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
@@ -18,6 +21,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/config"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	im_store "github.com/lejeunel/go-image-annotator/modules/image-store"
 	ig "github.com/lejeunel/go-image-annotator/modules/ingester"
@@ -28,7 +32,7 @@ import (
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
 )
 
-func NewSQLiteApp(cfg config.Config, auth auth.Interface) app.App {
+func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) app.App {
 	apiTokenGen := tk.New(cfg.ApiTokenLength)
 	passwordTokenizer := tk.New(cfg.RandomPasswordLength)
 	forgottenPasswordGen := tk.New(cfg.RandomPasswordLength)
@@ -41,10 +45,12 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface) app.App {
 	grprepo := grp.NewSQLiteGroupRepo(db)
 	rlrepo := r.NewSQLiteRoleRepo(db)
 	usrrepo := usr.NewSQLiteUserRepo(db)
+	eventrepo := ev.NewSQLiteEventRepo(db)
 	imageFileStore := fs.NewFileStore(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "images"))
 	policyFileStore := fs.NewFileStore(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "assets"))
 	imstore := im_store.New(imrepo, clrepo, anrepo, imageFileStore)
 	scrrepo := scr.NewSQLiteScrollerRepo(db)
+	eventlogger := el.New(eventrepo, el.WithMaxNumTasksPerUser(cfg.MaxNumTasksPerUser))
 
 	sessionManager := sm.NewSQLiteSessionManager(db.DB, usrrepo, apiTokenGen)
 	scr := scroller.New(scrrepo)
@@ -53,7 +59,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface) app.App {
 		imageFileStore, sha256.New(), rea.ImageSpecsDetector{})
 	itrs := itr.Interactors{
 		Label:      NewSQLiteLabelInteractors(lbrepo, cfg.DefaultPageSize, auth),
-		Collection: NewSQLiteCollectionInteractors(clrepo, grprepo, cfg.DefaultPageSize, auth),
+		Collection: NewSQLiteCollectionInteractors(clrepo, imrepo, anrepo, grprepo, imstore, eventlogger, logger, cfg.DefaultPageSize, auth),
 		Image:      NewSQLiteImageInteractors(imrepo, clrepo, anrepo, imstore, imageFileStore, ingester, cfg.DefaultPageSize, auth),
 		User: NewSQLiteUserInteractors(usrrepo, grprepo, rlrepo,
 			apiTokenGen,

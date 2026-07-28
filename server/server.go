@@ -34,13 +34,14 @@ import (
 func Make(url string, port int) http.Handler {
 	cfg := config.Parse()
 	defaultAuth := auth.NewDefault()
-	app := sqlite.NewSQLiteApp(cfg, &defaultAuth)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
+	app := sqlite.NewSQLiteApp(cfg, &defaultAuth, *logger)
 
 	currentVersion := g.Info{Version: g.Version, Commit: g.Commit, Date: g.Date}
 	basePageBuilder := b.NewBasePageBuilder()
 	pageBuilder := b.NewPageBuilder(basePageBuilder, currentVersion)
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	a.BootstrapInitialAdmin(app.Itrs.Bootstrap, cfg.InitialAdminEmail, cfg.InitialAdminPassword, *logger)
 
 	baseURL := fmt.Sprintf("%v:%v", url, port)
@@ -70,7 +71,7 @@ func Make(url string, port int) http.Handler {
 
 	collectionServer := clc.New(pageBuilder, cfg.DefaultPageSize,
 		app.Itrs.Collection.Create, app.Itrs.Collection.List, app.Itrs.Collection.Update,
-		app.Itrs.Collection.Delete, app.Itrs.Collection.Find)
+		app.Itrs.Collection.Delete, app.Itrs.Collection.Clone, app.Itrs.Collection.Find)
 	collectionServer.Route(router, webAuth)
 
 	imagesServer := im.New(pageBuilder, cfg.DefaultPageSize, app.Itrs.Image.List, app.Itrs.Image.Delete, app.Itrs.Image.Find)

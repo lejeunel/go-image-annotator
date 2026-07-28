@@ -84,15 +84,11 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if err := i.EventLogger.InitTask(
-		task.Id, task.Type, task.Issuer,
-		"source-collection", r.Source,
-		"destination-collection", r.Destination,
-		"deep-copy", strconv.FormatBool(r.Deep)); err != nil {
+		task.Id, task.Type, task.Issuer); err != nil {
 		out.Error(fmt.Errorf("%v: pushing init task to logger: %w", errCtx, err))
 		return
 	}
-
-	if err := i.EventLogger.AddEvent(i.Clock.Now(), task.Id, e.PendingTask, nil); err != nil {
+	if err := i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.PendingTask}); err != nil {
 		out.Error(fmt.Errorf("%v: adding pending status: %w", errCtx, err))
 		return
 	}
@@ -123,31 +119,32 @@ func (i *Interactor) checkCollections(source, destination string) error {
 }
 
 func (i *Interactor) LogError(id t.TaskId, err error) {
-	i.EventLogger.AddEvent(i.Clock.Now(), id, e.FailedTask, err)
+	i.EventLogger.AddEvent(id, e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()})
 	i.Logger.Error(err.Error())
 }
 
 func (i *Interactor) runTask(task t.Task, source string, destination string, group *grp.Group, deep bool) {
 	errCtx := fmt.Errorf("running collection cloning task")
+	i.Logger.Info(fmt.Sprintf("started clone task %v", task.Id))
 
 	if err := i.checkCollections(source, destination); err != nil {
 		i.LogError(task.Id, fmt.Errorf("%w: %w", errCtx, err))
 		return
 	}
-
-	if err := i.EventLogger.AddEvent(i.Clock.Now(), task.Id, e.StartedTask, nil); err != nil {
+	extra := map[string]string{
+		"source-collection":      source,
+		"destination-collection": destination,
+		"deep-copy":              strconv.FormatBool(deep)}
+	if err := i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.StartedTask, Extra: extra}); err != nil {
 		i.Logger.Error(fmt.Errorf("%w: logging event upon cloning task startup: %w", errCtx, err).Error())
 		return
 	}
 
-	var dst clc.Collection
-	if group != nil {
-		dst = clc.NewCollection(clc.NewCollectionId(), destination, clc.WithGroup(*group))
-	} else {
-		dst = clc.NewCollection(clc.NewCollectionId(), destination)
-	}
+	dst := clc.NewCollection(clc.NewCollectionId(), destination, clc.WithCreatedAt(i.Clock.Now()))
+	dst.Group = group
+
 	if err := i.CollectionRepo.Create(dst); err != nil {
-		i.EventLogger.AddEvent(i.Clock.Now(), task.Id, e.FailedTask, err)
+		i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()})
 		i.Logger.Error(err.Error())
 		return
 	}
@@ -155,7 +152,7 @@ func (i *Interactor) runTask(task t.Task, source string, destination string, gro
 	for baseImage, err := range i.ImageRepo.Iterate(im.Filtering{Collection: &source}, 1) {
 		if err != nil {
 			err = fmt.Errorf("%w: iterating on images: %w", errCtx, err)
-			i.EventLogger.AddEvent(i.Clock.Now(), task.Id, e.FailedTask, err)
+			i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()})
 			i.Logger.Error(err.Error())
 			return
 		}
@@ -192,5 +189,5 @@ func (i *Interactor) runTask(task t.Task, source string, destination string, gro
 
 		}
 	}
-	i.EventLogger.AddEvent(i.Clock.Now(), task.Id, e.DoneTask, nil)
+	i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.DoneTask})
 }

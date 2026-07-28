@@ -8,6 +8,9 @@ import (
 //go:embed svg/trash.svg
 var Trash string
 
+//go:embed svg/copy.svg
+var Copy string
+
 //go:embed svg/edit.svg
 var Edit string
 

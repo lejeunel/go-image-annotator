@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"slices"
@@ -93,7 +92,6 @@ func (p *EditPresenter) SuccessListRoles(roles []r.Role) {
 }
 func (p EditPresenter) Render(w io.Writer) {
 	form := bf.NewHTMXInlineFormBuilder(p.user.Id, len(listUsersFields), p.Url)
-	form.AddTitle(fmt.Sprintf("Editing %v", p.user.Id))
 	groupSelect := form.AddSelectableCombobox("Groups", "groups")
 	for _, grp := range p.groups {
 		groupSelect.AddField(grp.Name, slices.Contains(p.user.Groups, grp.Name))

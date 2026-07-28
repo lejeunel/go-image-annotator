@@ -7,6 +7,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
+	"github.com/lejeunel/go-image-annotator/use-cases/collection/clone"
 )
 
 type Interactors struct {
@@ -15,6 +16,7 @@ type Interactors struct {
 	Delete          delete.Interactor
 	List            list.Interactor
 	Update          update.Interactor
+	Clone           clone.Interactor
 	DefaultPageSize int
 	Authorizer      auth.Authorizer
 }

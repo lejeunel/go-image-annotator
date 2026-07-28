@@ -10,6 +10,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/config"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	ingm "github.com/lejeunel/go-image-annotator/modules/ingester"
+	l "github.com/lejeunel/go-image-annotator/shared/logging"
 )
 
 type IngestPresenter struct {
@@ -27,7 +28,7 @@ func IngestDirectory(ctx context.Context, dir, collection string) {
 		panic(err)
 	}
 
-	app := s.NewSQLiteApp(config.Parse(), auth.NewVoidAuth())
+	app := s.NewSQLiteApp(config.Parse(), auth.NewVoidAuth(), *l.NewCliLogger())
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			f, err := os.Open(filepath.Join(dir, entry.Name()))

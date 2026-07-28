@@ -14,6 +14,7 @@ func (s *Server) Route(r chi.Router,
 		r.Get(rt.CollectionsUrl, s.List)
 		r.Get(CollectionUrl, s.TableRow)
 		r.Post(CollectionUrl, s.Create)
+		r.Patch(CollectionUrl, s.Clone)
 		r.Delete(CollectionUrl, s.Delete)
 		r.Put(CollectionUrl, s.Edit)
 		r.Get(CreateCollectionFormUrl, s.CreateForm)

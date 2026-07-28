@@ -24,15 +24,6 @@ func TestDeleteNonExistingCollectionShouldFail(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestDeleteCollectionWithAssociatedResourcesShouldFail(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&fk.CollectionRepo{ExistingNames: []string{"my-collection"},
-		IsPopulated_: true}, &fk.GroupRepo{})
-	itr.Execute(t.Context(), "my-collection", p)
-	assert.True(t, p.GotDependencyErr)
-	assert.False(t, p.GotSuccess)
-}
-
 func TestHandleInternalErrorOnDelete(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.CollectionRepo{ExistingNames: []string{"my-collection"},

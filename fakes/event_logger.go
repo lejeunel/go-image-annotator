@@ -12,8 +12,8 @@ import (
 type EventLogger struct {
 }
 
-func (l *EventLogger) InitTask(t.TaskId, t.TaskType, u.UserId, ...string) error { return nil }
-func (l *EventLogger) AddEvent(time.Time, t.TaskId, e.State, error) error       { return nil }
+func (l *EventLogger) InitTask(t.TaskId, t.TaskType, u.UserId) error { return nil }
+func (l *EventLogger) AddEvent(t.TaskId, e.Event) error              { return nil }
 
 type EventLoggerRepo struct {
 	ErrOnInitTask   error

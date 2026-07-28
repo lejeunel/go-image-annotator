@@ -2,7 +2,6 @@ package label
 
 import (
 	_ "embed"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -70,7 +69,6 @@ func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 
 func (p EditPresenter) SuccessFindLabel(l lbl.Label) {
 	b := bf.NewHTMXInlineFormBuilder(l.Name, len(listLabelsFields), p.Url)
-	b.AddTitle(fmt.Sprintf("Editing %v", l.Name))
 	b.AddTextField("description", "Description", bf.WithDefault(l.Description))
 	b.Render(p.Writer)
 }

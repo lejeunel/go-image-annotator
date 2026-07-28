@@ -16,15 +16,15 @@ type FormMode int
 
 const (
 	EditMode FormMode = iota
-	CreateMode
+	CloneMode
 )
 
 func (m FormMode) Verb() string {
 	switch m {
 	case EditMode:
 		return "Editing"
-	case CreateMode:
-		return "Creating"
+	case CloneMode:
+		return "Cloning"
 	default:
 		return ""
 	}
@@ -33,8 +33,8 @@ func (m FormMode) HTMXMethod() string {
 	switch m {
 	case EditMode:
 		return "hx-put"
-	case CreateMode:
-		return "hx-post"
+	case CloneMode:
+		return "hx-patch"
 	default:
 		return ""
 	}
@@ -69,10 +69,6 @@ func NewHTMXInlineFormBuilder(resourceName string, numColumns int, endpoint url.
 	}
 	return *f
 }
-func (b *HTMXInlineFormBuilder) AddTitle(title string) *HTMXInlineFormBuilder {
-	b.title = &title
-	return b
-}
 func (b *HTMXInlineFormBuilder) AddTextField(fieldName, displayName string, opts ...FormTextFieldOption) *HTMXInlineFormBuilder {
 	field := NewFormTextField(fieldName, displayName, opts...)
 	b.fields = append(b.fields, field)
@@ -82,6 +78,11 @@ func (b *HTMXInlineFormBuilder) AddSelectableCombobox(title, id string) *Selecta
 	box := NewSelectableCombobox(title, id)
 	b.fields = append(b.fields, &box)
 	return &box
+}
+func (b *HTMXInlineFormBuilder) AddCheckbox(fieldName, displayName string) *HTMXInlineFormBuilder {
+	field := NewFormCheckboxField(fieldName, displayName)
+	b.fields = append(b.fields, field)
+	return b
 }
 func (b HTMXInlineFormBuilder) Render(w io.Writer) {
 

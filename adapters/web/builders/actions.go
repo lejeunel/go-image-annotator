@@ -27,6 +27,10 @@ func (p *ActionsPanelBuilder) SetConfirmDelete(url url.URL) *ActionsPanelBuilder
 	p.Items = append(p.Items, Item{Icon: ic.Trash, URL: url, Tooltip: "delete"})
 	return p
 }
+func (p *ActionsPanelBuilder) SetClone(url url.URL) *ActionsPanelBuilder {
+	p.Items = append(p.Items, Item{Icon: ic.Copy, URL: url, Tooltip: "clone"})
+	return p
+}
 
 func (p *ActionsPanelBuilder) Build() Node {
 	res := []Node{}

@@ -1,7 +1,6 @@
 package group
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -83,7 +82,6 @@ func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 }
 func (p EditPresenter) SuccessFindGroup(group g.Group) {
 	b := bf.NewHTMXInlineFormBuilder(group.Name, len(listGroupsFields), p.Url)
-	b.AddTitle(fmt.Sprintf("Editing %v", group.Name))
 	b.AddTextField("name", "Name", bf.WithRequired(), bf.WithDefault(group.Name))
 	b.AddTextField("description", "Description", bf.WithDefault(group.Description))
 	b.Render(p.writer)

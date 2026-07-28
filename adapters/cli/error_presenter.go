@@ -1,8 +1,8 @@
 package cli
 
 import (
+	l "github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
-	"os"
 )
 
 type ErrorPresenter struct {
@@ -10,8 +10,7 @@ type ErrorPresenter struct {
 }
 
 func NewErrorPresenter() ErrorPresenter {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	return ErrorPresenter{*logger}
+	return ErrorPresenter{*l.NewCliLogger()}
 }
 
 func (p ErrorPresenter) Error(err error) {

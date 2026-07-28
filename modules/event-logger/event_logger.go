@@ -12,8 +12,8 @@ import (
 )
 
 type Interface interface {
-	InitTask(t.TaskId, t.TaskType, u.UserId, ...string) error
-	AddEvent(time.Time, t.TaskId, e.State, error) error
+	InitTask(t.TaskId, t.TaskType, u.UserId) error
+	AddEvent(t.TaskId, e.Event) error
 }
 
 type Repo interface {

@@ -8,12 +8,14 @@ const (
 	ModeView DynamicRowMode = iota
 	ModeEdit
 	ModeConfirmDelete
+	ModeClone
 )
 
 var modeName = map[DynamicRowMode]string{
 	ModeView:          "view",
 	ModeEdit:          "edit",
 	ModeConfirmDelete: "confirm-delete",
+	ModeClone:         "clone",
 }
 
 func (m DynamicRowMode) String() string {

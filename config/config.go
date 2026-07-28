@@ -16,6 +16,7 @@ type Config struct {
 	RandomPasswordLength                 int      `default:"10"`
 	ForgotPasswordTokenExpirationMinutes int      `default:"30"`
 	PasswordMinEntropy                   int      `default:"50"`
+	MaxNumTasksPerUser                   int      `default:"50"`
 }
 
 func Parse() Config {

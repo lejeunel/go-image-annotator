@@ -25,11 +25,6 @@ func (i Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	if err := i.ensureDeletable(name); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-
 	if err := i.collectionRepo.Delete(name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -52,17 +47,6 @@ func (i Interactor) authorizeDeletion(ctx context.Context, name string) error {
 	}
 	return nil
 
-}
-func (i Interactor) ensureDeletable(name string) error {
-	errCtx := fmt.Errorf("ensuring collection with name %v is empty", name)
-	isPopulated, err := i.collectionRepo.IsPopulated(name)
-	if err != nil {
-		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
-	}
-	if *isPopulated {
-		return fmt.Errorf("%w: %w", errCtx, e.ErrDependency)
-	}
-	return nil
 }
 func (i Interactor) ensureExists(name string) error {
 	errCtx := fmt.Errorf("checking whether collection with name %v exists", name)
