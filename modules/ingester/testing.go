@@ -6,11 +6,11 @@ import (
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 )
 
-type memUoW struct {
+type TestingTransactor struct {
 	Repos
 }
 
-func (m *memUoW) RunInTx(
+func (m *TestingTransactor) RunInTx(
 	fn func(Repos) error) error {
 	return fn(m.Repos)
 }
@@ -28,7 +28,7 @@ func NewTestingIngester(repos Repos, opts ...Option) *Ingester {
 	i := &Ingester{
 		Hasher:             &fk.Hasher{},
 		Repos:              repos,
-		UnitOfWork:         &memUoW{repos},
+		Transactor:         &TestingTransactor{repos},
 		ArtefactRepo:       &fk.FileStore{},
 		ImageSpecsDetector: &fk.SpecsDetector{Return: im.Specs{MIMEType: "image/jpeg"}},
 		clock:              clockwork.NewFakeClock(),

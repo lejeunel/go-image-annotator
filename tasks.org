@@ -90,3 +90,5 @@ this will lock yourself out...
   1. annotations are deleted
   2. check whether another collection has reference to image and
      possibly delete raw image if orphan
+
+* TODO run clone in transaction

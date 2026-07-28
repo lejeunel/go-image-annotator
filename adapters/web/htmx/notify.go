@@ -5,6 +5,18 @@ import (
 	"net/http"
 )
 
+func NotifySuccessPayload(w http.ResponseWriter, title, message string) {
+	payload, _ := json.Marshal(map[string]any{
+		"htmx-notify": map[string]string{
+			"variant": "success",
+			"title":   title,
+			"message": message,
+		},
+	})
+	w.Header().Set("HX-Trigger", string(payload))
+	w.WriteHeader(http.StatusOK)
+}
+
 func NotifySuccessPayloadAndReload(w http.ResponseWriter, title, message string) {
 	payload, _ := json.Marshal(map[string]any{
 		"htmx-notify-and-reload": map[string]string{

@@ -22,9 +22,11 @@ type ImageRepo struct {
 	ErrOnFindHash                error
 	ErrOnCount                   error
 	ErrOnIterate                 error
+	ErrOnIsUsed                  error
 	AddedImageId                 im.ImageId
 	AddedIntoCollectionId        clc.CollectionId
 	ImageIsInCollection          bool
+	IsUsed_                      bool
 	GotFilters                   im.Filtering
 	GotPagination                pa.PaginationParams
 	GotOrdering                  im.Ordering
@@ -44,7 +46,6 @@ func (r *ImageRepo) RemoveImageFromCollection(imageId im.ImageId, collectionId c
 	r.RemovedImageId = imageId
 	return nil
 }
-
 func (r *ImageRepo) ImageExists(imageId im.ImageId) (bool, error) {
 	if r.ErrOnImageExists != nil {
 		return false, r.ErrOnImageExists
@@ -60,7 +61,6 @@ func (r *ImageRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc
 	}
 	return false, nil
 }
-
 func (r *ImageRepo) AddToCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
 	if r.ErrOnAddToCollection != nil {
 		return r.ErrOnAddToCollection
@@ -98,7 +98,6 @@ func (r *ImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.Specs) er
 	r.GotSpecs = specs
 	return nil
 }
-
 func (r *ImageRepo) Delete(im.ImageId) error {
 	if r.ErrOnDeleteImage != nil {
 		return r.ErrOnDeleteImage
@@ -106,7 +105,6 @@ func (r *ImageRepo) Delete(im.ImageId) error {
 	r.NumDeletedImages += 1
 	return nil
 }
-
 func (r *ImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	if r.ErrOnFindHash != nil {
 		return nil, r.ErrOnFindHash
@@ -124,14 +122,12 @@ func (r *ImageRepo) Count(f im.Filtering) (*int64, error) {
 	return &r.Count_, nil
 
 }
-
 func (r ImageRepo) GetSpecs(im.ImageId) (*im.Specs, error) {
 	if r.ErrOnGetSpecs != nil {
 		return nil, r.ErrOnGetSpecs
 	}
 	return r.ReturnSpecs, nil
 }
-
 func (r ImageRepo) Iterate(f im.Filtering, pageSize int) iter.Seq2[im.BaseImage, error] {
 	return func(yield func(im.BaseImage, error) bool) {
 		for img := range slices.Values(r.IterateBaseImages) {
@@ -140,4 +136,11 @@ func (r ImageRepo) Iterate(f im.Filtering, pageSize int) iter.Seq2[im.BaseImage,
 			}
 		}
 	}
+}
+func (r *ImageRepo) IsUsed(id im.ImageId) (*bool, error) {
+	if r.ErrOnIsUsed != nil {
+		return nil, r.ErrOnIsUsed
+	}
+	return &r.IsUsed_, nil
+
 }

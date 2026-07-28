@@ -21,12 +21,12 @@ type DeletePresenter struct {
 func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
 	task := "deleting collection"
 	okMessageFunc := func(r delete.Response) string {
-		return fmt.Sprintf("Successfully deleted collection %v", r.Name)
+		return fmt.Sprintf("Started deletion task %v", r.Id)
 	}
 	return DeletePresenter{w, u, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 
-func (p DeletePresenter) Success(r delete.Response) {
+func (p DeletePresenter) SuccessDeleteCollection(r delete.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 

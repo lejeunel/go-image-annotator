@@ -14,7 +14,7 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
 	r "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
 	scr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/scroll"
-	uow "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/unit-of-work"
+	tra "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/transactors"
 	usr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	"github.com/lejeunel/go-image-annotator/app"
 	itr "github.com/lejeunel/go-image-annotator/app/interactors"
@@ -55,11 +55,11 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 	sessionManager := sm.NewSQLiteSessionManager(db.DB, usrrepo, apiTokenGen)
 	scr := scroller.New(scrrepo)
 	ingester := ig.New(imrepo, clrepo, lbrepo, anrepo,
-		uow.NewIngestionUoW(db),
+		tra.NewIngestionTransactor(db),
 		imageFileStore, sha256.New(), rea.ImageSpecsDetector{})
 	itrs := itr.Interactors{
 		Label:      NewSQLiteLabelInteractors(lbrepo, cfg.DefaultPageSize, auth),
-		Collection: NewSQLiteCollectionInteractors(clrepo, imrepo, anrepo, grprepo, imstore, eventlogger, logger, cfg.DefaultPageSize, auth),
+		Collection: NewSQLiteCollectionInteractors(db, clrepo, imrepo, anrepo, grprepo, imstore, eventlogger, logger, cfg.DefaultPageSize, auth),
 		Image:      NewSQLiteImageInteractors(imrepo, clrepo, anrepo, imstore, imageFileStore, ingester, cfg.DefaultPageSize, auth),
 		User: NewSQLiteUserInteractors(usrrepo, grprepo, rlrepo,
 			apiTokenGen,

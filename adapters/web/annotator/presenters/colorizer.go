@@ -18,7 +18,7 @@ func (c CyclicColorizer) Colorize(key string) string {
 	if ok {
 		return color
 	}
-	newColor := c.Palette[len(c.ColorMap)%(len(c.Palette)-1)]
+	newColor := c.Palette[len(c.ColorMap)%len(c.Palette)]
 	c.ColorMap[key] = newColor
 	return newColor
 }

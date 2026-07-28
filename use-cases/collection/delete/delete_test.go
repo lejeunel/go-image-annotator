@@ -17,11 +17,16 @@ func Setup(t *testing.T) (Interactor, clc.Collection, grp.Group, context.Context
 	group := grp.NewGroup(grp.NewGroupId(), "my-group")
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection", clc.WithGroup(group))
 	user := u.NewUser("user@mail.com", u.WithGroups([]string{"my-group"}))
-	itr := New(
-		&fk.CollectionRepo{
+	repos := Repos{
+		CollectionRepo: &fk.CollectionRepo{
 			Return: collection},
-		&fk.ImageRepo{},
-		&fk.AnnotationRepo{},
+		ImageRepo:      &fk.ImageRepo{},
+		AnnotationRepo: &fk.AnnotationRepo{},
+	}
+	itr := New(
+		repos,
+		&TestingTransactor{repos},
+		&fk.ImageStore{},
 		&fk.JobQueue{},
 		&fk.EventLogger{}, fk.NewLogger(),
 		WithAuth(fk.Auth{}))
@@ -79,11 +84,14 @@ func TestRemoveAllAnnotations(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
 	image := im.NewImage(im.NewImageId(), collection)
 	imRepo := &fk.ImageRepo{IterateBaseImages: []im.BaseImage{{ImageId: image.Id, Collection: collection.Name}}}
+	imageStore := &fk.ImageStore{}
 	itr.ImageRepo = imRepo
+	itr.ImageStore = imageStore
 	anRepo := &fk.AnnotationRepo{}
 	itr.AnnotationRepo = anRepo
 	p := &FakePresenter{}
 	itr.Execute(ctx, "my-collection", p)
 	assert.True(t, anRepo.RemovedAllAnnotations)
+	assert.Equal(t, image.Id, imageStore.DeletedId)
 	assert.True(t, p.GotSuccess)
 }

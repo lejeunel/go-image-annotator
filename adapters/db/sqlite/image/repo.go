@@ -222,6 +222,19 @@ func (r SQLiteImageRepo) sliceAfterId(f im.Filtering, pageSize int, after *im.Im
 	}
 	return images, next, nil
 }
+func (r SQLiteImageRepo) IsUsed(id im.ImageId) (*bool, error) {
+	var count int64
+	query := "SELECT COUNT(*) FROM images_collections WHERE image_id=$1"
+	err := r.Db.QueryRow(query, id).Scan(&count)
+	if err != nil {
+		return nil, fmt.Errorf("counting number of collections using image %v: %v: %w", id, err, e.ErrInternal)
+	}
+	var isUsed bool
+	if count > 0 {
+		isUsed = true
+	}
+	return &isUsed, nil
+}
 
 func NewSQLiteImageRepo(db adb.Querier) SQLiteImageRepo {
 	return SQLiteImageRepo{Db: db}

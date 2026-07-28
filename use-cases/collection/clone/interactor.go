@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/jonboulle/clockwork"
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	e "github.com/lejeunel/go-image-annotator/entities/event"
 	grp "github.com/lejeunel/go-image-annotator/entities/group"
@@ -165,20 +166,23 @@ func (i *Interactor) runTask(task t.Task, source string, destination string, gro
 
 		if deep {
 			for _, label := range image.Labels {
-				if err := i.AnnotationRepo.AddImageLabel(image.Id, image.Collection.Id, label, label.Author, label.Time); err != nil {
+				label.Id = a.NewAnnotationId()
+				if err := i.AnnotationRepo.AddImageLabel(image.Id, dst.Id, label, label.Author, label.Time); err != nil {
 					i.LogError(task.Id, fmt.Errorf("%w: adding image label: %w", errCtx, err))
 					return
 				}
 			}
 
 			for _, box := range image.BoundingBoxes {
-				if err := i.AnnotationRepo.AddBoundingBox(image.Id, image.Collection.Id, box, box.Author, box.Time); err != nil {
+				box.Id = a.NewAnnotationId()
+				if err := i.AnnotationRepo.AddBoundingBox(image.Id, dst.Id, box, box.Author, box.Time); err != nil {
 					i.LogError(task.Id, fmt.Errorf("%w: adding bounding boxes: %w", errCtx, err))
 					return
 				}
 			}
 			for _, poly := range image.Polygons {
-				if err := i.AnnotationRepo.AddPolygon(image.Id, image.Collection.Id, poly, poly.Author, poly.Time); err != nil {
+				poly.Id = a.NewAnnotationId()
+				if err := i.AnnotationRepo.AddPolygon(image.Id, dst.Id, poly, poly.Author, poly.Time); err != nil {
 					i.LogError(task.Id, fmt.Errorf("%w: adding polygons: %w", errCtx, err))
 					return
 				}

@@ -67,6 +67,14 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 
 }
 
+func (s ImageStore) DeleteAsset(id im.ImageId) error {
+	specs, err := s.ImageRepo.GetSpecs(id)
+	if err != nil {
+		return fmt.Errorf("fetching image specs")
+	}
+	return s.fileStore.Delete(fmt.Sprintf("%v.%v", id, strings.Split(specs.MIMEType, "/")[1]))
+}
+
 func New(i ImageRepo, c CollectionRepo, a AnnotationRepo, f fs.Interface) ImageStore {
 	return ImageStore{i, c, a, f}
 }

@@ -30,15 +30,13 @@ type Repos struct {
 	CollectionRepo
 	AnnotationRepo
 }
-type UnitOfWork interface {
-	// RunInTx runs fn inside a single transaction. Every store
-	// in the Repos value executes against that transaction.
+type Transactor interface {
 	RunInTx(fn func(Repos) error) error
 }
 type Ingester struct {
 	Hasher hash.Hash
 	Repos
-	UnitOfWork
+	Transactor
 	ArtefactRepo       ast.Interface
 	ImageSpecsDetector IImageSpecsDetector
 	clock              clockwork.Clock
@@ -53,11 +51,11 @@ func WithClock(c clockwork.Clock) Option {
 }
 
 func New(imr ImageRepo, clr CollectionRepo,
-	lr LabelRepo, ar AnnotationRepo, uow UnitOfWork,
+	lr LabelRepo, ar AnnotationRepo, tra Transactor,
 	fileStore ast.Interface, hasher hash.Hash, specsDetector IImageSpecsDetector, opts ...Option) *Ingester {
 	i := &Ingester{
 		Repos:        Repos{imr, lr, clr, ar},
-		UnitOfWork:   uow,
+		Transactor:   tra,
 		ArtefactRepo: fileStore, Hasher: hasher,
 		ImageSpecsDetector: specsDetector,
 		clock:              clockwork.NewRealClock(),
@@ -93,7 +91,7 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 	}
 
 	specs.IngestedAt = i.clock.Now()
-	if err := i.UnitOfWork.RunInTx(func(tx Repos) error {
+	if err := i.Transactor.RunInTx(func(tx Repos) error {
 		if err := i.ingestImage(tx, r.UserId, image, *hash, *specs); err != nil {
 			i.ArtefactRepo.Delete(image.Filename())
 			return err

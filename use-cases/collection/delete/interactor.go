@@ -13,13 +13,18 @@ import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	event_logger "github.com/lejeunel/go-image-annotator/modules/event-logger"
+	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
 	"github.com/lejeunel/go-image-annotator/modules/job-queue"
 )
 
+type Transactor interface {
+	RunInTx(fn func(Repos) error) error
+}
+
 type Interactor struct {
-	CollectionRepo
-	ImageRepo
-	AnnotationRepo
+	Repos
+	Transactor
+	ImageStore ims.Interface
 	Auth
 	JobQueue    job_queue.Interface
 	EventLogger event_logger.Interface
@@ -27,17 +32,17 @@ type Interactor struct {
 	clockwork.Clock
 }
 
-func New(cr CollectionRepo, imr ImageRepo, anr AnnotationRepo, jq job_queue.Interface, el event_logger.Interface,
+func New(r Repos, tra Transactor, ims ims.Interface, jq job_queue.Interface, el event_logger.Interface,
 	logger slog.Logger, opts ...Option) Interactor {
 	i := &Interactor{
-		CollectionRepo: cr,
-		ImageRepo:      imr,
-		AnnotationRepo: anr,
-		EventLogger:    el,
-		Logger:         logger,
-		JobQueue:       jq,
-		Clock:          clockwork.NewRealClock(),
-		Auth:           auth.NewVoidAuth()}
+		Repos:       r,
+		Transactor:  tra,
+		ImageStore:  ims,
+		EventLogger: el,
+		Logger:      logger,
+		JobQueue:    jq,
+		Clock:       clockwork.NewRealClock(),
+		Auth:        auth.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -78,7 +83,7 @@ func (i Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	i.JobQueue.Submit(func() {
 		i.runTask(task, *collection)
 	})
-	out.Success(Response{Name: name})
+	out.SuccessDeleteCollection(Response{Id: task.Id, Type: task.Type, Issuer: user.Id})
 }
 func (i *Interactor) runTask(task t.Task, collection clc.Collection) {
 	errCtx := fmt.Errorf("running delete collection task")
@@ -90,25 +95,37 @@ func (i *Interactor) runTask(task t.Task, collection clc.Collection) {
 		return
 	}
 
-	for baseImage, err := range i.ImageRepo.Iterate(im.Filtering{Collection: &collection.Name}, 1) {
-		if err != nil {
-			i.LogError(task.Id, fmt.Errorf("%w: iterating on images: %w", errCtx, err))
-			return
-		}
-		if err := i.AnnotationRepo.RemoveAllAnnotations(baseImage.ImageId, collection.Name); err != nil {
-			i.LogError(task.Id, fmt.Errorf("%w: deleting annotations: %w", errCtx, err))
-			return
-		}
-		if err := i.ImageRepo.RemoveImageFromCollection(baseImage.ImageId, collection.Id); err != nil {
-			i.LogError(task.Id, fmt.Errorf("%w: adding image to collection: %w", errCtx, err))
-			return
-		}
-	}
+	if err := i.Transactor.RunInTx(func(tx Repos) error {
+		for baseImage, err := range i.ImageRepo.Iterate(im.Filtering{Collection: &collection.Name}, 1) {
+			if err != nil {
+				return fmt.Errorf("%w: iterating on images: %w", errCtx, err)
+			}
+			if err := i.AnnotationRepo.RemoveAllAnnotations(baseImage.ImageId, collection.Name); err != nil {
+				return fmt.Errorf("%w: deleting annotations: %w", errCtx, err)
+			}
+			if err := i.ImageRepo.RemoveImageFromCollection(baseImage.ImageId, collection.Id); err != nil {
+				return fmt.Errorf("%w: adding image to collection: %w", errCtx, err)
+			}
 
-	if err := i.CollectionRepo.Delete(collection.Name); err != nil {
-		i.LogError(task.Id, fmt.Errorf("%w: deleting collection: %w", errCtx, err))
+			isUsed, err := i.ImageRepo.IsUsed(baseImage.ImageId)
+			if err != nil {
+				return fmt.Errorf("%w: checking whether image %v is used in another collection: %w", errCtx, baseImage.ImageId, err)
+			}
+			if !*isUsed {
+				i.ImageStore.DeleteAsset(baseImage.ImageId)
+			}
+		}
+
+		if err := i.CollectionRepo.Delete(collection.Name); err != nil {
+			return fmt.Errorf("%w: deleting collection: %w", errCtx, err)
+		}
+		return nil
+
+	}); err != nil {
+		i.Logger.Error(err.Error())
 		return
 	}
+
 	i.EventLogger.AddEvent(task.Id, ev.Event{Time: i.Clock.Now(), State: ev.DoneTask})
 }
 func (i *Interactor) LogError(id t.TaskId, err error) {

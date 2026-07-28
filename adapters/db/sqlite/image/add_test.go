@@ -25,10 +25,13 @@ func TestAddSpecs(t *testing.T) {
 func TestCountAddedImageToCollection(t *testing.T) {
 	imRepo, clcRepo := MakeRepos(s.NewInMemory())
 	collection := "a-collection"
-	AddToCollection(imRepo, clcRepo, collection, "")
+	imageId, _, _ := AddToCollection(imRepo, clcRepo, collection, "")
 	count, err := imRepo.Count(im.Filtering{Collection: &collection})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, int(*count))
+	isUsed, err := imRepo.IsUsed(*imageId)
+	assert.NoError(t, err)
+	assert.True(t, *isUsed)
 }
 
 func TestCountAllImagesWhenAddingImageToCollection(t *testing.T) {

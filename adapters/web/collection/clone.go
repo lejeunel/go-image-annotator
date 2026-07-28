@@ -3,7 +3,6 @@ package collection
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
@@ -19,9 +18,8 @@ func (s *Server) Clone(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var withAnnotations bool
-	withAnnotations, err := strconv.ParseBool(r.FormValue(cloneWithAnnotationsFieldName))
-	if err != nil {
-		withAnnotations = false
+	if r.FormValue(cloneWithAnnotationsFieldName) == "on" {
+		withAnnotations = true
 	}
 
 	s.CloneItr.Execute(r.Context(),

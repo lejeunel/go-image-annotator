@@ -23,8 +23,8 @@ type AnnotoriousPresenter struct {
 	polygons []v.Polygon
 }
 
-func NewAnnotoriousPresenter(colorizer Colorizer) AnnotoriousPresenter {
-	return AnnotoriousPresenter{Colorizer: colorizer}
+func NewAnnotoriousPresenter() AnnotoriousPresenter {
+	return AnnotoriousPresenter{Colorizer: NewCyclicColorizer(Palette)}
 }
 
 func (p *AnnotoriousPresenter) SuccessReadImage(r im.Image) {

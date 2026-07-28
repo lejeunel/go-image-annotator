@@ -9,6 +9,15 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(Response) {
+func (p *FakePresenter) SuccessDeleteCollection(Response) {
 	p.GotSuccess = true
+}
+
+type TestingTransactor struct {
+	Repos
+}
+
+func (m *TestingTransactor) RunInTx(
+	fn func(Repos) error) error {
+	return fn(m.Repos)
 }
