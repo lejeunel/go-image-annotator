@@ -11,37 +11,39 @@ import (
 )
 
 type AnnotationRepo struct {
-	Err                    error
-	ErrOnAddPoly           error
-	ErrOnAddLabel          error
-	ErrOnAddBoundingBox    error
-	ErrOnUpdate            error
-	ErrOnFindPolygons      error
-	ErrOnFindBoundingBoxes error
-	ErrOnFindImageLabels   error
-	ErrOnGetSpecs          error
-	GotImageId             im.ImageId
-	GotCollectionId        clc.CollectionId
-	GotUserId              *u.UserId
-	GotTime                *time.Time
-	GotBox                 a.BoundingBox
-	GotPolygon             a.Polygon
-	AddedAnnotationId      a.AnnotationId
-	AddedLabelId           lbl.LabelId
-	AddedOnImageId         im.ImageId
-	AddedOnCollectionId    clc.CollectionId
-	GotUpdatableBox        a.BoundingBoxUpdatables
-	GotUpdatablePoly       a.PolygonUpdatables
-	GotRemovedAnnotation   a.AnnotationId
-	ErrOnRemoveAnnotation  error
-	UpdatedAnnotationId    a.AnnotationId
-	UpdatedLabelId         lbl.LabelId
-	NumBoundingBoxesAdded  int
-	NumImageLabelsAdded    int
-	Labels                 []a.ImageLabel
-	BoundingBoxes          []a.BoundingBox
-	Polygons               []a.Polygon
-	Specs                  im.Specs
+	Err                       error
+	ErrOnAddPoly              error
+	ErrOnAddLabel             error
+	ErrOnAddBoundingBox       error
+	ErrOnUpdate               error
+	ErrOnFindPolygons         error
+	ErrOnFindBoundingBoxes    error
+	ErrOnFindImageLabels      error
+	ErrOnRemoveAllAnnotations error
+	ErrOnGetSpecs             error
+	GotImageId                im.ImageId
+	GotCollectionId           clc.CollectionId
+	GotUserId                 *u.UserId
+	GotTime                   *time.Time
+	GotBox                    a.BoundingBox
+	GotPolygon                a.Polygon
+	AddedAnnotationId         a.AnnotationId
+	AddedLabelId              lbl.LabelId
+	AddedOnImageId            im.ImageId
+	AddedOnCollectionId       clc.CollectionId
+	GotUpdatableBox           a.BoundingBoxUpdatables
+	GotUpdatablePoly          a.PolygonUpdatables
+	GotRemovedAnnotation      a.AnnotationId
+	ErrOnRemoveAnnotation     error
+	UpdatedAnnotationId       a.AnnotationId
+	UpdatedLabelId            lbl.LabelId
+	NumBoundingBoxesAdded     int
+	NumImageLabelsAdded       int
+	RemovedAllAnnotations     bool
+	Labels                    []a.ImageLabel
+	BoundingBoxes             []a.BoundingBox
+	Polygons                  []a.Polygon
+	Specs                     im.Specs
 
 	NoGroup bool
 }
@@ -163,9 +165,10 @@ func (r *AnnotationRepo) FindImageLabels(imageId im.ImageId, collectionId clc.Co
 	return nil, nil
 }
 
-func (r *AnnotationRepo) GetSpecs(imageId im.ImageId) (*im.Specs, error) {
-	if r.ErrOnGetSpecs != nil {
-		return nil, r.Err
+func (r *AnnotationRepo) RemoveAllAnnotations(imageId im.ImageId, collection string) error {
+	if r.ErrOnRemoveAllAnnotations != nil {
+		return r.ErrOnRemoveAllAnnotations
 	}
-	return &r.Specs, nil
+	r.RemovedAllAnnotations = true
+	return nil
 }

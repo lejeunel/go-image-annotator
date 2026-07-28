@@ -13,7 +13,7 @@ type AnnotationRepo interface {
 }
 
 type CollectionRepo interface {
-	FindCollectionByName(string) (*clc.Collection, error)
+	Find(string) (*clc.Collection, error)
 }
 
 type ImageRepo interface {

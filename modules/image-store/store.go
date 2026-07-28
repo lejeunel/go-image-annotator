@@ -17,7 +17,7 @@ type ImageStore struct {
 }
 
 func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
-	collection, err := s.CollectionRepo.FindCollectionByName(base.Collection)
+	collection, err := s.CollectionRepo.Find(base.Collection)
 	if err != nil {
 		return nil, fmt.Errorf("fetching collection by name (%v): %w", base.Collection, err)
 	}

@@ -22,6 +22,9 @@ func (f Auth) CreateCollection(ctx context.Context, g string) error {
 func (f Auth) UpdateCollection(ctx context.Context, g string) error {
 	return f.Err
 }
+func (f Auth) DeleteCollection(ctx context.Context, g string) error {
+	return f.Err
+}
 
 func (f Auth) CloneCollection(ctx context.Context, g string) error {
 	return f.Err

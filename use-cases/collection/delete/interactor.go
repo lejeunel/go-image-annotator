@@ -2,77 +2,124 @@ package delete
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"log/slog"
+
+	"github.com/jonboulle/clockwork"
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	ev "github.com/lejeunel/go-image-annotator/entities/event"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
+	t "github.com/lejeunel/go-image-annotator/entities/task"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	event_logger "github.com/lejeunel/go-image-annotator/modules/event-logger"
+	"github.com/lejeunel/go-image-annotator/modules/job-queue"
 )
 
 type Interactor struct {
-	collectionRepo CollectionRepo
-	groupRepo      GroupRepo
-	auth           Auth
+	CollectionRepo
+	ImageRepo
+	AnnotationRepo
+	Auth
+	JobQueue    job_queue.Interface
+	EventLogger event_logger.Interface
+	slog.Logger
+	clockwork.Clock
+}
+
+func New(cr CollectionRepo, imr ImageRepo, anr AnnotationRepo, jq job_queue.Interface, el event_logger.Interface,
+	logger slog.Logger, opts ...Option) Interactor {
+	i := &Interactor{
+		CollectionRepo: cr,
+		ImageRepo:      imr,
+		AnnotationRepo: anr,
+		EventLogger:    el,
+		Logger:         logger,
+		JobQueue:       jq,
+		Clock:          clockwork.NewRealClock(),
+		Auth:           auth.NewVoidAuth()}
+	for _, opt := range opts {
+		opt(i)
+	}
+	return *i
 }
 
 func (i Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	errCtx := "deleting collection"
-	if err := i.authorizeDeletion(ctx, name); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
 
-	if err := i.ensureExists(name); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-	if err := i.collectionRepo.Delete(name); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-	out.Success(Response{Name: name})
-}
-func (i Interactor) authorizeDeletion(ctx context.Context, name string) error {
-	errCtx := fmt.Errorf("checking group ownership of collection with name %v", name)
-	group, err := i.groupRepo.GroupOfCollection(name)
-	if errors.Is(err, e.ErrNotFound) {
-		return nil
-	}
+	collection, err := i.CollectionRepo.Find(name)
 	if err != nil {
-		return fmt.Errorf("%w: %w: %w", errCtx, err, e.ErrInternal)
+		out.Error(fmt.Errorf("%v: fetching collection: %w", errCtx, err))
+		return
 	}
-	if group != nil {
-		if err := i.auth.DeleteCollection(ctx, *group); err != nil {
-			return fmt.Errorf("%w: %w: %w", errCtx, err, e.ErrAuthorization)
+	if collection.Group != nil {
+		if err := i.Auth.DeleteCollection(ctx, collection.Group.Name); err != nil {
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
+			return
 		}
 	}
-	return nil
+	user := u.IdentityFromContext(ctx)
+	if user == nil {
+		out.Error(fmt.Errorf("%v: failed fetching user id from context", errCtx))
+		return
+	}
 
+	task := t.NewTask(t.NewTaskId(), user.Id, t.CollectionDeleteTask)
+	if err := i.EventLogger.InitTask(
+		task.Id, task.Type, task.Issuer); err != nil {
+		out.Error(fmt.Errorf("%v: pushing init task to logger: %w", errCtx, err))
+		return
+	}
+	if err := i.EventLogger.AddEvent(task.Id, ev.Event{Time: i.Clock.Now(), State: ev.PendingTask}); err != nil {
+		out.Error(fmt.Errorf("%v: adding pending status: %w", errCtx, err))
+		return
+	}
+
+	i.JobQueue.Submit(func() {
+		i.runTask(task, *collection)
+	})
+	out.Success(Response{Name: name})
 }
-func (i Interactor) ensureExists(name string) error {
-	errCtx := fmt.Errorf("checking whether collection with name %v exists", name)
-	exists, err := i.collectionRepo.Exists(name)
-	if err != nil {
-		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
+func (i *Interactor) runTask(task t.Task, collection clc.Collection) {
+	errCtx := fmt.Errorf("running delete collection task")
+	i.Logger.Info(fmt.Sprintf("started delete task %v", task.Id))
+
+	extra := map[string]string{"collection": collection.Name}
+	if err := i.EventLogger.AddEvent(task.Id, ev.Event{Time: i.Clock.Now(), State: ev.StartedTask, Extra: extra}); err != nil {
+		i.Logger.Error(fmt.Errorf("%w: logging event upon delete task startup: %w", errCtx, err).Error())
+		return
 	}
-	if !exists {
-		return fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
+
+	for baseImage, err := range i.ImageRepo.Iterate(im.Filtering{Collection: &collection.Name}, 1) {
+		if err != nil {
+			i.LogError(task.Id, fmt.Errorf("%w: iterating on images: %w", errCtx, err))
+			return
+		}
+		if err := i.AnnotationRepo.RemoveAllAnnotations(baseImage.ImageId, collection.Name); err != nil {
+			i.LogError(task.Id, fmt.Errorf("%w: deleting annotations: %w", errCtx, err))
+			return
+		}
+		if err := i.ImageRepo.RemoveImageFromCollection(baseImage.ImageId, collection.Id); err != nil {
+			i.LogError(task.Id, fmt.Errorf("%w: adding image to collection: %w", errCtx, err))
+			return
+		}
 	}
-	return nil
+
+	if err := i.CollectionRepo.Delete(collection.Name); err != nil {
+		i.LogError(task.Id, fmt.Errorf("%w: deleting collection: %w", errCtx, err))
+		return
+	}
+	i.EventLogger.AddEvent(task.Id, ev.Event{Time: i.Clock.Now(), State: ev.DoneTask})
+}
+func (i *Interactor) LogError(id t.TaskId, err error) {
+	i.EventLogger.AddEvent(id, ev.Event{Time: i.Clock.Now(), State: ev.FailedTask, Error: err.Error()})
+	i.Logger.Error(err.Error())
 }
 
 type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
-}
-
-func New(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
-	i := &Interactor{collectionRepo: cr, groupRepo: gr,
-		auth: auth.NewVoidAuth()}
-	for _, opt := range opts {
-		opt(i)
-	}
-	return *i
 }

@@ -195,7 +195,7 @@ func (i Ingester) ingestImage(tx Repos, authorId u.UserId, image *im.Image, hash
 }
 
 func (i Ingester) findCollectionByName(name string) (*clc.Collection, error) {
-	collection, err := i.CollectionRepo.FindCollectionByName(name)
+	collection, err := i.CollectionRepo.Find(name)
 	baseErr := fmt.Errorf("finding collection with name %v", name)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", baseErr, err)

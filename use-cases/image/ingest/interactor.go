@@ -77,7 +77,7 @@ func (i Interactor) Execute(ctx context.Context, r ing.Request, out OutputPort) 
 }
 
 func (i Interactor) findCollectionByName(name string) (*clc.Collection, error) {
-	collection, err := i.repo.FindCollectionByName(name)
+	collection, err := i.repo.Find(name)
 	baseErr := fmt.Errorf("finding collection with name %v", name)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", baseErr, err)

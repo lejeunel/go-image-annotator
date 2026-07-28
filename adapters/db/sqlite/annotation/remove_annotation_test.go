@@ -47,3 +47,13 @@ func TestRemoveImageLabel(t *testing.T) {
 	labels, _ := repos.Annotation.FindImageLabels(image.Id, collection.Id)
 	assert.Equal(t, 0, len(labels))
 }
+
+func TestRemoveAllAnnotations(t *testing.T) {
+	repos := NewAnnotationTestRepos(s.NewInMemory())
+	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
+	repos.Annotation.AddImageLabel(image.Id, collection.Id, a.NewImageLabel(label), nil, nil)
+	err := repos.Annotation.RemoveAllAnnotations(image.Id, collection.Name)
+	assert.NoError(t, err)
+	labels, _ := repos.Annotation.FindImageLabels(image.Id, collection.Id)
+	assert.Equal(t, 0, len(labels))
+}

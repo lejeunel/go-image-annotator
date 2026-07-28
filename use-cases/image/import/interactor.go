@@ -101,7 +101,7 @@ func (i Interactor) ensureSourceImageExists(id im.ImageId) error {
 func (i Interactor) findCollection(name string) (*clc.Collection, error) {
 
 	errCtx := fmt.Errorf("fetching collection %v", name)
-	collection, err := i.CollectionRepo.FindCollectionByName(name)
+	collection, err := i.CollectionRepo.Find(name)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}

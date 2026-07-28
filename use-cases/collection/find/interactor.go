@@ -11,7 +11,7 @@ type Interactor struct {
 
 func (i Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	errCtx := "fetching collection"
-	found, err := i.repo.FindCollectionByName(name)
+	found, err := i.repo.Find(name)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

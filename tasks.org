@@ -85,3 +85,8 @@ and the database should be rolled-back
 * DONE forbid deleting user who is yourself
 this will lock yourself out...
 * TODO bootstrap interactor should clean-up on fail (transaction-like)
+* TODO delete collection
+- initiate a task where
+  1. annotations are deleted
+  2. check whether another collection has reference to image and
+     possibly delete raw image if orphan

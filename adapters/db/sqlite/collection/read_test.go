@@ -13,7 +13,7 @@ import (
 func TestRetrieveNonExistingShouldFail(t *testing.T) {
 	repo := NewSQLiteCollectionRepo(s.NewInMemory())
 	CreateCollection(repo, "a-collection")
-	_, err := repo.FindCollectionByName("non-existing-collection")
+	_, err := repo.Find("non-existing-collection")
 	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
@@ -22,7 +22,7 @@ func TestInternalErrOnFindShouldFail(t *testing.T) {
 	repo := NewSQLiteCollectionRepo(db)
 	CreateCollection(repo, "a-collection")
 	db.Close()
-	_, err := repo.FindCollectionByName("a-collection")
+	_, err := repo.Find("a-collection")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
@@ -32,7 +32,7 @@ func TestRetrieve(t *testing.T) {
 		clc.WithDescription("a-description"),
 		clc.WithCreatedAt(time.Now()))
 	repo.Create(c)
-	r, err := repo.FindCollectionByName("a-collection")
+	r, err := repo.Find("a-collection")
 	assert.NoError(t, err, "expected no error on find")
 	assert.Equal(t, c.Name, r.Name)
 	assert.Equal(t, c.Description, r.Description)

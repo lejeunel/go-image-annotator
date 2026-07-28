@@ -9,8 +9,9 @@ import (
 type TaskType string
 
 const (
-	CollectionCloneTask TaskType = "collection-clone"
-	IngestDirTask       TaskType = "ingest-dir"
+	CollectionCloneTask  TaskType = "collection-clone"
+	CollectionDeleteTask TaskType = "collection-delete"
+	IngestDirTask        TaskType = "ingest-dir"
 )
 
 func (r TaskType) String() string {

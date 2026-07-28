@@ -17,11 +17,8 @@ import (
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	event_logger "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
+	"github.com/lejeunel/go-image-annotator/modules/job-queue"
 )
-
-type JobQueue interface {
-	Submit(func())
-}
 
 type Interactor struct {
 	ImageRepo
@@ -33,11 +30,11 @@ type Interactor struct {
 	Auth
 	clockwork.Clock
 	slog.Logger
-	JobQueue
+	JobQueue job_queue.Interface
 }
 
 func New(i ImageRepo, c CollectionRepo, a AnnotationRepo, g GroupRepo,
-	s st.Interface, l event_logger.Interface, logger slog.Logger, j JobQueue,
+	s st.Interface, l event_logger.Interface, logger slog.Logger, j job_queue.Interface,
 	opts ...Option) Interactor {
 	itr := &Interactor{i, c, a, g, s, l, auth.NewVoidAuth(), clockwork.NewRealClock(), logger, j}
 	for _, opt := range opts {

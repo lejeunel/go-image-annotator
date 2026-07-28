@@ -87,6 +87,15 @@ func (r SQLiteAnnotationRepo) FindImageLabels(imageId i.ImageId, collectionId c.
 
 	return imageLabels, nil
 }
+func (r SQLiteAnnotationRepo) RemoveAllAnnotations(imageId i.ImageId, collection string) error {
+	_, err := r.Db.Exec("DELETE FROM annotations WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2)",
+		imageId, collection)
+
+	if err != nil {
+		return fmt.Errorf("deleting annotations: %v: %w", err, e.ErrInternal)
+	}
+	return nil
+}
 func (r SQLiteAnnotationRepo) RemoveAnnotation(id a.AnnotationId) error {
 	_, err := r.Db.Exec("DELETE FROM annotations WHERE id=$1", id)
 

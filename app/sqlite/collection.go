@@ -34,7 +34,7 @@ func NewSQLiteCollectionInteractors(
 		Find: find.New(cr),
 		Create: create.New(cr, gr, create.WithNameValidator(validation.NewNameValidator()),
 			create.WithClock(clockwork.NewRealClock()), create.WithAuth(auth)),
-		Delete: delete.New(cr, gr, delete.WithAuth(auth)),
+		Delete: delete.New(cr, ir, ar, q.NewJobQueue(), el, logger, delete.WithAuth(auth)),
 		List:   list.New(cr),
 		Update: update.New(cr, gr, update.WithAuth(auth)),
 		Clone:  clone.New(ir, cr, ar, gr, ims, el, logger, q.NewJobQueue()),

@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"context"
 	"errors"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -47,4 +48,9 @@ type FakeProvider struct {
 
 func (p FakeProvider) Provide() (*u.User, error) {
 	return &u.User{}, nil
+}
+
+func CreateCtxWithUserId(ctx context.Context, userId u.UserId) context.Context {
+	user := u.NewUser(userId)
+	return u.AppendUserToContext(ctx, user)
 }

@@ -1,8 +1,6 @@
 package clone
 
 import (
-	"log/slog"
-
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	testing "github.com/lejeunel/go-image-annotator/shared/testing"
 )
@@ -20,5 +18,5 @@ func (p *FakePresenter) SuccessSubmitCloneTask(r Response) {
 
 func NewTestingCloner() Interactor {
 	return New(&fk.ImageRepo{}, &fk.CollectionRepo{}, &fk.AnnotationRepo{}, &fk.GroupRepo{},
-		&fk.ImageStore{}, &fk.EventLogger{}, slog.Logger{}, &fk.JobQueue{})
+		&fk.ImageStore{}, &fk.EventLogger{}, fk.NewLogger(), &fk.JobQueue{})
 }

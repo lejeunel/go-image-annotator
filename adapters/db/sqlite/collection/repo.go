@@ -49,7 +49,7 @@ func (r SQLiteCollectionRepo) rowToEntity(row Row) clc.Collection {
 	return c
 
 }
-func (r SQLiteCollectionRepo) FindCollectionByName(name string) (*clc.Collection, error) {
+func (r SQLiteCollectionRepo) Find(name string) (*clc.Collection, error) {
 
 	row := Row{}
 	err := r.Db.Get(&row,

@@ -41,7 +41,7 @@ func (r *CollectionRepo) Exists(name string) (bool, error) {
 	return false, nil
 }
 
-func (r *CollectionRepo) FindCollectionByName(name string) (*clc.Collection, error) {
+func (r *CollectionRepo) Find(name string) (*clc.Collection, error) {
 	if r.ErrOnFind != nil {
 		return nil, r.ErrOnFind
 	}
