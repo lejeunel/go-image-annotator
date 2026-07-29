@@ -33,8 +33,18 @@ func TestCreateCollectionInGroup(t *testing.T) {
 	c := clc.NewCollection(clc.NewCollectionId(), "a-collection",
 		clc.WithGroup(group))
 	collectionRepo.Create(c)
-	r, err := groupRepo.GroupOfCollection(c.Name)
+	r, err := collectionRepo.GetGroup(c.Name)
 	assert.NoError(t, err)
 	assert.NotNil(t, r)
 	assert.Equal(t, "a-group", *r)
+}
+
+func TestCollectionWithoutGroupFailsWithNotFoundErr(t *testing.T) {
+	db := s.NewInMemory()
+	clcRepo := NewSQLiteCollectionRepo(db)
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	clcRepo.Create(collection)
+	group, _ := clcRepo.GetGroup("a-collection")
+	assert.Nil(t, group)
+
 }

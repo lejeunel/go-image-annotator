@@ -52,7 +52,8 @@ func NewClonePresenter(w http.ResponseWriter, u b.RowURL) ClonePresenter {
 }
 
 func (p ClonePresenter) SuccessFindCollection(c clc.Collection) {
-	b := bf.NewHTMXInlineFormBuilder(c.Name, len(listCollectionsFields), p.Url, bf.WithMode(bf.CloneMode))
+	b := bf.NewHTMXInlineFormBuilder(len(listCollectionsFields), p.Url, bf.WithMode(bf.CloneMode))
+	b.SetResourceName(c.Name)
 	b.AddTextField(cloneNameFieldName, "Name", bf.WithRequired(), bf.WithDefault(c.Name))
 	b.AddTextField(cloneDescriptionFieldName, "Description", bf.WithDefault(c.Description))
 	b.AddCheckbox(cloneWithAnnotationsFieldName, "With annotations")

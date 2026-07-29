@@ -81,7 +81,8 @@ func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 		ErrorPresenter: htmx.NewErrorPresenter(task, w)}
 }
 func (p EditPresenter) SuccessFindGroup(group g.Group) {
-	b := bf.NewHTMXInlineFormBuilder(group.Name, len(listGroupsFields), p.Url)
+	b := bf.NewHTMXInlineFormBuilder(len(listGroupsFields), p.Url)
+	b.SetResourceName(group.Name)
 	b.AddTextField("name", "Name", bf.WithRequired(), bf.WithDefault(group.Name))
 	b.AddTextField("description", "Description", bf.WithDefault(group.Description))
 	b.Render(p.writer)

@@ -25,8 +25,9 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	s.RowURL.SetId(name)
 	switch r.URL.Query().Get("mode") {
 	case b.ModeEdit.String():
-		s.FindItr.Execute(r.Context(), name,
-			NewEditPresenter(w, s.RowURL))
+		p := NewEditPresenter(w, s.RowURL)
+		s.FindItr.Execute(r.Context(), name, &p)
+		s.ListGroupItr.Execute(r.Context(), &p)
 	case b.ModeConfirmDelete.String():
 		s.FindItr.Execute(r.Context(), name,
 			NewDeletePresenter(w, s.RowURL))
@@ -47,7 +48,7 @@ func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
-	s.ListItr.Execute(r.Context(), pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
+	s.ListCollectionItr.Execute(r.Context(), pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
 		NewListPresenter(w, s.PageBuilder, s.RowURL))
 }
 

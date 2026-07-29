@@ -47,6 +47,7 @@ type UpdateModel struct {
 	Name           string
 	NewName        string
 	NewDescription string
+	NewGroup       *string
 }
 
 type CollectionId struct {

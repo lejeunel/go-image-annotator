@@ -4,15 +4,13 @@ import (
 	"testing"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
-	g "github.com/lejeunel/go-image-annotator/entities/group"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&fk.CollectionRepo{},
-		&fk.GroupRepo{Return: g.NewGroup(g.NewGroupId(), "a-group")},
+	itr := New(&fk.CollectionRepo{ReturnGroup: "a-group"}, &fk.GroupRepo{},
 		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
@@ -59,8 +57,21 @@ func TestUpdateCollectionWithNameAlreadyTakenShouldFail(t *testing.T) {
 func TestUpdateCollectionWithNoGroup(t *testing.T) {
 	p := &FakePresenter{}
 	name := "name"
-	itr := New(&fk.CollectionRepo{ExistingNames: []string{name}},
-		&fk.GroupRepo{ErrOnGetGroupOfCollection: e.ErrNotFound})
+	itr := New(&fk.CollectionRepo{ExistingNames: []string{name}, ErrOnGetGroup: e.ErrNotFound},
+		&fk.GroupRepo{})
 	itr.Execute(t.Context(), Request{Name: name, NewName: name}, p)
+	assert.True(t, p.GotSuccess)
+}
+
+func TestUpdateCollectionGroup(t *testing.T) {
+	p := &FakePresenter{}
+	name := "name"
+	currentGroup := "current-group"
+	newGroup := "my-group"
+	clcRepo := &fk.CollectionRepo{ExistingNames: []string{name}, ReturnGroup: currentGroup}
+	itr := New(clcRepo, &fk.GroupRepo{ExistingNames: []string{newGroup}})
+	itr.Execute(t.Context(), Request{Name: name, NewName: name, NewGroup: &newGroup}, p)
+	assert.NotNil(t, clcRepo.GotUpdateModel.NewGroup)
+	assert.Equal(t, newGroup, *clcRepo.GotUpdateModel.NewGroup)
 	assert.True(t, p.GotSuccess)
 }

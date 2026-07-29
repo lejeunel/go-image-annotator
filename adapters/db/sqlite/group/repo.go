@@ -126,21 +126,6 @@ func (r SQLiteGroupRepo) Count() (*int64, error) {
 
 	return &count, nil
 }
-func (r SQLiteGroupRepo) GroupOfCollection(name string) (*string, error) {
-	var group string
-	errCtx := fmt.Errorf("retrieving group of collection with name %v", name)
-
-	err := r.Db.Get(&group, `SELECT name FROM groups WHERE id=(SELECT group_id FROM collections WHERE name=$1)`, name)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
-		}
-		return nil, fmt.Errorf("%w: %w: %w", errCtx, err, e.ErrInternal)
-	}
-
-	return &group, nil
-
-}
 func (r SQLiteGroupRepo) List() ([]g.Group, error) {
 	q := sq.StatementBuilder.Select(`id,name,description`).From("groups")
 	sql, args, err := q.ToSql()

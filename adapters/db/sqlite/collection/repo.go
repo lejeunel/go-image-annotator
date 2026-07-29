@@ -139,6 +139,21 @@ func (r SQLiteCollectionRepo) List(m pa.PaginationParams) ([]*clc.Collection, er
 
 	return objects, nil
 }
+func (r SQLiteCollectionRepo) GetGroup(name string) (*string, error) {
+	var group string
+	errCtx := fmt.Errorf("retrieving group of collection with name %v", name)
+
+	err := r.Db.Get(&group, `SELECT name FROM groups WHERE id=(SELECT group_id FROM collections WHERE name=$1)`, name)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
+		}
+		return nil, fmt.Errorf("%w: %w: %w", errCtx, err, e.ErrInternal)
+	}
+
+	return &group, nil
+
+}
 
 func NewSQLiteCollectionRepo(db adb.Querier) SQLiteCollectionRepo {
 	return SQLiteCollectionRepo{Db: db}

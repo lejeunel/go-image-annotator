@@ -109,7 +109,7 @@ paths:
   /images:
     get:
       summary: List images
-      description: Paginate images
+      description: Retrieve image meta-data given filtering criteria
       operationId: listImages
       tags: [Image]
       parameters:

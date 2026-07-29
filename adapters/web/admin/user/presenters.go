@@ -91,7 +91,8 @@ func (p *EditPresenter) SuccessListRoles(roles []r.Role) {
 	p.roles = roles
 }
 func (p EditPresenter) Render(w io.Writer) {
-	form := bf.NewHTMXInlineFormBuilder(p.user.Id, len(listUsersFields), p.Url)
+	form := bf.NewHTMXInlineFormBuilder(len(listUsersFields), p.Url)
+	form.SetResourceName(p.user.Id)
 	groupSelect := form.AddSelectableCombobox("Groups", "groups")
 	for _, grp := range p.groups {
 		groupSelect.AddField(grp.Name, slices.Contains(p.user.Groups, grp.Name))

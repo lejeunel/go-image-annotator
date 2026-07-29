@@ -1,0 +1,192 @@
+{{define "combobox"}}
+<div
+    x-data="{
+        options: [
+            {{- range .Options }}
+            {
+                value: '{{ .Value }}',
+                label: '{{ .Value }}',
+            },
+            {{- end }}
+        ],
+
+        isOpen: false,
+        openedWithKeyboard: false,
+        selectedOption: {{ .SelectedValue }},
+
+        init() {
+            this.selectedOption =
+                this.options.find(o => o.value === '{{ .Value }}') ?? null
+
+            if (this.selectedOption) {
+                this.$refs.hiddenTextField.value = this.selectedOption.value
+            }
+        },
+
+        setSelectedOption(option) {
+            this.selectedOption = option
+            this.$refs.hiddenTextField.value = option.value
+            this.isOpen = false
+            this.openedWithKeyboard = false
+        },
+
+        highlightFirstMatchingOption(key) {
+            if (key.length !== 1) return
+
+            const option = this.options.find(o =>
+                o.label.toLowerCase().startsWith(key.toLowerCase())
+            )
+
+            if (!option) return
+
+            const index = this.options.indexOf(option)
+            const items = this.$root.querySelectorAll('.combobox-option')
+
+            items[index]?.focus()
+        },
+    }"
+    x-init="init()"
+    class="w-full max-w-xs flex flex-col gap-1"
+    @keydown="highlightFirstMatchingOption($event.key)"
+    @keydown.esc.window="isOpen = false; openedWithKeyboard = false"
+>
+
+    <label
+        for="{{ .ID }}"
+        class="w-fit pl-0.5 text-sm text-on-surface dark:text-on-surface-dark"
+    >
+        {{ .Title }}
+    </label>
+
+    <div class="relative">
+
+        <!-- Trigger -->
+        <button
+            type="button"
+            id="{{ .ID }}-trigger"
+            x-ref="trigger"
+            role="combobox"
+            aria-haspopup="listbox"
+            aria-controls="{{ .ID }}-list"
+            :aria-expanded="isOpen || openedWithKeyboard"
+            :aria-label="selectedOption?.label || 'Please Select'"
+            @click="isOpen = !isOpen"
+            @keydown.down.prevent="openedWithKeyboard = true"
+            @keydown.enter.prevent="openedWithKeyboard = true"
+            @keydown.space.prevent="openedWithKeyboard = true"
+            class="inline-flex w-full items-center justify-between gap-2
+                   border border-outline rounded-radius
+                   bg-surface-alt px-4 py-2
+                   text-sm text-on-surface
+                   hover:opacity-75
+                   focus-visible:outline-2
+                   focus-visible:outline-offset-2
+                   focus-visible:outline-primary
+                   dark:border-outline-dark
+                   dark:bg-surface-dark-alt/50
+                   dark:text-on-surface-dark
+                   dark:focus-visible:outline-primary-dark"
+        >
+
+            <span
+                class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left"
+                x-text="selectedOption?.label || 'Please Select'"
+            ></span>
+
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                class="size-5 shrink-0"
+            >
+                <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"
+                />
+            </svg>
+
+        </button>
+
+        <input
+            x-ref="hiddenTextField"
+            id="{{ .ID }}"
+            name="{{ .ID }}"
+            type="hidden"
+        >
+
+        <template x-teleport="body">
+            <ul
+                x-cloak
+                x-show="isOpen || openedWithKeyboard"
+                x-anchor.bottom-start.offset-2="$refs.trigger"
+                id="{{ .ID }}-list"
+                role="listbox"
+                class="z-50 flex max-h-60 
+                       flex-col overflow-y-auto
+                       rounded-radius border border-outline
+                       bg-surface-alt py-1
+                       dark:border-outline-dark
+                       dark:bg-surface-dark-alt"
+                @click.outside="isOpen = false; openedWithKeyboard = false"
+                @keydown.down.prevent="$focus.wrap().next()"
+                @keydown.up.prevent="$focus.wrap().previous()"
+                x-transition
+                x-trap="openedWithKeyboard"
+            >
+
+                <template
+                    x-for="item in options"
+                    :key="item.value"
+                >
+
+                    <li
+                        class="combobox-option
+                               flex cursor-pointer items-center justify-between
+                               px-4 py-2
+                               text-sm
+                               hover:bg-surface-dark/5
+                               focus:bg-surface-dark/5
+                               focus:outline-none
+                               dark:hover:bg-surface/5
+                               dark:focus:bg-surface/5"
+                        tabindex="0"
+                        role="option"
+                        :aria-selected="selectedOption?.value === item.value"
+                        @click="setSelectedOption(item)"
+                        @keydown.enter.prevent="setSelectedOption(item)"
+                    >
+
+                        <span
+                            :class="selectedOption?.value === item.value ? 'font-semibold' : ''"
+                            x-text="item.label"
+                        ></span>
+
+                        <svg
+                            x-show="selectedOption?.value === item.value"
+                            x-cloak
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            class="size-4"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M4.5 12.75l6 6 9-13.5"
+                            />
+                        </svg>
+
+                    </li>
+
+                </template>
+
+            </ul>
+        </template>
+
+    </div>
+
+</div>
+{{end}}

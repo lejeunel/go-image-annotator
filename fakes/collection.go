@@ -14,12 +14,14 @@ type CollectionRepo struct {
 	ErrOnCount     error
 	ErrOnList      error
 	ErrOnUpdate    error
+	ErrOnGetGroup  error
 	ExistingNames  []string
 	IsPopulated_   bool
 	Return         clc.Collection
 	Count_         int
 	Got            clc.Collection
 	GotUpdateModel clc.UpdateModel
+	ReturnGroup    string
 }
 
 func (r *CollectionRepo) Create(c clc.Collection) error {
@@ -93,4 +95,10 @@ func (r *CollectionRepo) Update(m clc.UpdateModel) error {
 	}
 	r.GotUpdateModel = m
 	return nil
+}
+func (r *CollectionRepo) GetGroup(name string) (*string, error) {
+	if r.ErrOnGetGroup != nil {
+		return nil, r.ErrOnGetGroup
+	}
+	return &r.ReturnGroup, nil
 }

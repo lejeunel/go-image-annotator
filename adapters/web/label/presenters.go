@@ -68,7 +68,8 @@ func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 }
 
 func (p EditPresenter) SuccessFindLabel(l lbl.Label) {
-	b := bf.NewHTMXInlineFormBuilder(l.Name, len(listLabelsFields), p.Url)
+	b := bf.NewHTMXInlineFormBuilder(len(listLabelsFields), p.Url)
+	b.SetResourceName(l.Name)
 	b.AddTextField("description", "Description", bf.WithDefault(l.Description))
 	b.Render(p.Writer)
 }

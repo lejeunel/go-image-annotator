@@ -56,12 +56,11 @@ func WithMode(m FormMode) FormOption {
 	}
 }
 
-func NewHTMXInlineFormBuilder(resourceName string, numColumns int, endpoint url.URL, opts ...FormOption) HTMXInlineFormBuilder {
+func NewHTMXInlineFormBuilder(numColumns int, endpoint url.URL, opts ...FormOption) HTMXInlineFormBuilder {
 	f := &HTMXInlineFormBuilder{
-		resourceName: resourceName,
-		endpoint:     endpoint,
-		numColumns:   numColumns,
-		mode:         EditMode,
+		endpoint:   endpoint,
+		numColumns: numColumns,
+		mode:       EditMode,
 	}
 
 	for _, opt := range opts {
@@ -79,17 +78,30 @@ func (b *HTMXInlineFormBuilder) AddSelectableCombobox(title, id string) *Selecta
 	b.fields = append(b.fields, &box)
 	return &box
 }
+func (b *HTMXInlineFormBuilder) AddCombobox(title, id string) *Combobox {
+	box := NewCombobox(title, id)
+	b.fields = append(b.fields, &box)
+	return &box
+}
 func (b *HTMXInlineFormBuilder) AddCheckbox(fieldName, displayName string) *HTMXInlineFormBuilder {
 	field := NewFormCheckboxField(fieldName, displayName)
 	b.fields = append(b.fields, field)
 	return b
 }
+func (b *HTMXInlineFormBuilder) SetResourceName(name string) *HTMXInlineFormBuilder {
+	b.resourceName = name
+	return b
+}
 func (b HTMXInlineFormBuilder) Render(w io.Writer) {
 
-	caption := Div(
-		Class("ml-auto flex gap-2"),
-		Div(Text(b.mode.Verb())),
-		Div(Class("font-bold"), Text(b.resourceName)))
+	var caption Node
+	if b.resourceName != "" {
+		caption = Div(
+			Class("ml-auto flex gap-2"),
+			Div(Text(b.mode.Verb())),
+			Div(Class("font-bold"), Text(b.resourceName)))
+	}
+
 	form := Tr(
 		Td(Attr(fmt.Sprintf("colspan=%v", b.numColumns)),
 			Form(

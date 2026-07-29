@@ -25,13 +25,6 @@ func (r *GroupRepo) Find(name string) (*grp.Group, error) {
 	return &r.Return, nil
 }
 
-func (r *GroupRepo) GroupOfCollection(string) (*string, error) {
-	if r.ErrOnGetGroupOfCollection != nil {
-		return nil, r.ErrOnGetGroupOfCollection
-	}
-	return &r.Return.Name, nil
-}
-
 func (r *GroupRepo) Exists(name string) (*bool, error) {
 	if r.ErrOnExists != nil {
 		return nil, r.ErrOnExists

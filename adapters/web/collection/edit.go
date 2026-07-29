@@ -7,6 +7,7 @@ import (
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	grp "github.com/lejeunel/go-image-annotator/entities/group"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
 )
 
@@ -26,11 +27,12 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 }
 
 type EditPresenter struct {
-	writer http.ResponseWriter
-	b.RowURL
+	writer        http.ResponseWriter
 	task          string
 	okMessageFunc func(update.Response) string
+	Form          bf.HTMXInlineFormBuilder
 	htmx.ErrorPresenter
+	groupOfCollection *string
 }
 
 func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
@@ -38,16 +40,30 @@ func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 	okMessageFunc := func(r update.Response) string {
 		return "Successfully updated collection"
 	}
-	return EditPresenter{w, u, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
+	form := bf.NewHTMXInlineFormBuilder(len(listCollectionsFields), u.Url)
+	return EditPresenter{w, task, okMessageFunc, form, htmx.NewErrorPresenter(task, w), nil}
 }
 
 func (p EditPresenter) SuccessUpdateCollection(r update.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 
-func (p EditPresenter) SuccessFindCollection(c clc.Collection) {
-	b := bf.NewHTMXInlineFormBuilder(c.Name, len(listCollectionsFields), p.Url)
-	b.AddTextField("name", "Name", bf.WithRequired(), bf.WithDefault(c.Name))
-	b.AddTextField("description", "Description", bf.WithDefault(c.Description))
-	b.Render(p.writer)
+func (p *EditPresenter) SuccessFindCollection(c clc.Collection) {
+	if c.Group != nil {
+		p.groupOfCollection = &c.Group.Name
+	}
+	p.Form.SetResourceName(c.Name)
+	p.Form.AddTextField("name", "Name", bf.WithRequired(), bf.WithDefault(c.Name))
+	p.Form.AddTextField("description", "Description", bf.WithDefault(c.Description))
+}
+
+func (p *EditPresenter) SuccessListGroups(groups []grp.Group) {
+	cb := p.Form.AddCombobox("Group", "group")
+	for _, group := range groups {
+		cb.AddField(group.Name)
+	}
+	if p.groupOfCollection != nil {
+		cb.SetSelectedValue(*p.groupOfCollection)
+	}
+	p.Form.Render(p.writer)
 }

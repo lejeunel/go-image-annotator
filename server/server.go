@@ -71,7 +71,8 @@ func Make(url string, port int) http.Handler {
 
 	collectionServer := clc.New(pageBuilder, cfg.DefaultPageSize,
 		app.Itrs.Collection.Create, app.Itrs.Collection.List, app.Itrs.Collection.Update,
-		app.Itrs.Collection.Delete, app.Itrs.Collection.Clone, app.Itrs.Collection.Find)
+		app.Itrs.Collection.Delete, app.Itrs.Collection.Clone, app.Itrs.Collection.Find,
+		app.Itrs.Group.List)
 	collectionServer.Route(router, webAuth)
 
 	imagesServer := im.New(pageBuilder, cfg.DefaultPageSize, app.Itrs.Image.List, app.Itrs.Image.Delete, app.Itrs.Image.Find)
