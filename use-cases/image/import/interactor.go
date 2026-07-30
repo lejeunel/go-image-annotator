@@ -53,7 +53,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if dstCollection.Group != nil {
-		if err := i.auth.ImportImage(ctx, dstCollection.Group.Name); err != nil {
+		if err := i.auth.ImportImage(ctx, *dstCollection.Group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}

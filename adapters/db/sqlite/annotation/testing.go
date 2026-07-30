@@ -50,7 +50,7 @@ func CreateAnnotableImage(repos AnnotationTestingRepos, collectionName string, l
 	if group != nil {
 		group_ := grp.NewGroup(grp.NewGroupId(), *group)
 		repos.Group.Create(group_)
-		collection.Group = &group_
+		collection.Group = &group_.Name
 	}
 	label := lbl.NewLabel(lbl.NewLabelId(), labelName)
 	repos.Label.Create(label)

@@ -16,7 +16,7 @@ import (
 func TestHandleAuthError(t *testing.T) {
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection",
-		clc.WithGroup(group))
+		clc.WithGroup(group.Name))
 	image := im.NewImage(im.NewImageId(), collection)
 	itr := New(&fk.ImageStore{Return: &image}, &fk.ImageRepo{},
 		&fk.AnnotationRepo{},

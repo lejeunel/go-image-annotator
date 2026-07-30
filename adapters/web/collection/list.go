@@ -42,8 +42,8 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b := bf.NewHTMXCreateFormBuilder(CollectionUrl, createCollectionTargetDiv)
 	b.AddTitle("Create a new collection")
-	b.AddTextField(createNameFieldName, "Name", bf.WithRequired())
-	b.AddTextField(createDescriptionFieldName, "Description")
+	b.AddTextField(nameFieldName, "Name", bf.WithRequired())
+	b.AddTextField(descriptionFieldName, "Description")
 	b.Render(w)
 }
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {

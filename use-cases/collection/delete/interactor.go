@@ -58,7 +58,7 @@ func (i Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 		return
 	}
 	if collection.Group != nil {
-		if err := i.Auth.DeleteCollection(ctx, collection.Group.Name); err != nil {
+		if err := i.Auth.DeleteCollection(ctx, *collection.Group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}

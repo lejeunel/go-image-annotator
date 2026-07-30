@@ -24,5 +24,5 @@ func TestRetrieveGroupOfAnnotation(t *testing.T) {
 	r, err := repos.Annotation.GroupOfAnnotation(imageLabel.Id)
 	assert.Nil(t, err)
 	assert.NotNil(t, group)
-	assert.Equal(t, (*collection.Group).Name, *r)
+	assert.Equal(t, *collection.Group, *r)
 }

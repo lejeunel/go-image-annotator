@@ -31,7 +31,7 @@ func TestCreateCollectionInGroup(t *testing.T) {
 	group := grp.NewGroup(grp.NewGroupId(), "a-group")
 	groupRepo.Create(group)
 	c := clc.NewCollection(clc.NewCollectionId(), "a-collection",
-		clc.WithGroup(group))
+		clc.WithGroup(group.Name))
 	collectionRepo.Create(c)
 	r, err := collectionRepo.GetGroup(c.Name)
 	assert.NoError(t, err)

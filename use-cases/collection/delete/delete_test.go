@@ -15,7 +15,8 @@ import (
 
 func Setup(t *testing.T) (Interactor, clc.Collection, grp.Group, context.Context) {
 	group := grp.NewGroup(grp.NewGroupId(), "my-group")
-	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection", clc.WithGroup(group))
+	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection",
+		clc.WithGroup(group.Name))
 	user := u.NewUser("user@mail.com", u.WithGroups([]string{"my-group"}))
 	repos := Repos{
 		CollectionRepo: &fk.CollectionRepo{

@@ -12,11 +12,11 @@
 
         isOpen: false,
         openedWithKeyboard: false,
-        selectedOption: {{ .SelectedValue }},
+        selectedOption: null,
 
         init() {
             this.selectedOption =
-                this.options.find(o => o.value === '{{ .Value }}') ?? null
+                this.options.find(o => o.value === '{{ .SelectedValue }}') ?? null
 
             if (this.selectedOption) {
                 this.$refs.hiddenTextField.value = this.selectedOption.value

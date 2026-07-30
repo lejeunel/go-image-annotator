@@ -47,7 +47,7 @@ func TestGroupPopulatedWithCollection(t *testing.T) {
 	clcRepo := clcr.NewSQLiteCollectionRepo(db)
 	groupRepo := NewSQLiteGroupRepo(db)
 	group, _ := CreateGroup(groupRepo, "a-group")
-	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection", clc.WithGroup(*group))
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection", clc.WithGroup(group.Name))
 	clcRepo.Create(collection)
 	isPopulated, err := groupRepo.IsPopulated(group.Name)
 	assert.NoError(t, err)

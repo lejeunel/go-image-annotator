@@ -54,7 +54,7 @@ func (i Interactor) Execute(ctx context.Context, r ing.Request, out OutputPort) 
 	}
 
 	if collection.Group != nil {
-		if err := i.auth.IngestImage(ctx, collection.Group.Name); err != nil {
+		if err := i.auth.IngestImage(ctx, *collection.Group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}

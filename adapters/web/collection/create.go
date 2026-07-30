@@ -30,6 +30,6 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.CreateItr.Execute(r.Context(),
-		create.Request{Name: r.FormValue(createNameFieldName),
-			Description: r.FormValue(createDescriptionFieldName)}, NewCreateCollectionPresenter(w))
+		create.Request{Name: r.FormValue(nameFieldName),
+			Description: r.FormValue(descriptionFieldName)}, NewCreateCollectionPresenter(w))
 }

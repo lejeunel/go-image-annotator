@@ -6,10 +6,6 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func ShortenUUID(id string) string {
-	return id[:8]
-}
-
 type LabelSelector struct {
 	Labels         []string
 	SelectorIsOpen bool

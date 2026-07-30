@@ -24,7 +24,7 @@ func CreateImage() im.Image {
 func TestHandleAuthError(t *testing.T) {
 	image := CreateImage()
 	group := g.NewGroup(g.NewGroupId(), "my-group")
-	image.Collection.Group = &group
+	image.Collection.Group = &group.Name
 	itr := New(&fk.AnnotationRepo{},
 		&fk.LabelRepo{},
 		&fk.ImageStore{Return: &image},

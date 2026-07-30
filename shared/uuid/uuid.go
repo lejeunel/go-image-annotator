@@ -35,3 +35,7 @@ func (u UUIDWrapper[T]) String() string {
 func (u UUIDWrapper[T]) IsNil() bool {
 	return u.UUID == uuid.Nil
 }
+
+func ShortenUUID(id string) string {
+	return id[:8]
+}

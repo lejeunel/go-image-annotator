@@ -12,8 +12,9 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
+	group := g.NewGroup(g.NewGroupId(), "dst-group")
 	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection",
-		clc.WithGroup(g.NewGroup(g.NewGroupId(), "dst-group")))
+		clc.WithGroup(group.Name))
 	itr := New(&fk.ImageRepo{}, &fk.CollectionRepo{Return: dstCollection},
 		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
@@ -45,8 +46,9 @@ func TestNonExistingDestinationCollectionShouldFail(t *testing.T) {
 func TestImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 
+	group := g.NewGroup(g.NewGroupId(), "dst-group")
 	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection",
-		clc.WithGroup(g.NewGroup(g.NewGroupId(), "dst-group")))
+		clc.WithGroup(group.Name))
 	itr := New(&fk.ImageRepo{ImageIsInCollection: true}, &fk.CollectionRepo{Return: dstCollection})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotDependencyErr)

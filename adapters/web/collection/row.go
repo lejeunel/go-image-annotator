@@ -31,7 +31,7 @@ func MakeRow(u b.RowURL, c clc.Collection) tb.Row {
 	if c.Group == nil {
 		groupName = "n/a"
 	} else {
-		groupName = c.Group.Name
+		groupName = *c.Group
 	}
 
 	u.SetId(c.Name)

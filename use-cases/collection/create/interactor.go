@@ -48,7 +48,7 @@ func (i Interactor) create(r Request) error {
 		if err != nil {
 			return err
 		}
-		collection.Group = group
+		collection.Group = &group.Name
 	}
 	if err := i.collectionRepo.Create(collection); err != nil {
 		return err

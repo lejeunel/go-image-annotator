@@ -16,13 +16,18 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
+	req := update.Request{
+		Name:           r.URL.Query().Get(resourceUrlFieldName),
+		NewName:        r.FormValue(nameFieldName),
+		NewDescription: r.FormValue(descriptionFieldName),
+	}
 
-	s.UpdateItr.Execute(r.Context(),
-		update.Request{
-			Name:           r.URL.Query().Get(resourceUrlFieldName),
-			NewName:        r.FormValue(createNameFieldName),
-			NewDescription: r.FormValue(createDescriptionFieldName),
-		},
+	group := r.FormValue(groupFieldName)
+	if group != publicGroupPlaceholderName {
+		req.NewGroup = &group
+	}
+
+	s.UpdateItr.Execute(r.Context(), req,
 		NewEditPresenter(w, s.RowURL))
 }
 
@@ -50,7 +55,7 @@ func (p EditPresenter) SuccessUpdateCollection(r update.Response) {
 
 func (p *EditPresenter) SuccessFindCollection(c clc.Collection) {
 	if c.Group != nil {
-		p.groupOfCollection = &c.Group.Name
+		p.groupOfCollection = c.Group
 	}
 	p.Form.SetResourceName(c.Name)
 	p.Form.AddTextField("name", "Name", bf.WithRequired(), bf.WithDefault(c.Name))
@@ -58,7 +63,8 @@ func (p *EditPresenter) SuccessFindCollection(c clc.Collection) {
 }
 
 func (p *EditPresenter) SuccessListGroups(groups []grp.Group) {
-	cb := p.Form.AddCombobox("Group", "group")
+	cb := p.Form.AddCombobox("Group", groupFieldName)
+	cb.AddField(publicGroupPlaceholderName)
 	for _, group := range groups {
 		cb.AddField(group.Name)
 	}

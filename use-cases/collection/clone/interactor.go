@@ -148,7 +148,9 @@ func (i *Interactor) runTask(task t.Task, source string, destination string, gro
 	}
 
 	dst := clc.NewCollection(clc.NewCollectionId(), destination, clc.WithCreatedAt(i.Clock.Now()))
-	dst.Group = group
+	if group != nil {
+		dst.Group = &group.Name
+	}
 
 	if err := i.CollectionRepo.Create(dst); err != nil {
 		i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()})

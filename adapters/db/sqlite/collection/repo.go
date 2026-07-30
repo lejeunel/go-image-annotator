@@ -23,14 +23,15 @@ type Row struct {
 	Name        string           `db:"name"`
 	Description string           `db:"description"`
 	CreatedAt   sql.NullTime     `db:"created_at"`
-	GroupId     g.GroupId        `db:"group_id"`
+	GroupId     *g.GroupId       `db:"group_id"`
+	GroupName   *string          `db:"group_name"`
 }
 
 func (r SQLiteCollectionRepo) Create(c clc.Collection) error {
 	var err error
 	if c.Group != nil {
-		query := `INSERT INTO collections (id, name, description, created_at, group_id) VALUES ($1,$2,$3,$4,$5)`
-		_, err = r.Db.Exec(query, c.Id.String(), c.Name, c.Description, c.CreatedAt, c.Group.Id)
+		query := `INSERT INTO collections (id, name, description, created_at, group_id) VALUES ($1,$2,$3,$4,(SELECT id FROM groups WHERE name=$5))`
+		_, err = r.Db.Exec(query, c.Id.String(), c.Name, c.Description, c.CreatedAt, *c.Group)
 	} else {
 		query := `INSERT INTO collections (id, name, description, created_at) VALUES ($1,$2,$3,$4)`
 		_, err = r.Db.Exec(query, c.Id.String(), c.Name, c.Description, c.CreatedAt)
@@ -46,6 +47,9 @@ func (r SQLiteCollectionRepo) rowToEntity(row Row) clc.Collection {
 	if row.CreatedAt.Valid {
 		c.CreatedAt = row.CreatedAt.Time
 	}
+	if row.GroupName != nil {
+		c.Group = row.GroupName
+	}
 	return c
 
 }
@@ -53,7 +57,11 @@ func (r SQLiteCollectionRepo) Find(name string) (*clc.Collection, error) {
 
 	row := Row{}
 	err := r.Db.Get(&row,
-		`SELECT id,name,description,created_at,group_id FROM collections WHERE name=$1`, name)
+		`
+		SELECT c.id,c.name,c.description,c.created_at,c.group_id,g.name AS group_name
+		FROM collections AS c
+		LEFT JOIN groups g ON g.id = c.group_id
+		WHERE c.name=$1`, name)
 
 	if err != nil {
 		switch {
@@ -65,6 +73,7 @@ func (r SQLiteCollectionRepo) Find(name string) (*clc.Collection, error) {
 	}
 
 	entity := r.rowToEntity(row)
+
 	return &entity, nil
 }
 func (r SQLiteCollectionRepo) Exists(name string) (bool, error) {
@@ -86,8 +95,15 @@ func (r SQLiteCollectionRepo) Delete(name string) error {
 	return nil
 }
 func (r SQLiteCollectionRepo) Update(m clc.UpdateModel) error {
-	query := "UPDATE collections SET name=$1,description=$2 WHERE name=$3"
-	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
+	var err error
+	if m.NewGroup != nil {
+		fmt.Println("repo updating with group", *m.NewGroup)
+		query := "UPDATE collections SET name=$1,description=$2,group_id=(SELECT id FROM groups WHERE name=$3) WHERE name=$4"
+		_, err = r.Db.Exec(query, m.NewName, m.NewDescription, *m.NewGroup, m.Name)
+	} else {
+		query := "UPDATE collections SET name=$1,description=$2,group_id=NULL WHERE name=$3"
+		_, err = r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
+	}
 
 	if err != nil {
 		return fmt.Errorf("updating record: %v: %w", err, e.ErrInternal)
@@ -120,7 +136,8 @@ func (r SQLiteCollectionRepo) Count() (*int64, error) {
 	return &count, nil
 }
 func (r SQLiteCollectionRepo) List(m pa.PaginationParams) ([]*clc.Collection, error) {
-	q := sq.StatementBuilder.Select(`id,name,description,created_at,group_id`).From("collections")
+	q := sq.StatementBuilder.Select(`c.id,c.name,c.description,c.created_at,c.group_id,g.name AS group_name`).From("collections AS c")
+	q = q.LeftJoin("groups g ON g.id=c.group_id")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
 	if err != nil {

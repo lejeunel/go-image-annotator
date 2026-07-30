@@ -2,7 +2,6 @@ package collection
 
 import (
 	"github.com/google/uuid"
-	g "github.com/lejeunel/go-image-annotator/entities/group"
 	uuidw "github.com/lejeunel/go-image-annotator/shared/uuid"
 	"time"
 )
@@ -12,7 +11,7 @@ type Collection struct {
 	Name        string
 	Description string
 	CreatedAt   time.Time
-	Group       *g.Group
+	Group       *string
 }
 
 func NewCollection(id CollectionId, name string, opts ...Option) Collection {
@@ -37,7 +36,7 @@ func WithCreatedAt(t time.Time) Option {
 	}
 }
 
-func WithGroup(g g.Group) Option {
+func WithGroup(g string) Option {
 	return func(c *Collection) {
 		c.Group = &g
 	}
