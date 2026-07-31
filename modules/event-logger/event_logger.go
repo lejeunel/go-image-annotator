@@ -14,6 +14,8 @@ import (
 type Interface interface {
 	InitTask(t.TaskId, t.TaskType, u.UserId) error
 	AddEvent(t.TaskId, e.Event) error
+	Count(u.UserId) (*int64, error)
+	ListUserTasks(u.UserId, pa.PaginationParams) ([]t.Task, error)
 }
 
 type Repo interface {
@@ -22,6 +24,7 @@ type Repo interface {
 	AddEvent(t.TaskId, e.Event) error
 	GetEvents(t.TaskId) ([]e.Event, error)
 	ClipNumTasks(u.UserId, int) error
+	Count(u.UserId) (*int64, error)
 }
 
 type EventLogger struct {

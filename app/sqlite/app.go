@@ -74,6 +74,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 		Role:       NewSQLiteRoleInteractors(rlrepo, auth),
 		Bootstrap:  NewSQLiteBootstrapInteractor(usrrepo, rlrepo, policyFileStore, passwordTokenizer, passwordValidator),
 		Policy:     NewSQLitePolicyInteractors(policyFileStore, auth),
+		Log:        NewSQLiteLogInteractors(eventlogger),
 	}
 	annotator := a.NewAnnotator(scr, itrs.Image.Find,
 		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox,

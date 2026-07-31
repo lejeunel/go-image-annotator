@@ -63,6 +63,18 @@ func (r SQLiteEventRepo) ListUserTasks(user u.UserId, p pa.PaginationParams) ([]
 	return objects, nil
 
 }
+func (r SQLiteEventRepo) Count(u.UserId) (*int64, error) {
+	var count int64
+
+	query := "SELECT COUNT(*) FROM tasks"
+	err := r.Db.QueryRow(query).Scan(&count)
+	if err != nil {
+		return nil, fmt.Errorf("counting tasks records: %v: %w", err, e.ErrInternal)
+	}
+
+	return &count, nil
+
+}
 func (r SQLiteEventRepo) AddEvent(id t.TaskId, event ev.Event) error {
 	query := `INSERT INTO events (task_id, time, state, extra, error) VALUES ($1,$2,$3,$4,$5)`
 	extraStr, err := serialize(event.Extra)

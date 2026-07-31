@@ -6,16 +6,14 @@ import (
 	"net/http"
 )
 
-var NewAPIToken = "/ui/new-api-token"
-var ChangePassword = "/change-password"
-
 func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
-		r.Get(rt.DashboardUrl, s.UserDashboard)
-		r.Get(CredentialsUrl, s.UserDashboard)
-		r.Get(NewAPIToken, s.NewAPIToken)
-		r.Post(ChangePassword, s.ChangePassword)
+		r.Get(rt.DashboardUrl, s.Credentials)
+		r.Get(CredentialsUrl, s.Credentials)
+		r.Get(LogsUrl, s.ListTasks)
+		r.Get(NewAPITokenUrl, s.NewAPIToken)
+		r.Post(ChangePasswordUrl, s.ChangePassword)
 	})
 }

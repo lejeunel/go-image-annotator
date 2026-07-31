@@ -97,7 +97,6 @@ func (r SQLiteCollectionRepo) Delete(name string) error {
 func (r SQLiteCollectionRepo) Update(m clc.UpdateModel) error {
 	var err error
 	if m.NewGroup != nil {
-		fmt.Println("repo updating with group", *m.NewGroup)
 		query := "UPDATE collections SET name=$1,description=$2,group_id=(SELECT id FROM groups WHERE name=$3) WHERE name=$4"
 		_, err = r.Db.Exec(query, m.NewName, m.NewDescription, *m.NewGroup, m.Name)
 	} else {

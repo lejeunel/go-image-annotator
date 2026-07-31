@@ -10,10 +10,27 @@ import (
 )
 
 type EventLogger struct {
+	ErrOnCount  error
+	ErrOnList   error
+	ReturnTasks []t.Task
+	Count_      int64
 }
 
 func (l *EventLogger) InitTask(t.TaskId, t.TaskType, u.UserId) error { return nil }
 func (l *EventLogger) AddEvent(t.TaskId, e.Event) error              { return nil }
+func (l *EventLogger) Count(u.UserId) (*int64, error) {
+	if l.ErrOnCount != nil {
+		return nil, l.ErrOnCount
+	}
+	return &l.Count_, nil
+}
+
+func (l *EventLogger) ListUserTasks(user u.UserId, p pa.PaginationParams) ([]t.Task, error) {
+	if l.ErrOnList != nil {
+		return nil, l.ErrOnList
+	}
+	return l.ReturnTasks, nil
+}
 
 type EventLoggerRepo struct {
 	ErrOnInitTask   error
@@ -23,8 +40,13 @@ type EventLoggerRepo struct {
 	CreatedTaskAt   time.Time
 
 	ClippedTasksToNum int
+	Count_            int64
 
 	AddedEvents []e.Event
+}
+
+func (l *EventLoggerRepo) Count(user u.UserId) (*int64, error) {
+	return &l.Count_, nil
 }
 
 func (l *EventLoggerRepo) CreateTask(taskId t.TaskId, now time.Time, taskType t.TaskType, user u.UserId) error {

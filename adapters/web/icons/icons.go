@@ -5,6 +5,9 @@ import (
 	"fmt"
 )
 
+//go:embed svg/notepad.svg
+var Notepad string
+
 //go:embed svg/trash.svg
 var Trash string
 
