@@ -1,6 +1,8 @@
 package event
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -41,6 +43,24 @@ func (r SQLiteEventRepo) CreateTask(id t.TaskId, now time.Time, taskType t.TaskT
 		return fmt.Errorf("creating initial task record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
+}
+func (r SQLiteEventRepo) FindTask(id t.TaskId) (*t.Task, error) {
+	row := Task{}
+	err := r.Db.Get(&row,
+		"SELECT id,user_id,created_at,type_ FROM tasks WHERE id=$1", id)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, e.ErrNotFound
+		default:
+			return nil, fmt.Errorf("finding task by id: %v: %w", err, e.ErrInternal)
+		}
+	}
+
+	task := t.NewTask(row.Id, row.User, row.Type)
+	return &task, nil
+
 }
 func (r SQLiteEventRepo) ListUserTasks(user u.UserId, p pa.PaginationParams) ([]t.Task, error) {
 	q := sq.StatementBuilder.Select(`id,user_id,created_at,type_`).From("tasks")

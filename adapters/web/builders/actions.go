@@ -31,6 +31,10 @@ func (p *ActionsPanelBuilder) SetClone(url url.URL) *ActionsPanelBuilder {
 	p.Items = append(p.Items, Item{Icon: ic.Copy, URL: url, Tooltip: "clone"})
 	return p
 }
+func (p *ActionsPanelBuilder) SetExpand(url url.URL) *ActionsPanelBuilder {
+	p.Items = append(p.Items, Item{Icon: ic.Expand, URL: url, Tooltip: "expand"})
+	return p
+}
 
 func (p *ActionsPanelBuilder) Build() Node {
 	res := []Node{}

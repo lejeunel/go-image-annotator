@@ -91,6 +91,20 @@ func TestCountTasks(t *testing.T) {
 	assert.Equal(t, int64(1), *count)
 }
 
+func TestFindTask(t *testing.T) {
+	db := s.NewInMemory()
+	repo := NewSQLiteEventRepo(db)
+	user := u.NewUser("first")
+	userRepo := ur.NewSQLiteUserRepo(db)
+	userRepo.Create(user)
+	tid := ta.NewTaskId()
+	repo.CreateTask(tid, time.Now(), ta.CollectionCloneTask, user.Id)
+	r, err := repo.FindTask(tid)
+	assert.NoError(t, err)
+	assert.Equal(t, tid, r.Id)
+	assert.Equal(t, ta.CollectionCloneTask, r.Type)
+}
+
 func TestClipNumTasksPerUser(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewSQLiteEventRepo(db)

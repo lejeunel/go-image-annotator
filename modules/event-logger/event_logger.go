@@ -16,11 +16,13 @@ type Interface interface {
 	AddEvent(t.TaskId, e.Event) error
 	Count(u.UserId) (*int64, error)
 	ListUserTasks(u.UserId, pa.PaginationParams) ([]t.Task, error)
+	FindTask(t.TaskId) (*t.Task, error)
 }
 
 type Repo interface {
 	CreateTask(t.TaskId, time.Time, t.TaskType, u.UserId) error
 	ListUserTasks(u.UserId, pa.PaginationParams) ([]t.Task, error)
+	FindTask(t.TaskId) (*t.Task, error)
 	AddEvent(t.TaskId, e.Event) error
 	GetEvents(t.TaskId) ([]e.Event, error)
 	ClipNumTasks(u.UserId, int) error
@@ -46,6 +48,19 @@ func (l EventLogger) InitTask(id t.TaskId, type_ t.TaskType, user u.UserId) erro
 		}
 	}
 	return nil
+}
+func (l EventLogger) FindTask(id t.TaskId) (*t.Task, error) {
+	task, err := l.Repo.FindTask(id)
+	if err != nil {
+		return nil, fmt.Errorf("retrieving task record: %w", err)
+	}
+	events, err := l.Repo.GetEvents(task.Id)
+	if err != nil {
+		return nil, fmt.Errorf("retrieving events: %w", err)
+	}
+	task.Events = events
+
+	return task, nil
 }
 func (l EventLogger) ListUserTasks(user u.UserId, p pa.PaginationParams) ([]t.Task, error) {
 	errCtx := fmt.Errorf("listing user tasks for %v", user)

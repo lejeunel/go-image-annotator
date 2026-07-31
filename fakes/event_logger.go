@@ -12,12 +12,21 @@ import (
 type EventLogger struct {
 	ErrOnCount  error
 	ErrOnList   error
+	ErrOnFind   error
 	ReturnTasks []t.Task
+	ReturnTask  t.Task
 	Count_      int64
 }
 
 func (l *EventLogger) InitTask(t.TaskId, t.TaskType, u.UserId) error { return nil }
-func (l *EventLogger) AddEvent(t.TaskId, e.Event) error              { return nil }
+func (l *EventLogger) FindTask(t.TaskId) (*t.Task, error) {
+	if l.ErrOnFind != nil {
+		return nil, l.ErrOnFind
+	}
+	return &l.ReturnTask, nil
+
+}
+func (l *EventLogger) AddEvent(t.TaskId, e.Event) error { return nil }
 func (l *EventLogger) Count(u.UserId) (*int64, error) {
 	if l.ErrOnCount != nil {
 		return nil, l.ErrOnCount
@@ -43,6 +52,11 @@ type EventLoggerRepo struct {
 	Count_            int64
 
 	AddedEvents []e.Event
+	ReturnTask  t.Task
+}
+
+func (l *EventLoggerRepo) FindTask(id t.TaskId) (*t.Task, error) {
+	return &l.ReturnTask, nil
 }
 
 func (l *EventLoggerRepo) Count(user u.UserId) (*int64, error) {

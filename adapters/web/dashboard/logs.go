@@ -2,8 +2,6 @@ package dashboard
 
 import (
 	_ "embed"
-	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -13,6 +11,7 @@ import (
 	e "github.com/lejeunel/go-image-annotator/adapters/web/error"
 	pg "github.com/lejeunel/go-image-annotator/adapters/web/pagination"
 	t "github.com/lejeunel/go-image-annotator/entities/task"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/log/list"
 	. "maragu.dev/gomponents"
@@ -21,68 +20,63 @@ import (
 //go:embed logs-preamble.md
 var logsPreamble string
 
-var listEventsFields = []string{"task_id", "task_type", "time", "state", "extra", "error"}
+var listEventsFields = []string{"id", "type", "started", "actions"}
 
 func (s *Server) ListTasks(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
 	s.ListTasksItr.Execute(r.Context(),
 		pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
-		NewLogsPresenter(w, s.PageBuilder))
+		NewTaskListPresenter(w, s.PageBuilder))
 }
 
-type LogsPresenter struct {
+type TaskListPresenter struct {
 	b.PaginatedListBuilder
 	Writer io.Writer
 	e.ErrorPresenter
 }
 
-func NewLogsPresenter(w http.ResponseWriter, p b.PageBuilder) LogsPresenter {
+func NewTaskListPresenter(w http.ResponseWriter, p b.PageBuilder) TaskListPresenter {
 	p.SetTitle(LogsPageName)
 	p.SetHTMLTitle(LogsPageName)
 	p.SetActiveSection(cmp.NoPageActive)
 	p.ActivateSidebarEntry(LogsPageName)
 	p.AddMarkdownPreamble(logsPreamble)
 	b := b.NewPaginatedListBuilder(p, listEventsFields)
-	return LogsPresenter{b, w, e.NewErrorPresenter(w)}
+	return TaskListPresenter{b, w, e.NewErrorPresenter(w)}
 }
-func (p LogsPresenter) SuccessListTasks(r list.Response) {
+func (p TaskListPresenter) SuccessListTasks(r list.Response) {
 	for _, t := range r.Tasks {
-		rows := MakeRows(t)
-		for _, r := range rows {
-			p.AddRow(r)
-		}
+		row := MakeRow(t)
+		p.AddRow(row)
 	}
-	fmt.Printf("%+v\n", r.Pagination)
-	p.SetPagination(r.Pagination, LogsUrl)
+	p.SetPagination(r.Pagination, ListTasksUrl)
 	p.Render(p.Writer)
 }
 
-func mapToJSON(m map[string]string) (string, error) {
-	data, err := json.Marshal(m)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
+type TaskRowPresenter struct {
+	Writer io.Writer
+	e.ErrorPresenter
 }
 
-func MakeRows(t t.Task) []tb.Row {
-	var rows []tb.Row
-	for _, ev := range t.Events {
-		row := tb.NewRow()
-		row.AddCell(tb.NewCell(Text(t.Id.String())))
-		row.AddCell(tb.NewCell(Text(t.Type.String())))
-		row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(ev.Time))))
-		row.AddCell(tb.NewCell(Text(ev.State.String())))
-		extra, err := mapToJSON(ev.Extra)
-		if err != nil {
-			row.AddCell(tb.NewCell(Text(err.Error())))
-		} else {
-			row.AddCell(tb.NewCell(Text(extra)))
-		}
-		row.AddCell(tb.NewCell(Text(ev.Error)))
-		rows = append(rows, row)
+func NewTaskRowPresenter(w http.ResponseWriter) TaskRowPresenter {
+	return TaskRowPresenter{w, e.NewErrorPresenter(w)}
+}
+func (p TaskRowPresenter) SuccessFindTask(t t.Task) {
+	MakeRow(t).Render(p.Writer)
+}
 
+func MakeRow(t t.Task) tb.Row {
+	actions := b.NewActionsPanelBuilder()
+	actions.SetExpand(rt.AddQueryParams(TaskDetailsUrl, TaskIdQueryArg,
+		t.Id.String()))
+
+	row := tb.NewRow()
+	row.AddCell(tb.NewCell(Text(t.Id.String())))
+	row.AddCell(tb.NewCell(Text(t.Type.String())))
+	if len(t.Events) > 0 {
+		row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(t.Events[0].Time))))
 	}
-	return rows
+	row.AddCell(tb.NewCell(actions.Build()))
+	return row
 
 }

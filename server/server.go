@@ -58,7 +58,8 @@ func Make(url string, port int) http.Handler {
 
 	RouteWebPages(router, HomePageHandlerFunc(pageBuilder), webAuth)
 
-	udb := userDashboard.New(pageBuilder, cfg.DefaultPageSize, app.Itrs.User.RenewToken, app.Itrs.User.ChangePassword, app.Itrs.Log.ListTasks)
+	udb := userDashboard.New(pageBuilder, cfg.DefaultPageSize, app.Itrs.User.RenewToken,
+		app.Itrs.User.ChangePassword, app.Itrs.Log.ListTasks, app.Itrs.Log.FindTask)
 	udb.Route(router, webAuth)
 
 	RouteAPI(router, *api.NewServer(&app.Itrs, *logger), apiAuth)
