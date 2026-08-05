@@ -17,14 +17,19 @@ import (
 
 type AnnotoriousPresenter struct {
 	Colorizer
+	Writer   http.ResponseWriter
 	Err      error
 	image    *v.Image
 	boxes    []v.BoundingBox
 	polygons []v.Polygon
 }
 
-func NewAnnotoriousPresenter() AnnotoriousPresenter {
-	return AnnotoriousPresenter{Colorizer: NewCyclicColorizer(Palette)}
+func NewAnnotoriousPresenter(w http.ResponseWriter) AnnotoriousPresenter {
+	return AnnotoriousPresenter{Colorizer: NewCyclicColorizer(Palette), Writer: w}
+}
+
+func (p *AnnotoriousPresenter) Error(err error) {
+	http.Error(p.Writer, err.Error(), http.StatusBadRequest)
 }
 
 func (p *AnnotoriousPresenter) SuccessReadImage(r im.Image) {
@@ -38,18 +43,8 @@ func (p AnnotoriousPresenter) SuccessUpdatePolygon(r updpoly.Response) {}
 func (p AnnotoriousPresenter) SuccessUpdateBox(r updbox.Response)      {}
 func (p AnnotoriousPresenter) SuccessUpdateLabel(r updlbl.Response)    {}
 func (p AnnotoriousPresenter) SuccessDeleteAnnotation(r del.Response)  {}
-func (p *AnnotoriousPresenter) Error(err error) {
-	p.Err = err
-}
-func (p AnnotoriousPresenter) Write(w http.ResponseWriter) {
-	// TODO write http error here
-}
 
 func (p *AnnotoriousPresenter) RenderRegionAnnotationsAsJSON(w http.ResponseWriter) {
-	if p.Err != nil {
-		http.Error(w, p.Err.Error(), http.StatusBadRequest)
-		return
-	}
 	boxes := ConvertBoxesToAnnotorious(p.boxes)
 	polygons := ConvertPolygonsToAnnotorious(p.polygons)
 	mergedRegions := make([]any, 0, len(boxes)+len(polygons))

@@ -51,9 +51,8 @@ func (s *Server) SubmitLabel(w http.ResponseWriter, r *http.Request) {
 	req := assign_label.Request{ImageId: r.URL.Query().Get("image_id"),
 		Collection: r.URL.Query().Get("collection"), Label: r.URL.Query().Get("label")}
 
-	p := ap.NewAnnotoriousPresenter()
+	p := ap.NewAnnotoriousPresenter(w)
 	s.Annotator.AddLabel(r.Context(), req, &p)
-	p.Write(w)
 }
 func (s *Server) SubmitPolygon(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
@@ -63,9 +62,8 @@ func (s *Server) SubmitPolygon(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("submit polygon: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	p := ap.NewAnnotoriousPresenter()
+	p := ap.NewAnnotoriousPresenter(w)
 	s.Annotator.AddPolygon(r.Context(), ap.ToAddPolygonRequest(polyreq), &p)
-	p.Write(w)
 }
 func (s *Server) UpdatePolygon(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
@@ -76,9 +74,8 @@ func (s *Server) UpdatePolygon(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("updating polygon: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	p := ap.NewAnnotoriousPresenter()
+	p := ap.NewAnnotoriousPresenter(w)
 	s.Annotator.UpdatePolygon(r.Context(), ap.ToUpdatePolygonRequest(polyreq), &p)
-	p.Write(w)
 
 }
 func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
@@ -91,9 +88,8 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p := ap.NewAnnotoriousPresenter()
+	p := ap.NewAnnotoriousPresenter(w)
 	s.Annotator.AddBox(r.Context(), ap.ToAddBoxRequest(boxreq), &p)
-	p.Write(w)
 }
 func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := io.ReadAll(r.Body)
@@ -104,14 +100,12 @@ func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("updating box: unmarshalling body: %w", err).Error(), http.StatusBadRequest)
 		return
 	}
-	p := ap.NewAnnotoriousPresenter()
+	p := ap.NewAnnotoriousPresenter(w)
 	s.Annotator.UpdateBox(r.Context(), ap.ToUpdateBoxRequest(boxreq), &p)
-	p.Write(w)
 }
 func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
-	p := ap.NewAnnotoriousPresenter()
+	p := ap.NewAnnotoriousPresenter(w)
 	s.Annotator.DeleteAnnotation(r.Context(), remove.Request{Id: r.URL.Query().Get("id")}, &p)
-	p.Write(w)
 }
 func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 	errCtx := fmt.Errorf("setting label")
@@ -125,12 +119,11 @@ func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Errorf("%w: failed parsing url to get label field", errCtx).Error(), http.StatusBadRequest)
 		return
 	}
-	p := ap.NewAnnotoriousPresenter()
+	p := ap.NewAnnotoriousPresenter(w)
 	s.Annotator.UpdateLabel(r.Context(), updlbl.Request{AnnotationId: id, Label: label}, &p)
-	p.Write(w)
 }
 func (s *Server) GetRegionsAsJSON(w http.ResponseWriter, r *http.Request) {
-	p := ap.NewAnnotoriousPresenter()
+	p := ap.NewAnnotoriousPresenter(w)
 	s.Annotator.ReadImage(r.URL.Query().Get("id"), r.URL.Query().Get("collection"), &p)
 	p.RenderRegionAnnotationsAsJSON(w)
 }

@@ -58,7 +58,10 @@ document.addEventListener('alpine:init', () => {
             url.searchParams.set("id", "{{.ImageId}}")
             url.searchParams.set("collection", "{{.Collection}}")
             const res = await fetch(url.toString());
-            if (!res.ok) throw new Error('Could not fetch annotations');
+            if (!res.ok) {
+                const message = await res.text();
+                throw new Error(message || "Could not fetch annotations");
+            }
             return res.json();
         },
         async setLabelToAnnotation(id, label) {
@@ -66,7 +69,10 @@ document.addEventListener('alpine:init', () => {
             url.searchParams.set("id", id)
             url.searchParams.set("label", label)
             const res = await fetch(url.toString(), {method: "POST"});
-            if (!res.ok) throw new Error('Could not relabel');
+            if (!res.ok) {
+                const message = await res.text();
+                throw new Error(message || "Could not update image label");
+            }
         },
         async addImageLabel(label) {
             url = newURLFromString(endpoints.submitImageLabel)
@@ -74,7 +80,10 @@ document.addEventListener('alpine:init', () => {
             url.searchParams.set("image_id", "{{.ImageId}}")
             url.searchParams.set("collection", "{{.Collection}}")
             const res = await fetch(url.toString(), {method: "POST"})
-            if (!res.ok) throw new Error('Could not submit annotation: ' + res.message);
+            if (!res.ok) {
+                const message = await res.text();
+                throw new Error(message || "Could not submit image label");
+            }
         },
         async submitBox(label, annotation) {
             const res = await fetch(endpoints.submitBox.toString(), {
@@ -87,7 +96,10 @@ document.addEventListener('alpine:init', () => {
                     annotation
                 })
             });
-            if (!res.ok) throw new Error('Could not submit bounding-box');
+            if (!res.ok) {
+                const message = await res.text();
+                throw new Error(message || "Could not submit bounding-box");
+            }
         },
         async submitPolygon(label, annotation) {
             const res = await fetch(endpoints.submitPolygon.toString(), {
@@ -100,7 +112,10 @@ document.addEventListener('alpine:init', () => {
                     annotation
                 })
             });
-            if (!res.ok) throw new Error('Could not submit polygon');
+            if (!res.ok) {
+                const message = await res.text();
+                throw new Error(message || "Could not submit polygon");
+            }
         },
 
         async remove(id) {
@@ -116,7 +131,10 @@ document.addEventListener('alpine:init', () => {
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify(annotation),
             });
-            if (!res.ok) throw new Error('Could not update annotation');
+            if (!res.ok) {
+                const message = await res.text();
+                throw new Error(message || "Could not update bounding-box");
+            }
         },
         async updatePolygon(annotation) {
             const res = await fetch(endpoints.updatePolygon.toString(), {
@@ -124,7 +142,10 @@ document.addEventListener('alpine:init', () => {
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify(annotation),
             });
-            if (!res.ok) throw new Error('Could not update annotation');
+            if (!res.ok) {
+                const message = await res.text();
+                throw new Error(message || "Could not update polygon");
+            }
         }
 
     };
@@ -175,14 +196,22 @@ document.addEventListener('alpine:init', () => {
                 Alpine.store("regionLabelModal").open();
             });
 
-            annotator.on('updateAnnotation', (updated) => {
+            annotator.on('updateAnnotation', async (updated) => {
                 switch(updated.target.selector.type){
                 case "RECTANGLE":
-                    AnnotationAPI.updateBox(updated);
+                    try {
+                        await AnnotationAPI.updateBox(updated);
+                    } catch (err) {
+                        notify("danger", "updating bounding-box", err.message);
+                    }
                     break;
                 case "POLYGON":
-                    AnnotationAPI.updatePolygon(updated);
-                    break
+                    try {
+                        await AnnotationAPI.updatePolygon(updated);
+                    } catch (err) {
+                        notify("danger", "updating polygon", err.message);
+                    }
+                    break;
                 default:
                     notify("danger", "updating annotation", "selector type " + updated.target.selector.type + " not recognized! Should be RECTANGLE or POLYGON")
                 }
@@ -234,7 +263,7 @@ document.addEventListener('alpine:init', () => {
                 await this.refreshUI();
 
             } catch (err) {
-                notify("danger", "submiting region", err.message);
+                notify("danger", "submitting region", err.message);
             }
         },
 
