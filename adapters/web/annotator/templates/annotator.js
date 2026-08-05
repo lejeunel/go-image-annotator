@@ -15,6 +15,17 @@ function newURLFromString(urlString) {
     return new URL(urlString, window.location.origin)
 }
 
+async function apiFetch(url, options, defaultError) {
+    const res = await fetch(url, options);
+
+    if (!res.ok) {
+        const message = (await res.text()).trim();
+        throw new Error(message || defaultError);
+    }
+
+    return res;
+}
+
 document.addEventListener('alpine:init', () => {
     Alpine.store('imageLabelModal', {
         show: false,
@@ -54,7 +65,7 @@ document.addEventListener('alpine:init', () => {
 
     const AnnotationAPI = {
         async fetchAllAnnotations() {
-            url = newURLFromString(endpoints.fetchAnnotations)
+            const url = newURLFromString(endpoints.fetchAnnotations)
             url.searchParams.set("id", "{{.ImageId}}")
             url.searchParams.set("collection", "{{.Collection}}")
             const res = await fetch(url.toString());
@@ -65,87 +76,69 @@ document.addEventListener('alpine:init', () => {
             return res.json();
         },
         async setLabelToAnnotation(id, label) {
-            url = newURLFromString(endpoints.setLabel)
+            const url = newURLFromString(endpoints.setLabel)
             url.searchParams.set("id", id)
             url.searchParams.set("label", label)
-            const res = await fetch(url.toString(), {method: "POST"});
-            if (!res.ok) {
-                const message = await res.text();
-                throw new Error(message || "Could not update image label");
-            }
+            await apiFetch(url.toString(), {method: "POST"}, "Could not update image label");
         },
         async addImageLabel(label) {
-            url = newURLFromString(endpoints.submitImageLabel)
+            const url = newURLFromString(endpoints.submitImageLabel)
             url.searchParams.set("label", label)
             url.searchParams.set("image_id", "{{.ImageId}}")
             url.searchParams.set("collection", "{{.Collection}}")
-            const res = await fetch(url.toString(), {method: "POST"})
-            if (!res.ok) {
-                const message = await res.text();
-                throw new Error(message || "Could not submit image label");
-            }
+            await apiFetch(url.toString(), {method: "POST"},
+                          "Could not submit image label")
         },
         async submitBox(label, annotation) {
-            const res = await fetch(endpoints.submitBox.toString(), {
-                method: "POST",
-                headers: { "Content-type": "application/json; charset=UTF-8" },
-                body: JSON.stringify({
-                    image_id: "{{.ImageId}}",
-                    collection: "{{.Collection}}",
-                    label,
-                    annotation
-                })
-            });
-            if (!res.ok) {
-                const message = await res.text();
-                throw new Error(message || "Could not submit bounding-box");
-            }
+            await apiFetch(endpoints.submitBox.toString(),
+                {
+                    method: "POST",
+                    headers: { "Content-type": "application/json; charset=UTF-8" },
+                    body: JSON.stringify({
+                        image_id: "{{.ImageId}}",
+                        collection: "{{.Collection}}",
+                        label,
+                        annotation
+                    })
+                },
+                          "Could not submit bounding-box");
         },
         async submitPolygon(label, annotation) {
-            const res = await fetch(endpoints.submitPolygon.toString(), {
-                method: "POST",
-                headers: { "Content-type": "application/json; charset=UTF-8" },
-                body: JSON.stringify({
-                    image_id: "{{.ImageId}}",
-                    collection: "{{.Collection}}",
-                    label,
-                    annotation
-                })
-            });
-            if (!res.ok) {
-                const message = await res.text();
-                throw new Error(message || "Could not submit polygon");
-            }
+            await apiFetch(
+                endpoints.submitPolygon,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        image_id: "{{.ImageId}}",
+                        collection: "{{.Collection}}",
+                        label,
+                        annotation
+                    })
+                },
+                "Could not submit polygon"
+            );
         },
 
         async remove(id) {
-            url = newURLFromString(endpoints.removeAnnotation)
+            const url = newURLFromString(endpoints.removeAnnotation)
             url.searchParams.set("id", id)
-            const res = await fetch(url.toString(), {method: 'DELETE'});
-            if (!res.ok) throw new Error('Could not remove annotation');
+            await apiFetch(url.toString(), {method: 'DELETE'}, "Could not remove annotation");
         },
 
         async updateBox(annotation) {
-            const res = await fetch(endpoints.updateBox.toString(), {
+            await apiFetch(endpoints.updateBox.toString(), {
                 method: "PUT",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify(annotation),
-            });
-            if (!res.ok) {
-                const message = await res.text();
-                throw new Error(message || "Could not update bounding-box");
-            }
+            }, "Could not update bounding-box");
         },
         async updatePolygon(annotation) {
-            const res = await fetch(endpoints.updatePolygon.toString(), {
+            await apiFetch(endpoints.updatePolygon.toString(), {
                 method: "PUT",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
                 body: JSON.stringify(annotation),
-            });
-            if (!res.ok) {
-                const message = await res.text();
-                throw new Error(message || "Could not update polygon");
-            }
+            }, "Could not update polygon");
         }
 
     };
@@ -201,6 +194,7 @@ document.addEventListener('alpine:init', () => {
                 case "RECTANGLE":
                     try {
                         await AnnotationAPI.updateBox(updated);
+                        await this.refreshUI();
                     } catch (err) {
                         notify("danger", "updating bounding-box", err.message);
                     }
@@ -208,17 +202,13 @@ document.addEventListener('alpine:init', () => {
                 case "POLYGON":
                     try {
                         await AnnotationAPI.updatePolygon(updated);
+                        await this.refreshUI();
                     } catch (err) {
                         notify("danger", "updating polygon", err.message);
                     }
                     break;
                 default:
                     notify("danger", "updating annotation", "selector type " + updated.target.selector.type + " not recognized! Should be RECTANGLE or POLYGON")
-                }
-                try {
-                    this.refreshUI();
-                } catch (err) {
-                    notify("danger", "updating annotation", err.message);
                 }
             });
 
@@ -286,7 +276,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         async refreshUI() {
-            this.refreshList();
+            await this.refreshList();
             await this.draw();
         },
 
