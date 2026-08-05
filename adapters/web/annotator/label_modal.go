@@ -22,7 +22,7 @@ const (
 
 func makeLabelModal(labels []string, kind LabelModalKind) (*string, error) {
 	tModal := template.New("")
-	template.Must(tModal.ParseFS(templatesFiles, "templates/label_modal_combobox.html"))
+	template.Must(tModal.ParseFS(templatesFiles, "templates/label_modal_search_combobox.html"))
 	template.Must(tModal.ParseFS(templatesFiles, "templates/label_modal.html"))
 
 	var modal NewLabelModal
