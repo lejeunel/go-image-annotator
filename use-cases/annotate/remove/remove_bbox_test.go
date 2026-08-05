@@ -6,13 +6,12 @@ import (
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
 	itr := New(&fk.AnnotationRepo{},
-		WithAuth(auth.FailingAuth{}))
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{Id: a.NewAnnotationId().String()},

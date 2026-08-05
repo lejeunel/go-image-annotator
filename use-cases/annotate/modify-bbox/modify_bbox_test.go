@@ -10,7 +10,6 @@ import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,7 +34,7 @@ func AssertUpdated(t *testing.T, expected, got a.BoundingBoxUpdatables) {
 func TestHandleAuthError(t *testing.T) {
 	itr := New(&fk.AnnotationRepo{},
 		&fk.LabelRepo{},
-		WithAuth(auth.FailingAuth{}))
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{AnnotationId: a.NewAnnotationId().String()},
