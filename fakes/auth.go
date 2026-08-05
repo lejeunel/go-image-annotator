@@ -124,3 +124,7 @@ func (f Auth) ReadPolicies(ctx context.Context) error {
 func (f Auth) SetPolicies(ctx context.Context) error {
 	return f.Err
 }
+
+func (f Auth) UpsertMetadata(ctx context.Context, group string) error {
+	return f.Err
+}

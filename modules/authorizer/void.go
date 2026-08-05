@@ -88,6 +88,10 @@ func (a VoidAuthorizer) CloneCollection(ctx context.Context, group string) error
 	return nil
 }
 
+func (a VoidAuthorizer) UpsertMetadata(ctx context.Context, group string) error {
+	return nil
+}
+
 func (a VoidAuthorizer) UpdateUserPrivileges(ctx context.Context) error {
 	return nil
 }
