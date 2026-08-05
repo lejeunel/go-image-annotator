@@ -67,6 +67,16 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
+	exists, err := i.MetaDataRepo.KeyExists(r.Key)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: checking existence of key %v: %v: %w", errCtx, r.Key, err, e.ErrInternal))
+		return
+	}
+	if *exists {
+		out.Error(fmt.Errorf("%v: checking existence of key %v: %w", errCtx, r.Key, e.ErrValidation))
+		return
+	}
+
 	if err := i.KeyValidator.Validate(r.Key); err != nil {
 		out.Error(fmt.Errorf("%v: validating key %v: %w", errCtx, r.Key, err))
 		return

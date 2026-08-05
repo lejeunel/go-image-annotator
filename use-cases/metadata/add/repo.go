@@ -6,4 +6,5 @@ type CollectionRepo interface {
 
 type MetaDataRepo interface {
 	Add(string, any) error
+	KeyExists(string) (*bool, error)
 }

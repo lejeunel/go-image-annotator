@@ -66,7 +66,7 @@ func TestCreateCollection(t *testing.T) {
 	req := Request{Name: "a-name", Description: "a-description", Group: &group.Name}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, req.Name, repo.Got.Name)
-	assert.Equal(t, *req.Group, repo.Got.Group)
+	assert.Equal(t, *req.Group, *repo.Got.Group)
 	assert.Equal(t, req.Description, repo.Got.Description)
 	assert.Equal(t, now, repo.Got.CreatedAt)
 	assert.False(t, repo.Got.Id.IsNil())

@@ -67,6 +67,34 @@ func TestErrorAddMetaData(t *testing.T) {
 	assert.True(t, p.GotInternalErr)
 }
 
+func TestCheckExistenceOfKeyError(t *testing.T) {
+	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
+	image := im.NewImage(im.NewImageId(), collection)
+	itr := New(&fk.CollectionRepo{}, &fk.MetaDataRepo{ErrOnKeyExists: e.ErrInternal},
+		&fk.StringValidator{}, &fk.ValueValidator{})
+	p := &FakePresenter{}
+	key, value := "the-key", "the-value"
+	itr.Execute(t.Context(),
+		Request{ImageId: image.Id.String(), Collection: collection.Name,
+			Key: key, Value: value},
+		p)
+	assert.ErrorIs(t, p.GotErr, e.ErrInternal)
+}
+
+func TestExistingKeyShouldFail(t *testing.T) {
+	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
+	image := im.NewImage(im.NewImageId(), collection)
+	itr := New(&fk.CollectionRepo{}, &fk.MetaDataRepo{ExistingKeys: []string{"the-key"}},
+		&fk.StringValidator{}, &fk.ValueValidator{})
+	p := &FakePresenter{}
+	key, value := "the-key", "the-value"
+	itr.Execute(t.Context(),
+		Request{ImageId: image.Id.String(), Collection: collection.Name,
+			Key: key, Value: value},
+		p)
+	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
+}
+
 func TestAddMetaData(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
 	image := im.NewImage(im.NewImageId(), collection)
