@@ -39,7 +39,6 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	if (err != nil) && !(errors.Is(err, e.ErrNotFound)) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
-
 	}
 	if group != nil {
 		if err := i.Auth.UpdateCollection(ctx, *group); err != nil {
