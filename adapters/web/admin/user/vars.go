@@ -8,4 +8,8 @@ const (
 	createIsAdminFieldName = "is_admin"
 	createUserTargetDiv    = "create-user"
 	resourceUrlFieldName   = "id"
+	groupsFieldName        = "groups"
+	groupsFieldLabelName   = "Groups"
+	rolesFieldName         = "roles"
+	rolesFieldLabelName    = "Roles"
 )

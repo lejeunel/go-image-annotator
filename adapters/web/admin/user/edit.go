@@ -2,6 +2,7 @@ package user
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/update-privileges"
@@ -31,11 +32,11 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// s.Users.UpdatePrivileges.Execute(r.Context(),
-	// 	update.Request{
-	// 		Id:             r.URL.Query().Get("id"),
-	// 		Groups:        r.FormValue("name"),
-	// 		NewDescription: r.FormValue("description"),
-	// 	},
-	// 	NewEditUserPresenter(w))
+	s.Users.UpdatePrivileges.Execute(r.Context(),
+		update.Request{
+			Id:     r.URL.Query().Get(resourceUrlFieldName),
+			Groups: strings.Split(r.FormValue(groupsFieldName), ","),
+			Roles:  strings.Split(r.FormValue(rolesFieldName), ","),
+		},
+		NewEditUserPresenter(w))
 }
