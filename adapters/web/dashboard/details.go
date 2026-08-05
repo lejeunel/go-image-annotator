@@ -51,7 +51,9 @@ func (p *TaskDetailPresenter) SuccessFindTask(t t.Task) {
 		return
 	}
 	url := rt.AddQueryParams(TaskRowUrl, TaskIdQueryArg, t.Id.String())
-	Tr(Td(Attr("colspan=3"), Class("p-4"), Div(Pre(Text(string(data))))),
+	Tr(Td(Attr("colspan=3"), Class("p-4"),
+		Div(Pre(Class("bg-surface-alt dark:bg-surface-dark-alt p-2"),
+			Text(string(data))))),
 		Td(Class("align-top p-4"),
 			cmp.MakeHTMXAbortButton("Close", url.String()),
 		)).Render(p.Writer)

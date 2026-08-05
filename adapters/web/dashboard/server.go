@@ -3,6 +3,7 @@ package dashboard
 import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	"github.com/lejeunel/go-image-annotator/adapters/web/icons"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	ft "github.com/lejeunel/go-image-annotator/use-cases/log/find"
 	lt "github.com/lejeunel/go-image-annotator/use-cases/log/list"
 	cpw "github.com/lejeunel/go-image-annotator/use-cases/user/change-password"
@@ -20,6 +21,7 @@ type Server struct {
 
 func New(pb b.PageBuilder, defaultPageSize int, i rat.Interactor, c cpw.Interactor, lt lt.Interactor,
 	ft ft.Interactor) Server {
+	pb.AddSidebarEntry(ProfilePageName, icons.Info, rt.DashboardUrl, false)
 	pb.AddSidebarEntry(CredentialsPageName, icons.Key, CredentialsUrl, false)
 	pb.AddSidebarEntry(LogsPageName, icons.Notepad, ListTasksUrl, false)
 	return Server{pb, i, c, lt, ft, defaultPageSize}

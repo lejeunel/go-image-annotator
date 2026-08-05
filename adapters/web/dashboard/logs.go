@@ -10,17 +10,19 @@ import (
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	e "github.com/lejeunel/go-image-annotator/adapters/web/error"
 	pg "github.com/lejeunel/go-image-annotator/adapters/web/pagination"
+	"github.com/lejeunel/go-image-annotator/entities/event"
 	t "github.com/lejeunel/go-image-annotator/entities/task"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/log/list"
 	. "maragu.dev/gomponents"
+	. "maragu.dev/gomponents/html"
 )
 
 //go:embed logs-preamble.md
 var logsPreamble string
 
-var listEventsFields = []string{"id", "type", "started", "actions"}
+var listEventsFields = []string{"id", "type", "started", "status", "actions"}
 
 func (s *Server) ListTasks(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
@@ -74,8 +76,21 @@ func MakeRow(t t.Task) tb.Row {
 	row.AddCell(tb.NewCell(Text(t.Id.String())))
 	row.AddCell(tb.NewCell(Text(t.Type.String())))
 	if len(t.Events) > 0 {
-		row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(t.Events[0].Time))))
+		row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(t.Events[len(t.Events)-1].Time))))
 	}
+
+	var state Node
+	switch t.Events[0].State {
+	case event.PendingTask:
+		state = Div(Class("text-warning"), Text(event.PendingTask.String()))
+	case event.StartedTask:
+		state = Div(Class("text-warning"), Text(event.StartedTask.String()))
+	case event.FailedTask:
+		state = Div(Class("text-danger"), Text(event.FailedTask.String()))
+	default:
+		state = Div(Class("text-success"), Text(event.DoneTask.String()))
+	}
+	row.AddCell(tb.NewCell(state))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row
 

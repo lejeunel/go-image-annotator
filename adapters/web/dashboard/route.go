@@ -10,7 +10,7 @@ func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
-		r.Get(rt.DashboardUrl, s.Credentials)
+		r.Get(rt.DashboardUrl, s.Profile)
 		r.Get(CredentialsUrl, s.Credentials)
 		r.Get(ListTasksUrl, s.ListTasks)
 		r.Get(TaskRowUrl, s.TaskRow)

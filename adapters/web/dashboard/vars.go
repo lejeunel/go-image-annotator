@@ -3,6 +3,7 @@ package dashboard
 const (
 	CredentialsPageName = "Credentials"
 	CredentialsUrl      = "/dashboard/credentials"
+	ProfilePageName     = "Profile"
 	LogsPageName        = "Logs"
 	ListTasksUrl        = "/dashboard/logs"
 	TaskDetailsUrl      = "/ui/dashboard/logs/detail"
