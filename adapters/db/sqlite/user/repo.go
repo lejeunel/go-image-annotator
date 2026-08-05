@@ -93,7 +93,7 @@ func (r SQLiteUserRepo) SetRoles(userId string, roles []string) error {
 }
 func (r SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 	var groups []string
-	query := "SELECT name FROM groups WHERE id=(SELECT group_id FROM users_groups WHERE user_id=$1)"
+	query := "SELECT name FROM groups WHERE id IN (SELECT group_id FROM users_groups WHERE user_id=$1)"
 	err := r.Db.Select(&groups, query, userId)
 	if err != nil {
 		return nil, fmt.Errorf("fetching groups: %v: %w", err, e.ErrInternal)

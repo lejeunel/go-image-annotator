@@ -41,12 +41,14 @@ func TestAssignToNewGroup(t *testing.T) {
 	user := u.NewUser(userId, u.WithGroups([]string{group.Name}))
 	userRepo.Create(user)
 
-	newGroup := g.NewGroup(g.NewGroupId(), "a-new-group")
-	groupRepo.Create(newGroup)
+	g0 := g.NewGroup(g.NewGroupId(), "a-new-group")
+	groupRepo.Create(g0)
+	g1 := g.NewGroup(g.NewGroupId(), "another-new-group")
+	groupRepo.Create(g1)
 
-	err := userRepo.SetGroups(user.Id, []string{newGroup.Name})
+	err := userRepo.SetGroups(user.Id, []string{g0.Name, g1.Name})
 	assert.NoError(t, err)
 	r, _ := userRepo.Find(user.Id)
-	assert.Equal(t, 1, len(r.Groups))
-	assert.Equal(t, newGroup.Name, r.Groups[0])
+	assert.Equal(t, 2, len(r.Groups))
+	assert.Equal(t, g0.Name, r.Groups[0])
 }
