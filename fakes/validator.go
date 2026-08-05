@@ -4,11 +4,11 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-type Validator struct {
+type StringValidator struct {
 	Invalid bool
 }
 
-func (v *Validator) Validate(string) error {
+func (v *StringValidator) Validate(string) error {
 	if v.Invalid {
 		return e.ErrValidation
 	}

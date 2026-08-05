@@ -5,7 +5,6 @@ import (
 
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	v "github.com/lejeunel/go-image-annotator/shared/validation"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +28,7 @@ func TestCreateRoleWithDuplicateNameShouldFail(t *testing.T) {
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.RoleRepo{ErrOnCreate: e.ErrInternal},
-		WithNameValidator(&v.FakeNameValidator{}))
+		WithNameValidator(&fk.StringValidator{}))
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
 }
@@ -38,7 +37,7 @@ func TestCreateWithInvalidNameShouldFail(t *testing.T) {
 	name := "my-role%/"
 	p := &FakePresenter{}
 	itr := New(&fk.RoleRepo{ExistingNames: []string{name}},
-		WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
+		WithNameValidator(&fk.StringValidator{Invalid: true}))
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotValidationErr)
 }

@@ -6,8 +6,8 @@ import (
 
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	v "github.com/lejeunel/go-image-annotator/modules/string-validator"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	v "github.com/lejeunel/go-image-annotator/shared/validation"
 )
 
 type Interactor struct {

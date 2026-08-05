@@ -14,7 +14,7 @@ import (
 	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
 	q "github.com/lejeunel/go-image-annotator/modules/job-queue"
-	"github.com/lejeunel/go-image-annotator/shared/validation"
+	v "github.com/lejeunel/go-image-annotator/modules/string-validator"
 	clc "github.com/lejeunel/go-image-annotator/use-cases/collection"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/clone"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
@@ -38,7 +38,7 @@ func NewSQLiteCollectionInteractors(
 	cloneRepos := clone.Repos{ImageRepo: ir, CollectionRepo: cr, AnnotationRepo: ar}
 	return clc.Interactors{
 		Find: find.New(cr),
-		Create: create.New(cr, gr, create.WithNameValidator(validation.NewNameValidator()),
+		Create: create.New(cr, gr, create.WithNameValidator(v.NewNameValidator()),
 			create.WithClock(clockwork.NewRealClock()), create.WithAuth(auth)),
 		Delete: delete.New(deleteRepos, tra.NewDeleteCollectionTransactor(db), ims,
 			q.NewJobQueue(), el, logger, delete.WithAuth(auth)),

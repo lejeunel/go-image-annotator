@@ -3,7 +3,6 @@ package create
 import (
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	v "github.com/lejeunel/go-image-annotator/shared/validation"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -34,7 +33,7 @@ func TestHandleInternalError(t *testing.T) {
 
 func TestCreateLabelWithInvalidNameShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.LabelRepo{}, WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
+	itr := New(&fk.LabelRepo{}, WithNameValidator(&fk.StringValidator{Invalid: true}))
 	itr.Execute(t.Context(), Request{Name: "invalid-name"}, p)
 	assert.True(t, p.GotValidationErr)
 }

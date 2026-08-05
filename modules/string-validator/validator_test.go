@@ -1,4 +1,4 @@
-package validation
+package validator
 
 import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"

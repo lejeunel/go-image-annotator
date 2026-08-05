@@ -1,4 +1,4 @@
-package validation
+package validator
 
 import (
 	"fmt"
@@ -8,14 +8,6 @@ import (
 
 type Validator interface {
 	Validate(string) error
-}
-
-type FakeNameValidator struct {
-	Err error
-}
-
-func (v *FakeNameValidator) Validate(name string) error {
-	return v.Err
 }
 
 type NameValidator struct {

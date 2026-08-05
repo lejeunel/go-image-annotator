@@ -9,7 +9,6 @@ import (
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	v "github.com/lejeunel/go-image-annotator/shared/validation"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,7 +38,7 @@ func TestCreateCollectionWithInvalidNameShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.CollectionRepo{ErrOnCreate: e.ErrValidation},
 		&fk.GroupRepo{},
-		WithNameValidator(&v.FakeNameValidator{Err: e.ErrValidation}))
+		WithNameValidator(&fk.StringValidator{Invalid: true}))
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotValidationErr)
 }

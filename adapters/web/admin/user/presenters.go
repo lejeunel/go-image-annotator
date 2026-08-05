@@ -93,13 +93,13 @@ func (p *EditPresenter) SuccessListRoles(roles []r.Role) {
 func (p EditPresenter) Render(w io.Writer) {
 	form := bf.NewHTMXInlineFormBuilder(len(listUsersFields), p.Url)
 	form.SetResourceName(p.user.Id)
-	groupSelect := form.AddSelectableCombobox(groupsFieldLabelName, groupsFieldName)
-	for _, grp := range p.groups {
-		groupSelect.AddField(grp.Name, slices.Contains(p.user.Groups, grp.Name))
-	}
 	roleSelect := form.AddSelectableCombobox(rolesFieldLabelName, rolesFieldName)
 	for _, role := range p.roles {
 		roleSelect.AddField(role.Name, slices.Contains(p.user.Roles, role.Name))
+	}
+	groupSelect := form.AddSelectableCombobox(groupsFieldLabelName, groupsFieldName)
+	for _, grp := range p.groups {
+		groupSelect.AddField(grp.Name, slices.Contains(p.user.Groups, grp.Name))
 	}
 	form.Render(p.Writer)
 }

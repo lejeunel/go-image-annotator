@@ -32,11 +32,23 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var groups []string
+	groupsStr := r.FormValue(groupsFieldName)
+	if groupsStr != "" {
+		groups = strings.Split(groupsStr, ",")
+	}
+
+	var roles []string
+	rolesStr := r.FormValue(rolesFieldName)
+	if rolesStr != "" {
+		roles = strings.Split(rolesStr, ",")
+	}
+
 	s.Users.UpdatePrivileges.Execute(r.Context(),
 		update.Request{
 			Id:     r.URL.Query().Get(resourceUrlFieldName),
-			Groups: strings.Split(r.FormValue(groupsFieldName), ","),
-			Roles:  strings.Split(r.FormValue(rolesFieldName), ","),
+			Groups: groups,
+			Roles:  roles,
 		},
 		NewEditUserPresenter(w))
 }

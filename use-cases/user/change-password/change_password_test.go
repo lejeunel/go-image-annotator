@@ -12,7 +12,7 @@ import (
 func TestPasswordMismatchShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	user := u.NewUser("user@example.com")
-	itr := New(&fk.UserRepo{Return: &user}, &fk.Tokenizer{}, &fk.Validator{})
+	itr := New(&fk.UserRepo{Return: &user}, &fk.Tokenizer{}, &fk.StringValidator{})
 	itr.Execute(t.Context(), Request{FirstPassword: "1", SecondPassword: "2"}, p)
 	assert.ErrorIs(t, p.GotErr, e.ErrPasswordMismatch)
 }
@@ -20,7 +20,7 @@ func TestPasswordMismatchShouldFail(t *testing.T) {
 func TestInvalidPasswordShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	user := u.NewUser("user@example.com")
-	itr := New(&fk.UserRepo{Return: &user}, &fk.Tokenizer{}, &fk.Validator{Invalid: true})
+	itr := New(&fk.UserRepo{Return: &user}, &fk.Tokenizer{}, &fk.StringValidator{Invalid: true})
 	itr.Execute(t.Context(), Request{FirstPassword: "1", SecondPassword: "1"}, p)
 	assert.ErrorIs(t, p.GotErr, e.ErrInvalidPassword)
 }
@@ -29,7 +29,7 @@ func TestHandleErrorOnUpdatePassword(t *testing.T) {
 	p := &FakePresenter{}
 	user := u.NewUser("user@example.com")
 	itr := New(&fk.UserRepo{Return: &user, ErrOnUpdatePassword: e.ErrInternal},
-		&fk.Tokenizer{}, &fk.Validator{})
+		&fk.Tokenizer{}, &fk.StringValidator{})
 	itr.Execute(t.Context(), Request{FirstPassword: "1", SecondPassword: "1"}, p)
 	assert.False(t, p.GotSuccess)
 	assert.ErrorIs(t, p.GotErr, e.ErrInternal)
@@ -38,7 +38,7 @@ func TestFailWhenCurrentPasswordIsWrong(t *testing.T) {
 	p := &FakePresenter{}
 	user := u.NewUser("user@mail.com")
 	repo := &fk.UserRepo{Return: &user}
-	itr := New(repo, &fk.Tokenizer{FailVerify: true}, &fk.Validator{})
+	itr := New(repo, &fk.Tokenizer{FailVerify: true}, &fk.StringValidator{})
 	current := "asdf"
 	itr.Execute(t.Context(),
 		Request{Id: user.Id, CurrentPassword: current, FirstPassword: "1", SecondPassword: "1"}, p)
@@ -51,7 +51,7 @@ func TestChangePassword(t *testing.T) {
 	hash := []byte("the-hash")
 	user := u.NewUser("user@mail.com")
 	repo := &fk.UserRepo{Return: &user}
-	itr := New(repo, &fk.Tokenizer{ReturnHash: hash}, &fk.Validator{})
+	itr := New(repo, &fk.Tokenizer{ReturnHash: hash}, &fk.StringValidator{})
 	itr.Execute(t.Context(), Request{Id: user.Id, FirstPassword: "1", SecondPassword: "1"}, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, hash, repo.GotHash)

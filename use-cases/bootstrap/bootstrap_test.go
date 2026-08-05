@@ -10,7 +10,7 @@ import (
 
 func TestNoopIfAdminRoleExists(t *testing.T) {
 	roleRepo := &fk.RoleRepo{ExistingNames: []string{"admin"}}
-	itr := New(&fk.UserRepo{}, roleRepo, &fk.FileStore{}, &fk.Tokenizer{}, &fk.Validator{})
+	itr := New(&fk.UserRepo{}, roleRepo, &fk.FileStore{}, &fk.Tokenizer{}, &fk.StringValidator{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotSuccess)
@@ -19,7 +19,7 @@ func TestNoopIfAdminRoleExists(t *testing.T) {
 
 func TestShouldCreateDefaultRoles(t *testing.T) {
 	roleRepo := &fk.RoleRepo{}
-	itr := New(&fk.UserRepo{}, roleRepo, &fk.FileStore{}, &fk.Tokenizer{}, &fk.Validator{})
+	itr := New(&fk.UserRepo{}, roleRepo, &fk.FileStore{}, &fk.Tokenizer{}, &fk.StringValidator{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.NotNil(t, roleRepo.Created)
@@ -27,7 +27,7 @@ func TestShouldCreateDefaultRoles(t *testing.T) {
 }
 func TestInvalidPassword(t *testing.T) {
 	itr := New(&fk.UserRepo{}, &fk.RoleRepo{}, &fk.FileStore{},
-		&fk.Tokenizer{}, &fk.Validator{Invalid: true})
+		&fk.Tokenizer{}, &fk.StringValidator{Invalid: true})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotValidationErr)
@@ -38,7 +38,7 @@ func TestShouldCreateAdminUser(t *testing.T) {
 	pwHash := []byte("the-hash")
 	tokenizer := &fk.Tokenizer{ReturnHash: pwHash}
 	store := &fk.FileStore{}
-	itr := New(userRepo, &fk.RoleRepo{}, store, tokenizer, &fk.Validator{})
+	itr := New(userRepo, &fk.RoleRepo{}, store, tokenizer, &fk.StringValidator{})
 	p := &FakePresenter{}
 	id := "admin@mail.com"
 	pw := "the-admin-password"
