@@ -91,6 +91,9 @@ func (a VoidAuthorizer) CloneCollection(ctx context.Context, group string) error
 func (a VoidAuthorizer) AddMetadata(ctx context.Context, group string) error {
 	return nil
 }
+func (a VoidAuthorizer) DeleteMetadata(ctx context.Context, group string) error {
+	return nil
+}
 
 func (a VoidAuthorizer) UpdateUserPrivileges(ctx context.Context) error {
 	return nil

@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+type CollectionName = string
+
 type Collection struct {
 	Id          CollectionId
 	Name        string

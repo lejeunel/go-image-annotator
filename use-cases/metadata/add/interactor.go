@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	sauth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	kv "github.com/lejeunel/go-image-annotator/modules/string-validator"
 	vv "github.com/lejeunel/go-image-annotator/modules/value-validator"
@@ -53,7 +54,7 @@ func WithAuth(a Auth) Option {
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
-	errCtx := "upserting metadata"
+	errCtx := "adding metadata"
 	group, err := i.CollectionRepo.GetGroup(r.Collection)
 	if (err != nil) && !(errors.Is(err, e.ErrNotFound)) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
@@ -67,7 +68,13 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	exists, err := i.MetaDataRepo.KeyExists(r.Key)
+	imageId, err := im.NewImageIdFromString(r.ImageId)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: parsing image id %v: %w", errCtx, imageId, err))
+		return
+	}
+
+	exists, err := i.MetaDataRepo.KeyExists(r.Collection, imageId, r.Key)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: checking existence of key %v: %v: %w", errCtx, r.Key, err, e.ErrInternal))
 		return
@@ -85,7 +92,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: validating value %v: %w", errCtx, r.Key, err))
 		return
 	}
-	if err := i.MetaDataRepo.Add(r.Key, r.Value); err != nil {
+	if err := i.MetaDataRepo.Add(r.Collection, imageId, r.Key, r.Value); err != nil {
 		out.Error(fmt.Errorf("%v: adding meta-data with key %v and value %v: %w",
 			errCtx, r.Key, r.Value, err))
 		return

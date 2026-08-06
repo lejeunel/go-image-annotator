@@ -1,4 +1,4 @@
-package add
+package delete
 
 import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
@@ -10,6 +10,6 @@ type CollectionRepo interface {
 }
 
 type MetaDataRepo interface {
-	Add(clc.CollectionName, im.ImageId, string, any) error
+	Delete(clc.CollectionName, im.ImageId, string) error
 	KeyExists(clc.CollectionName, im.ImageId, string) (*bool, error)
 }
