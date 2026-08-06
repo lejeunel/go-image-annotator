@@ -1,14 +1,13 @@
-package add
+package update
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	sauth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	kv "github.com/lejeunel/go-image-annotator/modules/string-validator"
-	vv "github.com/lejeunel/go-image-annotator/modules/value-validator"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -17,27 +16,21 @@ type Interface interface {
 }
 
 type Auth interface {
-	AddMetadata(ctx context.Context, group string) error
+	UpdateMetadata(ctx context.Context, group string) error
 }
 
 type Interactor struct {
 	CollectionRepo
 	MetaDataRepo
-	KeyValidator   kv.Validator
-	ValueValidator vv.Validator
 	Auth
 }
 
 func New(c CollectionRepo, m MetaDataRepo,
-	kv kv.Validator, vv vv.Validator,
 	opts ...Option) Interactor {
 	i := &Interactor{
 		CollectionRepo: c,
 		MetaDataRepo:   m,
-		KeyValidator:   kv,
-		ValueValidator: vv,
-
-		Auth: sauth.NewVoidAuth()}
+		Auth:           sauth.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -54,7 +47,7 @@ func WithAuth(a Auth) Option {
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
-	errCtx := "adding metadata"
+	errCtx := "updating metadata"
 	group, err := i.CollectionRepo.GetGroup(r.Collection)
 	if (err != nil) && !(errors.Is(err, e.ErrNotFound)) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
@@ -62,7 +55,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if group != nil {
-		if err := i.Auth.AddMetadata(ctx, *group); err != nil {
+		if err := i.Auth.UpdateMetadata(ctx, *group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
@@ -79,24 +72,42 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: checking existence of key %v: %v: %w", errCtx, r.Key, err, e.ErrInternal))
 		return
 	}
-	if *exists {
+	if !*exists {
 		out.Error(fmt.Errorf("%v: checking existence of key %v: %w", errCtx, r.Key, e.ErrValidation))
 		return
 	}
 
-	if err := i.KeyValidator.Validate(r.Key); err != nil {
-		out.Error(fmt.Errorf("%v: validating key %v: %w", errCtx, r.Key, err))
+	currentValue, err := i.MetaDataRepo.GetValue(r.Collection, imageId, r.Key)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: fetching current value at key %v: %v: %w", errCtx, r.Key, err, e.ErrInternal))
 		return
 	}
-	if err := i.ValueValidator.Validate(r.Value); err != nil {
-		out.Error(fmt.Errorf("%v: validating value %v: %w", errCtx, r.Value, err))
+
+	if reflect.TypeOf(*currentValue) != reflect.TypeOf(r.Value) {
+		out.Error(fmt.Errorf("%v: comparing types of current value %v with new value %v: %v: %w",
+			errCtx, *currentValue, r.Value, err, e.ErrValidation))
 		return
 	}
-	if err := i.MetaDataRepo.Add(r.Collection, imageId, r.Key, r.Value); err != nil {
-		out.Error(fmt.Errorf("%v: adding meta-data with key %v and value %v: %w",
-			errCtx, r.Key, r.Value, err))
+
+	if err := i.MetaDataRepo.UpdateValue(r.Collection, imageId, r.Key, r.Value); err != nil {
+		out.Error(fmt.Errorf("%v: updating key %v with new value %v: %v: %w",
+			errCtx, r.Key, r.Value, err, e.ErrInternal))
 		return
 	}
+
+	// if err := i.KeyValidator.Validate(r.Key); err != nil {
+	// 	out.Error(fmt.Errorf("%v: validating key %v: %w", errCtx, r.Key, err))
+	// 	return
+	// }
+	// if err := i.ValueValidator.Validate(r.Value); err != nil {
+	// 	out.Error(fmt.Errorf("%v: validating value %v: %w", errCtx, r.Value, err))
+	// 	return
+	// }
+	// if err := i.MetaDataRepo.Add(r.Collection, imageId, r.Key, r.Value); err != nil {
+	// 	out.Error(fmt.Errorf("%v: adding meta-data with key %v and value %v: %w",
+	// 		errCtx, r.Key, r.Value, err))
+	// 	return
+	// }
 
 	out.SuccessAddMetadata()
 

@@ -132,3 +132,7 @@ func (f Auth) AddMetadata(ctx context.Context, group string) error {
 func (f Auth) DeleteMetadata(ctx context.Context, group string) error {
 	return f.Err
 }
+
+func (f Auth) UpdateMetadata(ctx context.Context, group string) error {
+	return f.Err
+}

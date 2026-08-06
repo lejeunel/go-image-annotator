@@ -1,11 +1,12 @@
 package fake
 
 import (
+	"slices"
+
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	"slices"
 )
 
 type ValueValidator struct {
@@ -24,11 +25,16 @@ type MetaDataRepo struct {
 	AddedKey       string
 	DeletedKey     string
 	AddedValue     any
+	UpdatedKey     string
+	UpdatedValue   any
 	ErrOnAdd       error
 	ErrOnKeyExists error
 	ErrOnDelete    error
 	ErrOnList      error
+	ErrOnGet       error
+	ErrOnUpdate    error
 	ReturnList     []m.MetaData
+	ReturnValue    any
 }
 
 func (r *MetaDataRepo) KeyExists(n clc.CollectionName, id im.ImageId, key string) (*bool, error) {
@@ -69,4 +75,20 @@ func (r *MetaDataRepo) List(clc.CollectionName, im.ImageId) ([]m.MetaData, error
 	}
 	return r.ReturnList, nil
 
+}
+
+func (r *MetaDataRepo) GetValue(clc.CollectionName, im.ImageId, string) (*any, error) {
+	if r.ErrOnGet != nil {
+		return nil, r.ErrOnGet
+	}
+	return &r.ReturnValue, nil
+}
+
+func (r *MetaDataRepo) UpdateValue(c clc.CollectionName, i im.ImageId, key string, value any) error {
+	if r.ErrOnUpdate != nil {
+		return r.ErrOnUpdate
+	}
+	r.UpdatedKey = key
+	r.UpdatedValue = value
+	return nil
 }
