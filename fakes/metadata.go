@@ -3,6 +3,7 @@ package fake
 import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"slices"
 )
@@ -26,6 +27,8 @@ type MetaDataRepo struct {
 	ErrOnAdd       error
 	ErrOnKeyExists error
 	ErrOnDelete    error
+	ErrOnList      error
+	ReturnList     []m.MetaData
 }
 
 func (r *MetaDataRepo) KeyExists(n clc.CollectionName, id im.ImageId, key string) (*bool, error) {
@@ -58,4 +61,12 @@ func (r *MetaDataRepo) Delete(n clc.CollectionName, id im.ImageId, key string) e
 	r.DeletedKey = key
 
 	return nil
+}
+
+func (r *MetaDataRepo) List(clc.CollectionName, im.ImageId) ([]m.MetaData, error) {
+	if r.ErrOnList != nil {
+		return nil, r.ErrOnList
+	}
+	return r.ReturnList, nil
+
 }
