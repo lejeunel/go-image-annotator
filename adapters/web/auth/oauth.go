@@ -2,7 +2,10 @@ package auth
 
 import (
 	"net/http"
+	"os"
 
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
@@ -23,12 +26,12 @@ func (s Server) OAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type OAuthProviderConfig struct {
-	Key         string
-	Secret      string
-	CallbackURL string
-}
+func MaybeSetupGoogle(pb *b.LoginPageBuilder, baseURL string) {
+	id := os.Getenv("GOIA_GOOGLE_CLIENT_ID")
+	secret := os.Getenv("GOIA_GOOGLE_CLIENT_SECRET")
+	if (id != "") && (secret != "") {
+		pb.AddOAuthProvider("google", rt.MakeOAuthLoginURL("google"))
+		goth.UseProviders(google.New(id, secret, rt.MakeOAuthCallbackURL(baseURL, "google")))
+	}
 
-func SetupForGoogle(cfg OAuthProviderConfig) {
-	goth.UseProviders(google.New(cfg.Key, cfg.Secret, cfg.CallbackURL))
 }

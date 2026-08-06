@@ -31,12 +31,12 @@ func (b *LoginPageBuilder) AddOAuthProvider(provider, url string) *LoginPageBuil
 	return b
 }
 func (b *LoginPageBuilder) makeContent() Node {
-	buttons := []Node{}
+	oauthButtons := []Node{}
 	for _, p := range b.OAuthProviders {
 		button := A(Href(p.URL),
 			Class(s.OAuthButtonClass),
 			Text(fmt.Sprintf("Continue with %v", p.Name)))
-		buttons = append(buttons, button)
+		oauthButtons = append(oauthButtons, button)
 	}
 	return Div(Class("flex justify-center"),
 		Span(
@@ -57,12 +57,15 @@ func (b *LoginPageBuilder) makeContent() Node {
 					Class("w-full px-3 py-2 mb-6 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")),
 				Button(Type("submit"), Text("Login"), Class(s.PasswordButtonClass)),
 			),
-			Div(Class("flex items-center gap-3 my-6 mb-4"),
-				Div(Class("h-px flex-1 bg-gray-300")),
-				Span(Class("text-xs"), Text("or")),
-				Div(Class("h-px flex-1 bg-gray-300"))),
-			Div(Class("flex justify-center"),
-				Group(buttons),
+			If(len(oauthButtons) > 0,
+				Div(
+					Div(Class("flex items-center gap-3 my-6 mb-4"),
+						Div(Class("h-px flex-1 bg-gray-300")),
+						Span(Class("text-xs"), Text("or")),
+						Div(Class("h-px flex-1 bg-gray-300"))),
+					Div(Class("flex justify-center"),
+						Group(oauthButtons)),
+				),
 			),
 		),
 	)
