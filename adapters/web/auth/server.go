@@ -18,6 +18,7 @@ type Server struct {
 	requestTokenItr  reqpw.Interactor
 	ResetPasswordItr respw.Interactor
 	baseURL          string
+	Notifier
 }
 
 func New(
@@ -25,6 +26,7 @@ func New(
 	basePageBuilder b.BasePageBuilder,
 	logger slog.Logger,
 	sm sm.SessionManager,
+	nf Notifier,
 	reqForgottenPw reqpw.Interactor,
 	resForgottenPw respw.Interactor,
 ) Server {
@@ -40,5 +42,6 @@ func New(
 		reqForgottenPw,
 		resForgottenPw,
 		baseURL,
+		nf,
 	}
 }

@@ -94,11 +94,13 @@ func Make(url string, port int) http.Handler {
 		app.Itrs.Label.Delete, app.Itrs.Label.Find)
 	labelServer.Route(router, webAuth)
 
+	notifier := wauth.MakeNotifierFromEnv(*logger)
 	authServer := wauth.New(
 		baseURL,
 		basePageBuilder,
 		*logger,
 		app.SessionManager,
+		notifier,
 		app.Itrs.User.RequestForgottenPassword,
 		app.Itrs.User.ResetForgottenPassword)
 	authServer.Route(router,

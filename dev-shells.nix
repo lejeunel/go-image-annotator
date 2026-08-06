@@ -15,6 +15,7 @@
           nodejs
           pkgsite
           gotools
+          mailhog
         ];
       };
     };

@@ -9,14 +9,14 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-var forgotPasswordTitle = "Request password reset token"
+var forgotPasswordTitle = "Forgot Password"
 
 type ForgotPasswordBuilder struct {
 	BasePageBuilder
 }
 
-func (b *ForgotPasswordBuilder) makeContent() Node {
-	return Div(Class("flex justify-center"),
+func (b *ForgotPasswordBuilder) Render(w io.Writer) {
+	content := Div(Class("flex justify-center"),
 		Span(
 			Div(Class("flex justify-center text-gray-900 dark:text-white font-bold text-xl mt-4 mb-4"), Text(forgotPasswordTitle)),
 			Form(
@@ -31,11 +31,10 @@ func (b *ForgotPasswordBuilder) makeContent() Node {
 			),
 		),
 	)
-}
-func (b *ForgotPasswordBuilder) Render(w io.Writer) {
-	b.BasePageBuilder.SetFrameContent(b.makeContent()).Render(w)
+	b.BasePageBuilder.SetFrameContent(content).Render(w)
 }
 
 func NewForgotPasswordBuilder(base BasePageBuilder) ForgotPasswordBuilder {
+	base.SetHTMLTitle(forgotPasswordTitle)
 	return ForgotPasswordBuilder{BasePageBuilder: base}
 }

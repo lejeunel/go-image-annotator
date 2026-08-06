@@ -17,6 +17,10 @@ type Config struct {
 	ForgotPasswordTokenExpirationMinutes int      `default:"30"`
 	PasswordMinEntropy                   int      `default:"50"`
 	MaxNumTasksPerUser                   int      `default:"50"`
+	SMTPUsername                         string
+	SMTPPassword                         string
+	SMTPHost                             string
+	SMTPPort                             int
 }
 
 func Parse() Config {

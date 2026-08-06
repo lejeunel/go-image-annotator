@@ -11,25 +11,8 @@ import (
 	fpw "github.com/lejeunel/go-image-annotator/use-cases/user/forgot-password"
 )
 
-type Notification struct {
-	Email string
-	URL   string
-}
-
-type PasswordResetNotifier interface {
-	Notify(n Notification)
-}
-
-type VoidPasswordResetNotifier struct {
-	slog.Logger
-}
-
-func (n VoidPasswordResetNotifier) Notify(notification Notification) {
-	n.Logger.Info("notifying password reset token", "notification", notification)
-}
-
 type NotifyPasswordResetPresenter struct {
-	PasswordResetNotifier
+	Notifier
 	slog.Logger
 	w       http.ResponseWriter
 	baseURL string
@@ -49,7 +32,7 @@ func (p NotifyPasswordResetPresenter) redirect() {
 }
 
 func (s Server) NotifyPasswordReset(w http.ResponseWriter, r *http.Request) {
-	p := NotifyPasswordResetPresenter{VoidPasswordResetNotifier{s.Logger}, s.Logger, w,
+	p := NotifyPasswordResetPresenter{s.Notifier, s.Logger, w,
 		s.baseURL + rt.ResetPasswordFormUrl}
 	r.ParseForm()
 	s.requestTokenItr.Execute(r.Context(), r.FormValue("email"), p)
