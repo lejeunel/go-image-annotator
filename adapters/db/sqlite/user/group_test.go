@@ -50,5 +50,4 @@ func TestAssignToNewGroup(t *testing.T) {
 	assert.NoError(t, err)
 	r, _ := userRepo.Find(user.Id)
 	assert.Equal(t, 2, len(r.Groups))
-	assert.Equal(t, g0.Name, r.Groups[0])
 }

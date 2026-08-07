@@ -37,7 +37,7 @@ func Make(url string, port int) http.Handler {
 
 	app := sqlite.NewSQLiteApp(cfg, &defaultAuth, *logger)
 
-	currentVersion := g.Info{Version: g.Version, Commit: g.Commit, Date: g.Date}
+	currentVersion := g.Info{Version: g.Version, Date: g.Date}
 	basePageBuilder := b.NewBasePageBuilder()
 	pageBuilder := b.NewPageBuilder(basePageBuilder, currentVersion)
 

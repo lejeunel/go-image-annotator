@@ -75,7 +75,11 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: fetching label %v: %w", errCtx, r.Label, err))
 		return
 	}
-	if err := i.update(ctx, *annotationId, a.PolygonUpdatables{LabelId: label.Id, Points: r.Points}); err != nil {
+	if err := i.update(
+		ctx,
+		*annotationId,
+		a.PolygonUpdatables{LabelId: label.Id, Points: r.Points},
+	); err != nil {
 		out.Error(fmt.Errorf("%v: updating: %w", errCtx, err))
 		return
 	}

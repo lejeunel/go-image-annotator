@@ -60,7 +60,10 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	if err := i.ensureImageDoesNotAlreadyExistInCollection(imageId, dstCollection.Name); err != nil {
+	if err := i.ensureImageDoesNotAlreadyExistInCollection(
+		imageId,
+		dstCollection.Name,
+	); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

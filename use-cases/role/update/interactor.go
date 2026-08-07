@@ -53,7 +53,9 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	if err := i.repo.Update(rl.UpdatableModel{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription}); err != nil {
+	if err := i.repo.Update(
+		rl.UpdatableModel{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription},
+	); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

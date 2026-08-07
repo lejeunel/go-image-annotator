@@ -98,7 +98,13 @@ func (i Interactor) addPolygon(ctx context.Context, image *im.Image, poly a.Poly
 		userId = &user.Id
 	}
 	now := i.clock.Now()
-	if err := i.annotationRepo.AddPolygon(image.Id, image.Collection.Id, poly, userId, &now); err != nil {
+	if err := i.annotationRepo.AddPolygon(
+		image.Id,
+		image.Collection.Id,
+		poly,
+		userId,
+		&now,
+	); err != nil {
 		return err
 	}
 	return nil

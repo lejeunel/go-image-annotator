@@ -102,7 +102,13 @@ func (i Interactor) addBox(ctx context.Context, image *im.Image, box a.BoundingB
 		userId = &user.Id
 	}
 	now := i.clock.Now()
-	if err := i.annotationRepo.AddBoundingBox(image.Id, image.Collection.Id, box, userId, &now); err != nil {
+	if err := i.annotationRepo.AddBoundingBox(
+		image.Id,
+		image.Collection.Id,
+		box,
+		userId,
+		&now,
+	); err != nil {
 		return err
 	}
 	return nil

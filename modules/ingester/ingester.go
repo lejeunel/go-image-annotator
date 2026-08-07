@@ -189,13 +189,25 @@ func (i Ingester) ingestImage(
 	}
 
 	for _, label := range image.Labels {
-		if err := tx.AnnotationRepo.AddImageLabel(image.Id, image.Collection.Id, label, &authorId, &now); err != nil {
+		if err := tx.AnnotationRepo.AddImageLabel(
+			image.Id,
+			image.Collection.Id,
+			label,
+			&authorId,
+			&now,
+		); err != nil {
 			return fmt.Errorf("adding image label to collection: %w", err)
 		}
 	}
 
 	for _, box := range image.BoundingBoxes {
-		if err := tx.AnnotationRepo.AddBoundingBox(image.Id, image.Collection.Id, box, &authorId, &now); err != nil {
+		if err := tx.AnnotationRepo.AddBoundingBox(
+			image.Id,
+			image.Collection.Id,
+			box,
+			&authorId,
+			&now,
+		); err != nil {
 			return fmt.Errorf("adding bounding box: %w", err)
 		}
 	}

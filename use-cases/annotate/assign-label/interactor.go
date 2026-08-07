@@ -100,7 +100,13 @@ func (i Interactor) addLabel(
 	now := i.clock.Now()
 
 	imageLabel := an.NewImageLabel(label)
-	if err := i.annotationRepo.AddImageLabel(imageId, collectionId, imageLabel, userId, &now); err != nil {
+	if err := i.annotationRepo.AddImageLabel(
+		imageId,
+		collectionId,
+		imageLabel,
+		userId,
+		&now,
+	); err != nil {
 		return nil, err
 	}
 	return &imageLabel, nil

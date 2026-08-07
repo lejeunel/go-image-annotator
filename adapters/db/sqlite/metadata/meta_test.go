@@ -49,7 +49,7 @@ func TestGetValue(t *testing.T) {
 	repo.Add(collection.Name, image.Id, "key", "value")
 	value, err := repo.GetValue(collection.Name, image.Id, "key")
 	assert.NoError(t, err)
-	assert.Equal(t, "value", value)
+	assert.Equal(t, "value", *value)
 }
 
 func TestUpdateValue(t *testing.T) {
@@ -58,7 +58,7 @@ func TestUpdateValue(t *testing.T) {
 	err := repo.UpdateValue(collection.Name, image.Id, "key", "new-value")
 	assert.NoError(t, err)
 	r, _ := repo.GetValue(collection.Name, image.Id, "key")
-	assert.Equal(t, "new-value", r)
+	assert.Equal(t, "new-value", *r)
 }
 
 func TestDeleteOne(t *testing.T) {

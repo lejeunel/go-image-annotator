@@ -1,5 +1,4 @@
-# ====== CONFIG ======
-VERSION := v0.1
+VERSION := dev
 REPO := github.com/lejeunel/go-image-annotator
 
 SPEC := assets/openapi.yaml
@@ -16,16 +15,13 @@ CSS_OUT := $(STATIC_DIR)/styles.css
 
 .PHONY: all api-code clean build node-deps build-ci format
 
-all: api-code auth-valid-methods htmx alpine alpine-persist alpine-anchor alpine-focus annotorious stoplight css format build
-
 node-deps:
 	npm ci
 
-build:
+build: 
 	go build \
 		-ldflags "\
 			-X '$(REPO)/globals.Version=$(VERSION)' \
-			-X '$(REPO)/globals.Commit=$$(git rev-parse --short HEAD)' \
 			-X '$(REPO)/globals.Date=$$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
 
 build-ci:
@@ -35,6 +31,9 @@ build-ci:
 format:
 	gofumpt -w .
 	golines -w .
+
+test:
+	gotestsum ./...
 
 css:
 	tailwindcss -i $(CSS_MAIN) -o $(CSS_OUT) --minify

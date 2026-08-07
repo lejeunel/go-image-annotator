@@ -47,7 +47,7 @@ func WithAuth(a Auth) Option {
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "deleting metadata"
 	group, err := i.CollectionRepo.GetGroup(r.Collection)
-	if (err != nil) && !(errors.Is(err, e.ErrNotFound)) {
+	if (err != nil) && !errors.Is(err, e.ErrNotFound) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

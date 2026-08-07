@@ -355,7 +355,14 @@ func (r SQLiteAnnotationRepo) UpdateBoundingBox(
 		return fmt.Errorf("%v: updating label: %w", errCtx, err)
 	}
 
-	if err := r.UpdateBoundingBoxCoordinates(id, u.Xc, u.Yc, u.Width, u.Height, u.Angle); err != nil {
+	if err := r.UpdateBoundingBoxCoordinates(
+		id,
+		u.Xc,
+		u.Yc,
+		u.Width,
+		u.Height,
+		u.Angle,
+	); err != nil {
 		return fmt.Errorf("%v: updating coordinates: %w", errCtx, err)
 	}
 	return nil

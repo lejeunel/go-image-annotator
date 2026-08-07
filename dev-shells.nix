@@ -1,25 +1,32 @@
 {
   perSystem =
-    { pkgs, ... }:
     {
-
+      pkgs,
+      ...
+    }:
+    {
       devShells.default = pkgs.mkShell {
-        buildInputs = with pkgs; [
+        packages = with pkgs; [
           go
+          gnumake
           gopls
-          gocyclo
+          gofumpt
+          golines
           gotestsum
-          oapi-codegen
-          tailwindcss_4
-          hugo
-          nodejs
-          pkgsite
-          gotools
-          mailhog
+          tailwindcss
+        ];
+      };
+      devShells.test = pkgs.mkShell {
+        packages = with pkgs; [
+          go
+          gotestsum
+        ];
+      };
+      devShells.format = pkgs.mkShell {
+        packages = with pkgs; [
           gofumpt
           golines
         ];
       };
     };
-
 }

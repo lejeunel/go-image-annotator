@@ -96,7 +96,10 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: pushing init task to logger: %w", errCtx, err))
 		return
 	}
-	if err := i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.PendingTask}); err != nil {
+	if err := i.EventLogger.AddEvent(
+		task.Id,
+		e.Event{Time: i.Clock.Now(), State: e.PendingTask},
+	); err != nil {
 		out.Error(fmt.Errorf("%v: adding pending status: %w", errCtx, err))
 		return
 	}
@@ -155,7 +158,10 @@ func (i *Interactor) runTask(
 		"destination-collection": destination,
 		"deep-copy":              strconv.FormatBool(deep),
 	}
-	if err := i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.StartedTask, Extra: extra}); err != nil {
+	if err := i.EventLogger.AddEvent(
+		task.Id,
+		e.Event{Time: i.Clock.Now(), State: e.StartedTask, Extra: extra},
+	); err != nil {
 		i.Logger.Error(
 			fmt.Errorf("%w: logging event upon cloning task startup: %w", errCtx, err).Error(),
 		)
@@ -192,20 +198,38 @@ func (i *Interactor) runTask(
 			if deep {
 				for _, label := range image.Labels {
 					label.Id = a.NewAnnotationId()
-					if err := i.AnnotationRepo.AddImageLabel(image.Id, dst.Id, label, label.Author, label.Time); err != nil {
+					if err := i.AnnotationRepo.AddImageLabel(
+						image.Id,
+						dst.Id,
+						label,
+						label.Author,
+						label.Time,
+					); err != nil {
 						return fmt.Errorf("%w: adding image label: %w", errCtx, err)
 					}
 				}
 
 				for _, box := range image.BoundingBoxes {
 					box.Id = a.NewAnnotationId()
-					if err := i.AnnotationRepo.AddBoundingBox(image.Id, dst.Id, box, box.Author, box.Time); err != nil {
+					if err := i.AnnotationRepo.AddBoundingBox(
+						image.Id,
+						dst.Id,
+						box,
+						box.Author,
+						box.Time,
+					); err != nil {
 						return fmt.Errorf("%w: adding bounding boxes: %w", errCtx, err)
 					}
 				}
 				for _, poly := range image.Polygons {
 					poly.Id = a.NewAnnotationId()
-					if err := i.AnnotationRepo.AddPolygon(image.Id, dst.Id, poly, poly.Author, poly.Time); err != nil {
+					if err := i.AnnotationRepo.AddPolygon(
+						image.Id,
+						dst.Id,
+						poly,
+						poly.Author,
+						poly.Time,
+					); err != nil {
 						return fmt.Errorf("%w: adding polygons: %w", errCtx, err)
 					}
 				}

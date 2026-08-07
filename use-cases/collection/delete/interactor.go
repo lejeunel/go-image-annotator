@@ -83,7 +83,10 @@ func (i Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 		out.Error(fmt.Errorf("%v: pushing init task to logger: %w", errCtx, err))
 		return
 	}
-	if err := i.EventLogger.AddEvent(task.Id, ev.Event{Time: i.Clock.Now(), State: ev.PendingTask}); err != nil {
+	if err := i.EventLogger.AddEvent(
+		task.Id,
+		ev.Event{Time: i.Clock.Now(), State: ev.PendingTask},
+	); err != nil {
 		out.Error(fmt.Errorf("%v: adding pending status: %w", errCtx, err))
 		return
 	}
@@ -99,7 +102,10 @@ func (i *Interactor) runTask(task t.Task, collection clc.Collection) {
 	i.Logger.Info(fmt.Sprintf("started delete task %v", task.Id))
 
 	extra := map[string]string{"collection": collection.Name}
-	if err := i.EventLogger.AddEvent(task.Id, ev.Event{Time: i.Clock.Now(), State: ev.StartedTask, Extra: extra}); err != nil {
+	if err := i.EventLogger.AddEvent(
+		task.Id,
+		ev.Event{Time: i.Clock.Now(), State: ev.StartedTask, Extra: extra},
+	); err != nil {
 		i.Logger.Error(
 			fmt.Errorf("%w: logging event upon delete task startup: %w", errCtx, err).Error(),
 		)
@@ -111,16 +117,27 @@ func (i *Interactor) runTask(task t.Task, collection clc.Collection) {
 			if err != nil {
 				return fmt.Errorf("%w: iterating on images: %w", errCtx, err)
 			}
-			if err := tx.AnnotationRepo.RemoveAllAnnotations(baseImage.ImageId, collection.Name); err != nil {
+			if err := tx.AnnotationRepo.RemoveAllAnnotations(
+				baseImage.ImageId,
+				collection.Name,
+			); err != nil {
 				return fmt.Errorf("%w: deleting annotations: %w", errCtx, err)
 			}
-			if err := tx.ImageRepo.RemoveImageFromCollection(baseImage.ImageId, collection.Id); err != nil {
+			if err := tx.ImageRepo.RemoveImageFromCollection(
+				baseImage.ImageId,
+				collection.Id,
+			); err != nil {
 				return fmt.Errorf("%w: adding image to collection: %w", errCtx, err)
 			}
 
 			isUsed, err := tx.ImageRepo.IsUsed(baseImage.ImageId)
 			if err != nil {
-				return fmt.Errorf("%w: checking whether image %v is used in another collection: %w", errCtx, baseImage.ImageId, err)
+				return fmt.Errorf(
+					"%w: checking whether image %v is used in another collection: %w",
+					errCtx,
+					baseImage.ImageId,
+					err,
+				)
 			}
 			if !*isUsed {
 				i.ImageStore.DeleteAsset(baseImage.ImageId)

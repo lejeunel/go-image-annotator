@@ -35,7 +35,7 @@ func New(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "updating collection"
 	group, err := i.CollectionRepo.GetGroup(r.Name)
-	if (err != nil) && !(errors.Is(err, e.ErrNotFound)) {
+	if (err != nil) && !errors.Is(err, e.ErrNotFound) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
