@@ -5,8 +5,13 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
+type ImageRepo interface {
+	ImageExistsInCollection(im.ImageId, clc.CollectionName) (bool, error)
+}
+
 type CollectionRepo interface {
 	GetGroup(string) (*string, error)
+	Exists(string) (bool, error)
 }
 
 type MetaDataRepo interface {

@@ -21,11 +21,12 @@ type Auth interface {
 
 type Interactor struct {
 	CollectionRepo
+	ImageRepo
 	MetaDataRepo
 	Auth
 }
 
-func New(c CollectionRepo, m MetaDataRepo,
+func New(c CollectionRepo, ir ImageRepo, m MetaDataRepo,
 	opts ...Option) Interactor {
 	i := &Interactor{
 		CollectionRepo: c,
@@ -64,6 +65,26 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	imageId, err := im.NewImageIdFromString(r.ImageId)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: parsing image id %v: %w", errCtx, imageId, err))
+		return
+	}
+
+	collectionExists, err := i.CollectionRepo.Exists(r.Collection)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: checking existence of collection %v: %v: %w", errCtx, r.Collection, err, e.ErrInternal))
+		return
+	}
+	if !collectionExists {
+		out.Error(fmt.Errorf("%v: checking existence of collection %v: %v: %w", errCtx, r.Collection, err, e.ErrValidation))
+		return
+	}
+
+	imageInCollection, err := i.ImageRepo.ImageExistsInCollection(imageId, r.Collection)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: checking whether image %v is in collection %v: %v: %w", errCtx, imageId, r.Collection, err, e.ErrInternal))
+		return
+	}
+	if !imageInCollection {
+		out.Error(fmt.Errorf("%v: checking whether image %v is in collection %v: %v: %w", errCtx, imageId, r.Collection, err, e.ErrValidation))
 		return
 	}
 

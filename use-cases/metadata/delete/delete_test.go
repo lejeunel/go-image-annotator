@@ -10,13 +10,20 @@ import (
 	"testing"
 )
 
-func TestHandleAuthError(t *testing.T) {
+func Setup() (Interactor, clc.Collection, im.Image, g.Group) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
 	image := im.NewImage(im.NewImageId(), collection)
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	image.Collection.Group = &group.Name
-	itr := New(&fk.CollectionRepo{ReturnGroup: group.Name}, &fk.MetaDataRepo{},
-		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
+	itr := New(&fk.CollectionRepo{}, &fk.MetaDataRepo{})
+	return itr, collection, image, group
+
+}
+
+func TestHandleAuthError(t *testing.T) {
+	itr, collection, image, group := Setup()
+	itr.Auth = &fk.Auth{Err: e.ErrAuthorization}
+	itr.CollectionRepo = &fk.CollectionRepo{ReturnGroup: group.Name}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{ImageId: image.Id.String(), Collection: collection.Name},
@@ -26,9 +33,8 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestErrorOnKeyExistsShouldFail(t *testing.T) {
-	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
-	image := im.NewImage(im.NewImageId(), collection)
-	itr := New(&fk.CollectionRepo{}, &fk.MetaDataRepo{ErrOnKeyExists: e.ErrInternal})
+	itr, collection, image, _ := Setup()
+	itr.MetaDataRepo = &fk.MetaDataRepo{ErrOnKeyExists: e.ErrInternal}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{ImageId: image.Id.String(), Collection: collection.Name, Key: "the-key"},
@@ -38,9 +44,7 @@ func TestErrorOnKeyExistsShouldFail(t *testing.T) {
 }
 
 func TestFailOnNonExistingKey(t *testing.T) {
-	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
-	image := im.NewImage(im.NewImageId(), collection)
-	itr := New(&fk.CollectionRepo{}, &fk.MetaDataRepo{})
+	itr, collection, image, _ := Setup()
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{ImageId: image.Id.String(), Collection: collection.Name, Key: "the-key"},
@@ -50,12 +54,10 @@ func TestFailOnNonExistingKey(t *testing.T) {
 }
 
 func TestErrorOnDelete(t *testing.T) {
-	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
-	image := im.NewImage(im.NewImageId(), collection)
+	itr, collection, image, _ := Setup()
 	key := "the-key"
-	itr := New(&fk.CollectionRepo{},
-		&fk.MetaDataRepo{ExistingKeys: []string{key},
-			ErrOnDelete: e.ErrInternal})
+	itr.MetaDataRepo = &fk.MetaDataRepo{ExistingKeys: []string{key},
+		ErrOnDelete: e.ErrInternal}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{ImageId: image.Id.String(), Collection: collection.Name, Key: key},
@@ -66,11 +68,10 @@ func TestErrorOnDelete(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
-	image := im.NewImage(im.NewImageId(), collection)
+	itr, collection, image, _ := Setup()
 	key := "the-key"
 	m := &fk.MetaDataRepo{ExistingKeys: []string{key}}
-	itr := New(&fk.CollectionRepo{}, m)
+	itr.MetaDataRepo = m
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{ImageId: image.Id.String(), Collection: collection.Name, Key: key},
