@@ -11,13 +11,11 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-type ScrollerView struct {
-}
+type ScrollerView struct{}
 
 func MakeLink(imageId, collection string) string {
 	return fmt.Sprintf("image?id=%v&collection=%v",
 		imageId, collection)
-
 }
 
 func (p *ScrollerView) Render(buttons view.ScrollerButtons) Node {
@@ -32,5 +30,4 @@ func (p *ScrollerView) Render(buttons view.ScrollerButtons) Node {
 		cmp.MakeNavigationButton(prevURL, buttons.Prev.IsActive, scr.ScrollPrevious, "Previous"),
 		cmp.MakeNavigationButton(nextURL, buttons.Next.IsActive, scr.ScrollNext, "Next"),
 	)
-
 }

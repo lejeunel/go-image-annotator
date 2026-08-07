@@ -3,11 +3,12 @@ package annotator
 import (
 	"bytes"
 	"fmt"
+	"text/template"
+
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
-	"text/template"
 )
 
 type RegionKind int
@@ -30,8 +31,16 @@ func (t *RegionTable) addRow(author, time, id, label, color string, regionKind R
 		"templates/label_combobox.html"))
 
 	var buf bytes.Buffer
-	tmpl.ExecuteTemplate(&buf, "label_combobox",
-		LabelSelector{Labels: t.AvailableLabels, SelectorIsOpen: false, Selected: &label, AnnotationId: id})
+	tmpl.ExecuteTemplate(
+		&buf,
+		"label_combobox",
+		LabelSelector{
+			Labels:         t.AvailableLabels,
+			SelectorIsOpen: false,
+			Selected:       &label,
+			AnnotationId:   id,
+		},
+	)
 
 	var regionIcon string
 	switch regionKind {
@@ -53,7 +62,13 @@ func (t *RegionTable) addRow(author, time, id, label, color string, regionKind R
 			Raw(buf.String()),
 			Div(
 				Class("flex  justify-end items-center pr-1"),
-				Raw(fmt.Sprintf(`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`, id, ic.Trash)),
+				Raw(
+					fmt.Sprintf(
+						`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`,
+						id,
+						ic.Trash,
+					),
+				),
 			),
 		}})
 }
@@ -64,14 +79,17 @@ func (t *RegionTable) AddPolygon(p view.Polygon) {
 
 func (t *RegionTable) AddBox(b view.BoundingBox) {
 	t.addRow(b.Author, b.Time, b.Id, b.Label, b.Color, RegionBox)
-
 }
 
 func (t *RegionTable) Build(title string) Node {
-	return Div(Class("overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark"),
+	return Div(
+		Class(
+			"overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark",
+		),
 		Table(Class("w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
 			RegionTableBody(title, t.Rows),
-		))
+		),
+	)
 }
 
 type RegionRow struct {
@@ -90,7 +108,6 @@ func RegionTableBody(title string, rows []RegionRow) Node {
 		Td(Div(Class("text-left py-2 ps-2 pe-2 text-sm font-bold"), Text(title))),
 		Map(rows, func(r RegionRow) Node {
 			return r.Render()
-
 		}),
 	)
 }

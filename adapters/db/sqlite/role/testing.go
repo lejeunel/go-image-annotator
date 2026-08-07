@@ -12,5 +12,4 @@ func CreateRole(repo SQLiteRoleRepo, name string) (*ro.Role, error) {
 		return nil, err
 	}
 	return &r, nil
-
 }

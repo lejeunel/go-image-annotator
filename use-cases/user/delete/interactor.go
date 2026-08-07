@@ -1,9 +1,8 @@
 package delete
 
 import (
-	"fmt"
-
 	"context"
+	"fmt"
 
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
@@ -33,7 +32,15 @@ func (i *Interactor) Execute(ctx context.Context, id string, out OutputPort) {
 	}
 
 	if currentUser.Id == id {
-		out.Error(fmt.Errorf("%v: attempting to delete user %v while logged-in as %v: %w", errCtx, id, currentUser.Id, e.ErrForbiddenOp))
+		out.Error(
+			fmt.Errorf(
+				"%v: attempting to delete user %v while logged-in as %v: %w",
+				errCtx,
+				id,
+				currentUser.Id,
+				e.ErrForbiddenOp,
+			),
+		)
 		return
 	}
 
@@ -43,6 +50,7 @@ func (i *Interactor) Execute(ctx context.Context, id string, out OutputPort) {
 	}
 	out.SuccessDeleteUser(id)
 }
+
 func (i *Interactor) exists(name string) error {
 	errCtx := fmt.Errorf("checking whether user with id %v exists", name)
 	exists, err := i.repo.Exists(name)
@@ -64,11 +72,12 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: r,
-		auth: auth.NewVoidAuth()}
+	i := &Interactor{
+		repo: r,
+		auth: auth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
 	return *i
-
 }

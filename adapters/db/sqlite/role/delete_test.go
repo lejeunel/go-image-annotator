@@ -1,12 +1,13 @@
 package role
 
 import (
+	"testing"
+
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	usrRepo "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestCreatedExists(t *testing.T) {

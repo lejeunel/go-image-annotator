@@ -12,7 +12,11 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/label/update"
 )
 
-func NewSQLiteLabelInteractors(repo infra.SQLiteLabelRepo, pageSize int, auth auth.Interface) lbl.Interactors {
+func NewSQLiteLabelInteractors(
+	repo infra.SQLiteLabelRepo,
+	pageSize int,
+	auth auth.Interface,
+) lbl.Interactors {
 	return lbl.Interactors{
 		Find:            *find.New(repo),
 		Create:          *create.New(repo, create.WithAuth(auth)),

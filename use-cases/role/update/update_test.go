@@ -1,10 +1,11 @@
 package update
 
 import (
+	"testing"
+
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestHandleAuthError(t *testing.T) {
@@ -29,16 +30,17 @@ func TestUpdateRole(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.RoleRepo{ExistingNames: []string{name}}
 	itr := New(repo)
-	req := Request{Name: name,
+	req := Request{
+		Name:           name,
 		NewName:        "updated-name",
-		NewDescription: "updated-description"}
+		NewDescription: "updated-description",
+	}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, req.NewName, p.Got.Name)
 	assert.Equal(t, req.NewDescription, p.Got.Description)
 }
 
 func TestUpdateRoleWithNameAlreadyTakenShouldFail(t *testing.T) {
-
 	p := &FakePresenter{}
 	name := "name"
 	existing_name := "existing-name"
@@ -49,7 +51,6 @@ func TestUpdateRoleWithNameAlreadyTakenShouldFail(t *testing.T) {
 }
 
 func TestUpdateRoleWithUnchangedNameShouldSucceed(t *testing.T) {
-
 	p := &FakePresenter{}
 	name := "name"
 	itr := New(&fk.RoleRepo{ExistingNames: []string{name}})
@@ -60,8 +61,10 @@ func TestUpdateRoleWithUnchangedNameShouldSucceed(t *testing.T) {
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	name := "name"
-	itr := New(&fk.RoleRepo{ExistingNames: []string{name},
-		ErrOnUpdate: e.ErrInternal})
+	itr := New(&fk.RoleRepo{
+		ExistingNames: []string{name},
+		ErrOnUpdate:   e.ErrInternal,
+	})
 	itr.Execute(t.Context(),
 		Request{Name: name, NewName: name}, p)
 	assert.True(t, p.GotInternalErr)

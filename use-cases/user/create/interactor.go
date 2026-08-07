@@ -48,7 +48,6 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	var passwordHash []byte
 	if r.Password != nil {
 		passwordHash = i.passwordGenerator.Hash(*r.Password)
-
 	} else {
 		passwordPair, err := i.passwordGenerator.Generate()
 		passwordHash = passwordPair.Hash
@@ -67,8 +66,10 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	out.SuccessCreateUser(Response{
 		Id:     user.Id,
 		Groups: user.Groups,
-		Roles:  user.Roles})
+		Roles:  user.Roles,
+	})
 }
+
 func (i *Interactor) checkDuplicate(id string) error {
 	errBaseMsg := "checking for duplicate user with id %v: %w"
 	alreadyExists, err := i.repo.Exists(id)
@@ -91,8 +92,10 @@ func WithAuth(a Auth) Option {
 
 func New(r Repo,
 	tg APITokenGenerator,
-	pg PasswordGenerator, opts ...Option) Interactor {
-	i := &Interactor{repo: r,
+	pg PasswordGenerator, opts ...Option,
+) Interactor {
+	i := &Interactor{
+		repo:              r,
 		auth:              auth.NewVoidAuth(),
 		tokenGenerator:    tg,
 		passwordGenerator: pg,

@@ -33,5 +33,4 @@ func TestRetrieve(t *testing.T) {
 	assert.Equal(t, grp.Name, r.Name)
 	assert.Equal(t, grp.Description, r.Description)
 	assert.Equal(t, grp.Id, r.Id)
-
 }

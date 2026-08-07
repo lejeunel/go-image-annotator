@@ -25,6 +25,7 @@ func TestShouldCreateDefaultRoles(t *testing.T) {
 	assert.NotNil(t, roleRepo.Created)
 	assert.Equal(t, len(r.DefaultRoleNames), len(roleRepo.Created))
 }
+
 func TestInvalidPassword(t *testing.T) {
 	itr := New(&fk.UserRepo{}, &fk.RoleRepo{}, &fk.FileStore{},
 		&fk.Tokenizer{}, &fk.StringValidator{Invalid: true})

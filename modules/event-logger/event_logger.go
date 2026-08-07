@@ -2,13 +2,13 @@ package event_logger
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jonboulle/clockwork"
 	e "github.com/lejeunel/go-image-annotator/entities/event"
 	t "github.com/lejeunel/go-image-annotator/entities/task"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
-	"time"
 )
 
 type Interface interface {
@@ -49,6 +49,7 @@ func (l EventLogger) InitTask(id t.TaskId, type_ t.TaskType, user u.UserId) erro
 	}
 	return nil
 }
+
 func (l EventLogger) FindTask(id t.TaskId) (*t.Task, error) {
 	task, err := l.Repo.FindTask(id)
 	if err != nil {
@@ -62,6 +63,7 @@ func (l EventLogger) FindTask(id t.TaskId) (*t.Task, error) {
 
 	return task, nil
 }
+
 func (l EventLogger) ListUserTasks(user u.UserId, p pa.PaginationParams) ([]t.Task, error) {
 	errCtx := fmt.Errorf("listing user tasks for %v", user)
 	tasks, err := l.Repo.ListUserTasks(user, p)
@@ -69,7 +71,7 @@ func (l EventLogger) ListUserTasks(user u.UserId, p pa.PaginationParams) ([]t.Ta
 		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}
 
-	for i, _ := range tasks {
+	for i := range tasks {
 		events, err := l.Repo.GetEvents(tasks[i].Id)
 		if err != nil {
 			return nil, fmt.Errorf("%w: retrieving events: %w", errCtx, err)
@@ -88,7 +90,8 @@ func WithMaxNumTasksPerUser(nTasks int) Option {
 }
 
 func New(r Repo, opts ...Option) EventLogger {
-	l := &EventLogger{Repo: r,
+	l := &EventLogger{
+		Repo:  r,
 		Clock: clockwork.NewRealClock(),
 	}
 	for _, opt := range opts {

@@ -24,12 +24,21 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "resetting forgotten password"
 
 	if r.FirstPassword != r.SecondPassword {
-		out.Error(fmt.Errorf("%v: checking for matching passwords: %w", errCtx, e.ErrPasswordMismatch))
+		out.Error(
+			fmt.Errorf("%v: checking for matching passwords: %w", errCtx, e.ErrPasswordMismatch),
+		)
 		return
 	}
 
 	if err := i.passwordValidator.Validate(r.FirstPassword); err != nil {
-		out.Error(fmt.Errorf("%v: checking for password validity: %w: %w", errCtx, err, e.ErrInvalidPassword))
+		out.Error(
+			fmt.Errorf(
+				"%v: checking for password validity: %w: %w",
+				errCtx,
+				err,
+				e.ErrInvalidPassword,
+			),
+		)
 		return
 	}
 
@@ -41,7 +50,9 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	if state.ExpiresAt != nil {
 		if state.ExpiresAt.Before(i.clock.Now()) {
-			out.Error(fmt.Errorf("%v: checking for token expiration: %w", errCtx, e.ErrExpiredToken))
+			out.Error(
+				fmt.Errorf("%v: checking for token expiration: %w", errCtx, e.ErrExpiredToken),
+			)
 			return
 		}
 	}
@@ -67,8 +78,10 @@ func WithClock(c clockwork.Clock) Option {
 }
 
 func New(r Repo, tokenHasher tk.TokenHasher, passwordValidator PasswordValidator,
-	opts ...Option) Interactor {
-	i := &Interactor{repo: r,
+	opts ...Option,
+) Interactor {
+	i := &Interactor{
+		repo:              r,
 		tokenHasher:       tokenHasher,
 		passwordValidator: passwordValidator,
 		clock:             clockwork.NewRealClock(),

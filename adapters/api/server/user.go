@@ -1,12 +1,13 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	p "github.com/lejeunel/go-image-annotator/adapters/api/json/user"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
-	"net/http"
 )
 
 func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -26,6 +27,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	s.User.Create.Execute(
 		r.Context(), req, p.NewCreatePresenter(w, s.Logger))
 }
+
 func (s *Server) WhoAmI(w http.ResponseWriter, r *http.Request) {
 	user := u.IdentityFromContext(r.Context())
 

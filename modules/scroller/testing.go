@@ -26,7 +26,11 @@ func (r *FakeRepo) CollectionMustExist(collection string) error {
 	return nil
 }
 
-func (r *FakeRepo) GetAdjacent(id im.ImageId, criteria ScrollingCriteria, d ScrollingDirection) (*im.BaseImage, error) {
+func (r *FakeRepo) GetAdjacent(
+	id im.ImageId,
+	criteria ScrollingCriteria,
+	d ScrollingDirection,
+) (*im.BaseImage, error) {
 	if d == ScrollNext {
 		return r.NextImage, nil
 	}
@@ -44,6 +48,7 @@ type FakePresenter struct {
 func (p *FakePresenter) SuccessInitScroller(state ScrollerState) {
 	p.GotState = &state
 }
+
 func (p *FakePresenter) Error(err error) {
 	p.GotErr = err
 }

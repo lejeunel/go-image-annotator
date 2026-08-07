@@ -27,10 +27,12 @@ func (p *ActionsPanelBuilder) SetConfirmDelete(url url.URL) *ActionsPanelBuilder
 	p.Items = append(p.Items, Item{Icon: ic.Trash, URL: url, Tooltip: "delete"})
 	return p
 }
+
 func (p *ActionsPanelBuilder) SetClone(url url.URL) *ActionsPanelBuilder {
 	p.Items = append(p.Items, Item{Icon: ic.Copy, URL: url, Tooltip: "clone"})
 	return p
 }
+
 func (p *ActionsPanelBuilder) SetExpand(url url.URL) *ActionsPanelBuilder {
 	p.Items = append(p.Items, Item{Icon: ic.Expand, URL: url, Tooltip: "expand"})
 	return p
@@ -46,13 +48,19 @@ func (p *ActionsPanelBuilder) Build() Node {
 				Class("relative w-fit"),
 				Button(
 					Type("button"),
-					Class("peer rounded-radius bg-surface-alt border border-surface-alt px-1 py-1 font-medium tracking-wide text-on-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark dark:focus-visible:outline-primary-dark cursor-pointer"),
+					Class(
+						"peer rounded-radius bg-surface-alt border border-surface-alt px-1 py-1 font-medium tracking-wide text-on-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark dark:focus-visible:outline-primary-dark cursor-pointer",
+					),
 					attr,
-					Raw(a.Icon)),
+					Raw(a.Icon),
+				),
 				Div(
-					Class("absolute -top-9 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded-sm bg-surface-dark px-2 py-1 text-center text-sm text-on-surface-dark-strong opacity-0 transition-all ease-out peer-hover:opacity-100 peer-focus:opacity-100 pointer-events-none dark:bg-surface dark:text-on-surface-strong"),
+					Class(
+						"absolute -top-9 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded-sm bg-surface-dark px-2 py-1 text-center text-sm text-on-surface-dark-strong opacity-0 transition-all ease-out peer-hover:opacity-100 peer-focus:opacity-100 pointer-events-none dark:bg-surface dark:text-on-surface-strong",
+					),
 					Role("tooltip"),
-					Text(a.Tooltip))))
+					Text(a.Tooltip),
+				)))
 	}
 	return Span(Class("inline-flex items-center gap-1"), Group(res))
 }

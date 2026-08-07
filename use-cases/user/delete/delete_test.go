@@ -24,6 +24,7 @@ func TestDeletingMissingUserShouldFail(t *testing.T) {
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
+
 func TestDeletingMyselfShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	id := "user@example.com"
@@ -44,8 +45,10 @@ func TestDeleteUser(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.UserRepo{ExistingIds: []string{"user@example.com"},
-		ErrOnDelete: e.ErrInternal})
+	itr := New(&fk.UserRepo{
+		ExistingIds: []string{"user@example.com"},
+		ErrOnDelete: e.ErrInternal,
+	})
 	itr.Execute(t.Context(), "user@example.com", p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)

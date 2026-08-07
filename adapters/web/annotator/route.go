@@ -1,24 +1,27 @@
 package annotator
 
 import (
-	"github.com/go-chi/chi/v5"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
-var AnnotateImage = "/ui/annotate/image"
-var SubmitBox = "/ui/annotate/submit-box"
-var UpdateBox = "/ui/annotate/update-box"
-var SubmitPolygon = "/ui/annotate/submit-polygon"
-var UpdatePolygon = "/ui/annotate/update-polygon"
-var SubmitImageLabel = "/ui/annotate/submit-label"
-var AnnotationPanel = "/ui/annotate/annotation-panel"
-var Annotations = "/ui/annotate/annotations"
-var RemoveAnnotation = "/ui/annotate/remove-annotation"
-var SetLabel = "/ui/annotate/set-label"
+var (
+	AnnotateImage    = "/ui/annotate/image"
+	SubmitBox        = "/ui/annotate/submit-box"
+	UpdateBox        = "/ui/annotate/update-box"
+	SubmitPolygon    = "/ui/annotate/submit-polygon"
+	UpdatePolygon    = "/ui/annotate/update-polygon"
+	SubmitImageLabel = "/ui/annotate/submit-label"
+	AnnotationPanel  = "/ui/annotate/annotation-panel"
+	Annotations      = "/ui/annotate/annotations"
+	RemoveAnnotation = "/ui/annotate/remove-annotation"
+	SetLabel         = "/ui/annotate/set-label"
+)
 
 func (s *Server) Route(r chi.Router,
-	mws ...func(http.Handler) http.Handler) {
-
+	mws ...func(http.Handler) http.Handler,
+) {
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
 		r.Get(AnnotateImage, s.AnnotateImage)

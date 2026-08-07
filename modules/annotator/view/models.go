@@ -1,9 +1,10 @@
 package view
 
 import (
+	"io"
+
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	"io"
 )
 
 type ScrollerButton struct {

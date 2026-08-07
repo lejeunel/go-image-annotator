@@ -2,8 +2,9 @@ package pagination
 
 import (
 	"fmt"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"math"
+
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type Pagination struct {
@@ -14,15 +15,21 @@ type Pagination struct {
 }
 
 func New(page int64, pageSize int, totalRecords int64) Pagination {
-	return Pagination{TotalRecords: totalRecords,
-		Page:       page,
-		PageSize:   pageSize,
-		TotalPages: int64(math.Ceil(float64(totalRecords) / float64(pageSize)))}
+	return Pagination{
+		TotalRecords: totalRecords,
+		Page:         page,
+		PageSize:     pageSize,
+		TotalPages:   int64(math.Ceil(float64(totalRecords) / float64(pageSize))),
+	}
 }
 
 func Validate(page int64, pageSize int) error {
 	if page < 1 {
-		return fmt.Errorf("validating page number: found non-positive value (%v): %w", page, e.ErrValidation)
+		return fmt.Errorf(
+			"validating page number: found non-positive value (%v): %w",
+			page,
+			e.ErrValidation,
+		)
 	}
 	return nil
 }

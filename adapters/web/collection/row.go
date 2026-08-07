@@ -22,6 +22,7 @@ type ViewPresenter struct {
 func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
 	return ViewPresenter{w, u, e.NewErrorPresenter(w)}
 }
+
 func (p ViewPresenter) SuccessFindCollection(c clc.Collection) {
 	MakeRow(p.RowURL, c).Render(p.Writer)
 }
@@ -47,5 +48,4 @@ func MakeRow(u b.RowURL, c clc.Collection) tb.Row {
 	row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(c.CreatedAt))))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row
-
 }

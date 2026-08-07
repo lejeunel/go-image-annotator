@@ -18,7 +18,7 @@ import (
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	event_logger "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
-	"github.com/lejeunel/go-image-annotator/modules/job-queue"
+	job_queue "github.com/lejeunel/go-image-annotator/modules/job-queue"
 )
 
 type Transactor interface {
@@ -45,7 +45,8 @@ type Interactor struct {
 
 func New(r Repos, tra Transactor, g GroupRepo,
 	s st.Interface, l event_logger.Interface, logger slog.Logger, j job_queue.Interface,
-	opts ...Option) Interactor {
+	opts ...Option,
+) Interactor {
 	itr := &Interactor{r, tra, g, s, l, auth.NewVoidAuth(), clockwork.NewRealClock(), logger, j}
 	for _, opt := range opts {
 		opt(itr)
@@ -119,18 +120,29 @@ func (i *Interactor) checkCollections(source, destination string) error {
 		errs = errors.Join(errs, fmt.Errorf("source collection %q does not exist", source))
 	}
 	if existsDst {
-		errs = errors.Join(errs, fmt.Errorf("destination collection %q already exists", destination))
+		errs = errors.Join(
+			errs,
+			fmt.Errorf("destination collection %q already exists", destination),
+		)
 	}
 	return errs
-
 }
 
 func (i *Interactor) LogError(id t.TaskId, err error) {
-	i.EventLogger.AddEvent(id, e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()})
+	i.EventLogger.AddEvent(
+		id,
+		e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()},
+	)
 	i.Logger.Error(err.Error())
 }
 
-func (i *Interactor) runTask(task t.Task, source string, destination string, group *grp.Group, deep bool) {
+func (i *Interactor) runTask(
+	task t.Task,
+	source string,
+	destination string,
+	group *grp.Group,
+	deep bool,
+) {
 	errCtx := fmt.Errorf("running collection cloning task")
 	i.Logger.Info(fmt.Sprintf("started clone task %v", task.Id))
 
@@ -141,9 +153,12 @@ func (i *Interactor) runTask(task t.Task, source string, destination string, gro
 	extra := map[string]string{
 		"source-collection":      source,
 		"destination-collection": destination,
-		"deep-copy":              strconv.FormatBool(deep)}
+		"deep-copy":              strconv.FormatBool(deep),
+	}
 	if err := i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.StartedTask, Extra: extra}); err != nil {
-		i.Logger.Error(fmt.Errorf("%w: logging event upon cloning task startup: %w", errCtx, err).Error())
+		i.Logger.Error(
+			fmt.Errorf("%w: logging event upon cloning task startup: %w", errCtx, err).Error(),
+		)
 		return
 	}
 
@@ -153,7 +168,10 @@ func (i *Interactor) runTask(task t.Task, source string, destination string, gro
 	}
 
 	if err := i.CollectionRepo.Create(dst); err != nil {
-		i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()})
+		i.EventLogger.AddEvent(
+			task.Id,
+			e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()},
+		)
 		i.Logger.Error(err.Error())
 		return
 	}
@@ -195,7 +213,10 @@ func (i *Interactor) runTask(task t.Task, source string, destination string, gro
 			}
 			return nil
 		}); err != nil {
-			i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()})
+			i.EventLogger.AddEvent(
+				task.Id,
+				e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()},
+			)
 			i.Logger.Error(err.Error())
 			return
 

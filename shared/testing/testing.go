@@ -3,6 +3,7 @@ package testing
 import (
 	"context"
 	"errors"
+
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -43,8 +44,7 @@ type FakeAuth struct {
 	Fail bool
 }
 
-type FakeProvider struct {
-}
+type FakeProvider struct{}
 
 func (p FakeProvider) Provide() (*u.User, error) {
 	return &u.User{}, nil

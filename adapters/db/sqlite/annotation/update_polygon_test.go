@@ -19,8 +19,15 @@ func TestErrOnUpdateShouldFail(t *testing.T) {
 	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
 	repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
 	db.Close()
-	err := repos.Annotation.UpdatePolygon(polygon.Id,
-		a.PolygonUpdatables{LabelId: label.Id, Points: a.Points{Coordinates: [][2]float32{{0, 0}, {3, 3}}}}, nil, nil)
+	err := repos.Annotation.UpdatePolygon(
+		polygon.Id,
+		a.PolygonUpdatables{
+			LabelId: label.Id,
+			Points:  a.Points{Coordinates: [][2]float32{{0, 0}, {3, 3}}},
+		},
+		nil,
+		nil,
+	)
 
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
@@ -35,7 +42,10 @@ func TestUpdatePolygon(t *testing.T) {
 	user := u.NewUser("user@example.com")
 	repos.User.Create(user)
 
-	newPolygon := a.PolygonUpdatables{LabelId: newLabel.Id, Points: a.Points{Coordinates: [][2]float32{{0, 0}, {5, 5}}}}
+	newPolygon := a.PolygonUpdatables{
+		LabelId: newLabel.Id,
+		Points:  a.Points{Coordinates: [][2]float32{{0, 0}, {5, 5}}},
+	}
 	now := time.Now()
 	err := repos.Annotation.UpdatePolygon(polygon.Id, newPolygon, &user.Id, &now)
 	assert.NoError(t, err)

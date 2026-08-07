@@ -16,7 +16,13 @@ type Server struct {
 	DefaultPageSize int
 }
 
-func New(pb b.PageBuilder, usr u.Interactors, grp g.Interactors, rl r.Interactors, defaultPageSize int) Server {
+func New(
+	pb b.PageBuilder,
+	usr u.Interactors,
+	grp g.Interactors,
+	rl r.Interactors,
+	defaultPageSize int,
+) Server {
 	userPage := b.NewPaginatedListBuilder(pb, listUsersFields)
 	userPage.ActivateSidebarEntry(PageName)
 	return Server{userPage, b.NewRowURL(UserUrl, "id"), usr, rl, grp, defaultPageSize}

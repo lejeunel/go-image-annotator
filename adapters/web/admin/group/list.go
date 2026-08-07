@@ -29,6 +29,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 		s.Groups.Find.Execute(r.Context(), name, NewViewPresenter(w, s.RowUrl))
 	}
 }
+
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b := bf.NewHTMXCreateFormBuilder(GroupRowUrl, createGroupTargetDiv)
 	b.AddTitle("Create a new group")

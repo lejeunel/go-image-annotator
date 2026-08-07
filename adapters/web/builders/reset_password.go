@@ -20,7 +20,12 @@ func (b *ResetPasswordBuilder) makeContent() Node {
 	endpoint := rt.AddQueryParams(rt.ResetPasswordUrl, "token", b.token)
 	return Div(Class("flex justify-center"),
 		Span(
-			Div(Class("flex justify-center text-gray-900 dark:text-white font-bold text-xl mt-4 mb-4"), Text(resetPasswordTitle)),
+			Div(
+				Class(
+					"flex justify-center text-gray-900 dark:text-white font-bold text-xl mt-4 mb-4",
+				),
+				Text(resetPasswordTitle),
+			),
 			Form(
 				Attr("hx-post", endpoint.String()),
 				Attr("hx-swap", "outerHTML"),
@@ -29,7 +34,11 @@ func (b *ResetPasswordBuilder) makeContent() Node {
 				Label(For("New password"), Text("New password"), Class(st.FormLabel)),
 				Input(Type("password"), ID("password"), Name("password"), Required(),
 					Class(st.FormInput)),
-				Label(For("New password (repeat)"), Text("New password (repeat)"), Class(st.FormLabel)),
+				Label(
+					For("New password (repeat)"),
+					Text("New password (repeat)"),
+					Class(st.FormLabel),
+				),
 				Input(Type("password"), ID("password-repeat"), Name("password-repeat"), Required(),
 					Class(st.FormInput)),
 				Button(Type("submit"), Text("Submit"), Class(st.PasswordButtonClass)),
@@ -37,9 +46,11 @@ func (b *ResetPasswordBuilder) makeContent() Node {
 		),
 	)
 }
+
 func (b *ResetPasswordBuilder) SetToken(token string) {
 	b.token = token
 }
+
 func (b *ResetPasswordBuilder) Render(w io.Writer) {
 	b.BasePageBuilder.SetFrameContent(b.makeContent()).Render(w)
 }

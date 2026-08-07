@@ -2,9 +2,10 @@ package annotator
 
 import (
 	"bytes"
+	"text/template"
+
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
-	"text/template"
 )
 
 type AnnotatorData struct {
@@ -35,7 +36,8 @@ var annotatorURLs = AnnotatorURLs{
 	UpdateBox,
 	UpdatePolygon,
 	RemoveAnnotation,
-	AnnotationPanel}
+	AnnotationPanel,
+}
 
 func MakeAnnotoriousScript(imageId string, collection string) (*Node, error) {
 	tAnnot, err := template.New("annotator").ParseFS(templatesFiles, "templates/annotator.js")
@@ -47,7 +49,8 @@ func MakeAnnotoriousScript(imageId string, collection string) (*Node, error) {
 		URLs:             annotatorURLs,
 		ImageId:          imageId,
 		Collection:       collection,
-		EnableAnnotation: true}
+		EnableAnnotation: true,
+	}
 
 	err = tAnnot.ExecuteTemplate(buf, "annotator", data)
 	if err != nil {

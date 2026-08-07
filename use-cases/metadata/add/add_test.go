@@ -1,13 +1,14 @@
 package add
 
 import (
+	"testing"
+
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Setup() (Interactor, clc.Collection, im.Image, g.Group) {
@@ -63,8 +64,10 @@ func TestCheckExistenceOfKeyError(t *testing.T) {
 	p := &FakePresenter{}
 	key, value := "the-key", "the-value"
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: key, Value: value},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: key, Value: value,
+		},
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrInternal)
 }
@@ -75,18 +78,23 @@ func TestExistingKeyShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	key, value := "the-key", "the-value"
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: key, Value: value},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: key, Value: value,
+		},
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
 }
+
 func TestErrorOnCheckExistenceOfCollectionShouldFail(t *testing.T) {
 	itr, collection, image, _ := Setup()
 	itr.CollectionRepo = &fk.CollectionRepo{ErrOnExists: e.ErrInternal}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: "key", Value: "value"},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: "key", Value: "value",
+		},
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrInternal)
 }
@@ -95,8 +103,10 @@ func TestNonExistingCollectionShouldFail(t *testing.T) {
 	itr, collection, image, _ := Setup()
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: "key", Value: "value"},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: "key", Value: "value",
+		},
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
 }
@@ -107,8 +117,10 @@ func TestErrorOnCheckImageIsInCollectionShouldFail(t *testing.T) {
 	itr.ImageRepo = &fk.ImageRepo{ErrOnImageExistsInCollection: e.ErrInternal}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: "key", Value: "value"},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: "key", Value: "value",
+		},
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrInternal)
 }
@@ -119,8 +131,10 @@ func TestShouldFailWhenImageIsNotMemberOfCollection(t *testing.T) {
 	itr.ImageRepo = &fk.ImageRepo{ImageIsInCollection: false}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: "key", Value: "value"},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: "key", Value: "value",
+		},
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
 }
@@ -147,8 +161,10 @@ func TestAddMetaData(t *testing.T) {
 	p := &FakePresenter{}
 	key, value := "the-key", "the-value"
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: key, Value: value},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: key, Value: value,
+		},
 		p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, m.AddedKey, key)

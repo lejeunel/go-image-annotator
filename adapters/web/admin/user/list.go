@@ -17,8 +17,11 @@ func (s *Server) ListUsers(w http.ResponseWriter, r *http.Request) {
 	s.Page.SetUserIdentity(r.Context()).SetHTMLTitle("Users").SetTitle("Users")
 	s.Page.ActivateSidebarEntry(PageName)
 	s.Page.AddCreationButton("Create", CreateUserFormUrl, createUserTargetDiv)
-	s.Users.List.Execute(r.Context(), pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
-		NewListPresenter(w, s.Page, s.RowUrl))
+	s.Users.List.Execute(
+		r.Context(),
+		pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
+		NewListPresenter(w, s.Page, s.RowUrl),
+	)
 }
 
 func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +40,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 		s.Users.Find.Execute(r.Context(), id, NewViewPresenter(w, s.RowUrl))
 	}
 }
+
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b := bf.NewHTMXCreateFormBuilder(UserUrl, createUserTargetDiv)
 	b.AddTitle("Create a new User")

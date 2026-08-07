@@ -1,9 +1,11 @@
 package web
 
 import (
+	"io"
+
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
-	"io"
+
 	. "maragu.dev/gomponents"
 )
 

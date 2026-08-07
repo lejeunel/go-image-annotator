@@ -31,6 +31,7 @@ func (m SessionManager) AuthCookiesMiddleWare(next http.Handler) http.Handler {
 func (m SessionManager) AuthBearerMiddleWare(next http.Handler) http.Handler {
 	return m.LoadAndSave(m.AuthBearerToken(next))
 }
+
 func (m SessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, error) {
 	errCtx := fmt.Errorf("inferring user's identity from bearer token")
 	token, err := tk.DecodeAndSplitPersonalAccessToken(bearerToken)
@@ -46,6 +47,7 @@ func (m SessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, e
 	}
 	return user, nil
 }
+
 func (m SessionManager) AuthBearerToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
@@ -68,9 +70,9 @@ func (m SessionManager) AuthBearerToken(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
 func (m SessionManager) AuthFromSessionId(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		id := m.GetString(r.Context(), UserIdKey)
 		if id == "" {
 			next.ServeHTTP(w, r)
@@ -86,12 +88,14 @@ func (m SessionManager) AuthFromSessionId(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
 func (m SessionManager) Logout(ctx context.Context) error {
 	if err := m.SessionManager.RenewToken(ctx); err != nil {
 		return err
 	}
 	return m.SessionManager.Clear(ctx)
 }
+
 func (m SessionManager) FinishOAuthLogin(ctx context.Context, id string) error {
 	errCtx := fmt.Errorf("logging in user %v", id)
 	if _, err := m.Repo.Find(id); err != nil {
@@ -103,6 +107,7 @@ func (m SessionManager) FinishOAuthLogin(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
 func (m SessionManager) PasswordLogin(ctx context.Context, email, password string) error {
 	errCtx := fmt.Errorf("logging in user %v using password method", email)
 	user, err := m.Repo.Find(email)
@@ -118,6 +123,7 @@ func (m SessionManager) PasswordLogin(ctx context.Context, email, password strin
 	}
 	return nil
 }
+
 func (m SessionManager) initSession(ctx context.Context, id string) error {
 	if err := m.SessionManager.RenewToken(ctx); err != nil {
 		return fmt.Errorf("initializing session: renewing token %w", err)
@@ -141,10 +147,13 @@ func (bw *bufferedResponseWriter) WriteHeader(code int) {
 }
 
 func NewSQLiteSessionManager(db *sql.DB, repo readusr.Repo,
-	verifier tk.TokenVerifier) SessionManager {
+	verifier tk.TokenVerifier,
+) SessionManager {
 	store := sqlite3store.New(db)
-	m := SessionManager{SessionManager: scs.New(), Repo: repo,
-		TokenVerifier: verifier}
+	m := SessionManager{
+		SessionManager: scs.New(), Repo: repo,
+		TokenVerifier: verifier,
+	}
 	m.Store = store
 	return m
 }

@@ -26,7 +26,8 @@ func TestErrorOnListShouldFail(t *testing.T) {
 func TestList(t *testing.T) {
 	items := []m.MetaData{
 		{Key: "first-key", Value: "hello"},
-		{Key: "second-key", Value: 123}}
+		{Key: "second-key", Value: 123},
+	}
 	itr := New(&fk.MetaDataRepo{ReturnList: items})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),

@@ -29,6 +29,7 @@ func (m FormMode) Verb() string {
 		return ""
 	}
 }
+
 func (m FormMode) HTMXMethod() string {
 	switch m {
 	case EditMode:
@@ -56,7 +57,11 @@ func WithMode(m FormMode) FormOption {
 	}
 }
 
-func NewHTMXInlineFormBuilder(numColumns int, endpoint url.URL, opts ...FormOption) HTMXInlineFormBuilder {
+func NewHTMXInlineFormBuilder(
+	numColumns int,
+	endpoint url.URL,
+	opts ...FormOption,
+) HTMXInlineFormBuilder {
 	f := &HTMXInlineFormBuilder{
 		endpoint:   endpoint,
 		numColumns: numColumns,
@@ -68,32 +73,40 @@ func NewHTMXInlineFormBuilder(numColumns int, endpoint url.URL, opts ...FormOpti
 	}
 	return *f
 }
-func (b *HTMXInlineFormBuilder) AddTextField(fieldName, displayName string, opts ...FormTextFieldOption) *HTMXInlineFormBuilder {
+
+func (b *HTMXInlineFormBuilder) AddTextField(
+	fieldName, displayName string,
+	opts ...FormTextFieldOption,
+) *HTMXInlineFormBuilder {
 	field := NewFormTextField(fieldName, displayName, opts...)
 	b.fields = append(b.fields, field)
 	return b
 }
+
 func (b *HTMXInlineFormBuilder) AddSelectableCombobox(title, id string) *SelectableCombobox {
 	box := NewSelectableCombobox(title, id)
 	b.fields = append(b.fields, &box)
 	return &box
 }
+
 func (b *HTMXInlineFormBuilder) AddCombobox(title, id string) *Combobox {
 	box := NewCombobox(title, id)
 	b.fields = append(b.fields, &box)
 	return &box
 }
+
 func (b *HTMXInlineFormBuilder) AddCheckbox(fieldName, displayName string) *HTMXInlineFormBuilder {
 	field := NewFormCheckboxField(fieldName, displayName)
 	b.fields = append(b.fields, field)
 	return b
 }
+
 func (b *HTMXInlineFormBuilder) SetResourceName(name string) *HTMXInlineFormBuilder {
 	b.resourceName = name
 	return b
 }
-func (b HTMXInlineFormBuilder) Render(w io.Writer) {
 
+func (b HTMXInlineFormBuilder) Render(w io.Writer) {
 	var caption Node
 	if b.resourceName != "" {
 		caption = Div(
@@ -130,5 +143,4 @@ func (b HTMXInlineFormBuilder) Render(w io.Writer) {
 	)
 
 	form.Render(w)
-
 }

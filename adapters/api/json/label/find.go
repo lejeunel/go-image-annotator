@@ -1,11 +1,12 @@
 package label
 
 import (
+	"log/slog"
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	l "github.com/lejeunel/go-image-annotator/entities/label"
-	"log/slog"
-	"net/http"
 )
 
 type Find struct {
@@ -20,7 +21,6 @@ func (p Find) SuccessFindLabel(r l.Label) {
 	}
 
 	json.WriteJSON(p.Writer, 200, response)
-
 }
 
 func NewFindPresenter(w http.ResponseWriter, l slog.Logger) Find {

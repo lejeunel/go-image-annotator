@@ -1,8 +1,9 @@
 package error
 
 import (
-	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	"net/http"
+
+	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 )
 
 type ErrorPresenter struct {

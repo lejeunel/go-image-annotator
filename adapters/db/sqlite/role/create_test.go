@@ -17,5 +17,4 @@ func TestInternalErrOnCreateShouldFail(t *testing.T) {
 func TestCreate(t *testing.T) {
 	_, err := CreateRole(NewTestSQLiteRoleRepo(), "a-role")
 	assert.NoError(t, err, "expected no error on create but got")
-
 }

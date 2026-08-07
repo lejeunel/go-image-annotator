@@ -25,6 +25,7 @@ func NewDeleteGroupPresenter(w http.ResponseWriter) DeleteGroupPresenter {
 func (p DeleteGroupPresenter) SuccessDeleteGroup(name string) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(name))
 }
+
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	s.Groups.Delete.Execute(r.Context(),
 		r.URL.Query().Get(resourceUrlFieldName),

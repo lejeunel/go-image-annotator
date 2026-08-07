@@ -39,8 +39,8 @@ func (a Authorizer) checkForGroup(userGroups []string, neededGroup string) error
 	}
 	return fmt.Errorf("checking membership to group %v: %w", neededGroup, e.ErrAuthorization)
 }
-func (a Authorizer) checkForRole(userRoles []string, method string) error {
 
+func (a Authorizer) checkForRole(userRoles []string, method string) error {
 	for _, role := range userRoles {
 		if slices.Contains(a.Rules[role], method) {
 			return nil
@@ -49,8 +49,13 @@ func (a Authorizer) checkForRole(userRoles []string, method string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("checking for role access given user roles %v: %w", userRoles, e.ErrAuthorization)
+	return fmt.Errorf(
+		"checking for role access given user roles %v: %w",
+		userRoles,
+		e.ErrAuthorization,
+	)
 }
+
 func (a Authorizer) check(ctx context.Context, method string, group *string) error {
 	errCtx := "authorizing request"
 	user := u.IdentityFromContext(ctx)
@@ -65,79 +70,102 @@ func (a Authorizer) check(ctx context.Context, method string, group *string) err
 		if err := a.checkForGroup(user.Groups, *group); err != nil {
 			return fmt.Errorf("%v: %w", errCtx, err)
 		}
-
 	}
 	return nil
 }
+
 func (a *Authorizer) SetAuthRules(rules Policies) {
 	a.Rules = rules
 }
+
 func (a Authorizer) CreateCollection(ctx context.Context, group string) error {
 	return a.check(ctx, "CreateCollection", &group)
 }
+
 func (a Authorizer) DeleteCollection(ctx context.Context, group string) error {
 	return a.check(ctx, "DeleteCollection", &group)
 }
+
 func (a Authorizer) UpdateCollection(ctx context.Context, group string) error {
 	return a.check(ctx, "UpdateCollection", &group)
 }
+
 func (a Authorizer) CreateLabel(ctx context.Context) error {
 	return a.check(ctx, "CreateLabel", nil)
 }
+
 func (a Authorizer) DeleteLabel(ctx context.Context) error {
 	return a.check(ctx, "DeleteLabel", nil)
 }
+
 func (a Authorizer) UpdateLabel(ctx context.Context) error {
 	return a.check(ctx, "UpdateLabel", nil)
 }
+
 func (a Authorizer) Annotate(ctx context.Context, group string) error {
 	return a.check(ctx, "Annotate", &group)
 }
+
 func (a Authorizer) DeleteImage(ctx context.Context, group string) error {
 	return a.check(ctx, "DeleteImage", &group)
 }
+
 func (a Authorizer) ImportImage(ctx context.Context, group string) error {
 	return a.check(ctx, "ImportImage", &group)
 }
+
 func (a Authorizer) IngestImage(ctx context.Context, group string) error {
 	return a.check(ctx, "IngestImage", &group)
 }
+
 func (a Authorizer) CreateUser(ctx context.Context) error {
 	return a.check(ctx, "CreateUser", nil)
 }
+
 func (a Authorizer) DeleteUser(ctx context.Context) error {
 	return a.check(ctx, "DeleteUser", nil)
 }
+
 func (a Authorizer) ListUsers(ctx context.Context) error {
 	return a.check(ctx, "ListUsers", nil)
 }
+
 func (a Authorizer) FindUser(ctx context.Context) error {
 	return a.check(ctx, "FindUser", nil)
 }
+
 func (a Authorizer) CreateGroup(ctx context.Context) error {
 	return a.check(ctx, "CreateGroup", nil)
 }
+
 func (a Authorizer) DeleteGroup(ctx context.Context) error {
 	return a.check(ctx, "DeleteGroup", nil)
 }
+
 func (a Authorizer) UpdateGroup(ctx context.Context) error {
 	return a.check(ctx, "UpdateGroup", nil)
 }
+
 func (a Authorizer) CreateRole(ctx context.Context) error {
 	return a.check(ctx, "CreateRole", nil)
 }
+
 func (a Authorizer) DeleteRole(ctx context.Context) error {
 	return a.check(ctx, "DeleteRole", nil)
 }
+
 func (a Authorizer) UpdateRole(ctx context.Context) error {
 	return a.check(ctx, "UpdateRole", nil)
 }
+
 func (a Authorizer) CloneCollection(ctx context.Context, group string) error {
 	return a.check(ctx, "CloneCollection", nil)
 }
+
 func (a Authorizer) UpdateUserPrivileges(ctx context.Context) error {
 	return a.check(ctx, "UpdateUserPrivileges", nil)
 }
+
 func (a Authorizer) ReadPolicies(ctx context.Context) error {
 	return a.check(ctx, "ReadPolicies", nil)
 }

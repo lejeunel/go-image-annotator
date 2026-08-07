@@ -64,6 +64,7 @@ func TestAssignNonExistingLabelShouldFail(t *testing.T) {
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
+
 func TestAddUserIdFromContext(t *testing.T) {
 	p := &FakePresenter{}
 	image := CreateImage()
@@ -75,6 +76,7 @@ func TestAddUserIdFromContext(t *testing.T) {
 	assert.NotNil(t, repo.GotUserId)
 	assert.Equal(t, user.Id, *repo.GotUserId)
 }
+
 func TestTime(t *testing.T) {
 	p := &FakePresenter{}
 	image := CreateImage()
@@ -91,9 +93,11 @@ func TestAssignLabelToImage(t *testing.T) {
 	p := &FakePresenter{}
 	image := CreateImage()
 	label := lbl.NewLabel(lbl.NewLabelId(), "al-label")
-	req := Request{ImageId: image.Id.String(),
+	req := Request{
+		ImageId:    image.Id.String(),
 		Collection: image.Collection.Name,
-		Label:      label.Name}
+		Label:      label.Name,
+	}
 	repo := &fk.AnnotationRepo{}
 	itr := New(repo,
 		&fk.LabelRepo{Return: label},

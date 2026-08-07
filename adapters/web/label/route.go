@@ -1,14 +1,15 @@
 package label
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	rt "github.com/lejeunel/go-image-annotator/routes"
-	"net/http"
 )
 
 func (s *Server) Route(r chi.Router,
-	mws ...func(http.Handler) http.Handler) {
-
+	mws ...func(http.Handler) http.Handler,
+) {
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
 		r.Get(rt.LabelsUrl, s.List)
@@ -17,6 +18,5 @@ func (s *Server) Route(r chi.Router,
 		r.Delete(LabelUrl, s.Delete)
 		r.Put(LabelUrl, s.Edit)
 		r.Get(CreateLabelFormUrl, s.CreateForm)
-
 	})
 }

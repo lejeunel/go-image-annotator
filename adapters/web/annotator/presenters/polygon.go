@@ -34,18 +34,19 @@ type PolygonTarget struct {
 }
 
 func ToAddPolygonRequest(r AnnotoriousPolygonRequest) addpoly.Request {
-	return addpoly.Request{ImageId: r.ImageId, Collection: r.Collection,
+	return addpoly.Request{
+		ImageId: r.ImageId, Collection: r.Collection,
 		Label:  r.Label,
 		Points: a.Points{Coordinates: r.Annotation.Target.Selector.Geometry.Points},
 	}
 }
 
 func ToUpdatePolygonRequest(r AnnotoriousPolygonModel) updpoly.Request {
-
-	return updpoly.Request{AnnotationId: r.AnnotationId,
-		Label:  r.Bodies[0].Value,
-		Points: a.Points{Coordinates: r.Target.Selector.Geometry.Points}}
-
+	return updpoly.Request{
+		AnnotationId: r.AnnotationId,
+		Label:        r.Bodies[0].Value,
+		Points:       a.Points{Coordinates: r.Target.Selector.Geometry.Points},
+	}
 }
 
 func ConvertPolygonsToAnnotorious(polygons []v.Polygon) []AnnotoriousPolygonModel {
@@ -64,7 +65,12 @@ func ConvertPolygonsToAnnotorious(polygons []v.Polygon) []AnnotoriousPolygonMode
 							MinX: p.Points.MinX(),
 							MinY: p.Points.MinY(),
 							MaxX: p.Points.MaxX(),
-							MaxY: p.Points.MaxY()}}}}})
+							MaxY: p.Points.MaxY(),
+						},
+					},
+				},
+			},
+		})
 	}
 	return result
 }

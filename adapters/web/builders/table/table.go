@@ -16,6 +16,7 @@ type TableBuilder struct {
 func NewTableBuilder(fields []string) TableBuilder {
 	return TableBuilder{fields: fields}
 }
+
 func (t TableBuilder) NumRows() int {
 	return len(t.rows)
 }
@@ -27,11 +28,16 @@ func (t *TableBuilder) Build() Node {
 			Pre(Class("font-mono whitespace-pre text-sm leading-tight"), Raw(emptyAsciiIcon)),
 		)
 	}
-	return Div(Class("overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark"),
-		Table(Class("table-fixed w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
+	return Div(
+		Class(
+			"overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark",
+		),
+		Table(
+			Class("table-fixed w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
 			TableHeader(t.fields),
 			TableBody(t.rows),
-		))
+		),
+	)
 }
 
 func (t *TableBuilder) AddRow(r Row) {
@@ -60,7 +66,6 @@ func (r Row) Build() Node {
 				Attr(c.ExtraAttr),
 				c.Content)
 		}))
-
 }
 
 func (r Row) Render(w io.Writer) {
@@ -68,10 +73,16 @@ func (r Row) Render(w io.Writer) {
 }
 
 func TableHeader(fields []string) Node {
-	return THead(Tr(Class("border-b border-outline bg-surface-alt text-sm text-on-surface-strong dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark-strong"),
-		Map(fields, func(f string) Node {
-			return Th(Scope("col"), Class("p-2"), Text(f))
-		})))
+	return THead(
+		Tr(
+			Class(
+				"border-b border-outline bg-surface-alt text-sm text-on-surface-strong dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark-strong",
+			),
+			Map(fields, func(f string) Node {
+				return Th(Scope("col"), Class("p-2"), Text(f))
+			}),
+		),
+	)
 }
 
 func TableBody(rows []Row) Node {
@@ -81,7 +92,6 @@ func TableBody(rows []Row) Node {
 		Attr("hx-swap", "outerHTML"),
 		Map(rows, func(r Row) Node {
 			return r.Build()
-
 		}),
 	)
 }

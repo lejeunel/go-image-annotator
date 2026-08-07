@@ -41,7 +41,9 @@ func (i Interactor) Execute(id string, out OutputPort) {
 		out.Error(fmt.Errorf("%v: fetching image specifications: %w", errCtx, err))
 		return
 	}
-	reader, err := i.fileGetter.Get(fmt.Sprintf("%v.%v", imageId.String(), strings.Split(specs.MIMEType, "/")[1]))
+	reader, err := i.fileGetter.Get(
+		fmt.Sprintf("%v.%v", imageId.String(), strings.Split(specs.MIMEType, "/")[1]),
+	)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: fetching raw-data: %w", errCtx, err))
 		return

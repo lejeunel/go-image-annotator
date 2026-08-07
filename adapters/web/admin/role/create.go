@@ -2,9 +2,10 @@ package role
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"github.com/lejeunel/go-image-annotator/use-cases/role/create"
-	"net/http"
 )
 
 type CreateRolePresenter struct {
@@ -21,9 +22,11 @@ func NewCreateRolePresenter(w http.ResponseWriter) CreateRolePresenter {
 	}
 	return CreateRolePresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
+
 func (p CreateRolePresenter) SuccessCreateRole(r create.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
+
 func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form data", http.StatusBadRequest)
@@ -32,6 +35,7 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 	s.Roles.Create.Execute(r.Context(),
 		create.Request{
 			Name:        r.FormValue(createNameFieldName),
-			Description: r.FormValue(createDescriptionFieldName)},
+			Description: r.FormValue(createDescriptionFieldName),
+		},
 		NewCreateRolePresenter(w))
 }

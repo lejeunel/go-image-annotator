@@ -30,9 +30,11 @@ func TestUpdateGroup(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.GroupRepo{ExistingNames: []string{name}}
 	itr := New(repo)
-	req := Request{Name: name,
+	req := Request{
+		Name:           name,
 		NewName:        "updated-name",
-		NewDescription: "updated-description"}
+		NewDescription: "updated-description",
+	}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, req.NewName, p.Got.Name)
 	assert.Equal(t, req.NewDescription, p.Got.Description)
@@ -59,8 +61,10 @@ func TestUpdateGroupWithUnchangedNameShouldSucceed(t *testing.T) {
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
 	name := "name"
-	itr := New(&fk.GroupRepo{ExistingNames: []string{name},
-		ErrOnUpdate: e.ErrInternal})
+	itr := New(&fk.GroupRepo{
+		ExistingNames: []string{name},
+		ErrOnUpdate:   e.ErrInternal,
+	})
 	itr.Execute(t.Context(),
 		Request{Name: name, NewName: name}, p)
 	assert.True(t, p.GotInternalErr)

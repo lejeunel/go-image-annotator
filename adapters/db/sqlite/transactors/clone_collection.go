@@ -15,8 +15,8 @@ func NewCloneCollectionTransactor(db *sqlx.DB) *CloneCollectionTransactor {
 }
 
 func (u *CloneCollectionTransactor) RunInTx(
-	fn func(cl.Repos) error) error {
-
+	fn func(cl.Repos) error,
+) error {
 	tx, err := u.db.Beginx()
 	if err != nil {
 		return err

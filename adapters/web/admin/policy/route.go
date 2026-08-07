@@ -13,7 +13,6 @@ import (
 )
 
 func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
-
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
 		r.Get(rt.AdminPoliciesUrl, s.Edit)

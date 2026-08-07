@@ -3,6 +3,7 @@ package assign_label
 import (
 	"context"
 	"fmt"
+
 	"github.com/jonboulle/clockwork"
 
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
@@ -28,7 +29,6 @@ type Interactor struct {
 }
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-
 	errCtx := "assigning label to image"
 
 	imageId, err := im.NewImageIdFromString(r.ImageId)
@@ -48,7 +48,6 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
-
 	}
 
 	label, err := i.findLabel(r.Label)
@@ -67,16 +66,18 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		ImageId:      r.ImageId,
 		Collection:   r.Collection,
 		Label:        r.Label,
-		AnnotationId: imageLabel.Id.String()})
+		AnnotationId: imageLabel.Id.String(),
+	})
 }
+
 func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 	label, err := i.labelRepo.FindLabel(name)
 	if err != nil {
 		return nil, err
 	}
 	return label, nil
-
 }
+
 func (i Interactor) findImage(imageId im.ImageId, collection string) (*im.Image, error) {
 	image, err := i.store.Find(im.BaseImage{ImageId: imageId, Collection: collection})
 	if err != nil {
@@ -84,7 +85,13 @@ func (i Interactor) findImage(imageId im.ImageId, collection string) (*im.Image,
 	}
 	return image, nil
 }
-func (i Interactor) addLabel(ctx context.Context, imageId im.ImageId, collectionId clc.CollectionId, label lbl.Label) (*an.ImageLabel, error) {
+
+func (i Interactor) addLabel(
+	ctx context.Context,
+	imageId im.ImageId,
+	collectionId clc.CollectionId,
+	label lbl.Label,
+) (*an.ImageLabel, error) {
 	var userId *u.UserId
 	user := u.IdentityFromContext(ctx)
 	if user != nil {
@@ -97,7 +104,6 @@ func (i Interactor) addLabel(ctx context.Context, imageId im.ImageId, collection
 		return nil, err
 	}
 	return &imageLabel, nil
-
 }
 
 type Option func(*Interactor)
@@ -107,6 +113,7 @@ func WithAuth(a auth.Auth) Option {
 		i.auth = a
 	}
 }
+
 func WithClock(c clockwork.Clock) Option {
 	return func(i *Interactor) {
 		i.clock = c
@@ -114,12 +121,14 @@ func WithClock(c clockwork.Clock) Option {
 }
 
 func New(repo AnnotationRepo, labelRepo LabelRepo, store st.Interface, opts ...Option) Interactor {
-	i := &Interactor{annotationRepo: repo,
-		labelRepo: labelRepo,
-		store:     store,
-		clock:     clockwork.NewRealClock(),
+	i := &Interactor{
+		annotationRepo: repo,
+		labelRepo:      labelRepo,
+		store:          store,
+		clock:          clockwork.NewRealClock(),
 
-		auth: sauth.NewVoidAuth()}
+		auth: sauth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}

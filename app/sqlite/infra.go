@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"fmt"
+
 	"github.com/jmoiron/sqlx"
 	an "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/annotation"
 	clc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
@@ -57,5 +58,4 @@ func NewLocalFSInfra(db *sqlx.DB, basePath string) LocalFSInfra {
 		User:            usrrepo,
 		Db:              db,
 	}
-
 }

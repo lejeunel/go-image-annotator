@@ -51,8 +51,10 @@ func TestUpdateBoundingBox(t *testing.T) {
 	user := u.NewUser("user@example.com")
 	repos.User.Create(user)
 
-	newBox := a.BoundingBoxUpdatables{LabelId: newLabel.Id, Xc: 2, Yc: 3, Width: 4, Height: 10,
-		Angle: -1}
+	newBox := a.BoundingBoxUpdatables{
+		LabelId: newLabel.Id, Xc: 2, Yc: 3, Width: 4, Height: 10,
+		Angle: -1,
+	}
 
 	now := time.Now()
 	err := repos.Annotation.UpdateBoundingBox(annotationId, newBox, &user.Id, &now)

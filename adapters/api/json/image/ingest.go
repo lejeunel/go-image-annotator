@@ -21,7 +21,6 @@ func (p Ingest) Success(r ig.Response) {
 	}
 
 	json.WriteJSON(p.Writer, 200, response)
-
 }
 
 func NewIngestPresenter(w http.ResponseWriter, l slog.Logger) Ingest {

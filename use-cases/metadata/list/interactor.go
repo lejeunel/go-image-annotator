@@ -20,7 +20,6 @@ func New(m MetaDataRepo) Interactor {
 }
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-
 	errCtx := fmt.Errorf("listing metadata for image %v and collection %v", r.ImageId, r.Collection)
 
 	imageId, err := im.NewImageIdFromString(r.ImageId)
@@ -36,5 +35,4 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	out.SuccessListMetadata(meta)
-
 }

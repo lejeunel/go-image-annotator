@@ -16,7 +16,8 @@ type Interactor struct {
 }
 
 func New(ur UserRepo, gr GroupRepo, rr RoleRepo, opts ...Option) Interactor {
-	i := &Interactor{userRepo: ur,
+	i := &Interactor{
+		userRepo:  ur,
 		groupRepo: gr,
 		roleRepo:  rr,
 		auth:      auth.NewVoidAuth(),
@@ -47,7 +48,9 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 			return
 		}
 		if !*exists {
-			out.Error(fmt.Errorf("%v: checking whether group %v exists: %w", errCtx, g, e.ErrNotFound))
+			out.Error(
+				fmt.Errorf("%v: checking whether group %v exists: %w", errCtx, g, e.ErrNotFound),
+			)
 			return
 		}
 	}
@@ -64,7 +67,9 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 			return
 		}
 		if !*exists {
-			out.Error(fmt.Errorf("%v: checking whether role %v exists: %w", errCtx, role, e.ErrNotFound))
+			out.Error(
+				fmt.Errorf("%v: checking whether role %v exists: %w", errCtx, role, e.ErrNotFound),
+			)
 			return
 		}
 	}

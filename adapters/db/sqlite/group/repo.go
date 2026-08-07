@@ -1,10 +1,9 @@
 package group
 
 import (
-	"fmt"
-
 	"database/sql"
 	"errors"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -32,19 +31,18 @@ func (r SQLiteGroupRepo) Create(grp g.Group) error {
 
 	return nil
 }
+
 func (r SQLiteGroupRepo) rowToEntity(row Row) g.Group {
 	c := g.NewGroup(row.Id, row.Name,
 		g.WithDescription(row.Description))
 	return c
-
 }
-func (r SQLiteGroupRepo) Find(name string) (*g.Group, error) {
 
+func (r SQLiteGroupRepo) Find(name string) (*g.Group, error) {
 	errCtx := fmt.Errorf("fetching group with name %v", name)
 	row := Row{}
 	err := r.Db.Get(&row,
 		`SELECT id,name,description FROM groups WHERE name=$1`, name)
-
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -57,42 +55,54 @@ func (r SQLiteGroupRepo) Find(name string) (*g.Group, error) {
 	entity := r.rowToEntity(row)
 	return &entity, nil
 }
+
 func (r SQLiteGroupRepo) IsPopulated(name string) (*bool, error) {
 	var exists bool
-	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM collections WHERE group_id=(SELECT id FROM groups WHERE name=$1))`, name)
+	err := r.Db.Get(
+		&exists,
+		`SELECT EXISTS (SELECT 1 FROM collections WHERE group_id=(SELECT id FROM groups WHERE name=$1))`,
+		name,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("checking whether group is used: %v: %w", err, e.ErrInternal)
 	}
 
 	return &exists, nil
 }
+
 func (r SQLiteGroupRepo) Exists(name string) (*bool, error) {
 	var exists bool
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM groups WHERE name = $1)`, name)
 	if err != nil {
-		return nil, fmt.Errorf("checking whether group with name %v exists: %v: %w", name, err, e.ErrInternal)
+		return nil, fmt.Errorf(
+			"checking whether group with name %v exists: %v: %w",
+			name,
+			err,
+			e.ErrInternal,
+		)
 	}
 
 	return &exists, nil
 }
+
 func (r SQLiteGroupRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM groups WHERE name=$1", name)
-
 	if err != nil {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 }
+
 func (r SQLiteGroupRepo) Update(m g.UpdateModel) error {
 	query := "UPDATE groups SET name=$1,description=$2 WHERE name=$3"
 	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
-
 	if err != nil {
 		return fmt.Errorf("updating record: %v: %w", err, e.ErrInternal)
 	}
 
 	return nil
 }
+
 func (r SQLiteGroupRepo) IsUsed(name string) (*bool, error) {
 	var count int64
 
@@ -102,19 +112,28 @@ func (r SQLiteGroupRepo) IsUsed(name string) (*bool, error) {
 	query = "SELECT COUNT(*) FROM users_groups WHERE group_id=(SELECT id FROM groups WHERE name=$1)"
 	err = r.Db.QueryRow(query, name).Scan(&count)
 	if err != nil {
-		return nil, fmt.Errorf("checking whether group is assigned to user: %v: %w", err, e.ErrInternal)
+		return nil, fmt.Errorf(
+			"checking whether group is assigned to user: %v: %w",
+			err,
+			e.ErrInternal,
+		)
 	}
 	isUsed = count > 0
 
 	query = "SELECT COUNT(*) FROM collections WHERE group_id=(SELECT id FROM groups WHERE name=$1)"
 	err = r.Db.QueryRow(query, name).Scan(&count)
 	if err != nil {
-		return nil, fmt.Errorf("checking whether group is assigned to collection: %v: %w", err, e.ErrInternal)
+		return nil, fmt.Errorf(
+			"checking whether group is assigned to collection: %v: %w",
+			err,
+			e.ErrInternal,
+		)
 	}
 	isUsed = isUsed || count > 0
 
 	return &isUsed, nil
 }
+
 func (r SQLiteGroupRepo) Count() (*int64, error) {
 	var count int64
 
@@ -126,6 +145,7 @@ func (r SQLiteGroupRepo) Count() (*int64, error) {
 
 	return &count, nil
 }
+
 func (r SQLiteGroupRepo) List() ([]g.Group, error) {
 	q := sq.StatementBuilder.Select(`id,name,description`).From("groups")
 	sql, args, err := q.ToSql()

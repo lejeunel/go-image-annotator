@@ -2,9 +2,10 @@ package user
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
-	"net/http"
 )
 
 type CreateUserPresenter struct {
@@ -21,9 +22,11 @@ func NewCreateUserPresenter(w http.ResponseWriter) CreateUserPresenter {
 	}
 	return CreateUserPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
+
 func (p CreateUserPresenter) SuccessCreateUser(r create.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
+
 func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form data", http.StatusBadRequest)

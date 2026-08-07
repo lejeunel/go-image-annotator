@@ -33,5 +33,4 @@ func MaybeSetupGoogle(pb *b.LoginPageBuilder, baseURL string) {
 		pb.AddOAuthProvider("google", rt.MakeOAuthLoginURL("google"))
 		goth.UseProviders(google.New(id, secret, rt.MakeOAuthCallbackURL(baseURL, "google")))
 	}
-
 }

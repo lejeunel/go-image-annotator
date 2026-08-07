@@ -25,6 +25,7 @@ func NewEditGroupPresenter(w http.ResponseWriter) EditGroupPresenter {
 func (p EditGroupPresenter) SuccessUpdateCollection(r update.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
+
 func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form data", http.StatusBadRequest)

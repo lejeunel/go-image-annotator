@@ -37,10 +37,12 @@ func WithClock(c clockwork.Clock) Option {
 }
 
 func New(repo AnnotationRepo, labelRepo LabelRepo, opts ...Option) Interactor {
-	i := &Interactor{annotationRepo: repo,
-		labelRepo: labelRepo,
-		clock:     clockwork.NewRealClock(),
-		auth:      sauth.NewVoidAuth()}
+	i := &Interactor{
+		annotationRepo: repo,
+		labelRepo:      labelRepo,
+		clock:          clockwork.NewRealClock(),
+		auth:           sauth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -88,5 +90,4 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	out.SuccessUpdateLabel(Response{})
-
 }

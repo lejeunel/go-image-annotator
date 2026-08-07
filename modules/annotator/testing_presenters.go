@@ -9,8 +9,7 @@ import (
 	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 )
 
-type FakeScrollerPresenter struct {
-}
+type FakeScrollerPresenter struct{}
 
 func (p *FakeScrollerPresenter) SuccessInitScroller(scr.ScrollerState) {
 }

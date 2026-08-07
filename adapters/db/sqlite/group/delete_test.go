@@ -1,12 +1,13 @@
 package group
 
 import (
+	"testing"
+
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	clcr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestCreatedExists(t *testing.T) {
@@ -47,7 +48,11 @@ func TestGroupPopulatedWithCollection(t *testing.T) {
 	clcRepo := clcr.NewSQLiteCollectionRepo(db)
 	groupRepo := NewSQLiteGroupRepo(db)
 	group, _ := CreateGroup(groupRepo, "a-group")
-	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection", clc.WithGroup(group.Name))
+	collection := clc.NewCollection(
+		clc.NewCollectionId(),
+		"a-collection",
+		clc.WithGroup(group.Name),
+	)
 	clcRepo.Create(collection)
 	isPopulated, err := groupRepo.IsPopulated(group.Name)
 	assert.NoError(t, err)

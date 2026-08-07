@@ -33,30 +33,38 @@ type PageBuilder struct {
 }
 
 func NewPageBuilder(base BasePageBuilder, version g.Info) PageBuilder {
-	return PageBuilder{BasePageBuilder: base, APIPath: rt.APIRootUrl, RepoURL: g.RepoURL, DocsURL: g.DocsURL,
-		Version: version, SidebarEntries: make(map[string]cmp.SidebarEntry)}
+	return PageBuilder{
+		BasePageBuilder: base, APIPath: rt.APIRootUrl, RepoURL: g.RepoURL, DocsURL: g.DocsURL,
+		Version: version, SidebarEntries: make(map[string]cmp.SidebarEntry),
+	}
 }
+
 func (b *PageBuilder) SetHTMLTitle(title string) *PageBuilder {
 	b.BasePageBuilder.SetHTMLTitle(title)
 	return b
 }
+
 func (b *PageBuilder) SetTitle(title string) *PageBuilder {
 	b.BasePageBuilder.SetTitle(title)
 	return b
 }
+
 func (b *PageBuilder) SetActiveSection(a cmp.ActivePage) *PageBuilder {
 	b.ActivePage = a
 	return b
 }
+
 func (b *PageBuilder) SetUserIdentity(ctx context.Context) *PageBuilder {
 	id := u.IdentityFromContext(ctx)
 	b.User = id
 	return b
 }
+
 func (b *PageBuilder) AddSidebarTitle(title string) *PageBuilder {
 	b.SidebarTitle = title
 	return b
 }
+
 func (b *PageBuilder) ActivateSidebarEntry(name string) *PageBuilder {
 	b.SidebarEntries = maps.Clone(b.SidebarEntries)
 	for k, v := range b.SidebarEntries {
@@ -69,12 +77,14 @@ func (b *PageBuilder) ActivateSidebarEntry(name string) *PageBuilder {
 	}
 	return b
 }
+
 func (b *PageBuilder) AddSidebarEntry(name, icon, url string, isActive bool) *PageBuilder {
 	b.SidebarEntries = maps.Clone(b.SidebarEntries)
 	b.SidebarEntries[name] = cmp.SidebarEntry{Label: name, Icon: icon, Url: url, IsActive: isActive}
 	b.SidebarEntriesOrder = append(b.SidebarEntriesOrder, name)
 	return b
 }
+
 func (b *PageBuilder) markdownToHTML(data string) string {
 	md := goldmark.New()
 	var buf bytes.Buffer
@@ -83,18 +93,22 @@ func (b *PageBuilder) markdownToHTML(data string) string {
 	}
 	return buf.String()
 }
+
 func (b *PageBuilder) AddMarkdownPreamble(md string) *PageBuilder {
 	b.preamble = b.markdownToHTML(md)
 	return b
 }
+
 func (b *PageBuilder) AddMarkdownPostamble(md string) *PageBuilder {
 	b.postamble = b.markdownToHTML(md)
 	return b
 }
+
 func (b *PageBuilder) SetContent(content Node) *PageBuilder {
 	b.content = content
 	return b
 }
+
 func (b *PageBuilder) Render(w io.Writer) {
 	if b.User == nil {
 		b.BasePageBuilder.SetError(fmt.Errorf("current user has not been set"))
@@ -109,7 +123,13 @@ func (b *PageBuilder) Render(w io.Writer) {
 	}
 
 	if b.preamble != "" {
-		content = Div(content, Div(Class("flex flex-col w-150"), Article(Class("prose dark:prose-invert max-w-none mb-4"), Raw(b.preamble))))
+		content = Div(
+			content,
+			Div(
+				Class("flex flex-col w-150"),
+				Article(Class("prose dark:prose-invert max-w-none mb-4"), Raw(b.preamble)),
+			),
+		)
 	}
 
 	content = Div(content, b.content)
@@ -128,9 +148,14 @@ func (b *PageBuilder) Render(w io.Writer) {
 		}
 		sidebar.Render(&bufSidebar)
 		content = Div(Class("relative flex w-full flex-col"),
-			Nav(Attr("x-cloak"),
-				Class(`fixed left-0 top-14 z-20 flex h-svh w-60 shrink-0 flex-col border-r border-outline bg-surface-alt p-4 transition-transform duration-300
-                      dark:border-outline-dark dark:bg-surface-dark-alt`), Raw(bufSidebar.String())),
+			Nav(
+				Attr("x-cloak"),
+				Class(
+					`fixed left-0 top-14 z-20 flex h-svh w-60 shrink-0 flex-col border-r border-outline bg-surface-alt p-4 transition-transform duration-300
+                      dark:border-outline-dark dark:bg-surface-dark-alt`,
+				),
+				Raw(bufSidebar.String()),
+			),
 			Div(Class("ml-60 px-4 py-18"), content),
 		)
 	} else {
@@ -140,7 +165,14 @@ func (b *PageBuilder) Render(w io.Writer) {
 	b.BasePageBuilder.SetFrameContent(
 		Group(
 			[]Node{
-				cmp.MakeNavBar(b.ActivePage, b.RepoURL, b.DocsURL, b.APIPath, *b.User, rt.DashboardUrl),
+				cmp.MakeNavBar(
+					b.ActivePage,
+					b.RepoURL,
+					b.DocsURL,
+					b.APIPath,
+					*b.User,
+					rt.DashboardUrl,
+				),
 				content,
 				cmp.MakeFooter(b.Version),
 			},

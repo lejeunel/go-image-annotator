@@ -46,5 +46,4 @@ func TestCollectionWithoutGroupFailsWithNotFoundErr(t *testing.T) {
 	clcRepo.Create(collection)
 	group, _ := clcRepo.GetGroup("a-collection")
 	assert.Nil(t, group)
-
 }

@@ -20,7 +20,8 @@ func NewSQLiteAnnotationInteractors(ims ims.ImageStore,
 	imr imr.SQLiteImageRepo,
 	lbr lbr.SQLiteLabelRepo,
 	anr anr.SQLiteAnnotationRepo,
-	auth auth.Interface) an.Interactors {
+	auth auth.Interface,
+) an.Interactors {
 	return an.Interactors{
 		AddPolygon:    addpoly.New(ims, anr, lbr, addpoly.WithAuth(auth)),
 		UpdatePolygon: updpoly.New(anr, lbr, updpoly.WithAuth(auth)),

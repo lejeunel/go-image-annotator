@@ -1,13 +1,14 @@
 package delete
 
 import (
+	"testing"
+
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Setup() (Interactor, clc.Collection, im.Image, g.Group) {
@@ -17,7 +18,6 @@ func Setup() (Interactor, clc.Collection, im.Image, g.Group) {
 	image.Collection.Group = &group.Name
 	itr := New(&fk.CollectionRepo{}, &fk.MetaDataRepo{})
 	return itr, collection, image, group
-
 }
 
 func TestHandleAuthError(t *testing.T) {
@@ -56,15 +56,16 @@ func TestFailOnNonExistingKey(t *testing.T) {
 func TestErrorOnDelete(t *testing.T) {
 	itr, collection, image, _ := Setup()
 	key := "the-key"
-	itr.MetaDataRepo = &fk.MetaDataRepo{ExistingKeys: []string{key},
-		ErrOnDelete: e.ErrInternal}
+	itr.MetaDataRepo = &fk.MetaDataRepo{
+		ExistingKeys: []string{key},
+		ErrOnDelete:  e.ErrInternal,
+	}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{ImageId: image.Id.String(), Collection: collection.Name, Key: key},
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrInternal)
 	assert.False(t, p.GotSuccess)
-
 }
 
 func TestDelete(t *testing.T) {

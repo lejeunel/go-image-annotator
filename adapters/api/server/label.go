@@ -13,6 +13,7 @@ import (
 func (s *Server) FindLabelByName(w http.ResponseWriter, r *http.Request, name string) {
 	s.Label.Find.Execute(r.Context(), name, p.NewFindPresenter(w, s.Logger))
 }
+
 func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
 	body, ok := json.MustDecodeJSON[models.NewLabel](w, r)
 	if !ok {
@@ -24,9 +25,11 @@ func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
 	}
 	s.Label.Create.Execute(r.Context(), req, p.NewCreatePresenter(w, s.Logger))
 }
+
 func (s *Server) DeleteLabelByName(w http.ResponseWriter, r *http.Request, name string) {
 	s.Label.Delete.Execute(r.Context(), name, p.NewDeletePresenter(w, s.Logger))
 }
+
 func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request, params ListLabelsParams) {
 	req := pag.PaginationParams{Page: 1, PageSize: s.Label.DefaultPageSize}
 	if p := params.Page; p != nil {

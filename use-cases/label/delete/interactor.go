@@ -34,6 +34,7 @@ func (i *Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	}
 	out.SuccessDeleteLabel(name)
 }
+
 func (i *Interactor) exists(name string) error {
 	errCtx := fmt.Errorf("checking whether label with name %v exists", name)
 	exists, err := i.repo.Exists(name)
@@ -56,7 +57,6 @@ func (i *Interactor) isUsed(name string) error {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrDependency)
 	}
 	return nil
-
 }
 
 type Option func(*Interactor)
@@ -68,11 +68,12 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo, opts ...Option) *Interactor {
-	i := &Interactor{repo: r,
-		auth: auth.NewVoidAuth()}
+	i := &Interactor{
+		repo: r,
+		auth: auth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
 	return i
-
 }

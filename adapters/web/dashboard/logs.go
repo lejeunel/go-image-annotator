@@ -46,6 +46,7 @@ func NewTaskListPresenter(w http.ResponseWriter, p b.PageBuilder) TaskListPresen
 	b := b.NewPaginatedListBuilder(p, listEventsFields)
 	return TaskListPresenter{b, w, e.NewErrorPresenter(w)}
 }
+
 func (p TaskListPresenter) SuccessListTasks(r list.Response) {
 	for _, t := range r.Tasks {
 		row := MakeRow(t)
@@ -63,6 +64,7 @@ type TaskRowPresenter struct {
 func NewTaskRowPresenter(w http.ResponseWriter) TaskRowPresenter {
 	return TaskRowPresenter{w, e.NewErrorPresenter(w)}
 }
+
 func (p TaskRowPresenter) SuccessFindTask(t t.Task) {
 	MakeRow(t).Render(p.Writer)
 }
@@ -93,5 +95,4 @@ func MakeRow(t t.Task) tb.Row {
 	row.AddCell(tb.NewCell(state))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row
-
 }

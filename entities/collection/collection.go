@@ -1,9 +1,10 @@
 package collection
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	uuidw "github.com/lejeunel/go-image-annotator/shared/uuid"
-	"time"
 )
 
 type CollectionName = string

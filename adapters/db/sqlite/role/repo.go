@@ -1,10 +1,9 @@
 package role
 
 import (
-	"fmt"
-
 	"database/sql"
 	"errors"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -32,19 +31,18 @@ func (r SQLiteRoleRepo) Create(role ro.Role) error {
 
 	return nil
 }
+
 func (r SQLiteRoleRepo) rowToEntity(row Row) ro.Role {
 	c := ro.NewRole(row.Id, row.Name,
 		ro.WithDescription(row.Description))
 	return c
-
 }
-func (r SQLiteRoleRepo) Find(name string) (*ro.Role, error) {
 
+func (r SQLiteRoleRepo) Find(name string) (*ro.Role, error) {
 	errCtx := fmt.Errorf("fetching role with name %v", name)
 	row := Row{}
 	err := r.Db.Get(&row,
 		`SELECT id,name,description FROM roles WHERE name=$1`, name)
-
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -57,33 +55,40 @@ func (r SQLiteRoleRepo) Find(name string) (*ro.Role, error) {
 	entity := r.rowToEntity(row)
 	return &entity, nil
 }
+
 func (r SQLiteRoleRepo) Exists(name string) (*bool, error) {
 	var exists bool
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM roles WHERE name = $1)`, name)
 	if err != nil {
-		return nil, fmt.Errorf("checking whether role with name %v exists: %v: %w", name, err, e.ErrInternal)
+		return nil, fmt.Errorf(
+			"checking whether role with name %v exists: %v: %w",
+			name,
+			err,
+			e.ErrInternal,
+		)
 	}
 
 	return &exists, nil
 }
+
 func (r SQLiteRoleRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM roles WHERE name=$1", name)
-
 	if err != nil {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 }
+
 func (r SQLiteRoleRepo) Update(m ro.UpdatableModel) error {
 	query := "UPDATE roles SET name=$1,description=$2 WHERE name=$3"
 	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
-
 	if err != nil {
 		return fmt.Errorf("updating record: %v: %w", err, e.ErrInternal)
 	}
 
 	return nil
 }
+
 func (r SQLiteRoleRepo) IsAssigned(name string) (*bool, error) {
 	var count int64
 
@@ -93,12 +98,17 @@ func (r SQLiteRoleRepo) IsAssigned(name string) (*bool, error) {
 	query = "SELECT COUNT(*) FROM users_roles WHERE role_id=(SELECT id FROM roles WHERE name=$1)"
 	err = r.Db.QueryRow(query, name).Scan(&count)
 	if err != nil {
-		return nil, fmt.Errorf("checking whether role is assigned to user: %v: %w", err, e.ErrInternal)
+		return nil, fmt.Errorf(
+			"checking whether role is assigned to user: %v: %w",
+			err,
+			e.ErrInternal,
+		)
 	}
 	isUsed = count > 0
 
 	return &isUsed, nil
 }
+
 func (r SQLiteRoleRepo) List() ([]ro.Role, error) {
 	q := sq.StatementBuilder.Select(`id,name,description`).From("roles")
 	sql, args, err := q.ToSql()

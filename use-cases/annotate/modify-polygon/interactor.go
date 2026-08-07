@@ -39,15 +39,18 @@ func WithClock(c clockwork.Clock) Option {
 }
 
 func New(repo AnnotationRepo, labelRepo LabelRepo, opts ...Option) Interactor {
-	i := &Interactor{annotationRepo: repo,
-		labelRepo: labelRepo,
-		clock:     clockwork.NewRealClock(),
-		auth:      sauth.NewVoidAuth()}
+	i := &Interactor{
+		annotationRepo: repo,
+		labelRepo:      labelRepo,
+		clock:          clockwork.NewRealClock(),
+		auth:           sauth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
 	return *i
 }
+
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "updating polygon"
 	annotationId, err := a.NewAnnotationIdFromString(r.AnnotationId)
@@ -77,8 +80,8 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 	out.SuccessUpdatePolygon(Response{})
-
 }
+
 func (i Interactor) update(ctx context.Context, id a.AnnotationId, upd a.PolygonUpdatables) error {
 	var userId *u.UserId
 	user := u.IdentityFromContext(ctx)
@@ -91,14 +94,12 @@ func (i Interactor) update(ctx context.Context, id a.AnnotationId, upd a.Polygon
 		return err
 	}
 	return nil
-
 }
-func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 
+func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 	label, err := i.labelRepo.FindLabel(name)
 	if err != nil {
 		return nil, err
 	}
 	return label, nil
-
 }

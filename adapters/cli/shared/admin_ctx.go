@@ -2,6 +2,7 @@ package shared
 
 import (
 	"context"
+
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 )
 

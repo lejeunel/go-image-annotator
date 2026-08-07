@@ -2,9 +2,10 @@ package group
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"github.com/lejeunel/go-image-annotator/use-cases/group/create"
-	"net/http"
 )
 
 type CreateGroupPresenter struct {
@@ -21,9 +22,11 @@ func NewCreateGroupPresenter(w http.ResponseWriter) CreateGroupPresenter {
 	}
 	return CreateGroupPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
+
 func (p CreateGroupPresenter) Success(r create.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
+
 func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form data", http.StatusBadRequest)
@@ -32,6 +35,7 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 	s.Groups.Create.Execute(r.Context(),
 		create.Request{
 			Name:        r.FormValue(createNameFieldName),
-			Description: r.FormValue(createDescriptionFieldName)},
+			Description: r.FormValue(createDescriptionFieldName),
+		},
 		NewCreateGroupPresenter(w))
 }

@@ -23,8 +23,8 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	default:
 		s.FindItr.Execute(r.Context(), name, NewViewPresenter(w, s.RowURL))
 	}
-
 }
+
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
 	s.ListItr.Execute(r.Context(),

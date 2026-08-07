@@ -29,6 +29,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 		s.Roles.Find.Execute(r.Context(), name, NewViewPresenter(w, s.RowUrl))
 	}
 }
+
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b := bf.NewHTMXCreateFormBuilder(RoleRowUrl, createRoleTargetDiv)
 	b.AddTitle("Create a new role")

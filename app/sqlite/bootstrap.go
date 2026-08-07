@@ -11,6 +11,7 @@ import (
 
 func NewSQLiteBootstrapInteractor(userRepo ur.SQLiteUserRepo, roleRepo rr.SQLiteRoleRepo,
 	fileStore fs.Interface,
-	t tk.TokenHasher, pv pw.PasswordValidator) bst.Interactor {
+	t tk.TokenHasher, pv pw.PasswordValidator,
+) bst.Interactor {
 	return bst.New(userRepo, roleRepo, fileStore, t, pv)
 }

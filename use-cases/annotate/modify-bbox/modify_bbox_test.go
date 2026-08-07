@@ -15,10 +15,14 @@ import (
 
 func CreateRequestAndUpdatable() (Request, a.BoundingBoxUpdatables, lbl.Label) {
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
-	req := Request{AnnotationId: a.NewAnnotationId().String(), Xc: 1, Yc: 1, Width: 1, Height: 1,
-		Angle: -1, Label: label.Name}
-	upd := a.BoundingBoxUpdatables{LabelId: label.Id, Xc: req.Xc,
-		Yc: req.Yc, Width: req.Width, Height: req.Height, Angle: req.Angle}
+	req := Request{
+		AnnotationId: a.NewAnnotationId().String(), Xc: 1, Yc: 1, Width: 1, Height: 1,
+		Angle: -1, Label: label.Name,
+	}
+	upd := a.BoundingBoxUpdatables{
+		LabelId: label.Id, Xc: req.Xc,
+		Yc: req.Yc, Width: req.Width, Height: req.Height, Angle: req.Angle,
+	}
 	return req, upd, label
 }
 
@@ -65,11 +69,21 @@ func TestInternalErrOnFindLabelShouldFail(t *testing.T) {
 func TestValidationErrShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.AnnotationRepo{}, &fk.LabelRepo{})
-	itr.Execute(t.Context(),
-		Request{AnnotationId: a.NewAnnotationId().String(), Xc: 1, Yc: 1, Width: -999, Height: 1}, p)
+	itr.Execute(
+		t.Context(),
+		Request{
+			AnnotationId: a.NewAnnotationId().String(),
+			Xc:           1,
+			Yc:           1,
+			Width:        -999,
+			Height:       1,
+		},
+		p,
+	)
 	assert.True(t, p.GotValidationErr)
 	assert.False(t, p.GotSuccess)
 }
+
 func TestNotFoundErrOnUpdateShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.AnnotationRepo{ErrOnUpdate: e.ErrNotFound},

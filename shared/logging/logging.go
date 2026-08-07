@@ -12,5 +12,4 @@ func NewNoOpLogger() *slog.Logger {
 
 func NewCliLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(os.Stdout, nil))
-
 }

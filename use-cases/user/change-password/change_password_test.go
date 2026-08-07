@@ -34,6 +34,7 @@ func TestHandleErrorOnUpdatePassword(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 	assert.ErrorIs(t, p.GotErr, e.ErrInternal)
 }
+
 func TestFailWhenCurrentPasswordIsWrong(t *testing.T) {
 	p := &FakePresenter{}
 	user := u.NewUser("user@mail.com")

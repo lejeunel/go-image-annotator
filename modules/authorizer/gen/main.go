@@ -94,14 +94,18 @@ func main() {
 	sort.Strings(methods)
 
 	var b strings.Builder
-	fmt.Fprintf(&b, "// Code generated automatically; DO NOT EDIT.\n\npackage %s\n\nvar ValidMethods = []string{\n", *pkg)
+	fmt.Fprintf(
+		&b,
+		"// Code generated automatically; DO NOT EDIT.\n\npackage %s\n\nvar ValidMethods = []string{\n",
+		*pkg,
+	)
 	for _, m := range methods {
 		fmt.Fprintf(&b, "\t%q,\n", m)
 	}
 	fmt.Fprintf(&b, "\t\"*\",\n")
 	b.WriteString("}\n")
 
-	if err := os.WriteFile(*out, []byte(b.String()), 0644); err != nil {
+	if err := os.WriteFile(*out, []byte(b.String()), 0o644); err != nil {
 		fmt.Fprintf(os.Stderr, "write error: %v\n", err)
 		os.Exit(1)
 	}

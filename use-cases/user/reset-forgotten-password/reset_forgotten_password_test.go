@@ -61,7 +61,11 @@ func TestExpiredStateShouldFail(t *testing.T) {
 func TestHandleErrorOnUpdatePassword(t *testing.T) {
 	p := &FakePresenter{}
 	state := u.ForgotPasswordState{Id: "user@mail.com"}
-	itr := New(&fk.UserRepo{ReturnPasswordState: &state, ErrOnUpdatePassword: e.ErrInternal}, &fk.Tokenizer{}, &fk.StringValidator{})
+	itr := New(
+		&fk.UserRepo{ReturnPasswordState: &state, ErrOnUpdatePassword: e.ErrInternal},
+		&fk.Tokenizer{},
+		&fk.StringValidator{},
+	)
 	itr.Execute(t.Context(), Request{FirstPassword: "1", SecondPassword: "1"}, p)
 	assert.False(t, p.GotSuccess)
 	assert.ErrorIs(t, p.GotErr, e.ErrInternal)

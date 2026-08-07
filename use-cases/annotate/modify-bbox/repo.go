@@ -1,10 +1,11 @@
 package modify_bbox
 
 import (
+	"time"
+
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	"time"
 )
 
 type AnnotationRepo interface {

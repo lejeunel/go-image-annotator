@@ -22,8 +22,10 @@ func BuildImageResponse(image im.Image) models.Image {
 		boxesToAdd := []models.BoundingBox{}
 		for _, b := range image.BoundingBoxes {
 			boxesToAdd = append(boxesToAdd,
-				models.BoundingBox{Id: b.Id.String(),
-					Xc: b.Xc, Yc: b.Yc, Height: b.Height, Width: b.Width, Label: b.Label.Name})
+				models.BoundingBox{
+					Id: b.Id.String(),
+					Xc: b.Xc, Yc: b.Yc, Height: b.Height, Width: b.Width, Label: b.Label.Name,
+				})
 		}
 		response.BoundingBoxes = &boxesToAdd
 	}
@@ -36,12 +38,13 @@ func BuildImageResponse(image im.Image) models.Image {
 				points = append(points, models.Point{p[0], p[1]})
 			}
 			polygonsToAdd = append(polygonsToAdd,
-				models.Polygon{Id: poly.Id.String(),
-					Points: points, Label: poly.Label.Name})
+				models.Polygon{
+					Id:     poly.Id.String(),
+					Points: points, Label: poly.Label.Name,
+				})
 		}
 		response.Polygons = &polygonsToAdd
 	}
 
 	return response
-
 }

@@ -77,5 +77,4 @@ func ReadAuthRulesFromPath(path string) (*Policies, error) {
 		return &voidPolicies, nil
 	}
 	return rules, nil
-
 }

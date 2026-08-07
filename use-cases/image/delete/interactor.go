@@ -25,9 +25,11 @@ func WithAuth(a Auth) Option {
 }
 
 func New(store st.Interface, r ImageRepo, a AnnotationRepo, opts ...Option) Interactor {
-	i := &Interactor{store: store, ImageRepo: r,
+	i := &Interactor{
+		store: store, ImageRepo: r,
 		AnnotationRepo: a,
-		auth:           auth.NewVoidAuth()}
+		auth:           auth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -82,7 +84,6 @@ func (i *Interactor) deleteBoundingBoxes(image im.Image) error {
 		}
 	}
 	return nil
-
 }
 
 func (i *Interactor) deleteLabels(image im.Image) error {
@@ -93,7 +94,6 @@ func (i *Interactor) deleteLabels(image im.Image) error {
 		}
 	}
 	return nil
-
 }
 
 func (i *Interactor) findImage(imageId im.ImageId, collection string) (*im.Image, error) {
@@ -103,5 +103,4 @@ func (i *Interactor) findImage(imageId im.ImageId, collection string) (*im.Image
 		return nil, fmt.Errorf("%w: %w", baseErr, err)
 	}
 	return image, nil
-
 }

@@ -3,8 +3,9 @@ package read
 import (
 	"context"
 	"fmt"
-	a "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	"io"
+
+	a "github.com/lejeunel/go-image-annotator/modules/authorizer"
 )
 
 type Store interface {

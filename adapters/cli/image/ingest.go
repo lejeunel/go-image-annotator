@@ -22,7 +22,6 @@ func (p *IngestPresenter) Success(r ingm.Response) {
 }
 
 func IngestDirectory(ctx context.Context, dir, collection string) {
-
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		panic(err)

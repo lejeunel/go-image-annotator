@@ -24,12 +24,12 @@ func (p List) SuccessListLabels(r list.Response) {
 			})
 	}
 
-	response := models.ListLabelsResponse{Data: &data,
+	response := models.ListLabelsResponse{
+		Data:       &data,
 		Pagination: json.BuildPaginationResponse(r.Pagination),
 	}
 
 	json.WriteJSON(p.Writer, 200, response)
-
 }
 
 func NewListPresenter(w http.ResponseWriter, l slog.Logger) List {

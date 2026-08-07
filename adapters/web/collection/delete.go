@@ -34,6 +34,7 @@ func (p DeletePresenter) SuccessFindCollection(c clc.Collection) {
 	b.RenderConfirmDeleteRow(len(listCollectionsFields),
 		c.Name, "collection", p.Url, p.writer)
 }
+
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get(resourceUrlFieldName)
 	s.DeleteItr.Execute(r.Context(), name,

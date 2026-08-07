@@ -33,7 +33,6 @@ func New(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
 }
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-
 	errCtx := "updating collection"
 	group, err := i.CollectionRepo.GetGroup(r.Name)
 	if (err != nil) && !(errors.Is(err, e.ErrNotFound)) {
@@ -70,11 +69,25 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 			return
 		}
 		if !*groupExists {
-			out.Error(fmt.Errorf("%v: requested assignment to new group %v: %w", errCtx, *r.NewGroup, err))
+			out.Error(
+				fmt.Errorf(
+					"%v: requested assignment to new group %v: %w",
+					errCtx,
+					*r.NewGroup,
+					err,
+				),
+			)
 			return
 		}
 		if err := i.Auth.UpdateCollection(ctx, *r.NewGroup); err != nil {
-			out.Error(fmt.Errorf("%v: authorizing assignment to new group %v: %w", errCtx, *r.NewGroup, err))
+			out.Error(
+				fmt.Errorf(
+					"%v: authorizing assignment to new group %v: %w",
+					errCtx,
+					*r.NewGroup,
+					err,
+				),
+			)
 			return
 		}
 	}
@@ -87,6 +100,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	out.SuccessUpdateCollection(Response{Name: r.NewName, Description: r.NewDescription})
 }
+
 func (i Interactor) ensureCollectionNameExists(name string) error {
 	baseErr := fmt.Errorf("ensuring that collection with name %v exists", name)
 	exists, err := i.CollectionRepo.Exists(name)
@@ -98,6 +112,7 @@ func (i Interactor) ensureCollectionNameExists(name string) error {
 	}
 	return nil
 }
+
 func (i Interactor) ensureCollectionNameDoesNotExist(name string) error {
 	baseErr := fmt.Errorf("ensuring that a collection with name %v does not already exist", name)
 	exists, err := i.CollectionRepo.Exists(name)

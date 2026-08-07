@@ -26,7 +26,11 @@ func TestHandleAuthErr(t *testing.T) {
 	itr := NewTestingCloner()
 	itr.Auth = fk.Auth{Err: e.ErrAuthorization}
 	p := &FakePresenter{}
-	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"), Request{DestinationGroup: &group}, p)
+	itr.Execute(
+		st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
+		Request{DestinationGroup: &group},
+		p,
+	)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -47,7 +51,11 @@ func TestCloningToAlreadyExistingCollectionShouldFail(t *testing.T) {
 	logger := &fk.EventLogger{}
 	itr.EventLogger = logger
 	p := &FakePresenter{}
-	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"), Request{Destination: "destination-collection"}, p)
+	itr.Execute(
+		st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
+		Request{Destination: "destination-collection"},
+		p,
+	)
 	assert.Error(t, p.GotErr)
 }
 
@@ -68,7 +76,9 @@ func SetupCloneableCollection() (Interactor, clc.Collection, im.Image, *fk.Image
 	srcCollection := clc.NewCollection(clc.NewCollectionId(), "src")
 	image := im.NewImage(im.NewImageId(), srcCollection)
 	image.AddLabel(lbl.NewLabel(lbl.NewLabelId(), "a-label"))
-	imRepo := &fk.ImageRepo{IterateBaseImages: []im.BaseImage{{ImageId: image.Id, Collection: srcCollection.Name}}}
+	imRepo := &fk.ImageRepo{
+		IterateBaseImages: []im.BaseImage{{ImageId: image.Id, Collection: srcCollection.Name}},
+	}
 	anRepo := &fk.AnnotationRepo{}
 	itr.ImageRepo = imRepo
 	itr.Store = &fk.ImageStore{Return: &image}

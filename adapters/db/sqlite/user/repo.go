@@ -32,7 +32,12 @@ type ForgottenPasswordStateRecord struct {
 
 func (r SQLiteUserRepo) Create(usr u.User) error {
 	query := "INSERT INTO users (id,api_token_hash,password_hash) VALUES ($1,$2,$3)"
-	_, err := r.Db.Exec(query, usr.Id, hex.EncodeToString(usr.HashPAT), hex.EncodeToString(usr.HashPassword))
+	_, err := r.Db.Exec(
+		query,
+		usr.Id,
+		hex.EncodeToString(usr.HashPAT),
+		hex.EncodeToString(usr.HashPassword),
+	)
 	if err != nil {
 		return fmt.Errorf("inserting user record: %v: %w", err, e.ErrInternal)
 	}
@@ -45,6 +50,7 @@ func (r SQLiteUserRepo) Create(usr u.User) error {
 
 	return nil
 }
+
 func (r SQLiteUserRepo) SetGroups(user u.UserId, groups []string) error {
 	_, err := r.Db.Exec(
 		"DELETE FROM users_groups WHERE user_id=$1;",
@@ -60,14 +66,26 @@ func (r SQLiteUserRepo) SetGroups(user u.UserId, groups []string) error {
 			user, group)
 		n, err := res.RowsAffected()
 		if err != nil {
-			return fmt.Errorf("assigning group %v to user %v: %v: %w", group, user, err, e.ErrInternal)
+			return fmt.Errorf(
+				"assigning group %v to user %v: %v: %w",
+				group,
+				user,
+				err,
+				e.ErrInternal,
+			)
 		}
 		if n == 0 {
-			return fmt.Errorf("assigning group %v to user %v: checking whether group was added: %w", group, user, e.ErrInternal)
+			return fmt.Errorf(
+				"assigning group %v to user %v: checking whether group was added: %w",
+				group,
+				user,
+				e.ErrInternal,
+			)
 		}
 	}
 	return nil
 }
+
 func (r SQLiteUserRepo) SetRoles(userId string, roles []string) error {
 	_, err := r.Db.Exec(
 		"DELETE FROM users_roles WHERE user_id=$1;",
@@ -83,14 +101,26 @@ func (r SQLiteUserRepo) SetRoles(userId string, roles []string) error {
 			userId, role)
 		n, err := res.RowsAffected()
 		if err != nil {
-			return fmt.Errorf("inserting role %v to user %v: %v: %w", role, userId, err, e.ErrInternal)
+			return fmt.Errorf(
+				"inserting role %v to user %v: %v: %w",
+				role,
+				userId,
+				err,
+				e.ErrInternal,
+			)
 		}
 		if n == 0 {
-			return fmt.Errorf("inserting role %v to user %v: checking whether role was added: %w", role, userId, e.ErrInternal)
+			return fmt.Errorf(
+				"inserting role %v to user %v: checking whether role was added: %w",
+				role,
+				userId,
+				e.ErrInternal,
+			)
 		}
 	}
 	return nil
 }
+
 func (r SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 	var groups []string
 	query := "SELECT name FROM groups WHERE id IN (SELECT group_id FROM users_groups WHERE user_id=$1)"
@@ -101,6 +131,7 @@ func (r SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 
 	return groups, nil
 }
+
 func (r SQLiteUserRepo) getRoleNames(userId string) ([]string, error) {
 	var roles []string
 	query := "SELECT name FROM roles WHERE id IN (SELECT role_id FROM users_roles WHERE user_id=$1)"
@@ -110,6 +141,7 @@ func (r SQLiteUserRepo) getRoleNames(userId string) ([]string, error) {
 	}
 	return roles, nil
 }
+
 func (r SQLiteUserRepo) recordToEntity(rec Record) (*u.User, error) {
 	groups, err := r.getGroupNames(rec.Id)
 	if err != nil {
@@ -134,11 +166,11 @@ func (r SQLiteUserRepo) recordToEntity(rec Record) (*u.User, error) {
 		u.WithPasswordHash(pwHash))
 	return &user, nil
 }
+
 func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 	record := Record{}
 	err := r.Db.Get(&record,
 		"SELECT id,api_token_hash,password_hash FROM users WHERE id=$1", id)
-
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -154,14 +186,15 @@ func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 
 	return user, nil
 }
+
 func (r SQLiteUserRepo) Delete(id string) error {
 	_, err := r.Db.Exec("DELETE FROM users WHERE id=$1", id)
-
 	if err != nil {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 }
+
 func (r SQLiteUserRepo) Exists(id string) (bool, error) {
 	var exists bool
 
@@ -171,8 +204,8 @@ func (r SQLiteUserRepo) Exists(id string) (bool, error) {
 	}
 
 	return exists, nil
-
 }
+
 func (r SQLiteUserRepo) Count() (int64, error) {
 	var count int64
 
@@ -184,6 +217,7 @@ func (r SQLiteUserRepo) Count() (int64, error) {
 
 	return count, nil
 }
+
 func (r SQLiteUserRepo) List(m pag.PaginationParams) ([]u.User, error) {
 	q := sq.StatementBuilder.Select("id,api_token_hash,password_hash").From("users")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
@@ -200,13 +234,18 @@ func (r SQLiteUserRepo) List(m pag.PaginationParams) ([]u.User, error) {
 	for _, rec := range records {
 		user, err := r.recordToEntity(rec)
 		if err != nil {
-			return nil, fmt.Errorf("converting user records to domain objects: %v: %w", err, e.ErrInternal)
+			return nil, fmt.Errorf(
+				"converting user records to domain objects: %v: %w",
+				err,
+				e.ErrInternal,
+			)
 		}
 		users = append(users, *user)
 	}
 
 	return users, nil
 }
+
 func (r SQLiteUserRepo) SetAccessTokenHash(userId u.UserId, hash []byte) error {
 	query := "UPDATE users SET api_token_hash=$2 WHERE id=$1"
 	_, err := r.Db.Exec(query, userId, hex.EncodeToString(hash))
@@ -215,21 +254,24 @@ func (r SQLiteUserRepo) SetAccessTokenHash(userId u.UserId, hash []byte) error {
 	}
 	return nil
 }
-func (r SQLiteUserRepo) AddForgottenPasswordState(hash []byte, id u.UserId, expiresAt time.Time) error {
+
+func (r SQLiteUserRepo) AddForgottenPasswordState(
+	hash []byte,
+	id u.UserId,
+	expiresAt time.Time,
+) error {
 	query := "INSERT INTO forgot_password (token_hash,id,expires_at) VALUES ($1,$2,$3)"
 	_, err := r.Db.Exec(query, hex.EncodeToString(hash), id, expiresAt)
 	if err != nil {
 		return fmt.Errorf("inserting user record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
-
 }
-func (r SQLiteUserRepo) FindResetPasswordState(hash []byte) (*u.ForgotPasswordState, error) {
 
+func (r SQLiteUserRepo) FindResetPasswordState(hash []byte) (*u.ForgotPasswordState, error) {
 	record := ForgottenPasswordStateRecord{}
 	err := r.Db.Get(&record,
 		"SELECT id,expires_at FROM forgot_password WHERE token_hash=$1", hex.EncodeToString(hash))
-
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -237,11 +279,10 @@ func (r SQLiteUserRepo) FindResetPasswordState(hash []byte) (*u.ForgotPasswordSt
 		default:
 			return nil, fmt.Errorf("finding forgotten password state: %v: %w", err, e.ErrInternal)
 		}
-
 	}
 	return &u.ForgotPasswordState{Id: record.Id, ExpiresAt: &record.ExpiresAt}, nil
-
 }
+
 func (r SQLiteUserRepo) UpdatePassword(id u.UserId, hash []byte) error {
 	query := "UPDATE users SET password_hash=$1 WHERE id=$2"
 	_, err := r.Db.Exec(query, hex.EncodeToString(hash), id)
@@ -250,6 +291,7 @@ func (r SQLiteUserRepo) UpdatePassword(id u.UserId, hash []byte) error {
 	}
 	return nil
 }
+
 func (r SQLiteUserRepo) DeleteForgottenPasswordTokens(id u.UserId) error {
 	query := "DELETE FROM forgot_password WHERE id=$1"
 	_, err := r.Db.Exec(query, id)
@@ -258,6 +300,7 @@ func (r SQLiteUserRepo) DeleteForgottenPasswordTokens(id u.UserId) error {
 	}
 	return nil
 }
+
 func (r SQLiteUserRepo) CountAdmins() (int64, error) {
 	var count int64
 	query := `SELECT COUNT(*) FROM users_roles WHERE role_id=(SELECT id FROM roles WHERE name="admin");`
@@ -267,8 +310,8 @@ func (r SQLiteUserRepo) CountAdmins() (int64, error) {
 	}
 
 	return count, nil
-
 }
+
 func NewSQLiteUserRepo(db *sqlx.DB) SQLiteUserRepo {
 	return SQLiteUserRepo{Db: db}
 }

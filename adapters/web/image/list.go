@@ -31,7 +31,11 @@ type ListImagesPresenter struct {
 
 var listImagesFields = []string{"id", "collection", "ingested", "n. annot.", "actions"}
 
-func NewListImagesPresenter(w http.ResponseWriter, p b.PageBuilder, collection string) ListImagesPresenter {
+func NewListImagesPresenter(
+	w http.ResponseWriter,
+	p b.PageBuilder,
+	collection string,
+) ListImagesPresenter {
 	p.SetTitle(fmt.Sprintf("%v / Images", collection)).SetHTMLTitle("Images")
 	b := b.NewPaginatedListBuilder(p, listImagesFields)
 	return ListImagesPresenter{b, w, ew.NewErrorPresenter(w), collection}
@@ -50,14 +54,13 @@ func makeImageRow(image im.Image) tb.Row {
 	row.AddCell(tb.NewCell(Text(strconv.Itoa(image.NumAnnotations()))))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row
-
 }
+
 func (p ListImagesPresenter) SuccessReadImage(image im.Image) {
 	makeImageRow(image).Render(p.Writer)
 }
 
 func (p ListImagesPresenter) SuccessListImages(r list.Response) {
-
 	baseURL := rt.AddQueryParams(rt.ImagesUrl, "collection", p.collection)
 	p.SetPagination(r.Pagination, baseURL.String())
 	for _, im := range r.Images {
@@ -67,20 +70,24 @@ func (p ListImagesPresenter) SuccessListImages(r list.Response) {
 }
 
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {
-
 	s.PageBuilder.SetUserIdentity(r.Context())
 	collection := r.URL.Query().Get("collection")
 	if collection == "" {
-		s.PageBuilder.SetError(fmt.Errorf("parsing url to get collection name: %w", e.ErrURLParsing))
+		s.PageBuilder.SetError(
+			fmt.Errorf("parsing url to get collection name: %w", e.ErrURLParsing),
+		)
 		s.PageBuilder.Render(w)
 	}
 	s.ListItr.Execute(list_im.Request{
 		Filtering: im.Filtering{
-			Collection: &collection},
+			Collection: &collection,
+		},
 		PaginationParams: pa.PaginationParams{
 			PageSize: s.DefaultPageSize,
-			Page:     pg.GetPageFromRequest(r)},
-		Ordering: im.Ordering{IngestTime: true}},
+			Page:     pg.GetPageFromRequest(r),
+		},
+		Ordering: im.Ordering{IngestTime: true},
+	},
 		NewListImagesPresenter(w, s.PageBuilder, collection))
 }
 

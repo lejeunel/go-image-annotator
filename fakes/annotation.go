@@ -48,7 +48,13 @@ type AnnotationRepo struct {
 	NoGroup bool
 }
 
-func (r *AnnotationRepo) AddBoundingBox(imageId im.ImageId, collectionId clc.CollectionId, box a.BoundingBox, userId *u.UserId, t *time.Time) error {
+func (r *AnnotationRepo) AddBoundingBox(
+	imageId im.ImageId,
+	collectionId clc.CollectionId,
+	box a.BoundingBox,
+	userId *u.UserId,
+	t *time.Time,
+) error {
 	if r.ErrOnAddBoundingBox != nil {
 		return r.ErrOnAddBoundingBox
 	}
@@ -61,7 +67,13 @@ func (r *AnnotationRepo) AddBoundingBox(imageId im.ImageId, collectionId clc.Col
 	return nil
 }
 
-func (r *AnnotationRepo) AddPolygon(imageId im.ImageId, collectionId clc.CollectionId, poly a.Polygon, userId *u.UserId, t *time.Time) error {
+func (r *AnnotationRepo) AddPolygon(
+	imageId im.ImageId,
+	collectionId clc.CollectionId,
+	poly a.Polygon,
+	userId *u.UserId,
+	t *time.Time,
+) error {
 	if r.ErrOnAddPoly != nil {
 		return r.ErrOnAddPoly
 	}
@@ -73,7 +85,13 @@ func (r *AnnotationRepo) AddPolygon(imageId im.ImageId, collectionId clc.Collect
 	return nil
 }
 
-func (r *AnnotationRepo) AddImageLabel(imageId im.ImageId, collectionId clc.CollectionId, imageLabel a.ImageLabel, userId *u.UserId, t *time.Time) error {
+func (r *AnnotationRepo) AddImageLabel(
+	imageId im.ImageId,
+	collectionId clc.CollectionId,
+	imageLabel a.ImageLabel,
+	userId *u.UserId,
+	t *time.Time,
+) error {
 	if r.ErrOnAddLabel != nil {
 		return r.ErrOnAddLabel
 	}
@@ -85,10 +103,14 @@ func (r *AnnotationRepo) AddImageLabel(imageId im.ImageId, collectionId clc.Coll
 	r.GotTime = t
 	r.NumImageLabelsAdded += 1
 	return nil
-
 }
 
-func (r *AnnotationRepo) UpdateBoundingBox(id a.AnnotationId, u a.BoundingBoxUpdatables, userId *u.UserId, t *time.Time) error {
+func (r *AnnotationRepo) UpdateBoundingBox(
+	id a.AnnotationId,
+	u a.BoundingBoxUpdatables,
+	userId *u.UserId,
+	t *time.Time,
+) error {
 	if r.ErrOnUpdate != nil {
 		return r.ErrOnUpdate
 	}
@@ -106,7 +128,12 @@ func (r *AnnotationRepo) GroupOfAnnotation(id a.AnnotationId) (*string, error) {
 	return &group, nil
 }
 
-func (r *AnnotationRepo) UpdatePolygon(id a.AnnotationId, u a.PolygonUpdatables, userId *u.UserId, t *time.Time) error {
+func (r *AnnotationRepo) UpdatePolygon(
+	id a.AnnotationId,
+	u a.PolygonUpdatables,
+	userId *u.UserId,
+	t *time.Time,
+) error {
 	if r.ErrOnUpdate != nil {
 		return r.ErrOnUpdate
 	}
@@ -124,7 +151,12 @@ func (r *AnnotationRepo) RemoveAnnotation(annotationId a.AnnotationId) error {
 	return nil
 }
 
-func (r *AnnotationRepo) UpdateLabelOfAnnotation(annotationId a.AnnotationId, labelId lbl.LabelId, userId *u.UserId, t *time.Time) error {
+func (r *AnnotationRepo) UpdateLabelOfAnnotation(
+	annotationId a.AnnotationId,
+	labelId lbl.LabelId,
+	userId *u.UserId,
+	t *time.Time,
+) error {
 	if r.ErrOnUpdate != nil {
 		return r.ErrOnUpdate
 	}
@@ -135,7 +167,10 @@ func (r *AnnotationRepo) UpdateLabelOfAnnotation(annotationId a.AnnotationId, la
 	return nil
 }
 
-func (r *AnnotationRepo) FindBoundingBoxes(imageId im.ImageId, collectionId clc.CollectionId) ([]a.BoundingBox, error) {
+func (r *AnnotationRepo) FindBoundingBoxes(
+	imageId im.ImageId,
+	collectionId clc.CollectionId,
+) ([]a.BoundingBox, error) {
 	if r.ErrOnFindBoundingBoxes != nil {
 		return nil, r.ErrOnFindBoundingBoxes
 	}
@@ -145,7 +180,10 @@ func (r *AnnotationRepo) FindBoundingBoxes(imageId im.ImageId, collectionId clc.
 	return nil, nil
 }
 
-func (r *AnnotationRepo) FindPolygons(imageId im.ImageId, collectionId clc.CollectionId) ([]a.Polygon, error) {
+func (r *AnnotationRepo) FindPolygons(
+	imageId im.ImageId,
+	collectionId clc.CollectionId,
+) ([]a.Polygon, error) {
 	if r.ErrOnFindPolygons != nil {
 		return nil, r.ErrOnFindPolygons
 	}
@@ -155,7 +193,10 @@ func (r *AnnotationRepo) FindPolygons(imageId im.ImageId, collectionId clc.Colle
 	return nil, nil
 }
 
-func (r *AnnotationRepo) FindImageLabels(imageId im.ImageId, collectionId clc.CollectionId) ([]a.ImageLabel, error) {
+func (r *AnnotationRepo) FindImageLabels(
+	imageId im.ImageId,
+	collectionId clc.CollectionId,
+) ([]a.ImageLabel, error) {
 	if r.ErrOnFindImageLabels != nil {
 		return nil, r.ErrOnFindImageLabels
 	}

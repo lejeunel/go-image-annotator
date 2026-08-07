@@ -18,9 +18,17 @@ func NewSQLiteMetadataInteractors(
 	mr mr.SQLiteMetaRepo,
 	cr cr.SQLiteCollectionRepo,
 	ir ir.SQLiteImageRepo,
-	auth auth.Interface) mu.Interactors {
+	auth auth.Interface,
+) mu.Interactors {
 	return mu.Interactors{
-		Add:    add.New(cr, ir, mr, kv.NewNameValidator(), vv.BaseTypeValidator{}, add.WithAuth(auth)),
+		Add: add.New(
+			cr,
+			ir,
+			mr,
+			kv.NewNameValidator(),
+			vv.BaseTypeValidator{},
+			add.WithAuth(auth),
+		),
 		Delete: delete.New(cr, mr, delete.WithAuth(auth)),
 		Update: update.New(cr, ir, mr, update.WithAuth(auth)),
 		List:   list.New(mr),

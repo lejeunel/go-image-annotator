@@ -55,22 +55,22 @@ func (b AnnotoriousBoxModel) ExtractCoordinates() BoxCoordinates {
 }
 
 func ToAddBoxRequest(r AnnotoriousBoxRequest) addbox.Request {
-
 	coords := r.Annotation.ExtractCoordinates()
 
-	return addbox.Request{ImageId: r.ImageId, Collection: r.Collection,
-		Label: r.Label, Xc: coords.Xc, Yc: coords.Yc, Width: coords.Width, Height: coords.Height}
-
+	return addbox.Request{
+		ImageId: r.ImageId, Collection: r.Collection,
+		Label: r.Label, Xc: coords.Xc, Yc: coords.Yc, Width: coords.Width, Height: coords.Height,
+	}
 }
 
 func ToUpdateBoxRequest(r AnnotoriousBoxModel) updbox.Request {
-
 	coords := r.ExtractCoordinates()
 
-	return updbox.Request{AnnotationId: r.AnnotationId,
-		Label: r.Bodies[0].Value, Xc: coords.Xc, Yc: coords.Yc,
-		Width: coords.Width, Height: coords.Height, Angle: coords.Angle}
-
+	return updbox.Request{
+		AnnotationId: r.AnnotationId,
+		Label:        r.Bodies[0].Value, Xc: coords.Xc, Yc: coords.Yc,
+		Width: coords.Width, Height: coords.Height, Angle: coords.Angle,
+	}
 }
 
 func ConvertBoxesToAnnotorious(boxes []v.BoundingBox) []AnnotoriousBoxModel {
@@ -83,17 +83,23 @@ func ConvertBoxesToAnnotorious(boxes []v.BoundingBox) []AnnotoriousBoxModel {
 				AnnotationId: b.Id,
 				Properties:   Properties{Color: b.Color},
 				Bodies:       []AnnotoriousBody{{Purpose: "label", Value: b.Label}},
-				Target: BoxTarget{BoxSelector{Type: "RECTANGLE",
+				Target: BoxTarget{BoxSelector{
+					Type: "RECTANGLE",
 					Geometry: BoxGeometry{
 						XTopLeft: xtopleft,
 						YTopLeft: ytopleft,
 						W:        b.Width,
 						H:        b.Height,
 						Rot:      b.Angle,
-						Bounds: Bounds{MinX: xtopleft,
+						Bounds: Bounds{
+							MinX: xtopleft,
 							MinY: ytopleft,
 							MaxX: xtopleft + b.Width,
-							MaxY: ytopleft + b.Height}}}}})
+							MaxY: ytopleft + b.Height,
+						},
+					},
+				}},
+			})
 
 	}
 	return result

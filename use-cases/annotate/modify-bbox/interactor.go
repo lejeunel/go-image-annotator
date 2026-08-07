@@ -39,15 +39,18 @@ func WithClock(c clockwork.Clock) Option {
 }
 
 func New(repo AnnotationRepo, labelRepo LabelRepo, opts ...Option) Interactor {
-	i := &Interactor{annotationRepo: repo,
-		labelRepo: labelRepo,
-		clock:     clockwork.NewRealClock(),
-		auth:      sauth.NewVoidAuth()}
+	i := &Interactor{
+		annotationRepo: repo,
+		labelRepo:      labelRepo,
+		clock:          clockwork.NewRealClock(),
+		auth:           sauth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
 	return *i
 }
+
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "updating bounding box properties"
 	annotationId, err := a.NewAnnotationIdFromString(r.AnnotationId)
@@ -83,9 +86,13 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 	out.SuccessUpdateBox(Response{})
-
 }
-func (i Interactor) update(ctx context.Context, id a.AnnotationId, upd a.BoundingBoxUpdatables) error {
+
+func (i Interactor) update(
+	ctx context.Context,
+	id a.AnnotationId,
+	upd a.BoundingBoxUpdatables,
+) error {
 	var userId *u.UserId
 	user := u.IdentityFromContext(ctx)
 	if user != nil {
@@ -97,24 +104,24 @@ func (i Interactor) update(ctx context.Context, id a.AnnotationId, upd a.Boundin
 		return err
 	}
 	return nil
-
 }
-func (i Interactor) validate(xc float32, yc float32, width float32,
-	height float32, label lbl.Label, angle float32) (*a.BoundingBoxUpdatables, error) {
 
+func (i Interactor) validate(xc float32, yc float32, width float32,
+	height float32, label lbl.Label, angle float32,
+) (*a.BoundingBoxUpdatables, error) {
 	if err := a.ValidateBoundingBox(xc, yc, width, height, angle); err != nil {
 		return nil, err
 	}
-	return &a.BoundingBoxUpdatables{LabelId: label.Id, Xc: xc, Yc: yc, Width: width, Height: height,
-		Angle: angle}, nil
-
+	return &a.BoundingBoxUpdatables{
+		LabelId: label.Id, Xc: xc, Yc: yc, Width: width, Height: height,
+		Angle: angle,
+	}, nil
 }
-func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 
+func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 	label, err := i.labelRepo.FindLabel(name)
 	if err != nil {
 		return nil, err
 	}
 	return label, nil
-
 }

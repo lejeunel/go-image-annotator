@@ -3,8 +3,9 @@ package forgot_password
 import (
 	"context"
 	"fmt"
-	"github.com/jonboulle/clockwork"
 	"time"
+
+	"github.com/jonboulle/clockwork"
 
 	tk "github.com/lejeunel/go-image-annotator/entities/token"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -49,8 +50,10 @@ func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort)
 		out.Error(fmt.Errorf("%v: storing token: %w", errCtx, err))
 		return
 	}
-	out.Success(Response{Id: userId, Email: userId,
-		PasswordResetToken: token.Value})
+	out.Success(Response{
+		Id: userId, Email: userId,
+		PasswordResetToken: token.Value,
+	})
 }
 
 type Option func(*Interactor)
@@ -62,7 +65,8 @@ func WithClock(c clockwork.Clock) Option {
 }
 
 func New(r Repo, expiresMinutes int, g TokenGenerator, opts ...Option) Interactor {
-	i := &Interactor{repo: r,
+	i := &Interactor{
+		repo:           r,
 		tokenGenerator: g,
 		expiresMinutes: expiresMinutes,
 		clock:          clockwork.NewRealClock(),

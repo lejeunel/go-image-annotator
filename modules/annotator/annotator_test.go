@@ -33,8 +33,8 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller) {
 		&FakeLabelUpdater{},
 		&FakeLabelAdder{})
 	return &annotator, &image, scroller
-
 }
+
 func TestInitializeScrollerOnStart(t *testing.T) {
 	a, image, scroller := createAnnotator()
 	p := &FakeScrollerPresenter{}
@@ -42,6 +42,7 @@ func TestInitializeScrollerOnStart(t *testing.T) {
 		"a-collection", &FakeImageReadPresenter{}, &FakeLabelFetchPresenter{}, p)
 	assert.True(t, scroller.IsInit)
 }
+
 func TestFetchLabelsOnInit(t *testing.T) {
 	a, image, _ := createAnnotator()
 	lp := FakeLabelFetchPresenter{}
@@ -57,18 +58,21 @@ func TestDrawImageOnInit(t *testing.T) {
 		"a-collection", ip, &FakeLabelFetchPresenter{}, &FakeScrollerPresenter{})
 	assert.True(t, ip.Called)
 }
+
 func TestAddBox(t *testing.T) {
 	a, _, _ := createAnnotator()
 	p := &FakeAddBoxPresenter{}
 	a.AddBox(t.Context(), addbox.Request{}, p)
 	assert.True(t, p.Called)
 }
+
 func TestUpdateLabel(t *testing.T) {
 	a, _, _ := createAnnotator()
 	p := &FakeUpdateLabelPresenter{}
 	a.UpdateLabel(t.Context(), updlbl.Request{}, p)
 	assert.True(t, p.Called)
 }
+
 func TestDeleteAnnotation(t *testing.T) {
 	a, _, _ := createAnnotator()
 	p := &FakeRemoveLabelPresenter{}

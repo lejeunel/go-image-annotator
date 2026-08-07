@@ -16,7 +16,8 @@ func TestHandleAuthError(t *testing.T) {
 	itr := NewTestingInteractor(&fk.CollectionRepo{
 		Return: clc.NewCollection(clc.NewCollectionId(),
 			"a-collection",
-			clc.WithGroup(group.Name))},
+			clc.WithGroup(group.Name)),
+	},
 		WithAuth(&fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), ig.Request{}, p)

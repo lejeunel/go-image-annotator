@@ -28,7 +28,6 @@ type OutputPort interface {
 
 func (s Scroller) Init(imageIdStr string, out OutputPort, opts ...Option) {
 	imageId, err := im.NewImageIdFromString(imageIdStr)
-
 	if err != nil {
 		out.Error(err)
 		return
@@ -51,8 +50,11 @@ func (s Scroller) Init(imageIdStr string, out OutputPort, opts ...Option) {
 	out.SuccessInitScroller(state)
 }
 
-func (s *Scroller) getOne(current im.ImageId, direction ScrollingDirection, criteria ScrollingCriteria) (*im.BaseImage, error) {
-
+func (s *Scroller) getOne(
+	current im.ImageId,
+	direction ScrollingDirection,
+	criteria ScrollingCriteria,
+) (*im.BaseImage, error) {
 	image, err := s.repo.GetAdjacent(current, criteria, direction)
 	if err != nil && !errors.Is(err, e.ErrNotFound) {
 		return nil, err
@@ -65,7 +67,6 @@ func checkCriteria(repo Repo, imageId im.ImageId, criteria ScrollingCriteria) er
 	if err := repo.ImageMustExist(imageId); err != nil {
 		return fmt.Errorf("%v: checking that image with id %v exists: %w",
 			errCtx, imageId, err)
-
 	}
 	if criteria.Collection != nil {
 		if err := repo.CollectionMustExist(*criteria.Collection); err != nil {

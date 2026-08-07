@@ -1,9 +1,10 @@
 package fake
 
 import (
+	"slices"
+
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
-	"slices"
 )
 
 type CollectionRepo struct {
@@ -49,10 +50,9 @@ func (r *CollectionRepo) Find(name string) (*clc.Collection, error) {
 	}
 
 	return &r.Return, nil
-
 }
-func (r *CollectionRepo) Delete(string) error {
 
+func (r *CollectionRepo) Delete(string) error {
 	if r.ErrOnDelete != nil {
 		return r.ErrOnDelete
 	}
@@ -96,6 +96,7 @@ func (r *CollectionRepo) Update(m clc.UpdateModel) error {
 	r.GotUpdateModel = m
 	return nil
 }
+
 func (r *CollectionRepo) GetGroup(name string) (*string, error) {
 	if r.ErrOnGetGroup != nil {
 		return nil, r.ErrOnGetGroup

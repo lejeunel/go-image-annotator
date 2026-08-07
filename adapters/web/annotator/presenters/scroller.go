@@ -8,16 +8,20 @@ import (
 func MakeScrollerButtons(s scr.ScrollerState) v.ScrollerButtons {
 	buttons := v.ScrollerButtons{}
 	if s.Next != nil {
-		buttons.Next = v.ScrollerButton{IsActive: true,
+		buttons.Next = v.ScrollerButton{
+			IsActive:   true,
 			Text:       "Next",
 			ImageId:    s.Next.ImageId.String(),
-			Collection: s.Next.Collection}
+			Collection: s.Next.Collection,
+		}
 	}
 	if s.Previous != nil {
-		buttons.Prev = v.ScrollerButton{IsActive: true,
+		buttons.Prev = v.ScrollerButton{
+			IsActive:   true,
 			Text:       "Previous",
 			ImageId:    s.Previous.ImageId.String(),
-			Collection: s.Previous.Collection}
+			Collection: s.Previous.Collection,
+		}
 	}
 	return buttons
 }

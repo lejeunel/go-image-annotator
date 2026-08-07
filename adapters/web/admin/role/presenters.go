@@ -26,6 +26,7 @@ type ListPresenter struct {
 func NewListPresenter(w http.ResponseWriter, p b.PaginatedListBuilder, u b.RowURL) ListPresenter {
 	return ListPresenter{p, u, w, e.NewErrorPresenter(w)}
 }
+
 func (p ListPresenter) SuccessListRoles(roles []r.Role) {
 	for _, role := range roles {
 		row := MakeRow(p.RowURL, role)
@@ -44,6 +45,7 @@ type ViewPresenter struct {
 func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
 	return ViewPresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w)}
 }
+
 func (p ViewPresenter) SuccessFindRole(role r.Role) {
 	MakeRow(p.RowURL, role).Render(p.Writer)
 }
@@ -57,6 +59,7 @@ type DeletePresenter struct {
 func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
 	return DeletePresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w)}
 }
+
 func (p DeletePresenter) SuccessFindRole(role r.Role) {
 	b.RenderConfirmDeleteRow(len(listRolesFields),
 		role.Name, "role", p.Url, p.Writer)
@@ -75,17 +78,19 @@ func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 	okMessageFunc := func(r update.Response) string {
 		return "Successfully updated role"
 	}
-	return EditPresenter{writer: w, task: task,
+	return EditPresenter{
+		writer: w, task: task,
 		okMessageFunc:  okMessageFunc,
 		RowURL:         u,
-		ErrorPresenter: htmx.NewErrorPresenter(task, w)}
+		ErrorPresenter: htmx.NewErrorPresenter(task, w),
+	}
 }
+
 func (p EditPresenter) SuccessFindRole(role r.Role) {
 	b := bf.NewHTMXInlineFormBuilder(len(listRolesFields), p.Url)
 	b.SetResourceName(role.Name)
 	b.AddTextField("description", "Description", bf.WithDefault(role.Description))
 	b.Render(p.writer)
-
 }
 
 func (p EditPresenter) SuccessUpdateRole(r update.Response) {
@@ -102,5 +107,4 @@ func MakeRow(url b.RowURL, role r.Role) tb.Row {
 	row.AddCell(tb.NewCell(Text(role.Description)))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row
-
 }

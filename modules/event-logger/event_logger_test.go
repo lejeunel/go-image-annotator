@@ -51,6 +51,7 @@ func TestAddEvent(t *testing.T) {
 	assert.Equal(t, state, addedEvent.State)
 	assert.Equal(t, err.Error(), addedEvent.Error)
 }
+
 func TestRetrieveAggregate(t *testing.T) {
 	repo := &fk.EventLoggerRepo{}
 	logger := New(repo, WithMaxNumTasksPerUser(1))
@@ -59,7 +60,10 @@ func TestRetrieveAggregate(t *testing.T) {
 	now := time.Now()
 	logger.InitTask(id, ta.CollectionCloneTask, user)
 	logger.AddEvent(id, ev.Event{Time: now, State: ev.StartedTask})
-	logger.AddEvent(id, ev.Event{Time: now.Add(time.Hour), State: ev.FailedTask, Error: e.ErrDuplicate.Error()})
+	logger.AddEvent(
+		id,
+		ev.Event{Time: now.Add(time.Hour), State: ev.FailedTask, Error: e.ErrDuplicate.Error()},
+	)
 	tasks, _ := logger.ListUserTasks(user, pa.PaginationParams{Page: 1, PageSize: 2})
 	assert.Equal(t, 1, len(tasks))
 	assert.Equal(t, 2, len(tasks[0].Events))

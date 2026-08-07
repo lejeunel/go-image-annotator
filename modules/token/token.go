@@ -6,8 +6,9 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
-	tk "github.com/lejeunel/go-image-annotator/entities/token"
 	"strings"
+
+	tk "github.com/lejeunel/go-image-annotator/entities/token"
 )
 
 type TokenVerifier interface {
@@ -62,7 +63,8 @@ type TokenService struct {
 func New(length int) TokenService {
 	return TokenService{
 		Length:      length,
-		TokenHasher: NewSHA256Hasher()}
+		TokenHasher: NewSHA256Hasher(),
+	}
 }
 
 func (g TokenService) Generate() (*tk.Token, error) {
@@ -79,6 +81,7 @@ func (g TokenService) Generate() (*tk.Token, error) {
 		Hash:  sum,
 	}, nil
 }
+
 func (g TokenService) Verify(token string, storedHash []byte) bool {
 	computed := sha256.Sum256([]byte(token))
 	return subtle.ConstantTimeCompare(computed[:], storedHash) == 1

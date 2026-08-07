@@ -30,6 +30,8 @@ func New(pb b.PageBuilder, defaultPageSize int,
 	d delete.Interactor, cl clone.Interactor, f find.Interactor,
 	lg listgrp.Interactor,
 ) Server {
-	return Server{pb, b.NewRowURL(CollectionUrl, resourceUrlFieldName), defaultPageSize,
-		lc, lg, c, u, d, cl, f}
+	return Server{
+		pb, b.NewRowURL(CollectionUrl, resourceUrlFieldName), defaultPageSize,
+		lc, lg, c, u, d, cl, f,
+	}
 }

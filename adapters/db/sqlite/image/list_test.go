@@ -18,7 +18,10 @@ type ImageListingTestingRepos struct {
 	Collection sc.SQLiteCollectionRepo
 }
 
-func CreateSingleImageCollection(repos ImageListingTestingRepos, collectionName string) (im.Image, clc.Collection) {
+func CreateSingleImageCollection(
+	repos ImageListingTestingRepos,
+	collectionName string,
+) (im.Image, clc.Collection) {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	repos.Collection.Create(collection)
 	imageId := im.NewImageId()
@@ -53,7 +56,11 @@ func TestListOneImage(t *testing.T) {
 	repos.Image.AddImage(image.Id, nil, im.Specs{})
 	repos.Image.AddToCollection(image.Id, collection.Id)
 
-	r, _ := repos.Image.Slice(im.Filtering{}, pa.PaginationParams{PageSize: 2, Page: 1}, im.Ordering{})
+	r, _ := repos.Image.Slice(
+		im.Filtering{},
+		pa.PaginationParams{PageSize: 2, Page: 1},
+		im.Ordering{},
+	)
 	assert.Equal(t, 1, len(r))
 }
 
@@ -63,20 +70,27 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 	firstImage, firstCollection := CreateSingleImageCollection(repos, "first-collection")
 	CreateSingleImageCollection(repos, "second-collection")
 
-	r, _ := repos.Image.Slice(im.Filtering{Collection: &firstCollection.Name}, pa.PaginationParams{PageSize: 2, Page: 1}, im.Ordering{})
+	r, _ := repos.Image.Slice(
+		im.Filtering{Collection: &firstCollection.Name},
+		pa.PaginationParams{PageSize: 2, Page: 1},
+		im.Ordering{},
+	)
 	assert.Equal(t, 1, len(r))
 	images := r
 	assert.True(t, images[0].ImageId == firstImage.Id)
 	assert.True(t, images[0].Collection == firstCollection.Name)
 }
 
-func CreateImageInCollectionFromString(repo SQLiteImageRepo, collection clc.Collection, imageId string) im.Image {
+func CreateImageInCollectionFromString(
+	repo SQLiteImageRepo,
+	collection clc.Collection,
+	imageId string,
+) im.Image {
 	id, _ := im.NewImageIdFromString(imageId)
 	image := im.NewImage(id, collection)
 	repo.AddImage(image.Id, []byte(image.Id.String()), im.Specs{})
 	repo.AddToCollection(image.Id, collection.Id)
 	return image
-
 }
 
 func TestListImagesOrderedById(t *testing.T) {
@@ -84,10 +98,22 @@ func TestListImagesOrderedById(t *testing.T) {
 	collectionName := "a-collection"
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	repos.Collection.Create(collection)
-	CreateImageInCollectionFromString(repos.Image, collection, "11111111-1111-1111-1111-111111111111")
-	image0 := CreateImageInCollectionFromString(repos.Image, collection, "00000000-0000-0000-0000-000000000000")
+	CreateImageInCollectionFromString(
+		repos.Image,
+		collection,
+		"11111111-1111-1111-1111-111111111111",
+	)
+	image0 := CreateImageInCollectionFromString(
+		repos.Image,
+		collection,
+		"00000000-0000-0000-0000-000000000000",
+	)
 
-	r, _ := repos.Image.Slice(im.Filtering{}, pa.PaginationParams{PageSize: 2, Page: 1}, im.Ordering{})
+	r, _ := repos.Image.Slice(
+		im.Filtering{},
+		pa.PaginationParams{PageSize: 2, Page: 1},
+		im.Ordering{},
+	)
 	got := r[0].ImageId
 	assert.Equal(t, image0.Id, got)
 }
@@ -105,7 +131,11 @@ func TestListImagesOrderedByIngestTime(t *testing.T) {
 	repos.Image.AddToCollection(firstImage.Id, collection.Id)
 	repos.Image.AddToCollection(secondImage.Id, collection.Id)
 
-	r, err := repos.Image.Slice(im.Filtering{}, pa.PaginationParams{PageSize: 2, Page: 1}, im.Ordering{IngestTime: true})
+	r, err := repos.Image.Slice(
+		im.Filtering{},
+		pa.PaginationParams{PageSize: 2, Page: 1},
+		im.Ordering{IngestTime: true},
+	)
 	assert.NoError(t, err)
 	assert.Equal(t, r[0].ImageId, firstImage.Id)
 	assert.Equal(t, r[1].ImageId, secondImage.Id)
@@ -116,8 +146,16 @@ func TestIterateImages(t *testing.T) {
 	collectionName := "a-collection"
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	repos.Collection.Create(collection)
-	im0 := CreateImageInCollectionFromString(repos.Image, collection, "00000000-0000-0000-0000-000000000000")
-	im1 := CreateImageInCollectionFromString(repos.Image, collection, "11111111-1111-1111-1111-111111111111")
+	im0 := CreateImageInCollectionFromString(
+		repos.Image,
+		collection,
+		"00000000-0000-0000-0000-000000000000",
+	)
+	im1 := CreateImageInCollectionFromString(
+		repos.Image,
+		collection,
+		"11111111-1111-1111-1111-111111111111",
+	)
 
 	res := []im.BaseImage{}
 	for batch, err := range repos.Image.Iterate(im.Filtering{}, 1) {

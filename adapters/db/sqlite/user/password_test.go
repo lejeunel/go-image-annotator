@@ -1,9 +1,10 @@
 package user
 
 import (
+	"testing"
+
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestUpdatePassword(t *testing.T) {

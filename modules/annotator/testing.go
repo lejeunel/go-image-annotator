@@ -2,6 +2,7 @@ package annotator
 
 import (
 	"context"
+
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
@@ -34,15 +35,13 @@ func (f *FakeLabelFetcher) Execute(ctx context.Context, o fetchlbl.OutputPort) {
 	o.SuccessFetchLabels(fetchlbl.Response{Labels: []string{"a-label"}})
 }
 
-type FakeImageReader struct {
-}
+type FakeImageReader struct{}
 
 func (b *FakeImageReader) Execute(r imread.Request, o imread.OutputPort) {
 	o.SuccessReadImage(im.Image{})
 }
 
-type FakeLabelAdder struct {
-}
+type FakeLabelAdder struct{}
 
 func (b *FakeLabelAdder) Execute(ctx context.Context, r addlbl.Request, o addlbl.OutputPort) {
 	o.SuccessAddLabel(addlbl.Response{})
@@ -56,36 +55,31 @@ func (b *FakePolygonAdder) Execute(c context.Context, r addpoly.Request, o addpo
 	o.SuccessAddPolygon(addpoly.Response{})
 }
 
-type FakePolygonUpdater struct {
-}
+type FakePolygonUpdater struct{}
 
 func (b *FakePolygonUpdater) Execute(c context.Context, r updpoly.Request, o updpoly.OutputPort) {
 	o.SuccessUpdatePolygon(updpoly.Response{})
 }
 
-type FakeBoxAdder struct {
-}
+type FakeBoxAdder struct{}
 
 func (b *FakeBoxAdder) Execute(c context.Context, r addbox.Request, o addbox.OutputPort) {
 	o.SuccessAddBox(addbox.Response{})
 }
 
-type FakeBoxUpdater struct {
-}
+type FakeBoxUpdater struct{}
 
 func (b *FakeBoxUpdater) Execute(c context.Context, r updbox.Request, o updbox.OutputPort) {
 	o.SuccessUpdateBox(updbox.Response{})
 }
 
-type FakeLabelUpdater struct {
-}
+type FakeLabelUpdater struct{}
 
 func (b *FakeLabelUpdater) Execute(ctx context.Context, r updlbl.Request, o updlbl.OutputPort) {
 	o.SuccessUpdateLabel(updlbl.Response{})
 }
 
-type FakeAnnotationDeleter struct {
-}
+type FakeAnnotationDeleter struct{}
 
 func (b *FakeAnnotationDeleter) Execute(c context.Context, r del.Request, o del.OutputPort) {
 	o.SuccessDeleteAnnotation(del.Response{})

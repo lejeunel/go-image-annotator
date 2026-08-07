@@ -18,6 +18,7 @@ type TestingTransactor struct {
 }
 
 func (m *TestingTransactor) RunInTx(
-	fn func(Repos) error) error {
+	fn func(Repos) error,
+) error {
 	return fn(m.Repos)
 }

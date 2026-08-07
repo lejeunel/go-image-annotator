@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
@@ -26,8 +27,6 @@ import (
 	"github.com/lejeunel/go-image-annotator/config"
 	g "github.com/lejeunel/go-image-annotator/globals"
 
-	"net/http"
-
 	"github.com/go-chi/chi/v5"
 )
 
@@ -42,7 +41,12 @@ func Make(url string, port int) http.Handler {
 	basePageBuilder := b.NewBasePageBuilder()
 	pageBuilder := b.NewPageBuilder(basePageBuilder, currentVersion)
 
-	a.BootstrapInitialAdmin(app.Itrs.Bootstrap, cfg.InitialAdminEmail, cfg.InitialAdminPassword, *logger)
+	a.BootstrapInitialAdmin(
+		app.Itrs.Bootstrap,
+		cfg.InitialAdminEmail,
+		cfg.InitialAdminPassword,
+		*logger,
+	)
 
 	baseURL := fmt.Sprintf("%v:%v", url, port)
 
@@ -53,7 +57,10 @@ func Make(url string, port int) http.Handler {
 		WebRequireLogin,
 	)
 	apiAuth := Chain(
-		app.SessionManager.LoadAndSave, app.SessionManager.AuthBearerMiddleWare, app.SessionManager.AuthCookiesMiddleWare, ApiRequireLogin,
+		app.SessionManager.LoadAndSave,
+		app.SessionManager.AuthBearerMiddleWare,
+		app.SessionManager.AuthCookiesMiddleWare,
+		ApiRequireLogin,
 	)
 
 	RouteWebPages(router, HomePageHandlerFunc(pageBuilder), webAuth)
@@ -76,11 +83,23 @@ func Make(url string, port int) http.Handler {
 		app.Itrs.Group.List)
 	collectionServer.Route(router, webAuth)
 
-	imagesServer := im.New(pageBuilder, cfg.DefaultPageSize, app.Itrs.Image.List, app.Itrs.Image.Delete, app.Itrs.Image.Find)
+	imagesServer := im.New(
+		pageBuilder,
+		cfg.DefaultPageSize,
+		app.Itrs.Image.List,
+		app.Itrs.Image.Delete,
+		app.Itrs.Image.Find,
+	)
 	imagesServer.Route(router, webAuth)
 
 	adminPageBuilder := adm.NewPageBuilder(pageBuilder)
-	adminUserServer := admusr.New(adminPageBuilder, app.Itrs.User, app.Itrs.Group, app.Itrs.Role, cfg.DefaultPageSize)
+	adminUserServer := admusr.New(
+		adminPageBuilder,
+		app.Itrs.User,
+		app.Itrs.Group,
+		app.Itrs.Role,
+		cfg.DefaultPageSize,
+	)
 	adminUserServer.Route(router, webAuth)
 	adminGroupServer := admgrp.New(adminPageBuilder, app.Itrs.Group)
 	adminGroupServer.Route(router, webAuth)
@@ -110,7 +129,6 @@ func Make(url string, port int) http.Handler {
 }
 
 func Serve(handler http.Handler, port int) {
-
 	fmt.Println("serving on port:", port)
 	http.ListenAndServe(fmt.Sprintf(":%v", port), handler)
 }

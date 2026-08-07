@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"iter"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	adb "github.com/lejeunel/go-image-annotator/adapters/db"
@@ -13,7 +14,6 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
-	"time"
 )
 
 type SQLiteImageRepo struct {
@@ -43,6 +43,7 @@ func (r SQLiteImageRepo) AddToCollection(imageId im.ImageId, collectionId clc.Co
 
 	return nil
 }
+
 func (r SQLiteImageRepo) Count(f im.Filtering) (*int64, error) {
 	var count int64
 
@@ -59,16 +60,20 @@ func (r SQLiteImageRepo) Count(f im.Filtering) (*int64, error) {
 		return nil, fmt.Errorf("counting image records: %v: %w", err, e.ErrInternal)
 	}
 	return &count, nil
-
 }
-func (r SQLiteImageRepo) Slice(f im.Filtering, p pa.PaginationParams, o im.Ordering) ([]im.BaseImage, error) {
 
+func (r SQLiteImageRepo) Slice(
+	f im.Filtering,
+	p pa.PaginationParams,
+	o im.Ordering,
+) ([]im.BaseImage, error) {
 	images, err := r.list(f, p, o)
 	if err != nil {
 		return nil, err
 	}
 	return images, nil
 }
+
 func (r SQLiteImageRepo) Iterate(f im.Filtering, pageSize int) iter.Seq2[im.BaseImage, error] {
 	return func(yield func(im.BaseImage, error) bool) {
 		var after *im.ImageId
@@ -90,16 +95,25 @@ func (r SQLiteImageRepo) Iterate(f im.Filtering, pageSize int) iter.Seq2[im.Base
 		}
 	}
 }
-func (r SQLiteImageRepo) ImageExistsInCollection(imageId im.ImageId, collection clc.CollectionName) (bool, error) {
+
+func (r SQLiteImageRepo) ImageExistsInCollection(
+	imageId im.ImageId,
+	collection clc.CollectionName,
+) (bool, error) {
 	var count int64
 	query := "SELECT COUNT(*) FROM images_collections WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2)"
 	err := r.Db.QueryRow(query, imageId.String(), collection).Scan(&count)
 	if err != nil {
-		return false, fmt.Errorf("checking image to collection junction records: %v: %w", err, e.ErrInternal)
+		return false, fmt.Errorf(
+			"checking image to collection junction records: %v: %w",
+			err,
+			e.ErrInternal,
+		)
 	}
 
 	return count > 0, nil
 }
+
 func (r SQLiteImageRepo) ImageExists(imageId im.ImageId) (bool, error) {
 	var count int64
 	query := "SELECT COUNT(*) FROM images WHERE id=$1"
@@ -110,10 +124,15 @@ func (r SQLiteImageRepo) ImageExists(imageId im.ImageId) (bool, error) {
 
 	return count > 0, nil
 }
+
 func (r SQLiteImageRepo) GetSpecs(imageId im.ImageId) (*im.Specs, error) {
 	errCtx := "finding image specification"
 	var row SpecsRow
-	err := r.Db.Get(&row, "SELECT mimetype,width,height,ingested_at FROM images WHERE id = $1", imageId)
+	err := r.Db.Get(
+		&row,
+		"SELECT mimetype,width,height,ingested_at FROM images WHERE id = $1",
+		imageId,
+	)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -122,8 +141,14 @@ func (r SQLiteImageRepo) GetSpecs(imageId im.ImageId) (*im.Specs, error) {
 			return nil, fmt.Errorf("%v: %v: %w", errCtx, err, e.ErrInternal)
 		}
 	}
-	return &im.Specs{MIMEType: row.MIMEType, Width: row.Width, Height: row.Height, IngestedAt: row.IngestedAt}, nil
+	return &im.Specs{
+		MIMEType:   row.MIMEType,
+		Width:      row.Width,
+		Height:     row.Height,
+		IngestedAt: row.IngestedAt,
+	}, nil
 }
+
 func (r SQLiteImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.Specs) error {
 	query := "INSERT INTO images (id, hash, mimetype, width, height, ingested_at) VALUES ($1,$2,$3,$4,$5,$6)"
 	_, err := r.Db.Exec(query, imageId.String(), hex.EncodeToString(hash), specs.MIMEType,
@@ -133,6 +158,7 @@ func (r SQLiteImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.Spec
 	}
 	return nil
 }
+
 func (r SQLiteImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	errCtx := "finding image record by hash"
 	var imageId im.ImageId
@@ -145,6 +171,7 @@ func (r SQLiteImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	}
 	return &imageId, nil
 }
+
 func (r SQLiteImageRepo) Delete(id im.ImageId) error {
 	_, err := r.Db.Exec("DELETE FROM images WHERE id = $1", id)
 	if err != nil {
@@ -152,14 +179,23 @@ func (r SQLiteImageRepo) Delete(id im.ImageId) error {
 	}
 	return nil
 }
-func (r SQLiteImageRepo) RemoveImageFromCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
+
+func (r SQLiteImageRepo) RemoveImageFromCollection(
+	imageId im.ImageId,
+	collectionId clc.CollectionId,
+) error {
 	_, err := r.Db.Exec("DELETE FROM images_collections WHERE image_id = $1 AND collection_id = $2",
 		imageId, collectionId)
 	if err != nil {
-		return fmt.Errorf("removing image from image to collection junction table: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf(
+			"removing image from image to collection junction table: %v: %w",
+			err,
+			e.ErrInternal,
+		)
 	}
 	return nil
 }
+
 func (r SQLiteImageRepo) makeBaseQuery(f im.Filtering, pageSize int) sq.SelectBuilder {
 	q := sq.StatementBuilder.Select(
 		"ic.image_id,ic.collection_id,i.ingested_at,c.name").From(
@@ -173,8 +209,8 @@ func (r SQLiteImageRepo) makeBaseQuery(f im.Filtering, pageSize int) sq.SelectBu
 	}
 
 	return q
-
 }
+
 func (r SQLiteImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, error) {
 	sql, args, err := q.ToSql()
 	if err != nil {
@@ -190,7 +226,12 @@ func (r SQLiteImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, er
 	}
 	return images, nil
 }
-func (r SQLiteImageRepo) list(f im.Filtering, p pa.PaginationParams, o im.Ordering) ([]im.BaseImage, error) {
+
+func (r SQLiteImageRepo) list(
+	f im.Filtering,
+	p pa.PaginationParams,
+	o im.Ordering,
+) ([]im.BaseImage, error) {
 	q := r.makeBaseQuery(f, p.PageSize)
 	q = q.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
 
@@ -205,7 +246,12 @@ func (r SQLiteImageRepo) list(f im.Filtering, p pa.PaginationParams, o im.Orderi
 	}
 	return images, nil
 }
-func (r SQLiteImageRepo) sliceAfterId(f im.Filtering, pageSize int, after *im.ImageId) ([]im.BaseImage, *im.ImageId, error) {
+
+func (r SQLiteImageRepo) sliceAfterId(
+	f im.Filtering,
+	pageSize int,
+	after *im.ImageId,
+) ([]im.BaseImage, *im.ImageId, error) {
 	q := r.makeBaseQuery(f, pageSize)
 	q = q.OrderBy("ic.image_id")
 	if after != nil {
@@ -222,12 +268,18 @@ func (r SQLiteImageRepo) sliceAfterId(f im.Filtering, pageSize int, after *im.Im
 	}
 	return images, next, nil
 }
+
 func (r SQLiteImageRepo) IsUsed(id im.ImageId) (*bool, error) {
 	var count int64
 	query := "SELECT COUNT(*) FROM images_collections WHERE image_id=$1"
 	err := r.Db.QueryRow(query, id).Scan(&count)
 	if err != nil {
-		return nil, fmt.Errorf("counting number of collections using image %v: %v: %w", id, err, e.ErrInternal)
+		return nil, fmt.Errorf(
+			"counting number of collections using image %v: %v: %w",
+			id,
+			err,
+			e.ErrInternal,
+		)
 	}
 	var isUsed bool
 	if count > 0 {

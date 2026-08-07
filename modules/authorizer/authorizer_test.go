@@ -67,8 +67,10 @@ func TestNotAuthorizedWhenNotInGroup(t *testing.T) {
 	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
 	auth, err := New(policies)
 	assert.NoError(t, err)
-	ctx := u.AppendUserToContext(t.Context(), u.User{Roles: []string{"a-role-that-i-have"},
-		Groups: []string{"group-of-losers"}})
+	ctx := u.AppendUserToContext(t.Context(), u.User{
+		Roles:  []string{"a-role-that-i-have"},
+		Groups: []string{"group-of-losers"},
+	})
 	err = auth.CreateCollection(ctx, "group-of-chads")
 	assert.Error(t, err)
 }
@@ -77,8 +79,10 @@ func TestAuthorizedWhenMemberOfGroup(t *testing.T) {
 	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
 	auth, err := New(policies)
 	assert.NoError(t, err)
-	ctx := u.AppendUserToContext(t.Context(), u.User{Roles: []string{"a-role-that-i-have"},
-		Groups: []string{"group-of-chads"}})
+	ctx := u.AppendUserToContext(t.Context(), u.User{
+		Roles:  []string{"a-role-that-i-have"},
+		Groups: []string{"group-of-chads"},
+	})
 	err = auth.CreateCollection(ctx, "group-of-chads")
 	assert.NoError(t, err)
 }
@@ -92,8 +96,10 @@ func TestAppendSetOfRules(t *testing.T) {
 }
 
 func TestAdminDoesNotNeedRoleNorGroup(t *testing.T) {
-	policies := map[string][]string{"a-role-that-i-dont-have": {"CreateCollection"},
-		"admin": {"*"}}
+	policies := map[string][]string{
+		"a-role-that-i-dont-have": {"CreateCollection"},
+		"admin":                   {"*"},
+	}
 	auth, _ := New(policies)
 	ctx := u.AppendUserToContext(t.Context(),
 		u.NewUser("admin@example.com", u.WithRoles([]string{"admin"})))

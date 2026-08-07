@@ -41,7 +41,8 @@ func (p *TaskDetailPresenter) SuccessFindTask(t t.Task) {
 	r := Task{Id: t.Id.String(), Type: t.Type.String(), Issuer: t.Issuer}
 	for _, e := range t.Events {
 		r.Events = append(r.Events,
-			Event{Time: e.Time.Format(time.DateTime),
+			Event{
+				Time:  e.Time.Format(time.DateTime),
 				State: e.State.String(), Extra: e.Extra, Error: e.Error,
 			})
 	}

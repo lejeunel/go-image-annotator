@@ -1,11 +1,12 @@
 package list
 
 import (
+	"testing"
+
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestHandleInternalErrOnCount(t *testing.T) {

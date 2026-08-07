@@ -1,9 +1,10 @@
 package server
 
 import (
+	"net/http"
+
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	rt "github.com/lejeunel/go-image-annotator/routes"
-	"net/http"
 )
 
 // Middleware is the standard net/http middleware signature.
@@ -24,7 +25,6 @@ func Chain(mws ...Middleware) Middleware {
 
 func ApiRequireLogin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		user := u.IdentityFromContext(r.Context())
 		if user == nil {
 			http.Error(w, "authentication required", http.StatusUnauthorized)
@@ -36,7 +36,6 @@ func ApiRequireLogin(next http.Handler) http.Handler {
 
 func WebRequireLogin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		user := u.IdentityFromContext(r.Context())
 		if user == nil {
 			http.Redirect(w, r, rt.LoginPageUrl, http.StatusFound)

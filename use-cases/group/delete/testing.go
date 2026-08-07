@@ -2,6 +2,7 @@ package delete
 
 import (
 	"context"
+
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
@@ -15,7 +16,6 @@ type FakeRepo struct {
 }
 
 func (r *FakeRepo) Delete(string) error {
-
 	if r.ErrOnDelete {
 		return r.Err
 	}
@@ -23,7 +23,7 @@ func (r *FakeRepo) Delete(string) error {
 }
 
 func (r *FakeRepo) Exists(c string) (*bool, error) {
-	var exist = true
+	exist := true
 	if r.Missing {
 		exist = false
 		return &exist, nil
@@ -49,8 +49,7 @@ func (p *FakePresenter) SuccessDeleteGroup(string) {
 	p.GotSuccess = true
 }
 
-type FailingAuth struct {
-}
+type FailingAuth struct{}
 
 func (f FailingAuth) DeleteGroup(ctx context.Context) error {
 	return e.ErrAuthorization

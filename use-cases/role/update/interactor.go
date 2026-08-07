@@ -23,8 +23,10 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: r,
-		auth: auth.NewVoidAuth()}
+	i := &Interactor{
+		repo: r,
+		auth: auth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -32,7 +34,6 @@ func New(r Repo, opts ...Option) Interactor {
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-
 	errCtx := "updating role"
 	if err := i.auth.UpdateRole(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
@@ -50,7 +51,6 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
-
 	}
 
 	if err := i.repo.Update(rl.UpdatableModel{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription}); err != nil {

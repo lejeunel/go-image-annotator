@@ -12,5 +12,4 @@ func CreateGroup(repo SQLiteGroupRepo, name string) (*g.Group, error) {
 		return nil, err
 	}
 	return &c, nil
-
 }

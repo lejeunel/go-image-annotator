@@ -1,10 +1,9 @@
 package annotator
 
 import (
+	"embed"
 	"fmt"
 	"net/http"
-
-	"embed"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
@@ -37,31 +36,42 @@ type AnnotationView struct {
 func (v *AnnotationView) SetScroller(buttons v.ScrollerButtons) {
 	v.scrollerButtons = buttons
 }
-func (v *AnnotationView) SetAnnotations(boxes []v.BoundingBox, polygons []v.Polygon, imageLabels []v.ImageLabel) {
+
+func (v *AnnotationView) SetAnnotations(
+	boxes []v.BoundingBox,
+	polygons []v.Polygon,
+	imageLabels []v.ImageLabel,
+) {
 	v.boxes = boxes
 	v.polygons = polygons
 	v.imageLabels = imageLabels
 }
+
 func (v *AnnotationView) SetAvailableLabels(labels []string) {
 	v.availableLabels = labels
 }
+
 func (v *AnnotationView) SetAvailableImageLabels(labels []string) {
 	v.availableImageLabels = labels
 }
+
 func (v *AnnotationView) SetImageInfo(info v.ImageInfo) {
 	v.imageInfo = &info
 }
+
 func (v *AnnotationView) SetImage(image v.Image) {
 	v.image = &image
 }
+
 func (v *AnnotationView) Error(err error) {
 	v.err = err
 }
+
 func (v *AnnotationView) RenderAnnotationList(w http.ResponseWriter) {
 	v.AnnotationsListView.Build(v.boxes, v.polygons, v.imageLabels, v.availableLabels).Render(w)
 }
-func (v *AnnotationView) Render(w http.ResponseWriter) {
 
+func (v *AnnotationView) Render(w http.ResponseWriter) {
 	if v.err != nil {
 		http.Error(w, v.err.Error(), http.StatusBadRequest)
 		return
@@ -77,13 +87,37 @@ func (v *AnnotationView) ShapeSelector() Node {
 		Attr("x-data", "{ active: 'rectangle'}"),
 		Class("flex gap-2 mb-2"),
 		Button(
-			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'rectangle', '%v': active !== 'rectangle'}`, s.PrimaryButton, s.InactiveButton)),
+			Attr(
+				"x-bind:class",
+				fmt.Sprintf(
+					`{'%v': active === 'rectangle', '%v': active !== 'rectangle'}`,
+					s.PrimaryButton,
+					s.InactiveButton,
+				),
+			),
 			Attr("@click", "AnnotatorModule.drawRectangle(); active = 'rectangle';"),
-			Div(Class("flex items-center gap-1"), Raw(ic.BoundingBox), Div(Class("ml-1"), Text("Rectangle")))),
+			Div(
+				Class("flex items-center gap-1"),
+				Raw(ic.BoundingBox),
+				Div(Class("ml-1"), Text("Rectangle")),
+			),
+		),
 		Button(
-			Attr("x-bind:class", fmt.Sprintf(`{'%v': active === 'polygon', '%v': active !== 'polygon'}`, s.PrimaryButton, s.InactiveButton)),
+			Attr(
+				"x-bind:class",
+				fmt.Sprintf(
+					`{'%v': active === 'polygon', '%v': active !== 'polygon'}`,
+					s.PrimaryButton,
+					s.InactiveButton,
+				),
+			),
 			Attr("@click", "AnnotatorModule.drawPolygon(); active = 'polygon';"),
-			Div(Class("flex items-center gap-1"), Raw(ic.Polygon), Div(Class("ml-1"), Text("Polygon")))))
+			Div(
+				Class("flex items-center gap-1"),
+				Raw(ic.Polygon),
+				Div(Class("ml-1"), Text("Polygon")),
+			),
+		))
 }
 
 func AnnotoriousLib() []Node {
@@ -115,9 +149,19 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 				Tr(Div(Class("flex"), v.ScrollerView.Render(v.scrollerButtons), v.ShapeSelector())),
 				Tr(Td(Table(
 					Tr(Td(Class("align-top"), v.ImageView.Build(*v.image)),
-						Td(Class("align-top pl-2"),
+						Td(
+							Class("align-top pl-2"),
 							Div(Class("pb-2"), v.ImageInfosView.Build(*v.imageInfo)),
-							Div(ID("annotation-list"), v.AnnotationsListView.Build(v.boxes, v.polygons, v.imageLabels, v.availableLabels)))),
+							Div(
+								ID("annotation-list"),
+								v.AnnotationsListView.Build(
+									v.boxes,
+									v.polygons,
+									v.imageLabels,
+									v.availableLabels,
+								),
+							),
+						)),
 				),
 				))),
 		}))

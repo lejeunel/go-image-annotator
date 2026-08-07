@@ -18,7 +18,6 @@ type Raw struct {
 }
 
 func (p Raw) SuccessReadRawImage(r raw.Response) {
-
 	data, err := io.ReadAll(r.Reader)
 	if err != nil {
 		http.Error(p.Writer, err.Error(), http.StatusInternalServerError)

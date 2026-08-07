@@ -1,10 +1,11 @@
 package user
 
 import (
+	"testing"
+
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestInternalErrOnDeleteShouldFail(t *testing.T) {

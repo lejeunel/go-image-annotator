@@ -19,8 +19,11 @@ func (p Policies) Validate() error {
 		}
 	}
 	if len(invalidMethods) > 0 {
-		return fmt.Errorf("validating methods: found invalid names %v: %w", invalidMethods, e.ErrValidation)
-
+		return fmt.Errorf(
+			"validating methods: found invalid names %v: %w",
+			invalidMethods,
+			e.ErrValidation,
+		)
 	}
 	return nil
 }
@@ -28,8 +31,14 @@ func (p Policies) Validate() error {
 var DefaultPolicyFileName = "policies.yaml"
 
 var DefaultPolicies = Policies{
-	"viewer":            {},
-	"annotator":         {"Annotate"},
-	"image-contributor": {"IngestImage", "ImportImage", "CreateCollection", "CloneCollection", "DeleteCollection"},
-	"admin":             {"*"},
+	"viewer":    {},
+	"annotator": {"Annotate"},
+	"image-contributor": {
+		"IngestImage",
+		"ImportImage",
+		"CreateCollection",
+		"CloneCollection",
+		"DeleteCollection",
+	},
+	"admin": {"*"},
 }

@@ -1,9 +1,10 @@
 package fake
 
 import (
+	"slices"
+
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
-	"slices"
 )
 
 type LabelRepo struct {
@@ -40,6 +41,7 @@ func (r *LabelRepo) Create(l lbl.Label) error {
 	r.Created = l
 	return nil
 }
+
 func (r *LabelRepo) Exists(name string) (bool, error) {
 	if r.ErrOnExists != nil {
 		return false, r.ErrOnExists
@@ -64,7 +66,6 @@ func (r *LabelRepo) IsUsed(n string) (*bool, error) {
 	}
 	if r.IsUsed_ {
 		return &res, nil
-
 	}
 	res = false
 	return &res, nil
@@ -95,7 +96,6 @@ func (r *LabelRepo) List(req pag.PaginationParams) ([]*lbl.Label, error) {
 		result = append(result, &l)
 	}
 	return result, nil
-
 }
 
 func (r *LabelRepo) Update(m lbl.UpdatableModel) error {

@@ -30,6 +30,7 @@ type ListPresenter struct {
 func NewListPresenter(w http.ResponseWriter, p b.PaginatedListBuilder, u b.RowURL) ListPresenter {
 	return ListPresenter{p, u, w, e.NewErrorPresenter(w)}
 }
+
 func (p ListPresenter) SuccessListUsers(r list.Response) {
 	p.SetPagination(r.Pagination, rt.AdminUsersUrl)
 	for _, user := range r.Users {
@@ -50,6 +51,7 @@ type ViewPresenter struct {
 func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
 	return ViewPresenter{u, w, e.NewErrorPresenter(w)}
 }
+
 func (p ViewPresenter) SuccessFindUser(user u.User) {
 	MakeRow(p.RowURL, user).Render(p.Writer)
 }
@@ -63,6 +65,7 @@ type DeletePresenter struct {
 func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
 	return DeletePresenter{w, u, e.NewErrorPresenter(w)}
 }
+
 func (p DeletePresenter) SuccessFindUser(user u.User) {
 	b.RenderConfirmDeleteRow(len(listUsersFields),
 		user.Id, "user", p.Url, p.Writer)
@@ -84,12 +87,15 @@ func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 func (p *EditPresenter) SuccessFindUser(user u.User) {
 	p.user = user
 }
+
 func (p *EditPresenter) SuccessListGroups(groups []g.Group) {
 	p.groups = groups
 }
+
 func (p *EditPresenter) SuccessListRoles(roles []r.Role) {
 	p.roles = roles
 }
+
 func (p EditPresenter) Render(w io.Writer) {
 	form := bf.NewHTMXInlineFormBuilder(len(listUsersFields), p.Url)
 	form.SetResourceName(p.user.Id)
@@ -115,5 +121,4 @@ func MakeRow(url b.RowURL, user u.User) tb.Row {
 	row.AddCell(tb.NewCell(Text(strings.Join(user.Groups, ", "))))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row
-
 }

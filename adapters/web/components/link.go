@@ -8,7 +8,9 @@ import (
 func MakeTextLink(url, text string) Node {
 	return A(
 		Href(url),
-		Class("font-medium text-primary underline-offset-2 hover:underline focus:underline focus:outline-hidden dark:text-primary-dark"),
+		Class(
+			"font-medium text-primary underline-offset-2 hover:underline focus:underline focus:outline-hidden dark:text-primary-dark",
+		),
 		Text(text),
 	)
 }

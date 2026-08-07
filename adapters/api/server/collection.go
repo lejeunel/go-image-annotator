@@ -15,6 +15,7 @@ func (s *Server) FindCollectionByName(w http.ResponseWriter, r *http.Request, na
 	s.Collection.Find.Execute(r.Context(), name,
 		presenter.NewFindPresenter(w, s.Logger))
 }
+
 func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 	body, ok := json.MustDecodeJSON[models.NewCollection](w, r)
 	if !ok {
@@ -26,11 +27,16 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 		create.Request{Name: body.Name, Description: *body.Description},
 		presenter.NewCreatePresenter(w, s.Logger))
 }
+
 func (s *Server) DeleteCollectionByName(w http.ResponseWriter, r *http.Request, name string) {
 	s.Collection.Delete.Execute(r.Context(), name, presenter.NewDeletePresenter(w, s.Logger))
-
 }
-func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request, params ListCollectionsParams) {
+
+func (s *Server) ListCollections(
+	w http.ResponseWriter,
+	r *http.Request,
+	params ListCollectionsParams,
+) {
 	req := pa.PaginationParams{Page: 1, PageSize: s.Collection.DefaultPageSize}
 	if p := params.Page; p != nil {
 		req.Page = *p
@@ -40,7 +46,6 @@ func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request, params 
 	}
 	s.Collection.List.Execute(r.Context(), req,
 		presenter.NewListPresenter(w, s.Logger))
-
 }
 
 func (s *Server) UpdateCollectionByName(w http.ResponseWriter, r *http.Request, name string) {
@@ -52,5 +57,4 @@ func (s *Server) UpdateCollectionByName(w http.ResponseWriter, r *http.Request, 
 	s.Collection.Update.Execute(r.Context(),
 		update.Request{Name: name, NewName: body.Name, NewDescription: body.Description},
 		presenter.NewUpdatePresenter(w, s.Logger))
-
 }

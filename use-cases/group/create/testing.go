@@ -1,9 +1,9 @@
 package create
 
 import (
+	"context"
 	"slices"
 
-	"context"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
@@ -25,7 +25,7 @@ func (r *FakeRepo) Create(g g.Group) error {
 }
 
 func (r *FakeRepo) Exists(name string) (*bool, error) {
-	var exist = true
+	exist := true
 	if slices.Contains(r.Names, name) {
 		return &exist, nil
 	}
@@ -44,8 +44,7 @@ func (p *FakePresenter) Success(r Response) {
 	p.Got = r
 }
 
-type FailingAuth struct {
-}
+type FailingAuth struct{}
 
 func (f FailingAuth) CreateGroup(ctx context.Context) error {
 	return e.ErrAuthorization

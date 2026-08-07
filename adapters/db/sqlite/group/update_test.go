@@ -1,10 +1,11 @@
 package group
 
 import (
+	"testing"
+
 	grp "github.com/lejeunel/go-image-annotator/entities/group"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestInternalErrOnUpdateShouldFail(t *testing.T) {

@@ -24,6 +24,7 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 	s.Image.Ingest.Execute(r.Context(), NewIngestImageRequest(*body, s.Image.AllowedImageFormats),
 		presenter.NewIngestPresenter(w, s.Logger))
 }
+
 func (s *Server) ReadRawImage(w http.ResponseWriter, r *http.Request, imageId string) {
 	s.Image.Raw.Execute(imageId, presenter.NewRawImagePresenter(w, s.Logger))
 }
@@ -36,11 +37,13 @@ func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionNam
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams) {
 	req := list.Request{
 		Filtering: im.Filtering{
-			Collection: params.Collection},
+			Collection: params.Collection,
+		},
 		PaginationParams: pa.PaginationParams{
 			PageSize: s.Image.DefaultPageSize,
 		},
-		Ordering: im.Ordering{IngestTime: true}}
+		Ordering: im.Ordering{IngestTime: true},
+	}
 	if p := params.Page; p != nil {
 		req.Page = *p
 	}
@@ -51,8 +54,10 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 }
 
 func NewIngestImageRequest(req models.NewImage, allowedImageFormats []string) ig.Request {
-
-	ingestReq := ig.Request{Collection: req.Collection, Reader: rd.NewBase64ImageDecoder(allowedImageFormats, req.Data)}
+	ingestReq := ig.Request{
+		Collection: req.Collection,
+		Reader:     rd.NewBase64ImageDecoder(allowedImageFormats, req.Data),
+	}
 	appendLabelsToIngestImageRequest(&ingestReq, req.Labels)
 	appendBoundingBoxesToIngestImageRequest(&ingestReq, req.BoundingBoxes)
 	return ingestReq
@@ -62,8 +67,10 @@ func appendBoundingBoxesToIngestImageRequest(req *ig.Request, boxes *[]models.Ne
 	if boxes != nil {
 		for _, box := range *boxes {
 			req.BoundingBoxes = append(req.BoundingBoxes,
-				an.BoundingBoxRequest{Xc: box.Xc, Yc: box.Yc,
-					Width: box.Width, Height: box.Height})
+				an.BoundingBoxRequest{
+					Xc: box.Xc, Yc: box.Yc,
+					Width: box.Width, Height: box.Height,
+				})
 		}
 	}
 }

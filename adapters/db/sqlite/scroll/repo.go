@@ -1,11 +1,11 @@
 package scroll
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
-	"database/sql"
-	"errors"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
@@ -26,7 +26,8 @@ type Row struct {
 }
 
 func (r SQLiteScrollerRepo) applyScrollOrdering(q sq.SelectBuilder, currentImageId im.ImageId,
-	ord im.Ordering, d scroller.ScrollingDirection) sq.SelectBuilder {
+	ord im.Ordering, d scroller.ScrollingDirection,
+) sq.SelectBuilder {
 	if ord.IngestTime {
 		if d == scroller.ScrollNext {
 			q = q.Where("i.ingested_at>(SELECT ingested_at FROM images WHERE id=?)", currentImageId)
@@ -45,10 +46,11 @@ func (r SQLiteScrollerRepo) applyScrollOrdering(q sq.SelectBuilder, currentImage
 		q = q.OrderBy("i.id DESC")
 	}
 	return q
-
 }
+
 func (r SQLiteScrollerRepo) GetAdjacent(id im.ImageId, criteria scroller.ScrollingCriteria,
-	d scroller.ScrollingDirection) (*im.BaseImage, error) {
+	d scroller.ScrollingDirection,
+) (*im.BaseImage, error) {
 	q := sq.StatementBuilder.Select(
 		"ic.image_id,ic.collection_id,i.ingested_at,c.name").From(
 		"images_collections AS ic").Join(
@@ -76,6 +78,7 @@ func (r SQLiteScrollerRepo) GetAdjacent(id im.ImageId, criteria scroller.Scrolli
 	result := im.BaseImage{ImageId: row.ImageId, Collection: row.Collection}
 	return &result, nil
 }
+
 func (r SQLiteScrollerRepo) ImageMustExist(id im.ImageId) error {
 	var count int64
 	query := "SELECT COUNT(*) FROM images WHERE id=$1"
@@ -88,6 +91,7 @@ func (r SQLiteScrollerRepo) ImageMustExist(id im.ImageId) error {
 	}
 	return nil
 }
+
 func (r SQLiteScrollerRepo) CollectionMustExist(collection string) error {
 	var count int64
 	query := "SELECT COUNT(*) FROM collections WHERE name=$1"

@@ -26,6 +26,7 @@ func NewDeleteRolePresenter(w http.ResponseWriter) DeleteRolePresenter {
 func (p DeleteRolePresenter) SuccessDeleteRole(name string) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(name))
 }
+
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	s.Roles.Delete.Execute(r.Context(),
 		r.URL.Query().Get(resourceUrlFieldName),

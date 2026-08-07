@@ -17,9 +17,11 @@ import (
 func CreateRequestAndUpdatable() (Request, a.PolygonUpdatables, lbl.Label) {
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 
-	req := Request{AnnotationId: a.NewAnnotationId().String(),
-		Points: a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}},
-		Label:  label.Name}
+	req := Request{
+		AnnotationId: a.NewAnnotationId().String(),
+		Points:       a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}},
+		Label:        label.Name,
+	}
 	upd := a.PolygonUpdatables{LabelId: label.Id, Points: req.Points}
 	return req, upd, label
 }

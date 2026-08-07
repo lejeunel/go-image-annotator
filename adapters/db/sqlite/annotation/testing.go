@@ -31,21 +31,23 @@ func NewAnnotationTestRepos(db *sqlx.DB) AnnotationTestingRepos {
 		Label:      sl.NewSQLiteLabelRepo(db),
 		Annotation: NewSQLiteAnnotationRepo(db),
 		Group:      sg.NewSQLiteGroupRepo(db),
-		User:       su.NewSQLiteUserRepo(db)}
+		User:       su.NewSQLiteUserRepo(db),
+	}
 }
+
 func CreateAnnotedImage(repos AnnotationTestingRepos, collectionName string, labelName string,
-	group *string) (im.Image, clc.Collection, lbl.Label, a.ImageLabel) {
+	group *string,
+) (im.Image, clc.Collection, lbl.Label, a.ImageLabel) {
 	image, collection, label := CreateAnnotableImage(repos, collectionName, labelName,
 		group)
 	imLabel := a.NewImageLabel(label)
 	repos.Annotation.AddImageLabel(image.Id, collection.Id, imLabel, nil, nil)
 	return image, collection, label, imLabel
-
 }
 
 func CreateAnnotableImage(repos AnnotationTestingRepos, collectionName string, labelName string,
-	group *string) (im.Image, clc.Collection, lbl.Label) {
-
+	group *string,
+) (im.Image, clc.Collection, lbl.Label) {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	if group != nil {
 		group_ := grp.NewGroup(grp.NewGroupId(), *group)
@@ -60,5 +62,4 @@ func CreateAnnotableImage(repos AnnotationTestingRepos, collectionName string, l
 	repos.Image.AddToCollection(image.Id, collection.Id)
 
 	return image, collection, label
-
 }

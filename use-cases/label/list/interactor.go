@@ -32,7 +32,6 @@ func (i *Interactor) Execute(ctx context.Context, r pag.PaginationParams, out Ou
 		response.Labels = append(response.Labels, *f)
 	}
 	out.SuccessListLabels(response)
-
 }
 
 type Option func(*Interactor)

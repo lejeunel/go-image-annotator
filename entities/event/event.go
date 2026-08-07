@@ -62,6 +62,6 @@ func (e *Event) SetExtra(now time.Time, extra map[string]string) Event {
 
 func New() Event {
 	return Event{
-		Extra: make(map[string]string)}
-
+		Extra: make(map[string]string),
+	}
 }

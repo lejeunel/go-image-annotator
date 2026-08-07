@@ -60,6 +60,7 @@ func WithRoles(roles []string) Option {
 		l.Roles = roles
 	}
 }
+
 func AppendUserToContext(ctx context.Context, user User) context.Context {
 	return context.WithValue(ctx, UserContextKey, &user)
 }

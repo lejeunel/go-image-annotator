@@ -28,7 +28,8 @@ func New(c CollectionRepo, m MetaDataRepo, opts ...Option) Interactor {
 	i := &Interactor{
 		CollectionRepo: c,
 		MetaDataRepo:   m,
-		Auth:           sauth.NewVoidAuth()}
+		Auth:           sauth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -44,7 +45,6 @@ func WithAuth(a Auth) Option {
 }
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-
 	errCtx := "deleting metadata"
 	group, err := i.CollectionRepo.GetGroup(r.Collection)
 	if (err != nil) && !(errors.Is(err, e.ErrNotFound)) {

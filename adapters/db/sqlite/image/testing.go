@@ -12,7 +12,8 @@ func MakeRepos(db *sqlx.DB) (SQLiteImageRepo, c.SQLiteCollectionRepo) {
 }
 
 func AddToCollection(imRepo SQLiteImageRepo, clcRepo c.SQLiteCollectionRepo,
-	collectionName string, hash string) (*im.ImageId, *clc.CollectionId, error) {
+	collectionName string, hash string,
+) (*im.ImageId, *clc.CollectionId, error) {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	clcRepo.Create(collection)
 	imageId := im.NewImageId()

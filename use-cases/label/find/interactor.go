@@ -17,7 +17,6 @@ func (i *Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	}
 
 	out.SuccessFindLabel(*found)
-
 }
 
 type Option func(*Interactor)

@@ -2,10 +2,10 @@ package builders
 
 import (
 	"bytes"
+	"html/template"
 	"io"
 
 	_ "embed"
-	"html/template"
 
 	. "maragu.dev/gomponents"
 )
@@ -35,6 +35,7 @@ func (b *BasePageBuilder) AddScripts(scripts ...Node) *BasePageBuilder {
 	}
 	return b
 }
+
 func (b *BasePageBuilder) SetTitle(title string) *BasePageBuilder {
 	b.Title = title
 	return b
@@ -44,14 +45,17 @@ func (b *BasePageBuilder) SetHTMLTitle(title string) *BasePageBuilder {
 	b.HTMLTitle = title
 	return b
 }
+
 func (b *BasePageBuilder) SetFrameContent(c Node) *BasePageBuilder {
 	b.Content = c
 	return b
 }
+
 func (b *BasePageBuilder) SetError(err error) *BasePageBuilder {
 	b.Error = err
 	return b
 }
+
 func (b *BasePageBuilder) Render(w io.Writer) {
 	if b.Error != nil {
 		Text(b.Error.Error()).Render(w)
@@ -79,12 +83,13 @@ func (b *BasePageBuilder) Render(w io.Writer) {
 	if err := baseTemplate.ExecuteTemplate(
 		w,
 		"base",
-		BaseData{HTMLTitle: b.HTMLTitle,
-			Content: template.HTML(content.String()),
-			Scripts: template.HTML(scripts.String())}); err != nil {
+		BaseData{
+			HTMLTitle: b.HTMLTitle,
+			Content:   template.HTML(content.String()),
+			Scripts:   template.HTML(scripts.String()),
+		}); err != nil {
 		Text(err.Error()).Render(w)
 	}
-
 }
 
 func NewBasePageBuilder() BasePageBuilder {

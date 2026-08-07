@@ -21,7 +21,6 @@ func (p Create) Success(r create.Response) {
 	}
 
 	json.WriteJSON(p.Writer, 200, response)
-
 }
 
 func NewCreatePresenter(w http.ResponseWriter, l slog.Logger) Create {

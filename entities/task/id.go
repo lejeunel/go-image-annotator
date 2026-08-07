@@ -2,6 +2,7 @@ package task
 
 import (
 	"fmt"
+
 	"github.com/google/uuid"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	uuidw "github.com/lejeunel/go-image-annotator/shared/uuid"

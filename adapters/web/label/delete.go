@@ -2,8 +2,9 @@ package label
 
 import (
 	"fmt"
-	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"net/http"
+
+	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 )
 
 type DeleteLabelPresenter struct {
@@ -24,6 +25,7 @@ func NewDeleteLabelPresenter(w http.ResponseWriter) DeleteLabelPresenter {
 func (p DeleteLabelPresenter) SuccessDeleteLabel(name string) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(name))
 }
+
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	s.DeleteItr.Execute(r.Context(),
 		r.URL.Query().Get(resourceUrlFieldName),

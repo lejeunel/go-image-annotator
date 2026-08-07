@@ -1,11 +1,12 @@
 package find
 
 import (
+	"testing"
+
 	ta "github.com/lejeunel/go-image-annotator/entities/task"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestHandleErrOnFind(t *testing.T) {

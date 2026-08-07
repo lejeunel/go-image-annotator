@@ -1,8 +1,9 @@
 package find
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	fk "github.com/lejeunel/go-image-annotator/fakes"

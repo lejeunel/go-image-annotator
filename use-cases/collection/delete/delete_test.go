@@ -20,7 +20,8 @@ func Setup(t *testing.T) (Interactor, clc.Collection, grp.Group, context.Context
 	user := u.NewUser("user@mail.com", u.WithGroups([]string{"my-group"}))
 	repos := Repos{
 		CollectionRepo: &fk.CollectionRepo{
-			Return: collection},
+			Return: collection,
+		},
 		ImageRepo:      &fk.ImageRepo{},
 		AnnotationRepo: &fk.AnnotationRepo{},
 	}
@@ -32,7 +33,6 @@ func Setup(t *testing.T) (Interactor, clc.Collection, grp.Group, context.Context
 		&fk.EventLogger{}, fk.NewLogger(),
 		WithAuth(fk.Auth{}))
 	return itr, collection, group, u.AppendUserToContext(t.Context(), user)
-
 }
 
 func TestHandleAuthError(t *testing.T) {
@@ -72,10 +72,13 @@ func TestRemoveImageFromCollection(t *testing.T) {
 	itr, _, _, ctx := Setup(t)
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
 	image := im.NewImage(im.NewImageId(), collection)
-	imRepo := &fk.ImageRepo{IterateBaseImages: []im.BaseImage{{ImageId: image.Id, Collection: collection.Name}}}
+	imRepo := &fk.ImageRepo{
+		IterateBaseImages: []im.BaseImage{{ImageId: image.Id, Collection: collection.Name}},
+	}
 	repos := Repos{
 		CollectionRepo: &fk.CollectionRepo{
-			Return: collection},
+			Return: collection,
+		},
 		ImageRepo:      imRepo,
 		AnnotationRepo: &fk.AnnotationRepo{},
 	}
@@ -92,11 +95,14 @@ func TestRemoveAllAnnotations(t *testing.T) {
 	itr, _, _, ctx := Setup(t)
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
 	image := im.NewImage(im.NewImageId(), collection)
-	imRepo := &fk.ImageRepo{IterateBaseImages: []im.BaseImage{{ImageId: image.Id, Collection: collection.Name}}}
+	imRepo := &fk.ImageRepo{
+		IterateBaseImages: []im.BaseImage{{ImageId: image.Id, Collection: collection.Name}},
+	}
 	anRepo := &fk.AnnotationRepo{}
 	repos := Repos{
 		CollectionRepo: &fk.CollectionRepo{
-			Return: collection},
+			Return: collection,
+		},
 		ImageRepo:      imRepo,
 		AnnotationRepo: anRepo,
 	}

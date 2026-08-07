@@ -3,6 +3,7 @@ package ingester
 import (
 	"errors"
 	"fmt"
+	"hash"
 	"io"
 
 	"github.com/jonboulle/clockwork"
@@ -14,7 +15,6 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
-	"hash"
 )
 
 type IImageSpecsDetector interface {
@@ -52,7 +52,8 @@ func WithClock(c clockwork.Clock) Option {
 
 func New(imr ImageRepo, clr CollectionRepo,
 	lr LabelRepo, ar AnnotationRepo, tra Transactor,
-	fileStore ast.Interface, hasher hash.Hash, specsDetector IImageSpecsDetector, opts ...Option) *Ingester {
+	fileStore ast.Interface, hasher hash.Hash, specsDetector IImageSpecsDetector, opts ...Option,
+) *Ingester {
 	i := &Ingester{
 		Repos:        Repos{imr, lr, clr, ar},
 		Transactor:   tra,
@@ -102,10 +103,9 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 	}
 
 	return &Response{ImageId: image.Id, Collection: collection.Name}, nil
-
 }
-func (i *Ingester) ingestRawData(image im.Image, reader io.Reader) (*[]byte, error) {
 
+func (i *Ingester) ingestRawData(image im.Image, reader io.Reader) (*[]byte, error) {
 	tee := io.TeeReader(reader, i.Hasher)
 	hash := i.Hasher.Sum(nil)
 
@@ -118,11 +118,11 @@ func (i *Ingester) ingestRawData(image im.Image, reader io.Reader) (*[]byte, err
 	}
 
 	return &hash, nil
-
 }
 
 func (i *Ingester) buildImage(id im.ImageId, collection clc.Collection, labelNames []string,
-	bboxes []a.BoundingBoxRequest) (*im.Image, error) {
+	bboxes []a.BoundingBoxRequest,
+) (*im.Image, error) {
 	image := im.NewImage(id, collection)
 
 	if err := i.appendLabels(&image, labelNames); err != nil {
@@ -134,7 +134,6 @@ func (i *Ingester) buildImage(id im.ImageId, collection clc.Collection, labelNam
 	}
 
 	return &image, nil
-
 }
 
 func (i Ingester) appendLabels(image *im.Image, labelNames []string) error {
@@ -148,8 +147,8 @@ func (i Ingester) appendLabels(image *im.Image, labelNames []string) error {
 		}
 	}
 	return nil
-
 }
+
 func (i Ingester) appendBoundingBoxes(image *im.Image, bboxes []a.BoundingBoxRequest) error {
 	baseErr := fmt.Errorf("appending bounding boxes")
 	for _, bbox := range bboxes {
@@ -157,16 +156,28 @@ func (i Ingester) appendBoundingBoxes(image *im.Image, bboxes []a.BoundingBoxReq
 		if err != nil {
 			return fmt.Errorf("%w: %w", baseErr, err)
 		}
-		box_ := a.NewBoundingBox(a.NewAnnotationId(), bbox.Xc, bbox.Yc, bbox.Width, bbox.Height, *label)
+		box_ := a.NewBoundingBox(
+			a.NewAnnotationId(),
+			bbox.Xc,
+			bbox.Yc,
+			bbox.Width,
+			bbox.Height,
+			*label,
+		)
 		if err := image.AddBoundingBox(box_); err != nil {
 			return fmt.Errorf("%w: %w", baseErr, err)
 		}
 	}
 	return nil
-
 }
 
-func (i Ingester) ingestImage(tx Repos, authorId u.UserId, image *im.Image, hash []byte, specs im.Specs) error {
+func (i Ingester) ingestImage(
+	tx Repos,
+	authorId u.UserId,
+	image *im.Image,
+	hash []byte,
+	specs im.Specs,
+) error {
 	now := i.clock.Now()
 
 	if err := tx.ImageRepo.AddImage(image.Id, hash, specs); err != nil {
@@ -189,7 +200,6 @@ func (i Ingester) ingestImage(tx Repos, authorId u.UserId, image *im.Image, hash
 		}
 	}
 	return nil
-
 }
 
 func (i Ingester) findCollectionByName(name string) (*clc.Collection, error) {
@@ -199,7 +209,6 @@ func (i Ingester) findCollectionByName(name string) (*clc.Collection, error) {
 		return nil, fmt.Errorf("%w: %w", baseErr, err)
 	}
 	return collection, nil
-
 }
 
 func (i Ingester) findLabelByName(name string) (*lbl.Label, error) {
@@ -209,15 +218,18 @@ func (i Ingester) findLabelByName(name string) (*lbl.Label, error) {
 		return nil, fmt.Errorf("%w: %w", baseErr, err)
 	}
 	return label, nil
-
 }
 
 func (i Ingester) ensureDuplicateImageDoesNotExists(hash []byte) error {
-
 	baseErr := fmt.Errorf("ensuring that duplicate image does not exist using hash")
 	duplicateId, err := i.ImageRepo.FindImageIdByHash(hash)
 	if duplicateId != nil {
-		return fmt.Errorf("%w: found duplicate image with id %v: %w", baseErr, *duplicateId, e.ErrDuplicate)
+		return fmt.Errorf(
+			"%w: found duplicate image with id %v: %w",
+			baseErr,
+			*duplicateId,
+			e.ErrDuplicate,
+		)
 	}
 
 	if errors.Is(err, e.ErrNotFound) {

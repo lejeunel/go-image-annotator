@@ -2,6 +2,7 @@ package task
 
 import (
 	"fmt"
+
 	e "github.com/lejeunel/go-image-annotator/entities/event"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 )
@@ -43,6 +44,8 @@ type Task struct {
 }
 
 func NewTask(id TaskId, user u.UserId, type_ TaskType) Task {
-	return Task{Id: id, Issuer: user,
-		Type: type_}
+	return Task{
+		Id: id, Issuer: user,
+		Type: type_,
+	}
 }

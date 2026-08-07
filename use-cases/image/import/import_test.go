@@ -19,9 +19,11 @@ func TestHandleAuthError(t *testing.T) {
 		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
-		Request{ImageId: im.NewImageId().String(),
+		Request{
+			ImageId:               im.NewImageId().String(),
 			SourceCollection:      "src-collection",
-			DestinationCollection: "dst-collection"},
+			DestinationCollection: "dst-collection",
+		},
 		p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
@@ -58,15 +60,22 @@ func TestImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 func TestInternalErrOnImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
-	itr := New(&fk.ImageRepo{ErrOnImageExistsInCollection: e.ErrInternal}, &fk.CollectionRepo{Return: dstCollection})
+	itr := New(
+		&fk.ImageRepo{ErrOnImageExistsInCollection: e.ErrInternal},
+		&fk.CollectionRepo{Return: dstCollection},
+	)
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
+
 func TestInternalErrOnImportShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
-	itr := New(&fk.ImageRepo{ErrOnAddToCollection: e.ErrInternal}, &fk.CollectionRepo{Return: dstCollection})
+	itr := New(
+		&fk.ImageRepo{ErrOnAddToCollection: e.ErrInternal},
+		&fk.CollectionRepo{Return: dstCollection},
+	)
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -79,9 +88,11 @@ func TestImportImageInCollection(t *testing.T) {
 	repo := &fk.ImageRepo{}
 	itr := New(repo, &fk.CollectionRepo{Return: collection})
 	itr.Execute(t.Context(),
-		Request{ImageId: imageId.String(),
+		Request{
+			ImageId:               imageId.String(),
 			SourceCollection:      "src-collection",
-			DestinationCollection: collection.Name}, p)
+			DestinationCollection: collection.Name,
+		}, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, imageId, repo.AddedImageId)
 	assert.Equal(t, collection.Id, repo.AddedIntoCollectionId)

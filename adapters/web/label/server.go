@@ -20,7 +20,14 @@ type Server struct {
 	FindItr         find.Interactor
 }
 
-func New(pb b.PageBuilder, defaultPageSize int,
-	c create.Interactor, l list.Interactor, u update.Interactor, d delete.Interactor, f find.Interactor) Server {
+func New(
+	pb b.PageBuilder,
+	defaultPageSize int,
+	c create.Interactor,
+	l list.Interactor,
+	u update.Interactor,
+	d delete.Interactor,
+	f find.Interactor,
+) Server {
 	return Server{pb, b.NewRowURL(LabelUrl, resourceUrlFieldName), defaultPageSize, l, c, u, d, f}
 }

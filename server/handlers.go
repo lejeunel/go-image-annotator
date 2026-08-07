@@ -15,6 +15,7 @@ func HomePageHandlerFunc(pb b.PageBuilder) http.HandlerFunc {
 		web.MakeHomePage(pb, w)
 	}
 }
+
 func APIDocsHandlerFunc(specsPath string, pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		web.APIDocsPage(r.Context(), specsPath,

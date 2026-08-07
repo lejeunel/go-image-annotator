@@ -3,11 +3,12 @@ package components
 import (
 	_ "embed"
 	"fmt"
-	au "github.com/lejeunel/go-image-annotator/modules/token"
-	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 	"html/template"
 	"io"
 	"net/http"
+
+	au "github.com/lejeunel/go-image-annotator/modules/token"
+	rt "github.com/lejeunel/go-image-annotator/use-cases/user/renew-access-token"
 )
 
 //go:embed templates/api_token_display.html
@@ -35,6 +36,7 @@ func (p APITokenPresenter) Success(resp rt.Response) {
 		TokenData{Token: au.Base64Encode(au.AppendUserToToken(resp.Id,
 			resp.PersonalAccessToken))})
 }
+
 func NewAPITokenPresenter(w http.ResponseWriter) APITokenPresenter {
 	return APITokenPresenter{w}
 }

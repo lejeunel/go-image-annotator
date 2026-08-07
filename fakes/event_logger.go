@@ -24,7 +24,6 @@ func (l *EventLogger) FindTask(t.TaskId) (*t.Task, error) {
 		return nil, l.ErrOnFind
 	}
 	return &l.ReturnTask, nil
-
 }
 func (l *EventLogger) AddEvent(t.TaskId, e.Event) error { return nil }
 func (l *EventLogger) Count(u.UserId) (*int64, error) {
@@ -63,7 +62,12 @@ func (l *EventLoggerRepo) Count(user u.UserId) (*int64, error) {
 	return &l.Count_, nil
 }
 
-func (l *EventLoggerRepo) CreateTask(taskId t.TaskId, now time.Time, taskType t.TaskType, user u.UserId) error {
+func (l *EventLoggerRepo) CreateTask(
+	taskId t.TaskId,
+	now time.Time,
+	taskType t.TaskType,
+	user u.UserId,
+) error {
 	if l.ErrOnInitTask != nil {
 		return l.ErrOnInitTask
 	}
@@ -73,10 +77,12 @@ func (l *EventLoggerRepo) CreateTask(taskId t.TaskId, now time.Time, taskType t.
 	l.CreatedTaskUser = user
 	return nil
 }
+
 func (l *EventLoggerRepo) ClipNumTasks(user u.UserId, n int) error {
 	l.ClippedTasksToNum = n
 	return nil
 }
+
 func (l *EventLoggerRepo) AddEvent(id t.TaskId, event e.Event) error {
 	l.AddedEvents = append(l.AddedEvents, event)
 	return nil

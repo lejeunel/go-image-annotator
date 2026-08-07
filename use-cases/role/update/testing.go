@@ -15,5 +15,4 @@ func (p *FakePresenter) SuccessUpdateRole(r Response) {
 	p.Got = r
 }
 
-type FailingAuth struct {
-}
+type FailingAuth struct{}

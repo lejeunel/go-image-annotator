@@ -16,7 +16,6 @@ type ReadMeta struct {
 func (p ReadMeta) SuccessReadImage(image im.Image) {
 	response := BuildImageResponse(image)
 	json.WriteJSON(p.Writer, 200, response)
-
 }
 
 func NewReadMetaPresenter(w http.ResponseWriter, l slog.Logger) ReadMeta {

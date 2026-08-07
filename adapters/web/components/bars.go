@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	_ "embed"
+
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	g "github.com/lejeunel/go-image-annotator/globals"
@@ -49,6 +50,7 @@ func MakeUserBadge(user u.User, dashboardURL string) Node {
 	tUser.ExecuteTemplate(&buf, "user_badge", menu)
 	return Raw(buf.String())
 }
+
 func MakeRepoButton(repoName string, currentVersion, url string) Node {
 	return A(
 		Target("_blank"),
@@ -61,6 +63,7 @@ func MakeRepoButton(repoName string, currentVersion, url string) Node {
 		),
 	)
 }
+
 func MakeMenuItem(name string, url string, activated bool) Node {
 	class := "font-medium text-on-surface underline-offset-2 hover:text-primary focus:outline-hidden focus:underline dark:text-on-surface-dark dark:hover:text-primary-dark"
 	if activated {
@@ -72,8 +75,8 @@ func MakeMenuItem(name string, url string, activated bool) Node {
 		Aria("current", "page"),
 		Span(Class(class), Text(name)),
 	)
-
 }
+
 func DarkModeToggle() Node {
 	return Button(
 		Attr("@click", "toggleDark()"),
@@ -90,11 +93,20 @@ func DarkModeToggle() Node {
 		),
 	)
 }
-func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefix string, user u.User, userDashboardURL string) Node {
+
+func MakeNavBar(
+	isActivated ActivePage,
+	repoURL string,
+	docsURL string,
+	apiPrefix string,
+	user u.User,
+	userDashboardURL string,
+) Node {
 	return Nav(
 		Attr("x-on:click.away", "mobileMenuIsOpen = false"),
 		Class(
-			"fixed top-0 z-30 hidden h-14 w-screen items-center justify-between border-outline px-10 py-2 backdrop-blur-xl md:flex dark:border-outline-dark bg-surface-alt/75 dark:bg-surface-dark-alt/75 border-b"),
+			"fixed top-0 z-30 hidden h-14 w-screen items-center justify-between border-outline px-10 py-2 backdrop-blur-xl md:flex dark:border-outline-dark bg-surface-alt/75 dark:bg-surface-dark-alt/75 border-b",
+		),
 		Aria("label", "ui menu"),
 
 		A(
@@ -115,7 +127,11 @@ func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefi
 				MakeMenuItem("Home", rt.HomePageUrl, isActivated == HomePageActive),
 			),
 			Li(
-				MakeMenuItem("Collections", rt.CollectionsUrl, isActivated == CollectionsPageActive),
+				MakeMenuItem(
+					"Collections",
+					rt.CollectionsUrl,
+					isActivated == CollectionsPageActive,
+				),
 			),
 			Li(
 				MakeMenuItem("Labels", rt.LabelsUrl, isActivated == LabelsPageActive),
@@ -134,6 +150,7 @@ func MakeNavBar(isActivated ActivePage, repoURL string, docsURL string, apiPrefi
 		),
 	)
 }
+
 func MakeDocsButton() Node {
 	return A(
 		Target("_blank"),
@@ -145,12 +162,16 @@ func MakeDocsButton() Node {
 		),
 	)
 }
-func MakeFooter(currentVersion g.Info) Node {
 
+func MakeFooter(currentVersion g.Info) Node {
 	return Footer(
-		Class("flex fixed bottom-0 z-30 h-8 text-xs w-screen items-center justify-end border-t border-outline bg-surface-alt/75 px-10 backdrop-blur-xl dark:border-outline-dark dark:bg-surface-dark-alt/75"),
+		Class(
+			"flex fixed bottom-0 z-30 h-8 text-xs w-screen items-center justify-end border-t border-outline bg-surface-alt/75 px-10 backdrop-blur-xl dark:border-outline-dark dark:bg-surface-dark-alt/75",
+		),
 		Div(
-			Class("flex items-center gap-2 text-gray-400 dark:text-gray-400 hover:text-gray-500 hover:dark:text-gray-500"),
+			Class(
+				"flex items-center gap-2 text-gray-400 dark:text-gray-400 hover:text-gray-500 hover:dark:text-gray-500",
+			),
 			Div(
 				MakeDocsButton(),
 			),

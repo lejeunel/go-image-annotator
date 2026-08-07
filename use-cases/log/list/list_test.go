@@ -1,13 +1,14 @@
 package list
 
 import (
+	"testing"
+
 	ta "github.com/lejeunel/go-image-annotator/entities/task"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	st "github.com/lejeunel/go-image-annotator/shared/testing"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestHandleInternalErrOnCount(t *testing.T) {
@@ -39,8 +40,10 @@ func TestListTasks(t *testing.T) {
 	pageSize := 2
 	page := int64(1)
 
-	tasks := []ta.Task{{Id: ta.NewTaskId(), Type: ta.CollectionCloneTask, Issuer: "user@mail.com"},
-		{Id: ta.NewTaskId(), Type: ta.CollectionDeleteTask, Issuer: "another-user@mail.com"}}
+	tasks := []ta.Task{
+		{Id: ta.NewTaskId(), Type: ta.CollectionCloneTask, Issuer: "user@mail.com"},
+		{Id: ta.NewTaskId(), Type: ta.CollectionDeleteTask, Issuer: "another-user@mail.com"},
+	}
 	logger := &fk.EventLogger{Count_: count, ReturnTasks: tasks}
 	p := &FakePresenter{}
 	itr := New(logger)

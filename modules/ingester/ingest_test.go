@@ -82,16 +82,22 @@ func TestNonExistingBBoxLabelShouldFail(t *testing.T) {
 	repos := NewTestingRepos()
 	repos.LabelRepo = &fk.LabelRepo{ErrOnFind: e.ErrNotFound}
 	ing := NewTestingIngester(repos)
-	_, err := ing.Ingest(Request{BoundingBoxes: []a.BoundingBoxRequest{{Label: "a-label"}},
-		Reader: &fk.ImageReader{}})
+	_, err := ing.Ingest(Request{
+		BoundingBoxes: []a.BoundingBoxRequest{{Label: "a-label"}},
+		Reader:        &fk.ImageReader{},
+	})
 	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestHandleBoundingBoxValidationError(t *testing.T) {
 	repos := NewTestingRepos()
 	ing := NewTestingIngester(repos)
-	_, err := ing.Ingest(Request{BoundingBoxes: []a.BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: -2, Height: -4}},
-		Reader: &fk.ImageReader{}})
+	_, err := ing.Ingest(Request{
+		BoundingBoxes: []a.BoundingBoxRequest{
+			{Label: "a-label", Xc: 10, Yc: 10, Width: -2, Height: -4},
+		},
+		Reader: &fk.ImageReader{},
+	})
 	assert.ErrorIs(t, err, e.ErrValidation)
 }
 
@@ -99,8 +105,12 @@ func TestHandleAddBoundingBoxInternalErr(t *testing.T) {
 	repos := NewTestingRepos()
 	repos.AnnotationRepo = &fk.AnnotationRepo{ErrOnAddBoundingBox: e.ErrInternal}
 	ing := NewTestingIngester(repos)
-	_, err := ing.Ingest(Request{BoundingBoxes: []a.BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: 2, Height: 4}},
-		Reader: &fk.ImageReader{}})
+	_, err := ing.Ingest(Request{
+		BoundingBoxes: []a.BoundingBoxRequest{
+			{Label: "a-label", Xc: 10, Yc: 10, Width: 2, Height: 4},
+		},
+		Reader: &fk.ImageReader{},
+	})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
@@ -129,8 +139,12 @@ func TestAddBoundingBoxToImage(t *testing.T) {
 	anRepo := &fk.AnnotationRepo{}
 	repos.AnnotationRepo = anRepo
 	ing := NewTestingIngester(repos)
-	_, err := ing.Ingest(Request{BoundingBoxes: []a.BoundingBoxRequest{{Label: "a-label", Xc: 10, Yc: 10, Width: 2, Height: 4}},
-		Reader: &fk.ImageReader{}})
+	_, err := ing.Ingest(Request{
+		BoundingBoxes: []a.BoundingBoxRequest{
+			{Label: "a-label", Xc: 10, Yc: 10, Width: 2, Height: 4},
+		},
+		Reader: &fk.ImageReader{},
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, anRepo.NumBoundingBoxesAdded)
 }
@@ -159,8 +173,10 @@ func TestAddImageLabel(t *testing.T) {
 	annotationRepo := &fk.AnnotationRepo{}
 	repos.AnnotationRepo = annotationRepo
 	ing := NewTestingIngester(repos)
-	_, err := ing.Ingest(Request{Labels: []string{"a-label"},
-		Reader: &fk.ImageReader{}})
+	_, err := ing.Ingest(Request{
+		Labels: []string{"a-label"},
+		Reader: &fk.ImageReader{},
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, annotationRepo.NumImageLabelsAdded)
 }
@@ -187,7 +203,9 @@ func TestShouldAddMIMEType(t *testing.T) {
 func TestCollectionWithoutGroup(t *testing.T) {
 	repos := NewTestingRepos()
 	ing := NewTestingIngester(repos)
-	ing.CollectionRepo = &fk.CollectionRepo{Return: clc.NewCollection(clc.NewCollectionId(), "a-collection")}
+	ing.CollectionRepo = &fk.CollectionRepo{
+		Return: clc.NewCollection(clc.NewCollectionId(), "a-collection"),
+	}
 	_, err := ing.Ingest(Request{Reader: &fk.ImageReader{}})
 	assert.NoError(t, err)
 }

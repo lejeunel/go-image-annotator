@@ -35,6 +35,7 @@ func (p InitialAdminPresenter) SuccessBootstrap(r bst.Response) {
 		p.Logger.Info("successfully bootstrapped application with initial admin")
 	}
 }
+
 func (p InitialAdminPresenter) Error(err error) {
 	p.Logger.Error("failed bootstrapping application", "error", err)
 	os.Exit(1)

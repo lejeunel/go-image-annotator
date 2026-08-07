@@ -30,16 +30,21 @@ func NewSQLiteUserInteractors(
 	passwordVerifier cpw.TokenVerifier,
 	forgotPassworkTokenExpirationMinutes int,
 	pwGen create.PasswordGenerator,
-	auth auth.Interface) usr.Interactors {
+	auth auth.Interface,
+) usr.Interactors {
 	return usr.Interactors{
-		Find:                     find.New(userRepo, find.WithAuth(auth)),
-		Create:                   create.New(userRepo, ApitokenGen, pwGen, create.WithAuth(auth)),
-		Delete:                   delete.New(userRepo, delete.WithAuth(auth)),
-		List:                     list.New(userRepo, list.WithAuth(auth)),
-		RenewToken:               rt.New(userRepo, ApitokenGen),
-		UpdatePrivileges:         upr.New(userRepo, grpRepo, roleRepo, upr.WithAuth(auth)),
-		RequestForgottenPassword: fp.New(userRepo, forgotPassworkTokenExpirationMinutes, forgotPasswordTokenGen),
-		ResetForgottenPassword:   rfpw.New(userRepo, passwordHasher, passwordValidator),
-		ChangePassword:           cpw.New(userRepo, passwordVerifier, passwordValidator),
+		Find:             find.New(userRepo, find.WithAuth(auth)),
+		Create:           create.New(userRepo, ApitokenGen, pwGen, create.WithAuth(auth)),
+		Delete:           delete.New(userRepo, delete.WithAuth(auth)),
+		List:             list.New(userRepo, list.WithAuth(auth)),
+		RenewToken:       rt.New(userRepo, ApitokenGen),
+		UpdatePrivileges: upr.New(userRepo, grpRepo, roleRepo, upr.WithAuth(auth)),
+		RequestForgottenPassword: fp.New(
+			userRepo,
+			forgotPassworkTokenExpirationMinutes,
+			forgotPasswordTokenGen,
+		),
+		ResetForgottenPassword: rfpw.New(userRepo, passwordHasher, passwordValidator),
+		ChangePassword:         cpw.New(userRepo, passwordVerifier, passwordValidator),
 	}
 }

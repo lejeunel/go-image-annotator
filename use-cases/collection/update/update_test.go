@@ -30,12 +30,16 @@ func TestUpdateNonExistingCollectionShouldFail(t *testing.T) {
 func TestUpdateCollection(t *testing.T) {
 	name := "name"
 	p := &FakePresenter{}
-	repo := &fk.CollectionRepo{ExistingNames: []string{"name"},
-		Return: clc.NewCollection(clc.NewCollectionId(), name)}
+	repo := &fk.CollectionRepo{
+		ExistingNames: []string{"name"},
+		Return:        clc.NewCollection(clc.NewCollectionId(), name),
+	}
 	itr := New(repo, &fk.GroupRepo{})
-	req := Request{Name: name,
+	req := Request{
+		Name:           name,
 		NewName:        "updated-name",
-		NewDescription: "updated-description"}
+		NewDescription: "updated-description",
+	}
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, req.NewName, p.Got.Name)
@@ -43,7 +47,6 @@ func TestUpdateCollection(t *testing.T) {
 }
 
 func TestUpdateCollectionWithNameAlreadyTakenShouldFail(t *testing.T) {
-
 	p := &FakePresenter{}
 	name := "name"
 	existing_name := "existing-name"

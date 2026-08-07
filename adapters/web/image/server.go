@@ -16,6 +16,7 @@ type Server struct {
 }
 
 func New(pb b.PageBuilder, defaultPageSize int,
-	l list.Interactor, d delete.Interactor, f find.Interactor) Server {
+	l list.Interactor, d delete.Interactor, f find.Interactor,
+) Server {
 	return Server{pb, defaultPageSize, l, d, f}
 }

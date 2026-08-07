@@ -1,11 +1,12 @@
 package fake
 
 import (
+	"slices"
+	"time"
+
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
-	"slices"
-	"time"
 )
 
 type UserRepo struct {
@@ -50,6 +51,7 @@ func (r *UserRepo) Find(id string) (*usr.User, error) {
 	}
 	return r.Return, nil
 }
+
 func (r *UserRepo) FindResetPasswordState(hash []byte) (*usr.ForgotPasswordState, error) {
 	if r.Missing {
 		return nil, e.ErrNotFound
@@ -57,6 +59,7 @@ func (r *UserRepo) FindResetPasswordState(hash []byte) (*usr.ForgotPasswordState
 	r.GotHash = hash
 	return r.ReturnPasswordState, nil
 }
+
 func (r *UserRepo) UpdatePassword(id usr.UserId, hash []byte) error {
 	if r.ErrOnUpdatePassword != nil {
 		return r.ErrOnUpdatePassword
@@ -65,6 +68,7 @@ func (r *UserRepo) UpdatePassword(id usr.UserId, hash []byte) error {
 	r.GotHash = hash
 	return nil
 }
+
 func (r *UserRepo) Create(u usr.User) error {
 	if r.ErrOnCreate != nil {
 		return r.ErrOnCreate
@@ -72,22 +76,26 @@ func (r *UserRepo) Create(u usr.User) error {
 	r.Created = &u
 	return nil
 }
+
 func (r *UserRepo) Exists(id string) (bool, error) {
 	if slices.Contains(r.ExistingIds, id) {
 		return true, nil
 	}
 	return false, nil
 }
+
 func (r *UserRepo) Delete(string) error {
 	if r.ErrOnDelete != nil {
 		return r.ErrOnDelete
 	}
 	return nil
 }
+
 func (r *UserRepo) DeleteForgottenPasswordTokens(usr.UserId) error {
 	r.DeletedPreviousTokens = true
 	return nil
 }
+
 func (r *UserRepo) AddForgottenPasswordState(hash []byte, id usr.UserId, expires time.Time) error {
 	if r.ErrOnAddForgottenPasswordState != nil {
 		return r.ErrOnAddForgottenPasswordState
@@ -97,6 +105,7 @@ func (r *UserRepo) AddForgottenPasswordState(hash []byte, id usr.UserId, expires
 	r.GotExpiresAt = expires
 	return nil
 }
+
 func (r *UserRepo) Count() (int64, error) {
 	if r.ErrOnCount != nil {
 		return 0, r.ErrOnCount
@@ -107,7 +116,6 @@ func (r *UserRepo) Count() (int64, error) {
 func (r *UserRepo) List(req pag.PaginationParams) ([]usr.User, error) {
 	if r.ErrOnList != nil {
 		return nil, r.ErrOnList
-
 	}
 
 	result := []usr.User{}
@@ -116,7 +124,6 @@ func (r *UserRepo) List(req pag.PaginationParams) ([]usr.User, error) {
 		result = append(result, usr)
 	}
 	return result, nil
-
 }
 
 func (r *UserRepo) SetAccessTokenHash(id usr.UserId, hash []byte) error {
@@ -143,7 +150,6 @@ func (r *UserRepo) SetGroups(id usr.UserId, groups []string) error {
 	r.SetGroups_ = groups
 	r.SetGroupsToUser = id
 	return nil
-
 }
 
 func (r *UserRepo) SetRoles(id usr.UserId, roles []string) error {
@@ -153,10 +159,8 @@ func (r *UserRepo) SetRoles(id usr.UserId, roles []string) error {
 	r.SetRoles_ = roles
 	r.SetRolesToUser = id
 	return nil
-
 }
 
 func (r *UserRepo) CountAdmins() (int64, error) {
 	return r.CountAdmins_, nil
-
 }

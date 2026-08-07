@@ -22,8 +22,10 @@ type PaginatedListBuilder struct {
 }
 
 func NewPaginatedListBuilder(base PageBuilder, fields []string) PaginatedListBuilder {
-	return PaginatedListBuilder{PaginableTableBuilder: NewPaginableTableBuilder(fields),
-		PageBuilder: base}
+	return PaginatedListBuilder{
+		PaginableTableBuilder: NewPaginableTableBuilder(fields),
+		PageBuilder:           base,
+	}
 }
 
 func (b *PaginatedListBuilder) Render(w io.Writer) {
@@ -32,7 +34,11 @@ func (b *PaginatedListBuilder) Render(w io.Writer) {
 
 	var creationPanel Node
 	if b.hasCreationButton {
-		button := cmp.MakeHTMXCreateButton(b.creationButton.label, b.creationButton.formGetEndpoint, b.creationButton.formDivId)
+		button := cmp.MakeHTMXCreateButton(
+			b.creationButton.label,
+			b.creationButton.formGetEndpoint,
+			b.creationButton.formDivId,
+		)
 		formPlaceholder := Div(ID(b.creationButton.formDivId))
 		creationPanel = Div(button, formPlaceholder)
 	}
@@ -44,7 +50,12 @@ func (b *PaginatedListBuilder) Render(w io.Writer) {
 	b.PageBuilder.SetContent(content)
 	b.PageBuilder.Render(w)
 }
-func (b *PaginatedListBuilder) AddCreationButton(buttonLabel string, formEndpoint string, formDivId string) *PaginatedListBuilder {
+
+func (b *PaginatedListBuilder) AddCreationButton(
+	buttonLabel string,
+	formEndpoint string,
+	formDivId string,
+) *PaginatedListBuilder {
 	b.creationButton = CreationButton{buttonLabel, formEndpoint, formDivId}
 	b.hasCreationButton = true
 	return b

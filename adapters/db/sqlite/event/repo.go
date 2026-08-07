@@ -36,7 +36,12 @@ type Event struct {
 	Extra string    `db:"extra"`
 }
 
-func (r SQLiteEventRepo) CreateTask(id t.TaskId, now time.Time, taskType t.TaskType, user u.UserId) error {
+func (r SQLiteEventRepo) CreateTask(
+	id t.TaskId,
+	now time.Time,
+	taskType t.TaskType,
+	user u.UserId,
+) error {
 	query := `INSERT INTO tasks (id, user_id, created_at, type_) VALUES ($1,$2,$3,$4)`
 	_, err := r.Db.Exec(query, id, user, now, taskType.String())
 	if err != nil {
@@ -44,11 +49,11 @@ func (r SQLiteEventRepo) CreateTask(id t.TaskId, now time.Time, taskType t.TaskT
 	}
 	return nil
 }
+
 func (r SQLiteEventRepo) FindTask(id t.TaskId) (*t.Task, error) {
 	row := Task{}
 	err := r.Db.Get(&row,
 		"SELECT id,user_id,created_at,type_ FROM tasks WHERE id=$1", id)
-
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -60,8 +65,8 @@ func (r SQLiteEventRepo) FindTask(id t.TaskId) (*t.Task, error) {
 
 	task := t.NewTask(row.Id, row.User, row.Type)
 	return &task, nil
-
 }
+
 func (r SQLiteEventRepo) ListUserTasks(user u.UserId, p pa.PaginationParams) ([]t.Task, error) {
 	q := sq.StatementBuilder.Select(`id,user_id,created_at,type_`).From("tasks")
 	q = q.Limit(uint64(p.PageSize)).Offset((uint64(p.Page-1) * uint64(p.PageSize)))
@@ -81,8 +86,8 @@ func (r SQLiteEventRepo) ListUserTasks(user u.UserId, p pa.PaginationParams) ([]
 	}
 
 	return objects, nil
-
 }
+
 func (r SQLiteEventRepo) Count(u.UserId) (*int64, error) {
 	var count int64
 
@@ -93,13 +98,17 @@ func (r SQLiteEventRepo) Count(u.UserId) (*int64, error) {
 	}
 
 	return &count, nil
-
 }
+
 func (r SQLiteEventRepo) AddEvent(id t.TaskId, event ev.Event) error {
 	query := `INSERT INTO events (task_id, time, state, extra, error) VALUES ($1,$2,$3,$4,$5)`
 	extraStr, err := serialize(event.Extra)
 	if err != nil {
-		return fmt.Errorf("creating event record: serializing extra meta-data: %w: %w", err, e.ErrInternal)
+		return fmt.Errorf(
+			"creating event record: serializing extra meta-data: %w: %w",
+			err,
+			e.ErrInternal,
+		)
 	}
 	_, err = r.Db.Exec(query, id, event.Time, event.State.String(), extraStr, event.Error)
 	if err != nil {
@@ -107,6 +116,7 @@ func (r SQLiteEventRepo) AddEvent(id t.TaskId, event ev.Event) error {
 	}
 	return nil
 }
+
 func (r SQLiteEventRepo) GetEvents(id t.TaskId) ([]ev.Event, error) {
 	q := sq.StatementBuilder.Select(`task_id,time,state,extra,error`).From("events")
 	q = q.Where("task_id=?", id)
@@ -123,14 +133,21 @@ func (r SQLiteEventRepo) GetEvents(id t.TaskId) ([]ev.Event, error) {
 	for _, rec := range records {
 		extra, err := deserialize(rec.Extra)
 		if err != nil {
-			return nil, fmt.Errorf("deserializing extra meta-data field: %v: %w", err, e.ErrInternal)
+			return nil, fmt.Errorf(
+				"deserializing extra meta-data field: %v: %w",
+				err,
+				e.ErrInternal,
+			)
 		}
-		events = append(events, ev.Event{Time: rec.Time, State: rec.State, Extra: extra, Error: rec.Error})
+		events = append(
+			events,
+			ev.Event{Time: rec.Time, State: rec.State, Extra: extra, Error: rec.Error},
+		)
 	}
 
 	return events, nil
-
 }
+
 func (r SQLiteEventRepo) ClipNumTasks(user u.UserId, numTasks int) error {
 	query := `DELETE FROM events WHERE task_id NOT IN (SELECT id FROM tasks WHERE user_id=$1 ORDER BY created_at DESC LIMIT $2)`
 	_, err := r.Db.Exec(query, user, numTasks)

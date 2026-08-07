@@ -38,6 +38,7 @@ const (
 func MakeOAuthCallbackURL(baseURL string, provider string) string {
 	return baseURL + strings.ReplaceAll(CallbackOAuthUrl, "{provider}", provider)
 }
+
 func MakeOAuthLoginURL(provider string) string {
 	return strings.ReplaceAll(LoginOAuthUrl, "{provider}", provider)
 }

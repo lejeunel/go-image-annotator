@@ -1,9 +1,10 @@
 package delete
 
 import (
+	"iter"
+
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	"iter"
 )
 
 type Repos struct {

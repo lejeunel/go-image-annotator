@@ -36,12 +36,13 @@ func (i Interactor) Execute(ctx context.Context, out OutputPort) {
 		return
 	}
 	out.SuccessFetchLabels(Response{labels})
-
 }
 
 func New(r Repo, opts ...Option) *Interactor {
-	i := &Interactor{repo: r,
-		countLimit: defaultLabelCountLimit}
+	i := &Interactor{
+		repo:       r,
+		countLimit: defaultLabelCountLimit,
+	}
 	for _, opt := range opts {
 		opt(i)
 	}

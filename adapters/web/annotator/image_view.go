@@ -17,10 +17,8 @@ type ImageView struct {
 func (p *ImageView) Build(image view.Image) Node {
 	if image.Reader == nil {
 		return Text("presenting image: got no reader")
-
 	}
 	bytes, err := io.ReadAll(image.Reader)
-
 	if err != nil {
 		return Text(err.Error())
 	}
@@ -28,5 +26,4 @@ func (p *ImageView) Build(image view.Image) Node {
 	b64Image := base64.StdEncoding.EncodeToString(bytes)
 	return Img(ID("image"), Src(fmt.Sprintf("data:%v;base64,%s",
 		image.MIMEType, b64Image)))
-
 }

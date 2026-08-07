@@ -30,7 +30,7 @@ func (r *RoleRepo) Create(role rl.Role) error {
 }
 
 func (r *RoleRepo) Exists(name string) (*bool, error) {
-	var exist = true
+	exist := true
 	if slices.Contains(r.ExistingNames, name) {
 		return &exist, nil
 	}
@@ -39,7 +39,6 @@ func (r *RoleRepo) Exists(name string) (*bool, error) {
 }
 
 func (r *RoleRepo) Delete(string) error {
-
 	if r.ErrOnDelete != nil {
 		return r.ErrOnDelete
 	}
@@ -61,7 +60,6 @@ func (r *RoleRepo) Find(name string) (*rl.Role, error) {
 	}
 
 	return &r.Return, nil
-
 }
 
 func (r *RoleRepo) List() ([]rl.Role, error) {

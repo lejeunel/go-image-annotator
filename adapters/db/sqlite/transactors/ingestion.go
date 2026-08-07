@@ -11,11 +11,15 @@ import (
 
 type IngestionTransactor struct{ db *sqlx.DB }
 
-func NewIngestionTransactor(db *sqlx.DB) *IngestionTransactor { return &IngestionTransactor{db: db} }
+func NewIngestionTransactor(
+	db *sqlx.DB,
+) *IngestionTransactor {
+	return &IngestionTransactor{db: db}
+}
 
 func (u *IngestionTransactor) RunInTx(
-	fn func(in.Repos) error) error {
-
+	fn func(in.Repos) error,
+) error {
 	tx, err := u.db.Beginx()
 	if err != nil {
 		return err

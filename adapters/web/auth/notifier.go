@@ -2,11 +2,12 @@ package auth
 
 import (
 	"fmt"
-	g "github.com/lejeunel/go-image-annotator/globals"
 	"log/slog"
 	"net/smtp"
 	"os"
 	"strconv"
+
+	g "github.com/lejeunel/go-image-annotator/globals"
 )
 
 type Notifier interface {
@@ -34,7 +35,11 @@ type SMTPPasswordResetNotifier struct {
 	Port     int
 }
 
-func NewSMTPPasswordResetNotifier(l slog.Logger, u, p, h string, port int) SMTPPasswordResetNotifier {
+func NewSMTPPasswordResetNotifier(
+	l slog.Logger,
+	u, p, h string,
+	port int,
+) SMTPPasswordResetNotifier {
 	return SMTPPasswordResetNotifier{l, u, p, h, port}
 }
 
@@ -78,7 +83,9 @@ func MakeNotifierFromEnv(l slog.Logger) Notifier {
 	password := os.Getenv("GOIA_SMTPPASSWORD")
 	host := os.Getenv("GOIA_SMTPHOST")
 	if host == "" {
-		l.Warn("GOIA_SMTPHOST environment variable is not set. Users will not receive notification!")
+		l.Warn(
+			"GOIA_SMTPHOST environment variable is not set. Users will not receive notification!",
+		)
 		return VoidNotifier{l}
 	}
 	port, err := strconv.Atoi(os.Getenv("GOIA_SMTPPORT"))

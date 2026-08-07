@@ -54,8 +54,10 @@ func MakePolygon(p a.Polygon, c Colorizer) v.Polygon {
 func MakeImageLabels(labels []a.ImageLabel) []v.ImageLabel {
 	result := []v.ImageLabel{}
 	for _, l := range labels {
-		row := v.ImageLabel{Id: l.Id.String(),
-			Label: l.Label.Name}
+		row := v.ImageLabel{
+			Id:    l.Id.String(),
+			Label: l.Label.Name,
+		}
 		if l.Author != nil {
 			row.Author = *l.Author
 		} else {

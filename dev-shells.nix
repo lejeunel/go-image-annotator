@@ -16,6 +16,8 @@
           pkgsite
           gotools
           mailhog
+          gofumpt
+          golines
         ];
       };
     };

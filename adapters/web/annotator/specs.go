@@ -17,9 +17,10 @@ func (p *ImageInfosView) Build(info view.ImageInfo) Node {
 	s.Fields = append(s.Fields, c.SpecFields{Name: "id", Value: info.Id},
 		c.SpecFields{Name: "collection", Value: info.Collection},
 		c.SpecFields{Name: "mimetype", Value: info.Specs.MIMEType},
-		c.SpecFields{Name: "dimensions",
-			Value: fmt.Sprintf("%vx%v", info.Specs.Width, info.Specs.Height)},
+		c.SpecFields{
+			Name:  "dimensions",
+			Value: fmt.Sprintf("%vx%v", info.Specs.Width, info.Specs.Height),
+		},
 		c.SpecFields{Name: "ingested", Value: c.DateTimeToStr(info.Specs.IngestedAt)})
 	return s.Render()
-
 }

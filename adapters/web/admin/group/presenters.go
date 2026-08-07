@@ -26,6 +26,7 @@ type ListPresenter struct {
 func NewListPresenter(w http.ResponseWriter, p b.PaginatedListBuilder, u b.RowURL) ListPresenter {
 	return ListPresenter{p, u, w, e.NewErrorPresenter(w)}
 }
+
 func (p ListPresenter) SuccessListGroups(groups []g.Group) {
 	for _, group := range groups {
 		row := MakeRow(p.RowURL, group)
@@ -44,6 +45,7 @@ type ViewPresenter struct {
 func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
 	return ViewPresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w)}
 }
+
 func (p ViewPresenter) SuccessFindGroup(group g.Group) {
 	MakeRow(p.RowURL, group).Render(p.Writer)
 }
@@ -57,6 +59,7 @@ type DeletePresenter struct {
 func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
 	return DeletePresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w)}
 }
+
 func (p DeletePresenter) SuccessFindGroup(group g.Group) {
 	b.RenderConfirmDeleteRow(len(listGroupsFields),
 		group.Name, "group", p.Url, p.Writer)
@@ -75,18 +78,20 @@ func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 	okMessageFunc := func(r update.Response) string {
 		return "Successfully updated group"
 	}
-	return EditPresenter{writer: w, task: task,
+	return EditPresenter{
+		writer: w, task: task,
 		okMessageFunc:  okMessageFunc,
 		RowURL:         u,
-		ErrorPresenter: htmx.NewErrorPresenter(task, w)}
+		ErrorPresenter: htmx.NewErrorPresenter(task, w),
+	}
 }
+
 func (p EditPresenter) SuccessFindGroup(group g.Group) {
 	b := bf.NewHTMXInlineFormBuilder(len(listGroupsFields), p.Url)
 	b.SetResourceName(group.Name)
 	b.AddTextField("name", "Name", bf.WithRequired(), bf.WithDefault(group.Name))
 	b.AddTextField("description", "Description", bf.WithDefault(group.Description))
 	b.Render(p.writer)
-
 }
 
 func (p EditPresenter) SuccessUpdateGroup(r update.Response) {
@@ -103,5 +108,4 @@ func MakeRow(url b.RowURL, group g.Group) tb.Row {
 	row.AddCell(tb.NewCell(Text(group.Description)))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row
-
 }

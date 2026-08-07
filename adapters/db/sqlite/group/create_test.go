@@ -17,5 +17,4 @@ func TestInternalErrOnCreateShouldFail(t *testing.T) {
 func TestCreate(t *testing.T) {
 	_, err := CreateGroup(NewTestSQLiteGroupRepo(), "a-group")
 	assert.NoError(t, err, "expected no error on create but got")
-
 }

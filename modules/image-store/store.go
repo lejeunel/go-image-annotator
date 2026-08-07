@@ -30,7 +30,6 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 	if !ok {
 		return nil, fmt.Errorf("checking whether image %v exists in collection %v: %w",
 			base.ImageId, base.Collection, e.ErrNotFound)
-
 	}
 
 	labels, err := s.AnnotationRepo.FindImageLabels(base.ImageId, collection.Id)
@@ -53,7 +52,9 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 		return nil, fmt.Errorf("fetching image specs: %w", err)
 	}
 
-	reader, err := s.fileStore.Get(fmt.Sprintf("%v.%v", base.ImageId, strings.Split(specs.MIMEType, "/")[1]))
+	reader, err := s.fileStore.Get(
+		fmt.Sprintf("%v.%v", base.ImageId, strings.Split(specs.MIMEType, "/")[1]),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("fetching raw data: %w", err)
 	}
@@ -63,8 +64,8 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 		BoundingBoxes: boxes,
 		Polygons:      polygons,
 		Specs:         *specs,
-		Reader:        reader}, nil
-
+		Reader:        reader,
+	}, nil
 }
 
 func (s ImageStore) DeleteAsset(id im.ImageId) error {

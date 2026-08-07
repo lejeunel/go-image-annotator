@@ -1,15 +1,16 @@
 package policy
 
 import (
-	_ "embed"
-	"io"
-	"net/http"
-
 	"bytes"
 	_ "embed"
 	"fmt"
-	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
+	"io"
+	"net/http"
 	"text/template"
+
+	_ "embed"
+
+	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	e "github.com/lejeunel/go-image-annotator/adapters/web/error"
@@ -39,6 +40,7 @@ func NewSetPresenter(w http.ResponseWriter) SetPresenter {
 	}
 	return SetPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
+
 func (p SetPresenter) SuccessSetPolicy(policies string) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(policies))
 }
@@ -59,8 +61,8 @@ type ViewPresenter struct {
 func NewViewPresenter(w http.ResponseWriter, p b.PageBuilder) ViewPresenter {
 	return ViewPresenter{p, w, e.NewErrorPresenter(w)}
 }
-func (p ViewPresenter) SuccessReadPolicy(policies string) {
 
+func (p ViewPresenter) SuccessReadPolicy(policies string) {
 	t, err := template.New("").Parse(postambleTemplate)
 	if err != nil {
 		Text(err.Error()).Render(p.Writer)

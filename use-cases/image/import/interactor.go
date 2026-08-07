@@ -25,13 +25,14 @@ func WithAuth(a Auth) Option {
 }
 
 func New(imr ImageRepo, c CollectionRepo, opts ...Option) *Interactor {
-	i := &Interactor{ImageRepo: imr, CollectionRepo: c,
-		auth: auth.NewVoidAuth()}
+	i := &Interactor{
+		ImageRepo: imr, CollectionRepo: c,
+		auth: auth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
 	return i
-
 }
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
@@ -72,11 +73,15 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	// TODO import annotations here
 
 	out.Success(Response{})
-
 }
-func (i Interactor) ensureImageDoesNotAlreadyExistInCollection(imageId im.ImageId, collection clc.CollectionName) error {
 
-	errCtx := fmt.Errorf("ensuring that source image does not already exist in destination collection")
+func (i Interactor) ensureImageDoesNotAlreadyExistInCollection(
+	imageId im.ImageId,
+	collection clc.CollectionName,
+) error {
+	errCtx := fmt.Errorf(
+		"ensuring that source image does not already exist in destination collection",
+	)
 	alreadyExists, err := i.ImageRepo.ImageExistsInCollection(imageId, collection)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, err)
@@ -86,6 +91,7 @@ func (i Interactor) ensureImageDoesNotAlreadyExistInCollection(imageId im.ImageI
 	}
 	return nil
 }
+
 func (i Interactor) ensureSourceImageExists(id im.ImageId) error {
 	errCtx := fmt.Errorf("ensuring that source image exists")
 	exists, err := i.ImageRepo.ImageExists(id)
@@ -96,15 +102,13 @@ func (i Interactor) ensureSourceImageExists(id im.ImageId) error {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
 	}
 	return nil
-
 }
-func (i Interactor) findCollection(name string) (*clc.Collection, error) {
 
+func (i Interactor) findCollection(name string) (*clc.Collection, error) {
 	errCtx := fmt.Errorf("fetching collection %v", name)
 	collection, err := i.CollectionRepo.Find(name)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}
 	return collection, nil
-
 }

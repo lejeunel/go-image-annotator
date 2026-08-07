@@ -2,16 +2,17 @@ package web
 
 import (
 	"context"
+	"io"
+
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
-	"io"
+
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
 
 func APIDocsLib() Node {
 	return Script(Src("/static/stoplight.js"))
-
 }
 
 func APIDocsPage(ctx context.Context, specsPath string, p b.PageBuilder, w io.Writer) {

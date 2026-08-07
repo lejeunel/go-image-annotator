@@ -41,13 +41,12 @@ func (r *MetaDataRepo) KeyExists(n clc.CollectionName, id im.ImageId, key string
 	if r.ErrOnKeyExists != nil {
 		return false, r.ErrOnKeyExists
 	}
-	var exist = true
+	exist := true
 	if slices.Contains(r.ExistingKeys, key) {
 		return exist, nil
 	}
 	exist = false
 	return exist, nil
-
 }
 
 func (r *MetaDataRepo) Add(n clc.CollectionName, id im.ImageId, key string, value any) error {
@@ -57,7 +56,6 @@ func (r *MetaDataRepo) Add(n clc.CollectionName, id im.ImageId, key string, valu
 	r.AddedKey = key
 	r.AddedValue = value
 	return nil
-
 }
 
 func (r *MetaDataRepo) Delete(n clc.CollectionName, id im.ImageId, key string) error {
@@ -74,7 +72,6 @@ func (r *MetaDataRepo) List(clc.CollectionName, im.ImageId) ([]m.MetaData, error
 		return nil, r.ErrOnList
 	}
 	return r.ReturnList, nil
-
 }
 
 func (r *MetaDataRepo) GetValue(clc.CollectionName, im.ImageId, string) (*any, error) {
@@ -84,7 +81,12 @@ func (r *MetaDataRepo) GetValue(clc.CollectionName, im.ImageId, string) (*any, e
 	return &r.ReturnValue, nil
 }
 
-func (r *MetaDataRepo) UpdateValue(c clc.CollectionName, i im.ImageId, key string, value any) error {
+func (r *MetaDataRepo) UpdateValue(
+	c clc.CollectionName,
+	i im.ImageId,
+	key string,
+	value any,
+) error {
 	if r.ErrOnUpdate != nil {
 		return r.ErrOnUpdate
 	}

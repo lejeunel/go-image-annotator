@@ -59,9 +59,11 @@ func TestErrOnFindLabelShouldFail(t *testing.T) {
 }
 
 func CreateTestAddPolygonRequest() Request {
-	return Request{ImageId: im.NewImageId().String(), Collection: "a-collection",
+	return Request{
+		ImageId: im.NewImageId().String(), Collection: "a-collection",
 
-		Label: "a-label", Points: a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}}}
+		Label: "a-label", Points: a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}},
+	}
 }
 
 func TestErrOnAddPolygonShouldFail(t *testing.T) {
@@ -117,5 +119,4 @@ func TestAddPolygon(t *testing.T) {
 	assert.Equal(t, collection.Id, repo.GotCollectionId)
 	assert.Equal(t, req.Label, repo.GotPolygon.Label.Name)
 	assert.Equal(t, req.Points, repo.GotPolygon.Points)
-
 }

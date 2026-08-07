@@ -15,7 +15,6 @@ type Delete struct {
 
 func (p Delete) SuccessDeleteCollection(delete.Response) {
 	p.Writer.WriteHeader(http.StatusNoContent)
-
 }
 
 func NewDeletePresenter(w http.ResponseWriter, l slog.Logger) Delete {

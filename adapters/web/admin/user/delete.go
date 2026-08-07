@@ -26,6 +26,7 @@ func NewDeleteUserPresenter(w http.ResponseWriter) DeleteUserPresenter {
 func (p DeleteUserPresenter) SuccessDeleteUser(id u.UserId) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(id))
 }
+
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	s.Users.Delete.Execute(r.Context(),
 		r.URL.Query().Get(resourceUrlFieldName),

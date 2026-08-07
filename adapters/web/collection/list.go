@@ -39,6 +39,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 			NewViewPresenter(w, s.RowURL))
 	}
 }
+
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b := bf.NewHTMXCreateFormBuilder(CollectionUrl, createCollectionTargetDiv)
 	b.AddTitle("Create a new collection")
@@ -46,10 +47,14 @@ func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b.AddTextField(descriptionFieldName, "Description")
 	b.Render(w)
 }
+
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 	s.PageBuilder.SetUserIdentity(r.Context())
-	s.ListCollectionItr.Execute(r.Context(), pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
-		NewListPresenter(w, s.PageBuilder, s.RowURL))
+	s.ListCollectionItr.Execute(
+		r.Context(),
+		pa.PaginationParams{PageSize: s.DefaultPageSize, Page: pg.GetPageFromRequest(r)},
+		NewListPresenter(w, s.PageBuilder, s.RowURL),
+	)
 }
 
 type ListPresenter struct {
@@ -60,10 +65,13 @@ type ListPresenter struct {
 }
 
 func NewListPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ListPresenter {
-	p.SetTitle("Collections").SetHTMLTitle("Collections").SetActiveSection(cmp.CollectionsPageActive)
+	p.SetTitle("Collections").
+		SetHTMLTitle("Collections").
+		SetActiveSection(cmp.CollectionsPageActive)
 	b := b.NewPaginatedListBuilder(p, listCollectionsFields)
 	return ListPresenter{b, u, w, e.NewErrorPresenter(w)}
 }
+
 func (p ListPresenter) SuccessListCollections(r list.Response) {
 	p.SetPagination(r.Pagination, rt.CollectionsUrl)
 	for _, c := range r.Collections {

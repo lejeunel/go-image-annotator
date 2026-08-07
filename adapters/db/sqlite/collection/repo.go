@@ -1,10 +1,9 @@
 package collection
 
 import (
-	"fmt"
-
 	"database/sql"
 	"errors"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 	adb "github.com/lejeunel/go-image-annotator/adapters/db"
@@ -41,6 +40,7 @@ func (r SQLiteCollectionRepo) Create(c clc.Collection) error {
 	}
 	return nil
 }
+
 func (r SQLiteCollectionRepo) rowToEntity(row Row) clc.Collection {
 	c := clc.NewCollection(row.Id, row.Name,
 		clc.WithDescription(row.Description))
@@ -51,10 +51,9 @@ func (r SQLiteCollectionRepo) rowToEntity(row Row) clc.Collection {
 		c.Group = row.GroupName
 	}
 	return c
-
 }
-func (r SQLiteCollectionRepo) Find(name string) (*clc.Collection, error) {
 
+func (r SQLiteCollectionRepo) Find(name string) (*clc.Collection, error) {
 	row := Row{}
 	err := r.Db.Get(&row,
 		`
@@ -62,7 +61,6 @@ func (r SQLiteCollectionRepo) Find(name string) (*clc.Collection, error) {
 		FROM collections AS c
 		LEFT JOIN groups g ON g.id = c.group_id
 		WHERE c.name=$1`, name)
-
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -76,6 +74,7 @@ func (r SQLiteCollectionRepo) Find(name string) (*clc.Collection, error) {
 
 	return &entity, nil
 }
+
 func (r SQLiteCollectionRepo) Exists(name string) (bool, error) {
 	var exists bool
 
@@ -86,14 +85,15 @@ func (r SQLiteCollectionRepo) Exists(name string) (bool, error) {
 
 	return exists, nil
 }
+
 func (r SQLiteCollectionRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM collections WHERE name=$1", name)
-
 	if err != nil {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 }
+
 func (r SQLiteCollectionRepo) Update(m clc.UpdateModel) error {
 	var err error
 	if m.NewGroup != nil {
@@ -110,6 +110,7 @@ func (r SQLiteCollectionRepo) Update(m clc.UpdateModel) error {
 
 	return nil
 }
+
 func (r SQLiteCollectionRepo) IsPopulated(name string) (*bool, error) {
 	var count int64
 
@@ -118,11 +119,16 @@ func (r SQLiteCollectionRepo) IsPopulated(name string) (*bool, error) {
 	query = "SELECT COUNT(*) FROM images_collections WHERE collection_id=(SELECT id FROM collections WHERE name=$1)"
 	err = r.Db.QueryRow(query, name).Scan(&count)
 	if err != nil {
-		return nil, fmt.Errorf("checking whether collection is populated: %v: %w", err, e.ErrInternal)
+		return nil, fmt.Errorf(
+			"checking whether collection is populated: %v: %w",
+			err,
+			e.ErrInternal,
+		)
 	}
 	isPopulated := count > 0
 	return &isPopulated, nil
 }
+
 func (r SQLiteCollectionRepo) Count() (*int64, error) {
 	var count int64
 
@@ -134,8 +140,10 @@ func (r SQLiteCollectionRepo) Count() (*int64, error) {
 
 	return &count, nil
 }
+
 func (r SQLiteCollectionRepo) List(m pa.PaginationParams) ([]*clc.Collection, error) {
-	q := sq.StatementBuilder.Select(`c.id,c.name,c.description,c.created_at,c.group_id,g.name AS group_name`).From("collections AS c")
+	q := sq.StatementBuilder.Select(`c.id,c.name,c.description,c.created_at,c.group_id,g.name AS group_name`).
+		From("collections AS c")
 	q = q.LeftJoin("groups g ON g.id=c.group_id")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
@@ -155,11 +163,16 @@ func (r SQLiteCollectionRepo) List(m pa.PaginationParams) ([]*clc.Collection, er
 
 	return objects, nil
 }
+
 func (r SQLiteCollectionRepo) GetGroup(name string) (*string, error) {
 	var group string
 	errCtx := fmt.Errorf("retrieving group of collection with name %v", name)
 
-	err := r.Db.Get(&group, `SELECT name FROM groups WHERE id=(SELECT group_id FROM collections WHERE name=$1)`, name)
+	err := r.Db.Get(
+		&group,
+		`SELECT name FROM groups WHERE id=(SELECT group_id FROM collections WHERE name=$1)`,
+		name,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
@@ -168,7 +181,6 @@ func (r SQLiteCollectionRepo) GetGroup(name string) (*string, error) {
 	}
 
 	return &group, nil
-
 }
 
 func NewSQLiteCollectionRepo(db adb.Querier) SQLiteCollectionRepo {

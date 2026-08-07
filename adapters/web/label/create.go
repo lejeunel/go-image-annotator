@@ -2,10 +2,11 @@ package label
 
 import (
 	"fmt"
+	"net/http"
+
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
-	"net/http"
 )
 
 type CreateLabelPresenter struct {
@@ -22,17 +23,22 @@ func NewCreateLabelPresenter(w http.ResponseWriter) CreateLabelPresenter {
 	}
 	return CreateLabelPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
+
 func (p CreateLabelPresenter) Success(r create.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
+
 func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
-	s.CreateItr.Execute(r.Context(), create.Request{Name: r.FormValue(createNameFieldName),
-		Description: r.FormValue(createDescriptionFieldName)}, NewCreateLabelPresenter(w))
+	s.CreateItr.Execute(r.Context(), create.Request{
+		Name:        r.FormValue(createNameFieldName),
+		Description: r.FormValue(createDescriptionFieldName),
+	}, NewCreateLabelPresenter(w))
 }
+
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b := bf.NewHTMXCreateFormBuilder(LabelUrl, createLabelTargetDiv)
 	b.AddTitle("Create a new label")

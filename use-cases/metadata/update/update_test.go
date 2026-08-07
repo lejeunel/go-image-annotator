@@ -1,13 +1,14 @@
 package update
 
 import (
+	"testing"
+
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Setup() (Interactor, clc.Collection, im.Image, g.Group) {
@@ -17,7 +18,6 @@ func Setup() (Interactor, clc.Collection, im.Image, g.Group) {
 	image.Collection.Group = &group.Name
 	return New(&fk.CollectionRepo{}, &fk.ImageRepo{},
 		&fk.MetaDataRepo{}), collection, image, group
-
 }
 
 func TestHandleAuthError(t *testing.T) {
@@ -30,6 +30,7 @@ func TestHandleAuthError(t *testing.T) {
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }
+
 func TestCheckExistenceOfCollectionError(t *testing.T) {
 	itr, collection, image, _ := Setup()
 	itr.CollectionRepo = &fk.CollectionRepo{ErrOnExists: e.ErrInternal}
@@ -48,6 +49,7 @@ func TestMissingCollectionShouldFail(t *testing.T) {
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
 }
+
 func TestCheckImageInCollectionError(t *testing.T) {
 	itr, collection, image, _ := Setup()
 	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{collection.Name}}
@@ -58,6 +60,7 @@ func TestCheckImageInCollectionError(t *testing.T) {
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrInternal)
 }
+
 func TestImageNotInCollectionShouldFail(t *testing.T) {
 	itr, collection, image, _ := Setup()
 	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{collection.Name}}
@@ -68,6 +71,7 @@ func TestImageNotInCollectionShouldFail(t *testing.T) {
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
 }
+
 func TestCheckExistenceOfKeyError(t *testing.T) {
 	itr, collection, image, _ := Setup()
 	itr.MetaDataRepo = &fk.MetaDataRepo{ErrOnKeyExists: e.ErrInternal}
@@ -76,8 +80,10 @@ func TestCheckExistenceOfKeyError(t *testing.T) {
 	p := &FakePresenter{}
 	key, value := "the-key", "the-value"
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: key, Value: value},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: key, Value: value,
+		},
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrInternal)
 }
@@ -87,8 +93,10 @@ func TestNonExistingKeyShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	key := "the-key"
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: key},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: key,
+		},
 		p)
 	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
 }
@@ -110,8 +118,10 @@ func TestErrorOnMismatchingValueTypes(t *testing.T) {
 	itr.MetaDataRepo = &fk.MetaDataRepo{ExistingKeys: []string{key}, ReturnValue: "hello"}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
-		Request{ImageId: im.NewImageId().String(), Collection: collection.Name,
-			Key: key, Value: 123},
+		Request{
+			ImageId: im.NewImageId().String(), Collection: collection.Name,
+			Key: key, Value: 123,
+		},
 		p)
 	assert.False(t, p.GotSuccess)
 	assert.True(t, p.GotValidationErr)
@@ -123,14 +133,17 @@ func TestErrorOnUpdate(t *testing.T) {
 	newValue := "the-new-value"
 	m := &fk.MetaDataRepo{
 		ExistingKeys: []string{key},
-		ReturnValue:  value, ErrOnUpdate: e.ErrInternal}
+		ReturnValue:  value, ErrOnUpdate: e.ErrInternal,
+	}
 	itr.MetaDataRepo = m
 	itr.ImageRepo = &fk.ImageRepo{ImageIsInCollection: true}
 	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{collection.Name}}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: key, Value: newValue},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: key, Value: newValue,
+		},
 		p)
 	assert.False(t, p.GotSuccess)
 	assert.ErrorIs(t, p.GotErr, e.ErrInternal)
@@ -144,12 +157,15 @@ func TestUpdate(t *testing.T) {
 	newValue := "the-new-value"
 	m := &fk.MetaDataRepo{
 		ExistingKeys: []string{key},
-		ReturnValue:  value}
+		ReturnValue:  value,
+	}
 	itr.MetaDataRepo = m
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: key, Value: newValue},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: key, Value: newValue,
+		},
 		p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, m.UpdatedKey, key)

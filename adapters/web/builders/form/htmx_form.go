@@ -23,11 +23,15 @@ type FormBuilder struct {
 	fields         []Renderer
 }
 
-func (b *FormBuilder) AddTextField(fieldName, displayName string, opts ...FormTextFieldOption) *FormBuilder {
+func (b *FormBuilder) AddTextField(
+	fieldName, displayName string,
+	opts ...FormTextFieldOption,
+) *FormBuilder {
 	field := NewFormTextField(fieldName, displayName, opts...)
 	b.fields = append(b.fields, field)
 	return b
 }
+
 func (b *FormBuilder) AddCheckbox(fieldName, displayName string) *FormBuilder {
 	field := NewFormCheckboxField(fieldName, displayName)
 	b.fields = append(b.fields, field)

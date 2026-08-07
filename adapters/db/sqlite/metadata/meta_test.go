@@ -26,7 +26,6 @@ func Init() (*sqlx.DB, SQLiteMetaRepo, clc.Collection, im.Image) {
 	imRepo.AddToCollection(image.Id, collection.Id)
 
 	return db, metaRepo, collection, image
-
 }
 
 func TestInternalErrOnAddShouldFail(t *testing.T) {

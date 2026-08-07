@@ -1,8 +1,9 @@
 package cli
 
 import (
-	l "github.com/lejeunel/go-image-annotator/shared/logging"
 	"log/slog"
+
+	l "github.com/lejeunel/go-image-annotator/shared/logging"
 )
 
 type ErrorPresenter struct {

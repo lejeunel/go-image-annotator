@@ -59,6 +59,7 @@ func WithNameValidator(v v.Validator) Option {
 		i.validator = v
 	}
 }
+
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
 		i.auth = a
@@ -66,7 +67,8 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo, opts ...Option) *Interactor {
-	i := &Interactor{repo: r, validator: v.NewNameValidator(),
+	i := &Interactor{
+		repo: r, validator: v.NewNameValidator(),
 		auth: auth.NewVoidAuth(),
 	}
 

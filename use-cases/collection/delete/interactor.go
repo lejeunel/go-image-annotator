@@ -14,7 +14,7 @@ import (
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	event_logger "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
-	"github.com/lejeunel/go-image-annotator/modules/job-queue"
+	job_queue "github.com/lejeunel/go-image-annotator/modules/job-queue"
 )
 
 type Transactor interface {
@@ -32,8 +32,15 @@ type Interactor struct {
 	clockwork.Clock
 }
 
-func New(r Repos, tra Transactor, ims ims.Interface, jq job_queue.Interface, el event_logger.Interface,
-	logger slog.Logger, opts ...Option) Interactor {
+func New(
+	r Repos,
+	tra Transactor,
+	ims ims.Interface,
+	jq job_queue.Interface,
+	el event_logger.Interface,
+	logger slog.Logger,
+	opts ...Option,
+) Interactor {
 	i := &Interactor{
 		Repos:       r,
 		Transactor:  tra,
@@ -42,7 +49,8 @@ func New(r Repos, tra Transactor, ims ims.Interface, jq job_queue.Interface, el 
 		Logger:      logger,
 		JobQueue:    jq,
 		Clock:       clockwork.NewRealClock(),
-		Auth:        auth.NewVoidAuth()}
+		Auth:        auth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -85,13 +93,16 @@ func (i Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	})
 	out.SuccessDeleteCollection(Response{Id: task.Id, Type: task.Type, Issuer: user.Id})
 }
+
 func (i *Interactor) runTask(task t.Task, collection clc.Collection) {
 	errCtx := fmt.Errorf("running delete collection task")
 	i.Logger.Info(fmt.Sprintf("started delete task %v", task.Id))
 
 	extra := map[string]string{"collection": collection.Name}
 	if err := i.EventLogger.AddEvent(task.Id, ev.Event{Time: i.Clock.Now(), State: ev.StartedTask, Extra: extra}); err != nil {
-		i.Logger.Error(fmt.Errorf("%w: logging event upon delete task startup: %w", errCtx, err).Error())
+		i.Logger.Error(
+			fmt.Errorf("%w: logging event upon delete task startup: %w", errCtx, err).Error(),
+		)
 		return
 	}
 
@@ -116,7 +127,10 @@ func (i *Interactor) runTask(task t.Task, collection clc.Collection) {
 			}
 			return nil
 		}); err != nil {
-			i.EventLogger.AddEvent(task.Id, ev.Event{Time: i.Clock.Now(), State: ev.FailedTask, Error: err.Error()})
+			i.EventLogger.AddEvent(
+				task.Id,
+				ev.Event{Time: i.Clock.Now(), State: ev.FailedTask, Error: err.Error()},
+			)
 			i.Logger.Error(err.Error())
 			return
 		}
@@ -129,8 +143,12 @@ func (i *Interactor) runTask(task t.Task, collection clc.Collection) {
 
 	i.EventLogger.AddEvent(task.Id, ev.Event{Time: i.Clock.Now(), State: ev.DoneTask})
 }
+
 func (i *Interactor) LogError(id t.TaskId, err error) {
-	i.EventLogger.AddEvent(id, ev.Event{Time: i.Clock.Now(), State: ev.FailedTask, Error: err.Error()})
+	i.EventLogger.AddEvent(
+		id,
+		ev.Event{Time: i.Clock.Now(), State: ev.FailedTask, Error: err.Error()},
+	)
 	i.Logger.Error(err.Error())
 }
 

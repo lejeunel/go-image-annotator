@@ -42,10 +42,15 @@ func (s *Sidebar) AddEntry(name, icon, url string, isActive bool) *Sidebar {
 	s.entriesNames = append(s.entriesNames, name)
 	return s
 }
+
 func (s Sidebar) Render(w io.Writer) {
 	var buf bytes.Buffer
-	Span(Class("ml-2 w-fit text-xl font-bold text-on-surface-strong dark:text-on-surface-dark-strong"),
-		Text(s.Title)).Render(&buf)
+	Span(
+		Class(
+			"ml-2 w-fit text-xl font-bold text-on-surface-strong dark:text-on-surface-dark-strong",
+		),
+		Text(s.Title),
+	).Render(&buf)
 
 	for _, n := range s.entriesNames {
 		s.Entries[n].Render(&buf)

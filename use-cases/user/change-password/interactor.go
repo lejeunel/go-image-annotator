@@ -34,12 +34,21 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if r.FirstPassword != r.SecondPassword {
-		out.Error(fmt.Errorf("%v: checking for matching passwords: %w", errCtx, e.ErrPasswordMismatch))
+		out.Error(
+			fmt.Errorf("%v: checking for matching passwords: %w", errCtx, e.ErrPasswordMismatch),
+		)
 		return
 	}
 
 	if err := i.passwordValidator.Validate(r.FirstPassword); err != nil {
-		out.Error(fmt.Errorf("%v: checking for password validity: %w: %w", errCtx, err, e.ErrInvalidPassword))
+		out.Error(
+			fmt.Errorf(
+				"%v: checking for password validity: %w: %w",
+				errCtx,
+				err,
+				e.ErrInvalidPassword,
+			),
+		)
 		return
 	}
 
@@ -54,8 +63,10 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 type Option func(*Interactor)
 
 func New(r Repo, tokenHasher TokenVerifier, passwordValidator pw.PasswordValidator,
-	opts ...Option) Interactor {
-	i := &Interactor{repo: r,
+	opts ...Option,
+) Interactor {
+	i := &Interactor{
+		repo:              r,
 		tokenVerifier:     tokenHasher,
 		passwordValidator: passwordValidator,
 	}

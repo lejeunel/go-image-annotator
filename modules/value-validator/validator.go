@@ -2,8 +2,9 @@ package value_validator
 
 import (
 	"fmt"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"time"
+
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type Validator interface {

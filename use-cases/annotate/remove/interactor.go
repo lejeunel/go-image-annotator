@@ -1,9 +1,9 @@
 package remove
 
 import (
+	"context"
 	"fmt"
 
-	"context"
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	sauth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
@@ -27,13 +27,16 @@ func WithAuth(a auth.Auth) Option {
 }
 
 func New(repo Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: repo,
-		auth: sauth.NewVoidAuth()}
+	i := &Interactor{
+		repo: repo,
+		auth: sauth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
 	return *i
 }
+
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "removing annotation"
 	id, err := a.NewAnnotationIdFromString(r.Id)
@@ -49,7 +52,6 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if group != nil {
-
 		if err := i.auth.Annotate(ctx, *group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
@@ -62,5 +64,4 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	out.SuccessDeleteAnnotation(Response{Id: *id})
-
 }

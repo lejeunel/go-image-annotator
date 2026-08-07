@@ -22,7 +22,12 @@ type Row struct {
 	Meta         json.RawMessage  `db:"meta"`
 }
 
-func (r SQLiteMetaRepo) Add(collection clc.CollectionName, imageId im.ImageId, key string, value any) error {
+func (r SQLiteMetaRepo) Add(
+	collection clc.CollectionName,
+	imageId im.ImageId,
+	key string,
+	value any,
+) error {
 	valueJSON, err := json.Marshal(value)
 	if err != nil {
 		return err
@@ -48,7 +53,6 @@ func (r SQLiteMetaRepo) Add(collection clc.CollectionName, imageId im.ImageId, k
 		"$."+key,
 		string(valueJSON),
 	)
-
 	if err != nil {
 		return fmt.Errorf("%v: %w", err, e.ErrInternal)
 	}
@@ -56,7 +60,11 @@ func (r SQLiteMetaRepo) Add(collection clc.CollectionName, imageId im.ImageId, k
 	return err
 }
 
-func (r SQLiteMetaRepo) KeyExists(collection clc.CollectionName, imageId im.ImageId, key string) (bool, error) {
+func (r SQLiteMetaRepo) KeyExists(
+	collection clc.CollectionName,
+	imageId im.ImageId,
+	key string,
+) (bool, error) {
 	var exists bool
 
 	err := r.Db.Get(
@@ -84,7 +92,12 @@ func (r SQLiteMetaRepo) KeyExists(collection clc.CollectionName, imageId im.Imag
 
 	return exists, nil
 }
-func (r SQLiteMetaRepo) GetValue(collection clc.CollectionName, imageID im.ImageId, key string) (*any, error) {
+
+func (r SQLiteMetaRepo) GetValue(
+	collection clc.CollectionName,
+	imageID im.ImageId,
+	key string,
+) (*any, error) {
 	var value any
 
 	err := r.Db.Get(
@@ -113,7 +126,12 @@ func (r SQLiteMetaRepo) GetValue(collection clc.CollectionName, imageID im.Image
 	return &value, nil
 }
 
-func (r SQLiteMetaRepo) UpdateValue(collection clc.CollectionName, imageID im.ImageId, key string, value any) error {
+func (r SQLiteMetaRepo) UpdateValue(
+	collection clc.CollectionName,
+	imageID im.ImageId,
+	key string,
+	value any,
+) error {
 	valueJSON, err := json.Marshal(value)
 	if err != nil {
 		return err
@@ -149,7 +167,11 @@ func (r SQLiteMetaRepo) UpdateValue(collection clc.CollectionName, imageID im.Im
 	return nil
 }
 
-func (r SQLiteMetaRepo) Delete(collection clc.CollectionName, imageID im.ImageId, key string) error {
+func (r SQLiteMetaRepo) Delete(
+	collection clc.CollectionName,
+	imageID im.ImageId,
+	key string,
+) error {
 	res, err := r.Db.Exec(`
         UPDATE metadata
         SET meta = json_remove(meta, ?)
@@ -179,7 +201,10 @@ func (r SQLiteMetaRepo) Delete(collection clc.CollectionName, imageID im.ImageId
 	return nil
 }
 
-func (r SQLiteMetaRepo) List(collection clc.CollectionName, imageId im.ImageId) ([]m.MetaData, error) {
+func (r SQLiteMetaRepo) List(
+	collection clc.CollectionName,
+	imageId im.ImageId,
+) ([]m.MetaData, error) {
 	var metadata []m.MetaData
 
 	if err := r.Db.Select(&metadata,

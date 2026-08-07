@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	i "image"
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
 	"slices"
+
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type Base64ImageDecoder struct {
@@ -21,7 +22,6 @@ type Base64ImageDecoder struct {
 
 func NewBase64ImageDecoder(allowedFormats []string, base64Data string) *Base64ImageDecoder {
 	return &Base64ImageDecoder{AllowedFormats: allowedFormats, Base64Data: base64Data}
-
 }
 
 func (r *Base64ImageDecoder) Read(p []byte) (int, error) {
@@ -39,8 +39,13 @@ func (r *Base64ImageDecoder) Read(p []byte) (int, error) {
 		}
 
 		if !slices.Contains(r.AllowedFormats, format) {
-			return 0, fmt.Errorf("%v: checking for supported format (allowed formats are %v): %v: %w",
-				errCtx, r.AllowedFormats, err, e.ErrImageFormat)
+			return 0, fmt.Errorf(
+				"%v: checking for supported format (allowed formats are %v): %v: %w",
+				errCtx,
+				r.AllowedFormats,
+				err,
+				e.ErrImageFormat,
+			)
 		}
 		r.data = bytesData
 

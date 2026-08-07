@@ -23,6 +23,7 @@ func (r UserInfoRow) Render() Node {
 	return Tr(Td(Class("py-2 px-2 font-bold"), Text(r.Name)),
 		Td(Class("py-2 px-2"), Text(r.Value)))
 }
+
 func RenderProfilePage(ctx context.Context, pb b.PageBuilder, w io.Writer) {
 	if pb.User == nil {
 		pb.SetError(fmt.Errorf("failed build user dashboard: user identity has not been set"))

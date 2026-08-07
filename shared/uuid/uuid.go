@@ -2,6 +2,7 @@ package uuid
 
 import (
 	"database/sql/driver"
+
 	"github.com/google/uuid"
 )
 

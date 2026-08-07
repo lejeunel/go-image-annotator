@@ -75,7 +75,14 @@ func TestHandleInternalErrOnDeleteBoxes(t *testing.T) {
 	p := &FakePresenter{}
 	id := im.NewImageId()
 	image := im.NewImage(id, clc.NewCollection(clc.NewCollectionId(), "a-collection"))
-	box := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, lbl.NewLabel(lbl.NewLabelId(), "a-label"))
+	box := a.NewBoundingBox(
+		a.NewAnnotationId(),
+		1,
+		1,
+		1,
+		1,
+		lbl.NewLabel(lbl.NewLabelId(), "a-label"),
+	)
 	image.AddBoundingBox(box)
 	itr := New(&fk.ImageStore{Return: &image},
 		&fk.ImageRepo{}, &fk.AnnotationRepo{ErrOnRemoveAnnotation: e.ErrInternal})

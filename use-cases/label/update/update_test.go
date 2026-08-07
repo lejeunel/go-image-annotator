@@ -1,10 +1,11 @@
 package update
 
 import (
+	"testing"
+
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestHandleAuthError(t *testing.T) {
@@ -16,7 +17,6 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestUpdateNonExistingLabelShouldFail(t *testing.T) {
-
 	p := &FakePresenter{}
 	non_existing_name := "non-existing-name"
 	itr := New(&fk.LabelRepo{})
@@ -31,16 +31,20 @@ func TestUpdateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.LabelRepo{ExistingNames: []string{name}}
 	itr := New(repo)
-	req := Request{Name: name,
-		NewDescription: "updated-description"}
+	req := Request{
+		Name:           name,
+		NewDescription: "updated-description",
+	}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, p.Got.Description, req.NewDescription)
 }
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.LabelRepo{ExistingNames: []string{"a-label"},
-		ErrOnUpdate: e.ErrInternal})
+	itr := New(&fk.LabelRepo{
+		ExistingNames: []string{"a-label"},
+		ErrOnUpdate:   e.ErrInternal,
+	})
 	itr.Execute(t.Context(), Request{Name: "a-label"}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)

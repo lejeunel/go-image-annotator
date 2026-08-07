@@ -2,6 +2,7 @@ package list
 
 import (
 	"fmt"
+
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	ist "github.com/lejeunel/go-image-annotator/modules/image-store"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
@@ -45,11 +46,17 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 		return
 	}
 
-	response := Response{Images: imageResponses,
-		Pagination: pagination.Pagination{Page: r.Page, PageSize: r.PageSize, TotalRecords: *count, TotalPages: *count / int64(r.PageSize)}}
+	response := Response{
+		Images: imageResponses,
+		Pagination: pagination.Pagination{
+			Page:         r.Page,
+			PageSize:     r.PageSize,
+			TotalRecords: *count,
+			TotalPages:   *count / int64(r.PageSize),
+		},
+	}
 
 	out.SuccessListImages(response)
-
 }
 
 func (i *Interactor) buildResponse(baseImages []im.BaseImage) ([]im.Image, error) {
@@ -62,5 +69,4 @@ func (i *Interactor) buildResponse(baseImages []im.BaseImage) ([]im.Image, error
 		r = append(r, *image)
 	}
 	return r, nil
-
 }

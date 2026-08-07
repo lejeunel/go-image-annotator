@@ -12,7 +12,8 @@ import (
 )
 
 func RenderConfirmDeleteRow(numCols int, name, resourceType string,
-	url url.URL, w io.Writer) {
+	url url.URL, w io.Writer,
+) {
 	row := tb.NewRow()
 	row.AddCell(
 		tb.NewCell(

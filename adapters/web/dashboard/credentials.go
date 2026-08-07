@@ -22,8 +22,8 @@ var credentialsPreamble string
 
 func makeSectionTitle(title string) Node {
 	return Div(Class("text-lg font-bold"), Text(title))
-
 }
+
 func RenderCredentialsPage(ctx context.Context, pb b.PageBuilder, w io.Writer) {
 	APIToken := Div(Class("mt-2"), makeSectionTitle("API token"),
 		P(Class("text-sm text-on-surface dark:text-on-surface-dark"),
@@ -35,11 +35,29 @@ func RenderCredentialsPage(ctx context.Context, pb b.PageBuilder, w io.Writer) {
 			Attr(fmt.Sprintf(`hx-post=%v`, ChangePasswordUrl)),
 			Class("m-2"),
 			Label(For("Current password"), Text("Current password"), Class(st.FormLabel)),
-			Input(Type("password"), ID("password-current"), Name("password-current"), Required(), Class(st.FormInput)),
+			Input(
+				Type("password"),
+				ID("password-current"),
+				Name("password-current"),
+				Required(),
+				Class(st.FormInput),
+			),
 			Label(For("New password"), Text("New password"), Class(st.FormLabel)),
-			Input(Type("password"), ID("password"), Name("password"), Required(), Class(st.FormInput)),
+			Input(
+				Type("password"),
+				ID("password"),
+				Name("password"),
+				Required(),
+				Class(st.FormInput),
+			),
 			Label(For("New password (repeat)"), Text("New password (repeat)"), Class(st.FormLabel)),
-			Input(Type("password"), ID("password-repeat"), Name("password-repeat"), Required(), Class(st.FormInput)),
+			Input(
+				Type("password"),
+				ID("password-repeat"),
+				Name("password-repeat"),
+				Required(),
+				Class(st.FormInput),
+			),
 			Button(Type("submit"),
 				Text("Submit"),
 				Class(st.SuccessButton)),
@@ -60,6 +78,7 @@ func (s *Server) Credentials(w http.ResponseWriter, r *http.Request) {
 	s.SetHTMLTitle(CredentialsPageName)
 	RenderCredentialsPage(r.Context(), s.PageBuilder, w)
 }
+
 func (s *Server) NewAPIToken(w http.ResponseWriter, r *http.Request) {
 	user := u.IdentityFromContext(r.Context())
 	if user == nil {
@@ -68,6 +87,7 @@ func (s *Server) NewAPIToken(w http.ResponseWriter, r *http.Request) {
 	s.RenewAPITokenItr.Execute(r.Context(),
 		user.Id, cmp.NewAPITokenPresenter(w))
 }
+
 func (s *Server) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	user := u.IdentityFromContext(r.Context())
 	if user == nil {
@@ -77,10 +97,11 @@ func (s *Server) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
-	s.ChangePasswordItr.Execute(r.Context(), cpw.Request{Id: user.Id, CurrentPassword: r.FormValue("password-current"),
-		FirstPassword: r.FormValue("password"), SecondPassword: r.FormValue("password-repeat")},
+	s.ChangePasswordItr.Execute(r.Context(), cpw.Request{
+		Id: user.Id, CurrentPassword: r.FormValue("password-current"),
+		FirstPassword: r.FormValue("password"), SecondPassword: r.FormValue("password-repeat"),
+	},
 		NewChangePasswordPresenter(w))
-
 }
 
 type ChangePasswordPresenter struct {
@@ -93,6 +114,7 @@ func NewChangePasswordPresenter(w http.ResponseWriter) ChangePasswordPresenter {
 	task := "Change password"
 	return ChangePasswordPresenter{w, task, htmx.NewErrorPresenter(task, w)}
 }
+
 func (p ChangePasswordPresenter) Success() {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, "Successfully changed password")
 }

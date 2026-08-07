@@ -19,7 +19,6 @@ func CreateUser(repo SQLiteUserRepo, id string, opts ...u.Option) (*u.User, erro
 		return nil, err
 	}
 	return &user, nil
-
 }
 
 func TestInternalErrOnCreateShouldFail(t *testing.T) {
@@ -91,5 +90,4 @@ func TestCreateAdminInGroup(t *testing.T) {
 	assert.Equal(t, 1, len(r.Roles))
 	assert.Contains(t, r.Roles, "admin")
 	assert.Contains(t, r.Groups, "my-group")
-
 }

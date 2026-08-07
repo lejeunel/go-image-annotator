@@ -3,6 +3,7 @@ package delete
 import (
 	"context"
 	"fmt"
+
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -68,11 +69,12 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: r,
-		auth: auth.NewVoidAuth()}
+	i := &Interactor{
+		repo: r,
+		auth: auth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
 	return *i
-
 }

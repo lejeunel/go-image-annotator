@@ -19,8 +19,14 @@ type Server struct {
 	DefaultPageSize   int
 }
 
-func New(pb b.PageBuilder, defaultPageSize int, i rat.Interactor, c cpw.Interactor, lt lt.Interactor,
-	ft ft.Interactor) Server {
+func New(
+	pb b.PageBuilder,
+	defaultPageSize int,
+	i rat.Interactor,
+	c cpw.Interactor,
+	lt lt.Interactor,
+	ft ft.Interactor,
+) Server {
 	pb.AddSidebarEntry(ProfilePageName, icons.Info, rt.DashboardUrl, false)
 	pb.AddSidebarEntry(CredentialsPageName, icons.Key, CredentialsUrl, false)
 	pb.AddSidebarEntry(LogsPageName, icons.Notepad, ListTasksUrl, false)

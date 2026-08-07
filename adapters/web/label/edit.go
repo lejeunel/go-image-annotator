@@ -1,9 +1,10 @@
 package label
 
 import (
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/update"
-	"net/http"
 )
 
 type EditLabelPresenter struct {
@@ -24,6 +25,7 @@ func NewEditLabelPresenter(w http.ResponseWriter) EditLabelPresenter {
 func (p EditLabelPresenter) SuccessUpdateLabel(r update.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
+
 func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form data", http.StatusBadRequest)

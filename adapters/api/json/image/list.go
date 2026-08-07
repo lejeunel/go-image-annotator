@@ -24,7 +24,6 @@ func (p List) SuccessListImages(r list.Response) {
 	}
 
 	json.WriteJSON(p.Writer, 200, response)
-
 }
 
 func NewListPresenter(w http.ResponseWriter, l slog.Logger) List {

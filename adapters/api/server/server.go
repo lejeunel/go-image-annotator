@@ -1,8 +1,9 @@
 package server
 
 import (
-	itrs "github.com/lejeunel/go-image-annotator/app/interactors"
 	"log/slog"
+
+	itrs "github.com/lejeunel/go-image-annotator/app/interactors"
 )
 
 type Server struct {

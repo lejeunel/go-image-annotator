@@ -16,6 +16,7 @@ func TestNonExistingUserShouldFail(t *testing.T) {
 	itr.Execute(t.Context(), "user", p)
 	assert.True(t, p.GotNotFoundErr)
 }
+
 func TestDeletePreviousTokens(t *testing.T) {
 	repo := &fk.UserRepo{ExistingIds: []string{"user"}}
 	itr := New(repo, 1, &fk.Tokenizer{})

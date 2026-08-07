@@ -17,7 +17,6 @@ const (
 )
 
 func NewPageBuilder(pb b.PageBuilder) b.PageBuilder {
-
 	pb.SetActiveSection(cmp.NoPageActive)
 	pb.AddSidebarTitle("Admin")
 	pb.AddSidebarEntry(usr.PageName, icons.User, rt.AdminUsersUrl, false)

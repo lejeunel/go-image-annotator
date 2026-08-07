@@ -1,8 +1,9 @@
 package fake
 
 import (
-	grp "github.com/lejeunel/go-image-annotator/entities/group"
 	"slices"
+
+	grp "github.com/lejeunel/go-image-annotator/entities/group"
 )
 
 type GroupRepo struct {

@@ -83,6 +83,7 @@ type DeletePresenter struct {
 func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
 	return DeletePresenter{w, u, e.NewErrorPresenter(w)}
 }
+
 func (p DeletePresenter) SuccessFindLabel(l lbl.Label) {
 	b.RenderConfirmDeleteRow(len(listLabelsFields),
 		l.Name, "label", p.Url, p.Writer)

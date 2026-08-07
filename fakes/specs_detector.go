@@ -1,8 +1,9 @@
 package fake
 
 import (
-	im "github.com/lejeunel/go-image-annotator/entities/image"
 	"io"
+
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
 type SpecsDetector struct {

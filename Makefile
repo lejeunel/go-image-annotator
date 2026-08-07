@@ -14,9 +14,9 @@ STATIC_DIR := assets/static
 CSS_MAIN := assets/app.css
 CSS_OUT := $(STATIC_DIR)/styles.css
 
-.PHONY: all api-code clean build node-deps build-ci
+.PHONY: all api-code clean build node-deps build-ci format
 
-all: api-code auth-valid-methods htmx alpine alpine-persist alpine-anchor alpine-focus annotorious stoplight css build
+all: api-code auth-valid-methods htmx alpine alpine-persist alpine-anchor alpine-focus annotorious stoplight css format build
 
 node-deps:
 	npm ci
@@ -31,6 +31,10 @@ build:
 build-ci:
 	$(MAKE) node-deps
 	$(MAKE) build
+
+format:
+	gofumpt -w .
+	golines -w .
 
 css:
 	tailwindcss -i $(CSS_MAIN) -o $(CSS_OUT) --minify

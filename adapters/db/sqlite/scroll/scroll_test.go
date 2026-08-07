@@ -31,7 +31,6 @@ func TestInternalErrOnGetAdjacent(t *testing.T) {
 	repos.Scroller.Db.Close()
 	_, err := repos.Scroller.GetAdjacent(im.NewImageId(), scr.NewCriteria(), scr.ScrollNext)
 	assert.ErrorIs(t, err, e.ErrInternal)
-
 }
 
 func TestShouldFailWhenImageDoesNotExist(t *testing.T) {
@@ -83,6 +82,7 @@ func TestGettingPrevImage(t *testing.T) {
 	r, _ := repos.Scroller.GetAdjacent(ids[2], scr.NewCriteria(), scr.ScrollPrevious)
 	assert.True(t, r.ImageId == ids[1])
 }
+
 func TestNextImageInCollection(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
@@ -115,7 +115,6 @@ func CreateImagesWithIngestTime(repos SQLiteScrollerRepos, num int) ([]im.ImageI
 		ids = append(ids, id)
 	}
 	return ids, collection
-
 }
 
 func TestNextIngestedImageInCollection(t *testing.T) {

@@ -27,5 +27,4 @@ type SpecFields struct {
 func (r SpecFields) Render() gp.Node {
 	return gh.Tr(gh.Td(gh.Class("py-2 px-2 font-bold"), gp.Text(r.Name)),
 		gh.Td(gh.Class("py-2 px-2"), gp.Text(r.Value)))
-
 }

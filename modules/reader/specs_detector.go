@@ -45,5 +45,6 @@ func (d ImageSpecsDetector) Detect(r io.Reader) (*im.Specs, io.Reader, error) {
 
 	return &im.Specs{
 		MIMEType: formatToMIME(format),
-		Width:    cfg.Width, Height: cfg.Height}, newReader, nil
+		Width:    cfg.Width, Height: cfg.Height,
+	}, newReader, nil
 }

@@ -48,6 +48,7 @@ func (b *RowURL) SetMode(m DynamicRowMode) *RowURL {
 	b.Url.RawQuery = q.Encode()
 	return b
 }
+
 func (b *RowURL) String() string {
 	return b.Url.String()
 }

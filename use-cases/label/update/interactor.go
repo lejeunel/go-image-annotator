@@ -22,8 +22,10 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo, opts ...Option) *Interactor {
-	i := &Interactor{repo: r,
-		auth: auth.NewVoidAuth()}
+	i := &Interactor{
+		repo: r,
+		auth: auth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -31,7 +33,6 @@ func New(r Repo, opts ...Option) *Interactor {
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-
 	errCtx := "updating label"
 	if err := i.auth.UpdateLabel(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
@@ -50,6 +51,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	out.SuccessUpdateLabel(Response{Name: r.Name, Description: r.NewDescription})
 }
+
 func (i *Interactor) ensureNameExists(name string) error {
 	exists, err := i.repo.Exists(name)
 	errCtx := fmt.Errorf("checking that label with name %v exists", name)

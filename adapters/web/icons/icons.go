@@ -69,13 +69,19 @@ var Polygon string
 var Book string
 
 func MakeColoredRectangleIcon(color string) string {
-	return fmt.Sprintf(`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+	return fmt.Sprintf(
+		`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <rect x="10" y="10" width="80" height="80" rx="10" ry="10" fill="%v" />
-</svg>`, color)
+</svg>`,
+		color,
+	)
 }
 
 func MakeColoredHexagonIcon(color string) string {
-	return fmt.Sprintf(`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+	return fmt.Sprintf(
+		`<svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <polygon points="50,10 84.64,30 84.64,70 50,90 15.36,70 15.36,30" fill="%v" />
-</svg>`, color)
+</svg>`,
+		color,
+	)
 }

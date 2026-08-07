@@ -7,7 +7,12 @@ import (
 )
 
 func MakePaginatedContent(baseURL string, numRows int, table Node, p pagination.Pagination) Node {
-	paginator := MakePaginator(baseURL, int(p.Page), int(p.TotalPages), numRows, int(p.TotalRecords))
+	paginator := MakePaginator(
+		baseURL,
+		int(p.Page),
+		int(p.TotalPages),
+		numRows,
+		int(p.TotalRecords),
+	)
 	return Div(Div(Class("py-2"), paginator), table)
-
 }

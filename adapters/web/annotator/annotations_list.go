@@ -14,7 +14,11 @@ type LabelSelector struct {
 }
 type AnnotationsListView struct{}
 
-func (v *AnnotationsListView) makeRegionList(boxes []view.BoundingBox, polygons []view.Polygon, availableLabels []string) Node {
+func (v *AnnotationsListView) makeRegionList(
+	boxes []view.BoundingBox,
+	polygons []view.Polygon,
+	availableLabels []string,
+) Node {
 	table := RegionTable{AvailableLabels: availableLabels}
 	for _, b := range boxes {
 		table.AddBox(b)
@@ -28,12 +32,20 @@ func (v *AnnotationsListView) makeRegionList(boxes []view.BoundingBox, polygons 
 func (v *AnnotationsListView) makeImageLabelList(imageLabels []view.ImageLabel) Node {
 	table := ImageLabelTable{}
 	for _, l := range imageLabels {
-		table.Rows = append(table.Rows, ImageLabelRow{Label: l.Label, Id: l.Id, Author: l.Author, Time: l.Time})
+		table.Rows = append(
+			table.Rows,
+			ImageLabelRow{Label: l.Label, Id: l.Id, Author: l.Author, Time: l.Time},
+		)
 	}
 	return table.Build()
 }
 
-func (v *AnnotationsListView) Build(boxes []view.BoundingBox, polygons []view.Polygon, imageLabels []view.ImageLabel, availableLabels []string) Node {
+func (v *AnnotationsListView) Build(
+	boxes []view.BoundingBox,
+	polygons []view.Polygon,
+	imageLabels []view.ImageLabel,
+	availableLabels []string,
+) Node {
 	regionsList := v.makeRegionList(boxes, polygons, availableLabels)
 	imageLabelsTable := v.makeImageLabelList(imageLabels)
 

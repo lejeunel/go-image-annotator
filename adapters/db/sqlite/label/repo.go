@@ -30,13 +30,12 @@ func (r SQLiteLabelRepo) Create(l lbl.Label) error {
 	}
 
 	return nil
-
 }
+
 func (r SQLiteLabelRepo) FindLabel(name string) (*lbl.Label, error) {
 	record := LabelRecord{}
 	err := r.Db.Get(&record,
 		"SELECT id,name,description FROM labels WHERE name=$1", name)
-
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -44,20 +43,20 @@ func (r SQLiteLabelRepo) FindLabel(name string) (*lbl.Label, error) {
 		default:
 			return nil, fmt.Errorf("finding record by label: %v: %w", err, e.ErrInternal)
 		}
-
 	}
 
 	l := lbl.NewLabel(record.Id, record.Name, lbl.WithDescription(record.Description))
 	return &l, nil
 }
+
 func (r SQLiteLabelRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM labels WHERE name=$1", name)
-
 	if err != nil {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 }
+
 func (r SQLiteLabelRepo) Count() (int64, error) {
 	var count int64
 
@@ -69,6 +68,7 @@ func (r SQLiteLabelRepo) Count() (int64, error) {
 
 	return count, nil
 }
+
 func (r SQLiteLabelRepo) List(m pag.PaginationParams) ([]*lbl.Label, error) {
 	q := sq.StatementBuilder.Select("id,name,description").From("labels")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
@@ -88,6 +88,7 @@ func (r SQLiteLabelRepo) List(m pag.PaginationParams) ([]*lbl.Label, error) {
 
 	return objects, nil
 }
+
 func (r SQLiteLabelRepo) FetchAll() ([]string, error) {
 	q := sq.StatementBuilder.Select("name").From("labels")
 	sql, args, err := q.ToSql()
@@ -101,16 +102,17 @@ func (r SQLiteLabelRepo) FetchAll() ([]string, error) {
 
 	return names, nil
 }
+
 func (r SQLiteLabelRepo) Update(m lbl.UpdatableModel) error {
 	query := "UPDATE labels SET description=$1 WHERE name=$2"
 	_, err := r.Db.Exec(query, m.NewDescription, m.Name)
-
 	if err != nil {
 		return fmt.Errorf("%v: %w", err, e.ErrInternal)
 	}
 
 	return nil
 }
+
 func (r SQLiteLabelRepo) Exists(name string) (bool, error) {
 	var exists bool
 
@@ -121,6 +123,7 @@ func (r SQLiteLabelRepo) Exists(name string) (bool, error) {
 
 	return exists, nil
 }
+
 func (r SQLiteLabelRepo) IsUsed(name string) (*bool, error) {
 	var count int64
 	query := "SELECT COUNT(*) FROM annotations WHERE label_id=(SELECT id FROM labels WHERE name=$1)"
@@ -131,7 +134,6 @@ func (r SQLiteLabelRepo) IsUsed(name string) (*bool, error) {
 
 	isUsed := count > 0
 	return &isUsed, nil
-
 }
 
 func NewSQLiteLabelRepo(db adb.Querier) SQLiteLabelRepo {

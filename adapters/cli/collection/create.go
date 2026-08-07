@@ -25,5 +25,4 @@ func Create(ctx context.Context, name string, group *string, description string)
 	app.Itrs.Collection.Create.Execute(ctx,
 		clc.Request{Name: name, Group: group, Description: description},
 		CreatePresenter{cli.NewErrorPresenter()})
-
 }

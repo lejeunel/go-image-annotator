@@ -13,5 +13,4 @@ func CreateCollection(repo SQLiteCollectionRepo, name string) (*clc.Collection, 
 		return nil, err
 	}
 	return &c, nil
-
 }

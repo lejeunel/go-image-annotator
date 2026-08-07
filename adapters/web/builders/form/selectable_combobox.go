@@ -42,5 +42,4 @@ func (f *SelectableCombobox) Render(w io.Writer) {
 		SelectableComboboxData{ID: f.id, Title: f.title, Options: f.fields}); err != nil {
 		panic(err)
 	}
-
 }

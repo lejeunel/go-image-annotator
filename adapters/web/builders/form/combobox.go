@@ -57,5 +57,4 @@ func (f *Combobox) Render(w io.Writer) {
 	if err := t.ExecuteTemplate(w, "combobox", data); err != nil {
 		panic(err)
 	}
-
 }

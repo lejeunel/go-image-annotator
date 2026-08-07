@@ -41,8 +41,11 @@ func TestMissingGroupShouldFail(t *testing.T) {
 }
 
 func TestHandleErrorOnFindUser(t *testing.T) {
-	itr := New(&fk.UserRepo{ErrOnFind: e.ErrInternal}, &fk.GroupRepo{ExistingNames: []string{"my-group"}},
-		&fk.RoleRepo{})
+	itr := New(
+		&fk.UserRepo{ErrOnFind: e.ErrInternal},
+		&fk.GroupRepo{ExistingNames: []string{"my-group"}},
+		&fk.RoleRepo{},
+	)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -66,8 +69,11 @@ func TestUpdateGroups(t *testing.T) {
 	user := usr.NewUser("user@example.com",
 		usr.WithGroups([]string{"a-group"}))
 	repo := &fk.UserRepo{Return: &user}
-	itr := New(repo, &fk.GroupRepo{ExistingNames: []string{"a-group", "new-group", "another-new-group"}},
-		&fk.RoleRepo{})
+	itr := New(
+		repo,
+		&fk.GroupRepo{ExistingNames: []string{"a-group", "new-group", "another-new-group"}},
+		&fk.RoleRepo{},
+	)
 	p := &FakePresenter{}
 	newGroups := []string{"new-group", "another-new-group"}
 	itr.Execute(t.Context(), Request{Id: user.Id, Groups: newGroups}, p)

@@ -45,7 +45,8 @@ func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort)
 type Option func(*Interactor)
 
 func New(r Repo, g TokenGenerator, opts ...Option) Interactor {
-	i := &Interactor{repo: r,
+	i := &Interactor{
+		repo:           r,
 		tokenGenerator: g,
 	}
 

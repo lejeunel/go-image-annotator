@@ -14,7 +14,6 @@ type Delete struct {
 
 func (p Delete) SuccessDeleteLabel(string) {
 	p.Writer.WriteHeader(http.StatusNoContent)
-
 }
 
 func NewDeletePresenter(w http.ResponseWriter, l slog.Logger) Delete {

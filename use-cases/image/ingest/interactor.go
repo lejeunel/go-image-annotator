@@ -35,9 +35,10 @@ func WithAuth(a Auth) Option {
 }
 
 func New(ingester ing.Interface, repo CollectionRepo, opts ...Option) *Interactor {
-	i := &Interactor{ingester: ingester,
-		repo: repo,
-		auth: auth.NewVoidAuth(),
+	i := &Interactor{
+		ingester: ingester,
+		repo:     repo,
+		auth:     auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -62,11 +63,19 @@ func (i Interactor) Execute(ctx context.Context, r ing.Request, out OutputPort) 
 
 	user := u.IdentityFromContext(ctx)
 	if user == nil {
-		out.Error(fmt.Errorf("%w: extracting user identity failed from context: %w", errCtx, e.ErrAuthentication))
+		out.Error(
+			fmt.Errorf(
+				"%w: extracting user identity failed from context: %w",
+				errCtx,
+				e.ErrAuthentication,
+			),
+		)
 		return
 	}
-	response, err := i.ingester.Ingest(ing.Request{UserId: user.Id, Collection: collection.Name, Labels: r.Labels,
-		BoundingBoxes: r.BoundingBoxes, Reader: r.Reader})
+	response, err := i.ingester.Ingest(ing.Request{
+		UserId: user.Id, Collection: collection.Name, Labels: r.Labels,
+		BoundingBoxes: r.BoundingBoxes, Reader: r.Reader,
+	})
 	if err != nil {
 		out.Error(fmt.Errorf("%w: %w", errCtx, err))
 		return
@@ -82,5 +91,4 @@ func (i Interactor) findCollectionByName(name string) (*clc.Collection, error) {
 		return nil, fmt.Errorf("%w: %w", baseErr, err)
 	}
 	return collection, nil
-
 }

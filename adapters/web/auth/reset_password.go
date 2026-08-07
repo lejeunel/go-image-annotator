@@ -22,6 +22,7 @@ func (p PasswordResetPresenter) Success() {
 	Div(P(Text("Password changed successfully!")),
 		P(Text("Proceed to "), cmp.MakeTextLink(rt.HomePageUrl, "login"), Text("."))).Render(p.w)
 }
+
 func (p PasswordResetPresenter) Error(err error) {
 	p.ErrorPresenter.Error(err)
 }
@@ -33,11 +34,14 @@ func (s Server) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	pw2 := r.FormValue("password-repeat")
 	pres := PasswordResetPresenter{s.Logger, w, htmx.NewErrorPresenter("Resetting password", w)}
 	r.ParseForm()
-	s.ResetPasswordItr.Execute(r.Context(), rfpw.Request{Token: token, FirstPassword: pw1, SecondPassword: pw2}, pres)
+	s.ResetPasswordItr.Execute(
+		r.Context(),
+		rfpw.Request{Token: token, FirstPassword: pw1, SecondPassword: pw2},
+		pres,
+	)
 }
 
 func (s Server) ResetPasswordForm(w http.ResponseWriter, r *http.Request) {
 	s.ResetPasswordBuilder.SetToken(r.URL.Query().Get("token"))
 	s.ResetPasswordBuilder.Render(w)
-
 }

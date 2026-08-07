@@ -32,15 +32,14 @@ func Setup() (SQLiteCollectionRepo, clc.Collection, gr.SQLiteGroupRepo, g.Group)
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	grpRepo.Create(group)
 	return clcRepo, collection, grpRepo, group
-
 }
 
 func TestUpdateNameAndDescription(t *testing.T) {
-
 	clcRepo, collection, _, _ := Setup()
 	req := clc.UpdateModel{
 		Name: collection.Name, NewName: "new-collection-name",
-		NewDescription: "new-description"}
+		NewDescription: "new-description",
+	}
 	err := clcRepo.Update(req)
 	assert.NoError(t, err)
 	r, err := clcRepo.Find(req.NewName)
@@ -48,26 +47,28 @@ func TestUpdateNameAndDescription(t *testing.T) {
 	assert.Equal(t, req.NewName, r.Name)
 	assert.Equal(t, req.NewDescription, r.Description)
 }
-func TestUpdateGroupFromPublic(t *testing.T) {
 
+func TestUpdateGroupFromPublic(t *testing.T) {
 	clcRepo, collection, _, group := Setup()
 	req := clc.UpdateModel{
 		Name: collection.Name, NewName: collection.Name,
 		NewDescription: collection.Description,
-		NewGroup:       &group.Name}
+		NewGroup:       &group.Name,
+	}
 	err := clcRepo.Update(req)
 	assert.NoError(t, err)
 	r, err := clcRepo.Find(req.NewName)
 	assert.NoError(t, err)
 	assert.NotNil(t, r.Group)
 }
-func TestUpdateGroupToPublic(t *testing.T) {
 
+func TestUpdateGroupToPublic(t *testing.T) {
 	clcRepo, collection, _, group := Setup()
 	req := clc.UpdateModel{
 		Name: collection.Name, NewName: collection.Name,
 		NewDescription: collection.Description,
-		NewGroup:       &group.Name}
+		NewGroup:       &group.Name,
+	}
 	clcRepo.Update(req)
 	req.NewGroup = nil
 	clcRepo.Update(req)
@@ -81,7 +82,8 @@ func TestUpdateAndListCollections(t *testing.T) {
 	req := clc.UpdateModel{
 		Name: collection.Name, NewName: "new-collection-name",
 		NewDescription: "new-description",
-		NewGroup:       &group.Name}
+		NewGroup:       &group.Name,
+	}
 	err := clcRepo.Update(req)
 	assert.NoError(t, err)
 	r, err := clcRepo.List(pagination.PaginationParams{Page: 1, PageSize: 1})

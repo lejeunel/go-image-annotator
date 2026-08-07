@@ -2,6 +2,7 @@ package fake
 
 import (
 	"context"
+
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	a "github.com/lejeunel/go-image-annotator/modules/authorizer"
 )
@@ -22,6 +23,7 @@ func (f Auth) CreateCollection(ctx context.Context, g string) error {
 func (f Auth) UpdateCollection(ctx context.Context, g string) error {
 	return f.Err
 }
+
 func (f Auth) DeleteCollection(ctx context.Context, g string) error {
 	return f.Err
 }
@@ -37,6 +39,7 @@ func (f Auth) Annotate(ctx context.Context, g string) error {
 func (f Auth) DeleteImage(ctx context.Context, g string) error {
 	return f.Err
 }
+
 func (f Auth) ImportImage(ctx context.Context, dstGroup string) error {
 	return f.Err
 }

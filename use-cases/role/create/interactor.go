@@ -42,7 +42,6 @@ func (i *Interactor) create(r Request) error {
 		return err
 	}
 	return nil
-
 }
 
 func (i *Interactor) validate(name string) error {
@@ -53,7 +52,6 @@ func (i *Interactor) validate(name string) error {
 		return err
 	}
 	return nil
-
 }
 
 func (i *Interactor) isDuplicate(name string) error {
@@ -83,8 +81,10 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: r, validator: v.NewNameValidator(),
-		auth: auth.NewVoidAuth()}
+	i := &Interactor{
+		repo: r, validator: v.NewNameValidator(),
+		auth: auth.NewVoidAuth(),
+	}
 
 	for _, opt := range opts {
 		opt(i)

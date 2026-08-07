@@ -38,5 +38,4 @@ func TestRetrieve(t *testing.T) {
 	assert.Equal(t, c.Description, r.Description)
 	assert.Equal(t, c.Id, r.Id)
 	assert.Equal(t, r.CreatedAt.Equal(c.CreatedAt), true)
-
 }

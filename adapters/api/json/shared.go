@@ -3,11 +3,12 @@ package json
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
+	"net/http"
+
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
-	"log/slog"
-	"net/http"
 )
 
 func BuildPaginationResponse(p pagination.Pagination) models.Pagination {
@@ -17,7 +18,6 @@ func BuildPaginationResponse(p pagination.Pagination) models.Pagination {
 		TotalItems: p.TotalRecords,
 		TotalPages: p.TotalPages,
 	}
-
 }
 
 func WriteJSON(w http.ResponseWriter, status int, v any) {
@@ -52,7 +52,6 @@ func MustDecodeJSON[T any](w http.ResponseWriter, r *http.Request) (*T, bool) {
 		return nil, false
 	}
 	return body, true
-
 }
 
 func HTTPStatusCodeFromErr(err error) int {

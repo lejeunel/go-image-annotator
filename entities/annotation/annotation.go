@@ -48,6 +48,7 @@ func (p Points) MaxX() float32 {
 	}
 	return r
 }
+
 func (p Points) MaxY() float32 {
 	if len(p.Coordinates) == 0 {
 		return float32(math.Inf(1))
@@ -75,6 +76,7 @@ func (p Points) MinX() float32 {
 	}
 	return r
 }
+
 func (p Points) MinY() float32 {
 	if len(p.Coordinates) == 0 {
 		return float32(math.Inf(-1))
@@ -169,13 +171,23 @@ func NewBoundingBox(id AnnotationId, xc float32, yc float32,
 	return *b
 }
 
-func ValidateBoundingBox(xc float32, yc float32, width float32, height float32, angle float32) error {
+func ValidateBoundingBox(
+	xc float32,
+	yc float32,
+	width float32,
+	height float32,
+	angle float32,
+) error {
 	errCtx := "validating bounding box"
 	if width <= 0 {
-		return fmt.Errorf("%v: checking whether width (%v) <= 0: %w", errCtx, width, e.ErrValidation)
+		return fmt.Errorf(
+			"%v: checking whether width (%v) <= 0: %w",
+			errCtx,
+			width,
+			e.ErrValidation,
+		)
 	}
 	return nil
-
 }
 
 func NewImageLabel(label lbl.Label) ImageLabel {

@@ -26,7 +26,6 @@ func (i *Interactor) Execute(ctx context.Context, id u.UserId, out OutputPort) {
 	}
 
 	out.SuccessFindUser(*found)
-
 }
 
 type Option func(*Interactor)
@@ -38,8 +37,10 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: r,
-		auth: auth.NewVoidAuth()}
+	i := &Interactor{
+		repo: r,
+		auth: auth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}

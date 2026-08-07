@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/lejeunel/go-image-annotator/adapters/cli/collection"
 	"github.com/lejeunel/go-image-annotator/adapters/cli/image"
 	"github.com/lejeunel/go-image-annotator/server"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 func main() {

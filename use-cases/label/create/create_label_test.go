@@ -1,10 +1,11 @@
 package create
 
 import (
+	"testing"
+
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestHandleAuthError(t *testing.T) {

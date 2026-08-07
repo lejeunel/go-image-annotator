@@ -15,8 +15,8 @@ func NewDeleteCollectionTransactor(db *sqlx.DB) *DeleteCollectionTransactor {
 }
 
 func (u *DeleteCollectionTransactor) RunInTx(
-	fn func(cd.Repos) error) error {
-
+	fn func(cd.Repos) error,
+) error {
 	tx, err := u.db.Beginx()
 	if err != nil {
 		return err

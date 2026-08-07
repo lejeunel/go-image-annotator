@@ -15,7 +15,6 @@ func CreateLabel(repo SQLiteLabelRepo, name string) (*lbl.Label, error) {
 		return nil, err
 	}
 	return &label, nil
-
 }
 
 func TestInternalErrOnCreateShouldFail(t *testing.T) {

@@ -32,7 +32,8 @@ func New(imageStore st.Interface, repo Repo, labelRepo LabelRepo, opts ...Option
 		labelRepo:      labelRepo,
 		imageStore:     imageStore,
 		clock:          clockwork.NewRealClock(),
-		auth:           sauth.NewVoidAuth()}
+		auth:           sauth.NewVoidAuth(),
+	}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -46,6 +47,7 @@ func WithAuth(a auth.Auth) Option {
 		i.auth = a
 	}
 }
+
 func WithClock(c clockwork.Clock) Option {
 	return func(i *Interactor) {
 		i.clock = c
@@ -87,8 +89,8 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	out.SuccessAddPolygon(Response{poly.Id})
-
 }
+
 func (i Interactor) addPolygon(ctx context.Context, image *im.Image, poly a.Polygon) error {
 	var userId *u.UserId
 	user := u.IdentityFromContext(ctx)
@@ -101,6 +103,7 @@ func (i Interactor) addPolygon(ctx context.Context, image *im.Image, poly a.Poly
 	}
 	return nil
 }
+
 func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 	label, err := i.labelRepo.FindLabel(name)
 	if err != nil {
@@ -108,6 +111,7 @@ func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 	}
 	return label, nil
 }
+
 func (i Interactor) findImage(imageId im.ImageId, collectionName string) (*im.Image, error) {
 	image, err := i.imageStore.Find(im.BaseImage{ImageId: imageId, Collection: collectionName})
 	if err != nil {

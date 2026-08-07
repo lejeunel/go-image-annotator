@@ -22,7 +22,8 @@ func NewTestScrollerRepos() SQLiteScrollerRepos {
 	return SQLiteScrollerRepos{
 		Scroller:   NewSQLiteScrollerRepo(db),
 		Image:      imsql.NewSQLiteImageRepo(db),
-		Collection: clcsql.NewSQLiteCollectionRepo(db)}
+		Collection: clcsql.NewSQLiteCollectionRepo(db),
+	}
 }
 
 func FakeUUIDFromInt(n int) string {
@@ -51,7 +52,8 @@ func CreateImagesWithOrderedIds(repos SQLiteScrollerRepos, num int) []im.ImageId
 }
 
 func CreateImageInCollection(imRepo imsql.SQLiteImageRepo, clcRepo clcsql.SQLiteCollectionRepo,
-	imageId im.ImageId, collectionName string) im.Image {
+	imageId im.ImageId, collectionName string,
+) im.Image {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
 	clcRepo.Create(collection)
 	image := im.NewImage(im.NewImageId(), collection)

@@ -2,12 +2,13 @@ package server
 
 import (
 	"fmt"
+	"net/http"
+
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
 	as "github.com/lejeunel/go-image-annotator/assets"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 
 	"github.com/go-chi/chi/v5"
-	"net/http"
 )
 
 func RouteAPIDocs(r chi.Router, h http.HandlerFunc, mws ...func(http.Handler) http.Handler) {
@@ -16,13 +17,14 @@ func RouteAPIDocs(r chi.Router, h http.HandlerFunc, mws ...func(http.Handler) ht
 }
 
 func RouteWebPages(r chi.Router, home http.HandlerFunc,
-	mws ...func(http.Handler) http.Handler) {
-
+	mws ...func(http.Handler) http.Handler,
+) {
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
 		r.Get(rt.HomePageUrl, home)
 	})
 }
+
 func RouteAPI(r chi.Router, apiServer api.Server, mws ...func(http.Handler) http.Handler) {
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)

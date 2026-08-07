@@ -4,20 +4,22 @@ import (
 	"context"
 	"database/sql"
 	"embed"
-	"github.com/jmoiron/sqlx"
-	goose "github.com/pressly/goose/v3"
 	"io/fs"
-	_ "modernc.org/sqlite"
 	"net/url"
 	"os"
 	"path/filepath"
+
+	"github.com/jmoiron/sqlx"
+	goose "github.com/pressly/goose/v3"
+
+	_ "modernc.org/sqlite"
 )
 
 //go:embed migrations/*.sql
 var MigrationsFS embed.FS
 
 func NewSQLiteConnection(path string) *sqlx.DB {
-	err := os.MkdirAll(filepath.Dir(path), 0755)
+	err := os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {
 		panic(err)
 	}
@@ -51,7 +53,6 @@ func NewSQLiteConnection(path string) *sqlx.DB {
 }
 
 func NewMigrationProvider(db *sql.DB) (*goose.Provider, error) {
-
 	migrationsFSsub, err := fs.Sub(MigrationsFS, "migrations")
 	if err != nil {
 		return nil, err
@@ -61,7 +62,6 @@ func NewMigrationProvider(db *sql.DB) (*goose.Provider, error) {
 		return nil, err
 	}
 	return provider, nil
-
 }
 
 func ApplyMigrations(ctx context.Context, db *sql.DB, direction string) error {

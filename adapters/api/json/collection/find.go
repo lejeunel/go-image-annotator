@@ -21,7 +21,6 @@ func (p Find) SuccessFindCollection(r clc.Collection) {
 	}
 
 	json.WriteJSON(p.Writer, 200, response)
-
 }
 
 func NewFindPresenter(w http.ResponseWriter, l slog.Logger) Find {

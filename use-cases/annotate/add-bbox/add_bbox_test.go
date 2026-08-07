@@ -62,9 +62,11 @@ func TestErrOnFindLabelShouldFail(t *testing.T) {
 }
 
 func CreateTestAddBoxRequest() Request {
-	return Request{ImageId: im.NewImageId().String(), Collection: "a-collection",
+	return Request{
+		ImageId: im.NewImageId().String(), Collection: "a-collection",
 		Label: "a-label", Xc: float32(1.0), Yc: float32(1.0), Width: float32(3.0),
-		Height: float32(3.0), Angle: float32(32)}
+		Height: float32(3.0), Angle: float32(32),
+	}
 }
 
 func TestValidationErrShouldFail(t *testing.T) {
@@ -119,9 +121,11 @@ func TestAddBoundingBox(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	image := im.NewImage(im.NewImageId(), collection)
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
-	req := Request{ImageId: image.Id.String(), Collection: collection.Name,
+	req := Request{
+		ImageId: image.Id.String(), Collection: collection.Name,
 		Label: label.Name, Xc: float32(1.0), Yc: float32(1.0), Width: float32(3.0),
-		Height: float32(3.0), Angle: float32(32)}
+		Height: float32(3.0), Angle: float32(32),
+	}
 
 	itr := New(&fk.ImageStore{Return: &image},
 		&repo,
@@ -137,5 +141,4 @@ func TestAddBoundingBox(t *testing.T) {
 	assert.Equal(t, req.Width, repo.GotBox.Width)
 	assert.Equal(t, req.Height, repo.GotBox.Height)
 	assert.Equal(t, req.Angle, repo.GotBox.Angle)
-
 }

@@ -11,7 +11,6 @@ func MakeClass(active bool) string {
 		return "flex items-center rounded-radius p-1 text-on-surface hover:text-primary dark:text-on-surface-dark dark:hover:text-primary-dark"
 	}
 	return "flex items-center rounded-radius p-1 text-gray-500 dark:text-gray-500 "
-
 }
 
 var leftArrow = `
@@ -20,6 +19,7 @@ var leftArrow = `
 					</svg>
 
 				`
+
 var rightArrow = `
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-6">
 						<path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -27,7 +27,12 @@ var rightArrow = `
 
 				`
 
-func MakeNavigationButton(url string, active bool, direction scr.ScrollingDirection, text string) Node {
+func MakeNavigationButton(
+	url string,
+	active bool,
+	direction scr.ScrollingDirection,
+	text string,
+) Node {
 	if direction == scr.ScrollNext {
 		return A(Href(url), Class(MakeClass(active)),
 			Text(text),
@@ -38,5 +43,4 @@ func MakeNavigationButton(url string, active bool, direction scr.ScrollingDirect
 		Raw(leftArrow),
 		Text(text),
 	)
-
 }
