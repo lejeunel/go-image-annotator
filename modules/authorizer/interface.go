@@ -30,6 +30,9 @@ type Interface interface {
 	UpdateRole(ctx context.Context) error
 	CloneCollection(ctx context.Context, group string) error
 	UpdateUserPrivileges(ctx context.Context) error
+	AddMetadata(ctx context.Context, group string) error
+	UpdateMetadata(ctx context.Context, group string) error
+	DeleteMetadata(ctx context.Context, group string) error
 	ReadPolicies(ctx context.Context) error
 	SetPolicies(ctx context.Context) error
 }

@@ -12,6 +12,7 @@ import (
 	grp "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
 	im "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	lbl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
+	md "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/metadata"
 	r "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
 	scr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/scroll"
 	tra "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/transactors"
@@ -46,6 +47,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 	rlrepo := r.NewSQLiteRoleRepo(db)
 	usrrepo := usr.NewSQLiteUserRepo(db)
 	eventrepo := ev.NewSQLiteEventRepo(db)
+	metadatarepo := md.NewSQLiteMetaRepo(db)
 	imageFileStore := fs.NewFileStore(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "images"))
 	policyFileStore := fs.NewFileStore(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "assets"))
 	imstore := im_store.New(imrepo, clrepo, anrepo, imageFileStore)
@@ -74,6 +76,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 		Role:       NewSQLiteRoleInteractors(rlrepo, auth),
 		Bootstrap:  NewSQLiteBootstrapInteractor(usrrepo, rlrepo, policyFileStore, passwordTokenizer, passwordValidator),
 		Policy:     NewSQLitePolicyInteractors(policyFileStore, auth),
+		Metadata:   NewSQLiteMetadataInteractors(metadatarepo, clrepo, imrepo, auth),
 		Log:        NewSQLiteLogInteractors(eventlogger),
 	}
 	annotator := a.NewAnnotator(scr, itrs.Image.Find,

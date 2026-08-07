@@ -3,6 +3,7 @@
 package authorizer
 
 var ValidMethods = []string{
+	"AddMetadata",
 	"Annotate",
 	"CloneCollection",
 	"CreateCollection",
@@ -14,6 +15,7 @@ var ValidMethods = []string{
 	"DeleteGroup",
 	"DeleteImage",
 	"DeleteLabel",
+	"DeleteMetadata",
 	"DeleteRole",
 	"DeleteUser",
 	"FindUser",
@@ -25,6 +27,7 @@ var ValidMethods = []string{
 	"UpdateCollection",
 	"UpdateGroup",
 	"UpdateLabel",
+	"UpdateMetadata",
 	"UpdateRole",
 	"UpdateUserPrivileges",
 	"*",

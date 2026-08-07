@@ -96,10 +96,10 @@ this will lock yourself out...
 - use "Combobox with search"
 - Find a way to make it "always open", or just display the "inside"
 ** TODO add keyboard shortcuts
-* TODO Admin web panel: setting user groups/roles
-* TODO meta-data
+* DONE Admin web panel: setting user groups/roles
+* DONE meta-data
 ** DONE use-cases (create, list by imageId/collection, update, delete)
-** TODO add use-case must check that collection and image exist
+** DONE add use-case must check that collection and image exist
 * TODO Add bounding box: check for range constraints
 * TODO Import image into collection with annotations (needs source collection)
 

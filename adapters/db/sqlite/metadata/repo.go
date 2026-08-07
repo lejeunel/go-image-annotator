@@ -84,7 +84,7 @@ func (r SQLiteMetaRepo) KeyExists(collection clc.CollectionName, imageId im.Imag
 
 	return exists, nil
 }
-func (r SQLiteMetaRepo) GetValue(collection clc.CollectionName, imageID im.ImageId, key string) (any, error) {
+func (r SQLiteMetaRepo) GetValue(collection clc.CollectionName, imageID im.ImageId, key string) (*any, error) {
 	var value any
 
 	err := r.Db.Get(
@@ -110,7 +110,7 @@ func (r SQLiteMetaRepo) GetValue(collection clc.CollectionName, imageID im.Image
 		return nil, fmt.Errorf("%v: %w", err, e.ErrInternal)
 	}
 
-	return value, nil
+	return &value, nil
 }
 
 func (r SQLiteMetaRepo) UpdateValue(collection clc.CollectionName, imageID im.ImageId, key string, value any) error {
