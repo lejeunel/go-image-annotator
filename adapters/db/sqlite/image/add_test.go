@@ -82,5 +82,6 @@ func TestCreatedAt(t *testing.T) {
 	assert.NoError(t, err)
 	specs, err := imRepo.GetSpecs(imageId)
 	assert.NoError(t, err)
-	assert.Equal(t, now.Round(0), specs.IngestedAt.Round(0))
+	// assert.Equal(t, now.Round(0), specs.IngestedAt.Round(0))
+	assert.True(t, now.Equal(specs.IngestedAt))
 }
