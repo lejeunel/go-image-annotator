@@ -22,17 +22,20 @@ type Auth interface {
 
 type Interactor struct {
 	CollectionRepo
+	ImageRepo
 	MetaDataRepo
 	KeyValidator   kv.Validator
 	ValueValidator vv.Validator
 	Auth
 }
 
-func New(c CollectionRepo, m MetaDataRepo,
+func New(c CollectionRepo, ir ImageRepo,
+	m MetaDataRepo,
 	kv kv.Validator, vv vv.Validator,
 	opts ...Option) Interactor {
 	i := &Interactor{
 		CollectionRepo: c,
+		ImageRepo:      ir,
 		MetaDataRepo:   m,
 		KeyValidator:   kv,
 		ValueValidator: vv,
@@ -74,13 +77,33 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	exists, err := i.MetaDataRepo.KeyExists(r.Collection, imageId, r.Key)
+	keyExists, err := i.MetaDataRepo.KeyExists(r.Collection, imageId, r.Key)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: checking existence of key %v: %v: %w", errCtx, r.Key, err, e.ErrInternal))
 		return
 	}
-	if *exists {
+	if *keyExists {
 		out.Error(fmt.Errorf("%v: checking existence of key %v: %w", errCtx, r.Key, e.ErrValidation))
+		return
+	}
+
+	collectionExists, err := i.CollectionRepo.Exists(r.Collection)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: checking existence of collection %v: %v: %w", errCtx, r.Collection, err, e.ErrInternal))
+		return
+	}
+	if !collectionExists {
+		out.Error(fmt.Errorf("%v: checking existence of collection %v: %w", errCtx, r.Collection, e.ErrValidation))
+		return
+	}
+
+	imageInCollection, err := i.ImageRepo.ImageExistsInCollection(imageId, r.Collection)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: checking whether image %v is in collection %v: %v: %w", errCtx, imageId, r.Collection, err, e.ErrInternal))
+		return
+	}
+	if !imageInCollection {
+		out.Error(fmt.Errorf("%v: checking whether image %v is in collection %v: %v: %w", errCtx, imageId, r.Collection, err, e.ErrValidation))
 		return
 	}
 

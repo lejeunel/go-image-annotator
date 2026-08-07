@@ -59,7 +59,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	if err := i.ensureImageDoesNotAlreadyExistInCollection(imageId, dstCollection.Id); err != nil {
+	if err := i.ensureImageDoesNotAlreadyExistInCollection(imageId, dstCollection.Name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -74,10 +74,10 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	out.Success(Response{})
 
 }
-func (i Interactor) ensureImageDoesNotAlreadyExistInCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
+func (i Interactor) ensureImageDoesNotAlreadyExistInCollection(imageId im.ImageId, collection clc.CollectionName) error {
 
 	errCtx := fmt.Errorf("ensuring that source image does not already exist in destination collection")
-	alreadyExists, err := i.ImageRepo.ImageExistsInCollection(imageId, collectionId)
+	alreadyExists, err := i.ImageRepo.ImageExistsInCollection(imageId, collection)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, err)
 	}

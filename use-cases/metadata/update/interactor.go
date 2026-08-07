@@ -95,20 +95,6 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	// if err := i.KeyValidator.Validate(r.Key); err != nil {
-	// 	out.Error(fmt.Errorf("%v: validating key %v: %w", errCtx, r.Key, err))
-	// 	return
-	// }
-	// if err := i.ValueValidator.Validate(r.Value); err != nil {
-	// 	out.Error(fmt.Errorf("%v: validating value %v: %w", errCtx, r.Value, err))
-	// 	return
-	// }
-	// if err := i.MetaDataRepo.Add(r.Collection, imageId, r.Key, r.Value); err != nil {
-	// 	out.Error(fmt.Errorf("%v: adding meta-data with key %v and value %v: %w",
-	// 		errCtx, r.Key, r.Value, err))
-	// 	return
-	// }
-
-	out.SuccessAddMetadata()
+	out.SuccessUpdateMetadata()
 
 }

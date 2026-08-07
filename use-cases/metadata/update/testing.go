@@ -9,6 +9,6 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) SuccessAddMetadata() {
+func (p *FakePresenter) SuccessUpdateMetadata() {
 	p.GotSuccess = true
 }

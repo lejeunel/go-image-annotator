@@ -90,10 +90,10 @@ func (r SQLiteImageRepo) Iterate(f im.Filtering, pageSize int) iter.Seq2[im.Base
 		}
 	}
 }
-func (r SQLiteImageRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc.CollectionId) (bool, error) {
+func (r SQLiteImageRepo) ImageExistsInCollection(imageId im.ImageId, collection clc.CollectionName) (bool, error) {
 	var count int64
-	query := "SELECT COUNT(*) FROM images_collections WHERE image_id=$1 AND collection_id=$2"
-	err := r.Db.QueryRow(query, imageId.String(), collectionId.String()).Scan(&count)
+	query := "SELECT COUNT(*) FROM images_collections WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2)"
+	err := r.Db.QueryRow(query, imageId.String(), collection).Scan(&count)
 	if err != nil {
 		return false, fmt.Errorf("checking image to collection junction records: %v: %w", err, e.ErrInternal)
 	}

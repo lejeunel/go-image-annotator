@@ -26,14 +26,14 @@ func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
 
 func TestRemoveImageFromCollection(t *testing.T) {
 	imRepo, clcRepo := MakeRepos(s.NewInMemory())
-	collectionId := clc.NewCollectionId()
-	clcRepo.Create(clc.NewCollection(collectionId, "a-collection"))
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	clcRepo.Create(collection)
 	imageId := im.NewImageId()
 	imRepo.AddImage(imageId, nil, im.Specs{})
 
-	imRepo.AddToCollection(imageId, collectionId)
-	err := imRepo.RemoveImageFromCollection(imageId, collectionId)
+	imRepo.AddToCollection(imageId, collection.Id)
+	err := imRepo.RemoveImageFromCollection(imageId, collection.Id)
 	assert.NoError(t, err)
-	exists, _ := imRepo.ImageExistsInCollection(imageId, collectionId)
+	exists, _ := imRepo.ImageExistsInCollection(imageId, collection.Name)
 	assert.False(t, exists)
 }

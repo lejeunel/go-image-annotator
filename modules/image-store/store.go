@@ -22,7 +22,7 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 		return nil, fmt.Errorf("fetching collection by name (%v): %w", base.Collection, err)
 	}
 
-	ok, err := s.ImageRepo.ImageExistsInCollection(base.ImageId, collection.Id)
+	ok, err := s.ImageRepo.ImageExistsInCollection(base.ImageId, collection.Name)
 	if err != nil {
 		return nil, fmt.Errorf("checking whether image %v exists in collection %v: %w",
 			base.ImageId, base.Collection, err)

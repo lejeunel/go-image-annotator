@@ -52,7 +52,7 @@ func (r *ImageRepo) ImageExists(imageId im.ImageId) (bool, error) {
 	}
 	return true, nil
 }
-func (r *ImageRepo) ImageExistsInCollection(imageId im.ImageId, collectionId clc.CollectionId) (bool, error) {
+func (r *ImageRepo) ImageExistsInCollection(imageId im.ImageId, collection clc.CollectionName) (bool, error) {
 	if r.ErrOnImageExistsInCollection != nil {
 		return false, r.ErrOnImageExistsInCollection
 	}
