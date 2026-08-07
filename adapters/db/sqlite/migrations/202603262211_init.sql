@@ -117,6 +117,13 @@ CREATE TABLE IF NOT EXISTS events (
 );
 CREATE INDEX events_task_id_idx ON events(task_id);
 
+CREATE TABLE metadata (
+    image_id      varchar(36) NOT NULL,
+    collection_id varchar(36) NOT NULL,
+    meta      TEXT NOT NULL DEFAULT '{}' CHECK (json_valid(meta)),
+    PRIMARY KEY (image_id, collection_id)
+);
+
 -- +goose Down
 
 DROP TABLE labels;

@@ -11,5 +11,5 @@ type CollectionRepo interface {
 
 type MetaDataRepo interface {
 	Delete(clc.CollectionName, im.ImageId, string) error
-	KeyExists(clc.CollectionName, im.ImageId, string) (*bool, error)
+	KeyExists(clc.CollectionName, im.ImageId, string) (bool, error)
 }

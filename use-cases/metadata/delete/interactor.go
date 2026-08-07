@@ -70,7 +70,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: checking existence of key %v: %w", errCtx, r.Key, err))
 		return
 	}
-	if *exists == false {
+	if !exists {
 		out.Error(fmt.Errorf("%v: checking existence of key %v: %w", errCtx, r.Key, e.ErrNotFound))
 		return
 	}

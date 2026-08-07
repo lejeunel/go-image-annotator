@@ -37,16 +37,16 @@ type MetaDataRepo struct {
 	ReturnValue    any
 }
 
-func (r *MetaDataRepo) KeyExists(n clc.CollectionName, id im.ImageId, key string) (*bool, error) {
+func (r *MetaDataRepo) KeyExists(n clc.CollectionName, id im.ImageId, key string) (bool, error) {
 	if r.ErrOnKeyExists != nil {
-		return nil, r.ErrOnKeyExists
+		return false, r.ErrOnKeyExists
 	}
 	var exist = true
 	if slices.Contains(r.ExistingKeys, key) {
-		return &exist, nil
+		return exist, nil
 	}
 	exist = false
-	return &exist, nil
+	return exist, nil
 
 }
 

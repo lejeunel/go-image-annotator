@@ -16,6 +16,6 @@ type CollectionRepo interface {
 
 type MetaDataRepo interface {
 	GetValue(clc.CollectionName, im.ImageId, string) (*any, error)
-	KeyExists(clc.CollectionName, im.ImageId, string) (*bool, error)
+	KeyExists(clc.CollectionName, im.ImageId, string) (bool, error)
 	UpdateValue(clc.CollectionName, im.ImageId, string, any) error
 }
