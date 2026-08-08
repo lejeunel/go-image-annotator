@@ -110,5 +110,5 @@ func TestRead(t *testing.T) {
 			Key: key},
 		p)
 	assert.True(t, p.GotSuccess)
-	assert.Equal(t, value, p.Got)
+	assert.Equal(t, value, p.Got.Data.Value)
 }

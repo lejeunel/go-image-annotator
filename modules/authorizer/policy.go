@@ -31,7 +31,6 @@ func (p Policies) Validate() error {
 var DefaultPolicyFileName = "policies.yaml"
 
 var DefaultPolicies = Policies{
-	"viewer":    {},
 	"annotator": {"Annotate"},
 	"image-contributor": {
 		"IngestImage",

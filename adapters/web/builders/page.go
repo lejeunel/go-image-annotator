@@ -126,7 +126,7 @@ func (b *PageBuilder) Render(w io.Writer) {
 		content = Div(
 			content,
 			Div(
-				Class("flex flex-col w-150"),
+				Class("flex flex-col w-full"),
 				Article(Class("prose dark:prose-invert max-w-none mb-4"), Raw(b.preamble)),
 			),
 		)

@@ -34,5 +34,5 @@ func TestList(t *testing.T) {
 		Request{ImageId: im.NewImageId().String(), Collection: "my-collection"},
 		p)
 	assert.True(t, p.GotSuccess)
-	assert.Equal(t, items, p.Got)
+	assert.Equal(t, items, p.Got.MetaData)
 }
