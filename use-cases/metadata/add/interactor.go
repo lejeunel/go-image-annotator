@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	sauth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	kv "github.com/lejeunel/go-image-annotator/modules/string-validator"
 	vv "github.com/lejeunel/go-image-annotator/modules/value-validator"
@@ -165,5 +166,5 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.SuccessAddMetadata()
+	out.SuccessAddMetadata(m.MetaData{Key: r.Key, Value: r.Value})
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
@@ -92,7 +93,7 @@ func (b *FakeAnnotationDeleter) Execute(c context.Context, r del.Request, o del.
 type FakeMetaAdder struct{}
 
 func (b *FakeMetaAdder) Execute(ctx context.Context, r addmd.Request, o addmd.OutputPort) {
-	o.SuccessAddMetadata()
+	o.SuccessAddMetadata(m.MetaData{})
 }
 
 type FakeMetaLister struct{}
