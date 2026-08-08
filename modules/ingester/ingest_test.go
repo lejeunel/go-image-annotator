@@ -149,6 +149,23 @@ func TestAddBoundingBoxToImage(t *testing.T) {
 	assert.Equal(t, 1, anRepo.NumBoundingBoxesAdded)
 }
 
+func TestAddPolygon(t *testing.T) {
+	repos := NewTestingRepos()
+	anRepo := &fk.AnnotationRepo{}
+	repos.AnnotationRepo = anRepo
+	ing := NewTestingIngester(repos)
+	_, err := ing.Ingest(Request{
+		Polygons: []a.PolygonRequest{
+			{
+				Label:  "a-label",
+				Points: a.Points{Coordinates: [][2]float32{{0, 0}, {0, 1}}}},
+		},
+		Reader: &fk.ImageReader{},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 1, anRepo.NumPolygonsAdded)
+}
+
 func TestInternalErrOnAddImageShouldFail(t *testing.T) {
 	repos := NewTestingRepos()
 	repos.ImageRepo = &fk.ImageRepo{ErrOnAddImage: e.ErrInternal}

@@ -123,6 +123,11 @@ type Polygon struct {
 	Time   *time.Time
 }
 
+type PolygonRequest struct {
+	Label  string
+	Points Points
+}
+
 type PolygonUpdatables struct {
 	LabelId lbl.LabelId
 	Points  Points

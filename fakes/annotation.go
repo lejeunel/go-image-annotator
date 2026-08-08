@@ -39,6 +39,7 @@ type AnnotationRepo struct {
 	UpdatedLabelId            lbl.LabelId
 	NumBoundingBoxesAdded     int
 	NumImageLabelsAdded       int
+	NumPolygonsAdded          int
 	RemovedAllAnnotations     bool
 	Labels                    []a.ImageLabel
 	BoundingBoxes             []a.BoundingBox
@@ -82,6 +83,7 @@ func (r *AnnotationRepo) AddPolygon(
 	r.GotPolygon = poly
 	r.GotUserId = userId
 	r.GotTime = t
+	r.NumPolygonsAdded += 1
 	return nil
 }
 

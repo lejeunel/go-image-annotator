@@ -13,6 +13,7 @@ type Request struct {
 	Collection    string
 	Labels        []string
 	BoundingBoxes []an.BoundingBoxRequest
+	Polygons      []an.PolygonRequest
 	Reader        io.Reader
 }
 

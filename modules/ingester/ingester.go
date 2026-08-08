@@ -75,7 +75,8 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 	}
 
 	imageId := im.NewImageId()
-	image, err := i.buildImage(imageId, *collection, r.Labels, r.BoundingBoxes)
+	image, err := i.buildImage(imageId, *collection, r.Labels, r.BoundingBoxes,
+		r.Polygons)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", errCtx, err)
 	}
@@ -121,7 +122,7 @@ func (i *Ingester) ingestRawData(image im.Image, reader io.Reader) (*[]byte, err
 }
 
 func (i *Ingester) buildImage(id im.ImageId, collection clc.Collection, labelNames []string,
-	bboxes []a.BoundingBoxRequest,
+	bboxes []a.BoundingBoxRequest, polygons []a.PolygonRequest,
 ) (*im.Image, error) {
 	image := im.NewImage(id, collection)
 
@@ -130,6 +131,9 @@ func (i *Ingester) buildImage(id im.ImageId, collection clc.Collection, labelNam
 	}
 
 	if err := i.appendBoundingBoxes(&image, bboxes); err != nil {
+		return nil, err
+	}
+	if err := i.appendPolygons(&image, polygons); err != nil {
 		return nil, err
 	}
 
@@ -165,6 +169,25 @@ func (i Ingester) appendBoundingBoxes(image *im.Image, bboxes []a.BoundingBoxReq
 			*label,
 		)
 		if err := image.AddBoundingBox(box_); err != nil {
+			return fmt.Errorf("%w: %w", baseErr, err)
+		}
+	}
+	return nil
+}
+
+func (i Ingester) appendPolygons(image *im.Image, polygons []a.PolygonRequest) error {
+	baseErr := fmt.Errorf("appending polygons")
+	for _, p := range polygons {
+		label, err := i.findLabelByName(p.Label)
+		if err != nil {
+			return fmt.Errorf("%w: %w", baseErr, err)
+		}
+		polygon_ := a.NewPolygon(
+			a.NewAnnotationId(),
+			p.Points,
+			*label,
+		)
+		if err := image.AddPolygon(polygon_); err != nil {
 			return fmt.Errorf("%w: %w", baseErr, err)
 		}
 	}
@@ -209,6 +232,18 @@ func (i Ingester) ingestImage(
 			&now,
 		); err != nil {
 			return fmt.Errorf("adding bounding box: %w", err)
+		}
+	}
+
+	for _, poly := range image.Polygons {
+		if err := tx.AnnotationRepo.AddPolygon(
+			image.Id,
+			image.Collection.Id,
+			poly,
+			&authorId,
+			&now,
+		); err != nil {
+			return fmt.Errorf("adding polygon: %w", err)
 		}
 	}
 	return nil
