@@ -50,7 +50,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 	metadatarepo := md.NewSQLiteMetaRepo(db)
 	imageFileStore := fs.NewFileStore(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "images"))
 	policyFileStore := fs.NewFileStore(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "assets"))
-	imstore := im_store.New(imrepo, clrepo, anrepo, imageFileStore)
+	imstore := im_store.New(imrepo, clrepo, anrepo, metadatarepo, imageFileStore)
 	scrrepo := scr.NewSQLiteScrollerRepo(db)
 	eventlogger := el.New(eventrepo, el.WithMaxNumTasksPerUser(cfg.MaxNumTasksPerUser))
 
@@ -110,7 +110,9 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 		itrs.Annotation.AddPolygon, itrs.Annotation.UpdatePolygon,
 		itrs.Annotation.Delete,
 		itrs.Label.FetchAll, itrs.Annotation.UpdateLabel,
-		itrs.Annotation.AddImageLabel)
+		itrs.Annotation.AddImageLabel, itrs.Metadata.Add, itrs.Metadata.List,
+		itrs.Metadata.Read, itrs.Metadata.Delete,
+	)
 
 	return app.NewApp(itrs, sessionManager, annotator)
 }

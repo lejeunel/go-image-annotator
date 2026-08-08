@@ -5,11 +5,19 @@ import (
 	"fmt"
 	"text/template"
 
+	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
+
+type LabelSelector struct {
+	Labels         []string
+	SelectorIsOpen bool
+	Selected       *string
+	AnnotationId   string
+}
 
 type RegionKind int
 
@@ -56,19 +64,13 @@ func (t *RegionTable) addRow(author, time, id, label, color string, regionKind R
 				Div(Class(authorInfo), Text(author)),
 				Div(Class(authorInfo), Text(time)),
 			),
-			Div(Class("ps-1"),
+			Div(Class("ps-1 py-3"),
 				Raw(regionIcon),
 			),
 			Raw(buf.String()),
 			Div(
 				Class("flex  justify-end items-center pr-1"),
-				Raw(
-					fmt.Sprintf(
-						`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`,
-						id,
-						ic.Trash,
-					),
-				),
+				cmp.MakeIconizedButton(ic.Trash, "delete", Attr(fmt.Sprintf("onclick=\"AnnotatorModule.remove('%v')\"", id))),
 			),
 		}})
 }
@@ -84,7 +86,7 @@ func (t *RegionTable) AddBox(b view.BoundingBox) {
 func (t *RegionTable) Build(title string) Node {
 	return Div(
 		Class(
-			"overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark",
+			"overflow-hidden w-full rounded-radius border border-outline dark:border-outline-dark",
 		),
 		Table(Class("w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
 			RegionTableBody(title, t.Rows),

@@ -1,4 +1,4 @@
-package list
+package read
 
 import (
 	m "github.com/lejeunel/go-image-annotator/entities/meta"
@@ -7,10 +7,11 @@ import (
 type Request struct {
 	ImageId    string
 	Collection string
+	Key        string
 }
 
 type Response struct {
 	ImageId    string
 	Collection string
-	MetaData   []m.MetaData
+	Data       m.MetaData
 }

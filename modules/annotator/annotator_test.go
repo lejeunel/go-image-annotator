@@ -31,7 +31,12 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller) {
 		&FakeAnnotationDeleter{},
 		&FakeLabelFetcher{},
 		&FakeLabelUpdater{},
-		&FakeLabelAdder{})
+		&FakeLabelAdder{},
+		&FakeMetaAdder{},
+		&FakeMetaLister{},
+		&FakeMetaReader{},
+		&FakeMetaDeleter{},
+	)
 	return &annotator, &image, scroller
 }
 
@@ -62,20 +67,20 @@ func TestDrawImageOnInit(t *testing.T) {
 func TestAddBox(t *testing.T) {
 	a, _, _ := createAnnotator()
 	p := &FakeAddBoxPresenter{}
-	a.AddBox(t.Context(), addbox.Request{}, p)
+	a.AddBox.Execute(t.Context(), addbox.Request{}, p)
 	assert.True(t, p.Called)
 }
 
 func TestUpdateLabel(t *testing.T) {
 	a, _, _ := createAnnotator()
 	p := &FakeUpdateLabelPresenter{}
-	a.UpdateLabel(t.Context(), updlbl.Request{}, p)
+	a.UpdateLabel.Execute(t.Context(), updlbl.Request{}, p)
 	assert.True(t, p.Called)
 }
 
 func TestDeleteAnnotation(t *testing.T) {
 	a, _, _ := createAnnotator()
 	p := &FakeRemoveLabelPresenter{}
-	a.DeleteAnnotation(t.Context(), del.Request{}, p)
+	a.DeleteAnnotation.Execute(t.Context(), del.Request{}, p)
 	assert.True(t, p.Called)
 }

@@ -9,16 +9,16 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func MakeHTMXCreateButton(text string, hxPut string, hxTarget string) Node {
+func MakeHTMXCreateButton(text string, hxGet string, hxTarget string) Node {
 	return Div(
 		Class("m-2"),
 		Button(
-			Attr(fmt.Sprintf("hx-get=%v", hxPut)),
+			Attr(fmt.Sprintf("hx-get=%v", hxGet)),
 			Attr(fmt.Sprintf("hx-target=#%v", hxTarget)),
 			Attr(`hx-swap=innerHTML`),
 			Class(s.PrimaryButton),
 			Span(Class("flex items-center"),
-				Raw(ic.Add), Div(Class("p-1"), Text(text)),
+				Raw(ic.Add), Div(Class("ml-1"), Text(text)),
 			)))
 }
 

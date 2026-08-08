@@ -8,13 +8,33 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
+const placeHolderText = "There is nothing here yet..."
+
 type TableBuilder struct {
-	fields []string
-	rows   []Row
+	fields      []string
+	rows        []Row
+	placeholder Node
 }
 
-func NewTableBuilder(fields []string) TableBuilder {
-	return TableBuilder{fields: fields}
+type TableBuilderOption func(*TableBuilder)
+
+func WithSimplePlaceHolder() TableBuilderOption {
+	return func(b *TableBuilder) {
+		b.placeholder = Div(Text(placeHolderText))
+	}
+}
+
+func NewTableBuilder(fields []string, opts ...TableBuilderOption) TableBuilder {
+	t := &TableBuilder{fields: fields,
+		placeholder: Div(Class("ml-8"),
+			Div(Class("pt-2 pb-8 text-lg italic"), Text(placeHolderText)),
+			Pre(Class("font-mono whitespace-pre text-sm leading-tight"), Raw(emptyAsciiIcon)),
+		),
+	}
+	for _, opt := range opts {
+		opt(t)
+	}
+	return *t
 }
 
 func (t TableBuilder) NumRows() int {
@@ -23,17 +43,14 @@ func (t TableBuilder) NumRows() int {
 
 func (t *TableBuilder) Build() Node {
 	if len(t.rows) == 0 {
-		return Div(Class("ml-8"),
-			Div(Class("pt-2 pb-8 text-lg italic"), Text("There is nothing here yet...")),
-			Pre(Class("font-mono whitespace-pre text-sm leading-tight"), Raw(emptyAsciiIcon)),
-		)
+		return t.placeholder
 	}
 	return Div(
 		Class(
-			"overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark",
+			"overflow-hidden overflow-x-auto rounded-radius border border-outline dark:border-outline-dark",
 		),
 		Table(
-			Class("table-fixed w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
+			Class("table-auto w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
 			TableHeader(t.fields),
 			TableBody(t.rows),
 		),

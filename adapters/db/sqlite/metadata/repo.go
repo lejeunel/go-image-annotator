@@ -84,7 +84,7 @@ func (r SQLiteMetaRepo) KeyExists(
 		collection,
 	)
 	if err == sql.ErrNoRows {
-		return false, e.ErrNotFound
+		return false, nil
 	}
 	if err != nil {
 		return false, fmt.Errorf("%v: %w", err, e.ErrInternal)

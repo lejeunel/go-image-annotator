@@ -14,6 +14,10 @@ type Validator interface {
 type BaseTypeValidator struct{}
 
 func (v BaseTypeValidator) Validate(value any) error {
+	if value == "" {
+		return fmt.Errorf("string value cannot be empty: %w", e.ErrValidation)
+	}
+
 	switch value.(type) {
 	case int, float32, float64, string, time.Time, bool:
 		return nil
@@ -22,4 +26,5 @@ func (v BaseTypeValidator) Validate(value any) error {
 	default:
 		return fmt.Errorf("unsupported value type: %T: %w", v, e.ErrValidation)
 	}
+
 }

@@ -13,7 +13,8 @@ type ImageStore struct {
 	ImageRepo
 	CollectionRepo
 	AnnotationRepo
-	fileStore fs.Interface
+	MetaRepo
+	FileStore fs.Interface
 }
 
 func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
@@ -52,7 +53,12 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 		return nil, fmt.Errorf("fetching image specs: %w", err)
 	}
 
-	reader, err := s.fileStore.Get(
+	meta, err := s.MetaRepo.List(base.Collection, base.ImageId)
+	if err != nil {
+		return nil, fmt.Errorf("fetching image meta-data: %w", err)
+	}
+
+	reader, err := s.FileStore.Get(
 		fmt.Sprintf("%v.%v", base.ImageId, strings.Split(specs.MIMEType, "/")[1]),
 	)
 	if err != nil {
@@ -64,6 +70,7 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 		BoundingBoxes: boxes,
 		Polygons:      polygons,
 		Specs:         *specs,
+		Meta:          meta,
 		Reader:        reader,
 	}, nil
 }
@@ -73,9 +80,9 @@ func (s ImageStore) DeleteAsset(id im.ImageId) error {
 	if err != nil {
 		return fmt.Errorf("fetching image specs")
 	}
-	return s.fileStore.Delete(fmt.Sprintf("%v.%v", id, strings.Split(specs.MIMEType, "/")[1]))
+	return s.FileStore.Delete(fmt.Sprintf("%v.%v", id, strings.Split(specs.MIMEType, "/")[1]))
 }
 
-func New(i ImageRepo, c CollectionRepo, a AnnotationRepo, f fs.Interface) ImageStore {
-	return ImageStore{i, c, a, f}
+func New(i ImageRepo, c CollectionRepo, a AnnotationRepo, m MetaRepo, f fs.Interface) ImageStore {
+	return ImageStore{i, c, a, m, f}
 }

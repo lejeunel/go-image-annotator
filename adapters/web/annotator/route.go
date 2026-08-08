@@ -17,6 +17,8 @@ var (
 	Annotations      = "/ui/annotate/annotations"
 	RemoveAnnotation = "/ui/annotate/remove-annotation"
 	SetLabel         = "/ui/annotate/set-label"
+	MetaUrl          = "/ui/annotate/meta"
+	MetaRowUrl       = "/ui/annotate/meta/row"
 )
 
 func (s *Server) Route(r chi.Router,
@@ -35,5 +37,10 @@ func (s *Server) Route(r chi.Router,
 		r.Get(Annotations, s.GetRegionsAsJSON)
 		r.Delete(RemoveAnnotation, s.DeleteAnnotation)
 		r.Post(SetLabel, s.SetLabel)
+
+		r.Get(MetaUrl, s.MetaDataForm)
+		r.Post(MetaUrl, s.AddMetaData)
+		r.Get(MetaRowUrl, s.MetaTableRow)
+		r.Delete(MetaRowUrl, s.DeleteMetaData)
 	})
 }

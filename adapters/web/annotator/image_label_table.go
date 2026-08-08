@@ -3,6 +3,7 @@ package annotator
 import (
 	"fmt"
 
+	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
@@ -24,18 +25,12 @@ func (r ImageLabelRow) Render() Node {
 				Div(Class(authorInfo), Text(r.Time)),
 			),
 		),
-		Td(Class("ps-2 py-1"),
+		Td(Class("ps-2 py-3 min-w-0 break-words"),
 			Text(r.Label),
 		),
 		Td(Div(
 			Class("flex justify-end items-center pr-1"),
-			Raw(
-				fmt.Sprintf(
-					`<a href="#" onclick="AnnotatorModule.remove('%v')"> %v </a>`,
-					r.Id,
-					ic.Trash,
-				),
-			),
+			cmp.MakeIconizedButton(ic.Trash, "delete", Attr(fmt.Sprintf("onclick=\"AnnotatorModule.remove('%v')\"", r.Id))),
 		),
 		))
 }
@@ -54,7 +49,7 @@ func (t *ImageLabelTable) Build() Node {
 		Class("pb-2"),
 		Div(
 			Class(
-				"overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark",
+				"overflow-hidden w-full rounded-radius border border-outline dark:border-outline-dark",
 			),
 			Table(Class("w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
 				TBody(Class("divide-y divide-outline dark:divide-outline-dark"),

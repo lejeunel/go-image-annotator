@@ -4,19 +4,39 @@ import (
 	"bytes"
 	"io"
 	"testing"
-	"time"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
+func Setup() (ImageStore, clc.Collection, im.Image, []byte) {
+	collection := clc.NewCollection(clc.NewCollectionId(), "the-collection")
+	image := im.NewImage(im.NewImageId(), collection)
+	meta := []m.MetaData{{Key: "first-key", Value: 123}}
+	specs := im.Specs{MIMEType: "image/jpeg"}
+	image.Specs = specs
+	image.Meta = meta
+	data := []byte("test-data")
+	itr := New(&fk.ImageRepo{
+		ImageIsInCollection: true,
+		ReturnSpecs:         &specs,
+	},
+		&fk.CollectionRepo{Return: collection},
+		&fk.AnnotationRepo{},
+		&fk.MetaDataRepo{ReturnList: meta},
+		&fk.FileStore{Data: data})
+	return itr, collection, image, data
+}
+
 func TestNonExistingCollectionShouldFail(t *testing.T) {
-	s := New(&fk.ImageRepo{}, &fk.CollectionRepo{}, &fk.AnnotationRepo{}, &fk.FileStore{})
+	s, _, _, _ := Setup()
+	s.CollectionRepo = &fk.CollectionRepo{ErrOnFind: e.ErrNotFound}
 	_, err := s.Find(im.BaseImage{
 		ImageId:    im.NewImageId(),
 		Collection: "a-collection",
@@ -25,12 +45,8 @@ func TestNonExistingCollectionShouldFail(t *testing.T) {
 }
 
 func TestErrOnFindLabelShouldFail(t *testing.T) {
-	s := New(
-		&fk.ImageRepo{},
-		&fk.CollectionRepo{},
-		&fk.AnnotationRepo{ErrOnFindImageLabels: e.ErrInternal},
-		&fk.FileStore{},
-	)
+	s, _, _, _ := Setup()
+	s.AnnotationRepo = &fk.AnnotationRepo{ErrOnFindImageLabels: e.ErrInternal}
 	_, err := s.Find(im.BaseImage{
 		ImageId:    im.NewImageId(),
 		Collection: "a-collection",
@@ -39,12 +55,8 @@ func TestErrOnFindLabelShouldFail(t *testing.T) {
 }
 
 func TestErrOnFindBoundingBoxesShouldFail(t *testing.T) {
-	s := New(
-		&fk.ImageRepo{},
-		&fk.CollectionRepo{},
-		&fk.AnnotationRepo{ErrOnFindBoundingBoxes: e.ErrInternal},
-		&fk.FileStore{},
-	)
+	s, _, _, _ := Setup()
+	s.AnnotationRepo = &fk.AnnotationRepo{ErrOnFindBoundingBoxes: e.ErrInternal}
 	_, err := s.Find(im.BaseImage{
 		ImageId:    im.NewImageId(),
 		Collection: "a-collection",
@@ -53,12 +65,8 @@ func TestErrOnFindBoundingBoxesShouldFail(t *testing.T) {
 }
 
 func TestErrOnFindPolygonsShouldFail(t *testing.T) {
-	s := New(
-		&fk.ImageRepo{},
-		&fk.CollectionRepo{},
-		&fk.AnnotationRepo{ErrOnFindPolygons: e.ErrInternal},
-		&fk.FileStore{},
-	)
+	s, _, _, _ := Setup()
+	s.AnnotationRepo = &fk.AnnotationRepo{ErrOnFindPolygons: e.ErrInternal}
 	_, err := s.Find(im.BaseImage{
 		ImageId:    im.NewImageId(),
 		Collection: "a-collection",
@@ -67,12 +75,8 @@ func TestErrOnFindPolygonsShouldFail(t *testing.T) {
 }
 
 func TestErrOnExistsShouldFail(t *testing.T) {
-	s := New(
-		&fk.ImageRepo{ErrOnImageExistsInCollection: e.ErrInternal},
-		&fk.CollectionRepo{},
-		&fk.AnnotationRepo{},
-		&fk.FileStore{},
-	)
+	s, _, _, _ := Setup()
+	s.ImageRepo = &fk.ImageRepo{ErrOnImageExistsInCollection: e.ErrInternal}
 	_, err := s.Find(im.BaseImage{
 		ImageId:    im.NewImageId(),
 		Collection: "a-collection",
@@ -81,24 +85,17 @@ func TestErrOnExistsShouldFail(t *testing.T) {
 }
 
 func TestFindImageGivesCorrectAnnotations(t *testing.T) {
+	s, collection, _, _ := Setup()
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	labels := []a.ImageLabel{{Id: a.NewAnnotationId(), Label: label}}
 	bboxes := []a.BoundingBox{{Id: a.NewAnnotationId(), Label: label}}
 	polygons := []a.Polygon{{Id: a.NewAnnotationId(), Label: label}}
-	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	s.AnnotationRepo = &fk.AnnotationRepo{
+		Labels:        labels,
+		BoundingBoxes: bboxes, Polygons: polygons,
+	}
+	s.FileStore = &fk.FileStore{Data: []byte("test-data")}
 
-	s := New(
-		&fk.ImageRepo{ImageIsInCollection: true, ReturnSpecs: &im.Specs{MIMEType: "image/jpeg"}},
-		&fk.CollectionRepo{
-			ExistingNames: []string{collection.Name},
-			Return:        collection,
-		},
-		&fk.AnnotationRepo{
-			Labels:        labels,
-			BoundingBoxes: bboxes, Polygons: polygons,
-		},
-		&fk.FileStore{Data: []byte("test-data")},
-	)
 	image, err := s.Find(im.BaseImage{
 		ImageId:    im.NewImageId(),
 		Collection: collection.Name,
@@ -111,14 +108,7 @@ func TestFindImageGivesCorrectAnnotations(t *testing.T) {
 }
 
 func TestImageReaderGivesCorrectBytes(t *testing.T) {
-	data := []byte("test-data")
-
-	s := New(&fk.ImageRepo{
-		ImageIsInCollection: true,
-		ReturnSpecs:         &im.Specs{MIMEType: "image/jpeg"},
-	},
-		&fk.CollectionRepo{ExistingNames: []string{"the-collection"}},
-		&fk.AnnotationRepo{}, &fk.FileStore{Data: data})
+	s, _, _, data := Setup()
 	image, _ := s.Find(im.BaseImage{
 		ImageId:    im.NewImageId(),
 		Collection: "the-collection",
@@ -128,17 +118,19 @@ func TestImageReaderGivesCorrectBytes(t *testing.T) {
 }
 
 func TestRetrieveSpecs(t *testing.T) {
-	now := time.Now()
-	specs := im.Specs{IngestedAt: now, MIMEType: "image/jpeg"}
-	s := New(&fk.ImageRepo{
-		ImageIsInCollection: true,
-		ReturnSpecs:         &specs,
-	},
-		&fk.CollectionRepo{ExistingNames: []string{"the-collection"}}, &fk.AnnotationRepo{},
-		&fk.FileStore{})
-	image, _ := s.Find(im.BaseImage{
+	s, _, image, _ := Setup()
+	r, _ := s.Find(im.BaseImage{
 		ImageId:    im.NewImageId(),
 		Collection: "the-collection",
 	})
-	assert.Equal(t, specs.IngestedAt, image.Specs.IngestedAt)
+	assert.Equal(t, image.Specs, r.Specs)
+}
+
+func TestRetrieveMetaData(t *testing.T) {
+	s, collection, image, _ := Setup()
+	r, _ := s.Find(im.BaseImage{
+		ImageId:    image.Id,
+		Collection: collection.Name,
+	})
+	assert.Equal(t, image.Meta, r.Meta)
 }

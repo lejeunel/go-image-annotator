@@ -13,7 +13,7 @@
           gofumpt
           golines
           gotestsum
-          tailwindcss
+          tailwindcss_4
         ];
       };
       devShells.test = pkgs.mkShell {

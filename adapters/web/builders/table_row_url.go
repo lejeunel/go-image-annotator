@@ -27,12 +27,25 @@ type RowURL struct {
 	idArgName string
 }
 
-func NewRowURL(baseURL, idArgName string) RowURL {
+func NewRowURL(baseURL string) RowURL {
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		panic(err)
 	}
-	return RowURL{Url: *u, idArgName: idArgName}
+	return RowURL{Url: *u, idArgName: "id"}
+}
+
+func NewRowURLWithId(baseURL, idArgName string) RowURL {
+	r := NewRowURL(baseURL)
+	r.idArgName = idArgName
+	return r
+}
+
+func (b *RowURL) Set(key string, value string) *RowURL {
+	q := b.Url.Query()
+	q.Set(key, value)
+	b.Url.RawQuery = q.Encode()
+	return b
 }
 
 func (b *RowURL) SetId(id string) *RowURL {

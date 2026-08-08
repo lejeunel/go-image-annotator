@@ -14,6 +14,10 @@ import (
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	imread "github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
+	addmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/add"
+	delmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/delete"
+	listmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/list"
+	readmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/read"
 )
 
 type FakeScroller struct {
@@ -83,4 +87,28 @@ type FakeAnnotationDeleter struct{}
 
 func (b *FakeAnnotationDeleter) Execute(c context.Context, r del.Request, o del.OutputPort) {
 	o.SuccessDeleteAnnotation(del.Response{})
+}
+
+type FakeMetaAdder struct{}
+
+func (b *FakeMetaAdder) Execute(ctx context.Context, r addmd.Request, o addmd.OutputPort) {
+	o.SuccessAddMetadata()
+}
+
+type FakeMetaLister struct{}
+
+func (b *FakeMetaLister) Execute(ctx context.Context, r listmd.Request, o listmd.OutputPort) {
+	o.SuccessListMetadata(listmd.Response{})
+}
+
+type FakeMetaReader struct{}
+
+func (b *FakeMetaReader) Execute(ctx context.Context, r readmd.Request, o readmd.OutputPort) {
+	o.SuccessReadMetadata(readmd.Response{})
+}
+
+type FakeMetaDeleter struct{}
+
+func (b *FakeMetaDeleter) Execute(ctx context.Context, r delmd.Request, o delmd.OutputPort) {
+	o.SuccessDeleteMetadata("")
 }

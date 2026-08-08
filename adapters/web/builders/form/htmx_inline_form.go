@@ -76,7 +76,7 @@ func NewHTMXInlineFormBuilder(
 
 func (b *HTMXInlineFormBuilder) AddTextField(
 	fieldName, displayName string,
-	opts ...FormTextFieldOption,
+	opts ...FormFieldOption,
 ) *HTMXInlineFormBuilder {
 	field := NewFormTextField(fieldName, displayName, opts...)
 	b.fields = append(b.fields, field)

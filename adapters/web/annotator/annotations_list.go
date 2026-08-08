@@ -6,12 +6,6 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-type LabelSelector struct {
-	Labels         []string
-	SelectorIsOpen bool
-	Selected       *string
-	AnnotationId   string
-}
 type AnnotationsListView struct{}
 
 func (v *AnnotationsListView) makeRegionList(

@@ -16,6 +16,7 @@ func TestValidateValue(t *testing.T) {
 		{"float32", float32(3.14), false},
 		{"float64", 3.14, false},
 		{"string", "hello", false},
+		{"string", "", true},
 		{"bool", true, false},
 		{"time", time.Now(), false},
 

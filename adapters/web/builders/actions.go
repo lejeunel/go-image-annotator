@@ -3,6 +3,7 @@ package builders
 import (
 	"net/url"
 
+	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -41,26 +42,7 @@ func (p *ActionsPanelBuilder) SetExpand(url url.URL) *ActionsPanelBuilder {
 func (p *ActionsPanelBuilder) Build() Node {
 	res := []Node{}
 	for _, a := range p.Items {
-		var attr Node
-		attr = Attr("hx-get", a.URL.String())
-		res = append(res,
-			Div(
-				Class("relative w-fit"),
-				Button(
-					Type("button"),
-					Class(
-						"peer rounded-radius bg-surface-alt border border-surface-alt px-1 py-1 font-medium tracking-wide text-on-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark dark:focus-visible:outline-primary-dark cursor-pointer",
-					),
-					attr,
-					Raw(a.Icon),
-				),
-				Div(
-					Class(
-						"absolute -top-9 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded-sm bg-surface-dark px-2 py-1 text-center text-sm text-on-surface-dark-strong opacity-0 transition-all ease-out peer-hover:opacity-100 peer-focus:opacity-100 pointer-events-none dark:bg-surface dark:text-on-surface-strong",
-					),
-					Role("tooltip"),
-					Text(a.Tooltip),
-				)))
+		res = append(res, cmp.MakeIconizedButton(a.Icon, a.Tooltip, Attr("hx-get", a.URL.String())))
 	}
 	return Span(Class("inline-flex items-center gap-1"), Group(res))
 }

@@ -8,6 +8,7 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -25,6 +26,7 @@ type AnnotationView struct {
 	boxes                []v.BoundingBox
 	polygons             []v.Polygon
 	imageLabels          []v.ImageLabel
+	metadata             []m.MetaData
 	imageInfo            *v.ImageInfo
 	availableLabels      []string
 	availableImageLabels []string
@@ -45,6 +47,9 @@ func (v *AnnotationView) SetAnnotations(
 	v.boxes = boxes
 	v.polygons = polygons
 	v.imageLabels = imageLabels
+}
+func (v *AnnotationView) SetMetaData(m []m.MetaData) {
+	v.metadata = m
 }
 
 func (v *AnnotationView) SetAvailableLabels(labels []string) {
@@ -145,25 +150,30 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 		Group([]Node{
 			Raw(*regionLabelModal),
 			Raw(*imageLabelModal),
-			Table(
-				Tr(Div(Class("flex"), v.ScrollerView.Render(v.scrollerButtons), v.ShapeSelector())),
-				Tr(Td(Table(
-					Tr(Td(Class("align-top"), v.ImageView.Build(*v.image)),
-						Td(
-							Class("align-top pl-2"),
-							Div(Class("pb-2"), v.ImageInfosView.Build(*v.imageInfo)),
-							Div(
-								ID("annotation-list"),
-								v.AnnotationsListView.Build(
-									v.boxes,
-									v.polygons,
-									v.imageLabels,
-									v.availableLabels,
-								),
+			Div(Class("flex flex-col"),
+				Div(Class("flex"), v.ScrollerView.Render(v.scrollerButtons), v.ShapeSelector()),
+				Div(Class("flex"),
+					Div(
+						Class("flex flex-col"),
+						Div(Class("align-top"), v.ImageView.Build(*v.image)),
+						Div(
+							Class("w-160"),
+							BuildMetaDataList(v.image.Id, v.image.Collection, v.metadata),
+						),
+					),
+					Div(Class("align-top pl-2"),
+						Div(Class("pb-2"), v.ImageInfosView.Build(*v.imageInfo)),
+						Div(
+							ID("annotation-list"),
+							v.AnnotationsListView.Build(
+								v.boxes,
+								v.polygons,
+								v.imageLabels,
+								v.availableLabels,
 							),
-						)),
-				),
-				))),
+						),
+					)),
+			),
 		}))
 	pb.Render(w)
 }

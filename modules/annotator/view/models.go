@@ -58,16 +58,11 @@ type Polygon struct {
 	Time   string
 }
 
-type Annotations struct {
-	BoundingBoxes []BoundingBox
-}
-
 type Image struct {
-	Reader      io.Reader
-	Id          string
-	Collection  string
-	MIMEType    string
-	Annotations Annotations
+	Reader     io.Reader
+	Id         string
+	Collection string
+	MIMEType   string
 }
 
 func NewImageInfo(imageId im.ImageId, collection string, specs im.Specs) ImageInfo {

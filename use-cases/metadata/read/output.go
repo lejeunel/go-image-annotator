@@ -1,6 +1,6 @@
-package list
+package read
 
 type OutputPort interface {
 	Error(error)
-	SuccessListMetadata(Response)
+	SuccessReadMetadata(Response)
 }

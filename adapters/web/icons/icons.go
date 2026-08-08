@@ -20,6 +20,21 @@ var Copy string
 //go:embed svg/edit.svg
 var Edit string
 
+//go:embed svg/hash.svg
+var Hash string
+
+//go:embed svg/percent.svg
+var Percent string
+
+//go:embed svg/flag.svg
+var Flag string
+
+//go:embed svg/calendar.svg
+var Calendar string
+
+//go:embed svg/text.svg
+var Text string
+
 //go:embed svg/sun.svg
 var Sun string
 

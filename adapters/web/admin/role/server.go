@@ -14,5 +14,5 @@ type Server struct {
 func New(pb b.PageBuilder, rl r.Interactors) Server {
 	rolePage := b.NewPaginatedListBuilder(pb, listRolesFields)
 	rolePage.ActivateSidebarEntry(PageName)
-	return Server{rolePage, b.NewRowURL(RoleRowUrl, resourceUrlFieldName), rl}
+	return Server{rolePage, b.NewRowURLWithId(RoleRowUrl, resourceUrlFieldName), rl}
 }

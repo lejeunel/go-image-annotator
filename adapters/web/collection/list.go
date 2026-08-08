@@ -2,6 +2,8 @@ package collection
 
 import (
 	_ "embed"
+	"fmt"
+	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"io"
 	"net/http"
 
@@ -19,6 +21,29 @@ var listCollectionsFields = []string{"name", "description", "group", "created", 
 
 //go:embed preamble.md
 var preamble string
+
+type MetaDeletePresenter struct {
+	writer http.ResponseWriter
+	b.RowURL
+	okMessageFunc func(string) string
+	htmx.ErrorPresenter
+}
+
+func NewMetaDeletePresenter(w http.ResponseWriter, u b.RowURL) MetaDeletePresenter {
+	okMessageFunc := func(key string) string {
+		return fmt.Sprintf("Successfully deleted key %v", key)
+	}
+	return MetaDeletePresenter{w, u, okMessageFunc, htmx.NewErrorPresenter("deleting meta-data", w)}
+}
+
+func (p MetaDeletePresenter) SuccessDeleteMetadata(key string) {
+	htmx.NotifySuccessPayload(p.writer, "deleting meta-data", p.okMessageFunc(key))
+}
+
+func (p MetaDeletePresenter) SuccessReadMetadata(k string, v any) {
+	b.RenderConfirmDeleteRow(len(listCollectionsFields),
+		k, "meta-data", p.Url, p.writer)
+}
 
 func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get(resourceUrlFieldName)

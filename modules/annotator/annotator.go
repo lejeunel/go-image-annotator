@@ -14,19 +14,27 @@ import (
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	imread "github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
+	addmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/add"
+	delmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/delete"
+	listmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/list"
+	readmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/read"
 )
 
 type Annotator struct {
-	scroller        scr.Interface
-	imageReader     imread.Interface
-	boxAdder        addbox.Interface
-	polygonAdder    addpoly.Interface
-	polygonUpdater  updpoly.Interface
-	imageLabelAdder addlbl.Interface
-	boxUpdater      updbox.Interface
-	deleter         del.Interface
-	labelFetcher    fetchlbl.Interface
-	labelUpdater    updlbl.Interface
+	scroller         scr.Interface
+	readImage        imread.Interface
+	AddBox           addbox.Interface
+	AddPolygon       addpoly.Interface
+	UpdatePolygon    updpoly.Interface
+	AddLabel         addlbl.Interface
+	UpdateBox        updbox.Interface
+	DeleteAnnotation del.Interface
+	FetchLabels      fetchlbl.Interface
+	UpdateLabel      updlbl.Interface
+	AddMetaData      addmd.Interface
+	ListMetaData     listmd.Interface
+	ReadMetaData     readmd.Interface
+	DeleteMetaData   delmd.Interface
 }
 
 func (a *Annotator) Init(ctx context.Context, imageId string, collection string,
@@ -36,39 +44,11 @@ func (a *Annotator) Init(ctx context.Context, imageId string, collection string,
 		scr.WithCollection(collection),
 		scr.WithOrdering(im.Ordering{IngestTime: true}))
 	a.ReadImage(imageId, collection, oim)
-	a.labelFetcher.Execute(ctx, olbl)
+	a.FetchLabels.Execute(ctx, olbl)
 }
 
 func (a *Annotator) ReadImage(imageId string, collection string, o imread.OutputPort) {
-	a.imageReader.Execute(imread.Request{ImageId: imageId, Collection: collection}, o)
-}
-
-func (a *Annotator) DeleteAnnotation(ctx context.Context, r del.Request, o del.OutputPort) {
-	a.deleter.Execute(ctx, r, o)
-}
-
-func (a *Annotator) UpdateLabel(ctx context.Context, r updlbl.Request, o updlbl.OutputPort) {
-	a.labelUpdater.Execute(ctx, r, o)
-}
-
-func (a *Annotator) UpdateBox(ctx context.Context, r updbox.Request, o updbox.OutputPort) {
-	a.boxUpdater.Execute(ctx, r, o)
-}
-
-func (a *Annotator) UpdatePolygon(ctx context.Context, r updpoly.Request, o updpoly.OutputPort) {
-	a.polygonUpdater.Execute(ctx, r, o)
-}
-
-func (a *Annotator) AddBox(ctx context.Context, r addbox.Request, o addbox.OutputPort) {
-	a.boxAdder.Execute(ctx, r, o)
-}
-
-func (a *Annotator) AddPolygon(ctx context.Context, r addpoly.Request, o addpoly.OutputPort) {
-	a.polygonAdder.Execute(ctx, r, o)
-}
-
-func (a *Annotator) AddLabel(ctx context.Context, r addlbl.Request, o addlbl.OutputPort) {
-	a.imageLabelAdder.Execute(ctx, r, o)
+	a.readImage.Execute(imread.Request{ImageId: imageId, Collection: collection}, o)
 }
 
 func NewAnnotator(
@@ -82,17 +62,25 @@ func NewAnnotator(
 	labelFetcher fetchlbl.Interface,
 	labelUpdater updlbl.Interface,
 	imageLabelAdder addlbl.Interface,
+	metaAdder addmd.Interface,
+	metaList listmd.Interface,
+	metaRead readmd.Interface,
+	metaDelete delmd.Interface,
 ) Annotator {
 	return Annotator{
-		scroller:        scroller,
-		imageReader:     imageMetaReader,
-		boxAdder:        boxAdder,
-		boxUpdater:      boxUpdater,
-		polygonAdder:    polygonAdder,
-		polygonUpdater:  polygonUpdater,
-		deleter:         annotationDeleter,
-		labelFetcher:    labelFetcher,
-		labelUpdater:    labelUpdater,
-		imageLabelAdder: imageLabelAdder,
+		scroller:         scroller,
+		readImage:        imageMetaReader,
+		AddBox:           boxAdder,
+		UpdateBox:        boxUpdater,
+		AddPolygon:       polygonAdder,
+		UpdatePolygon:    polygonUpdater,
+		DeleteAnnotation: annotationDeleter,
+		FetchLabels:      labelFetcher,
+		UpdateLabel:      labelUpdater,
+		AddLabel:         imageLabelAdder,
+		AddMetaData:      metaAdder,
+		ListMetaData:     metaList,
+		ReadMetaData:     metaRead,
+		DeleteMetaData:   metaDelete,
 	}
 }

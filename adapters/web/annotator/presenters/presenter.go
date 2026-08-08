@@ -31,6 +31,7 @@ func (p AnnotationPagePresenter) SuccessReadImage(im im.Image) {
 	p.View.SetAnnotations(MakeBoundingBoxes(im.BoundingBoxes, p.Colorizer),
 		MakePolygons(im.Polygons, p.Colorizer),
 		MakeImageLabels(im.Labels))
+	p.View.SetMetaData(im.Meta)
 }
 
 func (p AnnotationPagePresenter) SuccessFetchLabels(r fetchlbl.Response) {

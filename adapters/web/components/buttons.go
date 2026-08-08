@@ -44,3 +44,23 @@ func MakeNavigationButton(
 		Text(text),
 	)
 }
+
+func MakeIconizedButton(icon, tooltip string, attrs ...Node) Node {
+	return Div(
+		Class("relative w-fit"),
+		Button(
+			Type("button"),
+			Class(
+				"peer rounded-radius bg-surface-alt border border-surface-alt px-1 py-1 font-medium tracking-wide text-on-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark dark:focus-visible:outline-primary-dark cursor-pointer",
+			),
+			Group(attrs),
+			Raw(icon),
+		),
+		Div(
+			Class(
+				"absolute -top-9 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded-sm bg-surface-dark px-2 py-1 text-center text-sm text-on-surface-dark-strong opacity-0 transition-all ease-out peer-hover:opacity-100 peer-focus:opacity-100 pointer-events-none dark:bg-surface dark:text-on-surface-strong",
+			),
+			Role("tooltip"),
+			Text(tooltip),
+		))
+}

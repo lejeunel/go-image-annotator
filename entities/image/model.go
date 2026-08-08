@@ -10,6 +10,7 @@ import (
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -37,6 +38,7 @@ type Image struct {
 	Labels        []an.ImageLabel
 	BoundingBoxes []an.BoundingBox
 	Polygons      []an.Polygon
+	Meta          []m.MetaData
 	Reader        io.Reader
 	Hash          string
 }

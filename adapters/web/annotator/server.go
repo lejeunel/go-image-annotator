@@ -57,7 +57,7 @@ func (s *Server) SubmitLabel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p := ap.NewAnnotoriousPresenter(w)
-	s.Annotator.AddLabel(r.Context(), req, &p)
+	s.Annotator.AddLabel.Execute(r.Context(), req, &p)
 }
 
 func (s *Server) SubmitPolygon(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +73,7 @@ func (s *Server) SubmitPolygon(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := ap.NewAnnotoriousPresenter(w)
-	s.Annotator.AddPolygon(r.Context(), ap.ToAddPolygonRequest(polyreq), &p)
+	s.Annotator.AddPolygon.Execute(r.Context(), ap.ToAddPolygonRequest(polyreq), &p)
 }
 
 func (s *Server) UpdatePolygon(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +90,7 @@ func (s *Server) UpdatePolygon(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := ap.NewAnnotoriousPresenter(w)
-	s.Annotator.UpdatePolygon(r.Context(), ap.ToUpdatePolygonRequest(polyreq), &p)
+	s.Annotator.UpdatePolygon.Execute(r.Context(), ap.ToUpdatePolygonRequest(polyreq), &p)
 }
 
 func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +108,7 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p := ap.NewAnnotoriousPresenter(w)
-	s.Annotator.AddBox(r.Context(), ap.ToAddBoxRequest(boxreq), &p)
+	s.Annotator.AddBox.Execute(r.Context(), ap.ToAddBoxRequest(boxreq), &p)
 }
 
 func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
@@ -125,12 +125,16 @@ func (s *Server) UpdateBox(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := ap.NewAnnotoriousPresenter(w)
-	s.Annotator.UpdateBox(r.Context(), ap.ToUpdateBoxRequest(boxreq), &p)
+	s.Annotator.UpdateBox.Execute(r.Context(), ap.ToUpdateBoxRequest(boxreq), &p)
 }
 
 func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
 	p := ap.NewAnnotoriousPresenter(w)
-	s.Annotator.DeleteAnnotation(r.Context(), remove.Request{Id: r.URL.Query().Get("id")}, &p)
+	s.Annotator.DeleteAnnotation.Execute(
+		r.Context(),
+		remove.Request{Id: r.URL.Query().Get("id")},
+		&p,
+	)
 }
 
 func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
@@ -154,7 +158,7 @@ func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := ap.NewAnnotoriousPresenter(w)
-	s.Annotator.UpdateLabel(r.Context(), updlbl.Request{AnnotationId: id, Label: label}, &p)
+	s.Annotator.UpdateLabel.Execute(r.Context(), updlbl.Request{AnnotationId: id, Label: label}, &p)
 }
 
 func (s *Server) GetRegionsAsJSON(w http.ResponseWriter, r *http.Request) {

@@ -9,7 +9,7 @@ on:
 
 jobs:
   format:
-    name: Check formatting
+    name: Format code
     runs-on: ubuntu-latest
 
     steps:

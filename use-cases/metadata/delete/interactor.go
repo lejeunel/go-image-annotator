@@ -81,5 +81,5 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	}
 
-	out.SuccessDeleteMetadata()
+	out.SuccessDeleteMetadata(r.Key)
 }

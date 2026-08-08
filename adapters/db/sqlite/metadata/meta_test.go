@@ -44,6 +44,13 @@ func TestKeyExists(t *testing.T) {
 	assert.True(t, keyExists)
 }
 
+func TestKeyDoesNotExist(t *testing.T) {
+	_, repo, collection, image := Init()
+	keyExists, err := repo.KeyExists(collection.Name, image.Id, "non-existing-key")
+	assert.NoError(t, err)
+	assert.False(t, keyExists)
+}
+
 func TestGetValue(t *testing.T) {
 	_, repo, collection, image := Init()
 	repo.Add(collection.Name, image.Id, "key", "value")

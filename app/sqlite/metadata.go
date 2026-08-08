@@ -11,6 +11,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/metadata/add"
 	"github.com/lejeunel/go-image-annotator/use-cases/metadata/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/metadata/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/metadata/read"
 	"github.com/lejeunel/go-image-annotator/use-cases/metadata/update"
 )
 
@@ -32,5 +33,6 @@ func NewSQLiteMetadataInteractors(
 		Delete: delete.New(cr, mr, delete.WithAuth(auth)),
 		Update: update.New(cr, ir, mr, update.WithAuth(auth)),
 		List:   list.New(mr),
+		Read:   read.New(cr, ir, mr),
 	}
 }

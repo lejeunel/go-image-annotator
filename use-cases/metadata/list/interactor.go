@@ -34,5 +34,5 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.SuccessListMetadata(meta)
+	out.SuccessListMetadata(Response{ImageId: r.ImageId, Collection: r.Collection, MetaData: meta})
 }

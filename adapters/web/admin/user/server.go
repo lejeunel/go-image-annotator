@@ -25,5 +25,5 @@ func New(
 ) Server {
 	userPage := b.NewPaginatedListBuilder(pb, listUsersFields)
 	userPage.ActivateSidebarEntry(PageName)
-	return Server{userPage, b.NewRowURL(UserUrl, "id"), usr, rl, grp, defaultPageSize}
+	return Server{userPage, b.NewRowURLWithId(UserUrl, "id"), usr, rl, grp, defaultPageSize}
 }

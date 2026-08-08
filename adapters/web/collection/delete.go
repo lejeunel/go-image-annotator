@@ -39,6 +39,4 @@ func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get(resourceUrlFieldName)
 	s.DeleteItr.Execute(r.Context(), name,
 		NewDeletePresenter(w, s.RowURL))
-	s.FindItr.Execute(r.Context(), name,
-		NewViewPresenter(w, s.RowURL))
 }

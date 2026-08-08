@@ -4,6 +4,7 @@ import (
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 )
 
 type AnnotationRepo interface {
@@ -19,4 +20,8 @@ type CollectionRepo interface {
 type ImageRepo interface {
 	GetSpecs(im.ImageId) (*im.Specs, error)
 	ImageExistsInCollection(im.ImageId, clc.CollectionName) (bool, error)
+}
+
+type MetaRepo interface {
+	List(clc.CollectionName, im.ImageId) ([]m.MetaData, error)
 }

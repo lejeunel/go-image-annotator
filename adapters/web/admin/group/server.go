@@ -14,5 +14,5 @@ type Server struct {
 func New(pb b.PageBuilder, grp g.Interactors) Server {
 	groupPage := b.NewPaginatedListBuilder(pb, listGroupsFields)
 	groupPage.ActivateSidebarEntry(PageName)
-	return Server{groupPage, b.NewRowURL(GroupRowUrl, resourceUrlFieldName), grp}
+	return Server{groupPage, b.NewRowURLWithId(GroupRowUrl, resourceUrlFieldName), grp}
 }
