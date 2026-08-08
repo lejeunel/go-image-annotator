@@ -3,7 +3,9 @@ package update
 import (
 	"context"
 	"fmt"
+	"slices"
 
+	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -35,7 +37,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	_, err := i.userRepo.Find(r.Id)
+	user, err := i.userRepo.Find(r.Id)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -57,6 +59,16 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	if err := i.userRepo.SetGroups(r.Id, r.Groups); err != nil {
 		out.Error(fmt.Errorf("%v: applying groups %v: %w", errCtx, r.Groups, err))
+		return
+	}
+
+	numAdmins, err := i.userRepo.CountAdmins()
+	if err != nil {
+		out.Error(fmt.Errorf("%v: fetching number of admin users: %w", errCtx, err))
+		return
+	}
+	if user.IsAdmin() && (numAdmins == 1) && !slices.Contains(r.Roles, rl.AdminRoleName) {
+		out.Error(fmt.Errorf("%v: attempting to un-assign admin role to the last existing admin: %w", errCtx, e.ErrValidation))
 		return
 	}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	r "github.com/lejeunel/go-image-annotator/entities/role"
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -82,7 +83,7 @@ func TestUpdateGroups(t *testing.T) {
 	assert.Equal(t, user.Id, repo.SetGroupsToUser)
 }
 
-func TestAssignRoles(t *testing.T) {
+func TestUpdateRoles(t *testing.T) {
 	user := usr.NewUser("user@example.com",
 		usr.WithRoles([]string{"a-role"}))
 	newRole := "a-new-role"
@@ -95,4 +96,15 @@ func TestAssignRoles(t *testing.T) {
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, updatedRoles, usrRepo.SetRoles_)
 	assert.Equal(t, user.Id, usrRepo.SetRolesToUser)
+}
+
+func TestRemovingAdminRoleWhenNoOtherAdminShouldFail(t *testing.T) {
+	user := usr.NewUser("user@example.com",
+		usr.WithRoles([]string{r.AdminRoleName}))
+	usrRepo := &fk.UserRepo{Return: &user, CountAdmins_: 1}
+	roleRepo := &fk.RoleRepo{ExistingNames: []string{r.AdminRoleName}}
+	itr := New(usrRepo, &fk.GroupRepo{}, roleRepo)
+	p := &FakePresenter{}
+	itr.Execute(t.Context(), Request{Id: user.Id, Roles: []string{}}, p)
+	assert.True(t, p.GotValidationErr)
 }

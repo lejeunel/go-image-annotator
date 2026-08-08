@@ -6,6 +6,7 @@ type UserRepo interface {
 	Find(usr.UserId) (*usr.User, error)
 	SetGroups(usr.UserId, []string) error
 	SetRoles(usr.UserId, []string) error
+	CountAdmins() (int64, error)
 }
 
 type GroupRepo interface {
