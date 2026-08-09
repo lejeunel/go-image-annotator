@@ -1,15 +1,15 @@
 package job_queue
 
-type Interface interface {
+type JobQueue interface {
 	Submit(f func())
 }
 
-type JobQueue struct{}
+type AsyncJobQueue struct{}
 
-func NewJobQueue() JobQueue {
-	return JobQueue{}
+func NewAsyncJobQueue() AsyncJobQueue {
+	return AsyncJobQueue{}
 }
 
-func (q JobQueue) Submit(f func()) {
+func (q AsyncJobQueue) Submit(f func()) {
 	go f()
 }

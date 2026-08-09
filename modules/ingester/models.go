@@ -23,7 +23,8 @@ type Response struct {
 }
 
 type BatchResponse struct {
-	NumIngestedImages int64
+	ImageIds   []im.ImageId
+	Collection string
 }
 
 type BatchRequest struct {

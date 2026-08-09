@@ -18,8 +18,13 @@ import (
 	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
 )
 
-type IImageSpecsDetector interface {
+type ImageSpecsDetector interface {
 	Detect(io.Reader) (*im.Specs, io.Reader, error)
+}
+
+type ArtefactRepo interface {
+	Store(string, io.Reader) error
+	Delete(string) error
 }
 
 type Repos struct {
@@ -35,8 +40,8 @@ type Ingester struct {
 	Hasher hash.Hash
 	Repos
 	Transactor
-	ArtefactRepo       ast.Interface
-	ImageSpecsDetector IImageSpecsDetector
+	ArtefactRepo
+	ImageSpecsDetector
 	clockwork.Clock
 }
 
@@ -50,7 +55,7 @@ func WithClock(c clockwork.Clock) Option {
 
 func New(imr ImageRepo, clr CollectionRepo,
 	lr LabelRepo, ar AnnotationRepo, tra Transactor,
-	fileStore ast.Interface, hasher hash.Hash, specsDetector IImageSpecsDetector, opts ...Option,
+	fileStore ast.FileStore, hasher hash.Hash, specsDetector ImageSpecsDetector, opts ...Option,
 ) *Ingester {
 	i := &Ingester{
 		Repos:        Repos{imr, lr, clr, ar},
@@ -103,14 +108,14 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 
 	return &Response{ImageId: image.Id, Collection: collection.Name}, nil
 }
-func (i Ingester) IngestArchive(r BatchRequest) (*BatchResponse, error) {
+func (i Ingester) IngestArchive(r BatchRequest) (BatchResponse, error) {
 	errCtx := fmt.Errorf("ingesting zip archive")
 
-	numIngestedImages := int64(0)
+	resp := BatchResponse{Collection: r.Collection}
 
 	zr, err := zip.NewReader(r.ReaderAt, r.Size)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", errCtx, err)
+		return resp, fmt.Errorf("%w: %w", errCtx, err)
 	}
 
 	for _, file := range zr.File {
@@ -120,22 +125,22 @@ func (i Ingester) IngestArchive(r BatchRequest) (*BatchResponse, error) {
 
 		reader, err := file.Open()
 		if err != nil {
-			return nil, fmt.Errorf("%w: opening file: %w", errCtx, err)
+			return resp, fmt.Errorf("%w: opening file: %w", errCtx, err)
 		}
 
-		_, err = i.Ingest(Request{UserId: r.UserId, Collection: r.Collection, Reader: reader})
+		r, err := i.Ingest(Request{UserId: r.UserId, Collection: r.Collection, Reader: reader})
 		if err != nil {
 			reader.Close()
-			return nil, fmt.Errorf("%w: ingesting image: %w", errCtx, err)
+			return resp, fmt.Errorf("%w: ingesting image: %w", errCtx, err)
 		}
 
 		if err := reader.Close(); err != nil {
-			return nil, fmt.Errorf("%w: closing image reader: %w", errCtx, err)
+			return resp, fmt.Errorf("%w: closing image reader: %w", errCtx, err)
 		}
-		numIngestedImages += 1
+		resp.ImageIds = append(resp.ImageIds, r.ImageId)
 	}
 
-	return &BatchResponse{NumIngestedImages: numIngestedImages}, nil
+	return resp, nil
 }
 func (i *Ingester) storeRawData(image im.Image, reader io.Reader) (*[]byte, error) {
 	tee := io.TeeReader(reader, i.Hasher)

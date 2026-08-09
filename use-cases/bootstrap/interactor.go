@@ -22,10 +22,10 @@ type Interactor struct {
 	RoleRepo
 	PasswordHasher
 	pw.PasswordValidator
-	FileStore fs.Interface
+	FileStore fs.FileStore
 }
 
-func New(ur UserRepo, rr RoleRepo, f fs.Interface,
+func New(ur UserRepo, rr RoleRepo, f fs.FileStore,
 	h PasswordHasher, v pw.PasswordValidator,
 ) Interactor {
 	return Interactor{ur, rr, h, v, f}

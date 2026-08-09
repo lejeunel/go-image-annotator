@@ -284,5 +284,5 @@ func TestIngestArchive(t *testing.T) {
 	)
 	r, err := ing.IngestArchive(BatchRequest{ReaderAt: archive, Size: size})
 	assert.NoError(t, err)
-	assert.Equal(t, int64(2), r.NumIngestedImages)
+	assert.Equal(t, 2, len(r.ImageIds))
 }

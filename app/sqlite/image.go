@@ -20,7 +20,7 @@ func NewSQLiteImageInteractors(
 	clr clrepo.SQLiteCollectionRepo,
 	anr anrepo.SQLiteAnnotationRepo,
 	ims ims.ImageStore,
-	imfs fs.Interface,
+	imfs fs.FileStore,
 	ingester ing.Ingester,
 	pageSize int,
 	auth auth.Interface,

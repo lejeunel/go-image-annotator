@@ -14,7 +14,7 @@ type ImageStore struct {
 	CollectionRepo
 	AnnotationRepo
 	MetaRepo
-	FileStore fs.Interface
+	fs.FileStore
 }
 
 func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
@@ -83,6 +83,6 @@ func (s ImageStore) DeleteAsset(id im.ImageId) error {
 	return s.FileStore.Delete(fmt.Sprintf("%v.%v", id, strings.Split(specs.MIMEType, "/")[1]))
 }
 
-func New(i ImageRepo, c CollectionRepo, a AnnotationRepo, m MetaRepo, f fs.Interface) ImageStore {
+func New(i ImageRepo, c CollectionRepo, a AnnotationRepo, m MetaRepo, f fs.FileStore) ImageStore {
 	return ImageStore{i, c, a, m, f}
 }

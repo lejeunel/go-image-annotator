@@ -11,7 +11,7 @@ import (
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
-type Interface interface {
+type IEventLogger interface {
 	InitTask(t.TaskId, t.TaskType, u.UserId) error
 	AddEvent(t.TaskId, e.Event) error
 	Count(u.UserId) (*int64, error)

@@ -3,19 +3,13 @@ package ingest
 import (
 	"context"
 	"fmt"
-	"io"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
-	im "github.com/lejeunel/go-image-annotator/entities/image"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	ing "github.com/lejeunel/go-image-annotator/modules/ingester"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
-
-type IImageSpecsDetector interface {
-	Detect(io.Reader) (*im.Specs, io.Reader, error)
-}
 
 type Ingester interface {
 	Ingest(ing.Request) (*ing.Response, error)

@@ -26,8 +26,8 @@ type Interactor struct {
 	Transactor
 	ImageStore ims.Interface
 	Auth
-	JobQueue    job_queue.Interface
-	EventLogger event_logger.Interface
+	JobQueue    job_queue.JobQueue
+	EventLogger event_logger.IEventLogger
 	slog.Logger
 	clockwork.Clock
 }
@@ -36,8 +36,8 @@ func New(
 	r Repos,
 	tra Transactor,
 	ims ims.Interface,
-	jq job_queue.Interface,
-	el event_logger.Interface,
+	jq job_queue.JobQueue,
+	el event_logger.IEventLogger,
 	logger slog.Logger,
 	opts ...Option,
 ) Interactor {

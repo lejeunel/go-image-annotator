@@ -9,22 +9,22 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-type FileStore struct {
+type LocalFileStore struct {
 	baseDir string
 }
 
-func NewFileStore(baseDir string) FileStore {
+func NewLocalFileStore(baseDir string) LocalFileStore {
 	if err := os.MkdirAll(baseDir, 0o755); err != nil {
 		panic(fmt.Sprintf("failed to create base directory: %v", err))
 	}
-	return FileStore{baseDir: baseDir}
+	return LocalFileStore{baseDir: baseDir}
 }
 
-func (r FileStore) filePath(path string) string {
+func (r LocalFileStore) filePath(path string) string {
 	return filepath.Join(r.baseDir, fmt.Sprintf("%s", path))
 }
 
-func (r FileStore) Store(path string, reader io.Reader) error {
+func (r LocalFileStore) Store(path string, reader io.Reader) error {
 	path = r.filePath(path)
 
 	f, err := os.Create(path)
@@ -36,7 +36,7 @@ func (r FileStore) Store(path string, reader io.Reader) error {
 	return err
 }
 
-func (r FileStore) Delete(path string) error {
+func (r LocalFileStore) Delete(path string) error {
 	path = r.filePath(path)
 	if err := os.Remove(path); err != nil {
 		if os.IsNotExist(err) {
@@ -47,7 +47,7 @@ func (r FileStore) Delete(path string) error {
 	return nil
 }
 
-func (r FileStore) Get(path string) (io.Reader, error) {
+func (r LocalFileStore) Get(path string) (io.Reader, error) {
 	path = r.filePath(path)
 	reader, err := os.Open(path)
 	if err != nil {

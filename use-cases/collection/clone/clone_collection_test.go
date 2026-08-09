@@ -48,8 +48,6 @@ func TestReceiveTaskPayload(t *testing.T) {
 func TestCloningToAlreadyExistingCollectionShouldFail(t *testing.T) {
 	itr := NewTestingCloner()
 	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{"destination-collection"}}
-	logger := &fk.EventLogger{}
-	itr.EventLogger = logger
 	p := &FakePresenter{}
 	itr.Execute(
 		st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
@@ -62,8 +60,6 @@ func TestCloningToAlreadyExistingCollectionShouldFail(t *testing.T) {
 func TestErrorOnFindGroup(t *testing.T) {
 	itr := NewTestingCloner()
 	itr.GroupRepo = &fk.GroupRepo{ErrOnFind: e.ErrNotFound}
-	logger := &fk.EventLogger{}
-	itr.EventLogger = logger
 	p := &FakePresenter{}
 	dstGroup := "my-group"
 	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
@@ -81,7 +77,7 @@ func SetupCloneableCollection() (Interactor, clc.Collection, im.Image, *fk.Image
 	}
 	anRepo := &fk.AnnotationRepo{}
 	itr.ImageRepo = imRepo
-	itr.Store = &fk.ImageStore{Return: &image}
+	itr.ImageStore = &fk.ImageStore{Return: &image}
 	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{srcCollection.Name}}
 	itr.AnnotationRepo = anRepo
 

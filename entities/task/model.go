@@ -13,6 +13,7 @@ const (
 	CollectionCloneTask  TaskType = "collection-clone"
 	CollectionDeleteTask TaskType = "collection-delete"
 	IngestDirTask        TaskType = "ingest-dir"
+	IngestArchiveTask    TaskType = "ingest-archive"
 )
 
 func (r TaskType) String() string {

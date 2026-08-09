@@ -16,13 +16,17 @@ import (
 	t "github.com/lejeunel/go-image-annotator/entities/task"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	event_logger "github.com/lejeunel/go-image-annotator/modules/event-logger"
+	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	st "github.com/lejeunel/go-image-annotator/modules/image-store"
-	job_queue "github.com/lejeunel/go-image-annotator/modules/job-queue"
+	jq "github.com/lejeunel/go-image-annotator/modules/job-queue"
 )
 
 type Transactor interface {
 	RunInTx(fn func(Repos) error) error
+}
+
+type ImageStore interface {
+	Find(base im.BaseImage) (*im.Image, error)
 }
 
 type Repos struct {
@@ -35,16 +39,16 @@ type Interactor struct {
 	Repos
 	Transactor
 	GroupRepo
-	Store       st.Interface
-	EventLogger event_logger.Interface
+	ImageStore
+	el.IEventLogger
 	Auth
 	clockwork.Clock
 	slog.Logger
-	JobQueue job_queue.Interface
+	jq.JobQueue
 }
 
 func New(r Repos, tra Transactor, g GroupRepo,
-	s st.Interface, l event_logger.Interface, logger slog.Logger, j job_queue.Interface,
+	s st.Interface, l el.IEventLogger, logger slog.Logger, j jq.JobQueue,
 	opts ...Option,
 ) Interactor {
 	itr := &Interactor{r, tra, g, s, l, auth.NewVoidAuth(), clockwork.NewRealClock(), logger, j}
@@ -91,12 +95,12 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.EventLogger.InitTask(
+	if err := i.IEventLogger.InitTask(
 		task.Id, task.Type, task.Issuer); err != nil {
 		out.Error(fmt.Errorf("%v: pushing init task to logger: %w", errCtx, err))
 		return
 	}
-	if err := i.EventLogger.AddEvent(
+	if err := i.IEventLogger.AddEvent(
 		task.Id,
 		e.Event{Time: i.Clock.Now(), State: e.PendingTask},
 	); err != nil {
@@ -132,7 +136,7 @@ func (i *Interactor) checkCollections(source, destination string) error {
 }
 
 func (i *Interactor) LogError(id t.TaskId, err error) {
-	i.EventLogger.AddEvent(
+	i.IEventLogger.AddEvent(
 		id,
 		e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()},
 	)
@@ -158,7 +162,7 @@ func (i *Interactor) runTask(
 		"destination-collection": destination,
 		"deep-copy":              strconv.FormatBool(deep),
 	}
-	if err := i.EventLogger.AddEvent(
+	if err := i.IEventLogger.AddEvent(
 		task.Id,
 		e.Event{Time: i.Clock.Now(), State: e.StartedTask, Extra: extra},
 	); err != nil {
@@ -174,7 +178,7 @@ func (i *Interactor) runTask(
 	}
 
 	if err := i.CollectionRepo.Create(dst); err != nil {
-		i.EventLogger.AddEvent(
+		i.IEventLogger.AddEvent(
 			task.Id,
 			e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()},
 		)
@@ -187,7 +191,7 @@ func (i *Interactor) runTask(
 			if err != nil {
 				return fmt.Errorf("%w: iterating on images: %w", errCtx, err)
 			}
-			image, err := i.Store.Find(baseImage)
+			image, err := i.ImageStore.Find(baseImage)
 			if err != nil {
 				return fmt.Errorf("%w: finding source image: %w", errCtx, err)
 			}
@@ -237,7 +241,7 @@ func (i *Interactor) runTask(
 			}
 			return nil
 		}); err != nil {
-			i.EventLogger.AddEvent(
+			i.IEventLogger.AddEvent(
 				task.Id,
 				e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()},
 			)
@@ -246,5 +250,5 @@ func (i *Interactor) runTask(
 
 		}
 	}
-	i.EventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.DoneTask})
+	i.IEventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.DoneTask})
 }

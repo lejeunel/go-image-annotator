@@ -42,7 +42,7 @@ func NewSQLiteCollectionInteractors(
 		Create: create.New(cr, gr, create.WithNameValidator(v.NewNameValidator()),
 			create.WithClock(clockwork.NewRealClock()), create.WithAuth(auth)),
 		Delete: delete.New(deleteRepos, tra.NewDeleteCollectionTransactor(db), ims,
-			q.NewJobQueue(), el, logger, delete.WithAuth(auth)),
+			q.NewAsyncJobQueue(), el, logger, delete.WithAuth(auth)),
 		List:   list.New(cr),
 		Update: update.New(cr, gr, update.WithAuth(auth)),
 		Clone: clone.New(
@@ -52,7 +52,7 @@ func NewSQLiteCollectionInteractors(
 			ims,
 			el,
 			logger,
-			q.NewJobQueue(),
+			q.NewAsyncJobQueue(),
 		),
 	}
 }

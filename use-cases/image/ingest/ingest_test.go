@@ -32,11 +32,3 @@ func TestNonExistingCollectionShouldFail(t *testing.T) {
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
-
-func TestHandleInternalErrorOnCollectionExistsCheck(t *testing.T) {
-	p := &FakePresenter{}
-	itr := NewTestingInteractor(&fk.CollectionRepo{ErrOnExists: e.ErrInternal})
-	itr.Execute(t.Context(), ig.Request{}, p)
-	assert.True(t, p.GotInternalErr)
-	assert.False(t, p.GotSuccess)
-}

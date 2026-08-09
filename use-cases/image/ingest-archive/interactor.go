@@ -1,0 +1,156 @@
+package ingest
+
+import (
+	"context"
+	"fmt"
+	"github.com/jonboulle/clockwork"
+	"io"
+	"log/slog"
+
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	ev "github.com/lejeunel/go-image-annotator/entities/event"
+	t "github.com/lejeunel/go-image-annotator/entities/task"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
+	ing "github.com/lejeunel/go-image-annotator/modules/ingester"
+	jq "github.com/lejeunel/go-image-annotator/modules/job-queue"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+)
+
+type Auth interface {
+	IngestImage(ctx context.Context, group string) error
+}
+
+type Ingester interface {
+	IngestArchive(ing.BatchRequest) (ing.BatchResponse, error)
+}
+
+type TemporaryFileStore interface {
+	Store(string, io.Reader) error
+	GetReaderAt(string) (io.ReaderAt, int64, error)
+}
+
+type Interactor struct {
+	Ingester
+	Auth
+	CollectionRepo
+	TemporaryFileStore
+	el.IEventLogger
+	clockwork.Clock
+	jq.JobQueue
+	slog.Logger
+}
+type Option func(*Interactor)
+
+func WithAuth(a Auth) Option {
+	return func(i *Interactor) {
+		i.Auth = a
+	}
+}
+
+func New(ig Ingester, cr CollectionRepo,
+	tfs TemporaryFileStore,
+	el el.IEventLogger,
+	logger slog.Logger,
+	jq jq.JobQueue,
+	opts ...Option) Interactor {
+	i := &Interactor{
+		Ingester:           ig,
+		CollectionRepo:     cr,
+		TemporaryFileStore: tfs,
+		Auth:               auth.NewVoidAuth(),
+		IEventLogger:       el,
+		Clock:              clockwork.NewRealClock(),
+		JobQueue:           jq,
+		Logger:             logger,
+	}
+	for _, opt := range opts {
+		opt(i)
+	}
+	return *i
+}
+
+func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+	errCtx := fmt.Errorf("ingesting image archive")
+	collection, err := i.findCollectionByName(r.Collection)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
+
+	if collection.Group != nil {
+		if err := i.Auth.IngestImage(ctx, *collection.Group); err != nil {
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
+			return
+		}
+	}
+
+	user := u.IdentityFromContext(ctx)
+	if user == nil {
+		out.Error(
+			fmt.Errorf(
+				"%w: extracting user identity failed from context: %w",
+				errCtx,
+				e.ErrAuthentication,
+			),
+		)
+		return
+	}
+	task := t.NewTask(t.NewTaskId(), user.Id, t.IngestArchiveTask)
+	tmpFileName := fmt.Sprintf("%v.zip", task.Id)
+	if err := i.TemporaryFileStore.Store(tmpFileName, r.Reader); err != nil {
+		out.Error(
+			fmt.Errorf("%w: storing archive in temporary location: %w", errCtx, err),
+		)
+		return
+	}
+	if err := i.IEventLogger.InitTask(task.Id, task.Type, task.Issuer); err != nil {
+		out.Error(
+			fmt.Errorf("%w: initializing ingestion task: %w", errCtx, err),
+		)
+		return
+	}
+	if err := i.IEventLogger.AddEvent(
+		task.Id,
+		ev.Event{Time: i.Clock.Now(), State: ev.PendingTask},
+	); err != nil {
+		out.Error(fmt.Errorf("%v: adding pending status: %w", errCtx, err))
+		return
+	}
+
+	i.JobQueue.Submit(func() {
+		i.runTask(task, user.Id, r.Collection, tmpFileName)
+	})
+	out.SuccessSubmitIngestArchiveTask(Response{Id: task.Id, Issuer: task.Issuer, Type: task.Type})
+}
+
+func (i Interactor) runTask(task t.Task, user u.UserId, collection clc.CollectionName, filename string) {
+	reader, size, err := i.TemporaryFileStore.GetReaderAt(filename)
+	if err != nil {
+		i.LogError(task.Id, fmt.Errorf("ingesting archive: reading archive from temporary store: %w", err))
+		return
+
+	}
+	i.Ingester.IngestArchive(ing.BatchRequest{UserId: user, Collection: collection,
+		ReaderAt: reader, Size: size,
+	})
+
+}
+
+func (i *Interactor) LogError(id t.TaskId, err error) {
+	i.IEventLogger.AddEvent(
+		id,
+		ev.Event{Time: i.Clock.Now(), State: ev.FailedTask, Error: err.Error()},
+	)
+	i.Logger.Error(err.Error())
+}
+
+func (i Interactor) findCollectionByName(name string) (*clc.Collection, error) {
+	collection, err := i.CollectionRepo.Find(name)
+	baseErr := fmt.Errorf("finding collection with name %v", name)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", baseErr, err)
+	}
+	return collection, nil
+}
