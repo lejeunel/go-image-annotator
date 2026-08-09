@@ -41,7 +41,7 @@ func (r SQLiteCollectionRepo) Create(c clc.Collection) error {
 	return nil
 }
 
-func (r SQLiteCollectionRepo) rowToEntity(row Row) clc.Collection {
+func (r SQLiteCollectionRepo) build(row Row) clc.Collection {
 	c := clc.NewCollection(row.Id, row.Name,
 		clc.WithDescription(row.Description))
 	if row.CreatedAt.Valid {
@@ -70,7 +70,7 @@ func (r SQLiteCollectionRepo) Find(name string) (*clc.Collection, error) {
 		}
 	}
 
-	entity := r.rowToEntity(row)
+	entity := r.build(row)
 
 	return &entity, nil
 }
@@ -157,7 +157,7 @@ func (r SQLiteCollectionRepo) List(m pa.PaginationParams) ([]*clc.Collection, er
 
 	objects := []*clc.Collection{}
 	for _, rec := range records {
-		e := r.rowToEntity(rec)
+		e := r.build(rec)
 		objects = append(objects, &e)
 	}
 

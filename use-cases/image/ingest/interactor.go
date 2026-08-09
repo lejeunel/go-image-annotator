@@ -18,13 +18,13 @@ type IImageSpecsDetector interface {
 }
 
 type Ingester interface {
-	Ingest() error
+	Ingest(ing.Request) (*ing.Response, error)
 }
 
 type Interactor struct {
-	ingester ing.Interface
-	auth     Auth
-	repo     CollectionRepo
+	Ingester
+	auth Auth
+	repo CollectionRepo
 }
 type Option func(*Interactor)
 
@@ -34,9 +34,9 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(ingester ing.Interface, repo CollectionRepo, opts ...Option) *Interactor {
+func New(ingester Ingester, repo CollectionRepo, opts ...Option) *Interactor {
 	i := &Interactor{
-		ingester: ingester,
+		Ingester: ingester,
 		repo:     repo,
 		auth:     auth.NewVoidAuth(),
 	}
@@ -72,7 +72,7 @@ func (i Interactor) Execute(ctx context.Context, r ing.Request, out OutputPort) 
 		)
 		return
 	}
-	response, err := i.ingester.Ingest(ing.Request{
+	response, err := i.Ingester.Ingest(ing.Request{
 		UserId: user.Id, Collection: collection.Name, Labels: r.Labels,
 		BoundingBoxes: r.BoundingBoxes, Reader: r.Reader,
 	})

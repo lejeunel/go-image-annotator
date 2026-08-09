@@ -21,7 +21,7 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.Image.Ingest.Execute(r.Context(), NewIngestImageRequest(*body, s.Image.AllowedImageFormats),
+	s.Image.Ingest.Execute(r.Context(), NewIngestImageRequest(*body),
 		presenter.NewIngestPresenter(w, s.Logger))
 }
 
@@ -53,10 +53,10 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 	s.Image.List.Execute(req, presenter.NewListPresenter(w, s.Logger))
 }
 
-func NewIngestImageRequest(req models.NewImage, allowedImageFormats []string) ig.Request {
+func NewIngestImageRequest(req models.NewImage) ig.Request {
 	ingestReq := ig.Request{
 		Collection: req.Collection,
-		Reader:     rd.NewBase64ImageDecoder(allowedImageFormats, req.Data),
+		Reader:     rd.NewBase64ImageDecoder(req.Data),
 	}
 	appendLabelsToIngestImageRequest(&ingestReq, req.Labels)
 	appendBoundingBoxesToIngestImageRequest(&ingestReq, req.BoundingBoxes)

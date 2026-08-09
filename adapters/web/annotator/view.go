@@ -183,6 +183,6 @@ func NewAnnotationView(pageBuilder b.PageBuilder) *AnnotationView {
 		ImageView:      ImageView{},
 		ImageInfosView: ImageInfosView{},
 		ScrollerView:   ScrollerView{},
-		PageBuilder:    *pageBuilder.SetTitle("Image"),
+		PageBuilder:    *pageBuilder.SetHTMLTitle("Annotate"),
 	}
 }

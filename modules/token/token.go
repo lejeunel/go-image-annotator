@@ -49,12 +49,6 @@ func DecodeAndSplitPersonalAccessToken(input string) (*APIToken, error) {
 	return &APIToken{userId, apiToken}, nil
 }
 
-type Interface interface {
-	Generate() (*tk.Token, error)
-	Verify(string, []byte) bool
-	TokenHasher
-}
-
 type TokenService struct {
 	Length int
 	TokenHasher

@@ -29,7 +29,7 @@ func NewServer(
 	return &Server{
 		Annotator:      annotator,
 		SessionManager: sessionManager,
-		PageBuilder:    *pageBuilder.SetHTMLTitle("Annotate"),
+		PageBuilder:    pageBuilder,
 	}
 }
 

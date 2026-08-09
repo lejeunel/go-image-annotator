@@ -58,7 +58,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 	scr := scroller.New(scrrepo)
 	ingester := ig.New(imrepo, clrepo, lbrepo, anrepo,
 		tra.NewIngestionTransactor(db),
-		imageFileStore, sha256.New(), rea.ImageSpecsDetector{})
+		imageFileStore, sha256.New(), rea.NewImageSpecsDetector(cfg.AllowedImageMIMETypes))
 	itrs := itr.Interactors{
 		Label: NewSQLiteLabelInteractors(lbrepo, cfg.DefaultPageSize, auth),
 		Collection: NewSQLiteCollectionInteractors(

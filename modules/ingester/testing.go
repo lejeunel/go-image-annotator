@@ -32,7 +32,7 @@ func NewTestingIngester(repos Repos, opts ...Option) *Ingester {
 		Transactor:         &TestingTransactor{repos},
 		ArtefactRepo:       &fk.FileStore{},
 		ImageSpecsDetector: &fk.SpecsDetector{Return: im.Specs{MIMEType: "image/jpeg"}},
-		clock:              clockwork.NewFakeClock(),
+		Clock:              clockwork.NewFakeClock(),
 	}
 	for _, opt := range opts {
 		opt(i)

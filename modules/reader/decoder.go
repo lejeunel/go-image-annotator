@@ -1,27 +1,23 @@
 package reader
 
 import (
-	"bytes"
 	"encoding/base64"
 	"fmt"
-	i "image"
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
-	"slices"
 
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type Base64ImageDecoder struct {
-	AllowedFormats []string
-	Base64Data     string
-	data           []byte
-	offset         int
+	Base64Data string
+	data       []byte
+	offset     int
 }
 
-func NewBase64ImageDecoder(allowedFormats []string, base64Data string) *Base64ImageDecoder {
-	return &Base64ImageDecoder{AllowedFormats: allowedFormats, Base64Data: base64Data}
+func NewBase64ImageDecoder(base64Data string) *Base64ImageDecoder {
+	return &Base64ImageDecoder{Base64Data: base64Data}
 }
 
 func (r *Base64ImageDecoder) Read(p []byte) (int, error) {
@@ -30,23 +26,9 @@ func (r *Base64ImageDecoder) Read(p []byte) (int, error) {
 	if r.data == nil {
 		bytesData, err := base64.StdEncoding.DecodeString(r.Base64Data)
 		if err != nil {
-			return 0, fmt.Errorf("%v: %v: %w", errCtx, err, e.ErrImageFormat)
+			return 0, fmt.Errorf("%v: %v: %w", errCtx, err, e.ErrValidation)
 		}
 
-		_, format, err := i.Decode(bytes.NewBuffer(bytesData))
-		if err != nil {
-			return 0, fmt.Errorf("%v: decoding image data: %v: %w", errCtx, err, e.ErrImageFormat)
-		}
-
-		if !slices.Contains(r.AllowedFormats, format) {
-			return 0, fmt.Errorf(
-				"%v: checking for supported format (allowed formats are %v): %v: %w",
-				errCtx,
-				r.AllowedFormats,
-				err,
-				e.ErrImageFormat,
-			)
-		}
 		r.data = bytesData
 
 	}

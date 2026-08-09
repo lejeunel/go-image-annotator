@@ -234,8 +234,16 @@ func TestShouldStoreIngestionTime(t *testing.T) {
 	ing := NewTestingIngester(repos)
 	specs := im.Specs{MIMEType: "image/jpeg"}
 	now := time.Now()
-	ing.clock = clockwork.NewFakeClockAt(now)
+	ing.Clock = clockwork.NewFakeClockAt(now)
 	ing.ImageSpecsDetector = &fk.SpecsDetector{Return: specs}
 	ing.Ingest(Request{Reader: &fk.ImageReader{}})
 	assert.Equal(t, now, imRepo.GotSpecs.IngestedAt)
+}
+
+func TestHandleInvalidSpecsError(t *testing.T) {
+	repos := NewTestingRepos()
+	ing := NewTestingIngester(repos)
+	ing.ImageSpecsDetector = &fk.SpecsDetector{Err: e.ErrValidation}
+	_, err := ing.Ingest(Request{})
+	assert.Error(t, err)
 }

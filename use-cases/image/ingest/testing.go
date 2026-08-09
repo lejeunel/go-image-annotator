@@ -18,7 +18,7 @@ func NewTestingIngester() TestingIngester {
 
 func NewTestingInteractor(repo CollectionRepo, opts ...Option) *Interactor {
 	i := &Interactor{
-		ingester: NewTestingIngester(),
+		Ingester: NewTestingIngester(),
 		auth:     auth.NewVoidAuth(),
 		repo:     repo,
 	}

@@ -11,7 +11,7 @@ type Config struct {
 	InitialAdminEmail                    string   `required:"true"`
 	InitialAdminPassword                 string   `required:"true"`
 	URL                                  string   `required:"true"`
-	AllowedImageFormats                  []string `default:"jpeg,png"`
+	AllowedImageMIMETypes                []string `default:"image/jpeg,image/png"`
 	DefaultPageSize                      int      `default:"20"`
 	ApiTokenLength                       int      `default:"32"`
 	RandomPasswordLength                 int      `default:"10"`

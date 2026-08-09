@@ -20,9 +20,6 @@ import (
 type IImageSpecsDetector interface {
 	Detect(io.Reader) (*im.Specs, io.Reader, error)
 }
-type Interface interface {
-	Ingest(Request) (*Response, error)
-}
 
 type Repos struct {
 	ImageRepo
@@ -39,14 +36,14 @@ type Ingester struct {
 	Transactor
 	ArtefactRepo       ast.Interface
 	ImageSpecsDetector IImageSpecsDetector
-	clock              clockwork.Clock
+	clockwork.Clock
 }
 
 type Option func(*Ingester)
 
 func WithClock(c clockwork.Clock) Option {
 	return func(i *Ingester) {
-		i.clock = c
+		i.Clock = c
 	}
 }
 
@@ -59,7 +56,7 @@ func New(imr ImageRepo, clr CollectionRepo,
 		Transactor:   tra,
 		ArtefactRepo: fileStore, Hasher: hasher,
 		ImageSpecsDetector: specsDetector,
-		clock:              clockwork.NewRealClock(),
+		Clock:              clockwork.NewRealClock(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -87,12 +84,12 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 	}
 
 	image.Specs = *specs
-	hash, err := i.ingestRawData(*image, reader)
+	hash, err := i.storeRawData(*image, reader)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", errCtx, err)
 	}
 
-	specs.IngestedAt = i.clock.Now()
+	specs.IngestedAt = i.Clock.Now()
 	if err := i.Transactor.RunInTx(func(tx Repos) error {
 		if err := i.ingestImage(tx, r.UserId, image, *hash, *specs); err != nil {
 			i.ArtefactRepo.Delete(image.Filename())
@@ -106,7 +103,7 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 	return &Response{ImageId: image.Id, Collection: collection.Name}, nil
 }
 
-func (i *Ingester) ingestRawData(image im.Image, reader io.Reader) (*[]byte, error) {
+func (i *Ingester) storeRawData(image im.Image, reader io.Reader) (*[]byte, error) {
 	tee := io.TeeReader(reader, i.Hasher)
 	hash := i.Hasher.Sum(nil)
 
@@ -119,6 +116,61 @@ func (i *Ingester) ingestRawData(image im.Image, reader io.Reader) (*[]byte, err
 	}
 
 	return &hash, nil
+}
+
+func (i Ingester) ingestImage(
+	tx Repos,
+	authorId u.UserId,
+	image *im.Image,
+	hash []byte,
+	specs im.Specs,
+) error {
+	now := i.Clock.Now()
+
+	if err := tx.ImageRepo.AddImage(image.Id, hash, specs); err != nil {
+		return fmt.Errorf("adding image: %w", err)
+	}
+
+	if err := tx.ImageRepo.AddToCollection(image.Id, image.Collection.Id); err != nil {
+		return fmt.Errorf("adding image to collection: %w", err)
+	}
+
+	for _, label := range image.Labels {
+		if err := tx.AnnotationRepo.AddImageLabel(
+			image.Id,
+			image.Collection.Id,
+			label,
+			&authorId,
+			&now,
+		); err != nil {
+			return fmt.Errorf("adding image label to collection: %w", err)
+		}
+	}
+
+	for _, box := range image.BoundingBoxes {
+		if err := tx.AnnotationRepo.AddBoundingBox(
+			image.Id,
+			image.Collection.Id,
+			box,
+			&authorId,
+			&now,
+		); err != nil {
+			return fmt.Errorf("adding bounding box: %w", err)
+		}
+	}
+
+	for _, poly := range image.Polygons {
+		if err := tx.AnnotationRepo.AddPolygon(
+			image.Id,
+			image.Collection.Id,
+			poly,
+			&authorId,
+			&now,
+		); err != nil {
+			return fmt.Errorf("adding polygon: %w", err)
+		}
+	}
+	return nil
 }
 
 func (i *Ingester) buildImage(id im.ImageId, collection clc.Collection, labelNames []string,
@@ -189,61 +241,6 @@ func (i Ingester) appendPolygons(image *im.Image, polygons []a.PolygonRequest) e
 		)
 		if err := image.AddPolygon(polygon_); err != nil {
 			return fmt.Errorf("%w: %w", baseErr, err)
-		}
-	}
-	return nil
-}
-
-func (i Ingester) ingestImage(
-	tx Repos,
-	authorId u.UserId,
-	image *im.Image,
-	hash []byte,
-	specs im.Specs,
-) error {
-	now := i.clock.Now()
-
-	if err := tx.ImageRepo.AddImage(image.Id, hash, specs); err != nil {
-		return fmt.Errorf("adding image: %w", err)
-	}
-
-	if err := tx.ImageRepo.AddToCollection(image.Id, image.Collection.Id); err != nil {
-		return fmt.Errorf("adding image to collection: %w", err)
-	}
-
-	for _, label := range image.Labels {
-		if err := tx.AnnotationRepo.AddImageLabel(
-			image.Id,
-			image.Collection.Id,
-			label,
-			&authorId,
-			&now,
-		); err != nil {
-			return fmt.Errorf("adding image label to collection: %w", err)
-		}
-	}
-
-	for _, box := range image.BoundingBoxes {
-		if err := tx.AnnotationRepo.AddBoundingBox(
-			image.Id,
-			image.Collection.Id,
-			box,
-			&authorId,
-			&now,
-		); err != nil {
-			return fmt.Errorf("adding bounding box: %w", err)
-		}
-	}
-
-	for _, poly := range image.Polygons {
-		if err := tx.AnnotationRepo.AddPolygon(
-			image.Id,
-			image.Collection.Id,
-			poly,
-			&authorId,
-			&now,
-		); err != nil {
-			return fmt.Errorf("adding polygon: %w", err)
 		}
 	}
 	return nil
