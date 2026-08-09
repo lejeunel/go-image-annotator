@@ -25,7 +25,7 @@ import (
 	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
-	im_store "github.com/lejeunel/go-image-annotator/modules/image-store"
+	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	rea "github.com/lejeunel/go-image-annotator/modules/reader"
 	"github.com/lejeunel/go-image-annotator/modules/scroller"
@@ -50,7 +50,13 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 	metadatarepo := md.NewSQLiteMetaRepo(db)
 	imageFileStore := fs.NewLocalFileStore(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "images"))
 	policyFileStore := fs.NewLocalFileStore(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "assets"))
-	imstore := im_store.New(imrepo, clrepo, anrepo, metadatarepo, imageFileStore)
+	imstore := ims.New(
+		ims.Repos{ImageRepo: imrepo,
+			CollectionRepo: clrepo,
+			AnnotationRepo: anrepo,
+			MetaRepo:       metadatarepo},
+		tra.NewStoreTransactor(db),
+		imageFileStore)
 	scrrepo := scr.NewSQLiteScrollerRepo(db)
 	eventlogger := el.New(eventrepo, el.WithMaxNumTasksPerUser(cfg.MaxNumTasksPerUser))
 

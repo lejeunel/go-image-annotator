@@ -104,10 +104,10 @@ func TestAssignLabelToImage(t *testing.T) {
 		&fk.ImageStore{Return: &image})
 	itr.Execute(t.Context(), req, p)
 	resp := p.Got
-	assert.Equal(t, resp.Label, req.Label, "label")
-	assert.Equal(t, resp.Collection, req.Collection, "collection")
-	assert.Equal(t, resp.ImageId, req.ImageId, "image id")
-	assert.Equal(t, repo.AddedLabelId, label.Id, "added label id")
-	assert.Equal(t, repo.AddedOnImageId, image.Id, "added on image id")
-	assert.Equal(t, repo.AddedOnCollectionId, image.Collection.Id, "added on collection id")
+	assert.Equal(t, resp.Label, req.Label)
+	assert.Equal(t, resp.Collection, req.Collection)
+	assert.Equal(t, resp.ImageId, req.ImageId)
+	assert.Equal(t, repo.AddedLabelId, label.Id)
+	assert.Equal(t, repo.AddedOnImageId, image.Id)
+	assert.Equal(t, repo.AddedOnCollection, image.Collection.Name)
 }

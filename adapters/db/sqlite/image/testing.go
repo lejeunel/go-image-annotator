@@ -18,6 +18,6 @@ func AddToCollection(imRepo SQLiteImageRepo, clcRepo c.SQLiteCollectionRepo,
 	clcRepo.Create(collection)
 	imageId := im.NewImageId()
 	imRepo.AddImage(imageId, nil, im.Specs{})
-
-	return &imageId, &collection.Id, imRepo.AddToCollection(imageId, collection.Id)
+	err := imRepo.AddToCollection(imageId, collection.Name)
+	return &imageId, &collection.Id, err
 }

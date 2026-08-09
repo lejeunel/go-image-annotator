@@ -21,20 +21,22 @@ func (v *ValueValidator) Validate(value any) error {
 }
 
 type MetaDataRepo struct {
-	ExistingKeys   []string
-	AddedKey       string
-	DeletedKey     string
-	AddedValue     any
-	UpdatedKey     string
-	UpdatedValue   any
-	ErrOnAdd       error
-	ErrOnKeyExists error
-	ErrOnDelete    error
-	ErrOnList      error
-	ErrOnGet       error
-	ErrOnUpdate    error
-	ReturnList     []m.MetaData
-	ReturnValue    any
+	ExistingKeys      []string
+	AddedKey          string
+	DeletedKey        string
+	AddedValue        any
+	UpdatedKey        string
+	UpdatedValue      any
+	ErrOnAdd          error
+	ErrOnKeyExists    error
+	ErrOnDelete       error
+	ErrOnList         error
+	ErrOnGet          error
+	ErrOnUpdate       error
+	ErrOnDeleteAll    error
+	ReturnList        []m.MetaData
+	ReturnValue       any
+	DeletedAllImageId *im.ImageId
 }
 
 func (r *MetaDataRepo) KeyExists(n clc.CollectionName, id im.ImageId, key string) (bool, error) {
@@ -63,6 +65,14 @@ func (r *MetaDataRepo) Delete(n clc.CollectionName, id im.ImageId, key string) e
 		return r.ErrOnDelete
 	}
 	r.DeletedKey = key
+
+	return nil
+}
+func (r *MetaDataRepo) DeleteAll(n clc.CollectionName, id im.ImageId) error {
+	if r.ErrOnDeleteAll != nil {
+		return r.ErrOnDeleteAll
+	}
+	r.DeletedAllImageId = &id
 
 	return nil
 }

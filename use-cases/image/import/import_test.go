@@ -95,5 +95,5 @@ func TestImportImageInCollection(t *testing.T) {
 		}, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, imageId, repo.AddedImageId)
-	assert.Equal(t, collection.Id, repo.AddedIntoCollectionId)
+	assert.Equal(t, collection.Name, *repo.AddedIntoCollection)
 }

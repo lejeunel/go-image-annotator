@@ -68,7 +68,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.ImageRepo.AddToCollection(imageId, dstCollection.Id); err != nil {
+	if err := i.ImageRepo.AddToCollection(imageId, dstCollection.Name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

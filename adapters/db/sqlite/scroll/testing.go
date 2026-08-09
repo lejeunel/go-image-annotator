@@ -45,7 +45,7 @@ func CreateImagesWithOrderedIds(repos SQLiteScrollerRepos, num int) []im.ImageId
 	for n := range num {
 		id, _ := im.NewImageIdFromString(FakeUUIDFromInt(n))
 		repos.Image.AddImage(id, []byte(id.String()), im.Specs{})
-		repos.Image.AddToCollection(id, collection.Id)
+		repos.Image.AddToCollection(id, collection.Name)
 		ids = append(ids, id)
 	}
 	return ids
@@ -58,6 +58,6 @@ func CreateImageInCollection(imRepo imsql.SQLiteImageRepo, clcRepo clcsql.SQLite
 	clcRepo.Create(collection)
 	image := im.NewImage(im.NewImageId(), collection)
 	imRepo.AddImage(image.Id, []byte(image.Id.String()), im.Specs{})
-	imRepo.AddToCollection(image.Id, image.Collection.Id)
+	imRepo.AddToCollection(image.Id, image.Collection.Name)
 	return image
 }

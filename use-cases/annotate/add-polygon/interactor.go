@@ -100,7 +100,7 @@ func (i Interactor) addPolygon(ctx context.Context, image *im.Image, poly a.Poly
 	now := i.clock.Now()
 	if err := i.annotationRepo.AddPolygon(
 		image.Id,
-		image.Collection.Id,
+		image.Collection.Name,
 		poly,
 		userId,
 		&now,

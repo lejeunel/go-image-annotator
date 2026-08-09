@@ -27,7 +27,7 @@ func CreateSingleImageCollection(
 	imageId := im.NewImageId()
 	image := im.NewImage(imageId, collection)
 	repos.Image.AddImage(image.Id, nil, im.Specs{})
-	repos.Image.AddToCollection(image.Id, collection.Id)
+	repos.Image.AddToCollection(image.Id, collection.Name)
 	return image, collection
 }
 
@@ -54,7 +54,7 @@ func TestListOneImage(t *testing.T) {
 	repos.Collection.Create(collection)
 	image := im.NewImage(im.NewImageId(), collection)
 	repos.Image.AddImage(image.Id, nil, im.Specs{})
-	repos.Image.AddToCollection(image.Id, collection.Id)
+	repos.Image.AddToCollection(image.Id, collection.Name)
 
 	r, _ := repos.Image.Slice(
 		im.Filtering{},
@@ -89,7 +89,7 @@ func CreateImageInCollectionFromString(
 	id, _ := im.NewImageIdFromString(imageId)
 	image := im.NewImage(id, collection)
 	repo.AddImage(image.Id, []byte(image.Id.String()), im.Specs{})
-	repo.AddToCollection(image.Id, collection.Id)
+	repo.AddToCollection(image.Id, collection.Name)
 	return image
 }
 
@@ -128,8 +128,8 @@ func TestListImagesOrderedByIngestTime(t *testing.T) {
 	secondImage := im.NewImage(secondId, collection)
 	repos.Image.AddImage(firstImage.Id, []byte("first-hash"), im.Specs{IngestedAt: time.Now()})
 	repos.Image.AddImage(secondImage.Id, []byte("second-hash"), im.Specs{IngestedAt: time.Now()})
-	repos.Image.AddToCollection(firstImage.Id, collection.Id)
-	repos.Image.AddToCollection(secondImage.Id, collection.Id)
+	repos.Image.AddToCollection(firstImage.Id, collection.Name)
+	repos.Image.AddToCollection(secondImage.Id, collection.Name)
 
 	r, err := repos.Image.Slice(
 		im.Filtering{},

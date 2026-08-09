@@ -46,7 +46,7 @@ func TestInternalErrOnCreateShouldFail(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewSQLiteImageRepo(db)
 	db.Close()
-	err := repo.AddToCollection(im.NewImageId(), clc.NewCollectionId())
+	err := repo.AddToCollection(im.NewImageId(), "a-collection")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 

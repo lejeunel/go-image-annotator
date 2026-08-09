@@ -11,7 +11,7 @@ import (
 )
 
 type AnnotationRepo interface {
-	AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel, *u.UserId, *time.Time) error
+	AddImageLabel(im.ImageId, clc.CollectionName, an.ImageLabel, *u.UserId, *time.Time) error
 }
 
 type LabelRepo interface {

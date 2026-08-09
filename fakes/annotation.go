@@ -22,7 +22,7 @@ type AnnotationRepo struct {
 	ErrOnRemoveAllAnnotations error
 	ErrOnGetSpecs             error
 	GotImageId                im.ImageId
-	GotCollectionId           clc.CollectionId
+	GotCollection             clc.CollectionName
 	GotUserId                 *u.UserId
 	GotTime                   *time.Time
 	GotBox                    a.BoundingBox
@@ -30,7 +30,7 @@ type AnnotationRepo struct {
 	AddedAnnotationId         *a.AnnotationId
 	AddedLabelId              lbl.LabelId
 	AddedOnImageId            im.ImageId
-	AddedOnCollectionId       clc.CollectionId
+	AddedOnCollection         clc.CollectionName
 	GotUpdatableBox           a.BoundingBoxUpdatables
 	GotUpdatablePoly          a.PolygonUpdatables
 	GotRemovedAnnotation      a.AnnotationId
@@ -51,7 +51,7 @@ type AnnotationRepo struct {
 
 func (r *AnnotationRepo) AddBoundingBox(
 	imageId im.ImageId,
-	collectionId clc.CollectionId,
+	collection clc.CollectionName,
 	box a.BoundingBox,
 	userId *u.UserId,
 	t *time.Time,
@@ -60,8 +60,9 @@ func (r *AnnotationRepo) AddBoundingBox(
 		return r.ErrOnAddBoundingBox
 	}
 	r.GotImageId = imageId
-	r.GotCollectionId = collectionId
+	r.GotCollection = collection
 	r.GotBox = box
+	r.AddedAnnotationId = &box.Id
 	r.GotUserId = userId
 	r.GotTime = t
 	r.NumBoundingBoxesAdded += 1
@@ -70,7 +71,7 @@ func (r *AnnotationRepo) AddBoundingBox(
 
 func (r *AnnotationRepo) AddPolygon(
 	imageId im.ImageId,
-	collectionId clc.CollectionId,
+	collection clc.CollectionName,
 	poly a.Polygon,
 	userId *u.UserId,
 	t *time.Time,
@@ -79,8 +80,9 @@ func (r *AnnotationRepo) AddPolygon(
 		return r.ErrOnAddPoly
 	}
 	r.GotImageId = imageId
-	r.GotCollectionId = collectionId
+	r.GotCollection = collection
 	r.GotPolygon = poly
+	r.AddedAnnotationId = &poly.Id
 	r.GotUserId = userId
 	r.GotTime = t
 	r.NumPolygonsAdded += 1
@@ -89,7 +91,7 @@ func (r *AnnotationRepo) AddPolygon(
 
 func (r *AnnotationRepo) AddImageLabel(
 	imageId im.ImageId,
-	collectionId clc.CollectionId,
+	collection clc.CollectionName,
 	imageLabel a.ImageLabel,
 	userId *u.UserId,
 	t *time.Time,
@@ -100,7 +102,7 @@ func (r *AnnotationRepo) AddImageLabel(
 	r.AddedAnnotationId = &imageLabel.Id
 	r.AddedLabelId = imageLabel.Label.Id
 	r.AddedOnImageId = imageId
-	r.AddedOnCollectionId = collectionId
+	r.AddedOnCollection = collection
 	r.GotUserId = userId
 	r.GotTime = t
 	r.NumImageLabelsAdded += 1
@@ -171,7 +173,7 @@ func (r *AnnotationRepo) UpdateLabelOfAnnotation(
 
 func (r *AnnotationRepo) FindBoundingBoxes(
 	imageId im.ImageId,
-	collectionId clc.CollectionId,
+	collection clc.CollectionName,
 ) ([]a.BoundingBox, error) {
 	if r.ErrOnFindBoundingBoxes != nil {
 		return nil, r.ErrOnFindBoundingBoxes
@@ -184,7 +186,7 @@ func (r *AnnotationRepo) FindBoundingBoxes(
 
 func (r *AnnotationRepo) FindPolygons(
 	imageId im.ImageId,
-	collectionId clc.CollectionId,
+	collection clc.CollectionName,
 ) ([]a.Polygon, error) {
 	if r.ErrOnFindPolygons != nil {
 		return nil, r.ErrOnFindPolygons
@@ -197,7 +199,7 @@ func (r *AnnotationRepo) FindPolygons(
 
 func (r *AnnotationRepo) FindImageLabels(
 	imageId im.ImageId,
-	collectionId clc.CollectionId,
+	collection clc.CollectionName,
 ) ([]a.ImageLabel, error) {
 	if r.ErrOnFindImageLabels != nil {
 		return nil, r.ErrOnFindImageLabels

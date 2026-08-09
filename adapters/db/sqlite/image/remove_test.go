@@ -18,7 +18,7 @@ func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
 	imageId := im.NewImageId()
 	imRepo.AddImage(imageId, nil, im.Specs{})
 
-	imRepo.AddToCollection(imageId, collection.Id)
+	imRepo.AddToCollection(imageId, collection.Name)
 	db.Close()
 	err := imRepo.RemoveImageFromCollection(imageId, collection.Name)
 	assert.ErrorIs(t, err, e.ErrInternal)
@@ -31,7 +31,7 @@ func TestRemoveImageFromCollection(t *testing.T) {
 	imageId := im.NewImageId()
 	imRepo.AddImage(imageId, nil, im.Specs{})
 
-	imRepo.AddToCollection(imageId, collection.Id)
+	imRepo.AddToCollection(imageId, collection.Name)
 	err := imRepo.RemoveImageFromCollection(imageId, collection.Name)
 	assert.NoError(t, err)
 	exists, _ := imRepo.ImageExistsInCollection(imageId, collection.Name)

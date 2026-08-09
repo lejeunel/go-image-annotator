@@ -3,9 +3,7 @@ package clone
 import (
 	"testing"
 
-	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	"github.com/lejeunel/go-image-annotator/entities/task"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -67,35 +65,19 @@ func TestErrorOnFindGroup(t *testing.T) {
 	assert.Error(t, p.GotErr)
 }
 
-func SetupCloneableCollection() (Interactor, clc.Collection, im.Image, *fk.ImageRepo, *fk.AnnotationRepo) {
+func TestClone(t *testing.T) {
 	itr := NewTestingCloner()
-	srcCollection := clc.NewCollection(clc.NewCollectionId(), "src")
-	image := im.NewImage(im.NewImageId(), srcCollection)
-	image.AddLabel(lbl.NewLabel(lbl.NewLabelId(), "a-label"))
-	imRepo := &fk.ImageRepo{
-		IterateBaseImages: []im.BaseImage{{ImageId: image.Id, Collection: srcCollection.Name}},
-	}
-	anRepo := &fk.AnnotationRepo{}
-	itr.ImageRepo = imRepo
-	itr.ImageStore = &fk.ImageStore{Return: &image}
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{srcCollection.Name}}
-	itr.AnnotationRepo = anRepo
-
-	return itr, srcCollection, image, imRepo, anRepo
-}
-
-func TestCloneOneImage(t *testing.T) {
-	itr, srcCollection, image, imRepo, _ := SetupCloneableCollection()
+	dst := "destination-collection"
+	src := "source-collection"
+	s := fk.ImageStore{}
+	itr.ImageStore = &s
+	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{src}}
+	itr.ImageRepo = &fk.ImageRepo{
+		IterateBaseImages: []im.BaseImage{
+			{ImageId: im.NewImageId(), Collection: src},
+			{ImageId: im.NewImageId(), Collection: src}}}
 	p := &FakePresenter{}
 	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
-		Request{Source: srcCollection.Name, Destination: "destination-collection"}, p)
-	assert.Equal(t, image.Id, imRepo.AddedImageId)
-}
-
-func TestDeepCloneAddsImageLabel(t *testing.T) {
-	itr, srcCollection, _, _, annotationRepo := SetupCloneableCollection()
-	p := &FakePresenter{}
-	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
-		Request{Source: srcCollection.Name, Destination: "destination-collection", Deep: true}, p)
-	assert.NotNil(t, annotationRepo.AddedAnnotationId)
+		Request{Source: src, Destination: dst}, p)
+	assert.Equal(t, dst, s.CopiedToCollection)
 }

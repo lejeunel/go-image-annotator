@@ -15,6 +15,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type TestingTransactor struct {
+	Repos
+}
+
+func (m *TestingTransactor) RunInTx(
+	fn func(Repos) error,
+) error {
+	return fn(m.Repos)
+}
+
 func Setup() (ImageStore, clc.Collection, im.Image, []byte) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "the-collection")
 	image := im.NewImage(im.NewImageId(), collection)
@@ -23,13 +33,16 @@ func Setup() (ImageStore, clc.Collection, im.Image, []byte) {
 	image.Specs = specs
 	image.Meta = meta
 	data := []byte("test-data")
-	itr := New(&fk.ImageRepo{
-		ImageIsInCollection: true,
-		ReturnSpecs:         &specs,
-	},
+	repos := Repos{
+		&fk.ImageRepo{
+			ImageIsInCollection: true,
+			ReturnSpecs:         &specs,
+		},
 		&fk.CollectionRepo{Return: collection},
 		&fk.AnnotationRepo{},
 		&fk.MetaDataRepo{ReturnList: meta},
+	}
+	itr := New(repos, &TestingTransactor{repos},
 		&fk.FileStore{Data: data})
 	return itr, collection, image, data
 }
@@ -101,7 +114,7 @@ func TestFindImageGivesCorrectAnnotations(t *testing.T) {
 		Collection: collection.Name,
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, collection.Id, image.Collection.Id)
+	assert.Equal(t, collection.Name, image.Collection.Name)
 	assert.Equal(t, 1, len(image.Labels))
 	assert.Equal(t, 1, len(image.BoundingBoxes))
 	assert.Equal(t, 1, len(image.Polygons))
@@ -133,4 +146,40 @@ func TestRetrieveMetaData(t *testing.T) {
 		Collection: collection.Name,
 	})
 	assert.Equal(t, image.Meta, r.Meta)
+}
+
+func SetupCopy() (ImageStore, clc.Collection, im.Image, clc.Collection, *fk.ImageRepo, *fk.AnnotationRepo) {
+	srcCollection := clc.NewCollection(clc.NewCollectionId(), "src")
+	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst")
+	image := im.NewImage(im.NewImageId(), srcCollection)
+	image.AddLabel(lbl.NewLabel(lbl.NewLabelId(), "a-label"))
+	imrepo := fk.ImageRepo{
+		IterateBaseImages:   []im.BaseImage{{ImageId: image.Id, Collection: srcCollection.Name}},
+		ImageIsInCollection: true,
+		ReturnSpecs:         &im.Specs{MIMEType: "image/jpeg"},
+	}
+	anrepo := fk.AnnotationRepo{Labels: image.Labels}
+	repos := Repos{
+		ImageRepo:      &imrepo,
+		CollectionRepo: &fk.CollectionRepo{},
+		AnnotationRepo: &anrepo,
+		MetaRepo:       &fk.MetaDataRepo{},
+	}
+	transactor := TestingTransactor{repos}
+	s := New(repos, &transactor, &fk.FileStore{})
+	return s, srcCollection, image, dstCollection, &imrepo, &anrepo
+}
+
+func TestShallowCopyOneImage(t *testing.T) {
+	store, srcCollection, image, dstCollection, imrepo, _ := SetupCopy()
+	err := store.Copy(srcCollection.Name, image.Id, dstCollection.Name, false)
+	assert.NoError(t, err)
+	assert.Equal(t, dstCollection.Name, *imrepo.AddedIntoCollection)
+}
+
+func TestDeepCopyOneImage(t *testing.T) {
+	store, srcCollection, image, dstCollection, _, anrepo := SetupCopy()
+	err := store.Copy(srcCollection.Name, image.Id, dstCollection.Name, true)
+	assert.NoError(t, err)
+	assert.NotNil(t, anrepo.AddedAnnotationId)
 }

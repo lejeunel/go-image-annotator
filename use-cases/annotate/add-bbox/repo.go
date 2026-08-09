@@ -11,7 +11,7 @@ import (
 )
 
 type Repo interface {
-	AddBoundingBox(im.ImageId, clc.CollectionId, a.BoundingBox, *u.UserId, *time.Time) error
+	AddBoundingBox(im.ImageId, clc.CollectionName, a.BoundingBox, *u.UserId, *time.Time) error
 }
 
 type LabelRepo interface {

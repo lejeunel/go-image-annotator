@@ -11,7 +11,7 @@ import (
 )
 
 type Repo interface {
-	AddPolygon(im.ImageId, clc.CollectionId, a.Polygon, *u.UserId, *time.Time) error
+	AddPolygon(im.ImageId, clc.CollectionName, a.Polygon, *u.UserId, *time.Time) error
 }
 
 type LabelRepo interface {

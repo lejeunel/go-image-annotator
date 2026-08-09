@@ -23,7 +23,7 @@ func Init() (*sqlx.DB, SQLiteMetaRepo, clc.Collection, im.Image) {
 	image := im.NewImage(im.NewImageId(), collection)
 	clcRepo.Create(collection)
 	imRepo.AddImage(image.Id, nil, im.Specs{})
-	imRepo.AddToCollection(image.Id, collection.Id)
+	imRepo.AddToCollection(image.Id, collection.Name)
 
 	return db, metaRepo, collection, image
 }
@@ -80,6 +80,20 @@ func TestDeleteOne(t *testing.T) {
 	assert.False(t, firstKeyExists)
 	secondKeyExists, _ := repo.KeyExists(collection.Name, image.Id, secondKey)
 	assert.True(t, secondKeyExists)
+}
+
+func TestDeleteAll(t *testing.T) {
+	_, repo, collection, image := Init()
+	firstKey, firstValue := "first-key", "first-value"
+	secondKey, secondValue := "second-key", "second-value"
+	repo.Add(collection.Name, image.Id, firstKey, firstValue)
+	repo.Add(collection.Name, image.Id, secondKey, secondValue)
+	err := repo.DeleteAll(collection.Name, image.Id)
+	assert.NoError(t, err)
+	firstKeyExists, _ := repo.KeyExists(collection.Name, image.Id, firstKey)
+	assert.False(t, firstKeyExists)
+	secondKeyExists, _ := repo.KeyExists(collection.Name, image.Id, secondKey)
+	assert.False(t, secondKeyExists)
 }
 
 func TestList(t *testing.T) {

@@ -167,6 +167,20 @@ func (r SQLiteMetaRepo) UpdateValue(
 	return nil
 }
 
+func (r SQLiteMetaRepo) DeleteAll(
+	collection clc.CollectionName,
+	imageID im.ImageId,
+) error {
+	_, err := r.Db.Exec(`
+        DELETE FROM metadata WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2)
+    `, imageID, collection)
+	if err != nil {
+		return fmt.Errorf("deleting all metadata records: %v: %w", err, e.ErrInternal)
+	}
+
+	return nil
+}
+
 func (r SQLiteMetaRepo) Delete(
 	collection clc.CollectionName,
 	imageID im.ImageId,

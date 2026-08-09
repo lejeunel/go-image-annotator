@@ -49,13 +49,14 @@ type PolygonSpecs struct {
 
 func (r SQLiteAnnotationRepo) AddImageLabel(
 	imageId i.ImageId,
-	collectionId c.CollectionId,
+	collection c.CollectionName,
 	ann a.ImageLabel,
 	userId *u.UserId,
 	t *time.Time,
 ) error {
-	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type, author, touched_at) VALUES ($1,$2,$3,$4,$5,$6,$7)"
-	_, err := r.Db.Exec(query, ann.Id, imageId, collectionId, ann.Label.Id, "image", userId, t)
+	query := `INSERT INTO annotations (id, image_id, collection_id, label_id, type, author, touched_at)
+		VALUES ($1,$2,(SELECT id FROM collections WHERE name=$3),$4,$5,$6,$7)`
+	_, err := r.Db.Exec(query, ann.Id, imageId, collection, ann.Label.Id, "image", userId, t)
 	if err != nil {
 		return fmt.Errorf("adding image label annotation record: %v: %w", err, e.ErrInternal)
 	}
@@ -75,13 +76,14 @@ func (r SQLiteAnnotationRepo) findLabelById(labelId l.LabelId) (*l.Label, error)
 
 func (r SQLiteAnnotationRepo) FindImageLabels(
 	imageId i.ImageId,
-	collectionId c.CollectionId,
+	collection c.CollectionName,
 ) ([]a.ImageLabel, error) {
-	query := "SELECT id,label_id,type,author,touched_at FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='image'"
+	query := `SELECT id,label_id,type,author,touched_at FROM annotations
+	WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2) AND type='image'`
 
 	errCtx := "querying image annotations"
 	records := []AnnotationRow{}
-	if err := r.Db.Select(&records, query, imageId, collectionId); err != nil {
+	if err := r.Db.Select(&records, query, imageId, collection); err != nil {
 		return nil, fmt.Errorf("%v: applying query: %v: %w", errCtx, err, e.ErrInternal)
 	}
 
@@ -122,13 +124,13 @@ func (r SQLiteAnnotationRepo) RemoveAnnotation(id a.AnnotationId) error {
 
 func (r SQLiteAnnotationRepo) RemoveImageLabel(
 	imageId i.ImageId,
-	collectionId c.CollectionId,
+	collection c.CollectionName,
 	labelId l.LabelId,
 ) error {
 	_, err := r.Db.Exec(
-		"DELETE FROM annotations WHERE image_id=$1 AND collection_id=$2 AND label_id=$3 AND type='image'",
+		"DELETE FROM annotations WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2) AND label_id=$3 AND type='image'",
 		imageId,
-		collectionId,
+		collection,
 		labelId,
 	)
 	if err != nil {
@@ -139,7 +141,7 @@ func (r SQLiteAnnotationRepo) RemoveImageLabel(
 
 func (r SQLiteAnnotationRepo) AddPolygon(
 	imageId i.ImageId,
-	collectionId c.CollectionId,
+	collection c.CollectionName,
 	polygon a.Polygon,
 	userId *u.UserId,
 	t *time.Time,
@@ -150,12 +152,13 @@ func (r SQLiteAnnotationRepo) AddPolygon(
 	}
 	coordsBytes, _ := json.Marshal(PolygonSpecs{Points: pointSpecs})
 	coordsString := string(coordsBytes)
-	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type, coordinates, author, touched_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)"
+	query := `INSERT INTO annotations (id, image_id, collection_id, label_id, type, coordinates, author, touched_at)
+		VALUES ($1,$2,(SELECT id FROM collections WHERE name=$3),$4,$5,$6,$7,$8)`
 	_, err := r.Db.Exec(
 		query,
 		polygon.Id,
 		imageId,
-		collectionId,
+		collection,
 		polygon.Label.Id,
 		"polygon",
 		coordsString,
@@ -171,13 +174,15 @@ func (r SQLiteAnnotationRepo) AddPolygon(
 
 func (r SQLiteAnnotationRepo) FindPolygons(
 	imageId i.ImageId,
-	collectionId c.CollectionId,
+	collection c.CollectionName,
 ) ([]a.Polygon, error) {
-	query := "SELECT id,label_id,type,coordinates,author,touched_at FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='polygon'"
+	query := `SELECT id,label_id,type,coordinates,author,touched_at
+		FROM annotations
+		WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2) AND type='polygon'`
 
 	errCtx := "querying polygon annotations"
 	records := []AnnotationRow{}
-	if err := r.Db.Select(&records, query, imageId, collectionId); err != nil {
+	if err := r.Db.Select(&records, query, imageId, collection); err != nil {
 		return nil, fmt.Errorf("%v: applying query: %v: %w", errCtx, err, e.ErrInternal)
 	}
 
@@ -211,7 +216,7 @@ func (r SQLiteAnnotationRepo) FindPolygons(
 
 func (r SQLiteAnnotationRepo) AddBoundingBox(
 	imageId i.ImageId,
-	collectionId c.CollectionId,
+	collection c.CollectionName,
 	box a.BoundingBox,
 	userId *u.UserId,
 	t *time.Time,
@@ -226,12 +231,13 @@ func (r SQLiteAnnotationRepo) AddBoundingBox(
 		},
 	)
 	coordsString := string(coordsBytes)
-	query := "INSERT INTO annotations (id, image_id, collection_id, label_id, type, coordinates, author, touched_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)"
+	query := `INSERT INTO annotations (id, image_id, collection_id, label_id, type, coordinates, author, touched_at)
+		VALUES ($1,$2,(SELECT id FROM collections WHERE name=$3),$4,$5,$6,$7,$8)`
 	_, err := r.Db.Exec(
 		query,
 		box.Id,
 		imageId,
-		collectionId,
+		collection,
 		box.Label.Id,
 		"bounding_box",
 		coordsString,
@@ -247,13 +253,15 @@ func (r SQLiteAnnotationRepo) AddBoundingBox(
 
 func (r SQLiteAnnotationRepo) FindBoundingBoxes(
 	imageId i.ImageId,
-	collectionId c.CollectionId,
+	collection c.CollectionName,
 ) ([]a.BoundingBox, error) {
-	query := "SELECT id,label_id,type,coordinates,author,touched_at FROM annotations WHERE image_id=$1 AND collection_id=$2 AND type='bounding_box'"
+	query := `SELECT id,label_id,type,coordinates,author,touched_at
+		FROM annotations
+		WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2) AND type='bounding_box'`
 
 	errCtx := "querying bounding-box annotations"
 	records := []AnnotationRow{}
-	if err := r.Db.Select(&records, query, imageId, collectionId); err != nil {
+	if err := r.Db.Select(&records, query, imageId, collection); err != nil {
 		return nil, fmt.Errorf("%v: applying query: %v: %w", errCtx, err, e.ErrInternal)
 	}
 

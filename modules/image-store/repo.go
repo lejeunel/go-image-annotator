@@ -5,13 +5,18 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	m "github.com/lejeunel/go-image-annotator/entities/meta"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
+	"time"
 )
 
 type AnnotationRepo interface {
-	FindImageLabels(im.ImageId, clc.CollectionId) ([]a.ImageLabel, error)
-	FindBoundingBoxes(im.ImageId, clc.CollectionId) ([]a.BoundingBox, error)
-	FindPolygons(im.ImageId, clc.CollectionId) ([]a.Polygon, error)
+	FindImageLabels(im.ImageId, clc.CollectionName) ([]a.ImageLabel, error)
+	FindBoundingBoxes(im.ImageId, clc.CollectionName) ([]a.BoundingBox, error)
+	FindPolygons(im.ImageId, clc.CollectionName) ([]a.Polygon, error)
 	RemoveAllAnnotations(im.ImageId, clc.CollectionName) error
+	AddImageLabel(im.ImageId, clc.CollectionName, a.ImageLabel, *u.UserId, *time.Time) error
+	AddBoundingBox(im.ImageId, clc.CollectionName, a.BoundingBox, *u.UserId, *time.Time) error
+	AddPolygon(im.ImageId, clc.CollectionName, a.Polygon, *u.UserId, *time.Time) error
 }
 
 type CollectionRepo interface {
@@ -23,8 +28,10 @@ type ImageRepo interface {
 	ImageExistsInCollection(im.ImageId, clc.CollectionName) (bool, error)
 	RemoveImageFromCollection(im.ImageId, clc.CollectionName) error
 	IsUsed(im.ImageId) (*bool, error)
+	AddToCollection(im.ImageId, clc.CollectionName) error
 }
 
 type MetaRepo interface {
 	List(clc.CollectionName, im.ImageId) ([]m.MetaData, error)
+	DeleteAll(clc.CollectionName, im.ImageId) error
 }

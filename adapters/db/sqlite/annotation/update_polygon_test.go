@@ -17,7 +17,7 @@ func TestErrOnUpdateShouldFail(t *testing.T) {
 	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
-	repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
+	repos.Annotation.AddPolygon(image.Id, collection.Name, polygon, nil, nil)
 	db.Close()
 	err := repos.Annotation.UpdatePolygon(
 		polygon.Id,
@@ -36,7 +36,7 @@ func TestUpdatePolygon(t *testing.T) {
 	repos := NewAnnotationTestRepos(s.NewInMemory())
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
-	repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
+	repos.Annotation.AddPolygon(image.Id, collection.Name, polygon, nil, nil)
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "a-new-label")
 	repos.Label.Create(newLabel)
 	user := u.NewUser("user@example.com")
@@ -49,7 +49,7 @@ func TestUpdatePolygon(t *testing.T) {
 	now := time.Now()
 	err := repos.Annotation.UpdatePolygon(polygon.Id, newPolygon, &user.Id, &now)
 	assert.NoError(t, err)
-	r, _ := repos.Annotation.FindPolygons(image.Id, collection.Id)
+	r, _ := repos.Annotation.FindPolygons(image.Id, collection.Name)
 	assert.Equal(t, r[0].Label.Id, newLabel.Id)
 	assert.Equal(t, r[0].Points.Coordinates, newPolygon.Points.Coordinates)
 	assert.NotNil(t, r[0].Author)

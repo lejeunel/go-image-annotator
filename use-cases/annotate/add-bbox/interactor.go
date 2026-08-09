@@ -104,7 +104,7 @@ func (i Interactor) addBox(ctx context.Context, image *im.Image, box a.BoundingB
 	now := i.clock.Now()
 	if err := i.annotationRepo.AddBoundingBox(
 		image.Id,
-		image.Collection.Id,
+		image.Collection.Name,
 		box,
 		userId,
 		&now,

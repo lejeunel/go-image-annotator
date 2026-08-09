@@ -16,8 +16,6 @@ type ImageStore interface {
 
 type Interactor struct {
 	ImageStore
-	ImageRepo
-	AnnotationRepo
 	auth Auth
 }
 

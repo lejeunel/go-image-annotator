@@ -41,7 +41,7 @@ func CreateAnnotedImage(repos AnnotationTestingRepos, collectionName string, lab
 	image, collection, label := CreateAnnotableImage(repos, collectionName, labelName,
 		group)
 	imLabel := a.NewImageLabel(label)
-	repos.Annotation.AddImageLabel(image.Id, collection.Id, imLabel, nil, nil)
+	repos.Annotation.AddImageLabel(image.Id, collection.Name, imLabel, nil, nil)
 	return image, collection, label, imLabel
 }
 
@@ -59,7 +59,7 @@ func CreateAnnotableImage(repos AnnotationTestingRepos, collectionName string, l
 	repos.Collection.Create(collection)
 	image := im.NewImage(im.NewImageId(), collection)
 	repos.Image.AddImage(image.Id, nil, im.Specs{})
-	repos.Image.AddToCollection(image.Id, collection.Id)
+	repos.Image.AddToCollection(image.Id, collection.Name)
 
 	return image, collection, label
 }

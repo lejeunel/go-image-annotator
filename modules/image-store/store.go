@@ -4,17 +4,27 @@ import (
 	"fmt"
 	"strings"
 
+	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-type ImageStore struct {
+type Transactor interface {
+	RunInTx(fn func(Repos) error) error
+}
+
+type Repos struct {
 	ImageRepo
 	CollectionRepo
 	AnnotationRepo
 	MetaRepo
+}
+
+type ImageStore struct {
+	Repos
+	Transactor
 	fs.FileStore
 }
 
@@ -34,17 +44,17 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 			base.ImageId, base.Collection, e.ErrNotFound)
 	}
 
-	labels, err := s.AnnotationRepo.FindImageLabels(base.ImageId, collection.Id)
+	labels, err := s.AnnotationRepo.FindImageLabels(base.ImageId, collection.Name)
 	if err != nil {
 		return nil, fmt.Errorf("fetching labels: %w", err)
 	}
 
-	boxes, err := s.AnnotationRepo.FindBoundingBoxes(base.ImageId, collection.Id)
+	boxes, err := s.AnnotationRepo.FindBoundingBoxes(base.ImageId, collection.Name)
 	if err != nil {
 		return nil, fmt.Errorf("fetching bounding boxes: %w", err)
 	}
 
-	polygons, err := s.AnnotationRepo.FindPolygons(base.ImageId, collection.Id)
+	polygons, err := s.AnnotationRepo.FindPolygons(base.ImageId, collection.Name)
 	if err != nil {
 		return nil, fmt.Errorf("fetching polygons: %w", err)
 	}
@@ -85,11 +95,19 @@ func (s ImageStore) DeleteAsset(id im.ImageId) error {
 }
 func (s ImageStore) Delete(id im.ImageId, collection clc.CollectionName) error {
 	errCtx := fmt.Errorf("deleting image")
-	if err := s.AnnotationRepo.RemoveAllAnnotations(id, collection); err != nil {
-		return fmt.Errorf("%w: %w", errCtx, err)
-	}
-	if err := s.ImageRepo.RemoveImageFromCollection(id, collection); err != nil {
-		return fmt.Errorf("%w: %w", errCtx, err)
+	if err := s.Transactor.RunInTx(func(tx Repos) error {
+		if err := tx.AnnotationRepo.RemoveAllAnnotations(id, collection); err != nil {
+			return fmt.Errorf("%w: %w", errCtx, err)
+		}
+		if err := tx.MetaRepo.DeleteAll(collection, id); err != nil {
+			return fmt.Errorf("%w: %w", errCtx, err)
+		}
+		if err := tx.ImageRepo.RemoveImageFromCollection(id, collection); err != nil {
+			return fmt.Errorf("%w: %w", errCtx, err)
+		}
+		return nil
+	}); err != nil {
+		return err
 	}
 
 	isUsed, err := s.ImageRepo.IsUsed(id)
@@ -108,7 +126,67 @@ func (s ImageStore) Delete(id im.ImageId, collection clc.CollectionName) error {
 	}
 	return nil
 }
+func (s ImageStore) Copy(src clc.CollectionName, id im.ImageId, dst clc.CollectionName, deep bool) error {
+	errCtx := fmt.Errorf("copying image %v from collection %v to collection %v", id, src, dst)
+	image, err := s.Find(im.BaseImage{ImageId: id, Collection: src})
+	if err != nil {
+		return fmt.Errorf("%w: finding source image: %w", errCtx, err)
+	}
 
-func New(i ImageRepo, c CollectionRepo, a AnnotationRepo, m MetaRepo, f fs.FileStore) ImageStore {
-	return ImageStore{i, c, a, m, f}
+	if err := s.Transactor.RunInTx(func(tx Repos) error {
+		if err := tx.ImageRepo.AddToCollection(image.Id, dst); err != nil {
+			return fmt.Errorf("%w: adding image to collection: %w", errCtx, err)
+		}
+		if deep {
+			for _, label := range image.Labels {
+				label.Id = a.NewAnnotationId()
+				if err := tx.AnnotationRepo.AddImageLabel(
+					image.Id,
+					dst,
+					label,
+					label.Author,
+					label.Time,
+				); err != nil {
+					return fmt.Errorf("%w: adding image label: %w", errCtx, err)
+				}
+			}
+
+			for _, box := range image.BoundingBoxes {
+				box.Id = a.NewAnnotationId()
+				if err := tx.AnnotationRepo.AddBoundingBox(
+					image.Id,
+					dst,
+					box,
+					box.Author,
+					box.Time,
+				); err != nil {
+					return fmt.Errorf("%w: adding bounding boxes: %w", errCtx, err)
+				}
+			}
+			for _, poly := range image.Polygons {
+				poly.Id = a.NewAnnotationId()
+				if err := tx.AnnotationRepo.AddPolygon(
+					image.Id,
+					dst,
+					poly,
+					poly.Author,
+					poly.Time,
+				); err != nil {
+					return fmt.Errorf("%w: adding polygons: %w", errCtx, err)
+				}
+			}
+
+		}
+		return nil
+
+	}); err != nil {
+		return err
+
+	}
+	return nil
+
+}
+
+func New(r Repos, t Transactor, f fs.FileStore) ImageStore {
+	return ImageStore{r, t, f}
 }

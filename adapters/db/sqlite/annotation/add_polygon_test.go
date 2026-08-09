@@ -17,7 +17,7 @@ func TestInternalErrOnAddPolygonShouldFail(t *testing.T) {
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
 	db.Close()
-	err := repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
+	err := repos.Annotation.AddPolygon(image.Id, collection.Name, polygon, nil, nil)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
@@ -26,9 +26,9 @@ func TestInternalErrOnFindPolygonShouldFail(t *testing.T) {
 	repos := NewAnnotationTestRepos(db)
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
-	repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
+	repos.Annotation.AddPolygon(image.Id, collection.Name, polygon, nil, nil)
 	db.Close()
-	_, err := repos.Annotation.FindPolygons(image.Id, collection.Id)
+	_, err := repos.Annotation.FindPolygons(image.Id, collection.Name)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
@@ -38,9 +38,9 @@ func TestAddPolygon(t *testing.T) {
 	labelName := "a-label"
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", labelName, nil)
 	polygon := a.NewPolygon(a.NewAnnotationId(), TestingPolygonPoints, label)
-	err := repos.Annotation.AddPolygon(image.Id, collection.Id, polygon, nil, nil)
+	err := repos.Annotation.AddPolygon(image.Id, collection.Name, polygon, nil, nil)
 	assert.NoError(t, err)
-	r, err := repos.Annotation.FindPolygons(image.Id, collection.Id)
+	r, err := repos.Annotation.FindPolygons(image.Id, collection.Name)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(r))
 	assert.Equal(t, labelName, r[0].Label.Name)

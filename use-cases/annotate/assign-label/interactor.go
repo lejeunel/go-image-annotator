@@ -56,7 +56,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	imageLabel, err := i.addLabel(ctx, image.Id, image.Collection.Id, *label)
+	imageLabel, err := i.addLabel(ctx, image.Id, image.Collection.Name, *label)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -89,7 +89,7 @@ func (i Interactor) findImage(imageId im.ImageId, collection string) (*im.Image,
 func (i Interactor) addLabel(
 	ctx context.Context,
 	imageId im.ImageId,
-	collectionId clc.CollectionId,
+	collection clc.CollectionName,
 	label lbl.Label,
 ) (*an.ImageLabel, error) {
 	var userId *u.UserId
@@ -102,7 +102,7 @@ func (i Interactor) addLabel(
 	imageLabel := an.NewImageLabel(label)
 	if err := i.annotationRepo.AddImageLabel(
 		imageId,
-		collectionId,
+		collection,
 		imageLabel,
 		userId,
 		&now,

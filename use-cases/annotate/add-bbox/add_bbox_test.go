@@ -134,7 +134,7 @@ func TestAddBoundingBox(t *testing.T) {
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, req.ImageId, repo.GotImageId.String())
-	assert.Equal(t, collection.Id, repo.GotCollectionId)
+	assert.Equal(t, collection.Name, repo.GotCollection)
 	assert.Equal(t, req.Label, repo.GotBox.Label.Name)
 	assert.Equal(t, req.Xc, repo.GotBox.Xc)
 	assert.Equal(t, req.Yc, repo.GotBox.Yc)

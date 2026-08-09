@@ -18,7 +18,7 @@ func TestInternalErrOnUpdateBoundingBoxShouldFail(t *testing.T) {
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	annotationId := a.NewAnnotationId()
 	bbox := a.NewBoundingBox(annotationId, 1, 1, 1, 1, label)
-	repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox, nil, nil)
+	repos.Annotation.AddBoundingBox(image.Id, collection.Name, bbox, nil, nil)
 	db.Close()
 	err := repos.Annotation.UpdateBoundingBox(annotationId,
 		a.BoundingBoxUpdatables{LabelId: label.Id, Xc: 1, Yc: 1, Width: 1, Height: 1}, nil, nil)
@@ -32,7 +32,7 @@ func TestUpdateBoundingBoxWithInvalidValuesShouldFail(t *testing.T) {
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	annotationId := a.NewAnnotationId()
 	bbox := a.NewBoundingBox(annotationId, 1, 1, 1, 1, label)
-	repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox, nil, nil)
+	repos.Annotation.AddBoundingBox(image.Id, collection.Name, bbox, nil, nil)
 
 	err := repos.Annotation.UpdateBoundingBox(annotationId,
 		a.BoundingBoxUpdatables{LabelId: label.Id, Xc: 1, Yc: 1, Width: -10, Height: 1}, nil, nil)
@@ -45,7 +45,7 @@ func TestUpdateBoundingBox(t *testing.T) {
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 	annotationId := a.NewAnnotationId()
 	bbox := a.NewBoundingBox(annotationId, 1, 1, 1, 1, label)
-	repos.Annotation.AddBoundingBox(image.Id, collection.Id, bbox, nil, nil)
+	repos.Annotation.AddBoundingBox(image.Id, collection.Name, bbox, nil, nil)
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "a-new-label")
 	repos.Label.Create(newLabel)
 	user := u.NewUser("user@example.com")
@@ -59,7 +59,7 @@ func TestUpdateBoundingBox(t *testing.T) {
 	now := time.Now()
 	err := repos.Annotation.UpdateBoundingBox(annotationId, newBox, &user.Id, &now)
 	assert.NoError(t, err)
-	r, _ := repos.Annotation.FindBoundingBoxes(image.Id, collection.Id)
+	r, _ := repos.Annotation.FindBoundingBoxes(image.Id, collection.Name)
 	assert.Equal(t, r[0].Width, newBox.Width)
 	assert.Equal(t, r[0].Height, newBox.Height)
 	assert.Equal(t, r[0].Xc, newBox.Xc)

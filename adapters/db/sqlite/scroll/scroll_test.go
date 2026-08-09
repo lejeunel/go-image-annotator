@@ -91,8 +91,8 @@ func TestNextImageInCollection(t *testing.T) {
 	secondId, _ := im.NewImageIdFromString(FakeUUIDFromInt(1))
 	repos.Image.AddImage(firstId, []byte("first-hash"), im.Specs{})
 	repos.Image.AddImage(secondId, []byte("second-hash"), im.Specs{})
-	repos.Image.AddToCollection(firstId, collection.Id)
-	repos.Image.AddToCollection(secondId, collection.Id)
+	repos.Image.AddToCollection(firstId, collection.Name)
+	repos.Image.AddToCollection(secondId, collection.Name)
 
 	r, err := repos.Scroller.GetAdjacent(firstId,
 		scr.NewCriteria(
@@ -111,7 +111,7 @@ func CreateImagesWithIngestTime(repos SQLiteScrollerRepos, num int) ([]im.ImageI
 		id := im.NewImageId()
 		repos.Image.AddImage(id, fmt.Append([]byte{}, n),
 			im.Specs{IngestedAt: now.Add(time.Duration(n) * time.Hour)})
-		repos.Image.AddToCollection(id, collection.Id)
+		repos.Image.AddToCollection(id, collection.Name)
 		ids = append(ids, id)
 	}
 	return ids, collection

@@ -19,14 +19,14 @@ type LabelRepo interface {
 }
 
 type AnnotationRepo interface {
-	AddImageLabel(im.ImageId, clc.CollectionId, an.ImageLabel, *u.UserId, *time.Time) error
-	AddBoundingBox(im.ImageId, clc.CollectionId, an.BoundingBox, *u.UserId, *time.Time) error
-	AddPolygon(im.ImageId, clc.CollectionId, an.Polygon, *u.UserId, *time.Time) error
+	AddImageLabel(im.ImageId, clc.CollectionName, an.ImageLabel, *u.UserId, *time.Time) error
+	AddBoundingBox(im.ImageId, clc.CollectionName, an.BoundingBox, *u.UserId, *time.Time) error
+	AddPolygon(im.ImageId, clc.CollectionName, an.Polygon, *u.UserId, *time.Time) error
 }
 
 type ImageRepo interface {
 	AddImage(im.ImageId, []byte, im.Specs) error
-	AddToCollection(im.ImageId, clc.CollectionId) error
+	AddToCollection(im.ImageId, clc.CollectionName) error
 	FindImageIdByHash([]byte) (*im.ImageId, error)
 	Delete(im.ImageId) error
 }

@@ -184,7 +184,7 @@ schemas:
 #+end_src
             
 * TODO Import image into collection with annotations (needs source collection)
-
+* TODO apply transactor in image store delete method
 
   
   

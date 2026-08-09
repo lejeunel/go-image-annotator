@@ -135,14 +135,14 @@ func (i ImageIngester) ingestImage(
 		return fmt.Errorf("adding image: %w", err)
 	}
 
-	if err := tx.ImageRepo.AddToCollection(image.Id, image.Collection.Id); err != nil {
+	if err := tx.ImageRepo.AddToCollection(image.Id, image.Collection.Name); err != nil {
 		return fmt.Errorf("adding image to collection: %w", err)
 	}
 
 	for _, label := range image.Labels {
 		if err := tx.AnnotationRepo.AddImageLabel(
 			image.Id,
-			image.Collection.Id,
+			image.Collection.Name,
 			label,
 			&authorId,
 			&now,
@@ -154,7 +154,7 @@ func (i ImageIngester) ingestImage(
 	for _, box := range image.BoundingBoxes {
 		if err := tx.AnnotationRepo.AddBoundingBox(
 			image.Id,
-			image.Collection.Id,
+			image.Collection.Name,
 			box,
 			&authorId,
 			&now,
@@ -166,7 +166,7 @@ func (i ImageIngester) ingestImage(
 	for _, poly := range image.Polygons {
 		if err := tx.AnnotationRepo.AddPolygon(
 			image.Id,
-			image.Collection.Id,
+			image.Collection.Name,
 			poly,
 			&authorId,
 			&now,

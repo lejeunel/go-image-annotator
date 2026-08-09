@@ -24,7 +24,7 @@ type ImageRepo struct {
 	ErrOnIterate                 error
 	ErrOnIsUsed                  error
 	AddedImageId                 im.ImageId
-	AddedIntoCollectionId        clc.CollectionId
+	AddedIntoCollection          *clc.CollectionName
 	ImageIsInCollection          bool
 	IsUsed_                      bool
 	GotFilters                   im.Filtering
@@ -70,12 +70,12 @@ func (r *ImageRepo) ImageExistsInCollection(
 	return false, nil
 }
 
-func (r *ImageRepo) AddToCollection(imageId im.ImageId, collectionId clc.CollectionId) error {
+func (r *ImageRepo) AddToCollection(imageId im.ImageId, collection clc.CollectionName) error {
 	if r.ErrOnAddToCollection != nil {
 		return r.ErrOnAddToCollection
 	}
 	r.AddedImageId = imageId
-	r.AddedIntoCollectionId = collectionId
+	r.AddedIntoCollection = &collection
 	return nil
 }
 

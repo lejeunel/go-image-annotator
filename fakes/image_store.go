@@ -6,12 +6,13 @@ import (
 )
 
 type ImageStore struct {
-	ErrOnFind      error
-	ErrOnDelete    error
-	Return         *im.Image
-	DeletedAssetId *im.ImageId
-	DeletedId      *im.ImageId
-	DeletedBatch   bool
+	ErrOnFind          error
+	ErrOnDelete        error
+	Return             *im.Image
+	DeletedAssetId     *im.ImageId
+	DeletedId          *im.ImageId
+	DeletedBatch       bool
+	CopiedToCollection string
 }
 
 func (s *ImageStore) Find(baseImage im.BaseImage) (*im.Image, error) {
@@ -39,5 +40,10 @@ func (s *ImageStore) Delete(id im.ImageId, collection clc.CollectionName) error 
 
 func (s *ImageStore) DeleteBatch([]im.ImageId, clc.CollectionName) error {
 	s.DeletedBatch = true
+	return nil
+}
+
+func (s *ImageStore) Copy(src clc.CollectionName, id im.ImageId, dst clc.CollectionName, deep bool) error {
+	s.CopiedToCollection = dst
 	return nil
 }

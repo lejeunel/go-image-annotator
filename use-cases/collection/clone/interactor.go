@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/jonboulle/clockwork"
-	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	e "github.com/lejeunel/go-image-annotator/entities/event"
 	grp "github.com/lejeunel/go-image-annotator/entities/group"
@@ -17,29 +16,19 @@ import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
-	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	jq "github.com/lejeunel/go-image-annotator/modules/job-queue"
 )
 
-type Transactor interface {
-	RunInTx(fn func(Repos) error) error
-}
-
 type ImageStore interface {
 	Find(base im.BaseImage) (*im.Image, error)
-}
-
-type Repos struct {
-	ImageRepo
-	CollectionRepo
-	AnnotationRepo
+	Copy(src clc.CollectionName, id im.ImageId, dst clc.CollectionName, deep bool) error
 }
 
 type Interactor struct {
-	Repos
-	Transactor
-	GroupRepo
 	ImageStore
+	ImageRepo
+	CollectionRepo
+	GroupRepo
 	el.IEventLogger
 	Auth
 	clockwork.Clock
@@ -47,11 +36,11 @@ type Interactor struct {
 	jq.JobQueue
 }
 
-func New(r Repos, tra Transactor, g GroupRepo,
-	s st.Interface, l el.IEventLogger, logger slog.Logger, j jq.JobQueue,
+func New(ims ImageStore, ir ImageRepo, c CollectionRepo, g GroupRepo,
+	l el.IEventLogger, logger slog.Logger, j jq.JobQueue,
 	opts ...Option,
 ) Interactor {
-	itr := &Interactor{r, tra, g, s, l, auth.NewVoidAuth(), clockwork.NewRealClock(), logger, j}
+	itr := &Interactor{ims, ir, c, g, l, auth.NewVoidAuth(), clockwork.NewRealClock(), logger, j}
 	for _, opt := range opts {
 		opt(itr)
 	}
@@ -187,65 +176,12 @@ func (i *Interactor) runTask(
 	}
 
 	for baseImage, err := range i.ImageRepo.Iterate(im.Filtering{Collection: &source}, 1) {
-		if err := i.Transactor.RunInTx(func(tx Repos) error {
-			if err != nil {
-				return fmt.Errorf("%w: iterating on images: %w", errCtx, err)
-			}
-			image, err := i.ImageStore.Find(baseImage)
-			if err != nil {
-				return fmt.Errorf("%w: finding source image: %w", errCtx, err)
-			}
-			if err := i.ImageRepo.AddToCollection(image.Id, dst.Id); err != nil {
-				return fmt.Errorf("%w: adding image to collection: %w", errCtx, err)
-			}
-
-			if deep {
-				for _, label := range image.Labels {
-					label.Id = a.NewAnnotationId()
-					if err := i.AnnotationRepo.AddImageLabel(
-						image.Id,
-						dst.Id,
-						label,
-						label.Author,
-						label.Time,
-					); err != nil {
-						return fmt.Errorf("%w: adding image label: %w", errCtx, err)
-					}
-				}
-
-				for _, box := range image.BoundingBoxes {
-					box.Id = a.NewAnnotationId()
-					if err := i.AnnotationRepo.AddBoundingBox(
-						image.Id,
-						dst.Id,
-						box,
-						box.Author,
-						box.Time,
-					); err != nil {
-						return fmt.Errorf("%w: adding bounding boxes: %w", errCtx, err)
-					}
-				}
-				for _, poly := range image.Polygons {
-					poly.Id = a.NewAnnotationId()
-					if err := i.AnnotationRepo.AddPolygon(
-						image.Id,
-						dst.Id,
-						poly,
-						poly.Author,
-						poly.Time,
-					); err != nil {
-						return fmt.Errorf("%w: adding polygons: %w", errCtx, err)
-					}
-				}
-
-			}
-			return nil
-		}); err != nil {
-			i.IEventLogger.AddEvent(
-				task.Id,
-				e.Event{Time: i.Clock.Now(), State: e.FailedTask, Error: err.Error()},
-			)
-			i.Logger.Error(err.Error())
+		if err != nil {
+			i.LogError(task.Id, err)
+			return
+		}
+		if err := i.ImageStore.Copy(source, baseImage.ImageId, dst.Name, deep); err != nil {
+			i.LogError(task.Id, err)
 			return
 
 		}
