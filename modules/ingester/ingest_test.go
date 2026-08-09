@@ -1,6 +1,7 @@
 package ingester
 
 import (
+	"archive/zip"
 	"bytes"
 	"testing"
 	"time"
@@ -11,6 +12,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	st "github.com/lejeunel/go-image-annotator/shared/testing"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -246,4 +248,41 @@ func TestHandleInvalidSpecsError(t *testing.T) {
 	ing.ImageSpecsDetector = &fk.SpecsDetector{Err: e.ErrValidation}
 	_, err := ing.Ingest(Request{})
 	assert.Error(t, err)
+}
+
+func MakeZipArchive(files map[string][]byte) (*bytes.Reader, int64) {
+	var buf bytes.Buffer
+	zw := zip.NewWriter(&buf)
+
+	for name, data := range files {
+		w, err := zw.Create(name)
+		if err != nil {
+			panic(err)
+		}
+
+		if _, err := w.Write(data); err != nil {
+			panic(err)
+		}
+	}
+
+	if err := zw.Close(); err != nil {
+		panic(err)
+	}
+
+	data := buf.Bytes()
+	return bytes.NewReader(data), int64(len(data))
+}
+
+func TestIngestArchive(t *testing.T) {
+	repos := NewTestingRepos()
+	ing := NewTestingIngester(repos)
+	archive, size := MakeZipArchive(
+		map[string][]byte{
+			"image1.jpg": st.TestJPGImage,
+			"image2.png": st.TestPNGImage,
+		},
+	)
+	r, err := ing.IngestArchive(BatchRequest{ReaderAt: archive, Size: size})
+	assert.NoError(t, err)
+	assert.Equal(t, int64(2), r.NumIngestedImages)
 }

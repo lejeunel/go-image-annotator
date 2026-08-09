@@ -1,6 +1,7 @@
 package ingester
 
 import (
+	"archive/zip"
 	"errors"
 	"fmt"
 	"hash"
@@ -102,7 +103,40 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 
 	return &Response{ImageId: image.Id, Collection: collection.Name}, nil
 }
+func (i Ingester) IngestArchive(r BatchRequest) (*BatchResponse, error) {
+	errCtx := fmt.Errorf("ingesting zip archive")
 
+	numIngestedImages := int64(0)
+
+	zr, err := zip.NewReader(r.ReaderAt, r.Size)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", errCtx, err)
+	}
+
+	for _, file := range zr.File {
+		if file.FileInfo().IsDir() {
+			continue
+		}
+
+		reader, err := file.Open()
+		if err != nil {
+			return nil, fmt.Errorf("%w: opening file: %w", errCtx, err)
+		}
+
+		_, err = i.Ingest(Request{UserId: r.UserId, Collection: r.Collection, Reader: reader})
+		if err != nil {
+			reader.Close()
+			return nil, fmt.Errorf("%w: ingesting image: %w", errCtx, err)
+		}
+
+		if err := reader.Close(); err != nil {
+			return nil, fmt.Errorf("%w: closing image reader: %w", errCtx, err)
+		}
+		numIngestedImages += 1
+	}
+
+	return &BatchResponse{NumIngestedImages: numIngestedImages}, nil
+}
 func (i *Ingester) storeRawData(image im.Image, reader io.Reader) (*[]byte, error) {
 	tee := io.TeeReader(reader, i.Hasher)
 	hash := i.Hasher.Sum(nil)

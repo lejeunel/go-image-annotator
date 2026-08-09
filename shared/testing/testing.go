@@ -2,11 +2,18 @@ package testing
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
+
+//go:embed sample-image.jpg
+var TestJPGImage []byte
+
+//go:embed sample-image.png
+var TestPNGImage []byte
 
 type TestingErrPresenter struct {
 	GotDuplicationErr bool

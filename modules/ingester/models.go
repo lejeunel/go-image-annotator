@@ -21,3 +21,14 @@ type Response struct {
 	ImageId    im.ImageId
 	Collection string
 }
+
+type BatchResponse struct {
+	NumIngestedImages int64
+}
+
+type BatchRequest struct {
+	UserId     u.UserId
+	Collection string
+	ReaderAt   io.ReaderAt
+	Size       int64
+}
