@@ -50,7 +50,7 @@ func TestHandleInternalErrOnList(t *testing.T) {
 
 func TestHandleInternalErrOnImageBuild(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.ImageRepo{}, &fk.ImageStore{Err: e.ErrInternal})
+	itr := New(&fk.ImageRepo{}, &fk.ImageStore{ErrOnFind: e.ErrInternal})
 	itr.Execute(
 		Request{Filtering: im.Filtering{}, PaginationParams: pa.PaginationParams{PageSize: 1}},
 		p,

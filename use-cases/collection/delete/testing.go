@@ -12,13 +12,3 @@ type FakePresenter struct {
 func (p *FakePresenter) SuccessDeleteCollection(Response) {
 	p.GotSuccess = true
 }
-
-type TestingTransactor struct {
-	Repos
-}
-
-func (m *TestingTransactor) RunInTx(
-	fn func(Repos) error,
-) error {
-	return fn(m.Repos)
-}

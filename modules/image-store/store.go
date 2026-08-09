@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -81,6 +82,31 @@ func (s ImageStore) DeleteAsset(id im.ImageId) error {
 		return fmt.Errorf("fetching image specs")
 	}
 	return s.FileStore.Delete(fmt.Sprintf("%v.%v", id, strings.Split(specs.MIMEType, "/")[1]))
+}
+func (s ImageStore) Delete(id im.ImageId, collection clc.CollectionName) error {
+	errCtx := fmt.Errorf("deleting image")
+	if err := s.AnnotationRepo.RemoveAllAnnotations(id, collection); err != nil {
+		return fmt.Errorf("%w: %w", errCtx, err)
+	}
+	if err := s.ImageRepo.RemoveImageFromCollection(id, collection); err != nil {
+		return fmt.Errorf("%w: %w", errCtx, err)
+	}
+
+	isUsed, err := s.ImageRepo.IsUsed(id)
+	if err != nil {
+		return fmt.Errorf(
+			"%w: checking whether image %v is used in another collection: %w",
+			errCtx,
+			id,
+			err,
+		)
+	}
+	if !*isUsed {
+		if err := s.DeleteAsset(id); err != nil {
+			return fmt.Errorf("%w: %w", errCtx, err)
+		}
+	}
+	return nil
 }
 
 func New(i ImageRepo, c CollectionRepo, a AnnotationRepo, m MetaRepo, f fs.FileStore) ImageStore {

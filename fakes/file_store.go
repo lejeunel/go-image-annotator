@@ -6,11 +6,11 @@ import (
 )
 
 type FileStore struct {
-	ErrOnStore       error
-	ErrOnGet         error
-	NumDeletedImages int
-	Data             []byte
-	GotData          []byte
+	ErrOnStore      error
+	ErrOnGet        error
+	NumDeletedItems int
+	Data            []byte
+	GotData         []byte
 }
 
 func (r *FileStore) Store(path string, reader io.Reader) error {
@@ -26,7 +26,7 @@ func (r *FileStore) GetReaderAt(string) (io.ReaderAt, int64, error) {
 }
 
 func (r *FileStore) Delete(string) error {
-	r.NumDeletedImages += 1
+	r.NumDeletedItems += 1
 	return nil
 }
 

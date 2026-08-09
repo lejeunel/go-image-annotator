@@ -9,7 +9,7 @@ import (
 	s "github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	ingm "github.com/lejeunel/go-image-annotator/modules/ingester"
+	ingm "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	l "github.com/lejeunel/go-image-annotator/shared/logging"
 )
 

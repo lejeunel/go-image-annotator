@@ -13,43 +13,42 @@ import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	event_logger "github.com/lejeunel/go-image-annotator/modules/event-logger"
-	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
-	job_queue "github.com/lejeunel/go-image-annotator/modules/job-queue"
+	jq "github.com/lejeunel/go-image-annotator/modules/job-queue"
 )
 
-type Transactor interface {
-	RunInTx(fn func(Repos) error) error
+type ImageStore interface {
+	Delete(id im.ImageId, collection clc.CollectionName) error
 }
 
 type Interactor struct {
-	Repos
-	Transactor
-	ImageStore ims.Interface
+	ImageStore
+	ImageRepo
+	CollectionRepo
 	Auth
-	JobQueue    job_queue.JobQueue
+	jq.JobQueue
 	EventLogger event_logger.IEventLogger
 	slog.Logger
 	clockwork.Clock
 }
 
 func New(
-	r Repos,
-	tra Transactor,
-	ims ims.Interface,
-	jq job_queue.JobQueue,
+	ims ImageStore,
+	imr ImageRepo,
+	cr CollectionRepo,
+	jq jq.JobQueue,
 	el event_logger.IEventLogger,
 	logger slog.Logger,
 	opts ...Option,
 ) Interactor {
 	i := &Interactor{
-		Repos:       r,
-		Transactor:  tra,
-		ImageStore:  ims,
-		EventLogger: el,
-		Logger:      logger,
-		JobQueue:    jq,
-		Clock:       clockwork.NewRealClock(),
-		Auth:        auth.NewVoidAuth(),
+		ImageStore:     ims,
+		ImageRepo:      imr,
+		CollectionRepo: cr,
+		EventLogger:    el,
+		Logger:         logger,
+		JobQueue:       jq,
+		Clock:          clockwork.NewRealClock(),
+		Auth:           auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -113,42 +112,13 @@ func (i *Interactor) runTask(task t.Task, collection clc.Collection) {
 	}
 
 	for baseImage, err := range i.ImageRepo.Iterate(im.Filtering{Collection: &collection.Name}, 1) {
-		if err := i.Transactor.RunInTx(func(tx Repos) error {
-			if err != nil {
-				return fmt.Errorf("%w: iterating on images: %w", errCtx, err)
-			}
-			if err := tx.AnnotationRepo.RemoveAllAnnotations(
-				baseImage.ImageId,
-				collection.Name,
-			); err != nil {
-				return fmt.Errorf("%w: deleting annotations: %w", errCtx, err)
-			}
-			if err := tx.ImageRepo.RemoveImageFromCollection(
-				baseImage.ImageId,
-				collection.Id,
-			); err != nil {
-				return fmt.Errorf("%w: adding image to collection: %w", errCtx, err)
-			}
+		if err != nil {
+			i.LogError(task.Id, err)
+			return
 
-			isUsed, err := tx.ImageRepo.IsUsed(baseImage.ImageId)
-			if err != nil {
-				return fmt.Errorf(
-					"%w: checking whether image %v is used in another collection: %w",
-					errCtx,
-					baseImage.ImageId,
-					err,
-				)
-			}
-			if !*isUsed {
-				i.ImageStore.DeleteAsset(baseImage.ImageId)
-			}
-			return nil
-		}); err != nil {
-			i.EventLogger.AddEvent(
-				task.Id,
-				ev.Event{Time: i.Clock.Now(), State: ev.FailedTask, Error: err.Error()},
-			)
-			i.Logger.Error(err.Error())
+		}
+		if err := i.ImageStore.Delete(baseImage.ImageId, baseImage.Collection); err != nil {
+			i.LogError(task.Id, err)
 			return
 		}
 	}

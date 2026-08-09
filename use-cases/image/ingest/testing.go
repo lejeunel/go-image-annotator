@@ -2,7 +2,7 @@ package ingest
 
 import (
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	ing "github.com/lejeunel/go-image-annotator/modules/ingester"
+	ing "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 

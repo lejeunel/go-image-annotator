@@ -7,7 +7,7 @@ import (
 )
 
 type ImageRepo interface {
-	RemoveImageFromCollection(im.ImageId, clc.CollectionId) error
+	RemoveImageFromCollection(im.ImageId, clc.CollectionName) error
 }
 type AnnotationRepo interface {
 	RemoveAnnotation(a.AnnotationId) error

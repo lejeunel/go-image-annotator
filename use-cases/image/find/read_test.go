@@ -12,7 +12,7 @@ import (
 
 func TestHandleErrorOnFind(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.ImageStore{Err: e.ErrNotFound})
+	itr := New(&fk.ImageStore{ErrOnFind: e.ErrNotFound})
 	itr.Execute(Request{ImageId: im.NewImageId().String(), Collection: "a-collection"}, p)
 	assert.ErrorIs(t, p.GotErr, e.ErrNotFound)
 	assert.False(t, p.GotSuccess)

@@ -8,7 +8,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	ig "github.com/lejeunel/go-image-annotator/modules/ingester"
+	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	rd "github.com/lejeunel/go-image-annotator/modules/reader"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"

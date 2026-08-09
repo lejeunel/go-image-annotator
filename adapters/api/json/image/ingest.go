@@ -6,7 +6,7 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
-	ig "github.com/lejeunel/go-image-annotator/modules/ingester"
+	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 )
 
 type Ingest struct {

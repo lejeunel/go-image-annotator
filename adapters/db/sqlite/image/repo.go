@@ -182,10 +182,10 @@ func (r SQLiteImageRepo) Delete(id im.ImageId) error {
 
 func (r SQLiteImageRepo) RemoveImageFromCollection(
 	imageId im.ImageId,
-	collectionId clc.CollectionId,
+	collection clc.CollectionName,
 ) error {
-	_, err := r.Db.Exec("DELETE FROM images_collections WHERE image_id = $1 AND collection_id = $2",
-		imageId, collectionId)
+	_, err := r.Db.Exec("DELETE FROM images_collections WHERE image_id = $1 AND collection_id = (SELECT id FROM collections WHERE name=$2)",
+		imageId, collection)
 	if err != nil {
 		return fmt.Errorf(
 			"removing image from image to collection junction table: %v: %w",

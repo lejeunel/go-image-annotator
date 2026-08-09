@@ -25,8 +25,8 @@ func NewTestingRepos() Repos {
 	}
 }
 
-func NewTestingIngester(repos Repos, opts ...Option) *Ingester {
-	i := &Ingester{
+func NewTestingImageIngester(repos Repos, opts ...Option) ImageIngester {
+	i := &ImageIngester{
 		Hasher:             &fk.Hasher{},
 		Repos:              repos,
 		Transactor:         &TestingTransactor{repos},
@@ -37,5 +37,5 @@ func NewTestingIngester(repos Repos, opts ...Option) *Ingester {
 	for _, opt := range opts {
 		opt(i)
 	}
-	return i
+	return *i
 }

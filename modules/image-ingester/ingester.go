@@ -1,7 +1,6 @@
 package ingester
 
 import (
-	"archive/zip"
 	"errors"
 	"fmt"
 	"hash"
@@ -36,7 +35,7 @@ type Repos struct {
 type Transactor interface {
 	RunInTx(fn func(Repos) error) error
 }
-type Ingester struct {
+type ImageIngester struct {
 	Hasher hash.Hash
 	Repos
 	Transactor
@@ -45,10 +44,10 @@ type Ingester struct {
 	clockwork.Clock
 }
 
-type Option func(*Ingester)
+type Option func(*ImageIngester)
 
 func WithClock(c clockwork.Clock) Option {
-	return func(i *Ingester) {
+	return func(i *ImageIngester) {
 		i.Clock = c
 	}
 }
@@ -56,8 +55,8 @@ func WithClock(c clockwork.Clock) Option {
 func New(imr ImageRepo, clr CollectionRepo,
 	lr LabelRepo, ar AnnotationRepo, tra Transactor,
 	fileStore ast.FileStore, hasher hash.Hash, specsDetector ImageSpecsDetector, opts ...Option,
-) *Ingester {
-	i := &Ingester{
+) *ImageIngester {
+	i := &ImageIngester{
 		Repos:        Repos{imr, lr, clr, ar},
 		Transactor:   tra,
 		ArtefactRepo: fileStore, Hasher: hasher,
@@ -70,7 +69,7 @@ func New(imr ImageRepo, clr CollectionRepo,
 	return i
 }
 
-func (i Ingester) Ingest(r Request) (*Response, error) {
+func (i ImageIngester) Ingest(r Request) (*Response, error) {
 	errCtx := "ingesting image"
 	collection, err := i.findCollectionByName(r.Collection)
 	if err != nil {
@@ -108,41 +107,7 @@ func (i Ingester) Ingest(r Request) (*Response, error) {
 
 	return &Response{ImageId: image.Id, Collection: collection.Name}, nil
 }
-func (i Ingester) IngestArchive(r BatchRequest) (BatchResponse, error) {
-	errCtx := fmt.Errorf("ingesting zip archive")
-
-	resp := BatchResponse{Collection: r.Collection}
-
-	zr, err := zip.NewReader(r.ReaderAt, r.Size)
-	if err != nil {
-		return resp, fmt.Errorf("%w: %w", errCtx, err)
-	}
-
-	for _, file := range zr.File {
-		if file.FileInfo().IsDir() {
-			continue
-		}
-
-		reader, err := file.Open()
-		if err != nil {
-			return resp, fmt.Errorf("%w: opening file: %w", errCtx, err)
-		}
-
-		r, err := i.Ingest(Request{UserId: r.UserId, Collection: r.Collection, Reader: reader})
-		if err != nil {
-			reader.Close()
-			return resp, fmt.Errorf("%w: ingesting image: %w", errCtx, err)
-		}
-
-		if err := reader.Close(); err != nil {
-			return resp, fmt.Errorf("%w: closing image reader: %w", errCtx, err)
-		}
-		resp.ImageIds = append(resp.ImageIds, r.ImageId)
-	}
-
-	return resp, nil
-}
-func (i *Ingester) storeRawData(image im.Image, reader io.Reader) (*[]byte, error) {
+func (i *ImageIngester) storeRawData(image im.Image, reader io.Reader) (*[]byte, error) {
 	tee := io.TeeReader(reader, i.Hasher)
 	hash := i.Hasher.Sum(nil)
 
@@ -157,7 +122,7 @@ func (i *Ingester) storeRawData(image im.Image, reader io.Reader) (*[]byte, erro
 	return &hash, nil
 }
 
-func (i Ingester) ingestImage(
+func (i ImageIngester) ingestImage(
 	tx Repos,
 	authorId u.UserId,
 	image *im.Image,
@@ -212,7 +177,7 @@ func (i Ingester) ingestImage(
 	return nil
 }
 
-func (i *Ingester) buildImage(id im.ImageId, collection clc.Collection, labelNames []string,
+func (i *ImageIngester) buildImage(id im.ImageId, collection clc.Collection, labelNames []string,
 	bboxes []a.BoundingBoxRequest, polygons []a.PolygonRequest,
 ) (*im.Image, error) {
 	image := im.NewImage(id, collection)
@@ -231,7 +196,7 @@ func (i *Ingester) buildImage(id im.ImageId, collection clc.Collection, labelNam
 	return &image, nil
 }
 
-func (i Ingester) appendLabels(image *im.Image, labelNames []string) error {
+func (i ImageIngester) appendLabels(image *im.Image, labelNames []string) error {
 	for _, labelName := range labelNames {
 		label, err := i.findLabelByName(labelName)
 		if err != nil {
@@ -244,7 +209,7 @@ func (i Ingester) appendLabels(image *im.Image, labelNames []string) error {
 	return nil
 }
 
-func (i Ingester) appendBoundingBoxes(image *im.Image, bboxes []a.BoundingBoxRequest) error {
+func (i ImageIngester) appendBoundingBoxes(image *im.Image, bboxes []a.BoundingBoxRequest) error {
 	baseErr := fmt.Errorf("appending bounding boxes")
 	for _, bbox := range bboxes {
 		label, err := i.findLabelByName(bbox.Label)
@@ -266,7 +231,7 @@ func (i Ingester) appendBoundingBoxes(image *im.Image, bboxes []a.BoundingBoxReq
 	return nil
 }
 
-func (i Ingester) appendPolygons(image *im.Image, polygons []a.PolygonRequest) error {
+func (i ImageIngester) appendPolygons(image *im.Image, polygons []a.PolygonRequest) error {
 	baseErr := fmt.Errorf("appending polygons")
 	for _, p := range polygons {
 		label, err := i.findLabelByName(p.Label)
@@ -285,7 +250,7 @@ func (i Ingester) appendPolygons(image *im.Image, polygons []a.PolygonRequest) e
 	return nil
 }
 
-func (i Ingester) findCollectionByName(name string) (*clc.Collection, error) {
+func (i ImageIngester) findCollectionByName(name string) (*clc.Collection, error) {
 	collection, err := i.CollectionRepo.Find(name)
 	baseErr := fmt.Errorf("finding collection with name %v", name)
 	if err != nil {
@@ -294,7 +259,7 @@ func (i Ingester) findCollectionByName(name string) (*clc.Collection, error) {
 	return collection, nil
 }
 
-func (i Ingester) findLabelByName(name string) (*lbl.Label, error) {
+func (i ImageIngester) findLabelByName(name string) (*lbl.Label, error) {
 	baseErr := fmt.Errorf("fetching label by name %v", name)
 	label, err := i.LabelRepo.FindLabel(name)
 	if err != nil {
@@ -303,7 +268,7 @@ func (i Ingester) findLabelByName(name string) (*lbl.Label, error) {
 	return label, nil
 }
 
-func (i Ingester) ensureDuplicateImageDoesNotExists(hash []byte) error {
+func (i ImageIngester) ensureDuplicateImageDoesNotExists(hash []byte) error {
 	baseErr := fmt.Errorf("ensuring that duplicate image does not exist using hash")
 	duplicateId, err := i.ImageRepo.FindImageIdByHash(hash)
 	if duplicateId != nil {

@@ -6,7 +6,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	im "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	lbl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
-	in "github.com/lejeunel/go-image-annotator/modules/ingester"
+	in "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 )
 
 type IngestionTransactor struct{ db *sqlx.DB }

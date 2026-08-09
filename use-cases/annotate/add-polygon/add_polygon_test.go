@@ -39,7 +39,7 @@ func TestHandleAuthError(t *testing.T) {
 
 func TestErrOnImageRetrievalShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.ImageStore{Err: e.ErrInternal},
+	itr := New(&fk.ImageStore{ErrOnFind: e.ErrInternal},
 		&fk.AnnotationRepo{},
 		&fk.LabelRepo{})
 	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)

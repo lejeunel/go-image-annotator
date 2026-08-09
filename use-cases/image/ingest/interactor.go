@@ -7,7 +7,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	ing "github.com/lejeunel/go-image-annotator/modules/ingester"
+	ing "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 

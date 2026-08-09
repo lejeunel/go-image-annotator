@@ -38,7 +38,7 @@ func TestHandleNotFoundErrOnImageRetrieval(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.AnnotationRepo{},
 		&fk.LabelRepo{},
-		&fk.ImageStore{Err: e.ErrNotFound})
+		&fk.ImageStore{ErrOnFind: e.ErrNotFound})
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -48,7 +48,7 @@ func TestHandleInternalErrOnImageRetrieval(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.AnnotationRepo{},
 		&fk.LabelRepo{},
-		&fk.ImageStore{Err: e.ErrInternal})
+		&fk.ImageStore{ErrOnFind: e.ErrInternal})
 	itr.Execute(t.Context(), Request{im.NewImageId().String(), "a-collection", "a-label"}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)

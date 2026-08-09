@@ -30,6 +30,6 @@ func NewSQLiteImageInteractors(
 		Find:   find.New(ims),
 		Raw:    raw.New(imfs, imr),
 		List:   list.New(imr, ims),
-		Delete: delete.New(ims, imr, anr),
+		Delete: delete.New(ims),
 	}
 }

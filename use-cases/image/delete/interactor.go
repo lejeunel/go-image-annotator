@@ -4,13 +4,18 @@ import (
 	"context"
 	"fmt"
 
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 )
 
+type ImageStore interface {
+	Find(im.BaseImage) (*im.Image, error)
+	Delete(im.ImageId, clc.CollectionName) error
+}
+
 type Interactor struct {
-	store st.Interface
+	ImageStore
 	ImageRepo
 	AnnotationRepo
 	auth Auth
@@ -24,11 +29,10 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(store st.Interface, r ImageRepo, a AnnotationRepo, opts ...Option) Interactor {
+func New(store ImageStore, opts ...Option) Interactor {
 	i := &Interactor{
-		store: store, ImageRepo: r,
-		AnnotationRepo: a,
-		auth:           auth.NewVoidAuth(),
+		ImageStore: store,
+		auth:       auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -57,48 +61,17 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	if err := i.deleteLabels(*image); err != nil {
+	if err := i.ImageStore.Delete(imageId, r.Collection); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
-	}
-
-	if err := i.deleteBoundingBoxes(*image); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-
-	if err := i.ImageRepo.RemoveImageFromCollection(image.Id, image.Collection.Id); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-
 	}
 
 	out.SuccessDeleteImage(Response{ImageId: image.Id.String(), Collection: image.Collection.Name})
 }
 
-func (i *Interactor) deleteBoundingBoxes(image im.Image) error {
-	baseErr := fmt.Errorf("deleting bounding box annotations")
-	for _, box := range image.BoundingBoxes {
-		if err := i.AnnotationRepo.RemoveAnnotation(box.Id); err != nil {
-			return fmt.Errorf("%w: %w", baseErr, err)
-		}
-	}
-	return nil
-}
-
-func (i *Interactor) deleteLabels(image im.Image) error {
-	baseErr := fmt.Errorf("deleting image labels")
-	for _, label := range image.Labels {
-		if err := i.AnnotationRepo.RemoveAnnotation(label.Id); err != nil {
-			return fmt.Errorf("%w: %w", baseErr, err)
-		}
-	}
-	return nil
-}
-
 func (i *Interactor) findImage(imageId im.ImageId, collection string) (*im.Image, error) {
 	baseErr := fmt.Errorf("fetching associated resources")
-	image, err := i.store.Find(im.BaseImage{ImageId: imageId, Collection: collection})
+	image, err := i.ImageStore.Find(im.BaseImage{ImageId: imageId, Collection: collection})
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", baseErr, err)
 	}

@@ -87,3 +87,28 @@ func TestIngestBatch(t *testing.T) {
 	assert.True(t, bytes.Equal(gotData, data))
 
 }
+
+func TestArchiveIsDeleted(t *testing.T) {
+	p := &FakePresenter{}
+	itr, collection, _, ctx, data := Setup(t)
+	tfs := &fk.FileStore{}
+	itr.TemporaryFileStore = tfs
+	itr.Execute(ctx,
+		Request{Reader: bytes.NewReader(data),
+			Collection: collection.Name}, p)
+	assert.True(t, tfs.NumDeletedItems > 0)
+
+}
+
+func TestFailedIngestionIsLogged(t *testing.T) {
+	p := &FakePresenter{}
+	itr, collection, _, ctx, data := Setup(t)
+	el := fk.EventLogger{}
+	itr.IEventLogger = &el
+	itr.Ingester = &FakeIngester{Err: e.ErrInternal}
+	itr.Execute(ctx,
+		Request{Reader: bytes.NewReader(data),
+			Collection: collection.Name}, p)
+	assert.Equal(t, ev.FailedTask, el.Events[len(el.Events)-1].State)
+
+}

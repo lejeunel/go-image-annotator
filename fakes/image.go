@@ -10,7 +10,7 @@ import (
 )
 
 type ImageRepo struct {
-	RemovedImageId               im.ImageId
+	RemovedImageIdFromCollection *im.ImageId
 	ErrOnRemoveImage             error
 	ErrOnImageExistsInCollection error
 	ErrOnImageExists             error
@@ -41,12 +41,12 @@ type ImageRepo struct {
 
 func (r *ImageRepo) RemoveImageFromCollection(
 	imageId im.ImageId,
-	collectionId clc.CollectionId,
+	collection clc.CollectionName,
 ) error {
 	if r.ErrOnRemoveImage != nil {
 		return r.ErrOnRemoveImage
 	}
-	r.RemovedImageId = imageId
+	r.RemovedImageIdFromCollection = &imageId
 	return nil
 }
 

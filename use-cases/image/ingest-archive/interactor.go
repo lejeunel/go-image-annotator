@@ -13,7 +13,7 @@ import (
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
-	ing "github.com/lejeunel/go-image-annotator/modules/ingester"
+	ing "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	jq "github.com/lejeunel/go-image-annotator/modules/job-queue"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -29,6 +29,7 @@ type Ingester interface {
 type TemporaryFileStore interface {
 	Store(string, io.Reader) error
 	GetReaderAt(string) (io.ReaderAt, int64, error)
+	Delete(string) error
 }
 
 type Interactor struct {
@@ -130,11 +131,28 @@ func (i Interactor) runTask(task t.Task, user u.UserId, collection clc.Collectio
 	if err != nil {
 		i.LogError(task.Id, fmt.Errorf("ingesting archive: reading archive from temporary store: %w", err))
 		return
-
 	}
-	i.Ingester.IngestArchive(ing.BatchRequest{UserId: user, Collection: collection,
+	i.IEventLogger.AddEvent(task.Id,
+		ev.Event{
+			Time:  i.Clock.Now(),
+			State: ev.StartedTask,
+			Extra: map[string]string{"collection": collection},
+		})
+	_, err = i.Ingester.IngestArchive(ing.BatchRequest{UserId: user, Collection: collection,
 		ReaderAt: reader, Size: size,
 	})
+	if err != nil {
+		i.IEventLogger.AddEvent(task.Id,
+			ev.Event{
+				Time:  i.Clock.Now(),
+				State: ev.FailedTask,
+				Error: err.Error(),
+			})
+	}
+
+	if err := i.TemporaryFileStore.Delete(filename); err != nil {
+		i.LogError(task.Id, fmt.Errorf("ingesting archive: deleting file from temporary store: %w", err))
+	}
 
 }
 

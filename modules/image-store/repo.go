@@ -11,6 +11,7 @@ type AnnotationRepo interface {
 	FindImageLabels(im.ImageId, clc.CollectionId) ([]a.ImageLabel, error)
 	FindBoundingBoxes(im.ImageId, clc.CollectionId) ([]a.BoundingBox, error)
 	FindPolygons(im.ImageId, clc.CollectionId) ([]a.Polygon, error)
+	RemoveAllAnnotations(im.ImageId, clc.CollectionName) error
 }
 
 type CollectionRepo interface {
@@ -20,6 +21,8 @@ type CollectionRepo interface {
 type ImageRepo interface {
 	GetSpecs(im.ImageId) (*im.Specs, error)
 	ImageExistsInCollection(im.ImageId, clc.CollectionName) (bool, error)
+	RemoveImageFromCollection(im.ImageId, clc.CollectionName) error
+	IsUsed(im.ImageId) (*bool, error)
 }
 
 type MetaRepo interface {

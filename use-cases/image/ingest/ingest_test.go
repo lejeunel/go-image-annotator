@@ -6,7 +6,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	grp "github.com/lejeunel/go-image-annotator/entities/group"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
-	ig "github.com/lejeunel/go-image-annotator/modules/ingester"
+	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
