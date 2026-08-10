@@ -8,6 +8,7 @@ import (
 
 	ap "github.com/lejeunel/go-image-annotator/adapters/web/annotator/presenters"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
 	s "github.com/lejeunel/go-image-annotator/shared/session"
 	assign_label "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
@@ -29,7 +30,7 @@ func NewServer(
 	return &Server{
 		Annotator:      annotator,
 		SessionManager: sessionManager,
-		PageBuilder:    pageBuilder,
+		PageBuilder:    *pageBuilder.SetActiveSection(cmp.NoPageActive),
 	}
 }
 
