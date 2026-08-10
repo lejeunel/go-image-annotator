@@ -20,7 +20,7 @@ type TableBuilderOption func(*TableBuilder)
 
 func WithSimplePlaceHolder() TableBuilderOption {
 	return func(b *TableBuilder) {
-		b.placeholder = Div(Text(placeHolderText))
+		b.placeholder = Div()
 	}
 }
 
