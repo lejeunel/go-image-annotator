@@ -52,7 +52,7 @@ func (p TaskListPresenter) SuccessListTasks(r list.Response) {
 		row := MakeRow(t)
 		p.AddRow(row)
 	}
-	p.SetPagination(r.Pagination, ListTasksUrl)
+	p.SetPagination(r.Pagination, rt.ListTasksUrl)
 	p.Render(p.Writer)
 }
 

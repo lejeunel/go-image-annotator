@@ -184,7 +184,9 @@ schemas:
 #+end_src
             
 * TODO Import image into collection with annotations (needs source collection)
-* TODO apply transactor in image store delete method
+* DONE apply transactor in image store delete method
+* TODO set maximum width for images and use a forward/backward converter
+coordinates of annotations will have to be adjusted
 
   
   

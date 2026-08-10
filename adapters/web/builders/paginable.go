@@ -16,7 +16,7 @@ type CreationButton struct {
 
 type PaginatedListBuilder struct {
 	hasCreationButton bool
-	creationButton    CreationButton
+	CreationButton
 	PaginableTableBuilder
 	PageBuilder
 }
@@ -34,12 +34,12 @@ func (b *PaginatedListBuilder) Render(w io.Writer) {
 
 	var creationPanel Node
 	if b.hasCreationButton {
-		button := cmp.MakeHTMXCreateButton(
-			b.creationButton.label,
-			b.creationButton.formGetEndpoint,
-			b.creationButton.formDivId,
+		button := cmp.MakeHTMXGetSwapButton(
+			b.CreationButton.label,
+			b.CreationButton.formGetEndpoint,
+			b.CreationButton.formDivId,
 		)
-		formPlaceholder := Div(ID(b.creationButton.formDivId))
+		formPlaceholder := Div(ID(b.CreationButton.formDivId))
 		creationPanel = Div(button, formPlaceholder)
 	}
 	content := Div(
@@ -56,7 +56,7 @@ func (b *PaginatedListBuilder) AddCreationButton(
 	formEndpoint string,
 	formDivId string,
 ) *PaginatedListBuilder {
-	b.creationButton = CreationButton{buttonLabel, formEndpoint, formDivId}
+	b.CreationButton = CreationButton{buttonLabel, formEndpoint, formDivId}
 	b.hasCreationButton = true
 	return b
 }

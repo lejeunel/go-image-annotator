@@ -123,9 +123,21 @@ func (s ImageStore) Delete(id im.ImageId, collection clc.CollectionName) error {
 		if err := s.DeleteAsset(id); err != nil {
 			return fmt.Errorf("%w: %w", errCtx, err)
 		}
+		if err := s.ImageRepo.Delete(id); err != nil {
+			return fmt.Errorf("%w: %w", errCtx, err)
+		}
 	}
 	return nil
 }
+func (s ImageStore) DeleteBatch(ids []im.ImageId, collection clc.CollectionName) error {
+	for _, id := range ids {
+		if err := s.Delete(id, collection); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s ImageStore) Copy(src clc.CollectionName, id im.ImageId, dst clc.CollectionName, deep bool) error {
 	errCtx := fmt.Errorf("copying image %v from collection %v to collection %v", id, src, dst)
 	image, err := s.Find(im.BaseImage{ImageId: id, Collection: src})

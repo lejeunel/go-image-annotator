@@ -5,6 +5,7 @@ import (
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
+	s "github.com/lejeunel/go-image-annotator/adapters/web/shared"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/delete"
 )
@@ -20,7 +21,7 @@ type DeletePresenter struct {
 func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
 	task := "deleting collection"
 	okMessageFunc := func(r delete.Response) string {
-		return MakeNewTaskMessage()
+		return s.MakeNewTaskMessage()
 	}
 	return DeletePresenter{w, u, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }

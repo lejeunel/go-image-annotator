@@ -9,7 +9,7 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func MakeHTMXCreateButton(text string, hxGet string, hxTarget string) Node {
+func MakeHTMXGetSwapButton(text string, hxGet string, hxTarget string) Node {
 	return Div(
 		Class("m-2"),
 		Button(

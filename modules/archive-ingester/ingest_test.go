@@ -34,7 +34,7 @@ func MakeZipArchive(files map[string][]byte) (*bytes.Reader, int64) {
 }
 
 func Setup() (ArchiveIngester, *bytes.Reader, int64) {
-	ing := New(&fk.ImageStore{})
+	ing := New(&fk.ImageStore{}, &FakeImageIngester{})
 	archive, size := MakeZipArchive(
 		map[string][]byte{
 			"image1.jpg": st.TestJPGImage,

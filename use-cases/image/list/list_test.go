@@ -81,18 +81,18 @@ func TestListImages(t *testing.T) {
 
 func TestPaginationMetaData(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &fk.ImageRepo{Count_: 10}
+	repo := &fk.ImageRepo{Count_: 12}
 	itr := New(repo, &fk.ImageStore{})
 	r := Request{
 		Filtering:        im.Filtering{},
-		PaginationParams: pa.PaginationParams{Page: 1, PageSize: 2},
+		PaginationParams: pa.PaginationParams{Page: 1, PageSize: 10},
 	}
 	itr.Execute(r, p)
 	pg := p.Got.Pagination
-	assert.Equal(t, pg.Page, r.Page, "page")
-	assert.Equal(t, pg.PageSize, r.PageSize, "page size")
-	assert.Equal(t, int(pg.TotalRecords), 10, "total records")
-	assert.Equal(t, int(pg.TotalPages), 5, "total pages")
+	assert.Equal(t, pg.Page, r.Page)
+	assert.Equal(t, pg.PageSize, r.PageSize)
+	assert.Equal(t, 12, int(pg.TotalRecords))
+	assert.Equal(t, 2, int(pg.TotalPages))
 }
 
 func TestQueryPaginationParams(t *testing.T) {

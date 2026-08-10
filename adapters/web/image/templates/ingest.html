@@ -1,0 +1,129 @@
+{{define "ingestion"}}
+<div
+    class="flex w-160 border border-outline dark:border-outline-dark rounded-radius"
+    x-data="{
+        selectedTab: 'archive',
+        dragging: false,
+        fileName: null,
+        uploadError: null,
+        maxBytes: {{.MaxMB}} * 1024 * 1024,
+        allowed: ['application/zip', 'application/x-zip-compressed'],
+
+        handleFiles(files) {
+            this.uploadError = null;
+
+            if (files.length > 1) {
+                this.uploadError = 'Only one file allowed';
+                return;
+            }
+
+            const file = files[0];
+            if (!file) return;
+
+            if (!this.allowed.includes(file.type)) {
+                this.uploadError = 'Unsupported format';
+                return;
+            }
+            if (file.size > this.maxBytes) {
+                this.uploadError = 'File exceeds 5MB';
+                return;
+            }
+
+            this.fileName = file.name;
+
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            this.$refs.archiveInput.files = dt.files;
+            this.$refs.archiveForm.requestSubmit();
+        }
+    }"
+    x-ref="{{.DivId}}"
+>
+  <div class="w-full">
+        <div x-on:keydown.right.prevent="$focus.wrap().next()" x-on:keydown.left.prevent="$focus.wrap().previous()" class="flex gap-2 overflow-x-auto border-b border-outline dark:border-outline-dark" role="tablist" aria-label="tab options">
+            <button
+                x-on:click="selectedTab = 'archive'"
+                x-bind:aria-selected="selectedTab === 'archive'"
+                x-bind:tabindex="selectedTab === 'archive' ? '0' : '-1'"
+                x-bind:class="selectedTab === 'archive' ? 'font-bold text-primary border-b-2 border-primary dark:border-primary-dark dark:text-primary-dark' : 'text-on-surface font-medium dark:text-on-surface-dark dark:hover:border-b-outline-dark-strong dark:hover:text-on-surface-dark-strong hover:border-b-2 hover:border-b-outline-strong hover:text-on-surface-strong'" class="h-min px-4 py-2 text-sm"
+                type="button"
+                role="tab"
+                aria-controls="tabpanelArchive" >
+                    Zip Archive
+            </button>
+            <button
+                x-on:click="selectedTab = 'python'"
+                x-bind:aria-selected="selectedTab === 'python'"
+                x-bind:tabindex="selectedTab === 'python' ? '0' : '-1'"
+                x-bind:class="selectedTab === 'python' ? 'font-bold text-primary border-b-2 border-primary dark:border-primary-dark dark:text-primary-dark' : 'text-on-surface font-medium dark:text-on-surface-dark dark:hover:border-b-outline-dark-strong dark:hover:text-on-surface-dark-strong hover:border-b-2 hover:border-b-outline-strong hover:text-on-surface-strong'"
+                class="h-min px-4 py-2 text-sm"
+                type="button"
+                role="tab"
+                aria-controls="tabpanelPython" >
+                Python
+            </button>
+            <button
+                type="button"
+                x-on:click="$refs.{{.DivId}}.remove()"
+                class="ml-auto px-3 py-2 text-lg text-on-surface hover:text-on-surface-strong dark:text-on-surface-dark"
+                aria-label="Close"
+                title="Close"
+            >
+                &times;
+            </button>
+        </div>
+        <div class="px-2 py-4 text-on-surface dark:text-on-surface-dark">
+          <div x-cloak x-show="selectedTab === 'archive'" id="tabpanelArchive" role="tabpanel" aria-label="groups">
+            <div class="flex mx-auto w-full max-w-xl text-center flex-col gap-1">
+                <span class="w-fit pl-0.5 text-sm text-on-surface dark:text-on-surface-dark">Archive File</span>
+
+                <form
+                    x-ref="archiveForm"
+                    hx-post="{{.ArchiveIngestUrl}}"
+                    hx-encoding="multipart/form-data"
+                >
+                    <div
+                        x-on:dragover.prevent="dragging = true"
+                        x-on:dragleave.prevent="dragging = false"
+                        x-on:drop.prevent="dragging = false; handleFiles($event.dataTransfer.files)"
+                        x-bind:class="dragging ? 'border-primary bg-primary/5' : 'border-outline dark:border-outline-dark'"
+                        class="flex w-full flex-col items-center justify-center gap-2 rounded-radius border border-dashed p-8 text-on-surface transition-colors dark:text-on-surface-dark"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" class="w-12 h-12 opacity-75">
+                            <path fill-rule="evenodd" d="M10.5 3.75a6 6 0 0 0-5.98 6.496A5.25 5.25 0 0 0 6.75 20.25H18a4.5 4.5 0 0 0 2.206-8.423 3.75 3.75 0 0 0-4.133-4.303A6.001 6.001 0 0 0 10.5 3.75Zm2.03 5.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 1 0 1.06 1.06l1.72-1.72v4.94a.75.75 0 0 0 1.5 0v-4.94l1.72 1.72a.75.75 0 1 0 1.06-1.06l-3-3Z" clip-rule="evenodd"/>
+                        </svg>
+                        <div class="group">
+                            <label for="archiveInput-{{.DivId}}" class="cursor-pointer font-medium text-primary group-focus-within:underline dark:text-primary-dark">
+                                <input
+                                    x-ref="archiveInput"
+                                    id="archiveInput-{{.DivId}}"
+                                    name="{{.InputName}}"
+                                    type="file"
+                                    accept=".zip,application/zip,application/x-zip-compressed"
+                                    class="sr-only"
+                                    aria-describedby="validFileFormats-{{.DivId}}"
+                                    x-on:change="fileName = $event.target.files[0]?.name ?? fileName"
+                                />
+                                Browse
+                            </label>
+                            or drag and drop here
+                        </div>
+                        <small id="validFileFormats-{{.DivId}}" x-show="!fileName && !uploadError">ZIP - Max {{.MaxMB}}MB</small>
+                        <small x-show="fileName && !uploadError" x-text="fileName"></small>
+                        <small x-show="uploadError" x-text="uploadError" class="text-error"></small>
+                    </div>
+                </form>
+
+                <div id="ingest-result-{{.DivId}}"></div>
+            </div>
+          </div>
+          <div x-cloak x-show="selectedTab === 'python'" id="tabpanelPython" role="tabpanel" aria-label="python">
+            <b>
+              <a href="#" class="underline">Python</a>
+          </b>
+            tab is selected
+          </div>
+        </div>
+    </div>
+</div>
+{{end}}

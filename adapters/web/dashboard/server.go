@@ -29,6 +29,6 @@ func New(
 ) Server {
 	pb.AddSidebarEntry(ProfilePageName, icons.Info, rt.DashboardUrl, false)
 	pb.AddSidebarEntry(CredentialsPageName, icons.Key, CredentialsUrl, false)
-	pb.AddSidebarEntry(LogsPageName, icons.Notepad, ListTasksUrl, false)
+	pb.AddSidebarEntry(LogsPageName, icons.Notepad, rt.ListTasksUrl, false)
 	return Server{pb, i, c, lt, ft, defaultPageSize}
 }

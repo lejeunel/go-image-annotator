@@ -78,7 +78,7 @@ func TestIngestBatch(t *testing.T) {
 	itr, collection, _, ctx, data := Setup(t)
 	ig := &FakeIngester{}
 	itr.TemporaryFileStore = &fk.FileStore{Data: data}
-	itr.Ingester = ig
+	itr.ArchiveIngester = ig
 	itr.Execute(ctx,
 		Request{Reader: bytes.NewReader(data),
 			Collection: collection.Name}, p)
@@ -105,10 +105,21 @@ func TestFailedIngestionIsLogged(t *testing.T) {
 	itr, collection, _, ctx, data := Setup(t)
 	el := fk.EventLogger{}
 	itr.IEventLogger = &el
-	itr.Ingester = &FakeIngester{Err: e.ErrInternal}
+	itr.ArchiveIngester = &FakeIngester{Err: e.ErrInternal}
 	itr.Execute(ctx,
 		Request{Reader: bytes.NewReader(data),
 			Collection: collection.Name}, p)
 	assert.Equal(t, ev.FailedTask, el.Events[len(el.Events)-1].State)
+}
 
+func TestIngest(t *testing.T) {
+	p := &FakePresenter{}
+	itr, collection, _, ctx, data := Setup(t)
+	el := fk.EventLogger{}
+	itr.IEventLogger = &el
+	itr.ArchiveIngester = &FakeIngester{}
+	itr.Execute(ctx,
+		Request{Reader: bytes.NewReader(data),
+			Collection: collection.Name}, p)
+	assert.Equal(t, ev.DoneTask, el.Events[len(el.Events)-1].State)
 }

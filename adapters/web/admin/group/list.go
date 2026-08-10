@@ -13,7 +13,7 @@ var preamble string
 
 func (s *Server) ListGroups(w http.ResponseWriter, r *http.Request) {
 	s.Page.SetUserIdentity(r.Context()).SetHTMLTitle("Groups").SetTitle("Groups")
-	s.Page.AddCreationButton("Create", CreateUserFormUrl, createGroupTargetDiv)
+	s.Page.AddCreationButton("Create", CreateGroupFormUrl, createGroupTargetDiv)
 	s.Groups.List.Execute(r.Context(), NewListPresenter(w, s.Page, s.RowUrl))
 }
 

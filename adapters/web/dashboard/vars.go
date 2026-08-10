@@ -5,7 +5,6 @@ const (
 	CredentialsUrl      = "/dashboard/credentials"
 	ProfilePageName     = "Profile"
 	LogsPageName        = "Logs"
-	ListTasksUrl        = "/dashboard/logs"
 	TaskDetailsUrl      = "/ui/dashboard/logs/detail"
 	TaskRowUrl          = "/ui/dashboard/logs/row"
 	TaskIdQueryArg      = "task_id"

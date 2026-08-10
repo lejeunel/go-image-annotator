@@ -21,10 +21,11 @@ import (
 	itr "github.com/lejeunel/go-image-annotator/app/interactors"
 	"github.com/lejeunel/go-image-annotator/config"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
+	aig "github.com/lejeunel/go-image-annotator/modules/archive-ingester"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
-	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
+	iig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	rea "github.com/lejeunel/go-image-annotator/modules/reader"
@@ -49,6 +50,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 	eventrepo := ev.NewSQLiteEventRepo(db)
 	metadatarepo := md.NewSQLiteMetaRepo(db)
 	imageFileStore := fs.NewLocalFileStore(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "images"))
+	tmpFileStore := fs.NewLocalFileStore(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "tmp"))
 	policyFileStore := fs.NewLocalFileStore(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "assets"))
 	imstore := ims.New(
 		ims.Repos{ImageRepo: imrepo,
@@ -62,9 +64,10 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 
 	sessionManager := sm.NewSQLiteSessionManager(db.DB, usrrepo, apiTokenGen)
 	scr := scroller.New(scrrepo)
-	ingester := ig.New(imrepo, clrepo, lbrepo, anrepo,
+	imageIngester := iig.New(imrepo, clrepo, lbrepo, anrepo,
 		tra.NewIngestionTransactor(db),
 		imageFileStore, sha256.New(), rea.NewImageSpecsDetector(cfg.AllowedImageMIMETypes))
+	archiveIngester := aig.New(imstore, imageIngester)
 	itrs := itr.Interactors{
 		Label: NewSQLiteLabelInteractors(lbrepo, cfg.DefaultPageSize, auth),
 		Collection: NewSQLiteCollectionInteractors(
@@ -85,7 +88,11 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 			anrepo,
 			imstore,
 			imageFileStore,
-			ingester,
+			tmpFileStore,
+			imageIngester,
+			archiveIngester,
+			eventlogger,
+			logger,
 			cfg.DefaultPageSize,
 			auth,
 		),

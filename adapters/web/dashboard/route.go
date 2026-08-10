@@ -12,7 +12,7 @@ func (s *Server) Route(r chi.Router, mws ...func(http.Handler) http.Handler) {
 		r.Use(mws...)
 		r.Get(rt.DashboardUrl, s.Profile)
 		r.Get(CredentialsUrl, s.Credentials)
-		r.Get(ListTasksUrl, s.ListTasks)
+		r.Get(rt.ListTasksUrl, s.ListTasks)
 		r.Get(TaskRowUrl, s.TaskRow)
 		r.Get(TaskDetailsUrl, s.TaskDetails)
 		r.Get(NewAPITokenUrl, s.NewAPIToken)

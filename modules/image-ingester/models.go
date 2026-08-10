@@ -21,15 +21,3 @@ type Response struct {
 	ImageId    im.ImageId
 	Collection string
 }
-
-type BatchResponse struct {
-	ImageIds   []im.ImageId
-	Collection string
-}
-
-type BatchRequest struct {
-	UserId     u.UserId
-	Collection string
-	ReaderAt   io.ReaderAt
-	Size       int64
-}

@@ -32,6 +32,7 @@ func (r LocalFileStore) Store(path string, reader io.Reader) error {
 		return err
 	}
 	defer f.Close()
+
 	_, err = io.Copy(f, reader)
 	return err
 }
@@ -57,4 +58,28 @@ func (r LocalFileStore) Get(path string) (io.Reader, error) {
 		return nil, fmt.Errorf("%w: %w", err, e.ErrInternal)
 	}
 	return reader, nil
+}
+
+func (r LocalFileStore) GetReaderAt(path string) (io.ReaderAt, int64, error) {
+	path = r.filePath(path)
+
+	f, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, 0, fmt.Errorf(
+				"file not found: %w: %w",
+				err,
+				e.ErrNotFound,
+			)
+		}
+		return nil, 0, fmt.Errorf("%w: %w", err, e.ErrInternal)
+	}
+
+	info, err := f.Stat()
+	if err != nil {
+		f.Close()
+		return nil, 0, fmt.Errorf("%w: %w", err, e.ErrInternal)
+	}
+
+	return f, info.Size(), nil
 }

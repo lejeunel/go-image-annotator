@@ -22,8 +22,8 @@ type ArchiveIngester struct {
 	ImageStore
 }
 
-func New(is ImageStore) ArchiveIngester {
-	return ArchiveIngester{&FakeImageIngester{}, is}
+func New(is ImageStore, ii ImageIngester) ArchiveIngester {
+	return ArchiveIngester{ii, is}
 }
 
 func (i ArchiveIngester) IngestArchive(r Request) (Response, error) {

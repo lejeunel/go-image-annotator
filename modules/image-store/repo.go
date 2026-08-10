@@ -29,6 +29,7 @@ type ImageRepo interface {
 	RemoveImageFromCollection(im.ImageId, clc.CollectionName) error
 	IsUsed(im.ImageId) (*bool, error)
 	AddToCollection(im.ImageId, clc.CollectionName) error
+	Delete(im.ImageId) error
 }
 
 type MetaRepo interface {

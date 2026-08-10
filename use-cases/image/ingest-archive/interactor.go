@@ -11,9 +11,10 @@ import (
 	ev "github.com/lejeunel/go-image-annotator/entities/event"
 	t "github.com/lejeunel/go-image-annotator/entities/task"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	aig "github.com/lejeunel/go-image-annotator/modules/archive-ingester"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
-	ing "github.com/lejeunel/go-image-annotator/modules/image-ingester"
+	iig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	jq "github.com/lejeunel/go-image-annotator/modules/job-queue"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -22,8 +23,12 @@ type Auth interface {
 	IngestImage(ctx context.Context, group string) error
 }
 
-type Ingester interface {
-	IngestArchive(ing.BatchRequest) (ing.BatchResponse, error)
+type ImageIngester interface {
+	Ingest(iig.Request) (*iig.Response, error)
+}
+
+type ArchiveIngester interface {
+	IngestArchive(aig.Request) (aig.Response, error)
 }
 
 type TemporaryFileStore interface {
@@ -33,7 +38,7 @@ type TemporaryFileStore interface {
 }
 
 type Interactor struct {
-	Ingester
+	ArchiveIngester
 	Auth
 	CollectionRepo
 	TemporaryFileStore
@@ -50,14 +55,16 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(ig Ingester, cr CollectionRepo,
+func New(aig ArchiveIngester,
+	cr CollectionRepo,
 	tfs TemporaryFileStore,
 	el el.IEventLogger,
 	logger slog.Logger,
 	jq jq.JobQueue,
 	opts ...Option) Interactor {
+
 	i := &Interactor{
-		Ingester:           ig,
+		ArchiveIngester:    aig,
 		CollectionRepo:     cr,
 		TemporaryFileStore: tfs,
 		Auth:               auth.NewVoidAuth(),
@@ -138,21 +145,23 @@ func (i Interactor) runTask(task t.Task, user u.UserId, collection clc.Collectio
 			State: ev.StartedTask,
 			Extra: map[string]string{"collection": collection},
 		})
-	_, err = i.Ingester.IngestArchive(ing.BatchRequest{UserId: user, Collection: collection,
+	_, err = i.ArchiveIngester.IngestArchive(aig.Request{UserId: user, Collection: collection,
 		ReaderAt: reader, Size: size,
 	})
 	if err != nil {
-		i.IEventLogger.AddEvent(task.Id,
-			ev.Event{
-				Time:  i.Clock.Now(),
-				State: ev.FailedTask,
-				Error: err.Error(),
-			})
+		i.LogError(task.Id, err)
+		return
 	}
 
 	if err := i.TemporaryFileStore.Delete(filename); err != nil {
 		i.LogError(task.Id, fmt.Errorf("ingesting archive: deleting file from temporary store: %w", err))
+		return
 	}
+
+	i.IEventLogger.AddEvent(
+		task.Id,
+		ev.Event{Time: i.Clock.Now(), State: ev.DoneTask},
+	)
 
 }
 

@@ -1,10 +1,13 @@
 package ingester
 
 import (
+	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"hash"
 	"io"
+	"sync"
 
 	"github.com/jonboulle/clockwork"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -42,6 +45,7 @@ type ImageIngester struct {
 	ArtefactRepo
 	ImageSpecsDetector
 	clockwork.Clock
+	mu sync.Mutex
 }
 
 type Option func(*ImageIngester)
@@ -69,7 +73,7 @@ func New(imr ImageRepo, clr CollectionRepo,
 	return i
 }
 
-func (i ImageIngester) Ingest(r Request) (*Response, error) {
+func (i *ImageIngester) Ingest(r Request) (*Response, error) {
 	errCtx := "ingesting image"
 	collection, err := i.findCollectionByName(r.Collection)
 	if err != nil {
@@ -93,7 +97,6 @@ func (i ImageIngester) Ingest(r Request) (*Response, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", errCtx, err)
 	}
-
 	specs.IngestedAt = i.Clock.Now()
 	if err := i.Transactor.RunInTx(func(tx Repos) error {
 		if err := i.ingestImage(tx, r.UserId, image, *hash, *specs); err != nil {
@@ -108,21 +111,31 @@ func (i ImageIngester) Ingest(r Request) (*Response, error) {
 	return &Response{ImageId: image.Id, Collection: collection.Name}, nil
 }
 func (i *ImageIngester) storeRawData(image im.Image, reader io.Reader) (*[]byte, error) {
-	tee := io.TeeReader(reader, i.Hasher)
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	i.mu.Lock()
+	i.Hasher.Reset()
+	if _, err := i.Hasher.Write(data); err != nil {
+		return nil, err
+	}
 	hash := i.Hasher.Sum(nil)
+	i.mu.Unlock()
 
 	if err := i.ensureDuplicateImageDoesNotExists(hash); err != nil {
 		return nil, err
 	}
 
-	if err := i.ArtefactRepo.Store(image.Filename(), tee); err != nil {
+	if err := i.ArtefactRepo.Store(image.Filename(), bytes.NewReader(data)); err != nil {
 		return nil, err
 	}
 
 	return &hash, nil
 }
 
-func (i ImageIngester) ingestImage(
+func (i *ImageIngester) ingestImage(
 	tx Repos,
 	authorId u.UserId,
 	image *im.Image,
@@ -196,7 +209,7 @@ func (i *ImageIngester) buildImage(id im.ImageId, collection clc.Collection, lab
 	return &image, nil
 }
 
-func (i ImageIngester) appendLabels(image *im.Image, labelNames []string) error {
+func (i *ImageIngester) appendLabels(image *im.Image, labelNames []string) error {
 	for _, labelName := range labelNames {
 		label, err := i.findLabelByName(labelName)
 		if err != nil {
@@ -209,7 +222,7 @@ func (i ImageIngester) appendLabels(image *im.Image, labelNames []string) error 
 	return nil
 }
 
-func (i ImageIngester) appendBoundingBoxes(image *im.Image, bboxes []a.BoundingBoxRequest) error {
+func (i *ImageIngester) appendBoundingBoxes(image *im.Image, bboxes []a.BoundingBoxRequest) error {
 	baseErr := fmt.Errorf("appending bounding boxes")
 	for _, bbox := range bboxes {
 		label, err := i.findLabelByName(bbox.Label)
@@ -231,7 +244,7 @@ func (i ImageIngester) appendBoundingBoxes(image *im.Image, bboxes []a.BoundingB
 	return nil
 }
 
-func (i ImageIngester) appendPolygons(image *im.Image, polygons []a.PolygonRequest) error {
+func (i *ImageIngester) appendPolygons(image *im.Image, polygons []a.PolygonRequest) error {
 	baseErr := fmt.Errorf("appending polygons")
 	for _, p := range polygons {
 		label, err := i.findLabelByName(p.Label)
@@ -250,7 +263,7 @@ func (i ImageIngester) appendPolygons(image *im.Image, polygons []a.PolygonReque
 	return nil
 }
 
-func (i ImageIngester) findCollectionByName(name string) (*clc.Collection, error) {
+func (i *ImageIngester) findCollectionByName(name string) (*clc.Collection, error) {
 	collection, err := i.CollectionRepo.Find(name)
 	baseErr := fmt.Errorf("finding collection with name %v", name)
 	if err != nil {
@@ -259,7 +272,7 @@ func (i ImageIngester) findCollectionByName(name string) (*clc.Collection, error
 	return collection, nil
 }
 
-func (i ImageIngester) findLabelByName(name string) (*lbl.Label, error) {
+func (i *ImageIngester) findLabelByName(name string) (*lbl.Label, error) {
 	baseErr := fmt.Errorf("fetching label by name %v", name)
 	label, err := i.LabelRepo.FindLabel(name)
 	if err != nil {
@@ -268,8 +281,8 @@ func (i ImageIngester) findLabelByName(name string) (*lbl.Label, error) {
 	return label, nil
 }
 
-func (i ImageIngester) ensureDuplicateImageDoesNotExists(hash []byte) error {
-	baseErr := fmt.Errorf("ensuring that duplicate image does not exist using hash")
+func (i *ImageIngester) ensureDuplicateImageDoesNotExists(hash []byte) error {
+	baseErr := fmt.Errorf("ensuring that duplicate image does not exist using hex hash %v", hex.EncodeToString(hash))
 	duplicateId, err := i.ImageRepo.FindImageIdByHash(hash)
 	if duplicateId != nil {
 		return fmt.Errorf(

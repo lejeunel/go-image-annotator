@@ -33,6 +33,8 @@ const (
 	AdminGroupsUrl   = "/admin/groups"
 	AdminRolesUrl    = "/admin/roles"
 	AdminPoliciesUrl = "/admin/policies"
+
+	ListTasksUrl = "/dashboard/logs"
 )
 
 func MakeOAuthCallbackURL(baseURL string, provider string) string {

@@ -52,7 +52,7 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 			Page:         r.Page,
 			PageSize:     r.PageSize,
 			TotalRecords: *count,
-			TotalPages:   *count / int64(r.PageSize),
+			TotalPages:   (*count + int64(r.PageSize) - 1) / int64(r.PageSize),
 		},
 	}
 

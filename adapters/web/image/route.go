@@ -16,5 +16,8 @@ func (s *Server) Route(r chi.Router,
 		r.Get(rt.ImagesUrl, s.List)
 		r.Get(ImageRow, s.TableRow)
 		r.Delete(ImageRow, s.Delete)
+
+		r.Get(ingestPanelUrl, s.IngestionPanel)
+		r.Post(archiveIngestUrl, s.IngestArchive)
 	})
 }

@@ -1,21 +1,21 @@
 package ingest
 
 import (
-	ing "github.com/lejeunel/go-image-annotator/modules/image-ingester"
+	ing "github.com/lejeunel/go-image-annotator/modules/archive-ingester"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakeIngester struct {
-	Got ing.BatchRequest
+	Got ing.Request
 	Err error
 }
 
-func (i *FakeIngester) IngestArchive(r ing.BatchRequest) (ing.BatchResponse, error) {
+func (i *FakeIngester) IngestArchive(r ing.Request) (ing.Response, error) {
 	if i.Err != nil {
-		return ing.BatchResponse{}, i.Err
+		return ing.Response{}, i.Err
 	}
 	i.Got = r
-	return ing.BatchResponse{}, nil
+	return ing.Response{}, nil
 }
 
 type FakePresenter struct {

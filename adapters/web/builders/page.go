@@ -26,7 +26,7 @@ type PageBuilder struct {
 	SidebarTitle        string
 	SidebarEntries      map[string]cmp.SidebarEntry
 	SidebarEntriesOrder []string
-	preamble            string
+	markdownPreamble    string
 	postamble           string
 	content             Node
 	Title               string
@@ -96,7 +96,7 @@ func (b *PageBuilder) markdownToHTML(data string) string {
 }
 
 func (b *PageBuilder) AddMarkdownPreamble(md string) *PageBuilder {
-	b.preamble = b.markdownToHTML(md)
+	b.markdownPreamble = b.markdownToHTML(md)
 	return b
 }
 
@@ -123,12 +123,12 @@ func (b *PageBuilder) Render(w io.Writer) {
 		content = Div(content, Div(Class("text-2xl/7 font-bold text-white sm:truncate sm:text-3xl sm:tracking-tight font-roboto"), Text(b.Title)))
 	}
 
-	if b.preamble != "" {
+	if b.markdownPreamble != "" {
 		content = Div(
 			content,
 			Div(
 				Class("flex flex-col w-full"),
-				Article(Class("prose dark:prose-invert max-w-none mb-4"), Raw(b.preamble)),
+				Article(Class("prose dark:prose-invert max-w-none mb-4"), Raw(b.markdownPreamble)),
 			),
 		)
 	}

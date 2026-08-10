@@ -89,6 +89,7 @@ func Make(url string, port int) http.Handler {
 		app.Itrs.Image.List,
 		app.Itrs.Image.Delete,
 		app.Itrs.Image.Find,
+		app.Itrs.Image.IngestArchive,
 	)
 	imagesServer.Route(router, webAuth)
 

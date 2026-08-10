@@ -6,6 +6,7 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
+	s "github.com/lejeunel/go-image-annotator/adapters/web/shared"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/clone"
 )
@@ -45,7 +46,7 @@ type ClonePresenter struct {
 func NewClonePresenter(w http.ResponseWriter, u b.RowURL) ClonePresenter {
 	task := "Cloning collection"
 	okMessageFunc := func(r clone.Response) string {
-		return MakeNewTaskMessage()
+		return s.MakeNewTaskMessage()
 	}
 	return ClonePresenter{w, u, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }

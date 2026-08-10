@@ -7,5 +7,5 @@ const (
 	createGroupTargetDiv       = "create-group"
 	resourceUrlFieldName       = "name"
 	GroupRowUrl                = "/ui/group"
-	CreateUserFormUrl          = "/ui/group/new"
+	CreateGroupFormUrl         = "/ui/group/new"
 )
