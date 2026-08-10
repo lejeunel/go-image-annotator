@@ -7,7 +7,7 @@ const (
 	nameFieldName              = "name"
 	descriptionFieldName       = "description"
 	groupFieldName             = "group"
-	withAnnotationsFieldName   = "with_annotations"
+	deepFieldName              = "with_annotations"
 	resourceUrlFieldName       = "name"
 	publicGroupPlaceholderName = "( public )"
 )

@@ -18,9 +18,9 @@ func (s *Server) Clone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var withAnnotations bool
-	if r.FormValue(withAnnotationsFieldName) == "on" {
-		withAnnotations = true
+	var deep bool
+	if r.FormValue(deepFieldName) == "on" {
+		deep = true
 	}
 
 	source := r.URL.Query().Get(resourceUrlFieldName)
@@ -28,7 +28,7 @@ func (s *Server) Clone(w http.ResponseWriter, r *http.Request) {
 		clone.Request{
 			Source:      source,
 			Destination: r.FormValue(nameFieldName),
-			Deep:        withAnnotations,
+			Deep:        deep,
 		},
 		NewClonePresenter(w, s.RowURL))
 
@@ -57,7 +57,7 @@ func (p ClonePresenter) SuccessFindCollection(c clc.Collection) {
 	b.SetResourceName(c.Name)
 	b.AddTextField(nameFieldName, "Name", bf.WithRequired(), bf.WithDefault(c.Name))
 	b.AddTextField(descriptionFieldName, "Description", bf.WithDefault(c.Description))
-	b.AddCheckbox(withAnnotationsFieldName, "With annotations")
+	b.AddCheckbox(deepFieldName, "Deep")
 	b.Render(p.writer)
 }
 

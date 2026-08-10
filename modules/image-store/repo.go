@@ -32,6 +32,7 @@ type ImageRepo interface {
 }
 
 type MetaRepo interface {
+	Add(clc.CollectionName, im.ImageId, string, any) error
 	List(clc.CollectionName, im.ImageId) ([]m.MetaData, error)
 	DeleteAll(clc.CollectionName, im.ImageId) error
 }

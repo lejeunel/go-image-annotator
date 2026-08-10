@@ -176,6 +176,11 @@ func (s ImageStore) Copy(src clc.CollectionName, id im.ImageId, dst clc.Collecti
 				}
 			}
 
+			for _, m := range image.Meta {
+				if err := tx.MetaRepo.Add(dst, image.Id, m.Key, m.Value); err != nil {
+					return fmt.Errorf("%w: adding meta-data with key %v: %w", errCtx, m.Key, err)
+				}
+			}
 		}
 		return nil
 
