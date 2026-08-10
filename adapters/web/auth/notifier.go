@@ -79,18 +79,18 @@ func (n SMTPPasswordResetNotifier) Notify(notification Notification) {
 }
 
 func MakeNotifierFromEnv(l slog.Logger) Notifier {
-	username := os.Getenv("GOIA_SMTPUSERNAME")
-	password := os.Getenv("GOIA_SMTPPASSWORD")
-	host := os.Getenv("GOIA_SMTPHOST")
+	username := os.Getenv("GOIA_SMTP_USERNAME")
+	password := os.Getenv("GOIA_SMTP_PASSWORD")
+	host := os.Getenv("GOIA_SMTP_HOST")
 	if host == "" {
 		l.Warn(
-			"GOIA_SMTPHOST environment variable is not set. Users will not receive notification!",
+			"GOIA_SMTP_HOST environment variable is not set. Users will not receive notification!",
 		)
 		return VoidNotifier{l}
 	}
-	port, err := strconv.Atoi(os.Getenv("GOIA_SMTPPORT"))
+	port, err := strconv.Atoi(os.Getenv("GOIA_SMTP_PORT"))
 	if err != nil {
-		panic(fmt.Errorf("extracting SMTP port from environment variable GOIA_SMTPPORT: %w", err))
+		panic(fmt.Errorf("extracting SMTP port from environment variable GOIA_SMTP_PORT: %w", err))
 	}
 	if username == "" {
 		panic("when using SMTP notification, username must be defined, but found none")

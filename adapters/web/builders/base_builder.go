@@ -20,7 +20,6 @@ type BaseData struct {
 }
 
 type BasePageBuilder struct {
-	Title     string
 	HTMLTitle string
 	pane      *Node
 	scripts   []Node
@@ -33,11 +32,6 @@ func (b *BasePageBuilder) AddScripts(scripts ...Node) *BasePageBuilder {
 	for _, s := range scripts {
 		b.scripts = append(b.scripts, s)
 	}
-	return b
-}
-
-func (b *BasePageBuilder) SetTitle(title string) *BasePageBuilder {
-	b.Title = title
 	return b
 }
 

@@ -90,7 +90,7 @@ func (v *AnnotationView) Render(w http.ResponseWriter) {
 func (v *AnnotationView) ShapeSelector() Node {
 	return Div(
 		Attr("x-data", "{ active: 'rectangle'}"),
-		Class("flex gap-2 mb-2"),
+		Class("flex gap-2"),
 		Button(
 			Attr(
 				"x-bind:class",
@@ -151,7 +151,9 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 			Raw(*regionLabelModal),
 			Raw(*imageLabelModal),
 			Div(Class("flex flex-col"),
-				Div(Class("flex"), v.ScrollerView.Render(v.scrollerButtons), v.ShapeSelector()),
+				Div(Class("flex items-center mb-2"),
+					v.ScrollerView.Render(v.scrollerButtons),
+					v.ShapeSelector()),
 				Div(Class("flex"),
 					Div(
 						Class("flex flex-col"),

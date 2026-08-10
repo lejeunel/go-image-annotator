@@ -49,7 +49,7 @@ func (t *ImageLabelTable) Build() Node {
 		Class("pb-2"),
 		Div(
 			Class(
-				"overflow-hidden w-full rounded-radius border border-outline dark:border-outline-dark",
+				"overflow-visible w-full rounded-radius border border-outline dark:border-outline-dark",
 			),
 			Table(Class("w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
 				TBody(Class("divide-y divide-outline dark:divide-outline-dark"),
@@ -63,12 +63,9 @@ func (t *ImageLabelTable) Build() Node {
 						Td(),
 						Td(Class("align-middle"),
 							Div(
-								Class("flex items-center justify-end pr-1"),
-								Raw(
-									fmt.Sprintf(
-										`<a href="#" onclick="Alpine.store('imageLabelModal').open()"> %v </a>`,
-										ic.AddCircle,
-									),
+								Class("flex items-center justify-end pr-1 py-1"),
+								cmp.MakeIconizedButton(ic.Add, "Add image label",
+									Attr(`onclick="Alpine.store('imageLabelModal').open()"`),
 								),
 							),
 						),

@@ -90,7 +90,7 @@ func (f FormField) label() Node {
 	return Label(
 		For(f.fieldName),
 		Text(displayName),
-		Class("block text-sm font-medium text-gray-900 dark:text-white"),
+		Class("w-fit pl-0.5 text-sm text-on-surface dark:text-on-surface-dark"),
 	)
 }
 
@@ -126,6 +126,6 @@ func (f FormField) input() Node {
 }
 
 func (f FormField) Render(w io.Writer) {
-	Div(Class("flex items-center"),
+	Div(Class("w-full max-w-xs flex flex-col gap-1"),
 		Group([]Node{Div(Class("mr-2"), f.label()), f.input()})).Render(w)
 }

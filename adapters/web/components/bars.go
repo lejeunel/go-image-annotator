@@ -166,7 +166,7 @@ func MakeDocsButton() Node {
 func MakeFooter(currentVersion g.Info) Node {
 	return Footer(
 		Class(
-			"flex fixed bottom-0 z-30 h-8 text-xs w-screen items-center justify-end border-t border-outline bg-surface-alt/75 px-10 backdrop-blur-xl dark:border-outline-dark dark:bg-surface-dark-alt/75",
+			"flex fixed bottom-0 z-30 h-8 text-xs w-screen items-center justify-end border-t border-outline bg-surface-alt/75 px-5 py-3 backdrop-blur-xl dark:border-outline-dark dark:bg-surface-dark-alt/75",
 		),
 		Div(
 			Class(

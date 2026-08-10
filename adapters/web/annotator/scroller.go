@@ -26,7 +26,7 @@ func (p *ScrollerView) Render(buttons view.ScrollerButtons) Node {
 	if buttons.Next.IsActive {
 		nextURL = MakeLink(buttons.Next.ImageId, buttons.Next.Collection)
 	}
-	return Div(Class("flex gap-2"),
+	return Div(Class("flex gap-2 mr-4"),
 		cmp.MakeNavigationButton(prevURL, buttons.Prev.IsActive, scr.ScrollPrevious, "Previous"),
 		cmp.MakeNavigationButton(nextURL, buttons.Next.IsActive, scr.ScrollNext, "Next"),
 	)

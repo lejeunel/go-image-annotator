@@ -11,13 +11,13 @@ This application stores meta and raw-data on a local mount.
 In particular, define a path for the SQLite database, e.g.
 
 ``` sh
-GOIA_DBPATH=/home/user/.cache/go-image-annotator/db.sqlite
+GOIA_DB_PATH=/home/user/.cache/go-image-annotator/db.sqlite
 ```
 
 Next, define a path where images will be stored, e.g.
 
 ``` sh
-GOIA_ARTEFACTDIR=/home/user/.cache/go-image-annotator/artefacts
+GOIA_ARTEFACT_DIR=/home/user/.cache/go-image-annotator/artefacts
 ```
 
 ## Build and Run
