@@ -24,6 +24,7 @@
 	  }
 	</script>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&amp;display=swap">
     <style>[x-cloak] { display: none !important; }</style>
     <script src="/static/htmx.js" defer></script>
@@ -56,7 +57,6 @@
 		  Alpine.store('notifications').variant = evt.detail.variant;
 		  Alpine.store('notifications').title = evt.detail.title;
 		  Alpine.store('notifications').message = evt.detail.message;
-          // console.log(evt.detail.redirect);
           window.location = evt.detail.redirect;
 	  });
 	</script>
@@ -163,7 +163,7 @@
                       x-cloak
                       x-show="notification.message"
                       class="text-pretty text-sm"
-                      x-text="notification.message">
+                      x-html="notification.message">
                     </p>
                   </div>
 
@@ -209,8 +209,18 @@
 
                   <!-- Title & Message -->
                   <div class="flex flex-col gap-2">
-                    <h3 x-cloak x-show="notification.title" class="text-sm font-semibold text-success" x-text="notification.title"></h3>
-                    <p x-cloak x-show="notification.message" class="text-pretty text-sm" x-text="notification.message"></p>
+                    <h3
+                      x-cloak
+                      x-show="notification.title"
+                      class="text-sm font-semibold text-success"
+                      x-text="notification.title">
+                    </h3>
+                    <p
+                      x-cloak
+                      x-show="notification.message"
+                      class="text-pretty text-sm"
+                      x-html="notification.message">
+                    </p>
                   </div>
 
                   <!--Dismiss Button -->
@@ -250,8 +260,17 @@
 
                   <!-- Title & Message -->
                   <div class="flex flex-col gap-2">
-                    <h3 x-cloak x-show="notification.title" class="text-sm font-semibold text-warning" x-text="notification.title"></h3>
-                    <p x-cloak x-show="notification.message" class="text-pretty text-sm" x-text="notification.message"></p>
+                    <h3
+                      x-cloak
+                      x-show="notification.title"
+                      class="text-sm font-semibold text-warning"
+                      x-text="notification.title">
+                    </h3>
+                    <p x-cloak
+                      x-show="notification.message"
+                      class="text-pretty text-sm"
+                      x-html="notification.message">
+                    </p>
                   </div>
 
                   <!--Dismiss Button -->
@@ -291,8 +310,18 @@
 
                   <!-- Title & Message -->
                   <div class="flex flex-col gap-2">
-                    <h3 x-cloak x-show="notification.title" class="text-sm font-semibold text-danger" x-text="notification.title"></h3>
-                    <p x-cloak x-show="notification.message" class="text-pretty text-sm" x-text="notification.message"></p>
+                    <h3
+                      x-cloak
+                      x-show="notification.title"
+                      class="text-sm font-semibold text-danger"
+                      x-text="notification.title">
+                    </h3>
+                    <p
+                      x-cloak
+                      x-show="notification.message"
+                      class="text-pretty text-sm"
+                      x-html="notification.message">
+                    </p>
                   </div>
 
                   <!--Dismiss Button -->
@@ -328,8 +357,18 @@
                     <img x-cloak x-show="notification.sender.avatar" class="mr-2 size-12 rounded-full" alt="avatar" aria-hidden="true" x-bind:src="notification.sender.avatar"/>
                     <div class="flex flex-col items-start gap-2">
                       <!-- Title & Message -->     
-                      <h3 x-cloak x-show="notification.sender.name" class="text-sm font-semibold text-on-surface-strong dark:text-on-surface-dark-strong" x-text="notification.sender.name"></h3>
-                      <p x-cloak x-show="notification.message" class="text-pretty text-sm" x-text="notification.message"></p>
+                      <h3
+                        x-cloak
+                        x-show="notification.sender.name"
+                        class="text-sm font-semibold text-on-surface-strong dark:text-on-surface-dark-strong"
+                        x-text="notification.sender.name">
+                      </h3>
+                      <p
+                        x-cloak
+                        x-show="notification.message"
+                        class="text-pretty text-sm"
+                        x-html="notification.message">
+                      </p>
 
                       <!-- Action Buttons -->
                       <div class="flex items-center gap-4">

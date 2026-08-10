@@ -1,7 +1,6 @@
 package collection
 
 import (
-	"fmt"
 	"net/http"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
@@ -21,7 +20,7 @@ type DeletePresenter struct {
 func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
 	task := "deleting collection"
 	okMessageFunc := func(r delete.Response) string {
-		return fmt.Sprintf("Started deletion task %v", r.Id)
+		return MakeNewTaskMessage()
 	}
 	return DeletePresenter{w, u, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
