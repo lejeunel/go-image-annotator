@@ -133,7 +133,8 @@ func (b *PageBuilder) Render(w io.Writer) {
 		)
 	}
 
-	content = Div(content, b.content)
+	// content = Div(Class("flex flex-col w-full"), content)
+	content = Div(Class("flex-1 min-w-0"), content, b.content)
 
 	if b.postamble != "" {
 		content = Div(content, Div(Class("flex flex-col w-150 mt-4"), cmp.Separator,

@@ -150,7 +150,7 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 		Group([]Node{
 			Raw(*regionLabelModal),
 			Raw(*imageLabelModal),
-			Div(Class("flex flex-col overflow-hidden"),
+			Div(Class("flex flex-col"),
 				Div(Class("flex items-center mb-2"),
 					v.ScrollerView.Render(v.scrollerButtons),
 					v.ShapeSelector()),
