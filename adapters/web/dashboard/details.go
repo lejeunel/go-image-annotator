@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -23,20 +24,6 @@ func NewTaskDetailPresenter(w http.ResponseWriter) TaskDetailPresenter {
 	task := "detailing task"
 	return TaskDetailPresenter{w, htmx.NewErrorPresenter(task, w)}
 }
-
-type Task struct {
-	Id     string  `json:"id"`
-	Type   string  `json:"type"`
-	Issuer string  `json:"issuer"`
-	Events []Event `json:"events"`
-}
-type Event struct {
-	Time  string            `json:"time"`
-	State string            `json:"state"`
-	Extra map[string]string `json:"extra"`
-	Error string            `json:"error"`
-}
-
 func (p *TaskDetailPresenter) SuccessFindTask(t t.Task) {
 	r := Task{Id: t.Id.String(), Type: t.Type.String(), Issuer: t.Issuer}
 	for _, e := range t.Events {
@@ -52,12 +39,27 @@ func (p *TaskDetailPresenter) SuccessFindTask(t t.Task) {
 		return
 	}
 	url := rt.AddQueryParams(TaskRowUrl, TaskIdQueryArg, t.Id.String())
-	Tr(Td(Attr("colspan=3"), Class("p-4"),
-		Div(Pre(Class("bg-surface-alt dark:bg-surface-dark-alt p-2"),
+	Tr(Td(
+		Attr(fmt.Sprintf("colspan=%v", len(listEventsFields)-1)),
+		Class("p-4"),
+		Div(Pre(Class("bg-surface-alt dark:bg-surface-dark-alt p-2 w-full break-words min-w-0 whitespace-pre-wrap"),
 			Text(string(data))))),
 		Td(Class("align-top p-4"),
 			cmp.MakeHTMXAbortButton("Close", url.String()),
 		)).Render(p.Writer)
+}
+
+type Task struct {
+	Id     string  `json:"id"`
+	Type   string  `json:"type"`
+	Issuer string  `json:"issuer"`
+	Events []Event `json:"events"`
+}
+type Event struct {
+	Time  string            `json:"time"`
+	State string            `json:"state"`
+	Extra map[string]string `json:"extra"`
+	Error string            `json:"error"`
 }
 
 func (s *Server) TaskRow(w http.ResponseWriter, r *http.Request) {

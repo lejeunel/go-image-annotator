@@ -52,7 +52,7 @@ func (i ArchiveIngester) IngestArchive(r Request) (Response, error) {
 		r, err := i.ImageIngester.Ingest(ii.Request{UserId: r.UserId, Collection: r.Collection, Reader: reader})
 		if err != nil {
 			reader.Close()
-			lastErr = fmt.Errorf("%w: ingesting file %v: %w", errCtx, file, err)
+			lastErr = fmt.Errorf("%w: ingesting file %v: %w", errCtx, file.Name, err)
 			break
 		}
 

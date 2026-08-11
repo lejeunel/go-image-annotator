@@ -45,7 +45,8 @@
                 x-on:click="selectedTab = 'archive'"
                 x-bind:aria-selected="selectedTab === 'archive'"
                 x-bind:tabindex="selectedTab === 'archive' ? '0' : '-1'"
-                x-bind:class="selectedTab === 'archive' ? 'font-bold text-primary border-b-2 border-primary dark:border-primary-dark dark:text-primary-dark' : 'text-on-surface font-medium dark:text-on-surface-dark dark:hover:border-b-outline-dark-strong dark:hover:text-on-surface-dark-strong hover:border-b-2 hover:border-b-outline-strong hover:text-on-surface-strong'" class="h-min px-4 py-2 text-sm"
+              x-bind:class="selectedTab === 'archive' ? 'font-bold text-primary border-b-2 border-primary dark:border-primary-dark dark:text-primary-dark' : 'text-on-surface font-medium dark:text-on-surface-dark dark:hover:border-b-outline-dark-strong dark:hover:text-on-surface-dark-strong hover:border-b-2 hover:border-b-outline-strong hover:text-on-surface-strong cursor-pointer'"
+              class="h-min px-4 py-2 text-sm cursor-pointer"
                 type="button"
                 role="tab"
                 aria-controls="tabpanelArchive" >
@@ -55,8 +56,8 @@
                 x-on:click="selectedTab = 'python'"
                 x-bind:aria-selected="selectedTab === 'python'"
                 x-bind:tabindex="selectedTab === 'python' ? '0' : '-1'"
-                x-bind:class="selectedTab === 'python' ? 'font-bold text-primary border-b-2 border-primary dark:border-primary-dark dark:text-primary-dark' : 'text-on-surface font-medium dark:text-on-surface-dark dark:hover:border-b-outline-dark-strong dark:hover:text-on-surface-dark-strong hover:border-b-2 hover:border-b-outline-strong hover:text-on-surface-strong'"
-                class="h-min px-4 py-2 text-sm"
+                x-bind:class="selectedTab === 'python' ? 'font-bold text-primary border-b-2 border-primary dark:border-primary-dark dark:text-primary-dark' : 'text-on-surface font-medium dark:text-on-surface-dark dark:hover:border-b-outline-dark-strong dark:hover:text-on-surface-dark-strong hover:border-b-2 hover:border-b-outline-strong hover:text-on-surface-strong cursor-pointer'"
+                class="h-min px-4 py-2 text-sm cursor-pointer"
                 type="button"
                 role="tab"
                 aria-controls="tabpanelPython" >
@@ -65,7 +66,7 @@
             <button
                 type="button"
                 x-on:click="$refs.{{.DivId}}.remove()"
-                class="ml-auto px-3 py-2 text-lg text-on-surface hover:text-on-surface-strong dark:text-on-surface-dark"
+                class="ml-auto px-3 py-2 text-lg text-on-surface dark:text-on-surface-dark cursor-pointer"
                 aria-label="Close"
                 title="Close"
             >
@@ -75,7 +76,7 @@
         <div class="px-2 py-4 text-on-surface dark:text-on-surface-dark">
           <div x-cloak x-show="selectedTab === 'archive'" id="tabpanelArchive" role="tabpanel" aria-label="groups">
             <div class="flex mx-auto w-full max-w-xl text-center flex-col gap-1">
-                <span class="w-fit pl-0.5 text-sm text-on-surface dark:text-on-surface-dark">Archive File</span>
+                <span class="w-fit pl-0.5 text-sm text-on-surface dark:text-on-surface-dark">Pack your image files in a zip archive. They should be all contained at the root (sub-directories are not supported)</span>
 
                 <form
                     x-ref="archiveForm"

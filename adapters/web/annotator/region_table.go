@@ -86,7 +86,7 @@ func (t *RegionTable) AddBox(b view.BoundingBox) {
 func (t *RegionTable) Build(title string) Node {
 	return Div(
 		Class(
-			"overflow-hidden w-full rounded-radius border border-outline dark:border-outline-dark",
+			"w-full rounded-radius border border-outline dark:border-outline-dark",
 		),
 		Table(Class("w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
 			RegionTableBody(title, t.Rows),

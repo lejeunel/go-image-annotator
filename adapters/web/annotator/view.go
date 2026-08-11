@@ -159,7 +159,7 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 						Class("flex flex-col"),
 						Div(Class("align-top"), v.ImageView.Build(*v.image)),
 						Div(
-							Class("w-160"),
+							Class("w-full"),
 							BuildMetaDataList(v.image.Id, v.image.Collection, v.metadata),
 						),
 					),

@@ -119,7 +119,7 @@ func BuildMetaDataList(imageId, collection string, data []m.MetaData) Node {
 		ID(MetaDivId),
 		cmp.Separator,
 		Div(Class("flex items-center mt-2 mb-2"),
-			Div(Class("flex-1 text-lg"), Text("Custom meta-data")),
+			Div(Class("flex-1 text-lg"), Text("Custom Meta-data")),
 			buttons,
 		),
 		Div(ID(MetaFormId)),
