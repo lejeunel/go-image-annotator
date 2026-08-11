@@ -44,7 +44,7 @@ func (v *AnnotationsListView) Build(
 	imageLabelsTable := v.makeImageLabelList(imageLabels)
 
 	fullTable := Div(
-		Class("min-w-90"),
+		Class("min-w-80"),
 		imageLabelsTable,
 		regionsList)
 	return fullTable
