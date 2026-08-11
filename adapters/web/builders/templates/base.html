@@ -4,16 +4,16 @@
 			  darkMode: false,
 
 			  init() {
-			  this.darkMode = localStorage.getItem(&#39;dark&#39;) === &#39;true&#39;
-			  document.documentElement.classList.toggle(&#39;dark&#39;, this.darkMode)
+			  this.darkMode = localStorage.getItem('dark') === &#39;true&#39;
+			  document.documentElement.classList.toggle('dark', this.darkMode)
 			  },
 			  toggleDark() {
 			  this.darkMode = !this.darkMode;
-			  localStorage.setItem(&#39;dark&#39;, this.darkMode);
-			  document.documentElement.classList.toggle(&#39;dark&#39;, this.darkMode)
+			  localStorage.setItem('dark', this.darkMode);
+			  document.documentElement.classList.toggle('dark', this.darkMode)
 			  }}"
       x-init="init()"
-      x-bind:class="{ &#39;dark&#39;: darkMode }">
+      x-bind:class="{ 'dark': darkMode }">
   <head>
     <title>{{.HTMLTitle}}</title>
     <meta charset="utf-8">

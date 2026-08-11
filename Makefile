@@ -42,6 +42,10 @@ auth-valid-methods: $(VALID_AUTH_OUT)
 
 api-code: $(MODELS_OUT) $(SERVER_OUT)
 
+api-docs:
+	wget https://cdn.redocly.com/redoc/v2.5.1/bundles/redoc.standalone.js -O $(STATIC_DIR)/redoc.standalone.js
+	redocly build-docs assets/openapi.yaml -o server/api-docs.html -t assets/redocly.hbs
+
 
 $(MODELS_OUT): $(SPEC)
 	mkdir -p $(MODELS_PKG)
@@ -66,6 +70,11 @@ docs-dev:
 
 $(VALID_AUTH_OUT):
 	go generate ./modules/authorizer
+
+prism:
+	wget https://raw.githubusercontent.com/prismjs/prism-themes/447479fc7b2be2051fe27e561aceed7cc87a589f/themes/prism-solarized-dark-atom.css -O $(STATIC_DIR)/prism.css
+	wget https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js -O $(STATIC_DIR)/prism.js
+	wget https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js -O $(STATIC_DIR)/prism-python.js
 
 htmx:
 	wget https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js -O $(STATIC_DIR)/htmx.js

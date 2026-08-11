@@ -65,6 +65,14 @@
 
     --font-roboto: 'Roboto', sans-serif;
 }
+ .revert-tailwind{
+  all: initial;
+}
+
+.revert-tailwind > * {
+  all: revert;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 .spotlight {
   @import "./static/stoplight.css";

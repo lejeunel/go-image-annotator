@@ -1,27 +1,62 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
 	"net/http"
 
-	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/image"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
-	rd "github.com/lejeunel/go-image-annotator/modules/reader"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 )
 
 func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
-	body, ok := json.MustDecodeJSON[models.NewImage](w, r)
-	if !ok {
+	reader, err := r.MultipartReader()
+	if err != nil {
+		http.Error(w, "invalid multipart body", http.StatusBadRequest)
 		return
 	}
 
-	s.Image.Ingest.Execute(r.Context(), NewIngestImageRequest(*body),
+	var meta models.NewImage
+	var imageReader io.Reader
+
+	for {
+		part, err := reader.NextPart()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			http.Error(w, "error reading multipart part", http.StatusBadRequest)
+			return
+		}
+
+		switch part.FormName() {
+		case "metadata":
+			if err := json.NewDecoder(part).Decode(&meta); err != nil {
+				http.Error(w, "invalid metadata json", http.StatusBadRequest)
+				return
+			}
+		case "image":
+			buf, err := io.ReadAll(part) // or stream directly to your storage/hasher
+			if err != nil {
+				http.Error(w, "error reading image data", http.StatusInternalServerError)
+				return
+			}
+			imageReader = bytes.NewReader(buf)
+		}
+	}
+
+	if imageReader == nil {
+		http.Error(w, "missing image part", http.StatusBadRequest)
+		return
+	}
+	s.Image.Ingest.Execute(r.Context(), NewIngestImageRequest(meta, imageReader),
 		presenter.NewIngestPresenter(w, s.Logger))
 }
 
@@ -53,13 +88,13 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 	s.Image.List.Execute(req, presenter.NewListPresenter(w, s.Logger))
 }
 
-func NewIngestImageRequest(req models.NewImage) ig.Request {
+func NewIngestImageRequest(meta models.NewImage, reader io.Reader) ig.Request {
 	ingestReq := ig.Request{
-		Collection: req.Collection,
-		Reader:     rd.NewBase64ImageDecoder(req.Data),
+		Collection: meta.Collection,
+		Reader:     reader,
 	}
-	appendLabelsToIngestImageRequest(&ingestReq, req.Labels)
-	appendBoundingBoxesToIngestImageRequest(&ingestReq, req.BoundingBoxes)
+	appendLabelsToIngestImageRequest(&ingestReq, meta.Labels)
+	appendBoundingBoxesToIngestImageRequest(&ingestReq, meta.BoundingBoxes)
 	return ingestReq
 }
 

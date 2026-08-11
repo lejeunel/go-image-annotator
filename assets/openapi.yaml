@@ -158,18 +158,33 @@ paths:
                 $ref: '#/components/schemas/Error'
     post:
       summary: Ingest a new image
-      description: Ingest an image into a collection. 
+      description: Ingest an image into a collection.
       operationId: ingestImage
       tags: [Image]
       requestBody:
         description: Ingestion payload
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/NewImage'
+              type: object
+              required:
+                - metadata
+                - image
+              properties:
+                metadata:
+                  $ref: '#/components/schemas/NewImage'
+                image:
+                  type: string
+                  format: binary
+                  description: Raw image data
+              encoding:
+                metadata:
+                  contentType: application/json
+                image:
+                  contentType: image/*
       responses:
-        '200':
+        '201':
           description: image ingestion response
           content:
             application/json:
@@ -179,7 +194,7 @@ paths:
           description: unexpected error
           content:
             application/json:
-            schema:
+              schema:
                 $ref: '#/components/schemas/Error'
   /collections/{name}:
     get:

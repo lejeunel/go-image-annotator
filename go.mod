@@ -12,7 +12,7 @@ require (
 	github.com/jonboulle/clockwork v0.5.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/markbates/goth v1.82.0
-	github.com/oapi-codegen/runtime v1.3.1
+	github.com/oapi-codegen/runtime v1.6.0
 	github.com/pressly/goose/v3 v3.27.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1

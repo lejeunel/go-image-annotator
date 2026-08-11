@@ -14,6 +14,9 @@ import (
 //go:embed templates/ingest.html
 var IngestionPanel string
 
+//go:embed templates/ingest.py
+var PythonIngestionScript string
+
 type IngestArchivePresenter struct {
 	writer        http.ResponseWriter
 	task          string
@@ -34,10 +37,11 @@ func (p IngestArchivePresenter) SuccessSubmitIngestArchiveTask(r ia.Response) {
 }
 
 type IngestionPanelData struct {
-	DivId            string
-	ArchiveIngestUrl string
-	InputName        string
-	MaxMB            int
+	DivId                 string
+	ArchiveIngestUrl      string
+	PythonIngestionScript string
+	InputName             string
+	MaxMB                 int
 }
 
 func (s *Server) IngestionPanel(w http.ResponseWriter, r *http.Request) {
@@ -48,10 +52,11 @@ func (s *Server) IngestionPanel(w http.ResponseWriter, r *http.Request) {
 		ingestCollectionArgName, r.FormValue(ingestCollectionArgName))
 	if err := t.ExecuteTemplate(w, "ingestion",
 		IngestionPanelData{
-			DivId:            ingestTargetDiv,
-			ArchiveIngestUrl: endpoint.String(),
-			MaxMB:            500,
-			InputName:        ingestFormInputName,
+			DivId:                 ingestTargetDiv,
+			ArchiveIngestUrl:      endpoint.String(),
+			MaxMB:                 500,
+			InputName:             ingestFormInputName,
+			PythonIngestionScript: PythonIngestionScript,
 		}); err != nil {
 		panic(err)
 	}

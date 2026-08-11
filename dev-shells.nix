@@ -14,6 +14,8 @@
           golines
           gotestsum
           tailwindcss_4
+          oapi-codegen
+          redocly
         ];
       };
       devShells.test = pkgs.mkShell {

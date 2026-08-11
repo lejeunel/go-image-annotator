@@ -1,5 +1,6 @@
 {{define "ingestion"}}
 <div
+    id="{{.DivId}}"
     class="flex w-160 border border-outline dark:border-outline-dark rounded-radius"
     x-data="{
         selectedTab: 'archive',
@@ -25,7 +26,7 @@
                 return;
             }
             if (file.size > this.maxBytes) {
-                this.uploadError = 'File exceeds 5MB';
+                this.uploadError = 'File exceeds {{.MaxMB}}MB';
                 return;
             }
 
@@ -53,7 +54,7 @@
                     Zip Archive
             </button>
             <button
-                x-on:click="selectedTab = 'python'"
+                x-on:click="selectedTab = 'python'; $nextTick(() => Prism.highlightAll());"
                 x-bind:aria-selected="selectedTab === 'python'"
                 x-bind:tabindex="selectedTab === 'python' ? '0' : '-1'"
                 x-bind:class="selectedTab === 'python' ? 'font-bold text-primary border-b-2 border-primary dark:border-primary-dark dark:text-primary-dark' : 'text-on-surface font-medium dark:text-on-surface-dark dark:hover:border-b-outline-dark-strong dark:hover:text-on-surface-dark-strong hover:border-b-2 hover:border-b-outline-strong hover:text-on-surface-strong cursor-pointer'"
@@ -74,7 +75,11 @@
             </button>
         </div>
         <div class="px-2 py-4 text-on-surface dark:text-on-surface-dark">
-          <div x-cloak x-show="selectedTab === 'archive'" id="tabpanelArchive" role="tabpanel" aria-label="groups">
+          <div x-cloak
+            x-show="selectedTab === 'archive'"
+            id="tabpanelArchive"
+            role="tabpanel"
+            aria-label="groups">
             <div class="flex mx-auto w-full max-w-xl text-center flex-col gap-1">
                 <span class="w-fit pl-0.5 text-sm text-on-surface dark:text-on-surface-dark">Pack your image files in a zip archive. They should be all contained at the root (sub-directories are not supported)</span>
 
@@ -82,6 +87,7 @@
                     x-ref="archiveForm"
                     hx-post="{{.ArchiveIngestUrl}}"
                     hx-encoding="multipart/form-data"
+                    hx-swap="none"
                 >
                     <div
                         x-on:dragover.prevent="dragging = true"
@@ -118,12 +124,21 @@
                 <div id="ingest-result-{{.DivId}}"></div>
             </div>
           </div>
-          <div x-cloak x-show="selectedTab === 'python'" id="tabpanelPython" role="tabpanel" aria-label="python">
-            <b>
-              <a href="#" class="underline">Python</a>
-          </b>
-            tab is selected
-          </div>
+            <template x-if="selectedTab === 'python'">
+                <div
+                    id="tabpanelPython"
+                    role="tabpanel"
+                    aria-label="python">
+                    <div class="flex flex-col max-h-50 w-full font-medium">
+                        <pre>
+                            <code class="language-python">
+{{.PythonIngestionScript}}
+                            </code>
+                        </pre>
+                    </div>
+                </div>
+
+            </template>
         </div>
     </div>
 </div>
