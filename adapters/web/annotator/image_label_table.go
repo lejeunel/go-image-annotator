@@ -29,8 +29,15 @@ func (r ImageLabelRow) Render() Node {
 			Text(r.Label),
 		),
 		Td(Div(
-			Class("flex justify-end items-center pr-1"),
-			cmp.MakeIconizedButton(ic.Trash, "delete", Attr(fmt.Sprintf("onclick=\"AnnotatorModule.remove('%v')\"", r.Id))),
+			Class("flex justify-end items-center pr-1 gap-1"),
+			cmp.MakeIconizedButton(ic.Edit, "edit",
+				Attr(fmt.Sprintf(
+					`onclick="
+						Annotator.setAnnotationId('%v');
+						Annotator.editLabelMode();
+						LabelPicker.open();"`,
+					r.Id))),
+			cmp.MakeIconizedButton(ic.Trash, "delete", Attr(fmt.Sprintf("onclick=\"Annotator.remove('%v')\"", r.Id))),
 		),
 		))
 }
@@ -65,7 +72,10 @@ func (t *ImageLabelTable) Build() Node {
 							Div(
 								Class("flex items-center justify-end pr-1 py-1"),
 								cmp.MakeIconizedButton(ic.Add, "Add image label",
-									Attr(`onclick="Alpine.store('imageLabelModal').open()"`),
+									Attr(`onclick="
+											Annotator.imageLabelMode();
+											Annotation.LabelPicker.open();
+								"`),
 								),
 							),
 						),

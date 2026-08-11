@@ -9,8 +9,6 @@ type NewLabelModal struct {
 	Labels         []string
 	SelectorIsOpen bool
 	Selected       *string
-	SubmissionFn   string
-	ModalName      string
 }
 
 type LabelModalKind int
@@ -20,25 +18,15 @@ const (
 	ImageLabelModal
 )
 
-func makeLabelModal(labels []string, kind LabelModalKind) (*string, error) {
+func makeLabelModal(labels []string) string {
 	tModal := template.New("")
 	template.Must(tModal.ParseFS(templatesFiles, "templates/label_modal_search_combobox.html"))
 	template.Must(tModal.ParseFS(templatesFiles, "templates/label_modal.html"))
 
-	var modal NewLabelModal
-	switch kind {
-	case RegionLabelModal:
-		modal = NewLabelModal{labels, true, nil, "submitRegion", "regionLabelModal"}
-	default:
-		modal = NewLabelModal{labels, true, nil, "submitImageLabel", "imageLabelModal"}
-	}
-
 	var buf bytes.Buffer
-	if err := tModal.ExecuteTemplate(&buf, "label_modal",
-		modal); err != nil {
-		return nil, err
+	if err := tModal.ExecuteTemplate(&buf, "label_modal", NewLabelModal{Labels: labels}); err != nil {
+		panic(err)
 	}
 
-	str := buf.String()
-	return &str, nil
+	return buf.String()
 }

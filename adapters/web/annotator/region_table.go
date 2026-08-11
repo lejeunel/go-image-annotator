@@ -1,9 +1,7 @@
 package annotator
 
 import (
-	"bytes"
 	"fmt"
-	"text/template"
 
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
@@ -34,21 +32,6 @@ type RegionTable struct {
 }
 
 func (t *RegionTable) addRow(author, time, id, label, color string, regionKind RegionKind) {
-	tmpl := template.New("")
-	template.Must(tmpl.ParseFS(templatesFiles,
-		"templates/label_combobox.html"))
-
-	var buf bytes.Buffer
-	tmpl.ExecuteTemplate(
-		&buf,
-		"label_combobox",
-		LabelSelector{
-			Labels:         t.AvailableLabels,
-			SelectorIsOpen: false,
-			Selected:       &label,
-			AnnotationId:   id,
-		},
-	)
 
 	var regionIcon string
 	switch regionKind {
@@ -67,10 +50,17 @@ func (t *RegionTable) addRow(author, time, id, label, color string, regionKind R
 			Div(Class("ps-1 py-3"),
 				Raw(regionIcon),
 			),
-			Raw(buf.String()),
+			Text(label),
 			Div(
-				Class("flex  justify-end items-center pr-1"),
-				cmp.MakeIconizedButton(ic.Trash, "delete", Attr(fmt.Sprintf("onclick=\"AnnotatorModule.remove('%v')\"", id))),
+				Class("flex  justify-end items-center pr-1 gap-1"),
+				cmp.MakeIconizedButton(ic.Edit, "edit",
+					Attr(fmt.Sprintf(
+						`onclick="
+						Annotator.setAnnotationId('%v');
+						Annotator.editLabelMode();
+						LabelPicker.open();"`,
+						id))),
+				cmp.MakeIconizedButton(ic.Trash, "delete", Attr(fmt.Sprintf("onclick=\"Annotator.remove('%v')\"", id))),
 			),
 		}})
 }

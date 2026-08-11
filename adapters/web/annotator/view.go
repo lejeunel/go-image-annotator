@@ -100,7 +100,7 @@ func (v *AnnotationView) ShapeSelector() Node {
 					s.InactiveButton,
 				),
 			),
-			Attr("@click", "AnnotatorModule.drawRectangle(); active = 'rectangle';"),
+			Attr("@click", "Annotator.rectangleMode(); active = 'rectangle';"),
 			Div(
 				Class("flex items-center gap-1"),
 				Raw(ic.BoundingBox),
@@ -116,7 +116,7 @@ func (v *AnnotationView) ShapeSelector() Node {
 					s.InactiveButton,
 				),
 			),
-			Attr("@click", "AnnotatorModule.drawPolygon(); active = 'polygon';"),
+			Attr("@click", "Annotator.polygonMode(); active = 'polygon';"),
 			Div(
 				Class("flex items-center gap-1"),
 				Raw(ic.Polygon),
@@ -143,13 +143,11 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 	pb.AddScripts(AnnotoriousLib()...)
 	pb.AddScripts(*script)
 
-	regionLabelModal, _ := makeLabelModal(v.availableLabels, RegionLabelModal)
-	imageLabelModal, _ := makeLabelModal(v.availableLabels, ImageLabelModal)
+	labelModal := makeLabelModal(v.availableLabels)
 
 	pb.SetContent(
 		Group([]Node{
-			Raw(*regionLabelModal),
-			Raw(*imageLabelModal),
+			Raw(labelModal),
 			Div(Class("flex flex-col"),
 				Div(Class("flex items-center mb-2"),
 					v.ScrollerView.Render(v.scrollerButtons),

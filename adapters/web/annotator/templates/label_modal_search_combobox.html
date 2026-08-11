@@ -92,7 +92,7 @@
             class="flex flex-col-reverse justify-between sm:flex-row sm:items-center md:justify-end pt-4"
         >
             <button
-                x-on:click="AnnotatorModule.{{.SubmissionFn}}($refs.hiddenTextField.value)"
+                x-on:click="Annotator.submit(selectedOption.value)"
                 type="button"
                 class="whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-center text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark">
                 Submit
