@@ -145,22 +145,22 @@ func (i Interactor) runTask(task t.Task, user u.UserId, collection clc.Collectio
 			State: ev.StartedTask,
 			Extra: map[string]string{"collection": collection},
 		})
-	_, err = i.ArchiveIngester.IngestArchive(aig.Request{UserId: user, Collection: collection,
+	resp, err := i.ArchiveIngester.IngestArchive(aig.Request{UserId: user, Collection: collection,
 		ReaderAt: reader, Size: size,
 	})
 	if err != nil {
 		i.LogError(task.Id, err)
-		return
-	}
-
-	if err := i.TemporaryFileStore.Delete(filename); err != nil {
-		i.LogError(task.Id, fmt.Errorf("ingesting archive: deleting file from temporary store: %w", err))
+		if err := i.TemporaryFileStore.Delete(filename); err != nil {
+			i.LogError(task.Id, fmt.Errorf("ingesting archive: deleting file from temporary store: %w", err))
+			return
+		}
 		return
 	}
 
 	i.IEventLogger.AddEvent(
 		task.Id,
-		ev.Event{Time: i.Clock.Now(), State: ev.DoneTask},
+		ev.Event{Time: i.Clock.Now(), State: ev.DoneTask,
+			Extra: map[string]string{"num-ingested-images": fmt.Sprintf("%v", len(resp.ImageIds))}},
 	)
 
 }

@@ -160,7 +160,7 @@ func (b *PageBuilder) Render(w io.Writer) {
 			Div(Class("ml-60 px-4 py-18"), content),
 		)
 	} else {
-		content = Div(Class("grow w-full px-4 py-18"), content)
+		content = Div(Class("flex overflow-hidden w-full px-4 py-18"), content)
 	}
 
 	b.BasePageBuilder.SetFrameContent(
