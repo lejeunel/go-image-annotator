@@ -29,7 +29,7 @@
                 }
             },
             }"
-            class="flex w-full max-w-xs flex-col gap-1"
+            class="flex w-full flex-col gap-1"
             x-on:keydown="handleKeydownOnOptions($event)"
             x-init="options = allOptions">
       <div
@@ -46,7 +46,7 @@
             <div
               id="labelsList"
 
-              class="flex max-h-44 w-full flex-col overflow-hidden overflow-y-auto border-outline bg-surface-alt py-1.5 dark:border-outline-dark dark:bg-surface-dark-alt rounded-radius border"
+              class="flex flex-col max-h-44 overflow-hidden overflow-y-auto border-outline bg-surface-alt py-1.5 dark:border-outline-dark dark:bg-surface-dark-alt rounded-radius border"
               role="listbox"
               aria-label="labels list"
               x-on:keydown.down.prevent="$focus.wrap().next()"
@@ -89,7 +89,7 @@
             </div>
         </div>
         <div
-            class="flex flex-col-reverse justify-between sm:flex-row sm:items-center md:justify-end pt-4"
+            class="flex flex-col-reverse justify-between sm:flex-row sm:items-center md:justify-end pt-2 pb-1"
         >
             <button
                 x-on:click="Annotator.submit(selectedOption.value)"

@@ -582,9 +582,6 @@ components:
         - data
         - collection
       properties:
-        data:
-          type: string
-          description: base64 encoded image raw bytes
         collection:
           type: string
           description: name of collection in which to add the image

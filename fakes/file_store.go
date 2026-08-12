@@ -17,7 +17,10 @@ func (r *FileStore) Store(path string, reader io.Reader) error {
 	if r.ErrOnStore != nil {
 		return r.ErrOnStore
 	}
-	data, _ := io.ReadAll(reader)
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		return err
+	}
 	r.GotData = data
 	return nil
 }

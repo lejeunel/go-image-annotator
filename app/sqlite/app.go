@@ -91,6 +91,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 			tmpFileStore,
 			imageIngester,
 			archiveIngester,
+			int64(cfg.MaxArchiveMB),
 			eventlogger,
 			logger,
 			cfg.DefaultPageSize,

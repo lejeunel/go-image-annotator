@@ -19,12 +19,13 @@ func Setup(t *testing.T) (Interactor, clc.Collection, grp.Group, context.Context
 	collection := clc.NewCollection(clc.NewCollectionId(),
 		"a-collection",
 		clc.WithGroup(group.Name))
+	data := []byte("asdf")
 	itr := New(&FakeIngester{},
 		&fk.CollectionRepo{ExistingNames: []string{collection.Name}},
-		&fk.FileStore{}, &fk.EventLogger{}, fk.NewLogger(), &fk.JobQueue{})
+		&fk.FileStore{}, &fk.EventLogger{}, fk.NewLogger(), &fk.JobQueue{},
+		100)
 	ctx := u.AppendUserToContext(t.Context(), u.NewUser("user@mail.com"))
 
-	data := []byte("asdf")
 	return itr, collection, group, ctx, data
 }
 
@@ -96,7 +97,7 @@ func TestArchiveIsDeleted(t *testing.T) {
 	itr.Execute(ctx,
 		Request{Reader: bytes.NewReader(data),
 			Collection: collection.Name}, p)
-	assert.True(t, tfs.NumDeletedItems > 0)
+	assert.Equal(t, 1, tfs.NumDeletedItems)
 
 }
 
@@ -110,6 +111,20 @@ func TestFailedIngestionIsLogged(t *testing.T) {
 		Request{Reader: bytes.NewReader(data),
 			Collection: collection.Name}, p)
 	assert.Equal(t, ev.FailedTask, el.Events[len(el.Events)-1].State)
+}
+
+func TestTooManyBytesShouldFail(t *testing.T) {
+	p := &FakePresenter{}
+	itr, collection, _, ctx, data := Setup(t)
+	el := fk.EventLogger{}
+	itr.IEventLogger = &el
+	itr.ArchiveIngester = &FakeIngester{}
+	itr.MaxMB = int64(0)
+	itr.Execute(ctx,
+		Request{Reader: bytes.NewReader(data),
+			Collection: collection.Name}, p)
+	assert.False(t, p.GotSuccess)
+	assert.True(t, p.GotValidationErr)
 }
 
 func TestIngest(t *testing.T) {

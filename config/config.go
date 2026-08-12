@@ -18,6 +18,7 @@ type Config struct {
 	ForgotPasswordTokenExpirationMinutes int      `default:"30" split_words:"true"`
 	PasswordMinEntropy                   int      `default:"50" split_words:"true"`
 	MaxNumTasksPerUser                   int      `default:"50" split_words:"true"`
+	MaxArchiveMB                         int      `default:"500" split_words:"true"`
 	SMTPUsername                         string   `split_words:"true"`
 	SMTPPassword                         string   `split_words:"true"`
 	SMTPHost                             string   `split_words:"true"`

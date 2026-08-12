@@ -46,6 +46,7 @@ type Interactor struct {
 	clockwork.Clock
 	jq.JobQueue
 	slog.Logger
+	MaxMB int64
 }
 type Option func(*Interactor)
 
@@ -61,6 +62,7 @@ func New(aig ArchiveIngester,
 	el el.IEventLogger,
 	logger slog.Logger,
 	jq jq.JobQueue,
+	maxMB int64,
 	opts ...Option) Interactor {
 
 	i := &Interactor{
@@ -72,6 +74,7 @@ func New(aig ArchiveIngester,
 		Clock:              clockwork.NewRealClock(),
 		JobQueue:           jq,
 		Logger:             logger,
+		MaxMB:              maxMB,
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -81,9 +84,10 @@ func New(aig ArchiveIngester,
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := fmt.Errorf("ingesting image archive")
-	collection, err := i.findCollectionByName(r.Collection)
+
+	collection, err := i.CollectionRepo.Find(r.Collection)
 	if err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		out.Error(fmt.Errorf("%v: finding collection with name %v: %w", errCtx, r.Collection, err))
 		return
 	}
 
@@ -107,7 +111,11 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 	task := t.NewTask(t.NewTaskId(), user.Id, t.IngestArchiveTask)
 	tmpFileName := fmt.Sprintf("%v.zip", task.Id)
-	if err := i.TemporaryFileStore.Store(tmpFileName, r.Reader); err != nil {
+
+	maxBytes := i.MaxMB * 1024 * 1024
+	maxBytesReader := NewMaxBytesReader(r.Reader, maxBytes,
+		fmt.Errorf("content exceeds maximum allowed size of %d MB: %w", i.MaxMB, e.ErrValidation))
+	if err := i.TemporaryFileStore.Store(tmpFileName, &maxBytesReader); err != nil {
 		out.Error(
 			fmt.Errorf("%w: storing archive in temporary location: %w", errCtx, err),
 		)
@@ -150,11 +158,10 @@ func (i Interactor) runTask(task t.Task, user u.UserId, collection clc.Collectio
 	})
 	if err != nil {
 		i.LogError(task.Id, err)
-		if err := i.TemporaryFileStore.Delete(filename); err != nil {
-			i.LogError(task.Id, fmt.Errorf("ingesting archive: deleting file from temporary store: %w", err))
-			return
-		}
 		return
+	}
+	if err := i.TemporaryFileStore.Delete(filename); err != nil {
+		i.Logger.Error(fmt.Errorf("deleting file %v from temporary store: %w", filename, err).Error())
 	}
 
 	i.IEventLogger.AddEvent(
@@ -171,13 +178,4 @@ func (i *Interactor) LogError(id t.TaskId, err error) {
 		ev.Event{Time: i.Clock.Now(), State: ev.FailedTask, Error: err.Error()},
 	)
 	i.Logger.Error(err.Error())
-}
-
-func (i Interactor) findCollectionByName(name string) (*clc.Collection, error) {
-	collection, err := i.CollectionRepo.Find(name)
-	baseErr := fmt.Errorf("finding collection with name %v", name)
-	if err != nil {
-		return nil, fmt.Errorf("%w: %w", baseErr, err)
-	}
-	return collection, nil
 }

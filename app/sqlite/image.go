@@ -29,6 +29,7 @@ func NewSQLiteImageInteractors(
 	tmpfs fs.LocalFileStore,
 	imageIngester ing.Ingester,
 	archiveIngester ia.ArchiveIngester,
+	maxArchiveMB int64,
 	el el.EventLogger,
 	logger slog.Logger,
 	pageSize int,
@@ -36,7 +37,7 @@ func NewSQLiteImageInteractors(
 ) im.Interactors {
 	return im.Interactors{
 		Ingest:        *ing.New(imageIngester, clr, ing.WithAuth(auth)),
-		IngestArchive: ia.New(archiveIngester, clr, tmpfs, el, logger, q.NewAsyncJobQueue(), ia.WithAuth(auth)),
+		IngestArchive: ia.New(archiveIngester, clr, tmpfs, el, logger, q.NewAsyncJobQueue(), maxArchiveMB, ia.WithAuth(auth)),
 		Find:          find.New(ims),
 		Raw:           raw.New(imfs, imr),
 		List:          list.New(imr, ims),

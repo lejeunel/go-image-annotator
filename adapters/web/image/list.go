@@ -37,6 +37,7 @@ func NewListImagesPresenter(
 	collection string,
 ) ListImagesPresenter {
 	p.SetTitle(fmt.Sprintf("%v / Images", collection)).SetHTMLTitle("Images")
+	p.SetActiveSection(cmp.NoPageActive)
 	b := b.NewPaginatedListBuilder(p, listImagesFields)
 	return ListImagesPresenter{b, w, ew.NewErrorPresenter(w), collection}
 }

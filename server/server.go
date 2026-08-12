@@ -30,7 +30,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func Make(url string, port int) http.Handler {
+func Make(port int) http.Handler {
 	cfg := config.Parse()
 	defaultAuth := auth.NewDefault()
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
@@ -47,8 +47,6 @@ func Make(url string, port int) http.Handler {
 		cfg.InitialAdminPassword,
 		*logger,
 	)
-
-	baseURL := fmt.Sprintf("%v:%v", url, port)
 
 	router := chi.NewRouter()
 	webAuth := Chain(
@@ -86,6 +84,7 @@ func Make(url string, port int) http.Handler {
 	imagesServer := im.New(
 		pageBuilder,
 		cfg.DefaultPageSize,
+		cfg.MaxArchiveMB,
 		app.Itrs.Image.List,
 		app.Itrs.Image.Delete,
 		app.Itrs.Image.Find,
@@ -116,7 +115,7 @@ func Make(url string, port int) http.Handler {
 
 	notifier := wauth.MakeNotifierFromEnv(*logger)
 	authServer := wauth.New(
-		baseURL,
+		cfg.URL,
 		basePageBuilder,
 		*logger,
 		app.SessionManager,

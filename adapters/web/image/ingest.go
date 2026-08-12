@@ -54,7 +54,7 @@ func (s *Server) IngestionPanel(w http.ResponseWriter, r *http.Request) {
 		IngestionPanelData{
 			DivId:                 ingestTargetDiv,
 			ArchiveIngestUrl:      endpoint.String(),
-			MaxMB:                 500,
+			MaxMB:                 s.maxArchiveMB,
 			InputName:             ingestFormInputName,
 			PythonIngestionScript: PythonIngestionScript,
 		}); err != nil {
