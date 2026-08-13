@@ -111,7 +111,7 @@ func (i *Interactor) runTask(task t.Task, collection clc.Collection) {
 		return
 	}
 
-	for baseImage, err := range i.ImageRepo.Iterate(im.Filtering{Collection: &collection.Name}, 1) {
+	for baseImage, err := range i.ImageRepo.Iterate("collection="+collection.Name, 1) {
 		if err != nil {
 			i.LogError(task.Id, err)
 			return

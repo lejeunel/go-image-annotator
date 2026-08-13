@@ -9,6 +9,7 @@ import (
 	ir "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,7 +18,7 @@ func Init() (*sqlx.DB, SQLiteMetaRepo, clc.Collection, im.Image) {
 	db := s.NewInMemory()
 	metaRepo := NewSQLiteMetaRepo(db)
 	clcRepo := cr.NewSQLiteCollectionRepo(db)
-	imRepo := ir.NewSQLiteImageRepo(db)
+	imRepo := ir.NewSQLiteImageRepo(db, &fk.FilterStrParser{}, &fk.OrderStrParser{})
 
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	image := im.NewImage(im.NewImageId(), collection)

@@ -13,7 +13,6 @@ import (
 type Server struct {
 	b.PageBuilder
 	maxArchiveMB     int
-	DefaultPageSize  int
 	ListItr          list.Interactor
 	DeleteItr        delete.Interactor
 	FindItr          find.Interactor
@@ -29,11 +28,10 @@ func CodeHighlightingLibs() []Node {
 }
 
 func New(
-	pb b.PageBuilder, defaultPageSize int, maxArchiveMB int,
+	pb b.PageBuilder, maxArchiveMB int,
 	l list.Interactor, d delete.Interactor, f find.Interactor,
 	i ia.Interactor,
 ) Server {
 	pb.AddScripts(CodeHighlightingLibs()...)
-	return Server{pb, maxArchiveMB,
-		defaultPageSize, l, d, f, i}
+	return Server{pb, maxArchiveMB, l, d, f, i}
 }

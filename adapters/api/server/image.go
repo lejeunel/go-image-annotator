@@ -9,7 +9,6 @@ import (
 	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/image"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
-	im "github.com/lejeunel/go-image-annotator/entities/image"
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
@@ -71,19 +70,13 @@ func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionNam
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams) {
 	req := list.Request{
-		Filtering: im.Filtering{
-			Collection: params.Collection,
-		},
 		PaginationParams: pa.PaginationParams{
 			PageSize: s.Image.DefaultPageSize,
 		},
-		OrderingArgs: im.OrderingArgs{{Field: "ingested_at", Order: im.DescOrder}},
+		OrderingStr: "ingested_at:asc",
 	}
-	if p := params.Page; p != nil {
-		req.Page = *p
-	}
-	if p := params.PageSize; p != nil {
-		req.PageSize = *p
+	if params.Collection != nil {
+		req.FilterQueryStr = "collection=" + *params.Collection
 	}
 	s.Image.List.Execute(req, presenter.NewListPresenter(w, s.Logger))
 }

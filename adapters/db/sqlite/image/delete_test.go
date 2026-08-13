@@ -3,24 +3,22 @@ package image
 import (
 	"testing"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleInternalErrOnDeleteImage(t *testing.T) {
-	db := s.NewInMemory()
-	repo := NewSQLiteImageRepo(db)
+	imr, db := BaseSetup()
 	db.Close()
-	err := repo.Delete(im.NewImageId())
+	err := imr.Delete(im.NewImageId())
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestDeleteImage(t *testing.T) {
-	repo := NewSQLiteImageRepo(s.NewInMemory())
+	imr, _ := BaseSetup()
 	id := im.NewImageId()
-	repo.AddImage(id, nil, im.Specs{})
-	err := repo.Delete(id)
+	imr.AddImage(id, nil, im.Specs{})
+	err := imr.Delete(id)
 	assert.NoError(t, err)
 }

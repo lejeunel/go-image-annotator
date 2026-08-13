@@ -12,7 +12,7 @@ import (
 
 func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	imRepo, clcRepo := MakeRepos(db)
+	imRepo, clcRepo, _ := SetupAdd(db)
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	clcRepo.Create(collection)
 	imageId := im.NewImageId()
@@ -25,7 +25,7 @@ func TestInternalErrOnRemoveImageFromCollectionShouldFail(t *testing.T) {
 }
 
 func TestRemoveImageFromCollection(t *testing.T) {
-	imRepo, clcRepo := MakeRepos(s.NewInMemory())
+	imRepo, clcRepo, _ := SetupAdd(s.NewInMemory())
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	clcRepo.Create(collection)
 	imageId := im.NewImageId()

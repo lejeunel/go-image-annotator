@@ -13,6 +13,7 @@ import (
 	grp "github.com/lejeunel/go-image-annotator/entities/group"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 )
 
 type AnnotationTestingRepos struct {
@@ -26,7 +27,7 @@ type AnnotationTestingRepos struct {
 
 func NewAnnotationTestRepos(db *sqlx.DB) AnnotationTestingRepos {
 	return AnnotationTestingRepos{
-		Image:      si.NewSQLiteImageRepo(db),
+		Image:      si.NewSQLiteImageRepo(db, &fk.FilterStrParser{}, &fk.OrderStrParser{}),
 		Collection: sc.NewSQLiteCollectionRepo(db),
 		Label:      sl.NewSQLiteLabelRepo(db),
 		Annotation: NewSQLiteAnnotationRepo(db),

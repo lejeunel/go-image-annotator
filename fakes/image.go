@@ -16,7 +16,7 @@ type ImageRepo struct {
 	ErrOnImageExists             error
 	ErrOnGetSpecs                error
 	ErrOnAddToCollection         error
-	ErrOnList                    error
+	ErrOnSlice                   error
 	ErrOnAddImage                error
 	ErrOnDeleteImage             error
 	ErrOnFindHash                error
@@ -27,9 +27,9 @@ type ImageRepo struct {
 	AddedIntoCollection          *clc.CollectionName
 	ImageIsInCollection          bool
 	IsUsed_                      bool
-	GotFilters                   im.Filtering
+	GotFilters                   im.FilterQueryStr
 	GotPagination                pa.PaginationParams
-	GotOrdering                  im.OrderingArgs
+	GotOrdering                  im.OrderingStr
 	GotHash                      []byte
 	GotSpecs                     im.Specs
 	ReturnSpecs                  *im.Specs
@@ -80,17 +80,18 @@ func (r *ImageRepo) AddToCollection(imageId im.ImageId, collection clc.Collectio
 }
 
 func (r *ImageRepo) Slice(
-	f im.Filtering,
+	f im.FilterQueryStr,
 	p pa.PaginationParams,
-	o im.OrderingArgs,
+	o im.OrderingStr,
 ) ([]im.BaseImage, error) {
-	if r.ErrOnList != nil {
-		return nil, r.ErrOnList
-	}
 
 	r.GotFilters = f
 	r.GotPagination = p
 	r.GotOrdering = o
+
+	if r.ErrOnSlice != nil {
+		return nil, r.ErrOnSlice
+	}
 
 	result := []im.BaseImage{}
 	collectionName := "a-collection"
@@ -133,7 +134,7 @@ func (r *ImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	return nil, nil
 }
 
-func (r *ImageRepo) Count(f im.Filtering) (*int64, error) {
+func (r *ImageRepo) Count(f im.FilterQueryStr) (*int64, error) {
 	if r.ErrOnCount != nil {
 		return nil, r.ErrOnCount
 	}
@@ -147,7 +148,7 @@ func (r ImageRepo) GetSpecs(im.ImageId) (*im.Specs, error) {
 	return r.ReturnSpecs, nil
 }
 
-func (r ImageRepo) Iterate(f im.Filtering, pageSize int) iter.Seq2[im.BaseImage, error] {
+func (r ImageRepo) Iterate(f im.FilterQueryStr, pageSize int) iter.Seq2[im.BaseImage, error] {
 	return func(yield func(im.BaseImage, error) bool) {
 		for img := range slices.Values(r.IterateBaseImages) {
 			if !yield(img, nil) {

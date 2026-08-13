@@ -3,14 +3,13 @@ package image
 import (
 	"testing"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRetrieveImageIdByHash(t *testing.T) {
-	repo := NewSQLiteImageRepo(s.NewInMemory())
+func TestFindImageIdByHash(t *testing.T) {
+	repo, _ := BaseSetup()
 	imageId := im.NewImageId()
 	hash := []byte("the-hash")
 	err := repo.AddImage(imageId, hash, im.Specs{})
@@ -21,17 +20,16 @@ func TestRetrieveImageIdByHash(t *testing.T) {
 	assert.Equal(t, *existingId, imageId)
 }
 
-func TestRetrieveImageIdByNonExistingHashShouldFail(t *testing.T) {
-	repo := NewSQLiteImageRepo(s.NewInMemory())
+func TestFindImageIdByNonExistingHashShouldFail(t *testing.T) {
+	repo, _ := BaseSetup()
 	imageId := im.NewImageId()
 	repo.AddImage(imageId, nil, im.Specs{})
 	_, err := repo.FindImageIdByHash([]byte("non-existing-hash"))
 	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
-func TestRetrieveImageIdByHashInternalErrShouldFail(t *testing.T) {
-	db := s.NewInMemory()
-	repo := NewSQLiteImageRepo(db)
+func TestFindImageIdByHashInternalErrShouldFail(t *testing.T) {
+	repo, db := BaseSetup()
 	db.Close()
 	_, err := repo.FindImageIdByHash(nil)
 	assert.ErrorIs(t, err, e.ErrInternal)

@@ -6,6 +6,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	im "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	lbl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	in "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 )
 
@@ -27,7 +28,7 @@ func (u *IngestionTransactor) RunInTx(
 	defer tx.Rollback()
 
 	stores := in.Repos{
-		ImageRepo:      im.NewSQLiteImageRepo(tx),
+		ImageRepo:      im.NewSQLiteImageRepo(tx, &fk.FilterStrParser{}, &fk.OrderStrParser{}),
 		LabelRepo:      lbl.NewSQLiteLabelRepo(tx),
 		CollectionRepo: clc.NewSQLiteCollectionRepo(tx),
 		AnnotationRepo: an.NewSQLiteAnnotationRepo(tx),

@@ -12,7 +12,8 @@ import (
 )
 
 func TestAddSpecs(t *testing.T) {
-	imRepo, _ := MakeRepos(s.NewInMemory())
+
+	imRepo, _, _ := SetupAdd(s.NewInMemory())
 	id := im.NewImageId()
 
 	specs := im.Specs{MIMEType: "the-mimetype", Width: 15, Height: 10}
@@ -23,10 +24,10 @@ func TestAddSpecs(t *testing.T) {
 }
 
 func TestCountAddedImageToCollection(t *testing.T) {
-	imRepo, clcRepo := MakeRepos(s.NewInMemory())
+	imRepo, clcRepo, _ := SetupAdd(s.NewInMemory())
 	collection := "a-collection"
 	imageId, _, _ := AddToCollection(imRepo, clcRepo, collection, "")
-	count, err := imRepo.Count(im.Filtering{Collection: &collection})
+	count, err := imRepo.Count("collection=\"a-collection\"")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, int(*count))
 	isUsed, err := imRepo.IsUsed(*imageId)
@@ -35,24 +36,23 @@ func TestCountAddedImageToCollection(t *testing.T) {
 }
 
 func TestCountAllImagesWhenAddingImageToCollection(t *testing.T) {
-	imRepo, clcRepo := MakeRepos(s.NewInMemory())
+	imRepo, clcRepo, _ := SetupAdd(s.NewInMemory())
 	AddToCollection(imRepo, clcRepo, "a-collection", "")
-	count, err := imRepo.Count(im.Filtering{})
+	count, err := imRepo.Count("collection=\"a-collection\"")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, int(*count))
 }
 
 func TestInternalErrOnCreateShouldFail(t *testing.T) {
-	db := s.NewInMemory()
-	repo := NewSQLiteImageRepo(db)
+	imr, _, db := SetupAdd(s.NewInMemory())
 	db.Close()
-	err := repo.AddToCollection(im.NewImageId(), "a-collection")
+	err := imr.AddToCollection(im.NewImageId(), "a-collection")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestInternalErrOnIsCollectionPopulatedShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	imRepo, clcRepo := MakeRepos(db)
+	imRepo, clcRepo, _ := SetupAdd(db)
 	collectionName := "a-collection"
 	AddToCollection(imRepo, clcRepo, collectionName, "the-hash")
 	db.Close()
@@ -62,7 +62,7 @@ func TestInternalErrOnIsCollectionPopulatedShouldFail(t *testing.T) {
 
 func TestIsCollectionPopulated(t *testing.T) {
 	db := s.NewInMemory()
-	imRepo, clcRepo := MakeRepos(db)
+	imRepo, clcRepo, _ := SetupAdd(db)
 	collectionName := "a-collection"
 	AddToCollection(imRepo, clcRepo, collectionName, "the-hash")
 	isPopulated, err := clcRepo.IsPopulated(collectionName)
@@ -72,7 +72,7 @@ func TestIsCollectionPopulated(t *testing.T) {
 
 func TestCreatedAt(t *testing.T) {
 	db := s.NewInMemory()
-	imRepo, clcRepo := MakeRepos(db)
+	imRepo, clcRepo, _ := SetupAdd(db)
 	collectionName := "a-collection"
 	now := time.Now()
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
@@ -82,6 +82,5 @@ func TestCreatedAt(t *testing.T) {
 	assert.NoError(t, err)
 	specs, err := imRepo.GetSpecs(imageId)
 	assert.NoError(t, err)
-	// assert.Equal(t, now.Round(0), specs.IngestedAt.Round(0))
 	assert.True(t, now.Equal(specs.IngestedAt))
 }

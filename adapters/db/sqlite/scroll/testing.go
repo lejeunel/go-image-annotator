@@ -6,6 +6,7 @@ import (
 	imsql "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	st "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
@@ -19,7 +20,7 @@ func NewTestScrollerRepos() SQLiteScrollerRepos {
 	db := s.NewInMemory()
 	return SQLiteScrollerRepos{
 		Scroller:   NewSQLiteScrollerRepo(db),
-		Image:      imsql.NewSQLiteImageRepo(db),
+		Image:      imsql.NewSQLiteImageRepo(db, &fk.FilterStrParser{}, &fk.OrderStrParser{}),
 		Collection: clcsql.NewSQLiteCollectionRepo(db),
 	}
 }

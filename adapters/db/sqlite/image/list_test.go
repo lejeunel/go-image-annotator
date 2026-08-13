@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
-	sc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -14,68 +12,33 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type ImageListingTestingRepos struct {
-	Image      SQLiteImageRepo
-	Collection sc.SQLiteCollectionRepo
-}
-
-func CreateSingleImageCollection(
-	repos ImageListingTestingRepos,
-	collectionName string,
-) (im.Image, clc.Collection) {
-	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
-	repos.Collection.Create(collection)
-	imageId := im.NewImageId()
-	image := im.NewImage(imageId, collection)
-	repos.Image.AddImage(image.Id, nil, im.Specs{})
-	repos.Image.AddToCollection(image.Id, collection.Name)
-	return image, collection
-}
-
-func NewImageListingTestRepos() ImageListingTestingRepos {
-	db := s.NewInMemory()
-	return ImageListingTestingRepos{
-		Image:      NewSQLiteImageRepo(db),
-		Collection: sc.NewSQLiteCollectionRepo(db),
-	}
-}
-
 func TestInternalErrOnImageListShouldFail(t *testing.T) {
-	db := s.NewInMemory()
-	repo := NewSQLiteImageRepo(db)
+	imr, _, db := SetupList()
 	db.Close()
-	_, err := repo.Slice(im.Filtering{}, pa.PaginationParams{}, im.OrderingArgs{})
+	_, err := imr.Slice("collection:\"my-collection\"", pa.PaginationParams{}, "")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestListOneImage(t *testing.T) {
-	repos := NewImageListingTestRepos()
+	imr, cr, _ := SetupList()
 	collectionName := "a-collection"
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
-	repos.Collection.Create(collection)
+	cr.Create(collection)
 	image := im.NewImage(im.NewImageId(), collection)
-	repos.Image.AddImage(image.Id, nil, im.Specs{})
-	repos.Image.AddToCollection(image.Id, collection.Name)
+	imr.AddImage(image.Id, nil, im.Specs{})
+	imr.AddToCollection(image.Id, collection.Name)
 
-	r, _ := repos.Image.Slice(
-		im.Filtering{},
-		pa.PaginationParams{PageSize: 2, Page: 1},
-		im.OrderingArgs{},
-	)
+	r, err := imr.Slice("", pa.PaginationParams{PageSize: 2, Page: 1}, "")
+	assert.NoError(t, err)
 	assert.Equal(t, 1, len(r))
 }
 
 func TestListOneImageInGivenCollection(t *testing.T) {
-	repos := NewImageListingTestRepos()
+	imr, cr, _ := SetupList()
+	firstImage, firstCollection := CreateSingleImageCollection(imr, cr, "first-collection")
+	CreateSingleImageCollection(imr, cr, "second-collection")
 
-	firstImage, firstCollection := CreateSingleImageCollection(repos, "first-collection")
-	CreateSingleImageCollection(repos, "second-collection")
-
-	r, _ := repos.Image.Slice(
-		im.Filtering{Collection: &firstCollection.Name},
-		pa.PaginationParams{PageSize: 2, Page: 1},
-		im.OrderingArgs{},
-	)
+	r, _ := imr.Slice("collection=first-collection", pa.PaginationParams{PageSize: 2, Page: 1}, "")
 	assert.Equal(t, 1, len(r))
 	images := r
 	assert.True(t, images[0].ImageId == firstImage.Id)
@@ -95,71 +58,67 @@ func CreateImageInCollectionFromString(
 }
 
 func TestListImagesOrderedById(t *testing.T) {
-	repos := NewImageListingTestRepos()
+	imr, cr, _ := SetupList()
 	collectionName := "a-collection"
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
-	repos.Collection.Create(collection)
+	cr.Create(collection)
 	CreateImageInCollectionFromString(
-		repos.Image,
+		imr,
 		collection,
 		st.FakeUUIDFromInt(1),
 	)
 	image0 := CreateImageInCollectionFromString(
-		repos.Image,
+		imr,
 		collection,
 		st.FakeUUIDFromInt(0),
 	)
 
-	r, _ := repos.Image.Slice(
-		im.Filtering{},
-		pa.PaginationParams{PageSize: 2, Page: 1},
-		im.OrderingArgs{},
-	)
+	r, _ := imr.Slice(
+		"", pa.PaginationParams{PageSize: 2, Page: 1}, "")
 	got := r[0].ImageId
 	assert.Equal(t, image0.Id, got)
 }
 
 func TestListImagesOrderedByIngestTime(t *testing.T) {
-	repos := NewImageListingTestRepos()
+	imr, cr, _ := SetupList()
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
-	repos.Collection.Create(collection)
+	cr.Create(collection)
 	firstId, _ := im.NewImageIdFromString(st.FakeUUIDFromInt(0))
 	secondId, _ := im.NewImageIdFromString(st.FakeUUIDFromInt(1))
 	firstImage := im.NewImage(firstId, collection)
 	secondImage := im.NewImage(secondId, collection)
-	repos.Image.AddImage(firstImage.Id, []byte("first-hash"), im.Specs{IngestedAt: time.Now()})
-	repos.Image.AddImage(secondImage.Id, []byte("second-hash"), im.Specs{IngestedAt: time.Now()})
-	repos.Image.AddToCollection(firstImage.Id, collection.Name)
-	repos.Image.AddToCollection(secondImage.Id, collection.Name)
+	imr.AddImage(firstImage.Id, []byte("first-hash"), im.Specs{IngestedAt: time.Now()})
+	imr.AddImage(secondImage.Id, []byte("second-hash"), im.Specs{IngestedAt: time.Now()})
+	imr.AddToCollection(firstImage.Id, collection.Name)
+	imr.AddToCollection(secondImage.Id, collection.Name)
 
-	r, err := repos.Image.Slice(
-		im.Filtering{},
+	r, err := imr.Slice(
+		"",
 		pa.PaginationParams{PageSize: 2, Page: 1},
-		im.OrderingArgs{{Field: "ingested_at", Order: im.AscOrder}},
-	)
+		"ingested_at:asc")
 	assert.NoError(t, err)
 	assert.Equal(t, r[0].ImageId, firstImage.Id)
 	assert.Equal(t, r[1].ImageId, secondImage.Id)
 }
 
 func TestIterateImages(t *testing.T) {
-	repos := NewImageListingTestRepos()
+	imr, cr, _ := SetupList()
 	collectionName := "a-collection"
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
-	repos.Collection.Create(collection)
+	cr.Create(collection)
 	im0 := CreateImageInCollectionFromString(
-		repos.Image,
+		imr,
 		collection,
 		st.FakeUUIDFromInt(0),
 	)
 	im1 := CreateImageInCollectionFromString(
-		repos.Image,
+		imr,
 		collection,
 		st.FakeUUIDFromInt(1),
 	)
 
 	res := []im.BaseImage{}
-	for batch, err := range repos.Image.Iterate(im.Filtering{}, 1) {
+	for batch, err := range imr.Iterate("", 1) {
 		assert.NoError(t, err)
 		res = append(res, batch)
 	}

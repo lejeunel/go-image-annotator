@@ -35,12 +35,14 @@ import (
 )
 
 func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) app.App {
+
 	apiTokenGen := tk.New(cfg.ApiTokenLength)
 	passwordTokenizer := tk.New(cfg.RandomPasswordLength)
 	forgottenPasswordGen := tk.New(cfg.RandomPasswordLength)
 	passwordValidator := pv.New(cfg.PasswordMinEntropy)
 	db := db.NewSQLiteDB(fmt.Sprintf("%v/%v", cfg.ArtefactPath, "db.sqlite"))
-	imrepo := im.NewSQLiteImageRepo(db)
+	filterParser, orderingParser := im.MakeQueryParsers()
+	imrepo := im.NewSQLiteImageRepo(db, filterParser, orderingParser)
 	anrepo := an.NewSQLiteAnnotationRepo(db)
 	clrepo := clc.NewSQLiteCollectionRepo(db)
 	lbrepo := lbl.NewSQLiteLabelRepo(db)
@@ -57,7 +59,7 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 			CollectionRepo: clrepo,
 			AnnotationRepo: anrepo,
 			MetaRepo:       metadatarepo},
-		tra.NewStoreTransactor(db),
+		tra.NewStoreTransactor(db, filterParser, orderingParser),
 		imageFileStore)
 	scrrepo := scr.NewSQLiteScrollerRepo(db)
 	eventlogger := el.New(eventrepo, el.WithMaxNumTasksPerUser(cfg.MaxNumTasksPerUser))
@@ -91,6 +93,8 @@ func NewSQLiteApp(cfg config.Config, auth auth.Interface, logger slog.Logger) ap
 			tmpFileStore,
 			imageIngester,
 			archiveIngester,
+			filterParser,
+			orderingParser,
 			int64(cfg.MaxArchiveMB),
 			eventlogger,
 			logger,

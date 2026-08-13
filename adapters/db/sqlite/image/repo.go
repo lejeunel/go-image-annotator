@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"go.tomakado.io/dumbql/schema"
 	"iter"
 	"time"
 
@@ -12,12 +13,37 @@ import (
 	adb "github.com/lejeunel/go-image-annotator/adapters/db"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	qu "github.com/lejeunel/go-image-annotator/modules/query"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
+	ss "github.com/lejeunel/go-image-annotator/shared/sql"
 )
+
+func MakeQueryParsers() (qu.FilterParser, qu.OrderingStrConverter) {
+	b := schema.NewSchemaBuilder()
+	b.AddField("collection", schema.Is[string]())
+	b.AddField("ingested_at", schema.Is[string]())
+	filteringStrConverter := qu.NewFilterParser(b.Build(), qu.WithFieldNameMapping("collection", "collections.name"))
+	orderingStrConverter := qu.NewOrderingConverter(qu.WithOrderingField("collection"), qu.WithOrderingField("ingested_at"))
+	return filteringStrConverter, orderingStrConverter
+}
+
+type FilterStrParser interface {
+	Parse(string) (ss.SQLizer, error)
+}
+
+type OrderStrParser interface {
+	Parse(string) (string, error)
+}
 
 type SQLiteImageRepo struct {
 	Db adb.Querier
+	FilterStrParser
+	OrderStrParser
+}
+
+func NewSQLiteImageRepo(db adb.Querier, fp FilterStrParser, op OrderStrParser) SQLiteImageRepo {
+	return SQLiteImageRepo{db, fp, op}
 }
 
 type ListRow struct {
@@ -44,42 +70,48 @@ func (r SQLiteImageRepo) AddToCollection(imageId im.ImageId, collection clc.Coll
 	return nil
 }
 
-func (r SQLiteImageRepo) Count(f im.Filtering) (*int64, error) {
-	var count int64
-
-	var query string
-	var err error
-	if f.Collection != nil {
-		query = "SELECT COUNT(*) FROM images_collections WHERE collection_id=(SELECT id FROM collections WHERE name=$1)"
-		err = r.Db.QueryRow(query, f.Collection).Scan(&count)
-	} else {
-		query = "SELECT COUNT(*) FROM images"
-		err = r.Db.QueryRow(query).Scan(&count)
-	}
+func (r SQLiteImageRepo) Count(f im.FilterQueryStr) (*int64, error) {
+	expr, err := r.FilterStrParser.Parse(f)
 	if err != nil {
-		return nil, fmt.Errorf("counting image records: %v: %w", err, e.ErrInternal)
+		return nil, fmt.Errorf("parsing filtering string %v: %v: %w", f, err, e.ErrInternal)
 	}
+	q := sq.StatementBuilder.Select("COUNT(*)")
+	q = q.From("images_collections").Join("collections ON collections.id = images_collections.collection_id")
+	sql, args, err := q.Where(expr).ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("building query from filters %v: %v: %w", f, err, e.ErrInternal)
+	}
+
+	var count int64
+	if err := r.Db.Get(&count, sql, args...); err != nil {
+		return nil, fmt.Errorf("querying using filters %v: %v: %w", f, err, e.ErrInternal)
+	}
+
 	return &count, nil
 }
 
 func (r SQLiteImageRepo) Slice(
-	f im.Filtering,
+	f im.FilterQueryStr,
 	p pa.PaginationParams,
-	o im.OrderingArgs,
+	o im.OrderingStr,
 ) ([]im.BaseImage, error) {
-	q := r.makeBaseQuery(f, p.PageSize)
-	q = q.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
-
-	for _, oc := range o {
-		if oc.Order == im.AscOrder {
-			q = q.OrderBy(fmt.Sprintf("i.%v ASC", oc.Field))
-		} else {
-			q = q.OrderBy(fmt.Sprintf("i.%v DESC", oc.Field))
-		}
+	q, err := r.makeBaseQuery(f, p.PageSize)
+	if err != nil {
+		return nil, err
 	}
+	qq := *q
+	qq = qq.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
 
-	q = q.OrderBy("ic.image_id")
-	images, err := r.fetchBaseImages(q)
+	if o != "" {
+		orderStr, err := r.OrderStrParser.Parse(o)
+		if err != nil {
+			return nil, err
+		}
+		qq = qq.OrderBy(orderStr)
+
+	}
+	qq = qq.OrderBy("ic.image_id")
+	images, err := r.fetchBaseImages(qq)
 	if err != nil {
 		return nil, err
 	}
@@ -87,17 +119,20 @@ func (r SQLiteImageRepo) Slice(
 }
 
 func (r SQLiteImageRepo) sliceAfterId(
-	f im.Filtering,
+	f im.FilterQueryStr,
 	pageSize int,
 	after *im.ImageId,
 ) ([]im.BaseImage, *im.ImageId, error) {
-	q := r.makeBaseQuery(f, pageSize)
-	q = q.OrderBy("ic.image_id")
+	q0, err := r.makeBaseQuery(f, pageSize)
+	if err != nil {
+		return nil, nil, err
+	}
+	q1 := q0.OrderBy("ic.image_id")
 	if after != nil {
-		q = q.Where(sq.Gt{"ic.image_id": after})
+		q1 = q1.Where(sq.Gt{"ic.image_id": after})
 	}
 
-	images, err := r.fetchBaseImages(q)
+	images, err := r.fetchBaseImages(q1)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -108,7 +143,7 @@ func (r SQLiteImageRepo) sliceAfterId(
 	return images, next, nil
 }
 
-func (r SQLiteImageRepo) Iterate(f im.Filtering, pageSize int) iter.Seq2[im.BaseImage, error] {
+func (r SQLiteImageRepo) Iterate(f im.FilterQueryStr, pageSize int) iter.Seq2[im.BaseImage, error] {
 	return func(yield func(im.BaseImage, error) bool) {
 		var after *im.ImageId
 		for {
@@ -230,7 +265,7 @@ func (r SQLiteImageRepo) RemoveImageFromCollection(
 	return nil
 }
 
-func (r SQLiteImageRepo) makeBaseQuery(f im.Filtering, pageSize int) sq.SelectBuilder {
+func (r SQLiteImageRepo) makeBaseQuery(f im.FilterQueryStr, pageSize int) (*sq.SelectBuilder, error) {
 	q := sq.StatementBuilder.Select(
 		"ic.image_id,ic.collection_id,i.ingested_at,c.name").From(
 		"images_collections AS ic").Join(
@@ -238,11 +273,16 @@ func (r SQLiteImageRepo) makeBaseQuery(f im.Filtering, pageSize int) sq.SelectBu
 		"collections AS c ON ic.collection_id=c.id")
 	q = q.Limit(uint64(pageSize))
 
-	if f.Collection != nil {
-		q = q.Where("collection_id=(SELECT id FROM collections WHERE name=?)", *f.Collection)
+	if f != "" {
+		expr, err := r.FilterStrParser.Parse(f)
+		if err != nil {
+			return nil, err
+		}
+		q.Where(expr)
+
 	}
 
-	return q
+	return &q, nil
 }
 
 func (r SQLiteImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, error) {
@@ -278,8 +318,4 @@ func (r SQLiteImageRepo) IsUsed(id im.ImageId) (*bool, error) {
 		isUsed = true
 	}
 	return &isUsed, nil
-}
-
-func NewSQLiteImageRepo(db adb.Querier) SQLiteImageRepo {
-	return SQLiteImageRepo{Db: db}
 }

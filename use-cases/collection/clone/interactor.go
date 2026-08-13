@@ -175,7 +175,7 @@ func (i *Interactor) runTask(
 		return
 	}
 
-	for baseImage, err := range i.ImageRepo.Iterate(im.Filtering{Collection: &source}, 1) {
+	for baseImage, err := range i.ImageRepo.Iterate("collection="+source, 1) {
 		if err != nil {
 			i.LogError(task.Id, err)
 			return

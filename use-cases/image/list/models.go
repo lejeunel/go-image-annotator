@@ -6,9 +6,9 @@ import (
 )
 
 type Request struct {
-	im.Filtering
+	im.FilterQueryStr
 	pa.PaginationParams
-	im.OrderingArgs
+	im.OrderingStr
 }
 
 type Response struct {

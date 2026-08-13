@@ -82,14 +82,9 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 		s.PageBuilder.Render(w)
 	}
 	s.ListItr.Execute(list_im.Request{
-		Filtering: im.Filtering{
-			Collection: &collection,
-		},
-		PaginationParams: pa.PaginationParams{
-			PageSize: s.DefaultPageSize,
-			Page:     pg.GetPageFromRequest(r),
-		},
-		OrderingArgs: im.OrderingArgs{{Field: "ingested_at", Order: im.AscOrder}},
+		FilterQueryStr:   "collection=" + collection,
+		PaginationParams: pa.PaginationParams{Page: pg.GetPageFromRequest(r)},
+		OrderingStr:      "ingested_at:asc",
 	},
 		NewListImagesPresenter(w, s.PageBuilder, collection))
 }

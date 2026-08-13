@@ -10,15 +10,14 @@ import (
 )
 
 func TestInternalErrOnImageIsInCollectionShouldFail(t *testing.T) {
-	db := s.NewInMemory()
-	repo := NewSQLiteImageRepo(db)
+	imRepo, _, db := SetupAdd(s.NewInMemory())
 	db.Close()
-	_, err := repo.ImageExistsInCollection(im.NewImageId(), "a-collection")
+	_, err := imRepo.ImageExistsInCollection(im.NewImageId(), "a-collection")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestAddedImageToCollectionExists(t *testing.T) {
-	imRepo, clcRepo := MakeRepos(s.NewInMemory())
+	imRepo, clcRepo, _ := SetupAdd(s.NewInMemory())
 	imageId, _, _ := AddToCollection(imRepo, clcRepo, "a-collection", "the-hash")
 	isAdded, err := imRepo.ImageExistsInCollection(*imageId, "a-collection")
 	assert.NoError(t, err)
@@ -27,8 +26,8 @@ func TestAddedImageToCollectionExists(t *testing.T) {
 
 func TestInternalErrOnImageExistsShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteImageRepo(db)
+	imr, _, db := SetupAdd(db)
 	db.Close()
-	_, err := repo.ImageExists(im.NewImageId())
+	_, err := imr.ImageExists(im.NewImageId())
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
