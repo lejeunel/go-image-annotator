@@ -29,7 +29,7 @@ type ImageRepo struct {
 	IsUsed_                      bool
 	GotFilters                   im.Filtering
 	GotPagination                pa.PaginationParams
-	GotOrdering                  im.Ordering
+	GotOrdering                  im.OrderingArgs
 	GotHash                      []byte
 	GotSpecs                     im.Specs
 	ReturnSpecs                  *im.Specs
@@ -82,7 +82,7 @@ func (r *ImageRepo) AddToCollection(imageId im.ImageId, collection clc.Collectio
 func (r *ImageRepo) Slice(
 	f im.Filtering,
 	p pa.PaginationParams,
-	o im.Ordering,
+	o im.OrderingArgs,
 ) ([]im.BaseImage, error) {
 	if r.ErrOnList != nil {
 		return nil, r.ErrOnList

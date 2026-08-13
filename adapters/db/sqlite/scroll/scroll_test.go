@@ -9,6 +9,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	st "github.com/lejeunel/go-image-annotator/shared/testing"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,44 +63,10 @@ func TestShouldFailWhenNoImage(t *testing.T) {
 
 func TestGettingAdjacentImageWhenSingleImageShouldFail(t *testing.T) {
 	repos := NewTestScrollerRepos()
-	id, _ := im.NewImageIdFromString("00000000-0000-0000-0000-000000000000")
+	id, _ := im.NewImageIdFromString(st.FakeUUIDFromInt(0))
 	repos.Image.AddImage(id, nil, im.Specs{})
 	_, err := repos.Scroller.GetAdjacent(id, scr.NewCriteria(), scr.ScrollPrevious)
 	assert.ErrorIs(t, err, e.ErrNotFound)
-}
-
-func TestGettingNextImage(t *testing.T) {
-	repos := NewTestScrollerRepos()
-	ids := CreateImagesWithOrderedIds(repos, 3)
-	r, err := repos.Scroller.GetAdjacent(ids[1], scr.NewCriteria(), scr.ScrollNext)
-	assert.NoError(t, err)
-	assert.True(t, r.ImageId == ids[2])
-}
-
-func TestGettingPrevImage(t *testing.T) {
-	repos := NewTestScrollerRepos()
-	ids := CreateImagesWithOrderedIds(repos, 3)
-	r, _ := repos.Scroller.GetAdjacent(ids[2], scr.NewCriteria(), scr.ScrollPrevious)
-	assert.True(t, r.ImageId == ids[1])
-}
-
-func TestNextImageInCollection(t *testing.T) {
-	repos := NewTestScrollerRepos()
-	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
-	repos.Collection.Create(collection)
-	firstId, _ := im.NewImageIdFromString(FakeUUIDFromInt(0))
-	secondId, _ := im.NewImageIdFromString(FakeUUIDFromInt(1))
-	repos.Image.AddImage(firstId, []byte("first-hash"), im.Specs{})
-	repos.Image.AddImage(secondId, []byte("second-hash"), im.Specs{})
-	repos.Image.AddToCollection(firstId, collection.Name)
-	repos.Image.AddToCollection(secondId, collection.Name)
-
-	r, err := repos.Scroller.GetAdjacent(firstId,
-		scr.NewCriteria(
-			scr.WithCollection(collection.Name)),
-		scr.ScrollNext)
-	assert.NoError(t, err)
-	assert.Equal(t, secondId, r.ImageId)
 }
 
 func CreateImagesWithIngestTime(repos SQLiteScrollerRepos, num int) ([]im.ImageId, clc.Collection) {
@@ -108,7 +75,8 @@ func CreateImagesWithIngestTime(repos SQLiteScrollerRepos, num int) ([]im.ImageI
 	ids := []im.ImageId{}
 	now := time.Now()
 	for n := range num {
-		id := im.NewImageId()
+
+		id, _ := im.NewImageIdFromString(st.FakeUUIDFromInt(n))
 		repos.Image.AddImage(id, fmt.Append([]byte{}, n),
 			im.Specs{IngestedAt: now.Add(time.Duration(n) * time.Hour)})
 		repos.Image.AddToCollection(id, collection.Name)
@@ -117,28 +85,36 @@ func CreateImagesWithIngestTime(repos SQLiteScrollerRepos, num int) ([]im.ImageI
 	return ids, collection
 }
 
-func TestNextIngestedImageInCollection(t *testing.T) {
-	repos := NewTestScrollerRepos()
-	ids, collection := CreateImagesWithIngestTime(repos, 3)
-
-	r, err := repos.Scroller.GetAdjacent(ids[0],
-		scr.NewCriteria(
-			scr.WithCollection(collection.Name),
-			scr.WithOrdering(im.Ordering{IngestTime: true})),
-		scr.ScrollNext)
-	assert.NoError(t, err)
-	assert.Equal(t, ids[1], r.ImageId)
+type ScrollerTest struct {
+	name         string
+	currentId    im.ImageId
+	OrderByField string
+	Order        im.Order
+	Direction    scr.ScrollingDirection
+	wantId       im.ImageId
 }
 
-func TestPreviousIngestedImageInCollection(t *testing.T) {
+func TestGetAdjacentImages(t *testing.T) {
 	repos := NewTestScrollerRepos()
 	ids, collection := CreateImagesWithIngestTime(repos, 3)
 
-	r, err := repos.Scroller.GetAdjacent(ids[2],
-		scr.NewCriteria(
-			scr.WithCollection(collection.Name),
-			scr.WithOrdering(im.Ordering{IngestTime: true})),
-		scr.ScrollPrevious)
-	assert.NoError(t, err)
-	assert.Equal(t, ids[1], r.ImageId)
+	tests := []ScrollerTest{
+		{"next with ingested_at asc", ids[0], "ingested_at", im.AscOrder, scr.ScrollNext, ids[1]},
+		{"prev with ingested_at asc", ids[2], "ingested_at", im.AscOrder, scr.ScrollPrevious, ids[1]},
+		{"next with ingested_at desc", ids[2], "ingested_at", im.DescOrder, scr.ScrollNext, ids[1]},
+		{"prev with ingested_at desc", ids[0], "ingested_at", im.DescOrder, scr.ScrollPrevious, ids[1]},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, err := repos.Scroller.GetAdjacent(tt.currentId,
+				scr.NewCriteria(
+					scr.WithCollection(collection.Name),
+					scr.WithOrdering(im.OrderingArgs{{Field: tt.OrderByField, Order: tt.Order}})),
+				tt.Direction)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.wantId.String(), r.ImageId.String())
+
+		})
+	}
 }

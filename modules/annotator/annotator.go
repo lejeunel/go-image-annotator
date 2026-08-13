@@ -42,7 +42,7 @@ func (a *Annotator) Init(ctx context.Context, imageId string, collection string,
 ) {
 	a.scroller.Init(imageId, oscr,
 		scr.WithCollection(collection),
-		scr.WithOrdering(im.Ordering{IngestTime: true}))
+		scr.WithOrdering(im.OrderingArgs{{Field: "ingested_at", Order: im.AscOrder}}))
 	a.ReadImage(imageId, collection, oim)
 	a.FetchLabels.Execute(ctx, olbl)
 }

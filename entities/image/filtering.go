@@ -1,8 +1,18 @@
 package image
 
-type Ordering struct {
-	IngestTime bool
+type Order int
+
+const (
+	AscOrder Order = iota
+	DescOrder
+)
+
+type OrderingArg struct {
+	Field string
+	Order
 }
+
+type OrderingArgs []OrderingArg
 
 type Filtering struct {
 	Collection *string

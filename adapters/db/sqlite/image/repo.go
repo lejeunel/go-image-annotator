@@ -65,13 +65,47 @@ func (r SQLiteImageRepo) Count(f im.Filtering) (*int64, error) {
 func (r SQLiteImageRepo) Slice(
 	f im.Filtering,
 	p pa.PaginationParams,
-	o im.Ordering,
+	o im.OrderingArgs,
 ) ([]im.BaseImage, error) {
-	images, err := r.list(f, p, o)
+	q := r.makeBaseQuery(f, p.PageSize)
+	q = q.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
+
+	for _, oc := range o {
+		if oc.Order == im.AscOrder {
+			q = q.OrderBy(fmt.Sprintf("i.%v ASC", oc.Field))
+		} else {
+			q = q.OrderBy(fmt.Sprintf("i.%v DESC", oc.Field))
+		}
+	}
+
+	q = q.OrderBy("ic.image_id")
+	images, err := r.fetchBaseImages(q)
 	if err != nil {
 		return nil, err
 	}
 	return images, nil
+}
+
+func (r SQLiteImageRepo) sliceAfterId(
+	f im.Filtering,
+	pageSize int,
+	after *im.ImageId,
+) ([]im.BaseImage, *im.ImageId, error) {
+	q := r.makeBaseQuery(f, pageSize)
+	q = q.OrderBy("ic.image_id")
+	if after != nil {
+		q = q.Where(sq.Gt{"ic.image_id": after})
+	}
+
+	images, err := r.fetchBaseImages(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	var next *im.ImageId
+	if len(images) > 0 {
+		next = &images[len(images)-1].ImageId
+	}
+	return images, next, nil
 }
 
 func (r SQLiteImageRepo) Iterate(f im.Filtering, pageSize int) iter.Seq2[im.BaseImage, error] {
@@ -225,48 +259,6 @@ func (r SQLiteImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, er
 		images = append(images, im.BaseImage{ImageId: r.ImageId, Collection: r.Name})
 	}
 	return images, nil
-}
-
-func (r SQLiteImageRepo) list(
-	f im.Filtering,
-	p pa.PaginationParams,
-	o im.Ordering,
-) ([]im.BaseImage, error) {
-	q := r.makeBaseQuery(f, p.PageSize)
-	q = q.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
-
-	if o.IngestTime {
-		q = q.OrderBy("i.ingested_at")
-	}
-
-	q = q.OrderBy("ic.image_id")
-	images, err := r.fetchBaseImages(q)
-	if err != nil {
-		return nil, err
-	}
-	return images, nil
-}
-
-func (r SQLiteImageRepo) sliceAfterId(
-	f im.Filtering,
-	pageSize int,
-	after *im.ImageId,
-) ([]im.BaseImage, *im.ImageId, error) {
-	q := r.makeBaseQuery(f, pageSize)
-	q = q.OrderBy("ic.image_id")
-	if after != nil {
-		q = q.Where(sq.Gt{"ic.image_id": after})
-	}
-
-	images, err := r.fetchBaseImages(q)
-	if err != nil {
-		return nil, nil, err
-	}
-	var next *im.ImageId
-	if len(images) > 0 {
-		next = &images[len(images)-1].ImageId
-	}
-	return images, next, nil
 }
 
 func (r SQLiteImageRepo) IsUsed(id im.ImageId) (*bool, error) {

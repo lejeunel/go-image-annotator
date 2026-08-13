@@ -10,6 +10,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
+	st "github.com/lejeunel/go-image-annotator/shared/testing"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,7 +44,7 @@ func TestInternalErrOnImageListShouldFail(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewSQLiteImageRepo(db)
 	db.Close()
-	_, err := repo.Slice(im.Filtering{}, pa.PaginationParams{}, im.Ordering{})
+	_, err := repo.Slice(im.Filtering{}, pa.PaginationParams{}, im.OrderingArgs{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
@@ -59,7 +60,7 @@ func TestListOneImage(t *testing.T) {
 	r, _ := repos.Image.Slice(
 		im.Filtering{},
 		pa.PaginationParams{PageSize: 2, Page: 1},
-		im.Ordering{},
+		im.OrderingArgs{},
 	)
 	assert.Equal(t, 1, len(r))
 }
@@ -73,7 +74,7 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 	r, _ := repos.Image.Slice(
 		im.Filtering{Collection: &firstCollection.Name},
 		pa.PaginationParams{PageSize: 2, Page: 1},
-		im.Ordering{},
+		im.OrderingArgs{},
 	)
 	assert.Equal(t, 1, len(r))
 	images := r
@@ -101,18 +102,18 @@ func TestListImagesOrderedById(t *testing.T) {
 	CreateImageInCollectionFromString(
 		repos.Image,
 		collection,
-		"11111111-1111-1111-1111-111111111111",
+		st.FakeUUIDFromInt(1),
 	)
 	image0 := CreateImageInCollectionFromString(
 		repos.Image,
 		collection,
-		"00000000-0000-0000-0000-000000000000",
+		st.FakeUUIDFromInt(0),
 	)
 
 	r, _ := repos.Image.Slice(
 		im.Filtering{},
 		pa.PaginationParams{PageSize: 2, Page: 1},
-		im.Ordering{},
+		im.OrderingArgs{},
 	)
 	got := r[0].ImageId
 	assert.Equal(t, image0.Id, got)
@@ -122,8 +123,8 @@ func TestListImagesOrderedByIngestTime(t *testing.T) {
 	repos := NewImageListingTestRepos()
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	repos.Collection.Create(collection)
-	firstId, _ := im.NewImageIdFromString("11111111-1111-1111-1111-111111111111")
-	secondId, _ := im.NewImageIdFromString("00000000-0000-0000-0000-000000000000")
+	firstId, _ := im.NewImageIdFromString(st.FakeUUIDFromInt(0))
+	secondId, _ := im.NewImageIdFromString(st.FakeUUIDFromInt(1))
 	firstImage := im.NewImage(firstId, collection)
 	secondImage := im.NewImage(secondId, collection)
 	repos.Image.AddImage(firstImage.Id, []byte("first-hash"), im.Specs{IngestedAt: time.Now()})
@@ -134,7 +135,7 @@ func TestListImagesOrderedByIngestTime(t *testing.T) {
 	r, err := repos.Image.Slice(
 		im.Filtering{},
 		pa.PaginationParams{PageSize: 2, Page: 1},
-		im.Ordering{IngestTime: true},
+		im.OrderingArgs{{Field: "ingested_at", Order: im.AscOrder}},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, r[0].ImageId, firstImage.Id)
@@ -149,12 +150,12 @@ func TestIterateImages(t *testing.T) {
 	im0 := CreateImageInCollectionFromString(
 		repos.Image,
 		collection,
-		"00000000-0000-0000-0000-000000000000",
+		st.FakeUUIDFromInt(0),
 	)
 	im1 := CreateImageInCollectionFromString(
 		repos.Image,
 		collection,
-		"11111111-1111-1111-1111-111111111111",
+		st.FakeUUIDFromInt(1),
 	)
 
 	res := []im.BaseImage{}

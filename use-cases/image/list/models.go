@@ -8,7 +8,7 @@ import (
 type Request struct {
 	im.Filtering
 	pa.PaginationParams
-	im.Ordering
+	im.OrderingArgs
 }
 
 type Response struct {

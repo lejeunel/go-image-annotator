@@ -115,7 +115,7 @@ func Make(port int) http.Handler {
 
 	notifier := wauth.MakeNotifierFromEnv(*logger)
 	authServer := wauth.New(
-		cfg.URL,
+		fmt.Sprintf("%v:%v", cfg.URL, port),
 		basePageBuilder,
 		*logger,
 		app.SessionManager,

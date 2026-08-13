@@ -6,7 +6,7 @@ import (
 
 type ScrollingCriteria struct {
 	Collection *string
-	im.Ordering
+	im.OrderingArgs
 }
 
 type Option func(*ScrollingCriteria)
@@ -17,9 +17,9 @@ func WithCollection(collection string) Option {
 	}
 }
 
-func WithOrdering(o im.Ordering) Option {
+func WithOrdering(o im.OrderingArgs) Option {
 	return func(c *ScrollingCriteria) {
-		c.Ordering = o
+		c.OrderingArgs = o
 	}
 }
 

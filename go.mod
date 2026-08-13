@@ -54,3 +54,5 @@ require (
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )
+
+replace go.tomakado.io/dumbql => github.com/lejeunel/dumbql v0.0.0-20260812125202-f870a291e978

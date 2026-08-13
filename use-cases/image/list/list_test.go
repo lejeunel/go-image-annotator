@@ -13,7 +13,7 @@ import (
 func TestHandleNotFoundErrOnList(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.ImageRepo{ErrOnList: e.ErrNotFound},
-		&fk.ImageStore{})
+		&fk.ImageStore{}, 1)
 	itr.Execute(
 		Request{Filtering: im.Filtering{}, PaginationParams: pa.PaginationParams{PageSize: 1}},
 		p,
@@ -22,10 +22,12 @@ func TestHandleNotFoundErrOnList(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestPaginationParamsFallbackToDefault(t *testing.T) {
+func TestSanitizePaginationParams(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.ImageRepo{},
-		&fk.ImageStore{})
+	repo := fk.ImageRepo{}
+	defaultPageSize := 1
+	itr := New(&repo,
+		&fk.ImageStore{}, defaultPageSize)
 	itr.Execute(
 		Request{
 			Filtering:        im.Filtering{},
@@ -33,56 +35,62 @@ func TestPaginationParamsFallbackToDefault(t *testing.T) {
 		},
 		p,
 	)
-	assert.True(t, p.GotSuccess)
+	assert.Equal(t, int64(1), repo.GotPagination.Page)
+	assert.Equal(t, defaultPageSize, repo.GotPagination.PageSize)
 }
 
-func TestHandleInternalErrOnList(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&fk.ImageRepo{ErrOnList: e.ErrInternal},
-		&fk.ImageStore{})
-	itr.Execute(
-		Request{Filtering: im.Filtering{}, PaginationParams: pa.PaginationParams{PageSize: 1}},
-		p,
-	)
-	assert.True(t, p.GotInternalErr)
-	assert.False(t, p.GotSuccess)
-}
-
-func TestHandleInternalErrOnImageBuild(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&fk.ImageRepo{}, &fk.ImageStore{ErrOnFind: e.ErrInternal})
-	itr.Execute(
-		Request{Filtering: im.Filtering{}, PaginationParams: pa.PaginationParams{PageSize: 1}},
-		p,
-	)
-	assert.True(t, p.GotInternalErr)
-	assert.False(t, p.GotSuccess)
-}
-
-func TestHandleInternalErrOnCount(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&fk.ImageRepo{ErrOnCount: e.ErrInternal}, &fk.ImageStore{})
-	itr.Execute(
-		Request{Filtering: im.Filtering{}, PaginationParams: pa.PaginationParams{PageSize: 1}},
-		p,
-	)
-	assert.True(t, p.GotInternalErr)
-	assert.False(t, p.GotSuccess)
-}
-
-func TestListImages(t *testing.T) {
+func TestQueryPaginationParams(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.ImageRepo{}
-	itr := New(repo, &fk.ImageStore{})
-	r := Request{Filtering: im.Filtering{}, PaginationParams: pa.PaginationParams{PageSize: 1}}
+	itr := New(repo, &fk.ImageStore{}, 20)
+	r := Request{
+		Filtering:        im.Filtering{},
+		PaginationParams: pa.PaginationParams{Page: 1, PageSize: 2},
+	}
 	itr.Execute(r, p)
-	assert.Equal(t, r.PageSize, len(p.Got.Images))
+	pg := repo.GotPagination
+	assert.Equal(t, int(pg.Page), int(r.Page), "page")
+	assert.Equal(t, pg.PageSize, r.PageSize, "page size")
+}
+
+func TestHandleErrOnList(t *testing.T) {
+	p := &FakePresenter{}
+	itr := New(&fk.ImageRepo{ErrOnList: e.ErrInternal},
+		&fk.ImageStore{}, 1)
+	itr.Execute(
+		Request{Filtering: im.Filtering{}, PaginationParams: pa.PaginationParams{PageSize: 1}},
+		p,
+	)
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
+}
+
+func TestHandleErrOnImageStoreRetrieval(t *testing.T) {
+	p := &FakePresenter{}
+	itr := New(&fk.ImageRepo{}, &fk.ImageStore{ErrOnFind: e.ErrInternal}, 1)
+	itr.Execute(
+		Request{Filtering: im.Filtering{}, PaginationParams: pa.PaginationParams{PageSize: 1}},
+		p,
+	)
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
+}
+
+func TestHandleErrOnCount(t *testing.T) {
+	p := &FakePresenter{}
+	itr := New(&fk.ImageRepo{ErrOnCount: e.ErrInternal}, &fk.ImageStore{}, 1)
+	itr.Execute(
+		Request{Filtering: im.Filtering{}, PaginationParams: pa.PaginationParams{PageSize: 1}},
+		p,
+	)
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
 }
 
 func TestPaginationMetaData(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.ImageRepo{Count_: 12}
-	itr := New(repo, &fk.ImageStore{})
+	itr := New(repo, &fk.ImageStore{}, 10)
 	r := Request{
 		Filtering:        im.Filtering{},
 		PaginationParams: pa.PaginationParams{Page: 1, PageSize: 10},
@@ -95,31 +103,26 @@ func TestPaginationMetaData(t *testing.T) {
 	assert.Equal(t, 2, int(pg.TotalPages))
 }
 
-func TestQueryPaginationParams(t *testing.T) {
-	p := &FakePresenter{}
-	repo := &fk.ImageRepo{}
-	itr := New(repo, &fk.ImageStore{})
-	r := Request{
-		Filtering:        im.Filtering{},
-		PaginationParams: pa.PaginationParams{Page: 1, PageSize: 2},
-	}
-	itr.Execute(r, p)
-	pg := repo.GotPagination
-	assert.Equal(t, int(pg.Page), int(r.Page), "page")
-	assert.Equal(t, pg.PageSize, r.PageSize, "page size")
-}
-
 func TestQueryOrderingParams(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.ImageRepo{}
-	itr := New(repo, &fk.ImageStore{})
-	ord := im.Ordering{IngestTime: true}
+	itr := New(repo, &fk.ImageStore{}, 1)
+	ord := im.OrderingArgs{{Field: "ingested_at", Order: im.DescOrder}}
 
 	r := Request{
 		Filtering:        im.Filtering{},
 		PaginationParams: pa.PaginationParams{PageSize: 1},
-		Ordering:         ord,
+		OrderingArgs:     ord,
 	}
 	itr.Execute(r, p)
 	assert.Equal(t, ord, repo.GotOrdering)
+}
+
+func TestListImages(t *testing.T) {
+	p := &FakePresenter{}
+	repo := &fk.ImageRepo{}
+	itr := New(repo, &fk.ImageStore{}, 1)
+	r := Request{Filtering: im.Filtering{}, PaginationParams: pa.PaginationParams{PageSize: 1}}
+	itr.Execute(r, p)
+	assert.Equal(t, r.PageSize, len(p.Got.Images))
 }

@@ -4,6 +4,8 @@ import (
 	"context"
 	_ "embed"
 	"errors"
+	"fmt"
+	"strings"
 
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -60,4 +62,16 @@ func (p FakeProvider) Provide() (*u.User, error) {
 func CreateCtxWithUserId(ctx context.Context, userId u.UserId) context.Context {
 	user := u.NewUser(userId)
 	return u.AppendUserToContext(ctx, user)
+}
+
+func FakeUUIDFromInt(n int) string {
+	digit := fmt.Sprintf("%d", n)
+	full := strings.Repeat(digit, 32)
+	return fmt.Sprintf("%s-%s-%s-%s-%s",
+		full[0:8],
+		full[8:12],
+		full[12:16],
+		full[16:20],
+		full[20:32],
+	)
 }

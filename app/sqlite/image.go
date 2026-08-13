@@ -40,7 +40,7 @@ func NewSQLiteImageInteractors(
 		IngestArchive: ia.New(archiveIngester, clr, tmpfs, el, logger, q.NewAsyncJobQueue(), maxArchiveMB, ia.WithAuth(auth)),
 		Find:          find.New(ims),
 		Raw:           raw.New(imfs, imr),
-		List:          list.New(imr, ims),
+		List:          list.New(imr, ims, pageSize),
 		Delete:        delete.New(ims),
 	}
 }

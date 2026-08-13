@@ -77,7 +77,7 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 		PaginationParams: pa.PaginationParams{
 			PageSize: s.Image.DefaultPageSize,
 		},
-		Ordering: im.Ordering{IngestTime: true},
+		OrderingArgs: im.OrderingArgs{{Field: "ingested_at", Order: im.DescOrder}},
 	}
 	if p := params.Page; p != nil {
 		req.Page = *p

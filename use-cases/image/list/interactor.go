@@ -14,21 +14,16 @@ type Interactor struct {
 	DefaultPageSize int
 }
 
-func New(r Repo, s ist.Interface) Interactor {
-	return Interactor{repo: r, store: s, DefaultPageSize: 10}
+func New(r Repo, s ist.Interface, defaultPageSize int) Interactor {
+	return Interactor{repo: r, store: s, DefaultPageSize: defaultPageSize}
 }
 
 func (i Interactor) Execute(r Request, out OutputPort) {
 	errCtx := "listing images"
 
-	if r.PageSize == 0 {
-		r.PageSize = i.DefaultPageSize
-	}
-	if r.Page == 0 {
-		r.Page = 1
-	}
+	r.PaginationParams.Sanitize(i.DefaultPageSize)
 
-	baseImages, err := i.repo.Slice(r.Filtering, r.PaginationParams, r.Ordering)
+	baseImages, err := i.repo.Slice(r.Filtering, r.PaginationParams, r.OrderingArgs)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

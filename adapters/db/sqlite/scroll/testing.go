@@ -1,14 +1,12 @@
 package scroll
 
 import (
-	"fmt"
-	"strings"
-
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	clcsql "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	imsql "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	st "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type SQLiteScrollerRepos struct {
@@ -26,24 +24,12 @@ func NewTestScrollerRepos() SQLiteScrollerRepos {
 	}
 }
 
-func FakeUUIDFromInt(n int) string {
-	digit := fmt.Sprintf("%d", n)
-	full := strings.Repeat(digit, 32)
-	return fmt.Sprintf("%s-%s-%s-%s-%s",
-		full[0:8],
-		full[8:12],
-		full[12:16],
-		full[16:20],
-		full[20:32],
-	)
-}
-
 func CreateImagesWithOrderedIds(repos SQLiteScrollerRepos, num int) []im.ImageId {
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	repos.Collection.Create(collection)
 	ids := []im.ImageId{}
 	for n := range num {
-		id, _ := im.NewImageIdFromString(FakeUUIDFromInt(n))
+		id, _ := im.NewImageIdFromString(st.FakeUUIDFromInt(n))
 		repos.Image.AddImage(id, []byte(id.String()), im.Specs{})
 		repos.Image.AddToCollection(id, collection.Name)
 		ids = append(ids, id)

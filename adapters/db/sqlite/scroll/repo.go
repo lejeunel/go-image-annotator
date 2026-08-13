@@ -26,25 +26,28 @@ type Row struct {
 }
 
 func (r SQLiteScrollerRepo) applyScrollOrdering(q sq.SelectBuilder, currentImageId im.ImageId,
-	ord im.Ordering, d scroller.ScrollingDirection,
+	ord im.OrderingArgs, d scroller.ScrollingDirection,
 ) sq.SelectBuilder {
-	if ord.IngestTime {
-		if d == scroller.ScrollNext {
-			q = q.Where("i.ingested_at>(SELECT ingested_at FROM images WHERE id=?)", currentImageId)
-			q = q.OrderBy("i.ingested_at")
-		} else {
-			q = q.Where("i.ingested_at<(SELECT ingested_at FROM images WHERE id=?)", currentImageId)
-			q = q.OrderBy("i.ingested_at DESC")
+	for _, orderingCriteria := range ord {
+		order := orderingCriteria.Order
+		if (order == im.AscOrder) && (d == scroller.ScrollNext) {
+			q = q.OrderBy(fmt.Sprintf("i.%v", orderingCriteria.Field))
+			q = q.Where(fmt.Sprintf("i.%v>(SELECT %v FROM images WHERE id=?)", orderingCriteria.Field, orderingCriteria.Field), currentImageId)
 		}
-		return q
+		if (order == im.AscOrder) && (d == scroller.ScrollPrevious) {
+			q = q.OrderBy(fmt.Sprintf("i.%v DESC", orderingCriteria.Field))
+			q = q.Where(fmt.Sprintf("i.%v<(SELECT %v FROM images WHERE id=?)", orderingCriteria.Field, orderingCriteria.Field), currentImageId)
+		}
+		if (order == im.DescOrder) && (d == scroller.ScrollNext) {
+			q = q.OrderBy(fmt.Sprintf("i.%v DESC", orderingCriteria.Field))
+			q = q.Where(fmt.Sprintf("i.%v<(SELECT %v FROM images WHERE id=?)", orderingCriteria.Field, orderingCriteria.Field), currentImageId)
+		}
+		if (order == im.DescOrder) && (d == scroller.ScrollPrevious) {
+			q = q.OrderBy(fmt.Sprintf("i.%v", orderingCriteria.Field))
+			q = q.Where(fmt.Sprintf("i.%v>(SELECT %v FROM images WHERE id=?)", orderingCriteria.Field, orderingCriteria.Field), currentImageId)
+		}
 	}
-	if d == scroller.ScrollNext {
-		q = q.Where("i.id>?", currentImageId)
-		q = q.OrderBy("i.id")
-	} else {
-		q = q.Where("i.id<?", currentImageId)
-		q = q.OrderBy("i.id DESC")
-	}
+
 	return q
 }
 
@@ -61,7 +64,7 @@ func (r SQLiteScrollerRepo) GetAdjacent(id im.ImageId, criteria scroller.Scrolli
 		q = q.Where("c.name=?", *criteria.Collection)
 	}
 
-	q = r.applyScrollOrdering(q, id, criteria.Ordering, d)
+	q = r.applyScrollOrdering(q, id, criteria.OrderingArgs, d)
 	q = q.Limit(1)
 	sqlQuery, args, err := q.ToSql()
 	if err != nil {

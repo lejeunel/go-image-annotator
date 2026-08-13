@@ -38,3 +38,12 @@ type PaginationParams struct {
 	PageSize int
 	Page     int64
 }
+
+func (p *PaginationParams) Sanitize(defaultPageSize int) {
+	if p.PageSize == 0 {
+		p.PageSize = defaultPageSize
+	}
+	if p.Page == 0 {
+		p.Page = 1
+	}
+}

@@ -89,7 +89,7 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 			PageSize: s.DefaultPageSize,
 			Page:     pg.GetPageFromRequest(r),
 		},
-		Ordering: im.Ordering{IngestTime: true},
+		OrderingArgs: im.OrderingArgs{{Field: "ingested_at", Order: im.AscOrder}},
 	},
 		NewListImagesPresenter(w, s.PageBuilder, collection))
 }
