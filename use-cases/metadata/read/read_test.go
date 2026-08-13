@@ -106,8 +106,10 @@ func TestRead(t *testing.T) {
 	itr.MetaDataRepo = &fk.MetaDataRepo{ReturnValue: value, ExistingKeys: []string{key}}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
-		Request{ImageId: image.Id.String(), Collection: collection.Name,
-			Key: key},
+		Request{
+			ImageId: image.Id.String(), Collection: collection.Name,
+			Key: key,
+		},
 		p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, value, p.Got.Data.Value)

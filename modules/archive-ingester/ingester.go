@@ -3,6 +3,7 @@ package ingester
 import (
 	"archive/zip"
 	"fmt"
+
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	ii "github.com/lejeunel/go-image-annotator/modules/image-ingester"
@@ -49,7 +50,9 @@ func (i ArchiveIngester) IngestArchive(r Request) (Response, error) {
 			break
 		}
 
-		r, err := i.ImageIngester.Ingest(ii.Request{UserId: r.UserId, Collection: r.Collection, Reader: reader})
+		r, err := i.ImageIngester.Ingest(
+			ii.Request{UserId: r.UserId, Collection: r.Collection, Reader: reader},
+		)
 		if err != nil {
 			reader.Close()
 			lastErr = fmt.Errorf("%w: ingesting file %v: %w", errCtx, file.Name, err)

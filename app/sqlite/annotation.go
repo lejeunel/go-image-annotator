@@ -16,10 +16,10 @@ import (
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
-func NewSQLiteAnnotationInteractors(ims ims.ImageStore,
-	imr imr.SQLiteImageRepo,
-	lbr lbr.SQLiteLabelRepo,
-	anr anr.SQLiteAnnotationRepo,
+func NewAnnotationInteractors(ims ims.ImageStore,
+	imr imr.ImageRepo,
+	lbr lbr.LabelRepo,
+	anr anr.AnnotationRepo,
 	auth auth.Interface,
 ) an.Interactors {
 	return an.Interactors{

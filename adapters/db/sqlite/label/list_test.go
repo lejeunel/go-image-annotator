@@ -11,14 +11,14 @@ import (
 
 func TestInternalErrOnLabelCountShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteLabelRepo(db)
+	repo := NewLabelRepo(db)
 	db.Close()
 	_, err := repo.Count()
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestCountLabels(t *testing.T) {
-	repo := NewSQLiteLabelRepo(s.NewInMemory())
+	repo := NewLabelRepo(s.NewInMemory())
 	CreateLabel(repo, "a-label")
 	count, _ := repo.Count()
 	assert.Equal(t, 1, int(count))
@@ -26,7 +26,7 @@ func TestCountLabels(t *testing.T) {
 
 func TestInternalErrOnLabelListShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteLabelRepo(db)
+	repo := NewLabelRepo(db)
 	db.Close()
 	_, err := repo.List(pag.PaginationParams{})
 	assert.ErrorIs(t, err, e.ErrInternal)
@@ -34,7 +34,7 @@ func TestInternalErrOnLabelListShouldFail(t *testing.T) {
 
 func TestListLabels(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteLabelRepo(db)
+	repo := NewLabelRepo(db)
 	CreateLabel(repo, "a-label")
 	CreateLabel(repo, "another-label")
 	labels, err := repo.List(pag.PaginationParams{Page: 1, PageSize: 2})

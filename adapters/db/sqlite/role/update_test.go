@@ -9,14 +9,14 @@ import (
 )
 
 func TestInternalErrOnUpdateShouldFail(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
+	repo := NewTestRoleRepo()
 	repo.Db.Close()
 	err := repo.Update(rl.UpdatableModel{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestUpdate(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
+	repo := NewTestRoleRepo()
 	role, _ := CreateRole(repo, "a-role")
 	newName := "new-role-name"
 	newDesc := "new-description"

@@ -12,6 +12,7 @@ import (
 
 type FilterStrParser interface {
 	Parse(string) (s.SQLizer, error)
+	Validate(query string) error
 }
 
 type FilterParser struct {

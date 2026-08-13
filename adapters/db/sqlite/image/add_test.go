@@ -12,7 +12,6 @@ import (
 )
 
 func TestAddSpecs(t *testing.T) {
-
 	imRepo, _, _ := SetupAdd(s.NewInMemory())
 	id := im.NewImageId()
 

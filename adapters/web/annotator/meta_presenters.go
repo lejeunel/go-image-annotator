@@ -37,6 +37,7 @@ func (p *AddMetaPresenter) SuccessAddMetadata(r m.MetaData) {
 		"adding meta-data",
 		fmt.Sprintf("Successfully added %v:%v", r.Key, r.Value))
 }
+
 func (p *AddMetaPresenter) SuccessListMetadata(r listmd.Response) {
 	RenderMetaDataList(r.ImageId, r.Collection, r.MetaData, p.Writer)
 }

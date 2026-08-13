@@ -15,7 +15,7 @@ import (
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
-type SQLiteEventRepo struct {
+type EventRepo struct {
 	Db adb.Querier
 }
 
@@ -36,7 +36,7 @@ type Event struct {
 	Extra string    `db:"extra"`
 }
 
-func (r SQLiteEventRepo) CreateTask(
+func (r EventRepo) CreateTask(
 	id t.TaskId,
 	now time.Time,
 	taskType t.TaskType,
@@ -50,7 +50,7 @@ func (r SQLiteEventRepo) CreateTask(
 	return nil
 }
 
-func (r SQLiteEventRepo) FindTask(id t.TaskId) (*t.Task, error) {
+func (r EventRepo) FindTask(id t.TaskId) (*t.Task, error) {
 	row := Task{}
 	err := r.Db.Get(&row,
 		"SELECT id,user_id,created_at,type_ FROM tasks WHERE id=$1", id)
@@ -67,7 +67,7 @@ func (r SQLiteEventRepo) FindTask(id t.TaskId) (*t.Task, error) {
 	return &task, nil
 }
 
-func (r SQLiteEventRepo) ListUserTasks(user u.UserId, p pa.PaginationParams) ([]t.Task, error) {
+func (r EventRepo) ListUserTasks(user u.UserId, p pa.PaginationParams) ([]t.Task, error) {
 	q := sq.StatementBuilder.Select(`id,user_id,created_at,type_`).From("tasks")
 	q = q.Limit(uint64(p.PageSize)).Offset((uint64(p.Page-1) * uint64(p.PageSize)))
 	q = q.Where("user_id=?", user)
@@ -88,7 +88,7 @@ func (r SQLiteEventRepo) ListUserTasks(user u.UserId, p pa.PaginationParams) ([]
 	return objects, nil
 }
 
-func (r SQLiteEventRepo) Count(u.UserId) (*int64, error) {
+func (r EventRepo) Count(u.UserId) (*int64, error) {
 	var count int64
 
 	query := "SELECT COUNT(*) FROM tasks"
@@ -100,7 +100,7 @@ func (r SQLiteEventRepo) Count(u.UserId) (*int64, error) {
 	return &count, nil
 }
 
-func (r SQLiteEventRepo) AddEvent(id t.TaskId, event ev.Event) error {
+func (r EventRepo) AddEvent(id t.TaskId, event ev.Event) error {
 	query := `INSERT INTO events (task_id, time, state, extra, error) VALUES ($1,$2,$3,$4,$5)`
 	extraStr, err := serialize(event.Extra)
 	if err != nil {
@@ -117,7 +117,7 @@ func (r SQLiteEventRepo) AddEvent(id t.TaskId, event ev.Event) error {
 	return nil
 }
 
-func (r SQLiteEventRepo) GetEvents(id t.TaskId) ([]ev.Event, error) {
+func (r EventRepo) GetEvents(id t.TaskId) ([]ev.Event, error) {
 	q := sq.StatementBuilder.Select(`task_id,time,state,extra,error`).From("events")
 	q = q.Where("task_id=?", id)
 	q = q.OrderBy("time DESC")
@@ -148,7 +148,7 @@ func (r SQLiteEventRepo) GetEvents(id t.TaskId) ([]ev.Event, error) {
 	return events, nil
 }
 
-func (r SQLiteEventRepo) ClipNumTasks(user u.UserId, numTasks int) error {
+func (r EventRepo) ClipNumTasks(user u.UserId, numTasks int) error {
 	query := `DELETE FROM events WHERE task_id NOT IN (SELECT id FROM tasks WHERE user_id=$1 ORDER BY created_at DESC LIMIT $2)`
 	_, err := r.Db.Exec(query, user, numTasks)
 	if err != nil {
@@ -163,6 +163,6 @@ func (r SQLiteEventRepo) ClipNumTasks(user u.UserId, numTasks int) error {
 	return nil
 }
 
-func NewSQLiteEventRepo(db adb.Querier) SQLiteEventRepo {
-	return SQLiteEventRepo{Db: db}
+func NewEventRepo(db adb.Querier) EventRepo {
+	return EventRepo{Db: db}
 }

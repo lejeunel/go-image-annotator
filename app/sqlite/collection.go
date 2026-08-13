@@ -23,12 +23,12 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
 )
 
-func NewSQLiteCollectionInteractors(
+func NewCollectionInteractors(
 	db *sqlx.DB,
-	cr cr.SQLiteCollectionRepo,
-	ir ir.SQLiteImageRepo,
-	ar ar.SQLiteAnnotationRepo,
-	gr gr.SQLiteGroupRepo,
+	cr cr.CollectionRepo,
+	ir ir.ImageRepo,
+	ar ar.AnnotationRepo,
+	gr gr.GroupRepo,
 	ims ims.ImageStore,
 	el el.EventLogger,
 	logger slog.Logger,

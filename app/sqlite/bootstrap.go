@@ -9,7 +9,7 @@ import (
 	bst "github.com/lejeunel/go-image-annotator/use-cases/bootstrap"
 )
 
-func NewSQLiteBootstrapInteractor(userRepo ur.SQLiteUserRepo, roleRepo rr.SQLiteRoleRepo,
+func NewBootstrapInteractor(userRepo ur.UserRepo, roleRepo rr.RoleRepo,
 	fileStore fs.FileStore,
 	t tk.TokenHasher, pv pw.PasswordValidator,
 ) bst.Interactor {

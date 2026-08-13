@@ -158,7 +158,8 @@ func TestAddPolygon(t *testing.T) {
 		Polygons: []a.PolygonRequest{
 			{
 				Label:  "a-label",
-				Points: a.Points{Coordinates: [][2]float32{{0, 0}, {0, 1}}}},
+				Points: a.Points{Coordinates: [][2]float32{{0, 0}, {0, 1}}},
+			},
 		},
 		Reader: &fk.ImageReader{},
 	})

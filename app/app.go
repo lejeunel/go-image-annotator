@@ -13,8 +13,8 @@ import (
 )
 
 type App struct {
-	Itrs           itrs.Interactors
-	SessionManager s.SessionManager
+	Itrs itrs.Interactors
+	s.SessionManager
 	a.Annotator
 }
 

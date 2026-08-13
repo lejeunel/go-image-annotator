@@ -43,7 +43,12 @@ func (s *ImageStore) DeleteBatch([]im.ImageId, clc.CollectionName) error {
 	return nil
 }
 
-func (s *ImageStore) Copy(src clc.CollectionName, id im.ImageId, dst clc.CollectionName, deep bool) error {
+func (s *ImageStore) Copy(
+	src clc.CollectionName,
+	id im.ImageId,
+	dst clc.CollectionName,
+	deep bool,
+) error {
 	s.CopiedToCollection = dst
 	return nil
 }

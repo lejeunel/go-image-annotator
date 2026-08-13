@@ -116,5 +116,6 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	out.SuccessReadMetadata(Response{
 		ImageId:    r.ImageId,
 		Collection: r.Collection,
-		Data:       m.MetaData{Key: r.Key, Value: *value}})
+		Data:       m.MetaData{Key: r.Key, Value: *value},
+	})
 }

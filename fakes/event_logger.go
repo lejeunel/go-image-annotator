@@ -24,16 +24,19 @@ func (l *EventLogger) InitTask(t.TaskId, t.TaskType, u.UserId) error {
 	l.InitializedTask = true
 	return nil
 }
+
 func (l *EventLogger) FindTask(t.TaskId) (*t.Task, error) {
 	if l.ErrOnFind != nil {
 		return nil, l.ErrOnFind
 	}
 	return &l.ReturnTask, nil
 }
+
 func (l *EventLogger) AddEvent(t t.TaskId, e e.Event) error {
 	l.Events = append(l.Events, e)
 	return nil
 }
+
 func (l *EventLogger) Count(u.UserId) (*int64, error) {
 	if l.ErrOnCount != nil {
 		return nil, l.ErrOnCount

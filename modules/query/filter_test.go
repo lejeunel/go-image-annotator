@@ -1,16 +1,16 @@
 package query
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"go.tomakado.io/dumbql/schema"
-	"testing"
 )
 
 func Setup() FilterParser {
 	b := schema.NewSchemaBuilder()
 	b.AddField("collection", schema.Is[string]())
 	return NewFilterParser(b.Build())
-
 }
 
 func TestParse(t *testing.T) {

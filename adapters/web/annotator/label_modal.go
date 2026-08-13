@@ -24,7 +24,11 @@ func makeLabelModal(labels []string) string {
 	template.Must(tModal.ParseFS(templatesFiles, "templates/label_modal.html"))
 
 	var buf bytes.Buffer
-	if err := tModal.ExecuteTemplate(&buf, "label_modal", NewLabelModal{Labels: labels}); err != nil {
+	if err := tModal.ExecuteTemplate(
+		&buf,
+		"label_modal",
+		NewLabelModal{Labels: labels},
+	); err != nil {
 		panic(err)
 	}
 

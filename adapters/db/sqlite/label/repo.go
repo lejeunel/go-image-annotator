@@ -12,7 +12,7 @@ import (
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
-type SQLiteLabelRepo struct {
+type LabelRepo struct {
 	Db adb.Querier
 }
 
@@ -22,7 +22,7 @@ type LabelRecord struct {
 	Description string      `db:"description"`
 }
 
-func (r SQLiteLabelRepo) Create(l lbl.Label) error {
+func (r LabelRepo) Create(l lbl.Label) error {
 	query := "INSERT INTO labels (id, name, description) VALUES ($1,$2,$3)"
 	_, err := r.Db.Exec(query, l.Id.String(), l.Name, l.Description)
 	if err != nil {
@@ -32,7 +32,7 @@ func (r SQLiteLabelRepo) Create(l lbl.Label) error {
 	return nil
 }
 
-func (r SQLiteLabelRepo) FindLabel(name string) (*lbl.Label, error) {
+func (r LabelRepo) FindLabel(name string) (*lbl.Label, error) {
 	record := LabelRecord{}
 	err := r.Db.Get(&record,
 		"SELECT id,name,description FROM labels WHERE name=$1", name)
@@ -49,7 +49,7 @@ func (r SQLiteLabelRepo) FindLabel(name string) (*lbl.Label, error) {
 	return &l, nil
 }
 
-func (r SQLiteLabelRepo) Delete(name string) error {
+func (r LabelRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM labels WHERE name=$1", name)
 	if err != nil {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
@@ -57,7 +57,7 @@ func (r SQLiteLabelRepo) Delete(name string) error {
 	return nil
 }
 
-func (r SQLiteLabelRepo) Count() (int64, error) {
+func (r LabelRepo) Count() (int64, error) {
 	var count int64
 
 	query := "SELECT COUNT(*) FROM labels"
@@ -69,7 +69,7 @@ func (r SQLiteLabelRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (r SQLiteLabelRepo) List(m pag.PaginationParams) ([]*lbl.Label, error) {
+func (r LabelRepo) List(m pag.PaginationParams) ([]*lbl.Label, error) {
 	q := sq.StatementBuilder.Select("id,name,description").From("labels")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
@@ -89,7 +89,7 @@ func (r SQLiteLabelRepo) List(m pag.PaginationParams) ([]*lbl.Label, error) {
 	return objects, nil
 }
 
-func (r SQLiteLabelRepo) FetchAll() ([]string, error) {
+func (r LabelRepo) FetchAll() ([]string, error) {
 	q := sq.StatementBuilder.Select("name").From("labels")
 	sql, args, err := q.ToSql()
 	if err != nil {
@@ -103,7 +103,7 @@ func (r SQLiteLabelRepo) FetchAll() ([]string, error) {
 	return names, nil
 }
 
-func (r SQLiteLabelRepo) Update(m lbl.UpdatableModel) error {
+func (r LabelRepo) Update(m lbl.UpdatableModel) error {
 	query := "UPDATE labels SET description=$1 WHERE name=$2"
 	_, err := r.Db.Exec(query, m.NewDescription, m.Name)
 	if err != nil {
@@ -113,7 +113,7 @@ func (r SQLiteLabelRepo) Update(m lbl.UpdatableModel) error {
 	return nil
 }
 
-func (r SQLiteLabelRepo) Exists(name string) (bool, error) {
+func (r LabelRepo) Exists(name string) (bool, error) {
 	var exists bool
 
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM labels WHERE name = $1)`, name)
@@ -124,7 +124,7 @@ func (r SQLiteLabelRepo) Exists(name string) (bool, error) {
 	return exists, nil
 }
 
-func (r SQLiteLabelRepo) IsUsed(name string) (*bool, error) {
+func (r LabelRepo) IsUsed(name string) (*bool, error) {
 	var count int64
 	query := "SELECT COUNT(*) FROM annotations WHERE label_id=(SELECT id FROM labels WHERE name=$1)"
 	err := r.Db.QueryRow(query, name).Scan(&count)
@@ -136,6 +136,6 @@ func (r SQLiteLabelRepo) IsUsed(name string) (*bool, error) {
 	return &isUsed, nil
 }
 
-func NewSQLiteLabelRepo(db adb.Querier) SQLiteLabelRepo {
-	return SQLiteLabelRepo{Db: db}
+func NewLabelRepo(db adb.Querier) LabelRepo {
+	return LabelRepo{Db: db}
 }

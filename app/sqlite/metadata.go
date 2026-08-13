@@ -15,10 +15,10 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/metadata/update"
 )
 
-func NewSQLiteMetadataInteractors(
-	mr mr.SQLiteMetaRepo,
-	cr cr.SQLiteCollectionRepo,
-	ir ir.SQLiteImageRepo,
+func NewMetadataInteractors(
+	mr mr.MetaRepo,
+	cr cr.CollectionRepo,
+	ir ir.ImageRepo,
 	auth auth.Interface,
 ) mu.Interactors {
 	return mu.Interactors{

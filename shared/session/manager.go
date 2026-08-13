@@ -3,12 +3,10 @@ package session
 import (
 	"bytes"
 	"context"
-	"database/sql"
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
@@ -144,16 +142,4 @@ func (bw *bufferedResponseWriter) Write(b []byte) (int, error) {
 
 func (bw *bufferedResponseWriter) WriteHeader(code int) {
 	bw.code = code
-}
-
-func NewSQLiteSessionManager(db *sql.DB, repo readusr.Repo,
-	verifier tk.TokenVerifier,
-) SessionManager {
-	store := sqlite3store.New(db)
-	m := SessionManager{
-		SessionManager: scs.New(), Repo: repo,
-		TokenVerifier: verifier,
-	}
-	m.Store = store
-	return m
 }

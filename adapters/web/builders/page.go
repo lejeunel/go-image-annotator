@@ -120,7 +120,15 @@ func (b *PageBuilder) Render(w io.Writer) {
 	var content Node
 
 	if b.Title != "" {
-		content = Div(content, Div(Class("text-2xl/7 font-bold text-white sm:truncate sm:text-3xl sm:tracking-tight font-roboto"), Text(b.Title)))
+		content = Div(
+			content,
+			Div(
+				Class(
+					"text-2xl/7 font-bold text-white sm:truncate sm:text-3xl sm:tracking-tight font-roboto",
+				),
+				Text(b.Title),
+			),
+		)
 	}
 
 	if b.markdownPreamble != "" {

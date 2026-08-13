@@ -37,7 +37,11 @@ func (r ImageLabelRow) Render() Node {
 						Annotator.editLabelMode();
 						LabelPicker.open();"`,
 					r.Id))),
-			cmp.MakeIconizedButton(ic.Trash, "delete", Attr(fmt.Sprintf("onclick=\"Annotator.remove('%v')\"", r.Id))),
+			cmp.MakeIconizedButton(
+				ic.Trash,
+				"delete",
+				Attr(fmt.Sprintf("onclick=\"Annotator.remove('%v')\"", r.Id)),
+			),
 		),
 		))
 }

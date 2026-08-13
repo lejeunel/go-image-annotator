@@ -1,12 +1,13 @@
 package image_store
 
 import (
+	"time"
+
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	"time"
 )
 
 type AnnotationRepo interface {

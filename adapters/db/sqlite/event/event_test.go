@@ -16,7 +16,7 @@ import (
 
 func TestErrOnInitTaskShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteEventRepo(db)
+	repo := NewEventRepo(db)
 	db.Close()
 	err := repo.CreateTask(ta.NewTaskId(), time.Now(), ta.CollectionCloneTask, "user@example.com")
 	assert.ErrorIs(t, err, e.ErrInternal)
@@ -24,10 +24,10 @@ func TestErrOnInitTaskShouldFail(t *testing.T) {
 
 func TestCreateAndRetrieveTaskOfUser(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteEventRepo(db)
+	repo := NewEventRepo(db)
 	firstUser := u.NewUser("first")
 	secondUser := u.NewUser("second")
-	userRepo := ur.NewSQLiteUserRepo(db)
+	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(firstUser)
 	userRepo.Create(secondUser)
 	repo.CreateTask(ta.NewTaskId(), time.Now(), ta.CollectionCloneTask, firstUser.Id)
@@ -40,9 +40,9 @@ func TestCreateAndRetrieveTaskOfUser(t *testing.T) {
 
 func TestTasksAreRetrievedInInverseChronologicalOrder(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteEventRepo(db)
+	repo := NewEventRepo(db)
 	user := u.NewUser("first")
-	userRepo := ur.NewSQLiteUserRepo(db)
+	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(user)
 	t0 := ta.NewTaskId()
 	t1 := ta.NewTaskId()
@@ -54,16 +54,16 @@ func TestTasksAreRetrievedInInverseChronologicalOrder(t *testing.T) {
 
 func TestAddingEventToNonExistingTaskShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteEventRepo(db)
+	repo := NewEventRepo(db)
 	err := repo.AddEvent(ta.NewTaskId(), ev.Event{})
 	assert.Error(t, err)
 }
 
 func TestAddEventToTask(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteEventRepo(db)
+	repo := NewEventRepo(db)
 	user := u.NewUser("first")
-	userRepo := ur.NewSQLiteUserRepo(db)
+	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(user)
 	tid := ta.NewTaskId()
 	repo.CreateTask(tid, time.Now(), ta.CollectionCloneTask, user.Id)
@@ -80,9 +80,9 @@ func TestAddEventToTask(t *testing.T) {
 
 func TestCountTasks(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteEventRepo(db)
+	repo := NewEventRepo(db)
 	user := u.NewUser("first")
-	userRepo := ur.NewSQLiteUserRepo(db)
+	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(user)
 	tid := ta.NewTaskId()
 	repo.CreateTask(tid, time.Now(), ta.CollectionCloneTask, user.Id)
@@ -93,9 +93,9 @@ func TestCountTasks(t *testing.T) {
 
 func TestFindTask(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteEventRepo(db)
+	repo := NewEventRepo(db)
 	user := u.NewUser("first")
-	userRepo := ur.NewSQLiteUserRepo(db)
+	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(user)
 	tid := ta.NewTaskId()
 	repo.CreateTask(tid, time.Now(), ta.CollectionCloneTask, user.Id)
@@ -107,9 +107,9 @@ func TestFindTask(t *testing.T) {
 
 func TestClipNumTasksPerUser(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteEventRepo(db)
+	repo := NewEventRepo(db)
 	user := u.NewUser("first")
-	userRepo := ur.NewSQLiteUserRepo(db)
+	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(user)
 	firstId := ta.NewTaskId()
 	secondId := ta.NewTaskId()

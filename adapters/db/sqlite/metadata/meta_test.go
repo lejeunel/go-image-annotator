@@ -14,11 +14,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Init() (*sqlx.DB, SQLiteMetaRepo, clc.Collection, im.Image) {
+func Init() (*sqlx.DB, MetaRepo, clc.Collection, im.Image) {
 	db := s.NewInMemory()
-	metaRepo := NewSQLiteMetaRepo(db)
-	clcRepo := cr.NewSQLiteCollectionRepo(db)
-	imRepo := ir.NewSQLiteImageRepo(db, &fk.FilterStrParser{}, &fk.OrderStrParser{})
+	metaRepo := NewMetaRepo(db)
+	clcRepo := cr.NewCollectionRepo(db)
+	imRepo := ir.NewImageRepo(db, &fk.FilterStrParser{}, &fk.OrderStrParser{})
 
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	image := im.NewImage(im.NewImageId(), collection)

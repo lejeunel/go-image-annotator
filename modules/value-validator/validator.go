@@ -26,5 +26,4 @@ func (v BaseTypeValidator) Validate(value any) error {
 	default:
 		return fmt.Errorf("unsupported value type: %T: %w", v, e.ErrValidation)
 	}
-
 }

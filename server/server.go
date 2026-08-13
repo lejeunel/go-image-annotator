@@ -35,7 +35,7 @@ func Make(port int) http.Handler {
 	defaultAuth := auth.NewDefault()
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	app := sqlite.NewSQLiteApp(cfg, &defaultAuth, *logger)
+	app := sqlite.NewApp(cfg, &defaultAuth, *logger)
 
 	currentVersion := g.Info{Version: g.Version, Date: g.Date}
 	basePageBuilder := b.NewBasePageBuilder()

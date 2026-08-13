@@ -35,7 +35,6 @@ var (
 )
 
 func parseFormValue(metaType, value string) any {
-
 	var parsed any
 	var err error
 	switch metaType {
@@ -149,6 +148,7 @@ func (s *Server) MetaDataForm(w http.ResponseWriter, r *http.Request) {
 
 	Div(Class("flex items-end"), b.Build()).Render(w)
 }
+
 func (s *Server) DeleteMetaData(w http.ResponseWriter, r *http.Request) {
 	key := r.URL.Query().Get(MetaKeyArg)
 	imageId := r.URL.Query().Get(MetaImageIdArg)

@@ -25,6 +25,7 @@ func NewHTMXCreateFormBuilder(submitEndpoint string, containerId string) HTMXCre
 		containerId: containerId,
 	}
 }
+
 func (b *HTMXCreateFormBuilder) AddSubmitQueryParam(key, value string) *HTMXCreateFormBuilder {
 	url := rt.AddQueryParams(b.FormBuilder.submitEndpoint, key, value)
 	b.FormBuilder.submitEndpoint = url.String()

@@ -44,6 +44,7 @@ func (v OrderingStrConverter) Validate(q string) error {
 	}
 	return nil
 }
+
 func (v OrderingStrConverter) Parse(q string) (string, error) {
 	if q == "" {
 		return "", nil
@@ -65,11 +66,9 @@ func (v OrderingStrConverter) Parse(q string) (string, error) {
 			}
 		} else {
 			res = append(res, term)
-
 		}
 	}
 	return strings.Join(res, ", "), nil
-
 }
 
 func (v OrderingStrConverter) extractField(term string) string {
@@ -83,7 +82,11 @@ func (v OrderingStrConverter) validateSuffix(term string) error {
 	if strings.Contains(term, ":") {
 		suffix := strings.Split(term, ":")[1]
 		if !slices.Contains([]string{"asc", "desc"}, suffix) {
-			return fmt.Errorf("validating suffix %v to be one of {asc, desc}: %w", suffix, e.ErrValidation)
+			return fmt.Errorf(
+				"validating suffix %v to be one of {asc, desc}: %w",
+				suffix,
+				e.ErrValidation,
+			)
 		}
 	}
 	return nil

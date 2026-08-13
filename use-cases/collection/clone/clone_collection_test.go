@@ -75,7 +75,9 @@ func TestClone(t *testing.T) {
 	itr.ImageRepo = &fk.ImageRepo{
 		IterateBaseImages: []im.BaseImage{
 			{ImageId: im.NewImageId(), Collection: src},
-			{ImageId: im.NewImageId(), Collection: src}}}
+			{ImageId: im.NewImageId(), Collection: src},
+		},
+	}
 	p := &FakePresenter{}
 	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
 		Request{Source: src, Destination: dst}, p)

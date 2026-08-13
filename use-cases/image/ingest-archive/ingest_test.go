@@ -67,8 +67,10 @@ func TestTaskIsInitializedAndPending(t *testing.T) {
 	el := fk.EventLogger{}
 	itr.IEventLogger = &el
 	itr.Execute(ctx,
-		Request{Reader: bytes.NewReader(data),
-			Collection: collection.Name}, p)
+		Request{
+			Reader:     bytes.NewReader(data),
+			Collection: collection.Name,
+		}, p)
 	assert.True(t, el.InitializedTask)
 	assert.Equal(t, ev.PendingTask, el.Events[0].State)
 	assert.True(t, p.GotSuccess)
@@ -81,12 +83,13 @@ func TestIngestBatch(t *testing.T) {
 	itr.TemporaryFileStore = &fk.FileStore{Data: data}
 	itr.ArchiveIngester = ig
 	itr.Execute(ctx,
-		Request{Reader: bytes.NewReader(data),
-			Collection: collection.Name}, p)
+		Request{
+			Reader:     bytes.NewReader(data),
+			Collection: collection.Name,
+		}, p)
 	gotData := make([]byte, len(data))
 	ig.Got.ReaderAt.ReadAt(gotData, 0)
 	assert.True(t, bytes.Equal(gotData, data))
-
 }
 
 func TestArchiveIsDeleted(t *testing.T) {
@@ -95,10 +98,11 @@ func TestArchiveIsDeleted(t *testing.T) {
 	tfs := &fk.FileStore{}
 	itr.TemporaryFileStore = tfs
 	itr.Execute(ctx,
-		Request{Reader: bytes.NewReader(data),
-			Collection: collection.Name}, p)
+		Request{
+			Reader:     bytes.NewReader(data),
+			Collection: collection.Name,
+		}, p)
 	assert.Equal(t, 1, tfs.NumDeletedItems)
-
 }
 
 func TestFailedIngestionIsLogged(t *testing.T) {
@@ -108,8 +112,10 @@ func TestFailedIngestionIsLogged(t *testing.T) {
 	itr.IEventLogger = &el
 	itr.ArchiveIngester = &FakeIngester{Err: e.ErrInternal}
 	itr.Execute(ctx,
-		Request{Reader: bytes.NewReader(data),
-			Collection: collection.Name}, p)
+		Request{
+			Reader:     bytes.NewReader(data),
+			Collection: collection.Name,
+		}, p)
 	assert.Equal(t, ev.FailedTask, el.Events[len(el.Events)-1].State)
 }
 
@@ -121,8 +127,10 @@ func TestTooManyBytesShouldFail(t *testing.T) {
 	itr.ArchiveIngester = &FakeIngester{}
 	itr.MaxMB = int64(0)
 	itr.Execute(ctx,
-		Request{Reader: bytes.NewReader(data),
-			Collection: collection.Name}, p)
+		Request{
+			Reader:     bytes.NewReader(data),
+			Collection: collection.Name,
+		}, p)
 	assert.False(t, p.GotSuccess)
 	assert.True(t, p.GotValidationErr)
 }
@@ -134,7 +142,9 @@ func TestIngest(t *testing.T) {
 	itr.IEventLogger = &el
 	itr.ArchiveIngester = &FakeIngester{}
 	itr.Execute(ctx,
-		Request{Reader: bytes.NewReader(data),
-			Collection: collection.Name}, p)
+		Request{
+			Reader:     bytes.NewReader(data),
+			Collection: collection.Name,
+		}, p)
 	assert.Equal(t, ev.DoneTask, el.Events[len(el.Events)-1].State)
 }

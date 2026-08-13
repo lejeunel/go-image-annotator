@@ -21,7 +21,7 @@ func (p CreatePresenter) Success(r clc.Response) {
 
 func Create(ctx context.Context, name string, group *string, description string) {
 	auth := auth.NewDefault()
-	app := a.NewSQLiteApp(config.Parse(), &auth, *l.NewCliLogger())
+	app := a.NewApp(config.Parse(), &auth, *l.NewCliLogger())
 	app.Itrs.Collection.Create.Execute(ctx,
 		clc.Request{Name: name, Group: group, Description: description},
 		CreatePresenter{cli.NewErrorPresenter()})

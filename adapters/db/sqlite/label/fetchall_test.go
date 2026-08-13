@@ -11,14 +11,14 @@ import (
 
 func TestInternalErrOnFetchAll(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteLabelRepo(db)
+	repo := NewLabelRepo(db)
 	db.Close()
 	_, err := repo.FetchAll()
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestFetchAll(t *testing.T) {
-	repo := NewSQLiteLabelRepo(s.NewInMemory())
+	repo := NewLabelRepo(s.NewInMemory())
 	repo.Create(l.NewLabel(l.NewLabelId(), "first-label"))
 	repo.Create(l.NewLabel(l.NewLabelId(), "second-label"))
 	labels, _ := repo.FetchAll()

@@ -17,7 +17,7 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-type SQLiteAnnotationRepo struct {
+type AnnotationRepo struct {
 	Db adb.Querier
 }
 
@@ -47,7 +47,7 @@ type PolygonSpecs struct {
 	Points []PointSpec `json:"points"`
 }
 
-func (r SQLiteAnnotationRepo) AddImageLabel(
+func (r AnnotationRepo) AddImageLabel(
 	imageId i.ImageId,
 	collection c.CollectionName,
 	ann a.ImageLabel,
@@ -64,7 +64,7 @@ func (r SQLiteAnnotationRepo) AddImageLabel(
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) findLabelById(labelId l.LabelId) (*l.Label, error) {
+func (r AnnotationRepo) findLabelById(labelId l.LabelId) (*l.Label, error) {
 	rec := sl.LabelRecord{}
 	err := r.Db.Get(&rec,
 		"SELECT id,name,description FROM labels WHERE id=$1", labelId)
@@ -74,7 +74,7 @@ func (r SQLiteAnnotationRepo) findLabelById(labelId l.LabelId) (*l.Label, error)
 	return &l.Label{Id: rec.Id, Name: rec.Name, Description: rec.Description}, nil
 }
 
-func (r SQLiteAnnotationRepo) FindImageLabels(
+func (r AnnotationRepo) FindImageLabels(
 	imageId i.ImageId,
 	collection c.CollectionName,
 ) ([]a.ImageLabel, error) {
@@ -102,7 +102,7 @@ func (r SQLiteAnnotationRepo) FindImageLabels(
 	return imageLabels, nil
 }
 
-func (r SQLiteAnnotationRepo) RemoveAllAnnotations(imageId i.ImageId, collection string) error {
+func (r AnnotationRepo) RemoveAllAnnotations(imageId i.ImageId, collection string) error {
 	_, err := r.Db.Exec(
 		"DELETE FROM annotations WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2)",
 		imageId,
@@ -114,7 +114,7 @@ func (r SQLiteAnnotationRepo) RemoveAllAnnotations(imageId i.ImageId, collection
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) RemoveAnnotation(id a.AnnotationId) error {
+func (r AnnotationRepo) RemoveAnnotation(id a.AnnotationId) error {
 	_, err := r.Db.Exec("DELETE FROM annotations WHERE id=$1", id)
 	if err != nil {
 		return fmt.Errorf("deleting annotation record: %v: %w", err, e.ErrInternal)
@@ -122,7 +122,7 @@ func (r SQLiteAnnotationRepo) RemoveAnnotation(id a.AnnotationId) error {
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) RemoveImageLabel(
+func (r AnnotationRepo) RemoveImageLabel(
 	imageId i.ImageId,
 	collection c.CollectionName,
 	labelId l.LabelId,
@@ -139,7 +139,7 @@ func (r SQLiteAnnotationRepo) RemoveImageLabel(
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) AddPolygon(
+func (r AnnotationRepo) AddPolygon(
 	imageId i.ImageId,
 	collection c.CollectionName,
 	polygon a.Polygon,
@@ -172,7 +172,7 @@ func (r SQLiteAnnotationRepo) AddPolygon(
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) FindPolygons(
+func (r AnnotationRepo) FindPolygons(
 	imageId i.ImageId,
 	collection c.CollectionName,
 ) ([]a.Polygon, error) {
@@ -214,7 +214,7 @@ func (r SQLiteAnnotationRepo) FindPolygons(
 	return polygons, nil
 }
 
-func (r SQLiteAnnotationRepo) AddBoundingBox(
+func (r AnnotationRepo) AddBoundingBox(
 	imageId i.ImageId,
 	collection c.CollectionName,
 	box a.BoundingBox,
@@ -251,7 +251,7 @@ func (r SQLiteAnnotationRepo) AddBoundingBox(
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) FindBoundingBoxes(
+func (r AnnotationRepo) FindBoundingBoxes(
 	imageId i.ImageId,
 	collection c.CollectionName,
 ) ([]a.BoundingBox, error) {
@@ -288,7 +288,7 @@ func (r SQLiteAnnotationRepo) FindBoundingBoxes(
 	return boxes, nil
 }
 
-func (r SQLiteAnnotationRepo) UpdateLabelOfAnnotation(
+func (r AnnotationRepo) UpdateLabelOfAnnotation(
 	id a.AnnotationId,
 	labelId l.LabelId,
 	userId *u.UserId,
@@ -311,7 +311,7 @@ func (r SQLiteAnnotationRepo) UpdateLabelOfAnnotation(
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) UpdateBoundingBoxCoordinates(
+func (r AnnotationRepo) UpdateBoundingBoxCoordinates(
 	id a.AnnotationId,
 	xc, yc, width, height, angle float32,
 ) error {
@@ -332,7 +332,7 @@ func (r SQLiteAnnotationRepo) UpdateBoundingBoxCoordinates(
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) UpdateAuthor(id a.AnnotationId, userId *u.UserId) error {
+func (r AnnotationRepo) UpdateAuthor(id a.AnnotationId, userId *u.UserId) error {
 	query := "UPDATE annotations SET author=$1 WHERE id=$2"
 	_, err := r.Db.Exec(query, userId, id)
 	if err != nil {
@@ -342,7 +342,7 @@ func (r SQLiteAnnotationRepo) UpdateAuthor(id a.AnnotationId, userId *u.UserId) 
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) UpdateTime(id a.AnnotationId, t *time.Time) error {
+func (r AnnotationRepo) UpdateTime(id a.AnnotationId, t *time.Time) error {
 	query := "UPDATE annotations SET touched_at=$1 WHERE id=$2"
 	_, err := r.Db.Exec(query, t, id)
 	if err != nil {
@@ -352,7 +352,7 @@ func (r SQLiteAnnotationRepo) UpdateTime(id a.AnnotationId, t *time.Time) error 
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) UpdateBoundingBox(
+func (r AnnotationRepo) UpdateBoundingBox(
 	id a.AnnotationId,
 	u a.BoundingBoxUpdatables,
 	userId *u.UserId,
@@ -376,7 +376,7 @@ func (r SQLiteAnnotationRepo) UpdateBoundingBox(
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) UpdatePolygonPoints(id a.AnnotationId, points a.Points) error {
+func (r AnnotationRepo) UpdatePolygonPoints(id a.AnnotationId, points a.Points) error {
 	errCtx := "updating polygon points"
 	pointSpecs := []PointSpec{}
 	for _, p := range points.Coordinates {
@@ -392,7 +392,7 @@ func (r SQLiteAnnotationRepo) UpdatePolygonPoints(id a.AnnotationId, points a.Po
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) UpdatePolygon(
+func (r AnnotationRepo) UpdatePolygon(
 	id a.AnnotationId,
 	u a.PolygonUpdatables,
 	userId *u.UserId,
@@ -409,7 +409,7 @@ func (r SQLiteAnnotationRepo) UpdatePolygon(
 	return nil
 }
 
-func (r SQLiteAnnotationRepo) GroupOfAnnotation(id a.AnnotationId) (*string, error) {
+func (r AnnotationRepo) GroupOfAnnotation(id a.AnnotationId) (*string, error) {
 	var group string
 	err := r.Db.Get(
 		&group,
@@ -425,6 +425,6 @@ func (r SQLiteAnnotationRepo) GroupOfAnnotation(id a.AnnotationId) (*string, err
 	return &group, nil
 }
 
-func NewSQLiteAnnotationRepo(db adb.Querier) SQLiteAnnotationRepo {
-	return SQLiteAnnotationRepo{Db: db}
+func NewAnnotationRepo(db adb.Querier) AnnotationRepo {
+	return AnnotationRepo{Db: db}
 }

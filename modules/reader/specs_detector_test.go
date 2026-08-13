@@ -51,5 +51,4 @@ func TestErrorOnInvalidType(t *testing.T) {
 	detector := NewImageSpecsDetector([]string{"image/jpeg"})
 	_, _, err := detector.Detect(bytes.NewBuffer(st.TestPNGImage))
 	assert.ErrorIs(t, err, e.ErrValidation)
-
 }

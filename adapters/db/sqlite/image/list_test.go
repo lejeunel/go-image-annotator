@@ -46,7 +46,7 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 }
 
 func CreateImageInCollectionFromString(
-	repo SQLiteImageRepo,
+	repo ImageRepo,
 	collection clc.Collection,
 	imageId string,
 ) im.Image {

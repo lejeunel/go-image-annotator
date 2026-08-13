@@ -17,22 +17,22 @@ import (
 )
 
 type AnnotationTestingRepos struct {
-	Image      si.SQLiteImageRepo
-	Collection sc.SQLiteCollectionRepo
-	Label      sl.SQLiteLabelRepo
-	Annotation SQLiteAnnotationRepo
-	Group      sg.SQLiteGroupRepo
-	User       su.SQLiteUserRepo
+	Image      si.ImageRepo
+	Collection sc.CollectionRepo
+	Label      sl.LabelRepo
+	Annotation AnnotationRepo
+	Group      sg.GroupRepo
+	User       su.UserRepo
 }
 
 func NewAnnotationTestRepos(db *sqlx.DB) AnnotationTestingRepos {
 	return AnnotationTestingRepos{
-		Image:      si.NewSQLiteImageRepo(db, &fk.FilterStrParser{}, &fk.OrderStrParser{}),
-		Collection: sc.NewSQLiteCollectionRepo(db),
-		Label:      sl.NewSQLiteLabelRepo(db),
-		Annotation: NewSQLiteAnnotationRepo(db),
-		Group:      sg.NewSQLiteGroupRepo(db),
-		User:       su.NewSQLiteUserRepo(db),
+		Image:      si.NewImageRepo(db, &fk.FilterStrParser{}, &fk.OrderStrParser{}),
+		Collection: sc.NewCollectionRepo(db),
+		Label:      sl.NewLabelRepo(db),
+		Annotation: NewAnnotationRepo(db),
+		Group:      sg.NewGroupRepo(db),
+		User:       su.NewUserRepo(db),
 	}
 }
 

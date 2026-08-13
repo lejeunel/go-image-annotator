@@ -12,7 +12,7 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-type SQLiteGroupRepo struct {
+type GroupRepo struct {
 	Db *sqlx.DB
 }
 
@@ -22,7 +22,7 @@ type Row struct {
 	Description string    `db:"description"`
 }
 
-func (r SQLiteGroupRepo) Create(grp g.Group) error {
+func (r GroupRepo) Create(grp g.Group) error {
 	query := `INSERT INTO groups (id, name, description) VALUES ($1,$2,$3)`
 	_, err := r.Db.Exec(query, grp.Id, grp.Name, grp.Description)
 	if err != nil {
@@ -32,13 +32,13 @@ func (r SQLiteGroupRepo) Create(grp g.Group) error {
 	return nil
 }
 
-func (r SQLiteGroupRepo) rowToEntity(row Row) g.Group {
+func (r GroupRepo) rowToEntity(row Row) g.Group {
 	c := g.NewGroup(row.Id, row.Name,
 		g.WithDescription(row.Description))
 	return c
 }
 
-func (r SQLiteGroupRepo) Find(name string) (*g.Group, error) {
+func (r GroupRepo) Find(name string) (*g.Group, error) {
 	errCtx := fmt.Errorf("fetching group with name %v", name)
 	row := Row{}
 	err := r.Db.Get(&row,
@@ -56,7 +56,7 @@ func (r SQLiteGroupRepo) Find(name string) (*g.Group, error) {
 	return &entity, nil
 }
 
-func (r SQLiteGroupRepo) IsPopulated(name string) (*bool, error) {
+func (r GroupRepo) IsPopulated(name string) (*bool, error) {
 	var exists bool
 	err := r.Db.Get(
 		&exists,
@@ -70,7 +70,7 @@ func (r SQLiteGroupRepo) IsPopulated(name string) (*bool, error) {
 	return &exists, nil
 }
 
-func (r SQLiteGroupRepo) Exists(name string) (*bool, error) {
+func (r GroupRepo) Exists(name string) (*bool, error) {
 	var exists bool
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM groups WHERE name = $1)`, name)
 	if err != nil {
@@ -85,7 +85,7 @@ func (r SQLiteGroupRepo) Exists(name string) (*bool, error) {
 	return &exists, nil
 }
 
-func (r SQLiteGroupRepo) Delete(name string) error {
+func (r GroupRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM groups WHERE name=$1", name)
 	if err != nil {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
@@ -93,7 +93,7 @@ func (r SQLiteGroupRepo) Delete(name string) error {
 	return nil
 }
 
-func (r SQLiteGroupRepo) Update(m g.UpdateModel) error {
+func (r GroupRepo) Update(m g.UpdateModel) error {
 	query := "UPDATE groups SET name=$1,description=$2 WHERE name=$3"
 	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
 	if err != nil {
@@ -103,7 +103,7 @@ func (r SQLiteGroupRepo) Update(m g.UpdateModel) error {
 	return nil
 }
 
-func (r SQLiteGroupRepo) IsUsed(name string) (*bool, error) {
+func (r GroupRepo) IsUsed(name string) (*bool, error) {
 	var count int64
 
 	var isUsed bool
@@ -134,7 +134,7 @@ func (r SQLiteGroupRepo) IsUsed(name string) (*bool, error) {
 	return &isUsed, nil
 }
 
-func (r SQLiteGroupRepo) Count() (*int64, error) {
+func (r GroupRepo) Count() (*int64, error) {
 	var count int64
 
 	query := "SELECT COUNT(*) FROM groups"
@@ -146,7 +146,7 @@ func (r SQLiteGroupRepo) Count() (*int64, error) {
 	return &count, nil
 }
 
-func (r SQLiteGroupRepo) List() ([]g.Group, error) {
+func (r GroupRepo) List() ([]g.Group, error) {
 	q := sq.StatementBuilder.Select(`id,name,description`).From("groups")
 	sql, args, err := q.ToSql()
 	if err != nil {
@@ -166,10 +166,10 @@ func (r SQLiteGroupRepo) List() ([]g.Group, error) {
 	return objects, nil
 }
 
-func NewSQLiteGroupRepo(db *sqlx.DB) SQLiteGroupRepo {
-	return SQLiteGroupRepo{Db: db}
+func NewGroupRepo(db *sqlx.DB) GroupRepo {
+	return GroupRepo{Db: db}
 }
 
-func NewTestSQLiteGroupRepo() SQLiteGroupRepo {
-	return NewSQLiteGroupRepo(s.NewInMemory())
+func NewTestSQLiteGroupRepo() GroupRepo {
+	return NewGroupRepo(s.NewInMemory())
 }

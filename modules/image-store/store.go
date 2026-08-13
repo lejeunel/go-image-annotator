@@ -93,6 +93,7 @@ func (s ImageStore) DeleteAsset(id im.ImageId) error {
 	}
 	return s.FileStore.Delete(fmt.Sprintf("%v.%v", id, strings.Split(specs.MIMEType, "/")[1]))
 }
+
 func (s ImageStore) Delete(id im.ImageId, collection clc.CollectionName) error {
 	errCtx := fmt.Errorf("deleting image")
 	if err := s.Transactor.RunInTx(func(tx Repos) error {
@@ -129,6 +130,7 @@ func (s ImageStore) Delete(id im.ImageId, collection clc.CollectionName) error {
 	}
 	return nil
 }
+
 func (s ImageStore) DeleteBatch(ids []im.ImageId, collection clc.CollectionName) error {
 	for _, id := range ids {
 		if err := s.Delete(id, collection); err != nil {
@@ -138,7 +140,12 @@ func (s ImageStore) DeleteBatch(ids []im.ImageId, collection clc.CollectionName)
 	return nil
 }
 
-func (s ImageStore) Copy(src clc.CollectionName, id im.ImageId, dst clc.CollectionName, deep bool) error {
+func (s ImageStore) Copy(
+	src clc.CollectionName,
+	id im.ImageId,
+	dst clc.CollectionName,
+	deep bool,
+) error {
 	errCtx := fmt.Errorf("copying image %v from collection %v to collection %v", id, src, dst)
 	image, err := s.Find(im.BaseImage{ImageId: id, Collection: src})
 	if err != nil {
@@ -195,13 +202,10 @@ func (s ImageStore) Copy(src clc.CollectionName, id im.ImageId, dst clc.Collecti
 			}
 		}
 		return nil
-
 	}); err != nil {
 		return err
-
 	}
 	return nil
-
 }
 
 func New(r Repos, t Transactor, f fs.FileStore) ImageStore {

@@ -71,8 +71,9 @@ func (s *Server) IngestArchive(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	s.IngestArchiveItr.Execute(r.Context(),
-		ia.Request{Collection: r.URL.Query().Get(ingestCollectionArgName),
-			Reader: file,
+		ia.Request{
+			Collection: r.URL.Query().Get(ingestCollectionArgName),
+			Reader:     file,
 		},
 		NewIngestArchivePresenter(w),
 	)

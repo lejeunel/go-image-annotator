@@ -33,10 +33,10 @@ func (u *StoreTransactor) RunInTx(
 	defer tx.Rollback()
 
 	stores := s.Repos{
-		ImageRepo:      im.NewSQLiteImageRepo(tx, u.FilterStrParser, u.OrderStrParser),
-		CollectionRepo: clc.NewSQLiteCollectionRepo(tx),
-		AnnotationRepo: an.NewSQLiteAnnotationRepo(tx),
-		MetaRepo:       m.NewSQLiteMetaRepo(tx),
+		ImageRepo:      im.NewImageRepo(tx, u.FilterStrParser, u.OrderStrParser),
+		CollectionRepo: clc.NewCollectionRepo(tx),
+		AnnotationRepo: an.NewAnnotationRepo(tx),
+		MetaRepo:       m.NewMetaRepo(tx),
 	}
 
 	if err := fn(stores); err != nil {

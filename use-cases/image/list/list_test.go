@@ -19,7 +19,6 @@ func SetupList() Interactor {
 	repo := &fk.ImageRepo{}
 	st := &fk.ImageStore{}
 	return New(repo, fv, ov, st, 1)
-
 }
 
 func TestSanitizePaginationParams(t *testing.T) {
@@ -66,6 +65,7 @@ func TestPaginationMetaData(t *testing.T) {
 	assert.Equal(t, 12, int(pg.TotalRecords))
 	assert.Equal(t, 2, int(pg.TotalPages))
 }
+
 func TestInvalidFilterQueryShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := SetupList()
@@ -77,6 +77,7 @@ func TestInvalidFilterQueryShouldFail(t *testing.T) {
 	assert.Equal(t, query, fv.Got)
 	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
 }
+
 func TestInvalidOrderingStrShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := SetupList()

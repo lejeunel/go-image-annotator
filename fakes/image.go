@@ -84,7 +84,6 @@ func (r *ImageRepo) Slice(
 	p pa.PaginationParams,
 	o im.OrderingStr,
 ) ([]im.BaseImage, error) {
-
 	r.GotFilters = f
 	r.GotPagination = p
 	r.GotOrdering = o

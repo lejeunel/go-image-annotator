@@ -3,11 +3,12 @@ package ingester
 import (
 	"archive/zip"
 	"bytes"
+	"testing"
+
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	st "github.com/lejeunel/go-image-annotator/shared/testing"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func MakeZipArchive(files map[string][]byte) (*bytes.Reader, int64) {

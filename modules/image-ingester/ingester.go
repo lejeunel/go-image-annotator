@@ -110,6 +110,7 @@ func (i *ImageIngester) Ingest(r Request) (*Response, error) {
 
 	return &Response{ImageId: image.Id, Collection: collection.Name}, nil
 }
+
 func (i *ImageIngester) storeRawData(image im.Image, reader io.Reader) (*[]byte, error) {
 	data, err := io.ReadAll(reader)
 	if err != nil {
@@ -282,7 +283,10 @@ func (i *ImageIngester) findLabelByName(name string) (*lbl.Label, error) {
 }
 
 func (i *ImageIngester) ensureDuplicateImageDoesNotExists(hash []byte) error {
-	baseErr := fmt.Errorf("ensuring that duplicate image does not exist using hex hash %v", hex.EncodeToString(hash))
+	baseErr := fmt.Errorf(
+		"ensuring that duplicate image does not exist using hex hash %v",
+		hex.EncodeToString(hash),
+	)
 	duplicateId, err := i.ImageRepo.FindImageIdByHash(hash)
 	if duplicateId != nil {
 		return fmt.Errorf(

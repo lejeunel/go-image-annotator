@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func CreateUser(repo SQLiteUserRepo, id string, opts ...u.Option) (*u.User, error) {
+func CreateUser(repo UserRepo, id string, opts ...u.Option) (*u.User, error) {
 	user := u.NewUser(id, opts...)
 	if err := repo.Create(user); err != nil {
 		return nil, err
@@ -22,14 +22,14 @@ func CreateUser(repo SQLiteUserRepo, id string, opts ...u.Option) (*u.User, erro
 }
 
 func TestInternalErrOnCreateShouldFail(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	repo.Db.Close()
 	_, err := CreateUser(repo, userId)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestCreateAddsCount(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	_, err := CreateUser(repo, userId)
 	assert.NoError(t, err)
 	count, err := repo.Count()
@@ -38,7 +38,7 @@ func TestCreateAddsCount(t *testing.T) {
 }
 
 func TestNoCreatedUserDoNotExist(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	exists, err := repo.Exists(userId)
 	assert.NoError(t, err)
 	assert.False(t, exists)
@@ -46,7 +46,7 @@ func TestNoCreatedUserDoNotExist(t *testing.T) {
 
 func TestPersonalAccessTokenHash(t *testing.T) {
 	hash := []byte("pat-hash")
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	user := u.NewUser("user@example.com",
 		u.WithHashedPersonalAccessToken(hash))
 	repo.Create(user)
@@ -57,7 +57,7 @@ func TestPersonalAccessTokenHash(t *testing.T) {
 
 func TestPasswordHash(t *testing.T) {
 	hash := []byte("password-hash")
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	user := u.NewUser("user@example.com",
 		u.WithPasswordHash(hash))
 	repo.Create(user)
@@ -68,15 +68,15 @@ func TestPasswordHash(t *testing.T) {
 
 func TestCreateAdminInGroup(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteUserRepo(db)
+	repo := NewUserRepo(db)
 
-	roleRepo := rlr.NewSQLiteRoleRepo(db)
+	roleRepo := rlr.NewRoleRepo(db)
 	role := r.NewRole(r.NewRoleId(), "admin")
 	anotherRole := r.NewRole(r.NewRoleId(), "another-role")
 	roleRepo.Create(role)
 	roleRepo.Create(anotherRole)
 
-	groupRepo := grr.NewSQLiteGroupRepo(db)
+	groupRepo := grr.NewGroupRepo(db)
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	groupRepo.Create(group)
 

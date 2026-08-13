@@ -9,14 +9,14 @@ import (
 )
 
 func TestInternalErrOnDeleteShouldFail(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	repo.Db.Close()
 	err := repo.Delete("user@example.com")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestDeleteUser(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	user, _ := CreateUser(repo, "user@example.com")
 	err := repo.Delete(user.Id)
 	assert.NoError(t, err)

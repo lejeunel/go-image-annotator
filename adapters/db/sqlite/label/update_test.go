@@ -9,7 +9,7 @@ import (
 )
 
 func TestUpdateLabel(t *testing.T) {
-	repo := NewSQLiteLabelRepo(s.NewInMemory())
+	repo := NewLabelRepo(s.NewInMemory())
 	name := "a-label"
 	label, _ := CreateLabel(repo, name)
 	newDesc := "new-description"

@@ -28,10 +28,10 @@ func (u *IngestionTransactor) RunInTx(
 	defer tx.Rollback()
 
 	stores := in.Repos{
-		ImageRepo:      im.NewSQLiteImageRepo(tx, &fk.FilterStrParser{}, &fk.OrderStrParser{}),
-		LabelRepo:      lbl.NewSQLiteLabelRepo(tx),
-		CollectionRepo: clc.NewSQLiteCollectionRepo(tx),
-		AnnotationRepo: an.NewSQLiteAnnotationRepo(tx),
+		ImageRepo:      im.NewImageRepo(tx, &fk.FilterStrParser{}, &fk.OrderStrParser{}),
+		LabelRepo:      lbl.NewLabelRepo(tx),
+		CollectionRepo: clc.NewCollectionRepo(tx),
+		AnnotationRepo: an.NewAnnotationRepo(tx),
 	}
 
 	if err := fn(stores); err != nil {

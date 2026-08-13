@@ -14,7 +14,7 @@ import (
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
-type SQLiteUserRepo struct {
+type UserRepo struct {
 	Db *sqlx.DB
 }
 
@@ -30,7 +30,7 @@ type ForgottenPasswordStateRecord struct {
 	ExpiresAt time.Time `db:"expires_at"`
 }
 
-func (r SQLiteUserRepo) Create(usr u.User) error {
+func (r UserRepo) Create(usr u.User) error {
 	query := "INSERT INTO users (id,api_token_hash,password_hash) VALUES ($1,$2,$3)"
 	_, err := r.Db.Exec(
 		query,
@@ -51,7 +51,7 @@ func (r SQLiteUserRepo) Create(usr u.User) error {
 	return nil
 }
 
-func (r SQLiteUserRepo) SetGroups(user u.UserId, groups []string) error {
+func (r UserRepo) SetGroups(user u.UserId, groups []string) error {
 	_, err := r.Db.Exec(
 		"DELETE FROM users_groups WHERE user_id=$1;",
 		user,
@@ -86,7 +86,7 @@ func (r SQLiteUserRepo) SetGroups(user u.UserId, groups []string) error {
 	return nil
 }
 
-func (r SQLiteUserRepo) SetRoles(userId string, roles []string) error {
+func (r UserRepo) SetRoles(userId string, roles []string) error {
 	_, err := r.Db.Exec(
 		"DELETE FROM users_roles WHERE user_id=$1;",
 		userId,
@@ -121,7 +121,7 @@ func (r SQLiteUserRepo) SetRoles(userId string, roles []string) error {
 	return nil
 }
 
-func (r SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
+func (r UserRepo) getGroupNames(userId string) ([]string, error) {
 	var groups []string
 	query := "SELECT name FROM groups WHERE id IN (SELECT group_id FROM users_groups WHERE user_id=$1)"
 	err := r.Db.Select(&groups, query, userId)
@@ -132,7 +132,7 @@ func (r SQLiteUserRepo) getGroupNames(userId string) ([]string, error) {
 	return groups, nil
 }
 
-func (r SQLiteUserRepo) getRoleNames(userId string) ([]string, error) {
+func (r UserRepo) getRoleNames(userId string) ([]string, error) {
 	var roles []string
 	query := "SELECT name FROM roles WHERE id IN (SELECT role_id FROM users_roles WHERE user_id=$1)"
 	err := r.Db.Select(&roles, query, userId)
@@ -142,7 +142,7 @@ func (r SQLiteUserRepo) getRoleNames(userId string) ([]string, error) {
 	return roles, nil
 }
 
-func (r SQLiteUserRepo) recordToEntity(rec Record) (*u.User, error) {
+func (r UserRepo) recordToEntity(rec Record) (*u.User, error) {
 	groups, err := r.getGroupNames(rec.Id)
 	if err != nil {
 		return nil, err
@@ -167,7 +167,7 @@ func (r SQLiteUserRepo) recordToEntity(rec Record) (*u.User, error) {
 	return &user, nil
 }
 
-func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
+func (r UserRepo) Find(id u.UserId) (*u.User, error) {
 	record := Record{}
 	err := r.Db.Get(&record,
 		"SELECT id,api_token_hash,password_hash FROM users WHERE id=$1", id)
@@ -187,7 +187,7 @@ func (r SQLiteUserRepo) Find(id u.UserId) (*u.User, error) {
 	return user, nil
 }
 
-func (r SQLiteUserRepo) Delete(id string) error {
+func (r UserRepo) Delete(id string) error {
 	_, err := r.Db.Exec("DELETE FROM users WHERE id=$1", id)
 	if err != nil {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
@@ -195,7 +195,7 @@ func (r SQLiteUserRepo) Delete(id string) error {
 	return nil
 }
 
-func (r SQLiteUserRepo) Exists(id string) (bool, error) {
+func (r UserRepo) Exists(id string) (bool, error) {
 	var exists bool
 
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM users WHERE id=$1)`, id)
@@ -206,7 +206,7 @@ func (r SQLiteUserRepo) Exists(id string) (bool, error) {
 	return exists, nil
 }
 
-func (r SQLiteUserRepo) Count() (int64, error) {
+func (r UserRepo) Count() (int64, error) {
 	var count int64
 
 	query := "SELECT COUNT(*) FROM users"
@@ -218,7 +218,7 @@ func (r SQLiteUserRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (r SQLiteUserRepo) List(m pag.PaginationParams) ([]u.User, error) {
+func (r UserRepo) List(m pag.PaginationParams) ([]u.User, error) {
 	q := sq.StatementBuilder.Select("id,api_token_hash,password_hash").From("users")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
@@ -246,7 +246,7 @@ func (r SQLiteUserRepo) List(m pag.PaginationParams) ([]u.User, error) {
 	return users, nil
 }
 
-func (r SQLiteUserRepo) SetAccessTokenHash(userId u.UserId, hash []byte) error {
+func (r UserRepo) SetAccessTokenHash(userId u.UserId, hash []byte) error {
 	query := "UPDATE users SET api_token_hash=$2 WHERE id=$1"
 	_, err := r.Db.Exec(query, userId, hex.EncodeToString(hash))
 	if err != nil {
@@ -255,7 +255,7 @@ func (r SQLiteUserRepo) SetAccessTokenHash(userId u.UserId, hash []byte) error {
 	return nil
 }
 
-func (r SQLiteUserRepo) AddForgottenPasswordState(
+func (r UserRepo) AddForgottenPasswordState(
 	hash []byte,
 	id u.UserId,
 	expiresAt time.Time,
@@ -268,7 +268,7 @@ func (r SQLiteUserRepo) AddForgottenPasswordState(
 	return nil
 }
 
-func (r SQLiteUserRepo) FindResetPasswordState(hash []byte) (*u.ForgotPasswordState, error) {
+func (r UserRepo) FindResetPasswordState(hash []byte) (*u.ForgotPasswordState, error) {
 	record := ForgottenPasswordStateRecord{}
 	err := r.Db.Get(&record,
 		"SELECT id,expires_at FROM forgot_password WHERE token_hash=$1", hex.EncodeToString(hash))
@@ -283,7 +283,7 @@ func (r SQLiteUserRepo) FindResetPasswordState(hash []byte) (*u.ForgotPasswordSt
 	return &u.ForgotPasswordState{Id: record.Id, ExpiresAt: &record.ExpiresAt}, nil
 }
 
-func (r SQLiteUserRepo) UpdatePassword(id u.UserId, hash []byte) error {
+func (r UserRepo) UpdatePassword(id u.UserId, hash []byte) error {
 	query := "UPDATE users SET password_hash=$1 WHERE id=$2"
 	_, err := r.Db.Exec(query, hex.EncodeToString(hash), id)
 	if err != nil {
@@ -292,7 +292,7 @@ func (r SQLiteUserRepo) UpdatePassword(id u.UserId, hash []byte) error {
 	return nil
 }
 
-func (r SQLiteUserRepo) DeleteForgottenPasswordTokens(id u.UserId) error {
+func (r UserRepo) DeleteForgottenPasswordTokens(id u.UserId) error {
 	query := "DELETE FROM forgot_password WHERE id=$1"
 	_, err := r.Db.Exec(query, id)
 	if err != nil {
@@ -301,7 +301,7 @@ func (r SQLiteUserRepo) DeleteForgottenPasswordTokens(id u.UserId) error {
 	return nil
 }
 
-func (r SQLiteUserRepo) CountAdmins() (int64, error) {
+func (r UserRepo) CountAdmins() (int64, error) {
 	var count int64
 	query := `SELECT COUNT(*) FROM users_roles WHERE role_id=(SELECT id FROM roles WHERE name="admin");`
 	err := r.Db.QueryRow(query).Scan(&count)
@@ -312,6 +312,6 @@ func (r SQLiteUserRepo) CountAdmins() (int64, error) {
 	return count, nil
 }
 
-func NewSQLiteUserRepo(db *sqlx.DB) SQLiteUserRepo {
-	return SQLiteUserRepo{Db: db}
+func NewUserRepo(db *sqlx.DB) UserRepo {
+	return UserRepo{Db: db}
 }

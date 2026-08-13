@@ -37,7 +37,6 @@ func (p *FilterStrParser) Parse(q string) (ss.SQLizer, error) {
 		return nil, p.Err
 	}
 	return p.SQLizer, nil
-
 }
 
 type OrderStrParser struct {
@@ -50,5 +49,4 @@ func (o *OrderStrParser) Parse(q string) (string, error) {
 		return "", o.Err
 	}
 	return o.Result, nil
-
 }

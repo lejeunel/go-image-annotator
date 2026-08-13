@@ -20,10 +20,10 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/image/raw"
 )
 
-func NewSQLiteImageInteractors(
-	imr imrepo.SQLiteImageRepo,
-	clr clrepo.SQLiteCollectionRepo,
-	anr anrepo.SQLiteAnnotationRepo,
+func NewImageInteractors(
+	imr imrepo.ImageRepo,
+	clr clrepo.CollectionRepo,
+	anr anrepo.AnnotationRepo,
 	ims ims.ImageStore,
 	imfs fs.FileStore,
 	tmpfs fs.LocalFileStore,
@@ -38,11 +38,20 @@ func NewSQLiteImageInteractors(
 	auth auth.Interface,
 ) im.Interactors {
 	return im.Interactors{
-		Ingest:        *ing.New(imageIngester, clr, ing.WithAuth(auth)),
-		IngestArchive: ia.New(archiveIngester, clr, tmpfs, el, logger, q.NewAsyncJobQueue(), maxArchiveMB, ia.WithAuth(auth)),
-		Find:          find.New(ims),
-		Raw:           raw.New(imfs, imr),
-		List:          list.New(imr, fv, ov, ims, pageSize),
-		Delete:        delete.New(ims),
+		Ingest: *ing.New(imageIngester, clr, ing.WithAuth(auth)),
+		IngestArchive: ia.New(
+			archiveIngester,
+			clr,
+			tmpfs,
+			el,
+			logger,
+			q.NewAsyncJobQueue(),
+			maxArchiveMB,
+			ia.WithAuth(auth),
+		),
+		Find:   find.New(ims),
+		Raw:    raw.New(imfs, imr),
+		List:   list.New(imr, fv, ov, ims, pageSize),
+		Delete: delete.New(ims),
 	}
 }

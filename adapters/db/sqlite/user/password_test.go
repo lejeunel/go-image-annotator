@@ -8,7 +8,7 @@ import (
 )
 
 func TestUpdatePassword(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	CreateUser(repo, userId)
 	pwHash := []byte("hello")
 	err := repo.UpdatePassword(userId, pwHash)

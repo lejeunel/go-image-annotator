@@ -45,8 +45,8 @@ func TestDelete(t *testing.T) {
 
 func TestGroupPopulatedWithCollection(t *testing.T) {
 	db := s.NewInMemory()
-	clcRepo := clcr.NewSQLiteCollectionRepo(db)
-	groupRepo := NewSQLiteGroupRepo(db)
+	clcRepo := clcr.NewCollectionRepo(db)
+	groupRepo := NewGroupRepo(db)
 	group, _ := CreateGroup(groupRepo, "a-group")
 	collection := clc.NewCollection(
 		clc.NewCollectionId(),

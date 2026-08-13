@@ -100,9 +100,23 @@ func TestGetAdjacentImages(t *testing.T) {
 
 	tests := []ScrollerTest{
 		{"next with ingested_at asc", ids[0], "ingested_at", im.AscOrder, scr.ScrollNext, ids[1]},
-		{"prev with ingested_at asc", ids[2], "ingested_at", im.AscOrder, scr.ScrollPrevious, ids[1]},
+		{
+			"prev with ingested_at asc",
+			ids[2],
+			"ingested_at",
+			im.AscOrder,
+			scr.ScrollPrevious,
+			ids[1],
+		},
 		{"next with ingested_at desc", ids[2], "ingested_at", im.DescOrder, scr.ScrollNext, ids[1]},
-		{"prev with ingested_at desc", ids[0], "ingested_at", im.DescOrder, scr.ScrollPrevious, ids[1]},
+		{
+			"prev with ingested_at desc",
+			ids[0],
+			"ingested_at",
+			im.DescOrder,
+			scr.ScrollPrevious,
+			ids[1],
+		},
 	}
 
 	for _, tt := range tests {
@@ -114,7 +128,6 @@ func TestGetAdjacentImages(t *testing.T) {
 				tt.Direction)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.wantId.String(), r.ImageId.String())
-
 		})
 	}
 }

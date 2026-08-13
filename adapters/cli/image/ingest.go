@@ -27,7 +27,7 @@ func IngestDirectory(ctx context.Context, dir, collection string) {
 		panic(err)
 	}
 
-	app := s.NewSQLiteApp(config.Parse(), auth.NewVoidAuth(), *l.NewCliLogger())
+	app := s.NewApp(config.Parse(), auth.NewVoidAuth(), *l.NewCliLogger())
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			f, err := os.Open(filepath.Join(dir, entry.Name()))

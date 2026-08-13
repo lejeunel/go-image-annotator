@@ -1,9 +1,10 @@
 package query
 
 import (
+	"testing"
+
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestSucceedsOnEmpty(t *testing.T) {

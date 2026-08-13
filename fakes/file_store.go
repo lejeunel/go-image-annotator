@@ -24,6 +24,7 @@ func (r *FileStore) Store(path string, reader io.Reader) error {
 	r.GotData = data
 	return nil
 }
+
 func (r *FileStore) GetReaderAt(string) (io.ReaderAt, int64, error) {
 	return bytes.NewReader(r.Data), int64(len(r.Data)), nil
 }

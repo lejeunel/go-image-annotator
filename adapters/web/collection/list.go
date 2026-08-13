@@ -3,9 +3,10 @@ package collection
 import (
 	_ "embed"
 	"fmt"
-	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	"io"
 	"net/http"
+
+	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"

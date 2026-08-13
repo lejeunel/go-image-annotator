@@ -11,17 +11,17 @@ import (
 )
 
 type SQLiteScrollerRepos struct {
-	Scroller   SQLiteScrollerRepo
-	Image      imsql.SQLiteImageRepo
-	Collection clcsql.SQLiteCollectionRepo
+	Scroller   ScrollerRepo
+	Image      imsql.ImageRepo
+	Collection clcsql.CollectionRepo
 }
 
 func NewTestScrollerRepos() SQLiteScrollerRepos {
 	db := s.NewInMemory()
 	return SQLiteScrollerRepos{
-		Scroller:   NewSQLiteScrollerRepo(db),
-		Image:      imsql.NewSQLiteImageRepo(db, &fk.FilterStrParser{}, &fk.OrderStrParser{}),
-		Collection: clcsql.NewSQLiteCollectionRepo(db),
+		Scroller:   NewScrollerRepo(db),
+		Image:      imsql.NewImageRepo(db, &fk.FilterStrParser{}, &fk.OrderStrParser{}),
+		Collection: clcsql.NewCollectionRepo(db),
 	}
 }
 
@@ -38,7 +38,7 @@ func CreateImagesWithOrderedIds(repos SQLiteScrollerRepos, num int) []im.ImageId
 	return ids
 }
 
-func CreateImageInCollection(imRepo imsql.SQLiteImageRepo, clcRepo clcsql.SQLiteCollectionRepo,
+func CreateImageInCollection(imRepo imsql.ImageRepo, clcRepo clcsql.CollectionRepo,
 	imageId im.ImageId, collectionName string,
 ) im.Image {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)

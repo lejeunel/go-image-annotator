@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func CreateLabel(repo SQLiteLabelRepo, name string) (*lbl.Label, error) {
+func CreateLabel(repo LabelRepo, name string) (*lbl.Label, error) {
 	label := lbl.NewLabel(lbl.NewLabelId(), name, lbl.WithDescription("a-description"))
 	if err := repo.Create(label); err != nil {
 		return nil, err
@@ -19,14 +19,14 @@ func CreateLabel(repo SQLiteLabelRepo, name string) (*lbl.Label, error) {
 
 func TestInternalErrOnCreateShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteLabelRepo(db)
+	repo := NewLabelRepo(db)
 	db.Close()
 	_, err := CreateLabel(repo, "a-label")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestCreateAddsCount(t *testing.T) {
-	repo := NewSQLiteLabelRepo(s.NewInMemory())
+	repo := NewLabelRepo(s.NewInMemory())
 	_, err := CreateLabel(repo, "a-label")
 	assert.NoError(t, err)
 	count, err := repo.Count()

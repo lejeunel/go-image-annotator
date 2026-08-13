@@ -9,20 +9,20 @@ import (
 )
 
 func TestCreatedLabelExists(t *testing.T) {
-	repo := NewSQLiteLabelRepo(s.NewInMemory())
+	repo := NewLabelRepo(s.NewInMemory())
 	label, _ := CreateLabel(repo, "a-label")
 	exists, _ := repo.Exists(label.Name)
 	assert.True(t, exists)
 }
 
 func TestNonExistingLabelDoesNotExists(t *testing.T) {
-	exists, _ := NewSQLiteLabelRepo(s.NewInMemory()).Exists("non-existing-label")
+	exists, _ := NewLabelRepo(s.NewInMemory()).Exists("non-existing-label")
 	assert.False(t, exists)
 }
 
 func TestInternalErrOnLabelExistsShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteLabelRepo(db)
+	repo := NewLabelRepo(db)
 	db.Close()
 	_, err := repo.Exists("")
 	assert.ErrorIs(t, err, e.ErrInternal)
@@ -30,14 +30,14 @@ func TestInternalErrOnLabelExistsShouldFail(t *testing.T) {
 
 func TestInternalErrOnDeleteShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteLabelRepo(db)
+	repo := NewLabelRepo(db)
 	db.Close()
 	err := repo.Delete("a-label")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestDeleteLabel(t *testing.T) {
-	repo := NewSQLiteLabelRepo(s.NewInMemory())
+	repo := NewLabelRepo(s.NewInMemory())
 	label, _ := CreateLabel(repo, "a-label")
 	err := repo.Delete(label.Name)
 	assert.NoError(t, err)

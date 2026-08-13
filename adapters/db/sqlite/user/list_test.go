@@ -13,21 +13,21 @@ import (
 )
 
 func TestInternalErrOnCountShouldFail(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	repo.Db.Close()
 	_, err := repo.Count()
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestCount(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	CreateUser(repo, "user@example.com")
 	count, _ := repo.Count()
 	assert.Equal(t, 1, int(count))
 }
 
 func TestInternalErrOnListShouldFail(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	repo.Db.Close()
 	_, err := repo.List(pag.PaginationParams{})
 	assert.ErrorIs(t, err, e.ErrInternal)
@@ -35,8 +35,8 @@ func TestInternalErrOnListShouldFail(t *testing.T) {
 
 func TestList(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteUserRepo(db)
-	roleRepo := rlr.NewSQLiteRoleRepo(db)
+	repo := NewUserRepo(db)
+	roleRepo := rlr.NewRoleRepo(db)
 	roleRepo.Create(r.NewRole(r.NewRoleId(), "admin"))
 	CreateUser(repo, "user@example.com")
 	_, err := CreateUser(repo, "another-user@example.com", user.WithRoles([]string{"admin"}))

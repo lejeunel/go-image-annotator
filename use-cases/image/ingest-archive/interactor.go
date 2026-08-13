@@ -3,9 +3,10 @@ package ingest
 import (
 	"context"
 	"fmt"
-	"github.com/jonboulle/clockwork"
 	"io"
 	"log/slog"
+
+	"github.com/jonboulle/clockwork"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	ev "github.com/lejeunel/go-image-annotator/entities/event"
@@ -63,8 +64,8 @@ func New(aig ArchiveIngester,
 	logger slog.Logger,
 	jq jq.JobQueue,
 	maxMB int64,
-	opts ...Option) Interactor {
-
+	opts ...Option,
+) Interactor {
 	i := &Interactor{
 		ArchiveIngester:    aig,
 		CollectionRepo:     cr,
@@ -141,10 +142,18 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	out.SuccessSubmitIngestArchiveTask(Response{Id: task.Id, Issuer: task.Issuer, Type: task.Type})
 }
 
-func (i Interactor) runTask(task t.Task, user u.UserId, collection clc.CollectionName, filename string) {
+func (i Interactor) runTask(
+	task t.Task,
+	user u.UserId,
+	collection clc.CollectionName,
+	filename string,
+) {
 	reader, size, err := i.TemporaryFileStore.GetReaderAt(filename)
 	if err != nil {
-		i.LogError(task.Id, fmt.Errorf("ingesting archive: reading archive from temporary store: %w", err))
+		i.LogError(
+			task.Id,
+			fmt.Errorf("ingesting archive: reading archive from temporary store: %w", err),
+		)
 		return
 	}
 	i.IEventLogger.AddEvent(task.Id,
@@ -153,7 +162,8 @@ func (i Interactor) runTask(task t.Task, user u.UserId, collection clc.Collectio
 			State: ev.StartedTask,
 			Extra: map[string]string{"collection": collection},
 		})
-	resp, err := i.ArchiveIngester.IngestArchive(aig.Request{UserId: user, Collection: collection,
+	resp, err := i.ArchiveIngester.IngestArchive(aig.Request{
+		UserId: user, Collection: collection,
 		ReaderAt: reader, Size: size,
 	})
 	if err != nil {
@@ -161,15 +171,18 @@ func (i Interactor) runTask(task t.Task, user u.UserId, collection clc.Collectio
 		return
 	}
 	if err := i.TemporaryFileStore.Delete(filename); err != nil {
-		i.Logger.Error(fmt.Errorf("deleting file %v from temporary store: %w", filename, err).Error())
+		i.Logger.Error(
+			fmt.Errorf("deleting file %v from temporary store: %w", filename, err).Error(),
+		)
 	}
 
 	i.IEventLogger.AddEvent(
 		task.Id,
-		ev.Event{Time: i.Clock.Now(), State: ev.DoneTask,
-			Extra: map[string]string{"num-ingested-images": fmt.Sprintf("%v", len(resp.ImageIds))}},
+		ev.Event{
+			Time: i.Clock.Now(), State: ev.DoneTask,
+			Extra: map[string]string{"num-ingested-images": fmt.Sprintf("%v", len(resp.ImageIds))},
+		},
 	)
-
 }
 
 func (i *Interactor) LogError(id t.TaskId, err error) {

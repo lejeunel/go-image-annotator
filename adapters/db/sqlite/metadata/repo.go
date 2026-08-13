@@ -12,7 +12,7 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-type SQLiteMetaRepo struct {
+type MetaRepo struct {
 	Db adb.Querier
 }
 
@@ -22,7 +22,7 @@ type Row struct {
 	Meta         json.RawMessage  `db:"meta"`
 }
 
-func (r SQLiteMetaRepo) Add(
+func (r MetaRepo) Add(
 	collection clc.CollectionName,
 	imageId im.ImageId,
 	key string,
@@ -60,7 +60,7 @@ func (r SQLiteMetaRepo) Add(
 	return err
 }
 
-func (r SQLiteMetaRepo) KeyExists(
+func (r MetaRepo) KeyExists(
 	collection clc.CollectionName,
 	imageId im.ImageId,
 	key string,
@@ -93,7 +93,7 @@ func (r SQLiteMetaRepo) KeyExists(
 	return exists, nil
 }
 
-func (r SQLiteMetaRepo) GetValue(
+func (r MetaRepo) GetValue(
 	collection clc.CollectionName,
 	imageID im.ImageId,
 	key string,
@@ -126,7 +126,7 @@ func (r SQLiteMetaRepo) GetValue(
 	return &value, nil
 }
 
-func (r SQLiteMetaRepo) UpdateValue(
+func (r MetaRepo) UpdateValue(
 	collection clc.CollectionName,
 	imageID im.ImageId,
 	key string,
@@ -167,7 +167,7 @@ func (r SQLiteMetaRepo) UpdateValue(
 	return nil
 }
 
-func (r SQLiteMetaRepo) DeleteAll(
+func (r MetaRepo) DeleteAll(
 	collection clc.CollectionName,
 	imageID im.ImageId,
 ) error {
@@ -181,7 +181,7 @@ func (r SQLiteMetaRepo) DeleteAll(
 	return nil
 }
 
-func (r SQLiteMetaRepo) Delete(
+func (r MetaRepo) Delete(
 	collection clc.CollectionName,
 	imageID im.ImageId,
 	key string,
@@ -215,7 +215,7 @@ func (r SQLiteMetaRepo) Delete(
 	return nil
 }
 
-func (r SQLiteMetaRepo) List(
+func (r MetaRepo) List(
 	collection clc.CollectionName,
 	imageId im.ImageId,
 ) ([]m.MetaData, error) {
@@ -241,6 +241,6 @@ func (r SQLiteMetaRepo) List(
 	return metadata, nil
 }
 
-func NewSQLiteMetaRepo(db adb.Querier) SQLiteMetaRepo {
-	return SQLiteMetaRepo{Db: db}
+func NewMetaRepo(db adb.Querier) MetaRepo {
+	return MetaRepo{Db: db}
 }

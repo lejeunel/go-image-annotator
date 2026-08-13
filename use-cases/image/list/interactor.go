@@ -27,7 +27,13 @@ type Interactor struct {
 	DefaultPageSize int
 }
 
-func New(r Repo, fv FilterQueryStrValidator, ov OrderingStrValidator, s ImageStore, ps int) Interactor {
+func New(
+	r Repo,
+	fv FilterQueryStrValidator,
+	ov OrderingStrValidator,
+	s ImageStore,
+	ps int,
+) Interactor {
 	return Interactor{r, fv, ov, s, ps}
 }
 
@@ -41,7 +47,6 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 			out.Error(fmt.Errorf("%v: validating query %v: %w", errCtx, r.FilterQueryStr, err))
 			return
 		}
-
 	}
 
 	if r.OrderingStr != "" {
@@ -49,7 +54,6 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 			out.Error(fmt.Errorf("%v: validating ordering %v: %w", errCtx, r.OrderingStr, err))
 			return
 		}
-
 	}
 
 	baseImages, err := i.Repo.Slice(r.FilterQueryStr, r.PaginationParams, r.OrderingStr)

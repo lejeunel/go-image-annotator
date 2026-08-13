@@ -12,8 +12,8 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/label/update"
 )
 
-func NewSQLiteLabelInteractors(
-	repo infra.SQLiteLabelRepo,
+func NewLabelInteractors(
+	repo infra.LabelRepo,
 	pageSize int,
 	auth auth.Interface,
 ) lbl.Interactors {

@@ -8,7 +8,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/policy/set"
 )
 
-func NewSQLitePolicyInteractors(fs fs.FileStore, auth auth.Interface) pl.Interactors {
+func NewPolicyInteractors(fs fs.FileStore, auth auth.Interface) pl.Interactors {
 	return pl.Interactors{
 		Read: read.New(fs, read.WithAuth(auth)),
 		Set:  set.New(fs, auth),

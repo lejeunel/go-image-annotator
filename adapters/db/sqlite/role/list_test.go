@@ -8,20 +8,20 @@ import (
 )
 
 func TestInternalErrOnListShouldFail(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
+	repo := NewTestRoleRepo()
 	repo.Db.Close()
 	_, err := repo.List()
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestListEmpty(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
+	repo := NewTestRoleRepo()
 	_, err := repo.List()
 	assert.NoError(t, err)
 }
 
 func TestList(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
+	repo := NewTestRoleRepo()
 	CreateRole(repo, "a-role")
 	CreateRole(repo, "another-role")
 	cs, err := repo.List()

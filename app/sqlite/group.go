@@ -11,7 +11,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/group/update"
 )
 
-func NewSQLiteGroupInteractors(repo gi.SQLiteGroupRepo, a auth.Interface) grp.Interactors {
+func NewGroupInteractors(repo gi.GroupRepo, a auth.Interface) grp.Interactors {
 	return grp.Interactors{
 		Find:   find.New(repo),
 		Create: create.New(repo, create.WithAuth(a)),

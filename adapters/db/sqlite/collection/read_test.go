@@ -11,7 +11,7 @@ import (
 )
 
 func TestRetrieveNonExistingShouldFail(t *testing.T) {
-	repo := NewSQLiteCollectionRepo(s.NewInMemory())
+	repo := NewCollectionRepo(s.NewInMemory())
 	CreateCollection(repo, "a-collection")
 	_, err := repo.Find("non-existing-collection")
 	assert.ErrorIs(t, err, e.ErrNotFound)
@@ -19,7 +19,7 @@ func TestRetrieveNonExistingShouldFail(t *testing.T) {
 
 func TestInternalErrOnFindShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteCollectionRepo(db)
+	repo := NewCollectionRepo(db)
 	CreateCollection(repo, "a-collection")
 	db.Close()
 	_, err := repo.Find("a-collection")
@@ -27,7 +27,7 @@ func TestInternalErrOnFindShouldFail(t *testing.T) {
 }
 
 func TestRetrieve(t *testing.T) {
-	repo := NewSQLiteCollectionRepo(s.NewInMemory())
+	repo := NewCollectionRepo(s.NewInMemory())
 	c := clc.NewCollection(clc.NewCollectionId(), "a-collection",
 		clc.WithDescription("a-description"),
 		clc.WithCreatedAt(time.Now()))

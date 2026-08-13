@@ -2,8 +2,10 @@ package image
 
 type Order int
 
-type FilterQueryStr = string
-type OrderingStr = string
+type (
+	FilterQueryStr = string
+	OrderingStr    = string
+)
 
 const (
 	AscOrder Order = iota

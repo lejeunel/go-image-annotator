@@ -11,14 +11,14 @@ import (
 
 func TestInternalErrOnCollectionCountShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteCollectionRepo(db)
+	repo := NewCollectionRepo(db)
 	db.Close()
 	_, err := repo.Count()
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestCountCollections(t *testing.T) {
-	repo := NewSQLiteCollectionRepo(s.NewInMemory())
+	repo := NewCollectionRepo(s.NewInMemory())
 	CreateCollection(repo, "a-collection")
 	count, _ := repo.Count()
 	assert.Equal(t, 1, int(*count))
@@ -26,14 +26,14 @@ func TestCountCollections(t *testing.T) {
 
 func TestInternalErrOnCollectionListShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteCollectionRepo(db)
+	repo := NewCollectionRepo(db)
 	db.Close()
 	_, err := repo.List(pa.PaginationParams{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestListCollections(t *testing.T) {
-	repo := NewSQLiteCollectionRepo(s.NewInMemory())
+	repo := NewCollectionRepo(s.NewInMemory())
 	CreateCollection(repo, "a-collection")
 	CreateCollection(repo, "another-collection")
 	cs, err := repo.List(pa.PaginationParams{Page: 1, PageSize: 2})

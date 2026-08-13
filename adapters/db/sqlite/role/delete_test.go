@@ -11,33 +11,33 @@ import (
 )
 
 func TestCreatedExists(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
+	repo := NewTestRoleRepo()
 	role, _ := CreateRole(repo, "a-role")
 	exists, _ := repo.Exists(role.Name)
 	assert.True(t, *exists)
 }
 
 func TestNonExistingDoesNotExists(t *testing.T) {
-	exists, _ := NewTestSQLiteRoleRepo().Exists("non-existing-role")
+	exists, _ := NewTestRoleRepo().Exists("non-existing-role")
 	assert.False(t, *exists)
 }
 
 func TestInternalErrOnExistsShouldFail(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
+	repo := NewTestRoleRepo()
 	repo.Db.Close()
 	_, err := repo.Exists("")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestInternalErrOnDeleteShouldFail(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
+	repo := NewTestRoleRepo()
 	repo.Db.Close()
 	err := repo.Delete("a-role")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestDelete(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
+	repo := NewTestRoleRepo()
 	grp, _ := CreateRole(repo, "a-role")
 	err := repo.Delete(grp.Name)
 	assert.Nil(t, err)
@@ -45,8 +45,8 @@ func TestDelete(t *testing.T) {
 
 func TestRoleUsedByUser(t *testing.T) {
 	db := s.NewInMemory()
-	usrRepo := usrRepo.NewSQLiteUserRepo(db)
-	roleRepo := NewSQLiteRoleRepo(db)
+	usrRepo := usrRepo.NewUserRepo(db)
+	roleRepo := NewRoleRepo(db)
 	role, _ := CreateRole(roleRepo, "a-role")
 	user := usr.NewUser("user@mail.com", usr.WithRoles([]string{"a-role"}))
 	usrRepo.Create(user)

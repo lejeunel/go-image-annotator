@@ -9,13 +9,13 @@ import (
 )
 
 func TestRetrieveNonExistingShouldFail(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	_, err := repo.Find("user@example.com")
 	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestInternalErrOnFindShouldFail(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	CreateUser(repo, "user@example.com")
 	repo.Db.Close()
 	_, err := repo.Find("user@example.com")
@@ -23,7 +23,7 @@ func TestInternalErrOnFindShouldFail(t *testing.T) {
 }
 
 func TestRetrieve(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	user, _ := CreateUser(repo, "user@example.com")
 	r, err := repo.Find("user@example.com")
 	assert.NoError(t, err)

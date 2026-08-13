@@ -32,7 +32,6 @@ type RegionTable struct {
 }
 
 func (t *RegionTable) addRow(author, time, id, label, color string, regionKind RegionKind) {
-
 	var regionIcon string
 	switch regionKind {
 	case RegionBox:
@@ -60,7 +59,11 @@ func (t *RegionTable) addRow(author, time, id, label, color string, regionKind R
 						Annotator.editLabelMode();
 						LabelPicker.open();"`,
 						id))),
-				cmp.MakeIconizedButton(ic.Trash, "delete", Attr(fmt.Sprintf("onclick=\"Annotator.remove('%v')\"", id))),
+				cmp.MakeIconizedButton(
+					ic.Trash,
+					"delete",
+					Attr(fmt.Sprintf("onclick=\"Annotator.remove('%v')\"", id)),
+				),
 			),
 		}})
 }

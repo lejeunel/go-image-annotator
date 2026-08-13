@@ -68,7 +68,13 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 	if user.IsAdmin() && (numAdmins == 1) && !slices.Contains(r.Roles, rl.AdminRoleName) {
-		out.Error(fmt.Errorf("%v: attempting to un-assign admin role to the last existing admin: %w", errCtx, e.ErrValidation))
+		out.Error(
+			fmt.Errorf(
+				"%v: attempting to un-assign admin role to the last existing admin: %w",
+				errCtx,
+				e.ErrValidation,
+			),
+		)
 		return
 	}
 

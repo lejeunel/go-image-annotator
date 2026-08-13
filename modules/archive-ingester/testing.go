@@ -14,5 +14,4 @@ func (i *FakeImageIngester) Ingest(r ii.Request) (*ii.Response, error) {
 		return nil, i.Err
 	}
 	return &i.Return, nil
-
 }

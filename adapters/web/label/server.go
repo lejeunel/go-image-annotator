@@ -29,5 +29,14 @@ func New(
 	d delete.Interactor,
 	f find.Interactor,
 ) Server {
-	return Server{pb, b.NewRowURLWithId(LabelUrl, resourceUrlFieldName), defaultPageSize, l, c, u, d, f}
+	return Server{
+		pb,
+		b.NewRowURLWithId(LabelUrl, resourceUrlFieldName),
+		defaultPageSize,
+		l,
+		c,
+		u,
+		d,
+		f,
+	}
 }

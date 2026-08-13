@@ -19,10 +19,10 @@ import (
 	upr "github.com/lejeunel/go-image-annotator/use-cases/user/update-privileges"
 )
 
-func NewSQLiteUserInteractors(
-	userRepo sqliteusr.SQLiteUserRepo,
-	grpRepo sqlitegrp.SQLiteGroupRepo,
-	roleRepo sqliterol.SQLiteRoleRepo,
+func NewUserInteractors(
+	userRepo sqliteusr.UserRepo,
+	grpRepo sqlitegrp.GroupRepo,
+	roleRepo sqliterol.RoleRepo,
 	ApitokenGen create.APITokenGenerator,
 	forgotPasswordTokenGen fp.TokenGenerator,
 	passwordValidator pw.PasswordValidator,

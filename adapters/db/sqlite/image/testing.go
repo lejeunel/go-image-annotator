@@ -10,25 +10,24 @@ import (
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 )
 
-func BaseSetup() (SQLiteImageRepo, *sqlx.DB) {
+func BaseSetup() (ImageRepo, *sqlx.DB) {
 	db := s.NewInMemory()
-	return NewSQLiteImageRepo(db, &fk.FilterStrParser{}, &fk.OrderStrParser{}), db
+	return NewImageRepo(db, &fk.FilterStrParser{}, &fk.OrderStrParser{}), db
 }
 
-func SetupAdd(db *sqlx.DB) (SQLiteImageRepo, c.SQLiteCollectionRepo, *sqlx.DB) {
+func SetupAdd(db *sqlx.DB) (ImageRepo, c.CollectionRepo, *sqlx.DB) {
 	filterParser, orderParser := MakeQueryParsers()
-	imr := NewSQLiteImageRepo(db, filterParser, orderParser)
-	return imr, c.NewSQLiteCollectionRepo(db), db
+	imr := NewImageRepo(db, filterParser, orderParser)
+	return imr, c.NewCollectionRepo(db), db
 }
 
-func SetupList() (SQLiteImageRepo, sc.SQLiteCollectionRepo, *sqlx.DB) {
+func SetupList() (ImageRepo, sc.CollectionRepo, *sqlx.DB) {
 	db := s.NewInMemory()
 	imr, cr, _ := SetupAdd(db)
 	return imr, cr, db
-
 }
 
-func AddToCollection(imRepo SQLiteImageRepo, clcRepo c.SQLiteCollectionRepo,
+func AddToCollection(imRepo ImageRepo, clcRepo c.CollectionRepo,
 	collectionName string, hash string,
 ) (*im.ImageId, *clc.CollectionId, error) {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
@@ -40,13 +39,13 @@ func AddToCollection(imRepo SQLiteImageRepo, clcRepo c.SQLiteCollectionRepo,
 }
 
 type ImageListingTestingRepos struct {
-	Image      SQLiteImageRepo
-	Collection sc.SQLiteCollectionRepo
+	Image      ImageRepo
+	Collection sc.CollectionRepo
 }
 
 func CreateSingleImageCollection(
-	imr SQLiteImageRepo,
-	cr c.SQLiteCollectionRepo,
+	imr ImageRepo,
+	cr c.CollectionRepo,
 	collectionName string,
 ) (im.Image, clc.Collection) {
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)

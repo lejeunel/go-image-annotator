@@ -25,7 +25,8 @@ func WithSimplePlaceHolder() TableBuilderOption {
 }
 
 func NewTableBuilder(fields []string, opts ...TableBuilderOption) TableBuilder {
-	t := &TableBuilder{fields: fields,
+	t := &TableBuilder{
+		fields: fields,
 		placeholder: Div(Class("ml-8"),
 			Div(Class("pt-2 pb-8 text-lg italic"), Text(placeHolderText)),
 			Pre(Class("font-mono whitespace-pre text-sm leading-tight"), Raw(emptyAsciiIcon)),

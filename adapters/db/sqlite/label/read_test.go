@@ -9,7 +9,7 @@ import (
 )
 
 func TestRetrieveNonExistingShouldFail(t *testing.T) {
-	repo := NewSQLiteLabelRepo(s.NewInMemory())
+	repo := NewLabelRepo(s.NewInMemory())
 	CreateLabel(repo, "a-label")
 	_, err := repo.FindLabel("non-existing-label")
 	assert.ErrorIs(t, err, e.ErrNotFound)
@@ -17,7 +17,7 @@ func TestRetrieveNonExistingShouldFail(t *testing.T) {
 
 func TestInternalErrOnFindShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteLabelRepo(db)
+	repo := NewLabelRepo(db)
 	CreateLabel(repo, "a-label")
 	db.Close()
 	_, err := repo.FindLabel("a-label")
@@ -25,7 +25,7 @@ func TestInternalErrOnFindShouldFail(t *testing.T) {
 }
 
 func TestRetrieve(t *testing.T) {
-	repo := NewSQLiteLabelRepo(s.NewInMemory())
+	repo := NewLabelRepo(s.NewInMemory())
 	label, _ := CreateLabel(repo, "a-label")
 	r, err := repo.FindLabel("a-label")
 	assert.NoError(t, err)

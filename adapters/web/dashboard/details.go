@@ -24,6 +24,7 @@ func NewTaskDetailPresenter(w http.ResponseWriter) TaskDetailPresenter {
 	task := "detailing task"
 	return TaskDetailPresenter{w, htmx.NewErrorPresenter(task, w)}
 }
+
 func (p *TaskDetailPresenter) SuccessFindTask(t t.Task) {
 	r := Task{Id: t.Id.String(), Type: t.Type.String(), Issuer: t.Issuer}
 	for _, e := range t.Events {
@@ -42,8 +43,15 @@ func (p *TaskDetailPresenter) SuccessFindTask(t t.Task) {
 	Tr(Td(
 		Attr(fmt.Sprintf("colspan=%v", len(listEventsFields)-1)),
 		Class("p-4"),
-		Div(Pre(Class("bg-surface-alt dark:bg-surface-dark-alt p-2 w-full break-words min-w-0 whitespace-pre-wrap"),
-			Text(string(data))))),
+		Div(
+			Pre(
+				Class(
+					"bg-surface-alt dark:bg-surface-dark-alt p-2 w-full break-words min-w-0 whitespace-pre-wrap",
+				),
+				Text(string(data)),
+			),
+		),
+	),
 		Td(Class("align-top p-4"),
 			cmp.MakeHTMXAbortButton("Close", url.String()),
 		)).Render(p.Writer)

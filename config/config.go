@@ -11,20 +11,20 @@ type Config struct {
 	InitialAdminEmail                    string   `required:"true" split_words:"true"`
 	InitialAdminPassword                 string   `required:"true" split_words:"true"`
 	URL                                  string   `required:"true" split_words:"true"`
-	AllowedImageMIMETypes                []string `default:"image/jpeg,image/png" split_words:"true"`
-	DefaultPageSize                      int      `default:"20" split_words:"true"`
-	ApiTokenLength                       int      `default:"32" split_words:"true"`
-	RandomPasswordLength                 int      `default:"10" split_words:"true"`
-	ForgotPasswordTokenExpirationMinutes int      `default:"30" split_words:"true"`
-	PasswordMinEntropy                   int      `default:"50" split_words:"true"`
-	MaxNumTasksPerUser                   int      `default:"50" split_words:"true"`
-	MaxArchiveMB                         int      `default:"500" split_words:"true"`
-	SMTPUsername                         string   `split_words:"true"`
-	SMTPPassword                         string   `split_words:"true"`
-	SMTPHost                             string   `split_words:"true"`
-	SMTPPort                             int      `split_words:"true"`
-	GoogleClientId                       string   `split_words:"true"`
-	GoogleClientSecret                   string   `split_words:"true"`
+	AllowedImageMIMETypes                []string `                split_words:"true" default:"image/jpeg,image/png"`
+	DefaultPageSize                      int      `                split_words:"true" default:"20"`
+	ApiTokenLength                       int      `                split_words:"true" default:"32"`
+	RandomPasswordLength                 int      `                split_words:"true" default:"10"`
+	ForgotPasswordTokenExpirationMinutes int      `                split_words:"true" default:"30"`
+	PasswordMinEntropy                   int      `                split_words:"true" default:"50"`
+	MaxNumTasksPerUser                   int      `                split_words:"true" default:"50"`
+	MaxArchiveMB                         int      `                split_words:"true" default:"500"`
+	SMTPUsername                         string   `                split_words:"true"`
+	SMTPPassword                         string   `                split_words:"true"`
+	SMTPHost                             string   `                split_words:"true"`
+	SMTPPort                             int      `                split_words:"true"`
+	GoogleClientId                       string   `                split_words:"true"`
+	GoogleClientSecret                   string   `                split_words:"true"`
 }
 
 func Parse() Config {

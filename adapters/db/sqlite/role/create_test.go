@@ -8,13 +8,13 @@ import (
 )
 
 func TestInternalErrOnCreateShouldFail(t *testing.T) {
-	repo := NewTestSQLiteRoleRepo()
+	repo := NewTestRoleRepo()
 	repo.Db.Close()
 	_, err := CreateRole(repo, "a-role")
 	assert.ErrorIs(t, err, e.ErrInternal, "expected internal error")
 }
 
 func TestCreate(t *testing.T) {
-	_, err := CreateRole(NewTestSQLiteRoleRepo(), "a-role")
+	_, err := CreateRole(NewTestRoleRepo(), "a-role")
 	assert.NoError(t, err, "expected no error on create but got")
 }

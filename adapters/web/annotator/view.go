@@ -48,6 +48,7 @@ func (v *AnnotationView) SetAnnotations(
 	v.polygons = polygons
 	v.imageLabels = imageLabels
 }
+
 func (v *AnnotationView) SetMetaData(m []m.MetaData) {
 	v.metadata = m
 }

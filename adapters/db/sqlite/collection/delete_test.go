@@ -9,20 +9,20 @@ import (
 )
 
 func TestCreatedCollectionExists(t *testing.T) {
-	repo := NewSQLiteCollectionRepo(s.NewInMemory())
+	repo := NewCollectionRepo(s.NewInMemory())
 	collection, _ := CreateCollection(repo, "a-collection")
 	exists, _ := repo.Exists(collection.Name)
 	assert.True(t, exists)
 }
 
 func TestNonExistingCollectionDoesNotExists(t *testing.T) {
-	exists, _ := NewSQLiteCollectionRepo(s.NewInMemory()).Exists("non-existing-collection")
+	exists, _ := NewCollectionRepo(s.NewInMemory()).Exists("non-existing-collection")
 	assert.False(t, exists)
 }
 
 func TestInternalErrOnCollectionExistsShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteCollectionRepo(db)
+	repo := NewCollectionRepo(db)
 	db.Close()
 	_, err := repo.Exists("")
 	assert.ErrorIs(t, err, e.ErrInternal)
@@ -30,14 +30,14 @@ func TestInternalErrOnCollectionExistsShouldFail(t *testing.T) {
 
 func TestInternalErrOnDeleteShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteCollectionRepo(db)
+	repo := NewCollectionRepo(db)
 	db.Close()
 	err := repo.Delete("a-collection")
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestDeleteCollection(t *testing.T) {
-	repo := NewSQLiteCollectionRepo(s.NewInMemory())
+	repo := NewCollectionRepo(s.NewInMemory())
 	collection, _ := CreateCollection(repo, "a-collection")
 	err := repo.Delete(collection.Name)
 	assert.NoError(t, err)

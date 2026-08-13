@@ -13,7 +13,7 @@ import (
 var userId = "user@example.com"
 
 func TestRetrieveUserWithNoRole(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	CreateUser(repo, userId)
 	r, _ := repo.Find(userId)
 	assert.Equal(t, 0, len(r.Roles))
@@ -21,8 +21,8 @@ func TestRetrieveUserWithNoRole(t *testing.T) {
 
 func TestCreateUserWithOneRole(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteUserRepo(db)
-	roleRepo := roleRepo.NewSQLiteRoleRepo(db)
+	repo := NewUserRepo(db)
+	roleRepo := roleRepo.NewRoleRepo(db)
 	user := u.NewUser(userId, u.WithRoles([]string{"a-role"}))
 	roleRepo.Create(r.NewRole(r.NewRoleId(), "a-role"))
 	repo.Create(user)
@@ -32,8 +32,8 @@ func TestCreateUserWithOneRole(t *testing.T) {
 
 func TestAssignRoleToExistingUser(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteUserRepo(db)
-	roleRepo := roleRepo.NewSQLiteRoleRepo(db)
+	repo := NewUserRepo(db)
+	roleRepo := roleRepo.NewRoleRepo(db)
 	CreateUser(repo, userId)
 	roleRepo.Create(r.NewRole(r.NewRoleId(), "a-role"))
 	err := repo.SetRoles(userId, []string{"a-role"})
@@ -45,9 +45,9 @@ func TestAssignRoleToExistingUser(t *testing.T) {
 
 func TestAssignNewRoles(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteUserRepo(db)
+	repo := NewUserRepo(db)
 	CreateUser(repo, userId)
-	roleRepo := roleRepo.NewSQLiteRoleRepo(db)
+	roleRepo := roleRepo.NewRoleRepo(db)
 	roleRepo.Create(r.NewRole(r.NewRoleId(), "a-role"))
 	roleRepo.Create(r.NewRole(r.NewRoleId(), "another-role"))
 	repo.SetRoles(userId, []string{"a-role", "another-role"})

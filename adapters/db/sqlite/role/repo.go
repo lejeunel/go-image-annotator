@@ -12,7 +12,7 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-type SQLiteRoleRepo struct {
+type RoleRepo struct {
 	Db *sqlx.DB
 }
 
@@ -22,7 +22,7 @@ type Row struct {
 	Description string    `db:"description"`
 }
 
-func (r SQLiteRoleRepo) Create(role ro.Role) error {
+func (r RoleRepo) Create(role ro.Role) error {
 	query := `INSERT INTO roles (id, name, description) VALUES ($1,$2,$3)`
 	_, err := r.Db.Exec(query, role.Id, role.Name, role.Description)
 	if err != nil {
@@ -32,13 +32,13 @@ func (r SQLiteRoleRepo) Create(role ro.Role) error {
 	return nil
 }
 
-func (r SQLiteRoleRepo) rowToEntity(row Row) ro.Role {
+func (r RoleRepo) rowToEntity(row Row) ro.Role {
 	c := ro.NewRole(row.Id, row.Name,
 		ro.WithDescription(row.Description))
 	return c
 }
 
-func (r SQLiteRoleRepo) Find(name string) (*ro.Role, error) {
+func (r RoleRepo) Find(name string) (*ro.Role, error) {
 	errCtx := fmt.Errorf("fetching role with name %v", name)
 	row := Row{}
 	err := r.Db.Get(&row,
@@ -56,7 +56,7 @@ func (r SQLiteRoleRepo) Find(name string) (*ro.Role, error) {
 	return &entity, nil
 }
 
-func (r SQLiteRoleRepo) Exists(name string) (*bool, error) {
+func (r RoleRepo) Exists(name string) (*bool, error) {
 	var exists bool
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM roles WHERE name = $1)`, name)
 	if err != nil {
@@ -71,7 +71,7 @@ func (r SQLiteRoleRepo) Exists(name string) (*bool, error) {
 	return &exists, nil
 }
 
-func (r SQLiteRoleRepo) Delete(name string) error {
+func (r RoleRepo) Delete(name string) error {
 	_, err := r.Db.Exec("DELETE FROM roles WHERE name=$1", name)
 	if err != nil {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
@@ -79,7 +79,7 @@ func (r SQLiteRoleRepo) Delete(name string) error {
 	return nil
 }
 
-func (r SQLiteRoleRepo) Update(m ro.UpdatableModel) error {
+func (r RoleRepo) Update(m ro.UpdatableModel) error {
 	query := "UPDATE roles SET name=$1,description=$2 WHERE name=$3"
 	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
 	if err != nil {
@@ -89,7 +89,7 @@ func (r SQLiteRoleRepo) Update(m ro.UpdatableModel) error {
 	return nil
 }
 
-func (r SQLiteRoleRepo) IsAssigned(name string) (*bool, error) {
+func (r RoleRepo) IsAssigned(name string) (*bool, error) {
 	var count int64
 
 	var isUsed bool
@@ -109,7 +109,7 @@ func (r SQLiteRoleRepo) IsAssigned(name string) (*bool, error) {
 	return &isUsed, nil
 }
 
-func (r SQLiteRoleRepo) List() ([]ro.Role, error) {
+func (r RoleRepo) List() ([]ro.Role, error) {
 	q := sq.StatementBuilder.Select(`id,name,description`).From("roles")
 	sql, args, err := q.ToSql()
 	if err != nil {
@@ -129,10 +129,10 @@ func (r SQLiteRoleRepo) List() ([]ro.Role, error) {
 	return objects, nil
 }
 
-func NewSQLiteRoleRepo(db *sqlx.DB) SQLiteRoleRepo {
-	return SQLiteRoleRepo{Db: db}
+func NewRoleRepo(db *sqlx.DB) RoleRepo {
+	return RoleRepo{Db: db}
 }
 
-func NewTestSQLiteRoleRepo() SQLiteRoleRepo {
-	return NewSQLiteRoleRepo(s.NewInMemory())
+func NewTestRoleRepo() RoleRepo {
+	return NewRoleRepo(s.NewInMemory())
 }

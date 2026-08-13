@@ -11,7 +11,7 @@ import (
 )
 
 func TestRetrieveUserWithNoGroup(t *testing.T) {
-	repo := NewSQLiteUserRepo(s.NewInMemory())
+	repo := NewUserRepo(s.NewInMemory())
 	CreateUser(repo, userId)
 	r, _ := repo.Find(userId)
 	assert.Equal(t, 0, len(r.Groups))
@@ -20,8 +20,8 @@ func TestRetrieveUserWithNoGroup(t *testing.T) {
 func TestCreateUserWithOneGroup(t *testing.T) {
 	group := g.NewGroup(g.NewGroupId(), "a-group")
 	db := s.NewInMemory()
-	userRepo := NewSQLiteUserRepo(db)
-	groupRepo := grpr.NewSQLiteGroupRepo(db)
+	userRepo := NewUserRepo(db)
+	groupRepo := grpr.NewGroupRepo(db)
 	groupRepo.Create(group)
 	user := u.NewUser(userId, u.WithGroups([]string{group.Name}))
 	err := userRepo.Create(user)
@@ -33,8 +33,8 @@ func TestCreateUserWithOneGroup(t *testing.T) {
 
 func TestAssignToNewGroup(t *testing.T) {
 	db := s.NewInMemory()
-	userRepo := NewSQLiteUserRepo(db)
-	groupRepo := grpr.NewSQLiteGroupRepo(db)
+	userRepo := NewUserRepo(db)
+	groupRepo := grpr.NewGroupRepo(db)
 
 	group := g.NewGroup(g.NewGroupId(), "a-group")
 	groupRepo.Create(group)

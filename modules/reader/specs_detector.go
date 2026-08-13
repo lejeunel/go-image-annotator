@@ -52,8 +52,12 @@ func (d ImageSpecsDetector) Detect(r io.Reader) (*im.Specs, io.Reader, error) {
 
 	mime := formatToMIME(format)
 	if !slices.Contains(d.allowedMIMETypes, mime) {
-		return nil, nil, fmt.Errorf("checking whether detected mimetype %v is contained in provided set %v: %w",
-			mime, d.allowedMIMETypes, e.ErrValidation)
+		return nil, nil, fmt.Errorf(
+			"checking whether detected mimetype %v is contained in provided set %v: %w",
+			mime,
+			d.allowedMIMETypes,
+			e.ErrValidation,
+		)
 	}
 
 	return &im.Specs{

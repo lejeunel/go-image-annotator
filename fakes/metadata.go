@@ -68,6 +68,7 @@ func (r *MetaDataRepo) Delete(n clc.CollectionName, id im.ImageId, key string) e
 
 	return nil
 }
+
 func (r *MetaDataRepo) DeleteAll(n clc.CollectionName, id im.ImageId) error {
 	if r.ErrOnDeleteAll != nil {
 		return r.ErrOnDeleteAll

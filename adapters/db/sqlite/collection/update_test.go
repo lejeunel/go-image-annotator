@@ -15,16 +15,16 @@ import (
 
 func TestInternalErrOnCollectionUpdateShouldFail(t *testing.T) {
 	db := s.NewInMemory()
-	repo := NewSQLiteCollectionRepo(db)
+	repo := NewCollectionRepo(db)
 	db.Close()
 	err := repo.Update(clc.UpdateModel{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
-func Setup() (SQLiteCollectionRepo, clc.Collection, gr.SQLiteGroupRepo, g.Group) {
+func Setup() (CollectionRepo, clc.Collection, gr.GroupRepo, g.Group) {
 	db := s.NewInMemory()
-	clcRepo := NewSQLiteCollectionRepo(db)
-	grpRepo := gr.NewSQLiteGroupRepo(db)
+	clcRepo := NewCollectionRepo(db)
+	grpRepo := gr.NewGroupRepo(db)
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection",
 		clc.WithDescription("a-description"), clc.WithCreatedAt(time.Now()))
 	clcRepo.Create(collection)
