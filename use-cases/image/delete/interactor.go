@@ -16,21 +16,21 @@ type ImageStore interface {
 
 type Interactor struct {
 	ImageStore
-	auth Auth
+	Auth
 }
 
 type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func New(store ImageStore, opts ...Option) Interactor {
 	i := &Interactor{
 		ImageStore: store,
-		auth:       auth.NewVoidAuth(),
+		Auth:       auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -53,7 +53,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if image.Collection.Group != nil {
-		if err := i.auth.DeleteImage(ctx, *image.Collection.Group); err != nil {
+		if err := i.Auth.DeleteImage(ctx, *image.Collection.Group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}

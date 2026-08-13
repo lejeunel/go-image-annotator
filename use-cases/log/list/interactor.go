@@ -10,7 +10,7 @@ import (
 )
 
 type Interactor struct {
-	logger TaskLogger
+	TaskLogger
 }
 
 func (i Interactor) Execute(ctx context.Context, r pa.PaginationParams, out OutputPort) {
@@ -26,13 +26,13 @@ func (i Interactor) Execute(ctx context.Context, r pa.PaginationParams, out Outp
 		return
 	}
 
-	found, err := i.logger.ListUserTasks(user.Id, r)
+	found, err := i.TaskLogger.ListUserTasks(user.Id, r)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	count, err := i.logger.Count(user.Id)
+	count, err := i.TaskLogger.Count(user.Id)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -48,7 +48,7 @@ func (i Interactor) Execute(ctx context.Context, r pa.PaginationParams, out Outp
 type Option func(*Interactor)
 
 func New(r TaskLogger, opts ...Option) Interactor {
-	i := &Interactor{logger: r}
+	i := &Interactor{TaskLogger: r}
 
 	for _, opt := range opts {
 		opt(i)

@@ -10,13 +10,13 @@ import (
 )
 
 type Interactor struct {
-	repo Repo
-	auth Auth
+	Repo
+	Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, id string, out OutputPort) {
 	errCtx := "deleting user"
-	if err := i.auth.DeleteUser(ctx); err != nil {
+	if err := i.Auth.DeleteUser(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -44,7 +44,7 @@ func (i *Interactor) Execute(ctx context.Context, id string, out OutputPort) {
 		return
 	}
 
-	if err := i.repo.Delete(id); err != nil {
+	if err := i.Repo.Delete(id); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -53,7 +53,7 @@ func (i *Interactor) Execute(ctx context.Context, id string, out OutputPort) {
 
 func (i *Interactor) exists(name string) error {
 	errCtx := fmt.Errorf("checking whether user with id %v exists", name)
-	exists, err := i.repo.Exists(name)
+	exists, err := i.Repo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%w: %v: %w", errCtx, err, e.ErrInternal)
 	}
@@ -67,14 +67,14 @@ type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func New(r Repo, opts ...Option) Interactor {
 	i := &Interactor{
-		repo: r,
-		auth: auth.NewVoidAuth(),
+		Repo: r,
+		Auth: auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)

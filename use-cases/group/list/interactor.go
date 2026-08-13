@@ -6,13 +6,13 @@ import (
 )
 
 type Interactor struct {
-	repo Repo
+	Repo
 }
 
 func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 	errCtx := "listing groups"
 
-	found, err := i.repo.List()
+	found, err := i.Repo.List()
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -24,7 +24,7 @@ func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 type Option func(*Interactor)
 
 func New(r Repo, opts ...Option) Interactor {
-	i := &Interactor{repo: r}
+	i := &Interactor{Repo: r}
 
 	for _, opt := range opts {
 		opt(i)

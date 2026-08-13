@@ -16,32 +16,32 @@ type Interface interface {
 }
 
 type Interactor struct {
-	annotationRepo AnnotationRepo
-	labelRepo      LabelRepo
-	auth           auth.Auth
-	clock          clockwork.Clock
+	AnnotationRepo
+	LabelRepo
+	auth.Auth
+	clockwork.Clock
 }
 
 type Option func(*Interactor)
 
 func WithAuth(a auth.Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func WithClock(c clockwork.Clock) Option {
 	return func(i *Interactor) {
-		i.clock = c
+		i.Clock = c
 	}
 }
 
 func New(repo AnnotationRepo, labelRepo LabelRepo, opts ...Option) Interactor {
 	i := &Interactor{
-		annotationRepo: repo,
-		labelRepo:      labelRepo,
-		clock:          clockwork.NewRealClock(),
-		auth:           sauth.NewVoidAuth(),
+		AnnotationRepo: repo,
+		LabelRepo:      labelRepo,
+		Clock:          clockwork.NewRealClock(),
+		Auth:           sauth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -51,7 +51,7 @@ func New(repo AnnotationRepo, labelRepo LabelRepo, opts ...Option) Interactor {
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "updating bounding box properties"
-	label, err := i.labelRepo.FindLabel(r.Label)
+	label, err := i.LabelRepo.FindLabel(r.Label)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -63,14 +63,14 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	group, err := i.annotationRepo.GroupOfAnnotation(*id)
+	group, err := i.AnnotationRepo.GroupOfAnnotation(*id)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if group != nil {
-		if err := i.auth.Annotate(ctx, *group); err != nil {
+		if err := i.Auth.Annotate(ctx, *group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
@@ -81,9 +81,9 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	if user != nil {
 		userId = &user.Id
 	}
-	now := i.clock.Now()
+	now := i.Clock.Now()
 
-	err = i.annotationRepo.UpdateLabelOfAnnotation(*id, label.Id, userId, &now)
+	err = i.AnnotationRepo.UpdateLabelOfAnnotation(*id, label.Id, userId, &now)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

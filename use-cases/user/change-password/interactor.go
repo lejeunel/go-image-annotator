@@ -14,21 +14,21 @@ type TokenVerifier interface {
 }
 
 type Interactor struct {
-	repo              Repo
-	tokenVerifier     TokenVerifier
-	passwordValidator pw.PasswordValidator
+	Repo
+	TokenVerifier
+	pw.PasswordValidator
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "changing password"
 
-	user, err := i.repo.Find(r.Id)
+	user, err := i.Repo.Find(r.Id)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: retrieving user info: %w", errCtx, err))
 		return
 	}
 
-	if ok := i.tokenVerifier.Verify(r.CurrentPassword, user.HashPassword); !ok {
+	if ok := i.TokenVerifier.Verify(r.CurrentPassword, user.HashPassword); !ok {
 		out.Error(fmt.Errorf("%v: verifying current password: %w", errCtx, e.ErrInvalidPassword))
 		return
 	}
@@ -40,7 +40,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.passwordValidator.Validate(r.FirstPassword); err != nil {
+	if err := i.PasswordValidator.Validate(r.FirstPassword); err != nil {
 		out.Error(
 			fmt.Errorf(
 				"%v: checking for password validity: %w: %w",
@@ -52,7 +52,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.repo.UpdatePassword(r.Id, i.tokenVerifier.Hash(r.FirstPassword)); err != nil {
+	if err := i.Repo.UpdatePassword(r.Id, i.TokenVerifier.Hash(r.FirstPassword)); err != nil {
 		out.Error(fmt.Errorf("%v: updating password: %v, %w", errCtx, err, e.ErrInternal))
 		return
 	}
@@ -66,9 +66,9 @@ func New(r Repo, tokenHasher TokenVerifier, passwordValidator pw.PasswordValidat
 	opts ...Option,
 ) Interactor {
 	i := &Interactor{
-		repo:              r,
-		tokenVerifier:     tokenHasher,
-		passwordValidator: passwordValidator,
+		Repo:              r,
+		TokenVerifier:     tokenHasher,
+		PasswordValidator: passwordValidator,
 	}
 
 	for _, opt := range opts {

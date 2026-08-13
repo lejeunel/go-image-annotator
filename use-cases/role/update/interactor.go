@@ -10,22 +10,22 @@ import (
 )
 
 type Interactor struct {
-	repo Repo
-	auth Auth
+	Repo
+	Auth
 }
 
 type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func New(r Repo, opts ...Option) Interactor {
 	i := &Interactor{
-		repo: r,
-		auth: auth.NewVoidAuth(),
+		Repo: r,
+		Auth: auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -35,7 +35,7 @@ func New(r Repo, opts ...Option) Interactor {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "updating role"
-	if err := i.auth.UpdateRole(ctx); err != nil {
+	if err := i.Auth.UpdateRole(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -53,7 +53,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	if err := i.repo.Update(
+	if err := i.Repo.Update(
 		rl.UpdatableModel{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription},
 	); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
@@ -65,7 +65,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 func (i *Interactor) ensureNameExists(name string) error {
 	baseErr := fmt.Errorf("ensuring that role with name %v exists", name)
-	exists, err := i.repo.Exists(name)
+	exists, err := i.Repo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
 	}
@@ -77,7 +77,7 @@ func (i *Interactor) ensureNameExists(name string) error {
 
 func (i *Interactor) ensureNameDoesNotExist(name string) error {
 	baseErr := fmt.Errorf("ensuring that a role with name %v does not already exist", name)
-	exists, err := i.repo.Exists(name)
+	exists, err := i.Repo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
 	}

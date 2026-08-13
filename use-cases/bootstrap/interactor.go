@@ -22,7 +22,7 @@ type Interactor struct {
 	RoleRepo
 	PasswordHasher
 	pw.PasswordValidator
-	FileStore fs.FileStore
+	fs.FileStore
 }
 
 func New(ur UserRepo, rr RoleRepo, f fs.FileStore,

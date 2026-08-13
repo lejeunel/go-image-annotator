@@ -9,17 +9,17 @@ import (
 )
 
 type Interactor struct {
-	repo Repo
-	auth Auth
+	Repo
+	Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, id u.UserId, out OutputPort) {
 	errCtx := "fetching user"
-	if err := i.auth.FindUser(ctx); err != nil {
+	if err := i.Auth.FindUser(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	found, err := i.repo.Find(id)
+	found, err := i.Repo.Find(id)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -32,14 +32,14 @@ type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func New(r Repo, opts ...Option) Interactor {
 	i := &Interactor{
-		repo: r,
-		auth: auth.NewVoidAuth(),
+		Repo: r,
+		Auth: auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)

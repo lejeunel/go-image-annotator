@@ -14,10 +14,10 @@ type PasswordValidator interface {
 }
 
 type Interactor struct {
-	repo              Repo
-	tokenHasher       tk.TokenHasher
-	passwordValidator PasswordValidator
-	clock             clockwork.Clock
+	Repo
+	tk.TokenHasher
+	PasswordValidator
+	clockwork.Clock
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
@@ -30,7 +30,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.passwordValidator.Validate(r.FirstPassword); err != nil {
+	if err := i.PasswordValidator.Validate(r.FirstPassword); err != nil {
 		out.Error(
 			fmt.Errorf(
 				"%v: checking for password validity: %w: %w",
@@ -42,14 +42,14 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	state, err := i.repo.FindResetPasswordState(i.tokenHasher.Hash(r.Token))
+	state, err := i.Repo.FindResetPasswordState(i.TokenHasher.Hash(r.Token))
 	if err != nil {
 		out.Error(fmt.Errorf("%v: finding by hash: %w", errCtx, err))
 		return
 	}
 
 	if state.ExpiresAt != nil {
-		if state.ExpiresAt.Before(i.clock.Now()) {
+		if state.ExpiresAt.Before(i.Clock.Now()) {
 			out.Error(
 				fmt.Errorf("%v: checking for token expiration: %w", errCtx, e.ErrExpiredToken),
 			)
@@ -57,11 +57,11 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	if err := i.repo.UpdatePassword(state.Id, i.tokenHasher.Hash(r.FirstPassword)); err != nil {
+	if err := i.Repo.UpdatePassword(state.Id, i.TokenHasher.Hash(r.FirstPassword)); err != nil {
 		out.Error(fmt.Errorf("%v: updating password: %v, %w", errCtx, err, e.ErrInternal))
 		return
 	}
-	if err := i.repo.DeleteForgottenPasswordTokens(state.Id); err != nil {
+	if err := i.Repo.DeleteForgottenPasswordTokens(state.Id); err != nil {
 		out.Error(fmt.Errorf("%v: deleting token: %v, %w", errCtx, err, e.ErrInternal))
 		return
 	}
@@ -73,7 +73,7 @@ type Option func(*Interactor)
 
 func WithClock(c clockwork.Clock) Option {
 	return func(i *Interactor) {
-		i.clock = c
+		i.Clock = c
 	}
 }
 
@@ -81,10 +81,10 @@ func New(r Repo, tokenHasher tk.TokenHasher, passwordValidator PasswordValidator
 	opts ...Option,
 ) Interactor {
 	i := &Interactor{
-		repo:              r,
-		tokenHasher:       tokenHasher,
-		passwordValidator: passwordValidator,
-		clock:             clockwork.NewRealClock(),
+		Repo:              r,
+		TokenHasher:       tokenHasher,
+		PasswordValidator: passwordValidator,
+		Clock:             clockwork.NewRealClock(),
 	}
 
 	for _, opt := range opts {

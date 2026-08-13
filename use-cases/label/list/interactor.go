@@ -8,18 +8,18 @@ import (
 )
 
 type Interactor struct {
-	repo Repo
+	Repo
 }
 
 func (i *Interactor) Execute(ctx context.Context, r pag.PaginationParams, out OutputPort) {
 	errCtx := "listing labels"
-	found, err := i.repo.List(r)
+	found, err := i.Repo.List(r)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	count, err := i.repo.Count()
+	count, err := i.Repo.Count()
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -37,7 +37,7 @@ func (i *Interactor) Execute(ctx context.Context, r pag.PaginationParams, out Ou
 type Option func(*Interactor)
 
 func New(r Repo, opts ...Option) *Interactor {
-	i := &Interactor{repo: r}
+	i := &Interactor{Repo: r}
 	for _, opt := range opts {
 		opt(i)
 	}

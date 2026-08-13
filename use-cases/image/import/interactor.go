@@ -13,21 +13,21 @@ import (
 type Interactor struct {
 	ImageRepo
 	CollectionRepo
-	auth Auth
+	Auth
 }
 
 type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func New(imr ImageRepo, c CollectionRepo, opts ...Option) *Interactor {
 	i := &Interactor{
 		ImageRepo: imr, CollectionRepo: c,
-		auth: auth.NewVoidAuth(),
+		Auth: auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -54,7 +54,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if dstCollection.Group != nil {
-		if err := i.auth.ImportImage(ctx, *dstCollection.Group); err != nil {
+		if err := i.Auth.ImportImage(ctx, *dstCollection.Group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}

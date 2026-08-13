@@ -13,13 +13,13 @@ type TokenGenerator interface {
 }
 
 type Interactor struct {
-	repo           Repo
-	tokenGenerator TokenGenerator
+	Repo
+	TokenGenerator
 }
 
 func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort) {
 	errCtx := "renewing personal access token"
-	exists, err := i.repo.Exists(userId)
+	exists, err := i.Repo.Exists(userId)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: checking user %v exists: %w", errCtx, userId, err))
 		return
@@ -29,13 +29,13 @@ func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort)
 		return
 	}
 
-	token, err := i.tokenGenerator.Generate()
+	token, err := i.TokenGenerator.Generate()
 	if err != nil {
 		out.Error(fmt.Errorf("%v: generating token: %w", errCtx, err))
 		return
 	}
 
-	if err := i.repo.SetAccessTokenHash(userId, token.Hash); err != nil {
+	if err := i.Repo.SetAccessTokenHash(userId, token.Hash); err != nil {
 		out.Error(fmt.Errorf("%v: setting token hash: %w", errCtx, err))
 		return
 	}
@@ -46,8 +46,8 @@ type Option func(*Interactor)
 
 func New(r Repo, g TokenGenerator, opts ...Option) Interactor {
 	i := &Interactor{
-		repo:           r,
-		tokenGenerator: g,
+		Repo:           r,
+		TokenGenerator: g,
 	}
 
 	for _, opt := range opts {

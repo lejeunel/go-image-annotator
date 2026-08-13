@@ -16,15 +16,15 @@ type TokenGenerator interface {
 }
 
 type Interactor struct {
-	repo           Repo
+	Repo
 	expiresMinutes int
 	tokenGenerator TokenGenerator
-	clock          clockwork.Clock
+	clockwork.Clock
 }
 
 func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort) {
 	errCtx := "requesting forgotten password token"
-	exists, err := i.repo.Exists(userId)
+	exists, err := i.Repo.Exists(userId)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: checking user %v exists: %w", errCtx, userId, err))
 		return
@@ -34,7 +34,7 @@ func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort)
 		return
 	}
 
-	if err := i.repo.DeleteForgottenPasswordTokens(userId); err != nil {
+	if err := i.Repo.DeleteForgottenPasswordTokens(userId); err != nil {
 		out.Error(fmt.Errorf("%v: deleting previous tokens: %w", errCtx, e.ErrInternal))
 		return
 	}
@@ -45,8 +45,8 @@ func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort)
 		return
 	}
 
-	expiresAt := i.clock.Now().Add(time.Minute * time.Duration(i.expiresMinutes))
-	if err := i.repo.AddForgottenPasswordState(token.Hash, userId, expiresAt); err != nil {
+	expiresAt := i.Clock.Now().Add(time.Minute * time.Duration(i.expiresMinutes))
+	if err := i.Repo.AddForgottenPasswordState(token.Hash, userId, expiresAt); err != nil {
 		out.Error(fmt.Errorf("%v: storing token: %w", errCtx, err))
 		return
 	}
@@ -60,16 +60,16 @@ type Option func(*Interactor)
 
 func WithClock(c clockwork.Clock) Option {
 	return func(i *Interactor) {
-		i.clock = c
+		i.Clock = c
 	}
 }
 
 func New(r Repo, expiresMinutes int, g TokenGenerator, opts ...Option) Interactor {
 	i := &Interactor{
-		repo:           r,
+		Repo:           r,
 		tokenGenerator: g,
 		expiresMinutes: expiresMinutes,
-		clock:          clockwork.NewRealClock(),
+		Clock:          clockwork.NewRealClock(),
 	}
 
 	for _, opt := range opts {

@@ -14,22 +14,22 @@ type Interface interface {
 }
 
 type Interactor struct {
-	repo Repo
-	auth auth.Auth
+	Repo
+	auth.Auth
 }
 
 type Option func(*Interactor)
 
 func WithAuth(a auth.Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func New(repo Repo, opts ...Option) Interactor {
 	i := &Interactor{
-		repo: repo,
-		auth: sauth.NewVoidAuth(),
+		Repo: repo,
+		Auth: sauth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -45,20 +45,20 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	group, err := i.repo.GroupOfAnnotation(*id)
+	group, err := i.Repo.GroupOfAnnotation(*id)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
 	if group != nil {
-		if err := i.auth.Annotate(ctx, *group); err != nil {
+		if err := i.Auth.Annotate(ctx, *group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 	}
 
-	if err := i.repo.RemoveAnnotation(*id); err != nil {
+	if err := i.Repo.RemoveAnnotation(*id); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

@@ -8,7 +8,7 @@ import (
 )
 
 type Interactor struct {
-	finder TaskFinder
+	TaskFinder
 }
 
 func (i Interactor) Execute(ctx context.Context, id string, out OutputPort) {
@@ -20,7 +20,7 @@ func (i Interactor) Execute(ctx context.Context, id string, out OutputPort) {
 		return
 	}
 
-	found, err := i.finder.FindTask(*taskId)
+	found, err := i.TaskFinder.FindTask(*taskId)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -30,5 +30,5 @@ func (i Interactor) Execute(ctx context.Context, id string, out OutputPort) {
 }
 
 func New(r TaskFinder) Interactor {
-	return Interactor{finder: r}
+	return Interactor{TaskFinder: r}
 }

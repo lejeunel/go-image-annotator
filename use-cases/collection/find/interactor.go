@@ -6,12 +6,12 @@ import (
 )
 
 type Interactor struct {
-	repo Repo
+	Repo
 }
 
 func (i Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	errCtx := "fetching collection"
-	found, err := i.repo.Find(name)
+	found, err := i.Repo.Find(name)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -23,7 +23,7 @@ type Option func(*Interactor)
 
 func New(r Repo, opts ...Option) Interactor {
 	i := &Interactor{
-		repo: r,
+		Repo: r,
 	}
 	for _, opt := range opts {
 		opt(i)

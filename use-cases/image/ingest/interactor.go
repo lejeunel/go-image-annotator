@@ -17,22 +17,22 @@ type Ingester interface {
 
 type Interactor struct {
 	Ingester
-	auth Auth
-	repo CollectionRepo
+	Auth
+	CollectionRepo
 }
 type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func New(ingester Ingester, repo CollectionRepo, opts ...Option) *Interactor {
 	i := &Interactor{
-		Ingester: ingester,
-		repo:     repo,
-		auth:     auth.NewVoidAuth(),
+		Ingester:       ingester,
+		CollectionRepo: repo,
+		Auth:           auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -49,7 +49,7 @@ func (i Interactor) Execute(ctx context.Context, r ing.Request, out OutputPort) 
 	}
 
 	if collection.Group != nil {
-		if err := i.auth.IngestImage(ctx, *collection.Group); err != nil {
+		if err := i.Auth.IngestImage(ctx, *collection.Group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
@@ -79,7 +79,7 @@ func (i Interactor) Execute(ctx context.Context, r ing.Request, out OutputPort) 
 }
 
 func (i Interactor) findCollectionByName(name string) (*clc.Collection, error) {
-	collection, err := i.repo.Find(name)
+	collection, err := i.CollectionRepo.Find(name)
 	baseErr := fmt.Errorf("finding collection with name %v", name)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", baseErr, err)

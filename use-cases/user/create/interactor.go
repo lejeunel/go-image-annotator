@@ -20,9 +20,9 @@ type PasswordGenerator interface {
 }
 
 type Interactor struct {
-	repo              Repo
-	tokenGenerator    APITokenGenerator
-	passwordGenerator PasswordGenerator
+	Repo              Repo
+	APITokenGenerator APITokenGenerator
+	PasswordGenerator PasswordGenerator
 
 	auth Auth
 }
@@ -39,7 +39,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	token, err := i.tokenGenerator.Generate()
+	token, err := i.APITokenGenerator.Generate()
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -47,9 +47,9 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	var passwordHash []byte
 	if r.Password != nil {
-		passwordHash = i.passwordGenerator.Hash(*r.Password)
+		passwordHash = i.PasswordGenerator.Hash(*r.Password)
 	} else {
-		passwordPair, err := i.passwordGenerator.Generate()
+		passwordPair, err := i.PasswordGenerator.Generate()
 		passwordHash = passwordPair.Hash
 		if err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
@@ -59,7 +59,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	user := usr.NewUser(r.Id, usr.WithHashedPersonalAccessToken(token.Hash),
 		usr.WithPasswordHash(passwordHash),
 		usr.WithGroups(r.Groups), usr.WithRoles(r.Roles))
-	if err := i.repo.Create(user); err != nil {
+	if err := i.Repo.Create(user); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -72,7 +72,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 func (i *Interactor) checkDuplicate(id string) error {
 	errBaseMsg := "checking for duplicate user with id %v: %w"
-	alreadyExists, err := i.repo.Exists(id)
+	alreadyExists, err := i.Repo.Exists(id)
 	if err != nil {
 		return fmt.Errorf(errBaseMsg, id, e.ErrInternal)
 	}
@@ -95,10 +95,10 @@ func New(r Repo,
 	pg PasswordGenerator, opts ...Option,
 ) Interactor {
 	i := &Interactor{
-		repo:              r,
+		Repo:              r,
 		auth:              auth.NewVoidAuth(),
-		tokenGenerator:    tg,
-		passwordGenerator: pg,
+		APITokenGenerator: tg,
+		PasswordGenerator: pg,
 	}
 
 	for _, opt := range opts {

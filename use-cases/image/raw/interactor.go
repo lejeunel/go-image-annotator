@@ -21,12 +21,12 @@ type Repo interface {
 }
 
 type Interactor struct {
-	fileGetter FileGetter
-	repo       Repo
+	FileGetter
+	Repo
 }
 
 func New(fileGetter FileGetter, repo Repo) Interactor {
-	return Interactor{fileGetter: fileGetter, repo: repo}
+	return Interactor{FileGetter: fileGetter, Repo: repo}
 }
 
 func (i Interactor) Execute(id string, out OutputPort) {
@@ -36,12 +36,12 @@ func (i Interactor) Execute(id string, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	specs, err := i.repo.GetSpecs(imageId)
+	specs, err := i.Repo.GetSpecs(imageId)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: fetching image specifications: %w", errCtx, err))
 		return
 	}
-	reader, err := i.fileGetter.Get(
+	reader, err := i.FileGetter.Get(
 		fmt.Sprintf("%v.%v", imageId.String(), strings.Split(specs.MIMEType, "/")[1]),
 	)
 	if err != nil {

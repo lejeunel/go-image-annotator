@@ -12,20 +12,22 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	sauth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	st "github.com/lejeunel/go-image-annotator/modules/image-store"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/auth"
 )
 
 type Interface interface {
 	Execute(ctx context.Context, r Request, out OutputPort)
 }
+type ImageStore interface {
+	Find(base im.BaseImage) (*im.Image, error)
+}
 
 type Interactor struct {
-	annotationRepo AnnotationRepo
-	labelRepo      LabelRepo
-	store          st.Interface
-	auth           auth.Auth
-	clock          clockwork.Clock
+	AnnotationRepo
+	LabelRepo
+	ImageStore
+	auth.Auth
+	clockwork.Clock
 }
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
@@ -44,7 +46,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if image.Collection.Group != nil {
-		if err := i.auth.Annotate(ctx, *image.Collection.Group); err != nil {
+		if err := i.Auth.Annotate(ctx, *image.Collection.Group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
@@ -71,7 +73,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 }
 
 func (i Interactor) findLabel(name string) (*lbl.Label, error) {
-	label, err := i.labelRepo.FindLabel(name)
+	label, err := i.LabelRepo.FindLabel(name)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +81,7 @@ func (i Interactor) findLabel(name string) (*lbl.Label, error) {
 }
 
 func (i Interactor) findImage(imageId im.ImageId, collection string) (*im.Image, error) {
-	image, err := i.store.Find(im.BaseImage{ImageId: imageId, Collection: collection})
+	image, err := i.ImageStore.Find(im.BaseImage{ImageId: imageId, Collection: collection})
 	if err != nil {
 		return nil, err
 	}
@@ -97,10 +99,10 @@ func (i Interactor) addLabel(
 	if user != nil {
 		userId = &user.Id
 	}
-	now := i.clock.Now()
+	now := i.Clock.Now()
 
 	imageLabel := an.NewImageLabel(label)
-	if err := i.annotationRepo.AddImageLabel(
+	if err := i.AnnotationRepo.AddImageLabel(
 		imageId,
 		collection,
 		imageLabel,
@@ -116,24 +118,24 @@ type Option func(*Interactor)
 
 func WithAuth(a auth.Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func WithClock(c clockwork.Clock) Option {
 	return func(i *Interactor) {
-		i.clock = c
+		i.Clock = c
 	}
 }
 
-func New(repo AnnotationRepo, labelRepo LabelRepo, store st.Interface, opts ...Option) Interactor {
+func New(repo AnnotationRepo, labelRepo LabelRepo, store ImageStore, opts ...Option) Interactor {
 	i := &Interactor{
-		annotationRepo: repo,
-		labelRepo:      labelRepo,
-		store:          store,
-		clock:          clockwork.NewRealClock(),
+		AnnotationRepo: repo,
+		LabelRepo:      labelRepo,
+		ImageStore:     store,
+		Clock:          clockwork.NewRealClock(),
 
-		auth: sauth.NewVoidAuth(),
+		Auth: sauth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)

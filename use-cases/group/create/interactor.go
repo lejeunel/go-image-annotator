@@ -11,14 +11,14 @@ import (
 )
 
 type Interactor struct {
-	repo      Repo
-	validator v.Validator
-	auth      Auth
+	Repo
+	v.Validator
+	Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "creating group"
-	if err := i.auth.CreateGroup(ctx); err != nil {
+	if err := i.Auth.CreateGroup(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -38,14 +38,14 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 func (i *Interactor) create(r Request) error {
 	group := g.NewGroup(g.NewGroupId(), r.Name, g.WithDescription(r.Description))
-	if err := i.repo.Create(group); err != nil {
+	if err := i.Repo.Create(group); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (i *Interactor) validate(name string) error {
-	if err := i.validator.Validate(name); err != nil {
+	if err := i.Validator.Validate(name); err != nil {
 		return fmt.Errorf("checking group name %v: %w", name, err)
 	}
 	if err := i.isDuplicate(name); err != nil {
@@ -56,7 +56,7 @@ func (i *Interactor) validate(name string) error {
 
 func (i *Interactor) isDuplicate(name string) error {
 	errBaseMsg := fmt.Sprintf("checking for duplicate group with name %v", name)
-	alreadyExists, err := i.repo.Exists(name)
+	alreadyExists, err := i.Repo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%v: %w", errBaseMsg, e.ErrInternal)
 	}
@@ -70,20 +70,20 @@ type Option func(*Interactor)
 
 func WithNameValidator(v v.Validator) Option {
 	return func(i *Interactor) {
-		i.validator = v
+		i.Validator = v
 	}
 }
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func New(r Repo, opts ...Option) Interactor {
 	i := &Interactor{
-		repo: r, validator: v.NewNameValidator(),
-		auth: auth.NewVoidAuth(),
+		Repo: r, Validator: v.NewNameValidator(),
+		Auth: auth.NewVoidAuth(),
 	}
 
 	for _, opt := range opts {

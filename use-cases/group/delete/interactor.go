@@ -9,13 +9,13 @@ import (
 )
 
 type Interactor struct {
-	repo Repo
-	auth Auth
+	Repo
+	Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 	errCtx := fmt.Errorf("deleting group")
-	if err := i.auth.DeleteGroup(ctx); err != nil {
+	if err := i.Auth.DeleteGroup(ctx); err != nil {
 		out.Error(fmt.Errorf("%w: %w", errCtx, e.ErrAuthorization))
 		return
 	}
@@ -29,7 +29,7 @@ func (i *Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 		return
 	}
 
-	if err := i.repo.Delete(name); err != nil {
+	if err := i.Repo.Delete(name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -38,7 +38,7 @@ func (i *Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 
 func (i *Interactor) ensureDeletable(name string) error {
 	errCtx := fmt.Errorf("ensuring group with name %v is empty", name)
-	isPopulated, err := i.repo.IsPopulated(name)
+	isPopulated, err := i.Repo.IsPopulated(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
@@ -50,7 +50,7 @@ func (i *Interactor) ensureDeletable(name string) error {
 
 func (i *Interactor) ensureExists(name string) error {
 	errCtx := fmt.Errorf("checking whether group with name %v exists", name)
-	exists, err := i.repo.Exists(name)
+	exists, err := i.Repo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)
 	}
@@ -64,14 +64,14 @@ type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func New(r Repo, opts ...Option) Interactor {
 	i := &Interactor{
-		repo: r,
-		auth: auth.NewVoidAuth(),
+		Repo: r,
+		Auth: auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)

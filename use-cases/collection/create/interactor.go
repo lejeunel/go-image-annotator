@@ -12,17 +12,17 @@ import (
 )
 
 type Interactor struct {
-	collectionRepo CollectionRepo
-	groupRepo      GroupRepo
-	validator      v.Validator
-	clock          clockwork.Clock
-	auth           Auth
+	CollectionRepo
+	GroupRepo
+	v.Validator
+	clockwork.Clock
+	Auth
 }
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "creating collection"
 	if r.Group != nil {
-		if err := i.auth.CreateCollection(ctx, *r.Group); err != nil {
+		if err := i.Auth.CreateCollection(ctx, *r.Group); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
@@ -43,22 +43,22 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 func (i Interactor) create(r Request) error {
 	collection := clc.NewCollection(clc.NewCollectionId(), r.Name,
 		clc.WithDescription(r.Description),
-		clc.WithCreatedAt(i.clock.Now()))
+		clc.WithCreatedAt(i.Clock.Now()))
 	if r.Group != nil {
-		group, err := i.groupRepo.Find(*r.Group)
+		group, err := i.GroupRepo.Find(*r.Group)
 		if err != nil {
 			return err
 		}
 		collection.Group = &group.Name
 	}
-	if err := i.collectionRepo.Create(collection); err != nil {
+	if err := i.CollectionRepo.Create(collection); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (i Interactor) validate(name string) error {
-	if err := i.validator.Validate(name); err != nil {
+	if err := i.Validator.Validate(name); err != nil {
 		return fmt.Errorf("checking collection name %v: %w", name, err)
 	}
 	if err := i.isDuplicate(name); err != nil {
@@ -69,7 +69,7 @@ func (i Interactor) validate(name string) error {
 
 func (i Interactor) isDuplicate(name string) error {
 	errBaseMsg := fmt.Sprintf("checking for duplicate collection with name %v", name)
-	alreadyExists, err := i.collectionRepo.Exists(name)
+	alreadyExists, err := i.CollectionRepo.Exists(name)
 	if err != nil {
 		return fmt.Errorf("%v: %w", errBaseMsg, e.ErrInternal)
 	}
@@ -83,29 +83,29 @@ type Option func(*Interactor)
 
 func WithNameValidator(v v.Validator) Option {
 	return func(i *Interactor) {
-		i.validator = v
+		i.Validator = v
 	}
 }
 
 func WithClock(c clockwork.Clock) Option {
 	return func(i *Interactor) {
-		i.clock = c
+		i.Clock = c
 	}
 }
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func New(rc CollectionRepo, rg GroupRepo, opts ...Option) Interactor {
 	i := &Interactor{
-		collectionRepo: rc,
-		groupRepo:      rg,
-		validator:      v.NewNameValidator(),
-		clock:          clockwork.NewRealClock(),
-		auth:           auth.NewVoidAuth(),
+		CollectionRepo: rc,
+		GroupRepo:      rg,
+		Validator:      v.NewNameValidator(),
+		Clock:          clockwork.NewRealClock(),
+		Auth:           auth.NewVoidAuth(),
 	}
 
 	for _, opt := range opts {

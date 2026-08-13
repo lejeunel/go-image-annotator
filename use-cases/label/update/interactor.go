@@ -10,21 +10,21 @@ import (
 )
 
 type Interactor struct {
-	repo Repo
-	auth Auth
+	Repo
+	Auth
 }
 type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
 func New(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{
-		repo: r,
-		auth: auth.NewVoidAuth(),
+		Repo: r,
+		Auth: auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -34,7 +34,7 @@ func New(r Repo, opts ...Option) *Interactor {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "updating label"
-	if err := i.auth.UpdateLabel(ctx); err != nil {
+	if err := i.Auth.UpdateLabel(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -44,7 +44,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.repo.Update(
+	if err := i.Repo.Update(
 		lbl.UpdatableModel{Name: r.Name, NewDescription: r.NewDescription},
 	); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
@@ -55,7 +55,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 }
 
 func (i *Interactor) ensureNameExists(name string) error {
-	exists, err := i.repo.Exists(name)
+	exists, err := i.Repo.Exists(name)
 	errCtx := fmt.Errorf("checking that label with name %v exists", name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCtx, e.ErrInternal)

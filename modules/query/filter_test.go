@@ -15,11 +15,12 @@ func Setup() FilterParser {
 
 func TestParse(t *testing.T) {
 	p := Setup()
-	expr, err := p.Parse("collection:a-collection")
+	expr, err := p.Parse("collection:\"a-collection\"")
 	assert.NoError(t, err)
-	sql, _, err := expr.ToSql()
+	sql, args, err := expr.ToSql()
 	assert.NoError(t, err)
 	assert.Equal(t, "collection = ?", sql)
+	assert.Equal(t, "a-collection", args[0])
 }
 
 func TestParseWithFieldNameMapping(t *testing.T) {

@@ -13,13 +13,13 @@ type Interface interface {
 	Execute(context.Context, OutputPort)
 }
 type Interactor struct {
-	repo       Repo
+	Repo
 	countLimit int
 }
 
 func (i Interactor) Execute(ctx context.Context, out OutputPort) {
 	errCtx := "listing label"
-	count, err := i.repo.Count()
+	count, err := i.Repo.Count()
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -30,7 +30,7 @@ func (i Interactor) Execute(ctx context.Context, out OutputPort) {
 		return
 	}
 
-	labels, err := i.repo.FetchAll()
+	labels, err := i.Repo.FetchAll()
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -40,7 +40,7 @@ func (i Interactor) Execute(ctx context.Context, out OutputPort) {
 
 func New(r Repo, opts ...Option) *Interactor {
 	i := &Interactor{
-		repo:       r,
+		Repo:       r,
 		countLimit: defaultLabelCountLimit,
 	}
 	for _, opt := range opts {

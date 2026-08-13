@@ -4,19 +4,21 @@ import (
 	"fmt"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	imstore "github.com/lejeunel/go-image-annotator/modules/image-store"
 )
 
 type Interface interface {
 	Execute(Request, OutputPort)
 }
-
-type Interactor struct {
-	store imstore.Interface
+type ImageStore interface {
+	Find(base im.BaseImage) (*im.Image, error)
 }
 
-func New(store imstore.Interface) Interactor {
-	return Interactor{store: store}
+type Interactor struct {
+	ImageStore
+}
+
+func New(store ImageStore) Interactor {
+	return Interactor{ImageStore: store}
 }
 
 func (i Interactor) Execute(r Request, out OutputPort) {
@@ -26,7 +28,7 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	image, err := i.store.Find(im.BaseImage{ImageId: imageId, Collection: r.Collection})
+	image, err := i.ImageStore.Find(im.BaseImage{ImageId: imageId, Collection: r.Collection})
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
