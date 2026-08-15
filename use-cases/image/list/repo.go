@@ -6,6 +6,6 @@ import (
 )
 
 type Repo interface {
-	Slice(im.FilterQueryStr, pa.PaginationParams, im.OrderingStr) ([]im.BaseImage, error)
-	Count(im.FilterQueryStr) (*int64, error)
+	Slice(im.FilterStr, pa.PaginationParams, im.OrderStr) ([]im.BaseImage, error)
+	Count(im.FilterStr) (*int64, error)
 }

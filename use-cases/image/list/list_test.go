@@ -72,7 +72,7 @@ func TestInvalidFilterQueryShouldFail(t *testing.T) {
 	fv := fk.QueryStrValidator{Err: e.ErrValidation}
 	itr.FilterQueryStrValidator = &fv
 	query := "i-dont-know-what-to-type-here"
-	r := Request{FilterQueryStr: query}
+	r := Request{FilterStr: query}
 	itr.Execute(r, p)
 	assert.Equal(t, query, fv.Got)
 	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
@@ -84,7 +84,7 @@ func TestInvalidOrderingStrShouldFail(t *testing.T) {
 	ov := fk.QueryStrValidator{Err: e.ErrValidation}
 	itr.OrderingStrValidator = &ov
 	query := "i-dont-know-what-to-type-here"
-	r := Request{OrderingStr: query}
+	r := Request{OrderStr: query}
 	itr.Execute(r, p)
 	assert.Equal(t, query, ov.Got)
 	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
@@ -97,7 +97,7 @@ func TestHandleErrOnSlice(t *testing.T) {
 	itr.Repo = &repo
 	query := "collection:my-collection"
 	itr.Execute(
-		Request{FilterQueryStr: query, PaginationParams: pa.PaginationParams{PageSize: 1}},
+		Request{FilterStr: query, PaginationParams: pa.PaginationParams{PageSize: 1}},
 		p,
 	)
 	assert.True(t, p.GotInternalErr)
@@ -123,26 +123,10 @@ func TestHandleErrOnImageStoreRetrieval(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-// func TestQueryOrderingParams(t *testing.T) {
-// 	p := &FakePresenter{}
-// 	repo := &fk.ImageRepo{}
-// 	itr := New(repo, &fk.ImageStore{}, 1)
-// 	ord := im.OrderingArgs{{Field: "ingested_at", Order: im.DescOrder}}
-
-// 	r := Request{
-// 		Filtering:        im.Filtering{},
-// 		PaginationParams: pa.PaginationParams{PageSize: 1},
-// 		OrderingArgs:     ord,
-// 	}
-// 	itr.Execute(r, p)
-// 	assert.Equal(t, ord, repo.GotOrdering)
-// }
-
-// func TestListImages(t *testing.T) {
-// 	p := &FakePresenter{}
-// 	repo := &fk.ImageRepo{}
-// 	itr := New(repo, &fk.ImageStore{}, 1)
-// 	r := Request{Filtering: im.Filtering{}, PaginationParams: pa.PaginationParams{PageSize: 1}}
-// 	itr.Execute(r, p)
-// 	assert.Equal(t, r.PageSize, len(p.Got.Images))
-// }
+func TestListImagesWithoutFilterAndOrder(t *testing.T) {
+	p := &FakePresenter{}
+	itr := SetupList()
+	r := Request{}
+	itr.Execute(r, p)
+	assert.True(t, p.GotSuccess)
+}

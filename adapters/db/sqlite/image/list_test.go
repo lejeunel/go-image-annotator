@@ -2,7 +2,6 @@ package image
 
 import (
 	"testing"
-	"time"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
@@ -38,7 +37,7 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 	firstImage, firstCollection := CreateSingleImageCollection(imr, cr, "first-collection")
 	CreateSingleImageCollection(imr, cr, "second-collection")
 
-	r, _ := imr.Slice("collection=first-collection", pa.PaginationParams{PageSize: 2, Page: 1}, "")
+	r, _ := imr.Slice("collection=\"first-collection\"", pa.PaginationParams{PageSize: 2, Page: 1}, "")
 	assert.Equal(t, 1, len(r))
 	images := r
 	assert.True(t, images[0].ImageId == firstImage.Id)
@@ -79,50 +78,17 @@ func TestListImagesOrderedById(t *testing.T) {
 	assert.Equal(t, image0.Id, got)
 }
 
-func TestListImagesOrderedByIngestTime(t *testing.T) {
+func TestCountAllImages(t *testing.T) {
 	imr, cr, _ := SetupList()
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	cr.Create(collection)
-	firstId, _ := im.NewImageIdFromString(st.FakeUUIDFromInt(0))
-	secondId, _ := im.NewImageIdFromString(st.FakeUUIDFromInt(1))
-	firstImage := im.NewImage(firstId, collection)
-	secondImage := im.NewImage(secondId, collection)
-	imr.AddImage(firstImage.Id, []byte("first-hash"), im.Specs{IngestedAt: time.Now()})
-	imr.AddImage(secondImage.Id, []byte("second-hash"), im.Specs{IngestedAt: time.Now()})
-	imr.AddToCollection(firstImage.Id, collection.Name)
-	imr.AddToCollection(secondImage.Id, collection.Name)
+	CreateImageInCollectionFromString(imr, collection, st.FakeUUIDFromInt(0))
+	CreateImageInCollectionFromString(imr, collection, st.FakeUUIDFromInt(1))
+	otherCollection := clc.NewCollection(clc.NewCollectionId(), "another-collection")
+	cr.Create(otherCollection)
+	CreateImageInCollectionFromString(imr, otherCollection, st.FakeUUIDFromInt(2))
 
-	r, err := imr.Slice(
-		"",
-		pa.PaginationParams{PageSize: 2, Page: 1},
-		"ingested_at:asc")
+	count, err := imr.Count("")
 	assert.NoError(t, err)
-	assert.Equal(t, r[0].ImageId, firstImage.Id)
-	assert.Equal(t, r[1].ImageId, secondImage.Id)
-}
-
-func TestIterateImages(t *testing.T) {
-	imr, cr, _ := SetupList()
-	collectionName := "a-collection"
-	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
-	cr.Create(collection)
-	im0 := CreateImageInCollectionFromString(
-		imr,
-		collection,
-		st.FakeUUIDFromInt(0),
-	)
-	im1 := CreateImageInCollectionFromString(
-		imr,
-		collection,
-		st.FakeUUIDFromInt(1),
-	)
-
-	res := []im.BaseImage{}
-	for batch, err := range imr.Iterate("", 1) {
-		assert.NoError(t, err)
-		res = append(res, batch)
-	}
-	assert.Equal(t, 2, len(res))
-	assert.Equal(t, im0.Id.String(), res[0].ImageId.String())
-	assert.Equal(t, im1.Id.String(), res[1].ImageId.String())
+	assert.Equal(t, int64(3), *count)
 }

@@ -1,6 +1,7 @@
 package fake
 
 import (
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	ss "github.com/lejeunel/go-image-annotator/shared/sql"
 )
 
@@ -40,13 +41,13 @@ func (p *FilterStrParser) Parse(q string) (ss.SQLizer, error) {
 }
 
 type OrderStrParser struct {
-	Err    error
-	Result string
+	Err  error
+	Args im.OrderingArgs
 }
 
-func (o *OrderStrParser) Parse(q string) (string, error) {
+func (o *OrderStrParser) Parse(q string) (im.OrderingArgs, error) {
 	if o.Err != nil {
-		return "", o.Err
+		return im.OrderingArgs{}, o.Err
 	}
-	return o.Result, nil
+	return o.Args, nil
 }

@@ -3,8 +3,8 @@ package image
 type Order int
 
 type (
-	FilterQueryStr = string
-	OrderingStr    = string
+	FilterStr = string
+	OrderStr  = string
 )
 
 const (

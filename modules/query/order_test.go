@@ -3,6 +3,7 @@ package query
 import (
 	"testing"
 
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -32,7 +33,7 @@ func TestParseOrderingWithEmpty(t *testing.T) {
 	v := NewOrderingConverter()
 	q, err := v.Parse("")
 	assert.NoError(t, err)
-	assert.Equal(t, "", q)
+	assert.Equal(t, im.OrderingArgs{}, q)
 }
 
 func TestParseOrderingWithInvalidField(t *testing.T) {
@@ -45,26 +46,27 @@ func TestParseAscendingOrdering(t *testing.T) {
 	v := NewOrderingConverter(WithOrderingField("amount"))
 	q, err := v.Parse("amount")
 	assert.NoError(t, err)
-	assert.Equal(t, "amount", q)
+	assert.Equal(t, im.OrderingArgs{{Field: "amount", Order: im.AscOrder}}, q)
 }
 
 func TestParseAscendingOrderingWithSuffix(t *testing.T) {
 	v := NewOrderingConverter(WithOrderingField("amount"))
 	q, err := v.Parse("amount:asc")
 	assert.NoError(t, err)
-	assert.Equal(t, "amount", q)
+	assert.Equal(t, im.OrderingArgs{{Field: "amount", Order: im.AscOrder}}, q)
 }
 
 func TestParseDescendingOrderingWithSuffix(t *testing.T) {
 	v := NewOrderingConverter(WithOrderingField("amount"))
 	q, err := v.Parse("amount:desc")
 	assert.NoError(t, err)
-	assert.Equal(t, "amount DESC", q)
+	assert.Equal(t, im.OrderingArgs{{Field: "amount", Order: im.DescOrder}}, q)
 }
 
 func TestParseMultipleOrderings(t *testing.T) {
 	v := NewOrderingConverter(WithOrderingField("amount"), WithOrderingField("age"))
 	q, err := v.Parse("amount:desc age:asc")
 	assert.NoError(t, err)
-	assert.Equal(t, "amount DESC, age", q)
+	assert.Equal(t, im.OrderingArgs{{Field: "amount", Order: im.DescOrder},
+		{Field: "age", Order: im.AscOrder}}, q)
 }

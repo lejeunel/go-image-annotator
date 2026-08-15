@@ -12,7 +12,6 @@ func Setup() FilterParser {
 	b.AddField("collection", schema.Is[string]())
 	return NewFilterParser(b.Build())
 }
-
 func TestParse(t *testing.T) {
 	p := Setup()
 	expr, err := p.Parse("collection:\"a-collection\"")

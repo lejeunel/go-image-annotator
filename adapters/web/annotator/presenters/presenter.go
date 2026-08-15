@@ -3,7 +3,7 @@ package presenters
 import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
-	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/scroll"
 	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 )
 
@@ -21,8 +21,8 @@ func (p *AnnotationPagePresenter) SetView(view v.View) *AnnotationPagePresenter 
 	return p
 }
 
-func (p AnnotationPagePresenter) SuccessInitScroller(s scr.ScrollerState) {
-	p.View.SetScroller(MakeScrollerButtons(s))
+func (p AnnotationPagePresenter) SuccessScroll(r scroll.Response) {
+	p.View.SetScroller(MakeScrollerButtons(r.Prev, r.Next))
 }
 
 func (p AnnotationPagePresenter) SuccessReadImage(im im.Image) {

@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strconv"
 
-	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	s "github.com/lejeunel/go-image-annotator/shared"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -57,7 +57,7 @@ func MakePaginator(baseURL string, currentPage, lastPage, numItems, totalItems i
 			Class("flex shrink-0 items-center gap-2 text-sm font-medium"),
 			If(
 				currentPage > 1,
-				Li(MakeNavigationButton(prevURL.String(), true, scr.ScrollPrevious, "Previous")),
+				Li(MakeNavigationButton(prevURL.String(), true, im.ScrollPrevious, "Previous")),
 			),
 			If(currentPage > 1, MakePaginatorNumberedButton(*parsedBaseURL, currentPage-1, false)),
 			If(lastPage > 1, MakePaginatorNumberedButton(*parsedBaseURL, currentPage, true)),
@@ -72,7 +72,7 @@ func MakePaginator(baseURL string, currentPage, lastPage, numItems, totalItems i
 			),
 			If(
 				currentPage < lastPage,
-				Li(MakeNavigationButton(nextURL.String(), true, scr.ScrollNext, "Next")),
+				Li(MakeNavigationButton(nextURL.String(), true, im.ScrollNext, "Next")),
 			),
 			Span(
 				Class("font-light"),

@@ -73,10 +73,12 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 		PaginationParams: pa.PaginationParams{
 			PageSize: s.Image.DefaultPageSize,
 		},
-		OrderingStr: "ingested_at:asc",
 	}
-	if params.Collection != nil {
-		req.FilterQueryStr = "collection=" + *params.Collection
+	if params.Filter != nil {
+		req.FilterStr = *params.Filter
+	}
+	if params.Order != nil {
+		req.OrderStr = *params.Order
 	}
 	s.Image.List.Execute(req, presenter.NewListPresenter(w, s.Logger))
 }

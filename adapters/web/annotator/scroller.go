@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
-	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -27,7 +27,7 @@ func (p *ScrollerView) Render(buttons view.ScrollerButtons) Node {
 		nextURL = MakeLink(buttons.Next.ImageId, buttons.Next.Collection)
 	}
 	return Div(Class("flex gap-2 mr-4"),
-		cmp.MakeNavigationButton(prevURL, buttons.Prev.IsActive, scr.ScrollPrevious, "Previous"),
-		cmp.MakeNavigationButton(nextURL, buttons.Next.IsActive, scr.ScrollNext, "Next"),
+		cmp.MakeNavigationButton(prevURL, buttons.Prev.IsActive, im.ScrollPrevious, "Previous"),
+		cmp.MakeNavigationButton(nextURL, buttons.Next.IsActive, im.ScrollNext, "Next"),
 	)
 }

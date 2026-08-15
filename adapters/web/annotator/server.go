@@ -39,7 +39,9 @@ func (s *Server) AnnotateImage(w http.ResponseWriter, r *http.Request) {
 	view := NewAnnotationView(s.PageBuilder)
 	p := ap.NewAnnotationPagePresenter(ap.NewCyclicColorizer(ap.Palette))
 	p.SetView(view)
-	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), p, p, p)
+	collection := r.URL.Query().Get("collection")
+	filter := fmt.Sprintf("collection:\"%v\"", collection)
+	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), collection, filter, "ingested_at", p, p, p)
 	view.Render(w)
 }
 
@@ -47,7 +49,9 @@ func (s *Server) MakeAnnotationPanel(w http.ResponseWriter, r *http.Request) {
 	view := NewAnnotationView(s.PageBuilder)
 	p := ap.NewAnnotationPagePresenter(ap.NewCyclicColorizer(ap.Palette))
 	p.SetView(view)
-	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), r.URL.Query().Get("collection"), p, p, p)
+	collection := r.URL.Query().Get("collection")
+	filter := fmt.Sprintf("collection:\"%v\"", collection)
+	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), collection, filter, "ingested_at", p, p, p)
 	view.RenderAnnotationList(w)
 }
 

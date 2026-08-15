@@ -2,16 +2,19 @@ package annotator
 
 import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	rmlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/scroll"
 	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 )
 
-type FakeScrollerPresenter struct{}
+type FakeScrollerPresenter struct {
+	Called bool
+}
 
-func (p *FakeScrollerPresenter) SuccessInitScroller(scr.ScrollerState) {
+func (p *FakeScrollerPresenter) SuccessScroll(r scroll.Response) {
+	p.Called = true
 }
 func (p FakeScrollerPresenter) Error(error) {}
 

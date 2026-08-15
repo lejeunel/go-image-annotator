@@ -1,26 +1,26 @@
 package presenters
 
 import (
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
-	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 )
 
-func MakeScrollerButtons(s scr.ScrollerState) v.ScrollerButtons {
+func MakeScrollerButtons(prev *im.BaseImage, next *im.BaseImage) v.ScrollerButtons {
 	buttons := v.ScrollerButtons{}
-	if s.Next != nil {
+	if next != nil {
 		buttons.Next = v.ScrollerButton{
 			IsActive:   true,
 			Text:       "Next",
-			ImageId:    s.Next.ImageId.String(),
-			Collection: s.Next.Collection,
+			ImageId:    next.ImageId.String(),
+			Collection: next.Collection,
 		}
 	}
-	if s.Previous != nil {
+	if prev != nil {
 		buttons.Prev = v.ScrollerButton{
 			IsActive:   true,
 			Text:       "Previous",
-			ImageId:    s.Previous.ImageId.String(),
-			Collection: s.Previous.Collection,
+			ImageId:    prev.ImageId.String(),
+			Collection: prev.Collection,
 		}
 	}
 	return buttons

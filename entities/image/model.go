@@ -106,3 +106,10 @@ func (i Image) Filename() string {
 func NewImage(id ImageId, collection clc.Collection) Image {
 	return Image{Id: id, Collection: collection}
 }
+
+type ScrollingDirection int
+
+const (
+	ScrollNext ScrollingDirection = iota
+	ScrollPrevious
+)

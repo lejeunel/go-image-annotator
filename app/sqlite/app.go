@@ -7,7 +7,6 @@ import (
 	"github.com/lejeunel/go-image-annotator/config"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	"github.com/lejeunel/go-image-annotator/modules/scroller"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
 )
 
@@ -18,7 +17,7 @@ func NewApp(cfg config.Config, auth auth.Interface, logger slog.Logger) app.App 
 	itrs := BuildInteractors(infra, auth, logger, cfg, apiTokenGen)
 	sessionManager := NewSessionManager(infra.DB.DB, infra.UserRepo, apiTokenGen)
 
-	annotator := a.NewAnnotator(scroller.New(infra.ScrollerRepo), itrs.Image.Find,
+	annotator := a.NewAnnotator(itrs.Image.Scroll, itrs.Image.Find,
 		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox,
 		itrs.Annotation.AddPolygon, itrs.Annotation.UpdatePolygon,
 		itrs.Annotation.Delete,

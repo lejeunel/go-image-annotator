@@ -131,9 +131,15 @@ paths:
             minimum: 1
             maximum: 100
             default: 20
-        - name: collection
+        - name: filter
           in: query
-          description: name of collection
+          description: filtering expression
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: ordering expression
           required: false
           schema:
             type: string

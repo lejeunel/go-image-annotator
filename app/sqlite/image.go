@@ -18,6 +18,7 @@ import (
 	ia "github.com/lejeunel/go-image-annotator/use-cases/image/ingest-archive"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/raw"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/scroll"
 )
 
 func NewImageInteractors(
@@ -52,6 +53,7 @@ func NewImageInteractors(
 		Find:   find.New(ims),
 		Raw:    raw.New(imfs, imr),
 		List:   list.New(imr, fv, ov, ims, pageSize),
+		Scroll: scroll.New(imr, fv, ov),
 		Delete: delete.New(ims),
 	}
 }

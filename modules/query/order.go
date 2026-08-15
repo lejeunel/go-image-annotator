@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
@@ -45,30 +46,30 @@ func (v OrderingStrConverter) Validate(q string) error {
 	return nil
 }
 
-func (v OrderingStrConverter) Parse(q string) (string, error) {
+func (v OrderingStrConverter) Parse(q string) (im.OrderingArgs, error) {
 	if q == "" {
-		return "", nil
+		return im.OrderingArgs{}, nil
 	}
 	if err := v.Validate(q); err != nil {
-		return "", err
+		return im.OrderingArgs{}, err
 	}
 
-	var res []string
+	var res im.OrderingArgs
 	terms := strings.SplitSeq(q, " ")
 	for term := range terms {
 		if strings.Contains(term, ":") {
 			splits := strings.Split(term, ":")
 			field, suffix := splits[0], splits[1]
 			if suffix == "desc" {
-				res = append(res, field+" DESC")
+				res = append(res, im.OrderingArg{Field: field, Order: im.DescOrder})
 			} else {
-				res = append(res, field)
+				res = append(res, im.OrderingArg{Field: field, Order: im.AscOrder})
 			}
 		} else {
-			res = append(res, term)
+			res = append(res, im.OrderingArg{Field: term, Order: im.AscOrder})
 		}
 	}
-	return strings.Join(res, ", "), nil
+	return res, nil
 }
 
 func (v OrderingStrConverter) extractField(term string) string {

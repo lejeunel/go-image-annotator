@@ -5,7 +5,6 @@ import (
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	m "github.com/lejeunel/go-image-annotator/entities/meta"
-	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
@@ -14,6 +13,7 @@ import (
 	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	imread "github.com/lejeunel/go-image-annotator/use-cases/image/find"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/scroll"
 	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 	addmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/add"
 	delmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/delete"
@@ -21,17 +21,10 @@ import (
 	readmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/read"
 )
 
-type FakeScroller struct {
-	Err       error
-	ErrOnInit bool
-	IsInit    bool
-}
+type FakeScroller struct{}
 
-func (s *FakeScroller) Init(imageId string, o scr.OutputPort, opts ...scr.Option) {
-	if s.ErrOnInit {
-		return
-	}
-	s.IsInit = true
+func (s *FakeScroller) Execute(ctx context.Context, r scroll.Request, o scroll.OutputPort) {
+	o.SuccessScroll(scroll.Response{})
 }
 
 type FakeLabelFetcher struct{}

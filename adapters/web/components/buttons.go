@@ -1,7 +1,7 @@
 package components
 
 import (
-	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -30,10 +30,10 @@ var rightArrow = `
 func MakeNavigationButton(
 	url string,
 	active bool,
-	direction scr.ScrollingDirection,
+	direction im.ScrollingDirection,
 	text string,
 ) Node {
-	if direction == scr.ScrollNext {
+	if direction == im.ScrollNext {
 		return A(Href(url), Class(MakeClass(active)),
 			Text(text),
 			Raw(rightArrow),

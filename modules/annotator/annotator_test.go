@@ -13,8 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createAnnotator() (*Annotator, *im.Image, *FakeScroller) {
-	scroller := &FakeScroller{}
+func createAnnotator() (*Annotator, *im.Image) {
 	image := im.NewImage(im.NewImageId(),
 		clc.NewCollection(clc.NewCollectionId(), "name"))
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
@@ -22,7 +21,7 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller) {
 	image.AddBoundingBox(box)
 	image.AddLabel(label)
 	annotator := NewAnnotator(
-		scroller,
+		&FakeScroller{},
 		&FakeImageReader{},
 		&FakeBoxAdder{},
 		&FakeBoxUpdater{},
@@ -37,49 +36,49 @@ func createAnnotator() (*Annotator, *im.Image, *FakeScroller) {
 		&FakeMetaReader{},
 		&FakeMetaDeleter{},
 	)
-	return &annotator, &image, scroller
+	return &annotator, &image
 }
 
-func TestInitializeScrollerOnStart(t *testing.T) {
-	a, image, scroller := createAnnotator()
+func TestDrawScrollerOnStart(t *testing.T) {
+	a, image := createAnnotator()
 	p := &FakeScrollerPresenter{}
 	a.Init(t.Context(), image.Id.String(),
-		"a-collection", &FakeImageReadPresenter{}, &FakeLabelFetchPresenter{}, p)
-	assert.True(t, scroller.IsInit)
+		"a-collection", "", "", &FakeImageReadPresenter{}, &FakeLabelFetchPresenter{}, p)
+	assert.True(t, p.Called)
 }
 
 func TestFetchLabelsOnInit(t *testing.T) {
-	a, image, _ := createAnnotator()
+	a, image := createAnnotator()
 	lp := FakeLabelFetchPresenter{}
 	a.Init(t.Context(), image.Id.String(),
-		"a-collection", &FakeImageReadPresenter{}, &lp, &FakeScrollerPresenter{})
+		"a-collection", "", "", &FakeImageReadPresenter{}, &lp, &FakeScrollerPresenter{})
 	assert.NotNil(t, lp.Called)
 }
 
 func TestDrawImageOnInit(t *testing.T) {
-	a, image, _ := createAnnotator()
+	a, image := createAnnotator()
 	ip := &FakeImageReadPresenter{}
 	a.Init(t.Context(), image.Id.String(),
-		"a-collection", ip, &FakeLabelFetchPresenter{}, &FakeScrollerPresenter{})
+		"a-collection", "", "", ip, &FakeLabelFetchPresenter{}, &FakeScrollerPresenter{})
 	assert.True(t, ip.Called)
 }
 
 func TestAddBox(t *testing.T) {
-	a, _, _ := createAnnotator()
+	a, _ := createAnnotator()
 	p := &FakeAddBoxPresenter{}
 	a.AddBox.Execute(t.Context(), addbox.Request{}, p)
 	assert.True(t, p.Called)
 }
 
 func TestUpdateLabel(t *testing.T) {
-	a, _, _ := createAnnotator()
+	a, _ := createAnnotator()
 	p := &FakeUpdateLabelPresenter{}
 	a.UpdateLabel.Execute(t.Context(), updlbl.Request{}, p)
 	assert.True(t, p.Called)
 }
 
 func TestDeleteAnnotation(t *testing.T) {
-	a, _, _ := createAnnotator()
+	a, _ := createAnnotator()
 	p := &FakeRemoveLabelPresenter{}
 	a.DeleteAnnotation.Execute(t.Context(), del.Request{}, p)
 	assert.True(t, p.Called)

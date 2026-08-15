@@ -8,7 +8,7 @@ import (
 )
 
 type ImageRepo interface {
-	Iterate(im.FilterQueryStr, int) iter.Seq2[im.BaseImage, error]
+	Iterate(im.FilterStr, int) iter.Seq2[im.BaseImage, error]
 }
 
 type CollectionRepo interface {

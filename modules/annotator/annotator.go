@@ -4,7 +4,6 @@ import (
 	"context"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	scr "github.com/lejeunel/go-image-annotator/modules/scroller"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
@@ -13,6 +12,7 @@ import (
 	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	imread "github.com/lejeunel/go-image-annotator/use-cases/image/find"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/scroll"
 	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 	addmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/add"
 	delmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/delete"
@@ -21,7 +21,7 @@ import (
 )
 
 type Annotator struct {
-	scroller         scr.Interface
+	scroll           scroll.Interface
 	readImage        imread.Interface
 	AddBox           addbox.Interface
 	AddPolygon       addpoly.Interface
@@ -37,12 +37,10 @@ type Annotator struct {
 	DeleteMetaData   delmd.Interface
 }
 
-func (a *Annotator) Init(ctx context.Context, imageId string, collection string,
-	oim imread.OutputPort, olbl fetchlbl.OutputPort, oscr scr.OutputPort,
+func (a *Annotator) Init(ctx context.Context, imageId string, collection string, f im.FilterStr, ord im.OrderStr,
+	oim imread.OutputPort, olbl fetchlbl.OutputPort, oscr scroll.OutputPort,
 ) {
-	a.scroller.Init(imageId, oscr,
-		scr.WithCollection(collection),
-		scr.WithOrdering(im.OrderingArgs{{Field: "ingested_at", Order: im.AscOrder}}))
+	a.scroll.Execute(ctx, scroll.Request{CurrentImageId: imageId, FilterStr: f, OrderStr: ord}, oscr)
 	a.ReadImage(imageId, collection, oim)
 	a.FetchLabels.Execute(ctx, olbl)
 }
@@ -52,7 +50,7 @@ func (a *Annotator) ReadImage(imageId string, collection string, o imread.Output
 }
 
 func NewAnnotator(
-	scroller scr.Interface,
+	scroller scroll.Interface,
 	imageMetaReader imread.Interface,
 	boxAdder addbox.Interface,
 	boxUpdater updbox.Interface,
@@ -68,7 +66,7 @@ func NewAnnotator(
 	metaDelete delmd.Interface,
 ) Annotator {
 	return Annotator{
-		scroller:         scroller,
+		scroll:           scroller,
 		readImage:        imageMetaReader,
 		AddBox:           boxAdder,
 		UpdateBox:        boxUpdater,

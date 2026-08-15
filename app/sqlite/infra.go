@@ -13,7 +13,6 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
 	md "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/metadata"
 	r "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
-	scr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/scroll"
 	usr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	qu "github.com/lejeunel/go-image-annotator/modules/query"
@@ -29,7 +28,6 @@ type Infra struct {
 	usr.UserRepo
 	ev.EventRepo
 	md.MetaRepo
-	scr.ScrollerRepo
 	ImageFileStore  fs.FileStore
 	TempFileStore   fs.LocalFileStore
 	PolicyFileStore fs.FileStore
@@ -51,7 +49,6 @@ func BuildInfra(path string) Infra {
 		usr.NewUserRepo(db),
 		ev.NewEventRepo(db),
 		md.NewMetaRepo(db),
-		scr.NewScrollerRepo(db),
 		fs.NewLocalFileStore(fmt.Sprintf("%v/%v", path, "images")),
 		fs.NewLocalFileStore(fmt.Sprintf("%v/%v", path, "tmp")),
 		fs.NewLocalFileStore(fmt.Sprintf("%v/%v", path, "assets")),

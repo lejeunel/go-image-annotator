@@ -46,6 +46,8 @@ func (v FilterParser) Validate(query string) error {
 	return err
 }
 
+// TODO this should be done directly on the parsed expression, and
+// not the sql string.
 type MappedSQLizer struct {
 	s.SQLizer
 	Mappings map[string]string
@@ -57,7 +59,7 @@ func (m MappedSQLizer) ToSql() (string, []any, error) {
 		return "", nil, err
 	}
 	for src, dst := range m.Mappings {
-		sql = strings.ReplaceAll(sql, src+" =", dst+" =")
+		sql = strings.ReplaceAll(sql, src+" ", dst+" ")
 	}
 	return sql, args, nil
 }

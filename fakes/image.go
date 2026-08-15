@@ -23,13 +23,14 @@ type ImageRepo struct {
 	ErrOnCount                   error
 	ErrOnIterate                 error
 	ErrOnIsUsed                  error
+	ErrOnGetAdjacent             error
 	AddedImageId                 im.ImageId
 	AddedIntoCollection          *clc.CollectionName
 	ImageIsInCollection          bool
 	IsUsed_                      bool
-	GotFilters                   im.FilterQueryStr
+	GotFilters                   im.FilterStr
 	GotPagination                pa.PaginationParams
-	GotOrdering                  im.OrderingStr
+	GotOrdering                  im.OrderStr
 	GotHash                      []byte
 	GotSpecs                     im.Specs
 	ReturnSpecs                  *im.Specs
@@ -37,6 +38,9 @@ type ImageRepo struct {
 	HashAlreadyExists            bool
 	Count_                       int64
 	IterateBaseImages            []im.BaseImage
+	NextImage                    im.BaseImage
+	PreviousImage                im.BaseImage
+	ImageMissing                 bool
 }
 
 func (r *ImageRepo) RemoveImageFromCollection(
@@ -53,6 +57,9 @@ func (r *ImageRepo) RemoveImageFromCollection(
 func (r *ImageRepo) ImageExists(imageId im.ImageId) (bool, error) {
 	if r.ErrOnImageExists != nil {
 		return false, r.ErrOnImageExists
+	}
+	if r.ImageMissing {
+		return false, nil
 	}
 	return true, nil
 }
@@ -80,9 +87,9 @@ func (r *ImageRepo) AddToCollection(imageId im.ImageId, collection clc.Collectio
 }
 
 func (r *ImageRepo) Slice(
-	f im.FilterQueryStr,
+	f im.FilterStr,
 	p pa.PaginationParams,
-	o im.OrderingStr,
+	o im.OrderStr,
 ) ([]im.BaseImage, error) {
 	r.GotFilters = f
 	r.GotPagination = p
@@ -133,7 +140,7 @@ func (r *ImageRepo) FindImageIdByHash(hash []byte) (*im.ImageId, error) {
 	return nil, nil
 }
 
-func (r *ImageRepo) Count(f im.FilterQueryStr) (*int64, error) {
+func (r *ImageRepo) Count(f im.FilterStr) (*int64, error) {
 	if r.ErrOnCount != nil {
 		return nil, r.ErrOnCount
 	}
@@ -147,7 +154,7 @@ func (r ImageRepo) GetSpecs(im.ImageId) (*im.Specs, error) {
 	return r.ReturnSpecs, nil
 }
 
-func (r ImageRepo) Iterate(f im.FilterQueryStr, pageSize int) iter.Seq2[im.BaseImage, error] {
+func (r ImageRepo) Iterate(f im.FilterStr, pageSize int) iter.Seq2[im.BaseImage, error] {
 	return func(yield func(im.BaseImage, error) bool) {
 		for img := range slices.Values(r.IterateBaseImages) {
 			if !yield(img, nil) {
@@ -162,4 +169,20 @@ func (r *ImageRepo) IsUsed(id im.ImageId) (*bool, error) {
 		return nil, r.ErrOnIsUsed
 	}
 	return &r.IsUsed_, nil
+}
+
+func (r *ImageRepo) GetAdjacent(
+	id im.ImageId,
+	f im.FilterStr,
+	o im.OrderStr,
+	d im.ScrollingDirection,
+) (*im.BaseImage, error) {
+	if r.ErrOnGetAdjacent != nil {
+		return nil, r.ErrOnGetAdjacent
+	}
+	if d == im.ScrollNext {
+		return &r.NextImage, nil
+	}
+	return &r.PreviousImage, nil
+
 }

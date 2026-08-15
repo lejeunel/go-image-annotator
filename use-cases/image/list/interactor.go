@@ -8,11 +8,11 @@ import (
 )
 
 type FilterQueryStrValidator interface {
-	Validate(im.FilterQueryStr) error
+	Validate(im.FilterStr) error
 }
 
 type OrderingStrValidator interface {
-	Validate(im.OrderingStr) error
+	Validate(im.OrderStr) error
 }
 
 type ImageStore interface {
@@ -42,27 +42,27 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 
 	r.PaginationParams.Sanitize(i.DefaultPageSize)
 
-	if r.FilterQueryStr != "" {
-		if err := i.FilterQueryStrValidator.Validate(r.FilterQueryStr); err != nil {
-			out.Error(fmt.Errorf("%v: validating query %v: %w", errCtx, r.FilterQueryStr, err))
+	if r.FilterStr != "" {
+		if err := i.FilterQueryStrValidator.Validate(r.FilterStr); err != nil {
+			out.Error(fmt.Errorf("%v: validating query %v: %w", errCtx, r.FilterStr, err))
 			return
 		}
 	}
 
-	if r.OrderingStr != "" {
-		if err := i.OrderingStrValidator.Validate(r.OrderingStr); err != nil {
-			out.Error(fmt.Errorf("%v: validating ordering %v: %w", errCtx, r.OrderingStr, err))
+	if r.OrderStr != "" {
+		if err := i.OrderingStrValidator.Validate(r.OrderStr); err != nil {
+			out.Error(fmt.Errorf("%v: validating ordering %v: %w", errCtx, r.OrderStr, err))
 			return
 		}
 	}
 
-	baseImages, err := i.Repo.Slice(r.FilterQueryStr, r.PaginationParams, r.OrderingStr)
+	baseImages, err := i.Repo.Slice(r.FilterStr, r.PaginationParams, r.OrderStr)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	count, err := i.Repo.Count(r.FilterQueryStr)
+	count, err := i.Repo.Count(r.FilterStr)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

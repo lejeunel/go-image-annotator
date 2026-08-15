@@ -131,11 +131,8 @@ type NewImage struct {
 	BoundingBoxes *[]NewBoundingBox `json:"bounding_boxes,omitempty"`
 
 	// Collection name of collection in which to add the image
-	Collection string `json:"collection"`
-
-	// Data base64 encoded image raw bytes
-	Data   string    `json:"data"`
-	Labels *[]string `json:"labels,omitempty"`
+	Collection string    `json:"collection"`
+	Labels     *[]string `json:"labels,omitempty"`
 }
 
 // NewLabel defines model for NewLabel.
@@ -219,8 +216,11 @@ type ListImagesParams struct {
 	// PageSize maximum number of collections to return
 	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
 
-	// Collection name of collection
-	Collection *string `form:"collection,omitempty" json:"collection,omitempty"`
+	// Filter filtering expression
+	Filter *string `form:"filter,omitempty" json:"filter,omitempty"`
+
+	// Order ordering expression
+	Order *string `form:"order,omitempty" json:"order,omitempty"`
 }
 
 // IngestImageMultipartBody defines parameters for IngestImage.
@@ -485,15 +485,28 @@ func (siw *ServerInterfaceWrapper) ListImages(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// ------------- Optional query parameter "collection" -------------
+	// ------------- Optional query parameter "filter" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", true, false, "collection", r.URL.Query(), &params.Collection, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "filter", r.URL.Query(), &params.Filter, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
 		var requiredError *runtime.RequiredParameterError
 		if errors.As(err, &requiredError) {
-			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "collection"})
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "filter"})
 		} else {
-			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "collection", Err: err})
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "filter", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "order" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "order", r.URL.Query(), &params.Order, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "order"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "order", Err: err})
 		}
 		return
 	}

@@ -124,11 +124,8 @@ type NewImage struct {
 	BoundingBoxes *[]NewBoundingBox `json:"bounding_boxes,omitempty"`
 
 	// Collection name of collection in which to add the image
-	Collection string `json:"collection"`
-
-	// Data base64 encoded image raw bytes
-	Data   string    `json:"data"`
-	Labels *[]string `json:"labels,omitempty"`
+	Collection string    `json:"collection"`
+	Labels     *[]string `json:"labels,omitempty"`
 }
 
 // NewLabel defines model for NewLabel.
@@ -212,8 +209,11 @@ type ListImagesParams struct {
 	// PageSize maximum number of collections to return
 	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
 
-	// Collection name of collection
-	Collection *string `form:"collection,omitempty" json:"collection,omitempty"`
+	// Filter filtering expression
+	Filter *string `form:"filter,omitempty" json:"filter,omitempty"`
+
+	// Order ordering expression
+	Order *string `form:"order,omitempty" json:"order,omitempty"`
 }
 
 // IngestImageMultipartBody defines parameters for IngestImage.
