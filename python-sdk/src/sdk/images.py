@@ -9,10 +9,10 @@ class Images:
     def __init__(self, client: Client):
         self.client = client
 
-    def get(self, image_id: str, collection: str):
+    def get(self, collection: str, id: str):
         return self.client._request(
             "GET",
-            f"/images/{collection}/{image_id}",
+            f"/images/{collection}/{id}",
         )
 
     def list_images(
