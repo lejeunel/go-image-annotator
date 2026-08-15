@@ -13,6 +13,7 @@ type Config struct {
 	URL                                  string   `required:"true" split_words:"true"`
 	AllowedImageMIMETypes                []string `                split_words:"true" default:"image/jpeg,image/png"`
 	DefaultPageSize                      int      `                split_words:"true" default:"20"`
+	MaxPageSize                          int      `                split_words:"true" default:"50"`
 	ApiTokenLength                       int      `                split_words:"true" default:"32"`
 	RandomPasswordLength                 int      `                split_words:"true" default:"10"`
 	ForgotPasswordTokenExpirationMinutes int      `                split_words:"true" default:"30"`

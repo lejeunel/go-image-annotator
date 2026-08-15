@@ -67,6 +67,7 @@ func BuildInteractors(infra Infra, auth auth.Interface, logger slog.Logger, cfg 
 			eventlogger,
 			logger,
 			cfg.DefaultPageSize,
+			cfg.MaxPageSize,
 			auth,
 		),
 		User: NewUserInteractors(infra.UserRepo, infra.GroupRepo, infra.RoleRepo,

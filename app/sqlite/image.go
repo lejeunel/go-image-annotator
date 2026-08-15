@@ -35,7 +35,8 @@ func NewImageInteractors(
 	maxArchiveMB int64,
 	el el.EventLogger,
 	logger slog.Logger,
-	pageSize int,
+	defaultPageSize int,
+	maxPageSize int,
 	auth auth.Interface,
 ) im.Interactors {
 	return im.Interactors{
@@ -52,7 +53,7 @@ func NewImageInteractors(
 		),
 		Find:   find.New(ims),
 		Raw:    raw.New(imfs, imr),
-		List:   list.New(imr, fv, ov, ims, pageSize),
+		List:   list.New(imr, fv, ov, ims, defaultPageSize, maxPageSize),
 		Scroll: scroll.New(imr, fv, ov),
 		Delete: delete.New(ims),
 	}

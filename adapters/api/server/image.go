@@ -71,7 +71,8 @@ func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionNam
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams) {
 	req := list.Request{
 		PaginationParams: pa.PaginationParams{
-			PageSize: s.Image.DefaultPageSize,
+			PageSize: *params.PageSize,
+			Page:     *params.Page,
 		},
 	}
 	if params.Filter != nil {

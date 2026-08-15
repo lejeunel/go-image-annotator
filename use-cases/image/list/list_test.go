@@ -18,7 +18,7 @@ func SetupList() Interactor {
 	ov := q.NewOrderingConverter(q.WithOrderingField("ingested_at"))
 	repo := &fk.ImageRepo{}
 	st := &fk.ImageStore{}
-	return New(repo, fv, ov, st, 1)
+	return New(repo, fv, ov, st, 1, 1)
 }
 
 func TestSanitizePaginationParams(t *testing.T) {

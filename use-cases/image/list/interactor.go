@@ -25,6 +25,7 @@ type Interactor struct {
 	OrderingStrValidator
 	ImageStore
 	DefaultPageSize int
+	MaxPageSize     int
 }
 
 func New(
@@ -33,14 +34,17 @@ func New(
 	ov OrderingStrValidator,
 	s ImageStore,
 	ps int,
+	mps int,
 ) Interactor {
-	return Interactor{r, fv, ov, s, ps}
+	return Interactor{r, fv, ov, s, ps, mps}
 }
 
 func (i Interactor) Execute(r Request, out OutputPort) {
 	errCtx := "listing images"
 
-	r.PaginationParams.Sanitize(i.DefaultPageSize)
+	fmt.Println(r.PaginationParams)
+	r.PaginationParams.Sanitize(i.DefaultPageSize, i.MaxPageSize)
+	fmt.Println(r.PaginationParams)
 
 	if r.FilterStr != "" {
 		if err := i.FilterQueryStrValidator.Validate(r.FilterStr); err != nil {
