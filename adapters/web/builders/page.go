@@ -3,6 +3,7 @@ package builders
 import (
 	"bytes"
 	"context"
+	_ "embed"
 	"fmt"
 	"io"
 	"maps"
@@ -15,6 +16,12 @@ import (
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
+
+//go:embed scripts/detect_os.js
+var detectOs string
+
+//go:embed templates/query_modal.html
+var queryModal string
 
 type PageBuilder struct {
 	APIPath             string
@@ -34,10 +41,12 @@ type PageBuilder struct {
 }
 
 func NewPageBuilder(base BasePageBuilder, version g.Info) PageBuilder {
-	return PageBuilder{
+	pb := PageBuilder{
 		BasePageBuilder: base, APIPath: rt.APIRootUrl, RepoURL: g.RepoURL, DocsURL: g.DocsURL,
 		Version: version, SidebarEntries: make(map[string]cmp.SidebarEntry),
 	}
+	pb.AddScripts(Script(Raw(detectOs)))
+	return pb
 }
 
 func (b *PageBuilder) SetHTMLTitle(title string) *PageBuilder {
@@ -157,7 +166,8 @@ func (b *PageBuilder) Render(w io.Writer) {
 			sidebar.AddEntry(e.Label, e.Icon, e.Url, e.IsActive)
 		}
 		sidebar.Render(&bufSidebar)
-		content = Div(Class("relative flex w-full flex-col"),
+		content = Div(
+			Class("relative flex w-full flex-col"),
 			Nav(
 				Attr("x-cloak"),
 				Class(
@@ -173,19 +183,26 @@ func (b *PageBuilder) Render(w io.Writer) {
 	}
 
 	b.BasePageBuilder.SetFrameContent(
-		Group(
-			[]Node{
-				cmp.MakeNavBar(
-					b.ActivePage,
-					b.RepoURL,
-					b.DocsURL,
-					b.APIPath,
-					*b.User,
-					rt.DashboardUrl,
-				),
-				content,
-				cmp.MakeFooter(b.Version),
-			},
-		))
+		Div(
+			Attr(`x-data="{ showSearch: false}"`),
+			Attr(`@keydown.cmd.k.window.prevent="showSearch = !showSearch, $dispatch('searchModalOpened')"`),
+			Attr(`@keydown.ctrl.k.window.prevent="showSearch = !showSearch, $dispatch('searchModalOpened')"`),
+			Group(
+				[]Node{
+					cmp.MakeNavBar(
+						b.ActivePage,
+						b.RepoURL,
+						b.DocsURL,
+						b.APIPath,
+						*b.User,
+						rt.DashboardUrl,
+					),
+					content,
+					cmp.MakeFooter(b.Version),
+				},
+			),
+			Raw(queryModal),
+		),
+	)
 	b.BasePageBuilder.Render(w)
 }

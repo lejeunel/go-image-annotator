@@ -5,6 +5,9 @@ import (
 	"fmt"
 )
 
+//go:embed svg/magnify.svg
+var Magnify string
+
 //go:embed svg/expand.svg
 var Expand string
 

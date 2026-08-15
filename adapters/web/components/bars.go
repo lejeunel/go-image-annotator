@@ -94,6 +94,61 @@ func DarkModeToggle() Node {
 	)
 }
 
+func MakeSearchButton() Node {
+
+	return Div(Class("bg-surface-alt p-0.5 dark:bg-surface-dark-alt"),
+		Button(
+			Class("btn-search flex h-8 w-full cursor-pointer items-center justify-between border-outline bg-surface px-2 font-light transition-all duration-200 dark:border-outlineDark dark:bg-surface-dark rounded-lg border"),
+			Attr(`x-on:click="showSearch=true, $dispatch('searchModalOpened')"`),
+			Attr(`x-bind:class="['rounded-lg', 'border']"`),
+			Div(Class("flex items-center gap-2"),
+				Raw(`
+	        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-on-surface dark:text-on-surface-dark">
+	            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+	        </svg>
+
+			`),
+				// Text("Search"),
+			),
+			Div(
+				Attr(`x-data="{ os: detectOS() }"`),
+				Class("flex items-center gap-1 text-xs text-on-surface-strong dark:text-on-surface-dark"),
+				Raw(`
+	        <svg x-show="os === 'Mac OS'" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="currentColor" viewBox="0 0 16 16" style="display: none;">
+	            <path d="M3.5 2A1.5 1.5 0 0 1 5 3.5V5H3.5a1.5 1.5 0 1 1 0-3zM6 5V3.5A2.5 2.5 0 1 0 3.5 6H5v4H3.5A2.5 2.5 0 1 0 6 12.5V11h4v1.5a2.5 2.5 0 1 0 2.5-2.5H11V6h1.5A2.5 2.5 0 1 0 10 3.5V5H6zm4 1v4H6V6h4zm1-1V3.5A1.5 1.5 0 1 1 12.5 5H11zm0 6h1.5a1.5 1.5 0 1 1-1.5 1.5V11zm-6 0v1.5A1.5 1.5 0 1 1 3.5 11H5z"></path>
+	        </svg>
+					`),
+				Span(Attr(`x-show="os === 'Windows' || os === 'Linux'" aria-hidden="true"`), Div(Class("pl-1"), Text("Ctrl +"))),
+				Span(Attr(`x-show="os === 'Mac OS' || os === 'Linux' || os === 'Windows'" aria-hidden="true"`), Text("K")),
+			),
+		),
+	)
+	// <button type="button" aria-label="Search" class="btn-search flex h-10 w-full cursor-pointer items-center justify-between border-outline bg-surfaceAlt p-2 px-4 font-light transition-all duration-200 dark:border-outlineDark dark:bg-surfaceDarkAlt rounded-lg border"
+	// x-on:click="showSearch=true, $dispatch('searchModalOpened')" x-bind:class="[
+	//         'rounded' + $store.border.radius,
+	//         $store.border.border ? 'border' : 'border-none'
+	//     ]">
+	//     <div class="flex items-center gap-2">
+	//         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-onSurface dark:text-onSurfaceDark">
+	//             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+	//         </svg>
+	//         Search
+	//     </div>
+	//     <div x-data="{ os: detectOS() }" class="flex items-center gap-1 text-sm text-onSurfaceStrong dark:text-onSurfaceDark">
+	//         <svg x-show="os === 'Mac OS'" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="currentColor" viewBox="0 0 16 16" style="display: none;">
+	//             <path d="M3.5 2A1.5 1.5 0 0 1 5 3.5V5H3.5a1.5 1.5 0 1 1 0-3zM6 5V3.5A2.5 2.5 0 1 0 3.5 6H5v4H3.5A2.5 2.5 0 1 0 6 12.5V11h4v1.5a2.5 2.5 0 1 0 2.5-2.5H11V6h1.5A2.5 2.5 0 1 0 10 3.5V5H6zm4 1v4H6V6h4zm1-1V3.5A1.5 1.5 0 1 1 12.5 5H11zm0 6h1.5a1.5 1.5 0 1 1-1.5 1.5V11zm-6 0v1.5A1.5 1.5 0 1 1 3.5 11H5z"></path>
+	//         </svg>
+	//         <span x-show="os === 'Windows' || os === 'Linux'" aria-hidden="true">
+	//             Ctrl +
+	//         </span>
+	//         <span x-show="os === 'Mac OS' || os === 'Linux' || os === 'Windows'" aria-hidden="true">
+	//             K
+	//         </span>
+	//     </div>
+	// </button>
+
+}
+
 func MakeNavBar(
 	isActivated ActivePage,
 	repoURL string,
@@ -123,6 +178,9 @@ func MakeNavBar(
 
 		Ul(
 			Class("hidden items-center gap-4 md:flex"),
+			Li(
+				MakeSearchButton(),
+			),
 			Li(
 				MakeMenuItem("Home", rt.HomePageUrl, isActivated == HomePageActive),
 			),
