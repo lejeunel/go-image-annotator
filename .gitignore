@@ -6,3 +6,5 @@
 /.direnv/
 /.envrc
 /node_modules
+__pycache__/
+.direnv/

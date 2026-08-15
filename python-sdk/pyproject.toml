@@ -1,0 +1,41 @@
+[project]
+name = "sdk"
+version = "0.1.0"
+description = "Python SDK for go-image-annotator"
+authors = [{name = "Laurent Lejeune", email = "olol85@gmail.com"}]
+readme = "README.md"
+requires-python="==3.12.*"
+dependencies = [
+    "requests>=2.34.2",
+    "typer>=0.20.0",
+]
+
+[project.scripts]
+sdk = "sdk.main:main"
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sdk"]
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+skip-string-normalization = false
+skip-magic-trailing-comma = false
+
+[tool.basedpyright]
+defineConstant = { DEBUG = true }
+reportMissingImports = "error"
+reportMissingTypeStubs = false
+
+pythonVersion = "3.13"
+pythonPlatform = "Linux"
+typeCheckingMode = "basic"
+venvPath = "."
+venv = ".venv"
