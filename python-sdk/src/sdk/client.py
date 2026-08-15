@@ -10,18 +10,7 @@ class Client:
     def _request(self, method: str, path: str, **kwargs) -> dict:
         url = f"{self.api_url.rstrip('/')}/{path.lstrip('/')}"
         response = self.session.request(method, url, **kwargs)
-        try:
-            response.raise_for_status()
-        except requests.HTTPError as e:
-            try:
-                error = response.json()["error"]
-            except (ValueError, KeyError):
-                error = response.text
-
-            raise requests.HTTPError(
-                f"API request failed ({response.status_code} {response.reason}): {error}",
-                response=response,
-            ) from e
+        self._raise_for_status(response)
 
         return response.json()
 
@@ -30,9 +19,22 @@ class Client:
         url = f"{self.api_url.rstrip('/')}/{path.lstrip('/')}"
 
         response = self.session.request(method, url, **kwargs)
-        response.raise_for_status()
-
+        self._raise_for_status(response)
         return response.content
+
+    def _raise_for_status(self, r: requests.Response):
+        try:
+            r.raise_for_status()
+        except requests.HTTPError as e:
+            try:
+                error = r.json()["error"]
+            except (ValueError, KeyError):
+                error = r.text
+
+            raise requests.HTTPError(
+                f"API request failed ({r.status_code} {r.reason}): {error}",
+                response=r,
+            ) from e
 
 
 def create_session() -> requests.Session:
