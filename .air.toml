@@ -1,0 +1,21 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/main ."
+bin = "./tmp/main serve -p 3000"
+full_bin = "./tmp/main serve -p 3000"
+include_ext = ["go", "tmpl", "html"]
+exclude_dir = ["tmp", "node_modules", "static", "vendor"]
+exclude_regex = ["_test\\.go"]
+delay = 200 # ms, debounce rapid saves
+stop_on_error = true
+
+[log]
+time = false
+
+[color]
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"

@@ -24,6 +24,12 @@ build:
 			-X '$(REPO)/globals.Version=$(VERSION)' \
 			-X '$(REPO)/globals.Date=$$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
 
+dev:
+	@trap 'kill 0' SIGINT; \
+	air & \
+	npx @tailwindcss/cli -i $(CSS_MAIN) -o $(CSS_OUT) --watch & \
+	wait
+
 build-ci:
 	$(MAKE) node-deps
 	$(MAKE) build

@@ -16,6 +16,7 @@
           tailwindcss_4
           oapi-codegen
           redocly
+          air
         ];
       };
       devShells.test = pkgs.mkShell {
