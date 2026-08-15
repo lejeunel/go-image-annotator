@@ -11,7 +11,7 @@ import (
 
 func TestHandleInternalErrOnList(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.LabelRepo{ErrOnList: e.ErrInternal})
+	itr := New(&fk.LabelRepo{ErrOnList: e.ErrInternal}, 1, 10)
 	itr.Execute(t.Context(), pag.PaginationParams{}, p)
 	assert.False(t, p.GotSuccess)
 	assert.True(t, p.GotInternalErr)
@@ -19,7 +19,7 @@ func TestHandleInternalErrOnList(t *testing.T) {
 
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.LabelRepo{ErrOnCount: e.ErrInternal})
+	itr := New(&fk.LabelRepo{ErrOnCount: e.ErrInternal}, 1, 10)
 	itr.Execute(t.Context(), pag.PaginationParams{}, p)
 	assert.False(t, p.GotSuccess)
 	assert.True(t, p.GotInternalErr)
@@ -31,7 +31,7 @@ func TestListLabel(t *testing.T) {
 	page := 1
 	repo := &fk.LabelRepo{Count_: int64(count)}
 	p := &FakePresenter{}
-	itr := New(repo)
+	itr := New(repo, 1, 10)
 	itr.Execute(t.Context(), pag.PaginationParams{PageSize: pageSize, Page: int64(page)}, p)
 
 	assert.Equal(t, len(p.Got.Labels), pageSize, "page size")

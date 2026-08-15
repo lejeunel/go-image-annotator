@@ -14,19 +14,25 @@ class Client:
             response.raise_for_status()
         except requests.HTTPError as e:
             try:
-                message = response.json()["error"]
+                error = response.json()["error"]
             except (ValueError, KeyError):
-                message = response.text
+                error = response.text
 
             raise requests.HTTPError(
-                f"{e}: {message}",
+                f"API request failed ({response.status_code} {response.reason}): {error}",
                 response=response,
             ) from e
 
         return response.json()
 
-    def whoami(self) -> dict:
-        return self._request("GET", "/whoami")
+    def _request_bytes(self, method: str, path: str, **kwargs) -> bytes:
+
+        url = f"{self.api_url.rstrip('/')}/{path.lstrip('/')}"
+
+        response = self.session.request(method, url, **kwargs)
+        response.raise_for_status()
+
+        return response.content
 
 
 def create_session() -> requests.Session:

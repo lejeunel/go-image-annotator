@@ -1,6 +1,7 @@
 import typer
 from .client import create_client, Client
 from typing import Any
+from pathlib import Path
 
 app = typer.Typer(help="list and download images")
 
@@ -15,7 +16,7 @@ class Images:
             f"/images/{collection}/{id}",
         )
 
-    def list_images(
+    def list(
         self,
         filter: str | None = None,
         order: str | None = None,
@@ -37,12 +38,14 @@ class Images:
             params=params,
         )
 
+    def download(self, id: str) -> bytes:
+        return self.client._request_bytes("GET", f"/raw/{id}")
+
 
 @app.command(help="query a page of image meta-data")
 def list(filters: str = "", ordering: str = "", page: int = 1, pagesize: int = 10):
-    cli = Images(create_client())
     print(
-        cli.list_images(
+        Images(create_client()).list(
             filter=filters,
             order=ordering,
             page=page,
@@ -53,5 +56,11 @@ def list(filters: str = "", ordering: str = "", page: int = 1, pagesize: int = 1
 
 @app.command(help="get an image by its id and collection")
 def get(collection: str, id: str):
-    cli = Images(create_client())
-    print(cli.get(collection, id))
+    print(Images(create_client()).get(collection, id))
+
+
+@app.command(help="download an image to a local path")
+def download(id: str, out: Path):
+    data = Images(create_client()).download(id)
+    with open(out, "wb") as f:
+        f.write(data)

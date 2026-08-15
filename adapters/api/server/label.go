@@ -6,7 +6,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	p "github.com/lejeunel/go-image-annotator/adapters/api/json/label"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
-	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
+	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 )
 
@@ -31,12 +31,9 @@ func (s *Server) DeleteLabelByName(w http.ResponseWriter, r *http.Request, name 
 }
 
 func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request, params ListLabelsParams) {
-	req := pag.PaginationParams{Page: 1, PageSize: s.Label.DefaultPageSize}
-	if p := params.Page; p != nil {
-		req.Page = *p
-	}
-	if p := params.PageSize; p != nil {
-		req.PageSize = *p
+	req := pa.PaginationParams{
+		PageSize: *params.PageSize,
+		Page:     *params.Page,
 	}
 	s.Label.List.Execute(r.Context(), req, p.NewListPresenter(w, s.Logger))
 }

@@ -14,16 +14,16 @@ import (
 
 func NewLabelInteractors(
 	repo infra.LabelRepo,
-	pageSize int,
+	defaultPageSize int,
+	maxPageSize int,
 	auth auth.Interface,
 ) lbl.Interactors {
 	return lbl.Interactors{
-		Find:            *find.New(repo),
-		Create:          *create.New(repo, create.WithAuth(auth)),
-		Delete:          *delete.New(repo, delete.WithAuth(auth)),
-		List:            *list.New(repo),
-		Update:          *update.New(repo),
-		FetchAll:        *fetchall.New(repo),
-		DefaultPageSize: pageSize,
+		Find:     *find.New(repo),
+		Create:   *create.New(repo, create.WithAuth(auth)),
+		Delete:   *delete.New(repo, delete.WithAuth(auth)),
+		List:     *list.New(repo, defaultPageSize, maxPageSize),
+		Update:   *update.New(repo),
+		FetchAll: *fetchall.New(repo),
 	}
 }

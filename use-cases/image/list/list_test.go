@@ -18,7 +18,7 @@ func SetupList() Interactor {
 	ov := q.NewOrderingConverter(q.WithOrderingField("ingested_at"))
 	repo := &fk.ImageRepo{}
 	st := &fk.ImageStore{}
-	return New(repo, fv, ov, st, 1, 1)
+	return New(repo, fv, ov, st, 1, 10)
 }
 
 func TestSanitizePaginationParams(t *testing.T) {
@@ -47,8 +47,8 @@ func TestQueryPaginationParams(t *testing.T) {
 	}
 	itr.Execute(r, p)
 	pg := repo.GotPagination
-	assert.Equal(t, int(pg.Page), int(r.Page), "page")
-	assert.Equal(t, pg.PageSize, r.PageSize, "page size")
+	assert.Equal(t, int(r.Page), int(pg.Page))
+	assert.Equal(t, r.PageSize, pg.PageSize)
 }
 
 func TestPaginationMetaData(t *testing.T) {

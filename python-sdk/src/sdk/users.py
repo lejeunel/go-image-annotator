@@ -14,5 +14,4 @@ class Users:
 
 @app.command(help="get current users's identity")
 def whoami():
-    cli = Users(create_client())
-    print(cli.whoami())
+    print(Users(create_client()).whoami())

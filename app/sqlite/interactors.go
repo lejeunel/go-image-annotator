@@ -39,7 +39,7 @@ func BuildInteractors(infra Infra, auth auth.Interface, logger slog.Logger, cfg 
 	archiveIngester := aig.New(imstore, imageIngester)
 
 	return itr.Interactors{
-		Label: NewLabelInteractors(infra.LabelRepo, cfg.DefaultPageSize, auth),
+		Label: NewLabelInteractors(infra.LabelRepo, cfg.DefaultPageSize, cfg.MaxPageSize, auth),
 		Collection: NewCollectionInteractors(
 			infra.DB,
 			infra.CollectionRepo,

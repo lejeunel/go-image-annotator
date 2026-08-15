@@ -46,7 +46,7 @@ func (p *PaginationParams) Sanitize(defaultPageSize int, maxPageSize int) {
 	if p.PageSize > maxPageSize {
 		p.PageSize = maxPageSize
 	}
-	if p.Page < 0 {
+	if p.Page <= 0 {
 		p.Page = 1
 	}
 }

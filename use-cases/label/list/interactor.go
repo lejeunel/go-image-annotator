@@ -9,10 +9,15 @@ import (
 
 type Interactor struct {
 	Repo
+	DefaultPageSize int
+	MaxPageSize     int
 }
 
 func (i *Interactor) Execute(ctx context.Context, r pag.PaginationParams, out OutputPort) {
 	errCtx := "listing labels"
+
+	r.Sanitize(i.DefaultPageSize, i.MaxPageSize)
+
 	found, err := i.Repo.List(r)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
@@ -36,8 +41,8 @@ func (i *Interactor) Execute(ctx context.Context, r pag.PaginationParams, out Ou
 
 type Option func(*Interactor)
 
-func New(r Repo, opts ...Option) *Interactor {
-	i := &Interactor{Repo: r}
+func New(r Repo, dps int, mps int, opts ...Option) *Interactor {
+	i := &Interactor{r, dps, mps}
 	for _, opt := range opts {
 		opt(i)
 	}
