@@ -54,9 +54,10 @@ type Image struct {
 	Collection string `json:"collection"`
 
 	// Id ID of the image
-	Id       string     `json:"id"`
-	Labels   *[]string  `json:"labels,omitempty"`
-	Polygons *[]Polygon `json:"polygons,omitempty"`
+	Id       string                  `json:"id"`
+	Labels   *[]string               `json:"labels,omitempty"`
+	Meta     *map[string]interface{} `json:"meta,omitempty"`
+	Polygons *[]Polygon              `json:"polygons,omitempty"`
 }
 
 // ImageIngestionResponse defines model for ImageIngestionResponse.

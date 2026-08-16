@@ -10,15 +10,15 @@ func BuildImageResponse(image im.Image) models.Image {
 		Id:         image.Id.String(),
 		Collection: image.Collection.Name,
 	}
-	labelsToAdd := []string{}
-	if image.Labels != nil {
+	if len(image.Labels) > 0 {
+		labelsToAdd := []string{}
 		for _, l := range image.Labels {
 			labelsToAdd = append(labelsToAdd, l.Label.Name)
 		}
 		response.Labels = &labelsToAdd
 	}
 
-	if image.BoundingBoxes != nil {
+	if len(image.BoundingBoxes) > 0 {
 		boxesToAdd := []models.BoundingBox{}
 		for _, b := range image.BoundingBoxes {
 			boxesToAdd = append(boxesToAdd,
@@ -30,7 +30,7 @@ func BuildImageResponse(image im.Image) models.Image {
 		response.BoundingBoxes = &boxesToAdd
 	}
 
-	if image.Polygons != nil {
+	if len(image.Polygons) > 0 {
 		polygonsToAdd := []models.Polygon{}
 		for _, poly := range image.Polygons {
 			points := []models.Point{}
@@ -44,6 +44,14 @@ func BuildImageResponse(image im.Image) models.Image {
 				})
 		}
 		response.Polygons = &polygonsToAdd
+	}
+
+	if len(image.Meta) > 0 {
+		toAdd := make(map[string]any)
+		for _, m := range image.Meta {
+			toAdd[m.Key] = m.Value
+		}
+		response.Meta = &toAdd
 	}
 
 	return response

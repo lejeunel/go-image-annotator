@@ -583,6 +583,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Polygon'
+        meta:
+          type: object
+          additionalProperties: {}
     NewImage:
       required:
         - data
