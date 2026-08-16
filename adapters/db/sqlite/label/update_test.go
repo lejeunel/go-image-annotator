@@ -3,7 +3,7 @@ package label
 import (
 	"testing"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	"github.com/stretchr/testify/assert"
 )

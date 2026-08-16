@@ -3,7 +3,7 @@ package user
 import (
 	"testing"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	roleRepo "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
 	r "github.com/lejeunel/go-image-annotator/entities/role"
 	u "github.com/lejeunel/go-image-annotator/entities/user"

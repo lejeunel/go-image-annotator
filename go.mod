@@ -18,6 +18,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/wagslane/go-password-validator v0.3.0
 	github.com/yuin/goldmark v1.8.4
+	go.tomakado.io/dumbql v0.6.0
 	gopkg.in/yaml.v3 v3.0.1
 	maragu.dev/gomponents v1.2.0
 	modernc.org/sqlite v1.51.0
@@ -45,7 +46,6 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	go.tomakado.io/dumbql v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
@@ -56,4 +56,4 @@ require (
 	modernc.org/memory v1.11.0 // indirect
 )
 
-replace go.tomakado.io/dumbql => github.com/lejeunel/dumbql v0.0.0-20260812125202-f870a291e978
+replace go.tomakado.io/dumbql => github.com/lejeunel/dumbql v0.0.0-20260816131337-37031656d075

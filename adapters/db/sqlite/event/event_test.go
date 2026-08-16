@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	ur "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	ev "github.com/lejeunel/go-image-annotator/entities/event"
 	ta "github.com/lejeunel/go-image-annotator/entities/task"

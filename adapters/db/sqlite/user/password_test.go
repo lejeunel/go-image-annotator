@@ -3,7 +3,7 @@ package user
 import (
 	"testing"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	"github.com/stretchr/testify/assert"
 )
 

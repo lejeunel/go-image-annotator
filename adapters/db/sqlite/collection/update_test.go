@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	gr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"

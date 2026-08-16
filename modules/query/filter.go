@@ -2,34 +2,38 @@ package query
 
 import (
 	"fmt"
-	"strings"
 
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
-	s "github.com/lejeunel/go-image-annotator/shared/sql"
 	"go.tomakado.io/dumbql"
+	"go.tomakado.io/dumbql/query"
 	"go.tomakado.io/dumbql/schema"
 )
 
 type FilterStrParser interface {
-	Parse(string) (s.SQLizer, error)
+	Parse(string) (query.Expr, error)
 	Validate(query string) error
+	ParseToSql(string) (*SQLizer, error)
+}
+
+type FilterStrSQLParser interface {
+	ParseToSql(string) (*SQLizer, error)
 }
 
 type FilterParser struct {
-	Schema            schema.Schema
-	FieldNameMappings map[string]string
+	Schema       schema.Schema
+	FieldRenamer *query.FieldRenamer
 }
 
 type FilterParserOption func(*FilterParser)
 
-func WithFieldNameMapping(source, destination string) FilterParserOption {
+func WithRenamer(renamer query.FieldRenamer) FilterParserOption {
 	return func(p *FilterParser) {
-		p.FieldNameMappings[source] = destination
+		p.FieldRenamer = &renamer
 	}
 }
 
 func NewFilterParser(schm schema.Schema, opts ...FilterParserOption) FilterParser {
-	p := &FilterParser{Schema: schm, FieldNameMappings: make(map[string]string)}
+	p := &FilterParser{Schema: schm}
 	for _, opt := range opts {
 		opt(p)
 	}
@@ -46,28 +50,27 @@ func (v FilterParser) Validate(query string) error {
 	return err
 }
 
-// TODO this should be done directly on the parsed expression, and
-// not the sql string.
-type MappedSQLizer struct {
-	s.SQLizer
-	Mappings map[string]string
-}
-
-func (m MappedSQLizer) ToSql() (string, []any, error) {
-	sql, args, err := m.SQLizer.ToSql()
-	if err != nil {
-		return "", nil, err
-	}
-	for src, dst := range m.Mappings {
-		sql = strings.ReplaceAll(sql, src+" ", dst+" ")
-	}
-	return sql, args, nil
-}
-
-func (v FilterParser) Parse(query string) (s.SQLizer, error) {
-	expr, err := dumbql.Parse(query)
+func (v FilterParser) Parse(q string) (query.Expr, error) {
+	expr, err := dumbql.Parse(q)
 	if err != nil {
 		return nil, err
 	}
-	return MappedSQLizer{expr, v.FieldNameMappings}, nil
+
+	if v.FieldRenamer != nil {
+		v.FieldRenamer.Rename(expr)
+	}
+	return expr, nil
+}
+
+func (v FilterParser) ParseToSql(q string) (*SQLizer, error) {
+	expr, err := v.Parse(q)
+	if err != nil {
+		return nil, err
+	}
+	sql, args, err := expr.ToSql()
+	if err != nil {
+		return nil, err
+	}
+	sqlizer := NewSQLizer(sql, args)
+	return &sqlizer, nil
 }

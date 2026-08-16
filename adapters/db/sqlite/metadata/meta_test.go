@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/jmoiron/sqlx"
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	cr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	ir "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fk "github.com/lejeunel/go-image-annotator/fakes"

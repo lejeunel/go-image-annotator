@@ -7,7 +7,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	ro "github.com/lejeunel/go-image-annotator/entities/role"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )

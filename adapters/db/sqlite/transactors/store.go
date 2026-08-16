@@ -7,17 +7,18 @@ import (
 	im "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	m "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/metadata"
 	s "github.com/lejeunel/go-image-annotator/modules/image-store"
+	qu "github.com/lejeunel/go-image-annotator/modules/query"
 )
 
 type StoreTransactor struct {
 	db *sqlx.DB
-	im.FilterStrParser
+	qu.FilterStrSQLParser
 	im.OrderStrParser
 }
 
 func NewStoreTransactor(
 	db *sqlx.DB,
-	fp im.FilterStrParser,
+	fp qu.FilterStrSQLParser,
 	op im.OrderStrParser,
 ) *StoreTransactor {
 	return &StoreTransactor{db, fp, op}
@@ -33,7 +34,7 @@ func (u *StoreTransactor) RunInTx(
 	defer tx.Rollback()
 
 	stores := s.Repos{
-		ImageRepo:      im.NewImageRepo(tx, u.FilterStrParser, u.OrderStrParser),
+		ImageRepo:      im.NewImageRepo(tx, u.FilterStrSQLParser, u.OrderStrParser),
 		CollectionRepo: clc.NewCollectionRepo(tx),
 		AnnotationRepo: an.NewAnnotationRepo(tx),
 		MetaRepo:       m.NewMetaRepo(tx),

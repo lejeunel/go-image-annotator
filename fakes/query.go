@@ -2,7 +2,7 @@ package fake
 
 import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	ss "github.com/lejeunel/go-image-annotator/shared/sql"
+	qu "github.com/lejeunel/go-image-annotator/modules/query"
 )
 
 type QueryStrValidator struct {
@@ -18,26 +18,18 @@ func (c *QueryStrValidator) Validate(q string) error {
 	return nil
 }
 
-type SQLizer struct {
+type FilterStrParser struct {
+	Err  error
 	sql  string
 	args []any
-	Err  error
 }
 
-func (s SQLizer) ToSql() (string, []any, error) {
-	return s.sql, s.args, s.Err
-}
-
-type FilterStrParser struct {
-	Err error
-	SQLizer
-}
-
-func (p *FilterStrParser) Parse(q string) (ss.SQLizer, error) {
+func (p FilterStrParser) ParseToSql(q string) (*qu.SQLizer, error) {
 	if p.Err != nil {
 		return nil, p.Err
 	}
-	return p.SQLizer, nil
+	sqlizer := qu.NewSQLizer(p.sql, p.args)
+	return &sqlizer, nil
 }
 
 type OrderStrParser struct {

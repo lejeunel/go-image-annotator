@@ -3,7 +3,7 @@ package collection
 import (
 	"testing"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	grr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	grp "github.com/lejeunel/go-image-annotator/entities/group"

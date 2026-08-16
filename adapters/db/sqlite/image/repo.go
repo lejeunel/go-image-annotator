@@ -8,6 +8,7 @@ import (
 	"iter"
 	"time"
 
+	"go.tomakado.io/dumbql/query"
 	"go.tomakado.io/dumbql/schema"
 
 	sq "github.com/Masterminds/squirrel"
@@ -17,17 +18,22 @@ import (
 	qu "github.com/lejeunel/go-image-annotator/modules/query"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
-	ss "github.com/lejeunel/go-image-annotator/shared/sql"
 )
 
 func MakeQueryParsers() (qu.FilterParser, qu.OrderingStrConverter) {
-	b := schema.NewSchemaBuilder()
-	b.AddField("collection", schema.Is[string]())
-	b.AddField("ingested_at", schema.Is[string]())
+	sb := schema.NewSchemaBuilder()
+	sb.AddField("collection", schema.Is[string]())
+	sb.AddField("ingested_at", schema.Is[string]())
+	sb.AddRegExpField(`^meta\..*$`, schema.Any(schema.Is[float64](), schema.Is[string](), schema.Is[bool]()))
+
+	rb := query.NewRenamerBuilder()
+	rb.Add(`\bcollection\b`, `collections.name`)
+	rb.Add(`\bingested_at\b`, `i.ingested_at`)
+	rb.Add(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
+
 	filteringStrConverter := qu.NewFilterParser(
-		b.Build(),
-		qu.WithFieldNameMapping("collection", "collections.name"),
-		// qu.WithFieldNameMapping("ingested_at", "i.ingested_at"),
+		sb.Build(),
+		qu.WithRenamer(rb.Build()),
 	)
 	orderingStrConverter := qu.NewOrderingConverter(
 		qu.WithOrderingField("collection"),
@@ -36,21 +42,21 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderingStrConverter) {
 	return filteringStrConverter, orderingStrConverter
 }
 
-type FilterStrParser interface {
-	Parse(string) (ss.SQLizer, error)
-}
-
 type OrderStrParser interface {
 	Parse(string) (im.OrderingArgs, error)
 }
 
+type FilterParser interface {
+	ParseToSql(q string) (*qu.SQLizer, error)
+}
+
 type ImageRepo struct {
 	Db adb.Querier
-	FilterStrParser
+	FilterParser
 	OrderStrParser
 }
 
-func NewImageRepo(db adb.Querier, fp FilterStrParser, op OrderStrParser) ImageRepo {
+func NewImageRepo(db adb.Querier, fp FilterParser, op OrderStrParser) ImageRepo {
 	return ImageRepo{db, fp, op}
 }
 
@@ -79,23 +85,23 @@ func (r ImageRepo) AddToCollection(imageId im.ImageId, collection clc.Collection
 }
 
 func (r ImageRepo) Count(f im.FilterStr) (*int64, error) {
+	errCtx := fmt.Errorf("counting using filters %v", f)
 	q := sq.StatementBuilder.Select("COUNT(*)")
 	q = q.From("images_collections AS ic").Join(
 		"images AS i ON ic.image_id=i.id").Join(
-		"collections ON ic.collection_id=collections.id")
+		"collections ON ic.collection_id=collections.id").LeftJoin(
+		"metadata AS m ON ic.image_id=m.image_id AND ic.collection_id=m.collection_id")
 
 	if f != "" {
-		expr, err := r.FilterStrParser.Parse(f)
+		sqlizer, err := r.FilterParser.ParseToSql(f)
 		if err != nil {
-			return nil, fmt.Errorf("parsing filtering string %v: %v: %w", f, err, e.ErrInternal)
+			return nil, err
 		}
-		q = q.Where(expr)
-
+		q = q.Where(*sqlizer)
 	}
-
 	sql, args, err := q.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building query from filters %v: %v: %w", f, err, e.ErrInternal)
+		return nil, fmt.Errorf("%v: %w", errCtx, e.ErrInternal)
 	}
 
 	var count int64
@@ -363,16 +369,16 @@ func (r ImageRepo) makeBaseSelectQuery(
 		"ic.image_id,ic.collection_id,i.ingested_at,collections.name").From(
 		"images_collections AS ic").Join(
 		"images AS i ON ic.image_id=i.id").Join(
-		"collections ON ic.collection_id=collections.id")
+		"collections ON ic.collection_id=collections.id").LeftJoin(
+		"metadata AS m ON ic.image_id=m.image_id AND ic.collection_id=m.collection_id")
 
 	if f != "" {
-		expr, err := r.FilterStrParser.Parse(f)
+		sqlizer, err := r.FilterParser.ParseToSql(f)
 		if err != nil {
 			return nil, err
 		}
-		q = q.Where(expr)
+		q = q.Where(*sqlizer)
 		return &q, nil
-
 	}
 
 	return &q, nil

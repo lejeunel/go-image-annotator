@@ -2,14 +2,13 @@ package image
 
 import (
 	"github.com/jmoiron/sqlx"
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	c "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	sc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	st "github.com/lejeunel/go-image-annotator/shared/testing"
-	"time"
 )
 
 func BaseSetup() (ImageRepo, *sqlx.DB) {
@@ -94,61 +93,4 @@ func CreateImageInCollection(repos ScrollerRepos,
 	repos.ImageRepo.AddImage(image.Id, []byte(image.Id.String()), im.Specs{})
 	repos.ImageRepo.AddToCollection(image.Id, image.Collection.Name)
 	return image
-}
-
-func IdFromInt(i int) im.ImageId {
-	id, err := im.NewImageIdFromString(st.FakeUUIDFromInt(i))
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
-
-func MustParseTime(s string) time.Time {
-	t, err := time.Parse("2006-01-02", s)
-	if err != nil {
-		panic(err)
-	}
-	return t
-}
-
-type TestIngestionPayload struct {
-	ImageId       im.ImageId
-	Collection    string
-	IngestionTime time.Time
-}
-type FilterTest struct {
-	name        string
-	images      []TestIngestionPayload
-	Filter      string
-	Order       string
-	WantFirstId im.ImageId
-	WantCount   int
-}
-
-func findCollectionByName(cs []clc.Collection, name string) *clc.Collection {
-	for _, c := range cs {
-		if c.Name == name {
-			return &c
-		}
-	}
-	return nil
-}
-
-func InitFilterTest(imr ImageRepo, cr sc.CollectionRepo, payloads []TestIngestionPayload) {
-	var createdCollections []clc.Collection
-	for _, p := range payloads {
-		collection := findCollectionByName(createdCollections, p.Collection)
-		if collection == nil {
-			c := clc.NewCollection(clc.NewCollectionId(), p.Collection)
-			cr.Create(c)
-			createdCollections = append(createdCollections, c)
-			collection = &c
-		}
-
-		image := im.NewImage(p.ImageId, *collection)
-		imr.AddImage(image.Id, []byte(image.Id.String()), im.Specs{IngestedAt: p.IngestionTime})
-		imr.AddToCollection(image.Id, collection.Name)
-	}
-
 }

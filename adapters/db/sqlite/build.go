@@ -86,17 +86,6 @@ func ApplyMigrations(ctx context.Context, db *sql.DB, direction string) error {
 	return nil
 }
 
-func NewInMemory() *sqlx.DB {
-	db, err := sqlx.Open("sqlite", ":memory:?cache=shared&_pragma=foreign_keys(1)")
-	if err != nil {
-		panic(err)
-	}
-	if err := ApplyMigrations(context.Background(), db.DB, "up"); err != nil {
-		panic(err)
-	}
-	return db
-}
-
 func NewSQLiteDB(path string) *sqlx.DB {
 	db := NewSQLiteConnection(path)
 	if err := ApplyMigrations(context.Background(), db.DB, "up"); err != nil {
