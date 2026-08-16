@@ -73,6 +73,24 @@ var tests = []FilterTest{
 		IdFromInt(0),
 		1,
 	},
+	{"order by metadata date field",
+		[]TestIngestionPayload{
+			{IdFromInt(0), "first-collection", time.Now(), map[string]any{"captured_at": "2026-08-30"}},
+			{IdFromInt(1), "first-collection", time.Now(), map[string]any{"captured_at": "2026-08-01"}}},
+		"",
+		"meta.captured_at",
+		IdFromInt(1),
+		2,
+	},
+	{"filter by metadata bool value with special char in name",
+		[]TestIngestionPayload{
+			{IdFromInt(0), "first-collection", time.Now(), map[string]any{"is-active": true}},
+			{IdFromInt(1), "first-collection", time.Now(), nil}},
+		"meta.is-active",
+		"",
+		IdFromInt(0),
+		1,
+	},
 }
 
 func TestFiltering(t *testing.T) {

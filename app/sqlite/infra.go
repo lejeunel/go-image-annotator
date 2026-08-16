@@ -31,8 +31,8 @@ type Infra struct {
 	ImageFileStore  fs.FileStore
 	TempFileStore   fs.LocalFileStore
 	PolicyFileStore fs.FileStore
-	qu.FilterStrParser
-	qu.OrderingStrConverter
+	qu.IFilterParser
+	qu.OrderParser
 	*sqlx.DB
 }
 

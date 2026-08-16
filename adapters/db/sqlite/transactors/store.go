@@ -12,13 +12,13 @@ import (
 
 type StoreTransactor struct {
 	db *sqlx.DB
-	qu.FilterStrSQLParser
+	qu.FilterSQLizer
 	im.OrderStrParser
 }
 
 func NewStoreTransactor(
 	db *sqlx.DB,
-	fp qu.FilterStrSQLParser,
+	fp qu.FilterSQLizer,
 	op im.OrderStrParser,
 ) *StoreTransactor {
 	return &StoreTransactor{db, fp, op}
@@ -34,7 +34,7 @@ func (u *StoreTransactor) RunInTx(
 	defer tx.Rollback()
 
 	stores := s.Repos{
-		ImageRepo:      im.NewImageRepo(tx, u.FilterStrSQLParser, u.OrderStrParser),
+		ImageRepo:      im.NewImageRepo(tx, u.FilterSQLizer, u.OrderStrParser),
 		CollectionRepo: clc.NewCollectionRepo(tx),
 		AnnotationRepo: an.NewAnnotationRepo(tx),
 		MetaRepo:       m.NewMetaRepo(tx),

@@ -7,11 +7,11 @@ import (
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
-type FilterQueryStrValidator interface {
+type FilterValidator interface {
 	Validate(im.FilterStr) error
 }
 
-type OrderingStrValidator interface {
+type OrderingValidator interface {
 	Validate(im.OrderStr) error
 }
 
@@ -21,8 +21,8 @@ type ImageStore interface {
 
 type Interactor struct {
 	Repo
-	FilterQueryStrValidator
-	OrderingStrValidator
+	FilterValidator
+	OrderingValidator
 	ImageStore
 	DefaultPageSize int
 	MaxPageSize     int
@@ -30,8 +30,8 @@ type Interactor struct {
 
 func New(
 	r Repo,
-	fv FilterQueryStrValidator,
-	ov OrderingStrValidator,
+	fv FilterValidator,
+	ov OrderingValidator,
 	s ImageStore,
 	dps int,
 	mps int,
@@ -45,14 +45,14 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 	r.PaginationParams.Sanitize(i.DefaultPageSize, i.MaxPageSize)
 
 	if r.FilterStr != "" {
-		if err := i.FilterQueryStrValidator.Validate(r.FilterStr); err != nil {
+		if err := i.FilterValidator.Validate(r.FilterStr); err != nil {
 			out.Error(fmt.Errorf("%v: validating query %v: %w", errCtx, r.FilterStr, err))
 			return
 		}
 	}
 
 	if r.OrderStr != "" {
-		if err := i.OrderingStrValidator.Validate(r.OrderStr); err != nil {
+		if err := i.OrderingValidator.Validate(r.OrderStr); err != nil {
 			out.Error(fmt.Errorf("%v: validating ordering %v: %w", errCtx, r.OrderStr, err))
 			return
 		}

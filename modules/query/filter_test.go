@@ -42,7 +42,7 @@ func TestParseWithJSONExtractMapping(t *testing.T) {
 	sb := schema.NewSchemaBuilder()
 	sb.AddRegExpField(`^meta\..*$`, schema.Is[string]())
 	rb := query.NewRenamerBuilder()
-	rb.Add(`\bmeta\.(.*)\b`, `json_extract(meta_table.meta, '$1')`)
+	rb.Add(`\bmeta\.(.*)\b`, `json_extract(metadata.meta, '$1')`)
 	p := NewFilterParser(sb.Build(), WithRenamer(rb.Build()))
 
 	expr, err := p.Parse("meta.name:\"a-name\"")

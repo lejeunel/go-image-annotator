@@ -20,7 +20,7 @@ import (
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
-func MakeQueryParsers() (qu.FilterParser, qu.OrderingStrConverter) {
+func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 	sb := schema.NewSchemaBuilder()
 	sb.AddField("collection", schema.Is[string]())
 	sb.AddField("ingested_at", schema.Is[string]())
@@ -31,15 +31,19 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderingStrConverter) {
 	rb.Add(`\bingested_at\b`, `i.ingested_at`)
 	rb.Add(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
 
-	filteringStrConverter := qu.NewFilterParser(
+	filterParser := qu.NewFilterParser(
 		sb.Build(),
 		qu.WithRenamer(rb.Build()),
 	)
-	orderingStrConverter := qu.NewOrderingConverter(
-		qu.WithOrderingField("collection"),
-		qu.WithOrderingField("ingested_at"),
-	)
-	return filteringStrConverter, orderingStrConverter
+	ob := qu.NewOrderParserBuilder()
+	ob.AddField("collection")
+	ob.AddField("ingested_at")
+	ob.AddRegExpField(`^meta\..*$`)
+	ob.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
+
+	orderParser := ob.Build()
+
+	return filterParser, orderParser
 }
 
 type OrderStrParser interface {

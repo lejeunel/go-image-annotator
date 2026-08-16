@@ -56,4 +56,4 @@ require (
 	modernc.org/memory v1.11.0 // indirect
 )
 
-replace go.tomakado.io/dumbql => github.com/lejeunel/dumbql v0.0.0-20260816131337-37031656d075
+replace go.tomakado.io/dumbql => github.com/lejeunel/dumbql v0.0.0-20260816161820-6a1f1a8d90f6

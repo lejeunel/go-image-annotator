@@ -10,7 +10,7 @@ import (
 )
 
 func Setup() Interactor {
-	return New(&fk.ImageRepo{}, &fk.QueryStrValidator{}, &fk.QueryStrValidator{})
+	return New(&fk.ImageRepo{}, &fk.FilterValidator{}, &fk.FilterValidator{})
 
 }
 
@@ -38,8 +38,8 @@ func TestNonExistingCurrentImageExistsShouldFail(t *testing.T) {
 func TestErrOnFilteringStrValidation(t *testing.T) {
 	p := &FakePresenter{}
 	itr := Setup()
-	v := fk.QueryStrValidator{Err: e.ErrValidation}
-	itr.FilterQueryStrValidator = &v
+	v := fk.FilterValidator{Err: e.ErrValidation}
+	itr.FilterValidator = &v
 	queryStr := "collection:\"my-collection\""
 	itr.Execute(t.Context(), Request{CurrentImageId: im.NewImageId().String(),
 		FilterStr: queryStr}, p)
@@ -50,8 +50,8 @@ func TestErrOnFilteringStrValidation(t *testing.T) {
 func TestErrOnOrderingStrValidation(t *testing.T) {
 	p := &FakePresenter{}
 	itr := Setup()
-	v := fk.QueryStrValidator{Err: e.ErrValidation}
-	itr.OrderingStrValidator = &v
+	v := fk.FilterValidator{Err: e.ErrValidation}
+	itr.OrderingValidator = &v
 	orderStr := "ingested_at:desc"
 	itr.Execute(t.Context(), Request{CurrentImageId: im.NewImageId().String(),
 		OrderStr: orderStr}, p)

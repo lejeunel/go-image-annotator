@@ -29,7 +29,7 @@ func BuildInteractors(infra Infra, auth auth.Interface, logger slog.Logger, cfg 
 			AnnotationRepo: infra.AnnotationRepo,
 			MetaRepo:       infra.MetaRepo,
 		},
-		tra.NewStoreTransactor(infra.DB, infra.FilterStrParser, infra.OrderStrParser),
+		tra.NewStoreTransactor(infra.DB, infra.IFilterParser, infra.OrderStrParser),
 		infra.ImageFileStore)
 	eventlogger := el.New(infra.EventRepo, el.WithMaxNumTasksPerUser(cfg.MaxNumTasksPerUser))
 
@@ -61,8 +61,8 @@ func BuildInteractors(infra Infra, auth auth.Interface, logger slog.Logger, cfg 
 			infra.TempFileStore,
 			imageIngester,
 			archiveIngester,
-			infra.FilterStrParser,
-			infra.OrderingStrConverter,
+			infra.IFilterParser,
+			infra.OrderParser,
 			int64(cfg.MaxArchiveMB),
 			eventlogger,
 			logger,

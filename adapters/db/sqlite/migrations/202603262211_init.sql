@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS images_collections (
   collection_id varchar(36) REFERENCES collections(id),
   PRIMARY KEY (image_id, collection_id)
 );
+CREATE INDEX idx_images_collections_collection
+ON images_collections(collection_id, image_id);
 
 CREATE TABLE IF NOT EXISTS annotations (
   id varchar(36),

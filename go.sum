@@ -58,8 +58,8 @@ github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 h1:SOEGU9fKiNWd/HOJuq
 github.com/lann/builder v0.0.0-20180802200727-47ae307949d0/go.mod h1:dXGbAdH5GtBTC4WfIxhKZfyBF/HBFgRZSWwZ9g/He9o=
 github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 h1:P6pPBnrTSX3DEVR4fDembhRWSsG5rVo6hYhAB/ADZrk=
 github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0/go.mod h1:vmVJ0l/dxyfGW6FmdpVm2joNMFikkuWg0EoCKLGUMNw=
-github.com/lejeunel/dumbql v0.0.0-20260816131337-37031656d075 h1:y2dmHxVbR32NG1j3UAfg98NQOoxz5/+Kdu/kgla0FVA=
-github.com/lejeunel/dumbql v0.0.0-20260816131337-37031656d075/go.mod h1:88zWYsv7BYJvOatN/Dubbm0w5wC6Aug2+Z2ON1Ye1xA=
+github.com/lejeunel/dumbql v0.0.0-20260816161820-6a1f1a8d90f6 h1:atCTKm0WpZZKKMig7n9w42+KKCzEOhQrPuq3Ewrn6J4=
+github.com/lejeunel/dumbql v0.0.0-20260816161820-6a1f1a8d90f6/go.mod h1:88zWYsv7BYJvOatN/Dubbm0w5wC6Aug2+Z2ON1Ye1xA=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
 github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
 github.com/markbates/goth v1.82.0 h1:8j/c34AjBSTNzO7zTsOyP5IYCQCMBTRBHAbBt/PI0bQ=

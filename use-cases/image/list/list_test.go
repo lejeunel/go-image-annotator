@@ -15,7 +15,7 @@ func SetupList() Interactor {
 	b := schema.NewSchemaBuilder()
 	b.AddField("collection", schema.Is[string]())
 	fv := q.NewFilterParser(b.Build())
-	ov := q.NewOrderingConverter(q.WithOrderingField("ingested_at"))
+	ov := q.NewOrderParserBuilder().AddField("ingested_at").Build()
 	repo := &fk.ImageRepo{}
 	st := &fk.ImageStore{}
 	return New(repo, fv, ov, st, 1, 10)
@@ -69,8 +69,8 @@ func TestPaginationMetaData(t *testing.T) {
 func TestInvalidFilterQueryShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := SetupList()
-	fv := fk.QueryStrValidator{Err: e.ErrValidation}
-	itr.FilterQueryStrValidator = &fv
+	fv := fk.FilterValidator{Err: e.ErrValidation}
+	itr.FilterValidator = &fv
 	query := "i-dont-know-what-to-type-here"
 	r := Request{FilterStr: query}
 	itr.Execute(r, p)
@@ -81,8 +81,8 @@ func TestInvalidFilterQueryShouldFail(t *testing.T) {
 func TestInvalidOrderingStrShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := SetupList()
-	ov := fk.QueryStrValidator{Err: e.ErrValidation}
-	itr.OrderingStrValidator = &ov
+	ov := fk.FilterValidator{Err: e.ErrValidation}
+	itr.OrderingValidator = &ov
 	query := "i-dont-know-what-to-type-here"
 	r := Request{OrderStr: query}
 	itr.Execute(r, p)

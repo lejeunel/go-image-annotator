@@ -9,13 +9,13 @@ import (
 	"go.tomakado.io/dumbql/schema"
 )
 
-type FilterStrParser interface {
+type IFilterParser interface {
 	Parse(string) (query.Expr, error)
 	Validate(query string) error
 	ParseToSql(string) (*SQLizer, error)
 }
 
-type FilterStrSQLParser interface {
+type FilterSQLizer interface {
 	ParseToSql(string) (*SQLizer, error)
 }
 

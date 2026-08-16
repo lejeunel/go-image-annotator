@@ -9,18 +9,18 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
-type FilterQueryStrValidator interface {
+type FilterValidator interface {
 	Validate(im.FilterStr) error
 }
 
-type OrderingStrValidator interface {
+type OrderingValidator interface {
 	Validate(im.OrderStr) error
 }
 
 type Interactor struct {
 	ImageRepo
-	FilterQueryStrValidator
-	OrderingStrValidator
+	FilterValidator
+	OrderingValidator
 }
 
 type Interface interface {
@@ -29,8 +29,8 @@ type Interface interface {
 
 func New(
 	ir ImageRepo,
-	fv FilterQueryStrValidator,
-	ov OrderingStrValidator,
+	fv FilterValidator,
+	ov OrderingValidator,
 ) Interactor {
 	return Interactor{ir, fv, ov}
 }
@@ -55,14 +55,14 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	}
 	if r.FilterStr != "" {
-		if err := i.FilterQueryStrValidator.Validate(r.FilterStr); err != nil {
+		if err := i.FilterValidator.Validate(r.FilterStr); err != nil {
 			out.Error(fmt.Errorf("%v: validating query %v: %w", errCtx, r.FilterStr, err))
 			return
 		}
 	}
 
 	if r.OrderStr != "" {
-		if err := i.OrderingStrValidator.Validate(r.OrderStr); err != nil {
+		if err := i.OrderingValidator.Validate(r.OrderStr); err != nil {
 			out.Error(fmt.Errorf("%v: validating ordering %v: %w", errCtx, r.OrderStr, err))
 			return
 		}

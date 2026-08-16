@@ -5,12 +5,12 @@ import (
 	qu "github.com/lejeunel/go-image-annotator/modules/query"
 )
 
-type QueryStrValidator struct {
+type FilterValidator struct {
 	Err error
 	Got string
 }
 
-func (c *QueryStrValidator) Validate(q string) error {
+func (c *FilterValidator) Validate(q string) error {
 	c.Got = q
 	if c.Err != nil {
 		return c.Err
