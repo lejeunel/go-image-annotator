@@ -14,7 +14,7 @@
                     aria-label="filter"
                     type="text"
                     id="filterInput"
-                    name="filter"
+                    name="{{.FilterQueryArgName}}"
                     placeholder="Filter"
                     autofocus="true"
                     class="bg-surface 
@@ -40,7 +40,7 @@
                     <div class="relative">
                       <input
                         aria-label="order"
-                        name="order"
+                        name="{{.OrderingQueryArgName}}"
                         type="text"
                         id="orderInput"
                         placeholder="Order"

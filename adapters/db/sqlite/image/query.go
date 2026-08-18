@@ -84,7 +84,7 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 	ob.AddField("ingested_at")
 	ob.AddField("collection")
 	ob.AddRegExpField(`^meta\..*$`)
-	ob.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
+	ob.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(meta, '$.$1')`)
 
 	orderParser := ob.Build()
 

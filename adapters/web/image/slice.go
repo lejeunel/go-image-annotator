@@ -38,7 +38,10 @@ func NewSlicePresenter(
 }
 
 func (p SlicePresenter) SuccessListImages(r list.Response) {
-	p.SetPagination(r.Pagination, rt.SliceUrl)
+	baseURL := rt.AddQueryParams(rt.SliceUrl,
+		rt.FilterQueryArgName, r.FilterStr,
+		rt.OrderingQueryArgName, r.OrderStr)
+	p.SetPagination(r.Pagination, baseURL.String())
 	for _, im := range r.Images {
 		p.AddRow(makeImageRow(im, MakeAnnotateImageURLFunc(im, p.FilterStr, p.OrderStr)))
 	}
@@ -51,8 +54,8 @@ func (s *Server) Slice(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
-	filters := r.FormValue("filter")
-	ordering := r.FormValue("order")
+	filters := r.FormValue(rt.FilterQueryArgName)
+	ordering := r.FormValue(rt.OrderingQueryArgName)
 	s.ListItr.Execute(list.Request{FilterStr: filters,
 		OrderStr: ordering}, NewSlicePresenter(w, s.PageBuilder, filters, ordering))
 }

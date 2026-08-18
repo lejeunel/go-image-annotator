@@ -25,7 +25,9 @@ var detectOs string
 var queryModal string
 
 type QueryModalData struct {
-	SubmitURL string
+	SubmitURL            string
+	FilterQueryArgName   string
+	OrderingQueryArgName string
 }
 
 type PageBuilder struct {
@@ -197,7 +199,9 @@ func (b *PageBuilder) Render(w io.Writer) {
 		&queryBuf,
 		"query",
 		QueryModalData{
-			SubmitURL: rt.SliceUrl,
+			SubmitURL:            rt.SliceUrl,
+			FilterQueryArgName:   rt.FilterQueryArgName,
+			OrderingQueryArgName: rt.OrderingQueryArgName,
 		}); err != nil {
 		Text(err.Error()).Render(w)
 		return

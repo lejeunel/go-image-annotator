@@ -46,7 +46,8 @@ func (p ListImagesPresenter) SuccessReadImage(image im.Image) {
 }
 
 func (p ListImagesPresenter) SuccessListImages(r list.Response) {
-	baseURL := rt.AddQueryParams(rt.ImagesUrl, rt.CollectionArgName, p.collection)
+	baseURL := rt.AddQueryParams(rt.ImagesUrl,
+		rt.CollectionArgName, p.collection)
 	p.SetPagination(r.Pagination, baseURL.String())
 	ingestUrl := rt.AddQueryParams(ingestPanelUrl, rt.CollectionArgName, p.collection)
 	p.PaginatedListBuilder.AddCreationButton("Ingest", ingestUrl.String(), ingestTargetDiv)

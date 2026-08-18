@@ -28,7 +28,9 @@ func NewImageRepo(db adb.Querier, fp FilterParser, op OrderStrParser) ImageRepo 
 type BaseRow struct {
 	ImageId        im.ImageId         `db:"image_id"`
 	CollectionName clc.CollectionName `db:"collection"`
+	CollectionId   clc.CollectionId   `db:"collection_id"`
 	IngestedAt     time.Time          `db:"ingested_at"`
+	Meta           *string            `db:"meta"`
 }
 
 type AdjacencyRow struct {
@@ -301,6 +303,7 @@ func (r ImageRepo) makeBaseSelectQuery() sq.SelectBuilder {
 		"i.id AS image_id",
 		"collections.name AS collection",
 		"i.ingested_at AS ingested_at",
+		"m.meta AS meta",
 	).From(
 		"images_collections AS ic").Join(
 		"images AS i ON ic.image_id=i.id").Join(
@@ -372,8 +375,8 @@ func (r ImageRepo) GetAdjacent(
 
 	// compute adjacencies
 	adj := sq.StatementBuilder.Select(
-		"image_id AS image_id",
-		"collection AS collection",
+		"image_id",
+		"collection",
 		"ingested_at",
 		windowExprs.prevId,
 		windowExprs.prevCollection,
@@ -383,8 +386,8 @@ func (r ImageRepo) GetAdjacent(
 
 	// remove current image/collection from adjacency list
 	current := sq.StatementBuilder.Select(
-		"image_id AS image_id",
-		"collection AS collection",
+		"image_id",
+		"collection",
 		"ingested_at",
 		"prev_id",
 		"prev_collection",

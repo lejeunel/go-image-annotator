@@ -84,6 +84,8 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 			TotalRecords: *count,
 			TotalPages:   (*count + int64(r.PageSize) - 1) / int64(r.PageSize),
 		},
+		FilterStr: r.FilterStr,
+		OrderStr:  r.OrderStr,
 	}
 
 	out.SuccessListImages(response)

@@ -210,6 +210,20 @@ var adjTests = []AdjTest{
 		st.IdFromInt(2),
 		"another-collection",
 	},
+	{"order by meta",
+		[]AdjTestPayload{
+			{*st.IdFromInt(0), "a-collection", time.Now(), []m.MetaData{{Key: "captured-at", Value: time.Now()}}},
+			{*st.IdFromInt(1), "a-collection", time.Now(), []m.MetaData{{Key: "captured-at", Value: time.Now()}}},
+		},
+		"",
+		"meta.captured-at:desc",
+		*st.IdFromInt(1),
+		"a-collection",
+		nil,
+		"",
+		st.IdFromInt(0),
+		"a-collection",
+	},
 }
 
 func TestAdjacency(t *testing.T) {

@@ -14,4 +14,6 @@ type Request struct {
 type Response struct {
 	Images     []im.Image
 	Pagination pa.Pagination
+	im.FilterStr
+	im.OrderStr
 }
