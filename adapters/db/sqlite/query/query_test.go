@@ -92,6 +92,15 @@ var queryTests = []QueryTest{
 		*st.IdFromInt(0),
 		1,
 	},
+	{"order by collection",
+		[]QueryTestPayload{
+			{*st.IdFromInt(0), "collection-v1", time.Now(), nil},
+			{*st.IdFromInt(1), "collection-v2", time.Now(), nil}},
+		"",
+		"collection:desc",
+		*st.IdFromInt(1),
+		2,
+	},
 }
 
 func TestFiltering(t *testing.T) {

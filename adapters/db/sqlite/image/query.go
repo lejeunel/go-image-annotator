@@ -73,7 +73,6 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 	sb.AddRegExpField(`^meta\..*$`, schema.Any(schema.Is[float64](), schema.Is[string](), schema.Is[bool]()))
 
 	rb := query.NewRenamerBuilder()
-	rb.Add(`\bcollection\b`, `collections.name`)
 	rb.Add(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
 
 	filterParser := qu.NewFilterParser(

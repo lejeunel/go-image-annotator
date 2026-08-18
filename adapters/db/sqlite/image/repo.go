@@ -26,8 +26,9 @@ func NewImageRepo(db adb.Querier, fp FilterParser, op OrderStrParser) ImageRepo 
 }
 
 type BaseRow struct {
-	ImageId        im.ImageId         `db:"id"`
-	CollectionName clc.CollectionName `db:"name"`
+	ImageId        im.ImageId         `db:"image_id"`
+	CollectionName clc.CollectionName `db:"collection"`
+	IngestedAt     time.Time          `db:"ingested_at"`
 }
 
 type AdjacencyRow struct {
@@ -59,19 +60,18 @@ func (r ImageRepo) AddToCollection(imageId im.ImageId, collection clc.Collection
 
 func (r ImageRepo) Count(f im.FilterStr) (*int64, error) {
 	errCtx := fmt.Errorf("counting using filters %v", f)
-	q := sq.StatementBuilder.Select("COUNT(*)")
-	q = q.From("images_collections AS ic").Join(
-		"images AS i ON ic.image_id=i.id").Join(
-		"collections ON ic.collection_id=collections.id").LeftJoin(
-		"metadata AS m ON ic.image_id=m.image_id AND ic.collection_id=m.collection_id")
+	inner := r.makeBaseSelectQuery()
 
 	if f != "" {
 		sqlizer, err := r.FilterParser.ParseToSql(f)
 		if err != nil {
 			return nil, err
 		}
-		q = q.Where(*sqlizer)
+		inner = inner.Where(*sqlizer)
 	}
+
+	q := sq.StatementBuilder.Select("COUNT (*)").FromSelect(inner, "a")
+
 	sql, args, err := q.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", errCtx, e.ErrInternal)
@@ -298,7 +298,10 @@ func (r ImageRepo) applyFilters(q sq.SelectBuilder, f im.FilterStr) (*sq.SelectB
 
 func (r ImageRepo) makeBaseSelectQuery() sq.SelectBuilder {
 	return sq.StatementBuilder.Select(
-		"i.id,collections.name").From(
+		"i.id AS image_id",
+		"collections.name AS collection",
+		"i.ingested_at AS ingested_at",
+	).From(
 		"images_collections AS ic").Join(
 		"images AS i ON ic.image_id=i.id").Join(
 		"collections ON ic.collection_id=collections.id").LeftJoin(
@@ -352,15 +355,7 @@ func (r ImageRepo) GetAdjacent(
 	errCtx := fmt.Errorf("getting adjacent image records")
 
 	// fetch images images and apply filtering/ordering
-	images := sq.StatementBuilder.Select(
-		"i.id AS image_id",
-		"i.ingested_at AS ingested_at",
-		"collections.name AS collection",
-	).From(
-		"images_collections AS ic").Join(
-		"images AS i ON ic.image_id=i.id").Join(
-		"collections ON ic.collection_id=collections.id").LeftJoin(
-		"metadata AS m ON ic.image_id=m.image_id AND ic.collection_id=m.collection_id")
+	images := r.makeBaseSelectQuery()
 	filtered, err := r.applyFilters(images, f)
 	if err != nil {
 		return nil, fmt.Errorf("%w: applying filters: %w", errCtx, err)
