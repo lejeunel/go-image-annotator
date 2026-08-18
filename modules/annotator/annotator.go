@@ -40,7 +40,8 @@ type Annotator struct {
 func (a *Annotator) Init(ctx context.Context, imageId string, collection string, f im.FilterStr, ord im.OrderStr,
 	oim imread.OutputPort, olbl fetchlbl.OutputPort, oscr scroll.OutputPort,
 ) {
-	a.scroll.Execute(ctx, scroll.Request{CurrentImageId: imageId, FilterStr: f, OrderStr: ord}, oscr)
+	a.scroll.Execute(ctx,
+		scroll.Request{CurrentImageId: imageId, CurrentCollection: collection, FilterStr: f, OrderStr: ord}, oscr)
 	a.ReadImage(imageId, collection, oim)
 	a.FetchLabels.Execute(ctx, olbl)
 }

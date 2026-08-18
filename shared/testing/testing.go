@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -74,4 +75,12 @@ func FakeUUIDFromInt(n int) string {
 		full[16:20],
 		full[20:32],
 	)
+}
+
+func IdFromInt(i int) *im.ImageId {
+	id, err := im.NewImageIdFromString(FakeUUIDFromInt(i))
+	if err != nil {
+		panic(err)
+	}
+	return &id
 }

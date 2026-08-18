@@ -5,6 +5,7 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"html/template"
 	"io"
 	"maps"
 
@@ -22,6 +23,10 @@ var detectOs string
 
 //go:embed templates/query_modal.html
 var queryModal string
+
+type QueryModalData struct {
+	SubmitURL string
+}
 
 type PageBuilder struct {
 	APIPath             string
@@ -182,6 +187,22 @@ func (b *PageBuilder) Render(w io.Writer) {
 		content = Div(Class("flex overflow-hidden w-full px-4 py-18"), content)
 	}
 
+	queryModalTemplate, err := template.New("").Parse(queryModal)
+	if err != nil {
+		Text(err.Error()).Render(w)
+		return
+	}
+	var queryBuf bytes.Buffer
+	if err := queryModalTemplate.ExecuteTemplate(
+		&queryBuf,
+		"query",
+		QueryModalData{
+			SubmitURL: rt.SliceUrl,
+		}); err != nil {
+		Text(err.Error()).Render(w)
+		return
+	}
+
 	b.BasePageBuilder.SetFrameContent(
 		Div(
 			Attr(`x-data="{ showSearch: false}"`),
@@ -201,7 +222,7 @@ func (b *PageBuilder) Render(w io.Writer) {
 					cmp.MakeFooter(b.Version),
 				},
 			),
-			Raw(queryModal),
+			Raw(queryBuf.String()),
 		),
 	)
 	b.BasePageBuilder.Render(w)

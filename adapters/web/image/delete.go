@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/delete"
 )
 
@@ -35,8 +36,8 @@ func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	s.DeleteItr.Execute(
 		r.Context(),
 		delete.Request{
-			ImageId:    r.URL.Query().Get("id"),
-			Collection: r.URL.Query().Get("collection"),
+			ImageId:    r.URL.Query().Get(rt.ImageIdArgName),
+			Collection: r.URL.Query().Get(rt.CollectionArgName),
 		},
 		NewDeleteImagePresenter(w),
 	)

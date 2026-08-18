@@ -35,6 +35,13 @@ const (
 	AdminPoliciesUrl = "/admin/policies"
 
 	ListTasksUrl = "/dashboard/logs"
+
+	SliceUrl = "/slice"
+
+	FilterQueryArgName   = "filters"
+	OrderingQueryArgName = "ordering"
+	CollectionArgName    = "collection"
+	ImageIdArgName       = "id"
 )
 
 func MakeOAuthCallbackURL(baseURL string, provider string) string {
@@ -43,10 +50,6 @@ func MakeOAuthCallbackURL(baseURL string, provider string) string {
 
 func MakeOAuthLoginURL(provider string) string {
 	return strings.ReplaceAll(LoginOAuthUrl, "{provider}", provider)
-}
-
-func MakeAnnotateImageURL(baseURL, imageId, collection string) string {
-	return fmt.Sprintf("%v?id=%v&collection=%v", baseURL, imageId, collection)
 }
 
 func MakeImagesURL(collection string) string {

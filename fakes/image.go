@@ -173,6 +173,7 @@ func (r *ImageRepo) IsUsed(id im.ImageId) (*bool, error) {
 
 func (r *ImageRepo) GetAdjacent(
 	id im.ImageId,
+	c string,
 	f im.FilterStr,
 	o im.OrderStr,
 	d im.ScrollingDirection,

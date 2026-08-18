@@ -8,6 +8,7 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
@@ -18,6 +19,7 @@ import (
 var templatesFiles embed.FS
 
 type AnnotationView struct {
+	QueryView
 	ImageView
 	ImageInfosView
 	AnnotationsListView
@@ -32,6 +34,8 @@ type AnnotationView struct {
 	availableImageLabels []string
 	scrollerButtons      v.ScrollerButtons
 	err                  error
+	filters              im.FilterStr
+	ordering             im.OrderStr
 	PageBuilder          b.PageBuilder
 }
 
@@ -47,6 +51,11 @@ func (v *AnnotationView) SetAnnotations(
 	v.boxes = boxes
 	v.polygons = polygons
 	v.imageLabels = imageLabels
+}
+
+func (v *AnnotationView) SetQuery(f im.FilterStr, o im.OrderStr) {
+	v.filters = f
+	v.ordering = o
 }
 
 func (v *AnnotationView) SetMetaData(m []m.MetaData) {
@@ -151,7 +160,7 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 			Raw(labelModal),
 			Div(Class("flex flex-col"),
 				Div(Class("flex items-center mb-2"),
-					v.ScrollerView.Render(v.scrollerButtons),
+					v.ScrollerView.Render(v.scrollerButtons, v.filters, v.ordering),
 					v.ShapeSelector()),
 				Div(Class("flex"),
 					Div(
@@ -163,6 +172,7 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 						),
 					),
 					Div(Class("align-top pl-2"),
+						Div(Class("pb-2"), v.QueryView.Build(v.filters, v.ordering)),
 						Div(Class("pb-2"), v.ImageInfosView.Build(*v.imageInfo)),
 						Div(
 							ID("annotation-list"),

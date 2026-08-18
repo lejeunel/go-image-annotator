@@ -5,7 +5,6 @@ import (
 	si "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	sm "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/metadata"
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
-	st "github.com/lejeunel/go-image-annotator/shared/testing"
 	_ "modernc.org/sqlite"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
@@ -21,14 +20,6 @@ func Setup() (sc.CollectionRepo, si.ImageRepo, sm.MetaRepo) {
 	mr := sm.NewMetaRepo(db)
 	return cr, imr, mr
 
-}
-
-func IdFromInt(i int) im.ImageId {
-	id, err := im.NewImageIdFromString(st.FakeUUIDFromInt(i))
-	if err != nil {
-		panic(err)
-	}
-	return id
 }
 
 func MustParseTime(s string) time.Time {

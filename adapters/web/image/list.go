@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	an "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
@@ -42,8 +41,27 @@ func NewListImagesPresenter(
 	return ListImagesPresenter{b, w, ew.NewErrorPresenter(w), collection}
 }
 
-func makeImageRow(image im.Image) tb.Row {
-	link := rt.MakeAnnotateImageURL(an.AnnotateImage, image.Id.String(), image.Collection.Name)
+func (p ListImagesPresenter) SuccessReadImage(image im.Image) {
+	makeImageRow(image, BaseAnnotateImageURLFunc).Render(p.Writer)
+}
+
+func (p ListImagesPresenter) SuccessListImages(r list.Response) {
+	baseURL := rt.AddQueryParams(rt.ImagesUrl, rt.CollectionArgName, p.collection)
+	p.SetPagination(r.Pagination, baseURL.String())
+	ingestUrl := rt.AddQueryParams(ingestPanelUrl, rt.CollectionArgName, p.collection)
+	p.PaginatedListBuilder.AddCreationButton("Ingest", ingestUrl.String(), ingestTargetDiv)
+	for _, im := range r.Images {
+		p.AddRow(makeImageRow(im, BaseAnnotateImageURLFunc))
+	}
+	p.Render(p.Writer)
+}
+
+func MakeAnnotateImageURL(baseURL, imageId, collection string) string {
+	return fmt.Sprintf("%v?id=%v&collection=%v", baseURL, imageId, collection)
+}
+
+func makeImageRow(image im.Image, urlFunc ImageURLFunc) tb.Row {
+	link := urlFunc(image)
 	actions := b.NewActionsPanelBuilder()
 	actions.SetConfirmDelete(rt.AddQueryParams(ImageRow, "id", image.Id.String(),
 		"collection", image.Collection.Name,
@@ -55,21 +73,6 @@ func makeImageRow(image im.Image) tb.Row {
 	row.AddCell(tb.NewCell(Text(strconv.Itoa(image.NumAnnotations()))))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row
-}
-
-func (p ListImagesPresenter) SuccessReadImage(image im.Image) {
-	makeImageRow(image).Render(p.Writer)
-}
-
-func (p ListImagesPresenter) SuccessListImages(r list.Response) {
-	baseURL := rt.AddQueryParams(rt.ImagesUrl, ingestCollectionArgName, p.collection)
-	p.SetPagination(r.Pagination, baseURL.String())
-	url := rt.AddQueryParams(ingestPanelUrl, ingestCollectionArgName, p.collection)
-	p.PaginatedListBuilder.AddCreationButton("Ingest", url.String(), ingestTargetDiv)
-	for _, im := range r.Images {
-		p.AddRow(makeImageRow(im))
-	}
-	p.Render(p.Writer)
 }
 
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {

@@ -22,7 +22,4 @@ func TestScrollerButtonsNextIdAndCollection(t *testing.T) {
 	if buttons.Next.ImageId != id.String() {
 		t.Fatalf("expected to have next id %v, got %v", id, buttons.Next.ImageId)
 	}
-	if buttons.Next.Collection != collection {
-		t.Fatalf("expected to have next collection %v, got %v", collection, buttons.Next.Collection)
-	}
 }

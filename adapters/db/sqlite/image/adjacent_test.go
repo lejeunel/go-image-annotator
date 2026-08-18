@@ -2,6 +2,7 @@ package image
 
 import (
 	"fmt"
+	"slices"
 	"testing"
 	"time"
 
@@ -25,75 +26,191 @@ func TestInternalErrOnGetAdjacent(t *testing.T) {
 	db := s.NewInMemory()
 	repos := NewTestScrollerRepos(db)
 	db.Close()
-	_, err := repos.ImageRepo.GetAdjacent(im.NewImageId(), "", "", im.ScrollNext)
+	_, err := repos.ImageRepo.GetAdjacent(im.NewImageId(), "", "", "", im.ScrollNext)
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
-func TestGettingAdjacentImageWhenSingle(t *testing.T) {
-	repos := NewTestScrollerRepos(s.NewInMemory())
-	id, _ := im.NewImageIdFromString(st.FakeUUIDFromInt(0))
-	repos.ImageRepo.AddImage(id, nil, im.Specs{})
-	rnext, err := repos.ImageRepo.GetAdjacent(id, "", "", im.ScrollNext)
-	rprev, err := repos.ImageRepo.GetAdjacent(id, "", "", im.ScrollPrevious)
-	assert.NoError(t, err)
-	assert.Nil(t, rnext)
-	assert.Nil(t, rprev)
+type TestIngestionPayload struct {
+	ImageId       im.ImageId
+	Collection    string
+	IngestionTime time.Time
 }
 
-func CreateImagesWithIngestTime(repos ScrollerRepos, num int) ([]im.ImageId, clc.Collection) {
-	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
-	repos.CollectionRepo.Create(collection)
-	ids := []im.ImageId{}
-	now := time.Now()
-	for n := range num {
-		id, _ := im.NewImageIdFromString(st.FakeUUIDFromInt(n))
-		repos.ImageRepo.AddImage(id, fmt.Append([]byte{}, n),
-			im.Specs{IngestedAt: now.Add(time.Duration(n) * time.Hour)})
-		repos.ImageRepo.AddToCollection(id, collection.Name)
-		ids = append(ids, id)
+type AdjacencyTest struct {
+	name   string
+	images []TestIngestionPayload
+	im.FilterStr
+	im.OrderStr
+	currentImage       im.ImageId
+	currentCollection  string
+	wantPrev           *im.ImageId
+	wantPrevCollection string
+	wantNext           *im.ImageId
+	wantNextCollection string
+}
+
+func findCollectionByName(cs []clc.Collection, name string) *clc.Collection {
+	for _, c := range cs {
+		if c.Name == name {
+			return &c
+		}
 	}
-	return ids, collection
+	return nil
 }
 
-type ScrollerTest struct {
-	name      string
-	currentId im.ImageId
-	OrderBy   string
-	Direction im.ScrollingDirection
-	wantId    im.ImageId
-}
+func InitAdjacencyTest(repos ScrollerRepos, payloads []TestIngestionPayload) {
+	var createdCollections []clc.Collection
+	var createdImages []im.ImageId
+	for _, p := range payloads {
+		collection := findCollectionByName(createdCollections, p.Collection)
+		if collection == nil {
+			c := clc.NewCollection(clc.NewCollectionId(), p.Collection)
+			if err := repos.CollectionRepo.Create(c); err != nil {
+				panic(err)
+			}
+			createdCollections = append(createdCollections, c)
+			collection = &c
+		}
 
-func TestGetAdjacentImages(t *testing.T) {
-	repos := NewTestScrollerRepos(s.NewInMemory())
-	ids, collection := CreateImagesWithIngestTime(repos, 3)
-
-	tests := []ScrollerTest{
-		{"next with ingested_at asc", ids[0], "ingested_at", im.ScrollNext, ids[1]},
-		{
-			"prev with ingested_at asc",
-			ids[2],
-			"ingested_at:asc",
-			im.ScrollPrevious,
-			ids[1],
-		},
-		{"next with ingested_at desc", ids[2], "ingested_at:desc", im.ScrollNext, ids[1]},
-		{
-			"prev with ingested_at desc",
-			ids[0],
-			"ingested_at:desc",
-			im.ScrollPrevious,
-			ids[1],
-		},
+		image := im.NewImage(p.ImageId, *collection)
+		if !slices.Contains(createdImages, image.Id) {
+			if err := repos.ImageRepo.AddImage(image.Id, []byte(image.Id.String()), im.Specs{IngestedAt: p.IngestionTime}); err != nil {
+				panic(err)
+			}
+			createdImages = append(createdImages, image.Id)
+		}
+		if err := repos.ImageRepo.AddToCollection(image.Id, collection.Name); err != nil {
+			panic(err)
+		}
 	}
 
+}
+
+var tests = []AdjacencyTest{
+	{"single image has no adjacents",
+		[]TestIngestionPayload{
+			{*st.IdFromInt(0), "a-collection", time.Now()}},
+		"",
+		"",
+		*st.IdFromInt(0),
+		"a-collection",
+		nil,
+		"",
+		nil,
+		"",
+	},
+	{"one image per collection has no adjacents",
+		[]TestIngestionPayload{
+			{*st.IdFromInt(0), "a-collection", time.Now()},
+			{*st.IdFromInt(1), "another-collection", time.Now()}},
+		"collection:\"a-collection\"",
+		"",
+		*st.IdFromInt(0),
+		"a-collection",
+		nil,
+		"",
+		nil,
+		"",
+	},
+	{"two images in one collection",
+		[]TestIngestionPayload{
+			{*st.IdFromInt(0), "a-collection", time.Now()},
+			{*st.IdFromInt(1), "a-collection", time.Now()},
+			{*st.IdFromInt(2), "another-collection", time.Now()}},
+		"collection:\"a-collection\"",
+		"ingested_at",
+		*st.IdFromInt(0),
+		"a-collection",
+		nil,
+		"",
+		st.IdFromInt(1),
+		"a-collection",
+	},
+	{"order by ingestion time ascending",
+		[]TestIngestionPayload{
+			{*st.IdFromInt(2), "a-collection", time.Now()},
+			{*st.IdFromInt(1), "a-collection", time.Now()},
+			{*st.IdFromInt(0), "a-collection", time.Now()},
+		},
+		"",
+		"ingested_at",
+		*st.IdFromInt(1),
+		"a-collection",
+		st.IdFromInt(2),
+		"a-collection",
+		st.IdFromInt(0),
+		"a-collection",
+	},
+	{"order by ingestion time descending",
+		[]TestIngestionPayload{
+			{*st.IdFromInt(0), "a-collection", time.Now()},
+			{*st.IdFromInt(1), "a-collection", time.Now()},
+			{*st.IdFromInt(2), "a-collection", time.Now()},
+		},
+		"",
+		"ingested_at:desc",
+		*st.IdFromInt(1),
+		"a-collection",
+		st.IdFromInt(2),
+		"a-collection",
+		st.IdFromInt(0),
+		"a-collection",
+	},
+	{"order by id by default",
+		[]TestIngestionPayload{
+			{*st.IdFromInt(1), "a-collection", time.Now()},
+			{*st.IdFromInt(0), "a-collection", time.Now()},
+			{*st.IdFromInt(2), "a-collection", time.Now()},
+		},
+		"",
+		"",
+		*st.IdFromInt(1),
+		"a-collection",
+		st.IdFromInt(0),
+		"a-collection",
+		st.IdFromInt(2),
+		"a-collection",
+	},
+	{"order by id desc",
+		[]TestIngestionPayload{
+			{*st.IdFromInt(1), "a-collection", time.Now()},
+			{*st.IdFromInt(2), "a-collection", time.Now()},
+			{*st.IdFromInt(0), "a-collection", time.Now()},
+		},
+		"",
+		"image_id:desc",
+		*st.IdFromInt(1),
+		"a-collection",
+		st.IdFromInt(2),
+		"a-collection",
+		st.IdFromInt(0),
+		"a-collection",
+	},
+}
+
+func TestAdjacency(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := repos.ImageRepo.GetAdjacent(tt.currentId,
-				fmt.Sprintf("collection:\"%v\"", collection.Name),
-				tt.OrderBy,
-				tt.Direction)
+			repos := NewTestScrollerRepos(s.NewInMemory())
+			InitAdjacencyTest(repos, tt.images)
+			prev, err := repos.ImageRepo.GetAdjacent(tt.currentImage, tt.currentCollection, tt.FilterStr, tt.OrderStr, im.ScrollPrevious)
 			assert.NoError(t, err)
-			assert.Equal(t, tt.wantId.String(), r.ImageId.String())
+			fmt.Println(prev)
+			next, err := repos.ImageRepo.GetAdjacent(tt.currentImage, tt.currentCollection, tt.FilterStr, tt.OrderStr, im.ScrollNext)
+			fmt.Println(next)
+			assert.NoError(t, err)
+			if tt.wantPrev == nil {
+				assert.Nil(t, prev, "previous")
+			} else {
+				assert.NotNil(t, prev)
+				assert.Equal(t, tt.wantPrev.String(), prev.ImageId.String())
+			}
+			if tt.wantNext == nil {
+				assert.Nil(t, next, "next")
+			} else {
+				assert.NotNil(t, next)
+				assert.Equal(t, tt.wantNext.String(), next.ImageId.String())
+			}
 		})
 	}
 }

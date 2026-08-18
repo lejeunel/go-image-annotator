@@ -23,6 +23,7 @@ func (p *AnnotationPagePresenter) SetView(view v.View) *AnnotationPagePresenter 
 
 func (p AnnotationPagePresenter) SuccessScroll(r scroll.Response) {
 	p.View.SetScroller(MakeScrollerButtons(r.Prev, r.Next))
+	p.View.SetQuery(r.FilterStr, r.OrderStr)
 }
 
 func (p AnnotationPagePresenter) SuccessReadImage(im im.Image) {

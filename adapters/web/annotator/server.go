@@ -10,6 +10,7 @@ import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 	s "github.com/lejeunel/go-image-annotator/shared/session"
 	assign_label "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
@@ -40,8 +41,9 @@ func (s *Server) AnnotateImage(w http.ResponseWriter, r *http.Request) {
 	p := ap.NewAnnotationPagePresenter(ap.NewCyclicColorizer(ap.Palette))
 	p.SetView(view)
 	collection := r.URL.Query().Get("collection")
-	filter := fmt.Sprintf("collection:\"%v\"", collection)
-	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), collection, filter, "ingested_at", p, p, p)
+	filters := r.URL.Query().Get(rt.FilterQueryArgName)
+	ordering := r.URL.Query().Get(rt.OrderingQueryArgName)
+	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), collection, filters, ordering, p, p, p)
 	view.Render(w)
 }
 

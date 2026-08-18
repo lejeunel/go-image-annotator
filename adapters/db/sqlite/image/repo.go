@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"iter"
+	"strings"
 	"time"
 
 	"go.tomakado.io/dumbql/query"
@@ -20,6 +21,28 @@ import (
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
+func makeOrderingWindowExpr(parser OrderStrParser, function string, ordering im.OrderStr, outName string) (*string, error) {
+	if ordering == "" {
+		ordering = "image_id"
+	}
+	args, err := parser.Parse(ordering)
+	if err != nil {
+		return nil, err
+	}
+
+	var terms []string
+	for _, a := range args {
+		if a.Order == im.DescOrder {
+			terms = append(terms, a.Field+" "+"DESC")
+		} else {
+			terms = append(terms, a.Field)
+		}
+	}
+
+	res := function + " OVER (ORDER BY " + strings.Join(terms, ",") + ") " + outName
+	return &res, nil
+}
+
 func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 	sb := schema.NewSchemaBuilder()
 	sb.AddField("collection", schema.Is[string]())
@@ -27,8 +50,8 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 	sb.AddRegExpField(`^meta\..*$`, schema.Any(schema.Is[float64](), schema.Is[string](), schema.Is[bool]()))
 
 	rb := query.NewRenamerBuilder()
-	rb.Add(`\bcollection\b`, `collections.name`)
-	rb.Add(`\bingested_at\b`, `i.ingested_at`)
+	// rb.Add(`\bcollection\b`, `collections.name`)
+	// rb.Add(`\bingested_at\b`, `i.ingested_at`)
 	rb.Add(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
 
 	filterParser := qu.NewFilterParser(
@@ -36,10 +59,14 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 		qu.WithRenamer(rb.Build()),
 	)
 	ob := qu.NewOrderParserBuilder()
-	ob.AddField("collection")
+	ob.AddField("image_id")
 	ob.AddField("ingested_at")
 	ob.AddRegExpField(`^meta\..*$`)
 	ob.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
+	// rb.Add(`\bingested_at\b`, `i.ingested_at`)
+	// ob.AddRenameRule(`\bimage_id\b`, `i.id`)
+	// ob.AddRenameRule(`\bingested_at\b`, `i.ingested_at`)
+	// ob.AddRenameRule(`\bcollection\b`, `collections.name`)
 
 	orderParser := ob.Build()
 
@@ -65,10 +92,18 @@ func NewImageRepo(db adb.Querier, fp FilterParser, op OrderStrParser) ImageRepo 
 }
 
 type Row struct {
-	ImageId      im.ImageId       `db:"image_id"`
-	CollectionId clc.CollectionId `db:"collection_id"`
-	Name         string           `db:"name"`
-	IngestTime   time.Time        `db:"ingested_at"`
+	ImageId        im.ImageId         `db:"id"`
+	CollectionName clc.CollectionName `db:"name"`
+}
+
+type AdjacencyRow struct {
+	ImageId        *im.ImageId         `db:"image_id"`
+	Collection     string              `db:"collection"`
+	IngestedAt     time.Time           `db:"ingested_at"`
+	PrevId         *im.ImageId         `db:"prev_id"`
+	PrevCollection *clc.CollectionName `db:"prev_collection"`
+	NextId         *im.ImageId         `db:"next_id"`
+	NextCollection *clc.CollectionName `db:"next_collection"`
 }
 
 type SpecsRow struct {
@@ -132,83 +167,27 @@ func (r ImageRepo) applyOrderingStr(q sq.SelectBuilder, o im.OrderStr) (*sq.Sele
 	return &q, nil
 }
 
-func (r ImageRepo) applyScrollOrdering(q sq.SelectBuilder, currentImageId im.ImageId, o im.OrderStr, d im.ScrollingDirection,
-) (sq.SelectBuilder, error) {
-
-	args, err := r.OrderStrParser.Parse(o)
-	if err != nil {
-		return q, err
-	}
-	for _, a := range args {
-		if (a.Order == im.AscOrder) && (d == im.ScrollNext) {
-			q = q.OrderBy(fmt.Sprintf("i.%v", a.Field))
-			q = q.Where(
-				fmt.Sprintf(
-					"i.%v>(SELECT %v FROM images WHERE id=?)",
-					a.Field,
-					a.Field,
-				),
-				currentImageId,
-			)
-		}
-		if (a.Order == im.AscOrder) && (d == im.ScrollPrevious) {
-			q = q.OrderBy(fmt.Sprintf("i.%v DESC", a.Field))
-			q = q.Where(
-				fmt.Sprintf(
-					"i.%v<(SELECT %v FROM images WHERE id=?)",
-					a.Field,
-					a.Field,
-				),
-				currentImageId,
-			)
-		}
-		if (a.Order == im.DescOrder) && (d == im.ScrollNext) {
-			q = q.OrderBy(fmt.Sprintf("i.%v DESC", a.Field))
-			q = q.Where(
-				fmt.Sprintf(
-					"i.%v<(SELECT %v FROM images WHERE id=?)",
-					a.Field,
-					a.Field,
-				),
-				currentImageId,
-			)
-		}
-		if (a.Order == im.DescOrder) && (d == im.ScrollPrevious) {
-			q = q.OrderBy(fmt.Sprintf("i.%v", a.Field))
-			q = q.Where(
-				fmt.Sprintf(
-					"i.%v>(SELECT %v FROM images WHERE id=?)",
-					a.Field,
-					a.Field,
-				),
-				currentImageId,
-			)
-		}
-	}
-	return q, nil
-}
-
 func (r ImageRepo) Slice(
 	f im.FilterStr,
 	p pa.PaginationParams,
 	o im.OrderStr,
 ) ([]im.BaseImage, error) {
-	q, err := r.makeBaseSelectQuery(f)
+	q := r.makeBaseSelectQuery()
+	qf, err := r.applyFilters(q, f)
 	if err != nil {
 		return nil, err
 	}
 
-	qq := *q
-	orderedQ, err := r.applyOrderingStr(qq, o)
+	qfo, err := r.applyOrderingStr(*qf, o)
 	if err != nil {
 		return nil, err
 	}
-	qq = *orderedQ
 
-	qq = qq.Limit(uint64(p.PageSize))
-	qq = qq.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
-	qq = qq.OrderBy("ic.image_id")
-	images, err := r.fetchBaseImages(qq)
+	qs := *qfo
+	qs = qs.Limit(uint64(p.PageSize))
+	qs = qs.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
+	qs = qs.OrderBy("ic.image_id")
+	images, err := r.fetchBaseImages(qs)
 	if err != nil {
 		return nil, err
 	}
@@ -220,17 +199,20 @@ func (r ImageRepo) sliceAfterId(
 	pageSize int,
 	after *im.ImageId,
 ) ([]im.BaseImage, *im.ImageId, error) {
-	q0, err := r.makeBaseSelectQuery(f)
+	q := r.makeBaseSelectQuery()
+	qf, err := r.applyFilters(q, f)
 	if err != nil {
 		return nil, nil, err
 	}
-	q1 := q0.OrderBy("ic.image_id")
-	q2 := q1.Limit(uint64(pageSize))
+
+	qs := *qf
+	qs = qs.OrderBy("ic.image_id")
+	qs = qs.Limit(uint64(pageSize))
 	if after != nil {
-		q2 = q2.Where(sq.Gt{"ic.image_id": after})
+		qs = qs.Where(sq.Gt{"ic.image_id": after})
 	}
 
-	images, err := r.fetchBaseImages(q2)
+	images, err := r.fetchBaseImages(qs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -366,16 +348,7 @@ func (r ImageRepo) RemoveImageFromCollection(
 	return nil
 }
 
-func (r ImageRepo) makeBaseSelectQuery(
-	f im.FilterStr,
-) (*sq.SelectBuilder, error) {
-	q := sq.StatementBuilder.Select(
-		"ic.image_id,ic.collection_id,i.ingested_at,collections.name").From(
-		"images_collections AS ic").Join(
-		"images AS i ON ic.image_id=i.id").Join(
-		"collections ON ic.collection_id=collections.id").LeftJoin(
-		"metadata AS m ON ic.image_id=m.image_id AND ic.collection_id=m.collection_id")
-
+func (r ImageRepo) applyFilters(q sq.SelectBuilder, f im.FilterStr) (*sq.SelectBuilder, error) {
 	if f != "" {
 		sqlizer, err := r.FilterParser.ParseToSql(f)
 		if err != nil {
@@ -386,6 +359,17 @@ func (r ImageRepo) makeBaseSelectQuery(
 	}
 
 	return &q, nil
+
+}
+
+func (r ImageRepo) makeBaseSelectQuery() sq.SelectBuilder {
+	return sq.StatementBuilder.Select(
+		"i.id,collections.name").From(
+		"images_collections AS ic").Join(
+		"images AS i ON ic.image_id=i.id").Join(
+		"collections ON ic.collection_id=collections.id").LeftJoin(
+		"metadata AS m ON ic.image_id=m.image_id AND ic.collection_id=m.collection_id")
+
 }
 
 func (r ImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, error) {
@@ -399,7 +383,7 @@ func (r ImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, error) {
 	}
 	images := []im.BaseImage{}
 	for _, r := range records {
-		images = append(images, im.BaseImage{ImageId: r.ImageId, Collection: r.Name})
+		images = append(images, im.BaseImage{ImageId: r.ImageId, Collection: r.CollectionName})
 	}
 	return images, nil
 }
@@ -423,44 +407,100 @@ func (r ImageRepo) IsUsed(id im.ImageId) (*bool, error) {
 	return &isUsed, nil
 }
 
-func (r ImageRepo) GetAdjacent(id im.ImageId,
+func (r ImageRepo) GetAdjacent(
+	currentId im.ImageId,
+	currentCollection string,
 	f im.FilterStr,
 	o im.OrderStr,
 	d im.ScrollingDirection,
 ) (*im.BaseImage, error) {
-	q, err := r.makeBaseSelectQuery(f)
+
+	prevIdWinExpr, innerCountErr := makeOrderingWindowExpr(r.OrderStrParser, "LAG(image_id, 1)", o, "prev_id")
+	if innerCountErr != nil {
+		return nil, innerCountErr
+	}
+	prevCollectionWinExpr, innerCountErr := makeOrderingWindowExpr(r.OrderStrParser, "LAG(collection, 1)", o, "prev_collection")
+	if innerCountErr != nil {
+		return nil, innerCountErr
+	}
+	nextIdWinExpr, innerCountErr := makeOrderingWindowExpr(r.OrderStrParser, "LEAD(image_id, 1)", o, "next_id")
+	if innerCountErr != nil {
+		return nil, innerCountErr
+	}
+	nextCollectionWinExpr, innerCountErr := makeOrderingWindowExpr(r.OrderStrParser, "LEAD(collection, 1)", o, "next_collection")
+	if innerCountErr != nil {
+		return nil, innerCountErr
+	}
+	all := sq.StatementBuilder.Select(
+		"i.id AS image_id",
+		"i.ingested_at AS ingested_at",
+		"collections.name AS collection",
+	).From(
+		"images_collections AS ic").Join(
+		"images AS i ON ic.image_id=i.id").Join(
+		"collections ON ic.collection_id=collections.id")
+	filtered, err := r.applyFilters(all, f)
 	if err != nil {
 		return nil, err
 	}
-	qq, err := r.applyScrollOrdering(*q, id, o, d)
+	ordered, err := r.applyOrderingStr(*filtered, o)
 	if err != nil {
 		return nil, err
 	}
 
-	qq = qq.Limit(1)
-	sqlQuery, args, err := qq.ToSql()
+	adj := sq.StatementBuilder.Select(
+		"image_id AS image_id",
+		"collection AS collection",
+		"ingested_at",
+		*prevIdWinExpr,
+		*prevCollectionWinExpr,
+		*nextIdWinExpr,
+		*nextCollectionWinExpr,
+	).FromSelect(*ordered, "adjacency")
+
+	adjSelf := sq.StatementBuilder.Select(
+		"image_id AS image_id",
+		"collection AS collection",
+		"ingested_at",
+		"prev_id",
+		"prev_collection",
+		"next_id",
+		"next_collection",
+	).FromSelect(adj, "adj").Where(
+		"image_id = ? AND collection= ?", currentId, currentCollection,
+	)
+
+	adjSql, adjArgs, err := adjSelf.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
 	}
-	var row Row
-	if err := r.Db.Get(&row, sqlQuery, args...); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
+	var row AdjacencyRow
+
+	err = r.Db.Get(&row, adjSql, adjArgs...)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
 
-	var collection string
-	err = r.Db.Get(&collection, `SELECT name FROM collections WHERE id = $1`, row.CollectionId)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"fetching collection with id %v: %v: %w",
-			row.CollectionId,
-			err,
-			e.ErrInternal,
-		)
+	var res im.BaseImage
+	fmt.Printf("got adjacencies %+v\n", row)
+	if d == im.ScrollNext {
+		if row.NextId == nil {
+			return nil, nil
+		}
+		res.ImageId = *row.NextId
+		res.Collection = *row.NextCollection
+
+	} else {
+		if row.PrevId == nil {
+			return nil, nil
+		}
+		res.ImageId = *row.PrevId
+		res.Collection = *row.PrevCollection
+
 	}
 
-	result := im.BaseImage{ImageId: row.ImageId, Collection: collection}
-	return &result, nil
+	return &res, nil
 }

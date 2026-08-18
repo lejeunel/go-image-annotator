@@ -49,7 +49,7 @@ func (s *Server) IngestionPanel(w http.ResponseWriter, r *http.Request) {
 	t.Parse(IngestionPanel)
 
 	endpoint := rt.AddQueryParams(archiveIngestUrl,
-		ingestCollectionArgName, r.FormValue(ingestCollectionArgName))
+		rt.CollectionArgName, r.FormValue(rt.CollectionArgName))
 	if err := t.ExecuteTemplate(w, "ingestion",
 		IngestionPanelData{
 			DivId:                 ingestTargetDiv,
@@ -72,7 +72,7 @@ func (s *Server) IngestArchive(w http.ResponseWriter, r *http.Request) {
 
 	s.IngestArchiveItr.Execute(r.Context(),
 		ia.Request{
-			Collection: r.URL.Query().Get(ingestCollectionArgName),
+			Collection: r.URL.Query().Get(rt.CollectionArgName),
 			Reader:     file,
 		},
 		NewIngestArchivePresenter(w),

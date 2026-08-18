@@ -1,5 +1,5 @@
-<!-- Search Overlay -->
-<div role="search" aria-label="Sitewide" x-show="showSearch" x-transition.opacity.duration.300ms x-data='{value: ""}'
+{{define "query"}}
+<div role="search" aria-label="Sitewide" x-show="showSearch" x-transition.opacity.duration.300ms 
     @keydown.esc.window="showSearch = false" x-cloak x-trap.inert.noscroll="showSearch" @keydown.down="$focus.next()"
     @keydown.up="$focus.previous()"
     class="search-modal bg-surface-dark/40 fixed inset-0 z-100 backdrop-blur-md flex items-baseline justify-center p-10 pt-20">
@@ -8,60 +8,81 @@
         x-transition:leave="transition ease-out duration-200" x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 translate-y-4" class="w-full md:w-2/4 flex flex-col">
         <div class="relative w-full" @click.away="showSearch=false">
-            <input aria-label="search" type="text" id="searchInput" x-model="value" placeholder="Search"
-                autofocus="true"
-                class="bg-surface 
-            dark:bg-surface-dark-alt 
-            border-outline 
-            dark:border-outline-dark 
-            outline-hidden 
-            transition-none
-            text-on-surface 
-            dark:text-on-surface-dark-strong 
-            text-lg
-            p-2 
-            w-full 
-            pl-10 "
-                :class="[
-                    value.length > 0 ? 'rounded-b-none border-b-none' : '',
-                    'border',
-                    'rounded-lg'
-                ]">
-            
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"
-                stroke="currentColor" class="w-5 h-5 text-primary dark:text-primary-dark absolute top-3 left-3">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </svg>
-            <div x-data="{ os: detectOS() }" x-cloak x-show="os === 'Mac OS' || os === 'Linux' || os === 'Windows'"
-                class="text-sm text-on-surface dark:text-on-surface-dark absolute top-3 right-4">
-                Esc
-            </div>
-        </div>
-        <div id="searchResults" x-show="value.length > 0"
-            class="
-        flex 
-        flex-col 
-        divide-y 
-        text-sm 
-        bg-surface 
-        dark:bg-surface-dark-alt 
-        font-light 
-        border-outline
-        dark:border-outline-dark 
-        outline-hidden 
-        focus-visible:border-outline 
-        divide-outline 
-        dark:divide-outline-dark 
-        overflow-hidden
-        "
-            :class="[
-                'border',
-                'rounded-b-lg'
-            ]">
-            <!-- Search Result Goes HERE -->
-        </div>
+            <form action="{{.SubmitURL}}" method="get">
+                <div class="relative">
+                  <input
+                    aria-label="filter"
+                    type="text"
+                    id="filterInput"
+                    name="filter"
+                    placeholder="Filter"
+                    autofocus="true"
+                    class="bg-surface 
+                    dark:bg-surface-dark-alt 
+                    border-outline 
+                    dark:border-outline-dark 
+                    outline-hidden 
+                    transition-none
+                    text-on-surface 
+                    dark:text-on-surface-dark-strong 
+                    text-lg
+                    p-2 
+                    w-full 
+                    pl-10 "
+                        :class="[
+                            value.length > 0 ? 'rounded-b-none border-b-none' : '',
+                            'border',
+                            'rounded-lg'
+                        ]">
 
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                        stroke="currentColor" class="w-5 h-5 text-primary dark:text-primary-dark absolute top-3 left-3">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                </div>
+                <div class="py-5">
+                    <div class="relative">
+                      <input
+                        aria-label="order"
+                        name="order"
+                        type="text"
+                        id="orderInput"
+                        placeholder="Order"
+                        autofocus="true"
+                        class="bg-surface 
+                        dark:bg-surface-dark-alt 
+                        border-outline 
+                        dark:border-outline-dark 
+                        outline-hidden 
+                        transition-none
+                        text-on-surface 
+                        dark:text-on-surface-dark-strong 
+                        text-lg
+                        p-2 
+                        w-full 
+                        pl-10 "
+                            :class="[
+                                value.length > 0 ? 'rounded-b-none border-b-none' : '',
+                                'border',
+                                'rounded-lg'
+                            ]">
+
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            stroke-width="1"
+                        stroke="currentColor"
+                        class="w-5 h-5 text-primary dark:text-primary-dark absolute top-3 left-3"
+                        >
+                        <path fill="currentColor"
+                                d="M18 3a1 1 0 1 0-2 0v15.586l-1.793-1.793a1 1 0 0 0-1.414 1.414l3.5 3.5a1 1 0 0 0 1.414 0l3.5-3.5a1 1 0 0 0-1.414-1.414L18 18.586zM3 4a1 1 0 0 0 0 2h10a1 1 0 1 0 0-2zm3 5a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H7a1 1 0 0 1-1-1m5 3a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2z"/>
+                        </svg>
+                    </div>
+                </div>
+                <input type="submit" style="display: none" />
+            </form>
+        </div>
     </div>
 </div>
-<!-- /Search Overlay -->
+{{end}}

@@ -1,7 +1,9 @@
 import typer
 from .client import create_client, Client
-from typing import Any
+from typing import Any, BinaryIO
 from pathlib import Path
+import json
+import mimetypes
 
 app = typer.Typer(help="list and download images")
 
@@ -41,6 +43,29 @@ class Images:
     def download(self, id: str) -> bytes:
         return self.client._request_bytes("GET", f"/raw/{id}")
 
+    def ingest(self, path: Path, collection: str) -> dict:
+        mimetype, _ = mimetypes.guess_type(path)
+        if mimetype is None:
+            raise ValueError(f"could not guess mimetype for file {path}")
+
+        with open(path, "rb") as f:
+            return self.client._request(
+                "POST",
+                "/images",
+                files={
+                    "metadata": (
+                        None,
+                        json.dumps({"collection": collection}),
+                        "application/json",
+                    ),
+                    "image": (
+                        None,
+                        f,
+                        mimetype,
+                    ),
+                },
+            )
+
 
 @app.command(help="query a page of image meta-data")
 def list(filters: str = "", ordering: str = "", page: int = 1, pagesize: int = 10):
@@ -64,3 +89,8 @@ def download(id: str, out: Path):
     data = Images(create_client()).download(id)
     with open(out, "wb") as f:
         f.write(data)
+
+
+@app.command(help="ingest an image into a collection")
+def ingest(collection: str, path: Path):
+    Images(create_client()).ingest(path, collection)
