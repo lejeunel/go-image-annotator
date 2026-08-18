@@ -5,22 +5,22 @@ import (
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 )
 
-func MakeScrollerButtons(prev *im.BaseImage, next *im.BaseImage) v.ScrollerButtons {
+func MakeScrollerButtons(adj im.AdjacentImages) v.ScrollerButtons {
 	buttons := v.ScrollerButtons{}
-	if next != nil {
+	if adj.Next != nil {
 		buttons.Next = v.ScrollerButton{
 			IsActive:   true,
 			Text:       "Next",
-			ImageId:    next.ImageId.String(),
-			Collection: next.Collection,
+			ImageId:    adj.Next.ImageId.String(),
+			Collection: adj.Next.Collection,
 		}
 	}
-	if prev != nil {
+	if adj.Prev != nil {
 		buttons.Prev = v.ScrollerButton{
 			IsActive:   true,
 			Text:       "Previous",
-			ImageId:    prev.ImageId.String(),
-			Collection: prev.Collection,
+			ImageId:    adj.Prev.ImageId.String(),
+			Collection: adj.Prev.Collection,
 		}
 	}
 	return buttons

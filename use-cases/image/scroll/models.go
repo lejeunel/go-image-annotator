@@ -13,8 +13,7 @@ type Request struct {
 }
 
 type Response struct {
-	Next *im.BaseImage
-	Prev *im.BaseImage
+	Adj im.AdjacentImages
 	im.FilterStr
 	im.OrderStr
 }

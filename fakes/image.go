@@ -38,8 +38,7 @@ type ImageRepo struct {
 	HashAlreadyExists            bool
 	Count_                       int64
 	IterateBaseImages            []im.BaseImage
-	NextImage                    im.BaseImage
-	PreviousImage                im.BaseImage
+	Adjacent                     im.AdjacentImages
 	ImageMissing                 bool
 }
 
@@ -177,13 +176,10 @@ func (r *ImageRepo) GetAdjacent(
 	f im.FilterStr,
 	o im.OrderStr,
 	d im.ScrollingDirection,
-) (*im.BaseImage, error) {
+) (*im.AdjacentImages, error) {
 	if r.ErrOnGetAdjacent != nil {
 		return nil, r.ErrOnGetAdjacent
 	}
-	if d == im.ScrollNext {
-		return &r.NextImage, nil
-	}
-	return &r.PreviousImage, nil
+	return &r.Adjacent, nil
 
 }

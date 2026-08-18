@@ -1,6 +1,7 @@
 package query
 
 import (
+	"github.com/jmoiron/sqlx"
 	sc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	si "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	sm "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/metadata"
@@ -30,15 +31,15 @@ func MustParseTime(s string) time.Time {
 	return t
 }
 
-type TestIngestionPayload struct {
+type QueryTestPayload struct {
 	ImageId       im.ImageId
 	Collection    string
 	IngestionTime time.Time
 	MetaData      map[string]any
 }
-type FilterTest struct {
+type QueryTest struct {
 	name        string
-	images      []TestIngestionPayload
+	images      []QueryTestPayload
 	Filter      string
 	Order       string
 	WantFirstId im.ImageId
@@ -54,7 +55,7 @@ func findCollectionByName(cs []clc.Collection, name string) *clc.Collection {
 	return nil
 }
 
-func InitFilterTest(imr si.ImageRepo, cr sc.CollectionRepo, sm sm.MetaRepo, payloads []TestIngestionPayload) {
+func InitFilterTest(imr si.ImageRepo, cr sc.CollectionRepo, sm sm.MetaRepo, payloads []QueryTestPayload) {
 	var createdCollections []clc.Collection
 	for _, p := range payloads {
 		collection := findCollectionByName(createdCollections, p.Collection)
@@ -73,4 +74,19 @@ func InitFilterTest(imr si.ImageRepo, cr sc.CollectionRepo, sm sm.MetaRepo, payl
 		}
 	}
 
+}
+
+type ScrollerRepos struct {
+	si.ImageRepo
+	sc.CollectionRepo
+	sm.MetaRepo
+}
+
+func NewTestScrollerRepos(db *sqlx.DB) ScrollerRepos {
+	fp, op := si.MakeQueryParsers()
+	return ScrollerRepos{
+		ImageRepo:      si.NewImageRepo(db, fp, op),
+		CollectionRepo: sc.NewCollectionRepo(db),
+		MetaRepo:       sm.NewMetaRepo(db),
+	}
 }

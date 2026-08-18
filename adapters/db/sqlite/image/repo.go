@@ -5,81 +5,15 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"iter"
-	"strings"
-	"time"
-
-	"go.tomakado.io/dumbql/query"
-	"go.tomakado.io/dumbql/schema"
-
 	sq "github.com/Masterminds/squirrel"
 	adb "github.com/lejeunel/go-image-annotator/adapters/db"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	qu "github.com/lejeunel/go-image-annotator/modules/query"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
+	"iter"
+	"time"
 )
-
-func makeOrderingWindowExpr(parser OrderStrParser, function string, ordering im.OrderStr, outName string) (*string, error) {
-	if ordering == "" {
-		ordering = "image_id"
-	}
-	args, err := parser.Parse(ordering)
-	if err != nil {
-		return nil, err
-	}
-
-	var terms []string
-	for _, a := range args {
-		if a.Order == im.DescOrder {
-			terms = append(terms, a.Field+" "+"DESC")
-		} else {
-			terms = append(terms, a.Field)
-		}
-	}
-
-	res := function + " OVER (ORDER BY " + strings.Join(terms, ",") + ") " + outName
-	return &res, nil
-}
-
-func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
-	sb := schema.NewSchemaBuilder()
-	sb.AddField("collection", schema.Is[string]())
-	sb.AddField("ingested_at", schema.Is[string]())
-	sb.AddRegExpField(`^meta\..*$`, schema.Any(schema.Is[float64](), schema.Is[string](), schema.Is[bool]()))
-
-	rb := query.NewRenamerBuilder()
-	rb.Add(`\bcollection\b`, `collections.name`)
-	// rb.Add(`\bingested_at\b`, `i.ingested_at`)
-	rb.Add(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
-
-	filterParser := qu.NewFilterParser(
-		sb.Build(),
-		qu.WithRenamer(rb.Build()),
-	)
-	ob := qu.NewOrderParserBuilder()
-	ob.AddField("image_id")
-	ob.AddField("ingested_at")
-	ob.AddRegExpField(`^meta\..*$`)
-	ob.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
-	// rb.Add(`\bingested_at\b`, `i.ingested_at`)
-	// ob.AddRenameRule(`\bimage_id\b`, `i.id`)
-	// ob.AddRenameRule(`\bingested_at\b`, `i.ingested_at`)
-	// ob.AddRenameRule(`\bcollection\b`, `collections.name`)
-
-	orderParser := ob.Build()
-
-	return filterParser, orderParser
-}
-
-type OrderStrParser interface {
-	Parse(string) (im.OrderingArgs, error)
-}
-
-type FilterParser interface {
-	ParseToSql(q string) (*qu.SQLizer, error)
-}
 
 type ImageRepo struct {
 	Db adb.Querier
@@ -91,7 +25,7 @@ func NewImageRepo(db adb.Querier, fp FilterParser, op OrderStrParser) ImageRepo 
 	return ImageRepo{db, fp, op}
 }
 
-type Row struct {
+type BaseRow struct {
 	ImageId        im.ImageId         `db:"id"`
 	CollectionName clc.CollectionName `db:"name"`
 }
@@ -377,7 +311,7 @@ func (r ImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
 	}
-	records := []Row{}
+	records := []BaseRow{}
 	if err := r.Db.Select(&records, sql, args...); err != nil {
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
@@ -413,41 +347,32 @@ func (r ImageRepo) GetAdjacent(
 	f im.FilterStr,
 	o im.OrderStr,
 	d im.ScrollingDirection,
-) (*im.BaseImage, error) {
+) (*im.AdjacentImages, error) {
 
-	prevIdWinExpr, innerCountErr := makeOrderingWindowExpr(r.OrderStrParser, "LAG(image_id, 1)", o, "prev_id")
-	if innerCountErr != nil {
-		return nil, innerCountErr
-	}
-	prevCollectionWinExpr, innerCountErr := makeOrderingWindowExpr(r.OrderStrParser, "LAG(collection, 1)", o, "prev_collection")
-	if innerCountErr != nil {
-		return nil, innerCountErr
-	}
-	nextIdWinExpr, innerCountErr := makeOrderingWindowExpr(r.OrderStrParser, "LEAD(image_id, 1)", o, "next_id")
-	if innerCountErr != nil {
-		return nil, innerCountErr
-	}
-	nextCollectionWinExpr, innerCountErr := makeOrderingWindowExpr(r.OrderStrParser, "LEAD(collection, 1)", o, "next_collection")
-	if innerCountErr != nil {
-		return nil, innerCountErr
-	}
+	errCtx := fmt.Errorf("getting adjacent image records")
 
-	// fetch all images and apply filtering/ordering
-	all := sq.StatementBuilder.Select(
+	// fetch images images and apply filtering/ordering
+	images := sq.StatementBuilder.Select(
 		"i.id AS image_id",
 		"i.ingested_at AS ingested_at",
 		"collections.name AS collection",
 	).From(
 		"images_collections AS ic").Join(
 		"images AS i ON ic.image_id=i.id").Join(
-		"collections ON ic.collection_id=collections.id")
-	filtered, err := r.applyFilters(all, f)
+		"collections ON ic.collection_id=collections.id").LeftJoin(
+		"metadata AS m ON ic.image_id=m.image_id AND ic.collection_id=m.collection_id")
+	filtered, err := r.applyFilters(images, f)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: applying filters: %w", errCtx, err)
 	}
 	ordered, err := r.applyOrderingStr(*filtered, o)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: applying ordering: %w", errCtx, err)
+	}
+
+	windowExprs, err := makeAllWindowExprs(r.OrderStrParser, o)
+	if err != nil {
+		return nil, fmt.Errorf("%w: building window expressions: %w", errCtx, err)
 	}
 
 	// compute adjacencies
@@ -455,14 +380,14 @@ func (r ImageRepo) GetAdjacent(
 		"image_id AS image_id",
 		"collection AS collection",
 		"ingested_at",
-		*prevIdWinExpr,
-		*prevCollectionWinExpr,
-		*nextIdWinExpr,
-		*nextCollectionWinExpr,
+		windowExprs.prevId,
+		windowExprs.prevCollection,
+		windowExprs.nextId,
+		windowExprs.nextCollection,
 	).FromSelect(*ordered, "adjacency")
 
 	// remove current image/collection from adjacency list
-	adjSelf := sq.StatementBuilder.Select(
+	current := sq.StatementBuilder.Select(
 		"image_id AS image_id",
 		"collection AS collection",
 		"ingested_at",
@@ -474,7 +399,7 @@ func (r ImageRepo) GetAdjacent(
 		"image_id = ? AND collection= ?", currentId, currentCollection,
 	)
 
-	adjSql, adjArgs, err := adjSelf.ToSql()
+	adjSql, adjArgs, err := current.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
 	}
@@ -488,22 +413,13 @@ func (r ImageRepo) GetAdjacent(
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
 
-	var res im.BaseImage
-	if d == im.ScrollNext {
-		if row.NextId == nil {
-			return nil, nil
-		}
-		res.ImageId = *row.NextId
-		res.Collection = *row.NextCollection
-
-	} else {
-		if row.PrevId == nil {
-			return nil, nil
-		}
-		res.ImageId = *row.PrevId
-		res.Collection = *row.PrevCollection
-
+	result := im.AdjacentImages{}
+	if (row.NextId != nil) && (row.NextCollection != nil) {
+		result.Next = &im.BaseImage{ImageId: *row.NextId, Collection: *row.NextCollection}
+	}
+	if (row.PrevId != nil) && (row.PrevCollection != nil) {
+		result.Prev = &im.BaseImage{ImageId: *row.PrevId, Collection: *row.PrevCollection}
 	}
 
-	return &res, nil
+	return &result, nil
 }

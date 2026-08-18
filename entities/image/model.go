@@ -19,6 +19,11 @@ type RawImage struct {
 	Hash string
 }
 
+type AdjacentImages struct {
+	Prev *BaseImage
+	Next *BaseImage
+}
+
 type BaseImage struct {
 	ImageId    ImageId
 	Collection string

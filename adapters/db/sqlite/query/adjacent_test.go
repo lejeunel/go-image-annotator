@@ -1,4 +1,4 @@
-package image
+package query
 
 import (
 	"slices"
@@ -8,6 +8,7 @@ import (
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	st "github.com/lejeunel/go-image-annotator/shared/testing"
 	"github.com/stretchr/testify/assert"
@@ -29,15 +30,16 @@ func TestInternalErrOnGetAdjacent(t *testing.T) {
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
-type TestIngestionPayload struct {
+type AdjTestPayload struct {
 	ImageId       im.ImageId
 	Collection    string
 	IngestionTime time.Time
+	Meta          []m.MetaData
 }
 
-type AdjacencyTest struct {
+type AdjTest struct {
 	name   string
-	images []TestIngestionPayload
+	images []AdjTestPayload
 	im.FilterStr
 	im.OrderStr
 	currentImage       im.ImageId
@@ -48,16 +50,7 @@ type AdjacencyTest struct {
 	wantNextCollection string
 }
 
-func findCollectionByName(cs []clc.Collection, name string) *clc.Collection {
-	for _, c := range cs {
-		if c.Name == name {
-			return &c
-		}
-	}
-	return nil
-}
-
-func InitAdjacencyTest(repos ScrollerRepos, payloads []TestIngestionPayload) {
+func InitAdjacencyTest(repos ScrollerRepos, payloads []AdjTestPayload) {
 	var createdCollections []clc.Collection
 	var createdImages []im.ImageId
 	for _, p := range payloads {
@@ -81,14 +74,19 @@ func InitAdjacencyTest(repos ScrollerRepos, payloads []TestIngestionPayload) {
 		if err := repos.ImageRepo.AddToCollection(image.Id, collection.Name); err != nil {
 			panic(err)
 		}
+		for _, m := range p.Meta {
+			if err := repos.MetaRepo.Add(collection.Name, image.Id, m.Key, m.Value); err != nil {
+				panic(err)
+			}
+		}
 	}
 
 }
 
-var tests = []AdjacencyTest{
+var adjTests = []AdjTest{
 	{"single image has no adjacents",
-		[]TestIngestionPayload{
-			{*st.IdFromInt(0), "a-collection", time.Now()}},
+		[]AdjTestPayload{
+			{*st.IdFromInt(0), "a-collection", time.Now(), nil}},
 		"",
 		"",
 		*st.IdFromInt(0),
@@ -99,9 +97,9 @@ var tests = []AdjacencyTest{
 		"",
 	},
 	{"one image per collection has no adjacents",
-		[]TestIngestionPayload{
-			{*st.IdFromInt(0), "a-collection", time.Now()},
-			{*st.IdFromInt(1), "another-collection", time.Now()}},
+		[]AdjTestPayload{
+			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(1), "another-collection", time.Now(), nil}},
 		"collection:\"a-collection\"",
 		"",
 		*st.IdFromInt(0),
@@ -112,10 +110,10 @@ var tests = []AdjacencyTest{
 		"",
 	},
 	{"two images in one collection",
-		[]TestIngestionPayload{
-			{*st.IdFromInt(0), "a-collection", time.Now()},
-			{*st.IdFromInt(1), "a-collection", time.Now()},
-			{*st.IdFromInt(2), "another-collection", time.Now()}},
+		[]AdjTestPayload{
+			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(1), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(2), "another-collection", time.Now(), nil}},
 		"collection:\"a-collection\"",
 		"ingested_at",
 		*st.IdFromInt(0),
@@ -126,10 +124,10 @@ var tests = []AdjacencyTest{
 		"a-collection",
 	},
 	{"order by ingestion time ascending",
-		[]TestIngestionPayload{
-			{*st.IdFromInt(2), "a-collection", time.Now()},
-			{*st.IdFromInt(1), "a-collection", time.Now()},
-			{*st.IdFromInt(0), "a-collection", time.Now()},
+		[]AdjTestPayload{
+			{*st.IdFromInt(2), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(1), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
 		},
 		"",
 		"ingested_at",
@@ -141,10 +139,10 @@ var tests = []AdjacencyTest{
 		"a-collection",
 	},
 	{"order by ingestion time descending",
-		[]TestIngestionPayload{
-			{*st.IdFromInt(0), "a-collection", time.Now()},
-			{*st.IdFromInt(1), "a-collection", time.Now()},
-			{*st.IdFromInt(2), "a-collection", time.Now()},
+		[]AdjTestPayload{
+			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(1), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(2), "a-collection", time.Now(), nil},
 		},
 		"",
 		"ingested_at:desc",
@@ -155,11 +153,11 @@ var tests = []AdjacencyTest{
 		st.IdFromInt(0),
 		"a-collection",
 	},
-	{"order by id by default",
-		[]TestIngestionPayload{
-			{*st.IdFromInt(1), "a-collection", time.Now()},
-			{*st.IdFromInt(0), "a-collection", time.Now()},
-			{*st.IdFromInt(2), "a-collection", time.Now()},
+	{"order by image id by default",
+		[]AdjTestPayload{
+			{*st.IdFromInt(1), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(2), "a-collection", time.Now(), nil},
 		},
 		"",
 		"",
@@ -171,10 +169,10 @@ var tests = []AdjacencyTest{
 		"a-collection",
 	},
 	{"order by id desc",
-		[]TestIngestionPayload{
-			{*st.IdFromInt(1), "a-collection", time.Now()},
-			{*st.IdFromInt(2), "a-collection", time.Now()},
-			{*st.IdFromInt(0), "a-collection", time.Now()},
+		[]AdjTestPayload{
+			{*st.IdFromInt(1), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(2), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
 		},
 		"",
 		"image_id:desc",
@@ -185,28 +183,54 @@ var tests = []AdjacencyTest{
 		st.IdFromInt(0),
 		"a-collection",
 	},
+	{"same image in two collections",
+		[]AdjTestPayload{
+			{*st.IdFromInt(0), "collection-v1", time.Now(), nil},
+			{*st.IdFromInt(0), "collection-v2", time.Now(), nil}},
+		"",
+		"collection",
+		*st.IdFromInt(0),
+		"collection-v1",
+		nil,
+		"",
+		st.IdFromInt(0),
+		"collection-v2",
+	},
+	{"filter by meta",
+		[]AdjTestPayload{
+			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
+			{*st.IdFromInt(1), "a-collection", time.Now(), []m.MetaData{{Key: "is-active", Value: true}}},
+			{*st.IdFromInt(2), "another-collection", time.Now(), []m.MetaData{{Key: "is-active", Value: true}}}},
+		"meta.is-active?",
+		"",
+		*st.IdFromInt(1),
+		"a-collection",
+		nil,
+		"",
+		st.IdFromInt(2),
+		"another-collection",
+	},
 }
 
 func TestAdjacency(t *testing.T) {
-	for _, tt := range tests {
+	for _, tt := range adjTests {
 		t.Run(tt.name, func(t *testing.T) {
 			repos := NewTestScrollerRepos(s.NewInMemory())
 			InitAdjacencyTest(repos, tt.images)
-			prev, err := repos.ImageRepo.GetAdjacent(tt.currentImage, tt.currentCollection, tt.FilterStr, tt.OrderStr, im.ScrollPrevious)
-			assert.NoError(t, err)
-			next, err := repos.ImageRepo.GetAdjacent(tt.currentImage, tt.currentCollection, tt.FilterStr, tt.OrderStr, im.ScrollNext)
+
+			adj, err := repos.ImageRepo.GetAdjacent(tt.currentImage, tt.currentCollection, tt.FilterStr, tt.OrderStr, im.ScrollPrevious)
 			assert.NoError(t, err)
 			if tt.wantPrev == nil {
-				assert.Nil(t, prev, "previous")
+				assert.Nil(t, adj.Prev, "previous")
 			} else {
-				assert.NotNil(t, prev)
-				assert.Equal(t, tt.wantPrev.String(), prev.ImageId.String())
+				assert.NotNil(t, adj.Prev)
+				assert.Equal(t, tt.wantPrev.String(), adj.Prev.ImageId.String())
 			}
 			if tt.wantNext == nil {
-				assert.Nil(t, next, "next")
+				assert.Nil(t, adj.Next, "next")
 			} else {
-				assert.NotNil(t, next)
-				assert.Equal(t, tt.wantNext.String(), next.ImageId.String())
+				assert.NotNil(t, adj.Next)
+				assert.Equal(t, tt.wantNext.String(), adj.Next.ImageId.String())
 			}
 		})
 	}

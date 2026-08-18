@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var tests = []FilterTest{
+var queryTests = []QueryTest{
 	{"filter by collection",
-		[]TestIngestionPayload{
+		[]QueryTestPayload{
 			{*st.IdFromInt(0), "first-collection", time.Now(), nil},
 			{*st.IdFromInt(1), "second-collection", time.Now(), nil}},
 		"collection:\"first-collection\"",
@@ -21,7 +21,7 @@ var tests = []FilterTest{
 		1,
 	},
 	{"order by ingested_at",
-		[]TestIngestionPayload{
+		[]QueryTestPayload{
 			{*st.IdFromInt(0), "first-collection", MustParseTime("2026-08-25"), nil},
 			{*st.IdFromInt(1), "first-collection", MustParseTime("2026-08-01"), nil}},
 		"",
@@ -30,7 +30,7 @@ var tests = []FilterTest{
 		2,
 	},
 	{"order by ingested_at descending",
-		[]TestIngestionPayload{
+		[]QueryTestPayload{
 			{*st.IdFromInt(0), "first-collection", MustParseTime("2026-08-25"), nil},
 			{*st.IdFromInt(1), "first-collection", MustParseTime("2026-08-01"), nil}},
 		"",
@@ -39,7 +39,7 @@ var tests = []FilterTest{
 		2,
 	},
 	{"filter by ingestion",
-		[]TestIngestionPayload{
+		[]QueryTestPayload{
 			{*st.IdFromInt(0), "first-collection", MustParseTime("2026-08-01"), nil},
 			{*st.IdFromInt(1), "first-collection", MustParseTime("2026-08-10"), nil}},
 		"ingested_at>\"2026-08-02\"",
@@ -48,7 +48,7 @@ var tests = []FilterTest{
 		1,
 	},
 	{"filter by metadata bool value",
-		[]TestIngestionPayload{
+		[]QueryTestPayload{
 			{*st.IdFromInt(0), "first-collection", time.Now(), map[string]any{"active": true}},
 			{*st.IdFromInt(1), "first-collection", time.Now(), nil}},
 		"meta.active",
@@ -57,7 +57,7 @@ var tests = []FilterTest{
 		1,
 	},
 	{"filter by metadata integer",
-		[]TestIngestionPayload{
+		[]QueryTestPayload{
 			{*st.IdFromInt(0), "first-collection", time.Now(), map[string]any{"score": 1}},
 			{*st.IdFromInt(1), "first-collection", time.Now(), map[string]any{"score": 10}}},
 		"meta.score > 5",
@@ -66,7 +66,7 @@ var tests = []FilterTest{
 		1,
 	},
 	{"filter by metadata date",
-		[]TestIngestionPayload{
+		[]QueryTestPayload{
 			{*st.IdFromInt(0), "first-collection", time.Now(), map[string]any{"captured_at": "2026-08-01"}},
 			{*st.IdFromInt(1), "first-collection", time.Now(), map[string]any{"captured_at": "2026-08-30"}}},
 		"meta.captured_at < \"2026-08-15\"",
@@ -75,7 +75,7 @@ var tests = []FilterTest{
 		1,
 	},
 	{"order by metadata date field",
-		[]TestIngestionPayload{
+		[]QueryTestPayload{
 			{*st.IdFromInt(0), "first-collection", time.Now(), map[string]any{"captured_at": "2026-08-30"}},
 			{*st.IdFromInt(1), "first-collection", time.Now(), map[string]any{"captured_at": "2026-08-01"}}},
 		"",
@@ -84,7 +84,7 @@ var tests = []FilterTest{
 		2,
 	},
 	{"filter by metadata bool value with special char in name",
-		[]TestIngestionPayload{
+		[]QueryTestPayload{
 			{*st.IdFromInt(0), "first-collection", time.Now(), map[string]any{"is-active": true}},
 			{*st.IdFromInt(1), "first-collection", time.Now(), nil}},
 		"meta.is-active",
@@ -95,7 +95,7 @@ var tests = []FilterTest{
 }
 
 func TestFiltering(t *testing.T) {
-	for _, tt := range tests {
+	for _, tt := range queryTests {
 		t.Run(tt.name, func(t *testing.T) {
 			cr, imr, mr := Setup()
 			InitFilterTest(imr, cr, mr, tt.images)

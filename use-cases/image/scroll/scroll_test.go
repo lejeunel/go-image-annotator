@@ -74,9 +74,10 @@ func TestGetAdjacent(t *testing.T) {
 	nextId, prevId := im.NewImageId(), im.NewImageId()
 	next := im.BaseImage{ImageId: nextId, Collection: collection}
 	prev := im.BaseImage{ImageId: prevId, Collection: collection}
-	itr.ImageRepo = &fk.ImageRepo{NextImage: next, PreviousImage: prev}
+	adj := im.AdjacentImages{Next: &next, Prev: &prev}
+	itr.ImageRepo = &fk.ImageRepo{Adjacent: adj}
 	itr.Execute(t.Context(), Request{CurrentImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotSuccess)
-	assert.Equal(t, nextId.String(), p.Got.Next.ImageId.String())
-	assert.Equal(t, prevId.String(), p.Got.Prev.ImageId.String())
+	assert.Equal(t, nextId.String(), p.Got.Adj.Next.ImageId.String())
+	assert.Equal(t, prevId.String(), p.Got.Adj.Prev.ImageId.String())
 }

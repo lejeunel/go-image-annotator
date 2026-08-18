@@ -6,6 +6,6 @@ import (
 )
 
 type ImageRepo interface {
-	GetAdjacent(im.ImageId, clc.CollectionName, im.FilterStr, im.OrderStr, im.ScrollingDirection) (*im.BaseImage, error)
+	GetAdjacent(im.ImageId, clc.CollectionName, im.FilterStr, im.OrderStr, im.ScrollingDirection) (*im.AdjacentImages, error)
 	ImageExists(imageId im.ImageId) (bool, error)
 }

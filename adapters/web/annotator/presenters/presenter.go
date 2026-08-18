@@ -22,7 +22,7 @@ func (p *AnnotationPagePresenter) SetView(view v.View) *AnnotationPagePresenter 
 }
 
 func (p AnnotationPagePresenter) SuccessScroll(r scroll.Response) {
-	p.View.SetScroller(MakeScrollerButtons(r.Prev, r.Next))
+	p.View.SetScroller(MakeScrollerButtons(r.Adj))
 	p.View.SetQuery(r.FilterStr, r.OrderStr)
 }
 
