@@ -1,7 +1,6 @@
 package image
 
 import (
-	"fmt"
 	"slices"
 	"testing"
 	"time"
@@ -195,9 +194,7 @@ func TestAdjacency(t *testing.T) {
 			InitAdjacencyTest(repos, tt.images)
 			prev, err := repos.ImageRepo.GetAdjacent(tt.currentImage, tt.currentCollection, tt.FilterStr, tt.OrderStr, im.ScrollPrevious)
 			assert.NoError(t, err)
-			fmt.Println(prev)
 			next, err := repos.ImageRepo.GetAdjacent(tt.currentImage, tt.currentCollection, tt.FilterStr, tt.OrderStr, im.ScrollNext)
-			fmt.Println(next)
 			assert.NoError(t, err)
 			if tt.wantPrev == nil {
 				assert.Nil(t, prev, "previous")

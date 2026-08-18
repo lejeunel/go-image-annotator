@@ -50,7 +50,7 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 	sb.AddRegExpField(`^meta\..*$`, schema.Any(schema.Is[float64](), schema.Is[string](), schema.Is[bool]()))
 
 	rb := query.NewRenamerBuilder()
-	// rb.Add(`\bcollection\b`, `collections.name`)
+	rb.Add(`\bcollection\b`, `collections.name`)
 	// rb.Add(`\bingested_at\b`, `i.ingested_at`)
 	rb.Add(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
 
@@ -431,6 +431,8 @@ func (r ImageRepo) GetAdjacent(
 	if innerCountErr != nil {
 		return nil, innerCountErr
 	}
+
+	// fetch all images and apply filtering/ordering
 	all := sq.StatementBuilder.Select(
 		"i.id AS image_id",
 		"i.ingested_at AS ingested_at",
@@ -448,6 +450,7 @@ func (r ImageRepo) GetAdjacent(
 		return nil, err
 	}
 
+	// compute adjacencies
 	adj := sq.StatementBuilder.Select(
 		"image_id AS image_id",
 		"collection AS collection",
@@ -458,6 +461,7 @@ func (r ImageRepo) GetAdjacent(
 		*nextCollectionWinExpr,
 	).FromSelect(*ordered, "adjacency")
 
+	// remove current image/collection from adjacency list
 	adjSelf := sq.StatementBuilder.Select(
 		"image_id AS image_id",
 		"collection AS collection",
@@ -485,7 +489,6 @@ func (r ImageRepo) GetAdjacent(
 	}
 
 	var res im.BaseImage
-	fmt.Printf("got adjacencies %+v\n", row)
 	if d == im.ScrollNext {
 		if row.NextId == nil {
 			return nil, nil
