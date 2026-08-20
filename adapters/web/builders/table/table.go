@@ -8,7 +8,7 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-const placeHolderText = "There is nothing here yet..."
+const placeHolderText = "Oh so empty..."
 
 type TableBuilder struct {
 	fields      []string
@@ -48,10 +48,10 @@ func (t *TableBuilder) Build() Node {
 	}
 	return Div(
 		Class(
-			"overflow-hidden overflow-x-auto rounded-radius border border-outline dark:border-outline-dark",
+			"w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark",
 		),
 		Table(
-			Class("table-auto w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
+			Class("table-fixed w-full text-left text-sm text-on-surface dark:text-on-surface-dark"),
 			TableHeader(t.fields),
 			TableBody(t.rows),
 		),
@@ -80,7 +80,7 @@ func (r Row) Build() Node {
 		Class("even:bg-primary/5 dark:even:bg-primary-dark/10"),
 		Map(r.Cells, func(c Cell) Node {
 			return Td(
-				Class(strings.Join([]string{"p-2", c.ExtraClass}, " ")),
+				Class(strings.Join([]string{"p-2 break-all", c.ExtraClass}, " ")),
 				Attr(c.ExtraAttr),
 				c.Content)
 		}))

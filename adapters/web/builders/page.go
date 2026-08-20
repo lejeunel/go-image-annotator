@@ -140,7 +140,7 @@ func (b *PageBuilder) Render(w io.Writer) {
 			content,
 			Div(
 				Class(
-					"text-2xl/7 font-bold text-white sm:truncate sm:text-3xl sm:tracking-tight font-roboto",
+					"text-2xl/7 font-bold sm:truncate sm:text-3xl sm:tracking-tight font-roboto",
 				),
 				Text(b.Title),
 			),
@@ -151,17 +151,16 @@ func (b *PageBuilder) Render(w io.Writer) {
 		content = Div(
 			content,
 			Div(
-				Class("flex flex-col w-full"),
+				Class("flex flex-col w-fit"),
 				Article(Class("prose dark:prose-invert max-w-none mb-4"), Raw(b.markdownPreamble)),
 			),
 		)
 	}
 
-	// content = Div(Class("flex flex-col w-full"), content)
-	content = Div(Class("flex-1 min-w-0"), content, b.content)
+	content = Div(Class("flex-1 flex flex-col items-center"), Div(Class("flex flex-col w-250"), content, b.content))
 
 	if b.postamble != "" {
-		content = Div(content, Div(Class("flex flex-col w-150 mt-4"), cmp.Separator,
+		content = Div(content, Div(Class("flex flex-col w-full mt-4"), cmp.Separator,
 			Article(Class("prose dark:prose-invert max-w-none"), Raw(b.postamble))))
 	}
 
@@ -174,11 +173,11 @@ func (b *PageBuilder) Render(w io.Writer) {
 		}
 		sidebar.Render(&bufSidebar)
 		content = Div(
-			Class("relative flex w-full flex-col"),
+			Class("relative flex flex-col"),
 			Nav(
 				Attr("x-cloak"),
 				Class(
-					`fixed left-0 top-14 z-20 flex h-svh w-60 shrink-0 flex-col border-r border-outline bg-surface-alt p-4 transition-transform duration-300
+					`fixed left-0 top-14 z-20 flex h-svh w-60 flex-col border-r border-outline bg-surface-alt p-4 transition-transform duration-300
                       dark:border-outline-dark dark:bg-surface-dark-alt`,
 				),
 				Raw(bufSidebar.String()),
@@ -186,7 +185,7 @@ func (b *PageBuilder) Render(w io.Writer) {
 			Div(Class("ml-60 px-4 py-18"), content),
 		)
 	} else {
-		content = Div(Class("flex overflow-hidden w-full px-4 py-18"), content)
+		content = Div(Class("flex w-full px-4 py-18 justify-center"), content)
 	}
 
 	queryModalTemplate, err := template.New("").Parse(queryModal)

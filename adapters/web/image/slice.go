@@ -7,7 +7,7 @@ import (
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
-	ew "github.com/lejeunel/go-image-annotator/adapters/web/error"
+	htmx "github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
@@ -16,7 +16,7 @@ import (
 type SlicePresenter struct {
 	b.PaginatedListBuilder
 	io.Writer
-	ew.ErrorPresenter
+	htmx.ErrorPresenter
 	im.FilterStr
 	im.OrderStr
 }
@@ -34,7 +34,7 @@ func NewSlicePresenter(
 **ordering**: %v
 `, filters, ordering))
 	b := b.NewPaginatedListBuilder(p, listImagesFields)
-	return SlicePresenter{b, w, ew.NewErrorPresenter(w), filters, ordering}
+	return SlicePresenter{b, w, htmx.NewErrorPresenter("querying", w), filters, ordering}
 }
 
 func (p SlicePresenter) SuccessListImages(r list.Response) {

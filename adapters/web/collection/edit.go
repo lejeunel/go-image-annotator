@@ -23,7 +23,7 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	group := r.FormValue(groupFieldName)
-	if group != publicGroupPlaceholderName {
+	if group != "" {
 		req.NewGroup = &group
 	}
 
@@ -63,7 +63,7 @@ func (p *EditPresenter) SuccessFindCollection(c clc.Collection) {
 }
 
 func (p *EditPresenter) SuccessListGroups(groups []grp.Group) {
-	cb := p.Form.AddCombobox("Group", groupFieldName)
+	cb := p.Form.AddCombobox("Group", groupFieldName, publicGroupPlaceholderName)
 	cb.AddField(publicGroupPlaceholderName)
 	for _, group := range groups {
 		cb.AddField(group.Name)

@@ -23,7 +23,7 @@ func (s *Server) Route(r chi.Router,
 		r.Get(ingestPanelUrl, s.IngestionPanel)
 		r.Post(archiveIngestUrl, s.IngestArchive)
 
-		r.Get(rt.SliceUrl, s.Slice)
+		r.Post(rt.SliceUrl, s.Slice)
 	})
 }
 

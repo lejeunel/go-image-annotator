@@ -15,6 +15,7 @@ import (
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
+	uuid "github.com/lejeunel/go-image-annotator/shared/uuid"
 	find_im "github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	list_im "github.com/lejeunel/go-image-annotator/use-cases/image/list"
@@ -68,7 +69,7 @@ func makeImageRow(image im.Image, urlFunc ImageURLFunc) tb.Row {
 		"collection", image.Collection.Name,
 		"mode", "confirm-delete"))
 	row := tb.NewRow()
-	row.AddCell(tb.NewCell(cmp.MakeTextLink(link, image.Id.String())))
+	row.AddCell(tb.NewCell(cmp.MakeTextLink(link, uuid.ShortenUUID(image.Id.String()))))
 	row.AddCell(tb.NewCell(Text(image.Collection.Name)))
 	row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(image.Specs.IngestedAt))))
 	row.AddCell(tb.NewCell(Text(strconv.Itoa(image.NumAnnotations()))))

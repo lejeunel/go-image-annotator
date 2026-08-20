@@ -352,6 +352,9 @@
   .z-100 {
     z-index: 100;
   }
+  .z-110 {
+    z-index: 110;
+  }
   .container {
     width: 100%;
     @media (width >= 40rem) {
@@ -964,6 +967,9 @@
   .w-180 {
     width: calc(var(--spacing) * 180);
   }
+  .w-250 {
+    width: calc(var(--spacing) * 250);
+  }
   .w-fit {
     width: fit-content;
   }
@@ -1018,8 +1024,8 @@
   .grow {
     flex-grow: 1;
   }
-  .table-auto {
-    table-layout: auto;
+  .table-fixed {
+    table-layout: fixed;
   }
   .border-collapse {
     border-collapse: collapse;
@@ -1546,6 +1552,9 @@
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
   }
+  .text-\[10px\] {
+    font-size: 10px;
+  }
   .leading-tight {
     --tw-leading: var(--leading-tight);
     line-height: var(--leading-tight);
@@ -1666,9 +1675,6 @@
   }
   .text-warning {
     color: var(--color-warning);
-  }
-  .text-white {
-    color: var(--color-white);
   }
   .capitalize {
     text-transform: capitalize;

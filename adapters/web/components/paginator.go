@@ -54,7 +54,7 @@ func MakePaginator(baseURL string, currentPage, lastPage, numItems, totalItems i
 	nextURL := s.URLWithQuery(*parsedBaseURL, "page", strconv.Itoa(currentPage+1))
 	return Nav(Aria("label", "pagination"),
 		Ul(
-			Class("flex shrink-0 items-center gap-2 text-sm font-medium"),
+			Class("flex w-fit items-center gap-2 text-sm font-medium"),
 			If(
 				currentPage > 1,
 				Li(MakeNavigationButton(prevURL.String(), true, im.ScrollPrevious, "Previous")),

@@ -89,8 +89,8 @@ func (b *HTMXInlineFormBuilder) AddSelectableCombobox(title, id string) *Selecta
 	return &box
 }
 
-func (b *HTMXInlineFormBuilder) AddCombobox(title, id string) *Combobox {
-	box := NewCombobox(title, id)
+func (b *HTMXInlineFormBuilder) AddCombobox(title, id, defaultValue string) *Combobox {
+	box := NewCombobox(title, id, defaultValue)
 	b.fields = append(b.fields, &box)
 	return &box
 }

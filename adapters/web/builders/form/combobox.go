@@ -19,6 +19,7 @@ type ComboboxData struct {
 	Value         string
 	Options       []ComboboxField
 	SelectedValue string
+	DefaultValue  string
 }
 
 type Combobox struct {
@@ -26,10 +27,11 @@ type Combobox struct {
 	id            string
 	fields        []ComboboxField
 	selectedValue *string
+	defaultValue  string
 }
 
-func NewCombobox(title, id string) Combobox {
-	return Combobox{title: title, id: id}
+func NewCombobox(title, id, d string) Combobox {
+	return Combobox{title: title, id: id, defaultValue: d}
 }
 
 func (f *Combobox) AddField(value string) *Combobox {
@@ -48,7 +50,7 @@ func (f *Combobox) Render(w io.Writer) {
 	if err != nil {
 		panic(err)
 	}
-	data := ComboboxData{ID: f.id, Title: f.title, Options: f.fields}
+	data := ComboboxData{ID: f.id, Title: f.title, Options: f.fields, DefaultValue: f.defaultValue}
 	if f.selectedValue != nil {
 		data.SelectedValue = *f.selectedValue
 	} else {

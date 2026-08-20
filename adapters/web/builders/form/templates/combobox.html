@@ -69,7 +69,7 @@
             aria-haspopup="listbox"
             aria-controls="{{ .ID }}-list"
             :aria-expanded="isOpen || openedWithKeyboard"
-            :aria-label="selectedOption?.label || 'Please Select'"
+            :aria-label="selectedOption?.label || '{{.DefaultValue}}'"
             @click="isOpen = !isOpen"
             @keydown.down.prevent="openedWithKeyboard = true"
             @keydown.enter.prevent="openedWithKeyboard = true"
@@ -90,7 +90,7 @@
 
             <span
                 class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left"
-                x-text="selectedOption?.label || 'Please Select'"
+                x-text="selectedOption?.label || '{{.DefaultValue}}'"
             ></span>
 
             <svg
