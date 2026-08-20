@@ -2,7 +2,6 @@ package image
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
@@ -15,7 +14,7 @@ import (
 
 type SlicePresenter struct {
 	b.PaginatedListBuilder
-	io.Writer
+	Writer http.ResponseWriter
 	htmx.ErrorPresenter
 	im.FilterStr
 	im.OrderStr
@@ -45,6 +44,8 @@ func (p SlicePresenter) SuccessListImages(r list.Response) {
 	for _, im := range r.Images {
 		p.AddRow(makeImageRow(im, MakeAnnotateImageURLFunc(im, p.FilterStr, p.OrderStr)))
 	}
+	p.Writer.Header().Set("HX-Push-Url", baseURL.String())
+
 	p.Render(p.Writer)
 }
 
