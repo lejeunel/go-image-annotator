@@ -1,6 +1,7 @@
 package collection
 
 import (
+	"fmt"
 	"net/http"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
@@ -43,7 +44,7 @@ type EditPresenter struct {
 func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 	task := "Updating collection"
 	okMessageFunc := func(r update.Response) string {
-		return "Successfully updated collection"
+		return fmt.Sprintf("Successfully updated %v", r.OriginalName)
 	}
 	form := bf.NewHTMXInlineFormBuilder(len(listCollectionsFields), u.Url)
 	return EditPresenter{w, task, okMessageFunc, form, htmx.NewErrorPresenter(task, w), nil}

@@ -8,6 +8,7 @@ type Request struct {
 }
 
 type Response struct {
-	Name        string
-	Description string
+	OriginalName string
+	Name         string
+	Description  string
 }

@@ -913,6 +913,9 @@
   .h-14 {
     height: calc(var(--spacing) * 14);
   }
+  .h-64 {
+    height: calc(var(--spacing) * 64);
+  }
   .h-90 {
     height: calc(var(--spacing) * 90);
   }
@@ -1002,6 +1005,9 @@
   }
   .min-w-48 {
     min-width: calc(var(--spacing) * 48);
+  }
+  .min-w-64 {
+    min-width: calc(var(--spacing) * 64);
   }
   .min-w-80 {
     min-width: calc(var(--spacing) * 80);

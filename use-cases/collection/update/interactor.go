@@ -98,7 +98,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.SuccessUpdateCollection(Response{Name: r.NewName, Description: r.NewDescription})
+	out.SuccessUpdateCollection(Response{OriginalName: r.Name, Name: r.NewName, Description: r.NewDescription})
 }
 
 func (i Interactor) ensureCollectionNameExists(name string) error {
