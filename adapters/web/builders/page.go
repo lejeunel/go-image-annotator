@@ -18,6 +18,24 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
+type PageColumnMode int
+
+const (
+	PageColumnThinMode PageColumnMode = iota
+	PageColumnExpandMode
+)
+
+func (m PageColumnMode) Class() Node {
+	switch m {
+	case PageColumnThinMode:
+		return Class("flex flex-col w-250")
+	case PageColumnExpandMode:
+		return Class("flex flex-col w-full")
+	default:
+		return Class("flex flex-col w-250")
+	}
+}
+
 //go:embed scripts/detect_os.js
 var detectOs string
 
@@ -44,6 +62,7 @@ type PageBuilder struct {
 	postamble           string
 	content             Node
 	Title               string
+	columnMode          PageColumnMode
 	BasePageBuilder
 }
 
@@ -54,6 +73,11 @@ func NewPageBuilder(base BasePageBuilder, version g.Info) PageBuilder {
 	}
 	pb.AddScripts(Script(Raw(detectOs)))
 	return pb
+}
+
+func (b *PageBuilder) SetExpanded() *PageBuilder {
+	b.columnMode = PageColumnExpandMode
+	return b
 }
 
 func (b *PageBuilder) SetHTMLTitle(title string) *PageBuilder {
@@ -157,12 +181,13 @@ func (b *PageBuilder) Render(w io.Writer) {
 		)
 	}
 
-	content = Div(Class("flex-1 flex flex-col items-center"), Div(Class("flex flex-col w-250"), content, b.content))
-
+	var postamble Node
 	if b.postamble != "" {
-		content = Div(content, Div(Class("flex flex-col w-full mt-4"), cmp.Separator,
-			Article(Class("prose dark:prose-invert max-w-none"), Raw(b.postamble))))
+		postamble = Div(Class("flex flex-col w-full mt-4"), cmp.Separator,
+			Article(Class("prose dark:prose-invert max-w-none"), Raw(b.postamble)))
 	}
+
+	content = Div(Class("flex-1 flex flex-col items-center"), Div(b.columnMode.Class(), content, b.content, postamble))
 
 	if len(b.SidebarEntries) > 0 {
 		var bufSidebar bytes.Buffer

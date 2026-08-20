@@ -15,6 +15,7 @@ var signInTitle = "Sign in to ImageAnnotator"
 type OAuthProvider struct {
 	Name string
 	URL  string
+	Icon string
 }
 
 type LoginPageBuilder struct {
@@ -26,8 +27,8 @@ func NewLoginPageBuilder(base BasePageBuilder) LoginPageBuilder {
 	return LoginPageBuilder{BasePageBuilder: *base.SetHTMLTitle("Login")}
 }
 
-func (b *LoginPageBuilder) AddOAuthProvider(provider, url string) *LoginPageBuilder {
-	b.OAuthProviders = append(b.OAuthProviders, OAuthProvider{Name: provider, URL: url})
+func (b *LoginPageBuilder) AddOAuthProvider(provider, url, icon string) *LoginPageBuilder {
+	b.OAuthProviders = append(b.OAuthProviders, OAuthProvider{Name: provider, URL: url, Icon: icon})
 	return b
 }
 
@@ -36,7 +37,7 @@ func (b *LoginPageBuilder) makeContent() Node {
 	for _, p := range b.OAuthProviders {
 		button := A(Href(p.URL),
 			Class(s.OAuthButtonClass),
-			Text(fmt.Sprintf("Continue with %v", p.Name)))
+			Div(Class("flex items-center justify-center gap-2"), Div(Class("w-5 h-5 shrink-0 [&>svg]:w-full [&>svg]:h-full"), Raw(p.Icon)), Text(fmt.Sprintf("Continue with %v", p.Name))))
 		oauthButtons = append(oauthButtons, button)
 	}
 	return Div(Class("flex justify-center"),

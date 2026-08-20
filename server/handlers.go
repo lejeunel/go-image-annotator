@@ -24,6 +24,7 @@ func APIDocsHandlerFunc(specsPath string, pb b.PageBuilder) http.HandlerFunc {
 		content := Div(Raw("<redoc spec-url='/api/openapi.yaml'></redoc>"),
 			Script(Src("/static/redoc.standalone.js")))
 		pb.SetUserIdentity(r.Context())
+		pb.SetExpanded()
 		pb.SetHTMLTitle("API Docs")
 		pb.SetActiveSection(cmp.APIDocsPageActive)
 		pb.SetContent(Div(Class("bg-white"), content))

@@ -1,10 +1,12 @@
 package auth
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -26,11 +28,12 @@ func (s Server) OAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func MaybeSetupGoogle(pb *b.LoginPageBuilder, baseURL string) {
+func MaybeSetupGoogle(pb *b.LoginPageBuilder, baseURL string, logger slog.Logger) {
 	id := os.Getenv("GOIA_GOOGLE_CLIENT_ID")
 	secret := os.Getenv("GOIA_GOOGLE_CLIENT_SECRET")
 	if (id != "") && (secret != "") {
-		pb.AddOAuthProvider("google", rt.MakeOAuthLoginURL("google"))
-		goth.UseProviders(google.New(id, secret, rt.MakeOAuthCallbackURL(baseURL, "google")))
+		logger.Info("setting up google auth")
+		pb.AddOAuthProvider(ProviderNameGoogle, rt.MakeOAuthLoginURL(ProviderNameGoogle), ic.Google)
+		goth.UseProviders(google.New(id, secret, rt.MakeOAuthCallbackURL(baseURL, ProviderNameGoogle)))
 	}
 }

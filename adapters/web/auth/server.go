@@ -31,7 +31,7 @@ func New(
 	resForgottenPw respw.Interactor,
 ) Server {
 	loginPageBuilder := b.NewLoginPageBuilder(basePageBuilder)
-	MaybeSetupGoogle(&loginPageBuilder, baseURL)
+	MaybeSetupGoogle(&loginPageBuilder, baseURL, logger)
 	return Server{
 		loginPageBuilder,
 		b.NewForgotPasswordBuilder(basePageBuilder),
