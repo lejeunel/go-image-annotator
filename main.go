@@ -29,6 +29,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+
 	rootCmd.AddCommand(server.Cmd)
 	rootCmd.AddCommand(image.IngestDirCmd)
 	rootCmd.AddCommand(collection.CreateCmd)

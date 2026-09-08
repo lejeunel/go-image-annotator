@@ -15,7 +15,7 @@ import (
 	r "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
 	usr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
-	qu "github.com/lejeunel/go-image-annotator/modules/query"
+	q "github.com/lejeunel/go-image-annotator/modules/query"
 )
 
 type Infra struct {
@@ -31,8 +31,8 @@ type Infra struct {
 	ImageFileStore  fs.FileStore
 	TempFileStore   fs.LocalFileStore
 	PolicyFileStore fs.FileStore
-	qu.IFilterParser
-	qu.OrderParser
+	q.FilterParser
+	q.OrderParser
 	*sqlx.DB
 }
 

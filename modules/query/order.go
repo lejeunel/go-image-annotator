@@ -16,28 +16,45 @@ type RenameTask struct {
 }
 
 type OrderParser struct {
-	Fields      []string
-	RegExps     []*regexp.Regexp
+	Fields      []Field
+	RegExps     []RegExpField
 	RenameTasks []RenameTask
 }
 
 type OrderParserBuilder struct {
-	fields  []string
-	regexps []*regexp.Regexp
-	renames []RenameTask
+	fields       []Field
+	regexps      []RegExpField
+	descriptions []string
+	renames      []RenameTask
+}
+
+func WithDescription(desc string) FieldOption {
+	return func(f *Field) { f.Description = desc }
+}
+
+func WithRegexpDescription(desc string) RegExpFieldOption {
+	return func(f *RegExpField) { f.Description = desc }
 }
 
 func NewOrderParserBuilder() *OrderParserBuilder {
 	return &OrderParserBuilder{}
 }
 
-func (o *OrderParserBuilder) AddField(field string) *OrderParserBuilder {
-	o.fields = append(o.fields, field)
+func (o *OrderParserBuilder) AddField(field string, opts ...FieldOption) *OrderParserBuilder {
+	new := Field{Name: field}
+	for _, opt := range opts {
+		opt(&new)
+	}
+	o.fields = append(o.fields, new)
 	return o
 }
-func (o *OrderParserBuilder) AddRegExpField(r string) *OrderParserBuilder {
+func (o *OrderParserBuilder) AddRegExpField(r string, opts ...RegExpFieldOption) *OrderParserBuilder {
 	re := regexp.MustCompile(r)
-	o.regexps = append(o.regexps, re)
+	new := RegExpField{RegExp: re}
+	for _, opt := range opts {
+		opt(&new)
+	}
+	o.regexps = append(o.regexps, new)
 	return o
 }
 func (o *OrderParserBuilder) AddRenameRule(rex string, template string) *OrderParserBuilder {
@@ -72,15 +89,20 @@ func (v OrderParser) Validate(q string) error {
 	return nil
 }
 func (v OrderParser) validateOnFields(field string) error {
-	if !slices.Contains(v.Fields, field) {
-		return e.ErrValidation
+
+	for _, f := range v.Fields {
+		if f.Name == field {
+			return nil
+		}
 	}
-	return nil
+
+	return e.ErrValidation
+
 }
 
 func (v OrderParser) validateOnRegExps(field string) error {
 	for _, re := range v.RegExps {
-		if re.MatchString(string(field)) {
+		if re.RegExp.MatchString(string(field)) {
 			return nil
 		}
 	}
@@ -115,6 +137,7 @@ func (v OrderParser) Parse(q string) (im.OrderingArgs, error) {
 	}
 	return res, nil
 }
+
 func (v OrderParser) applyRenaming(field string) string {
 	for _, t := range v.RenameTasks {
 		field = t.rex.ReplaceAllString(field, t.template)
@@ -142,3 +165,17 @@ func (v OrderParser) validateSuffix(term string) error {
 	}
 	return nil
 }
+
+func (v OrderParser) DescribeOrderingFields() []FieldDescription {
+	descriptions := []FieldDescription{}
+	for _, f := range v.Fields {
+		descriptions = append(descriptions, FieldDescription{Name: f.Name, Description: f.Description})
+	}
+	for _, r := range v.RegExps {
+		descriptions = append(descriptions, FieldDescription{Name: r.RegExp.String(), Description: r.Description})
+	}
+	return descriptions
+
+}
+
+func (v OrderParser) Examples() []string { return []string{} }

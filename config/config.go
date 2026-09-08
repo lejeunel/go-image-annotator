@@ -63,6 +63,8 @@ func (c Config) DefinesS3Store() (bool, error) {
 	return false, nil
 }
 
+// Parse builds the main Config struct
+// from environment variables
 func Parse() Config {
 	var cfg Config
 	err := envconfig.Process("GOIA", &cfg)

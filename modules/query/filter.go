@@ -9,12 +9,6 @@ import (
 	"go.tomakado.io/dumbql/schema"
 )
 
-type IFilterParser interface {
-	Parse(string) (query.Expr, error)
-	Validate(query string) error
-	ParseToSql(string) (*SQLizer, error)
-}
-
 type FilterSQLizer interface {
 	ParseToSql(string) (*SQLizer, error)
 }
@@ -73,4 +67,10 @@ func (v FilterParser) ParseToSql(q string) (*SQLizer, error) {
 	}
 	sqlizer := NewSQLizer(sql, args)
 	return &sqlizer, nil
+}
+func (v FilterParser)	DescribeFilteringFields() []FieldDescription{
+	return []FieldDescription{}
+}
+func (v FilterParser)	Examples() []string{
+	return []string{"first-example", "second-example"}
 }

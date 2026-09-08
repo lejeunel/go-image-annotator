@@ -8,21 +8,34 @@ import (
 	itrs "github.com/lejeunel/go-image-annotator/app/interactors"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
+	q "github.com/lejeunel/go-image-annotator/modules/query"
 	s "github.com/lejeunel/go-image-annotator/shared/session"
 	bst "github.com/lejeunel/go-image-annotator/use-cases/bootstrap"
 )
 
+type ImageFilterDocumenter interface {
+	DescribeFilteringFields() []q.FieldDescription
+	Examples() []string
+}
+type ImageSortDocumenter interface {
+	DescribeOrderingFields() []q.FieldDescription
+	Examples() []string
+}
 type App struct {
 	Itrs itrs.Interactors
 	s.SessionManager
 	a.Annotator
+	ImageFilterDocumenter
+	ImageSortDocumenter
 }
 
-func NewApp(itrs itrs.Interactors, sm s.SessionManager, an a.Annotator) App {
+func NewApp(itrs itrs.Interactors, sm s.SessionManager, an a.Annotator, fd ImageFilterDocumenter, sd ImageSortDocumenter) App {
 	return App{
-		Itrs:           itrs,
-		SessionManager: sm,
-		Annotator:      an,
+		Itrs:                  itrs,
+		SessionManager:        sm,
+		Annotator:             an,
+		ImageFilterDocumenter: fd,
+		ImageSortDocumenter:   sd,
 	}
 }
 

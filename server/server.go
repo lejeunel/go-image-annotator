@@ -30,6 +30,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Make initializes the root handler and listens on the given port.
 func Make(port int) http.Handler {
 	cfg := config.Parse()
 	defaultAuth := auth.NewDefault()

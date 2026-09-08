@@ -95,3 +95,24 @@ func TestParseWithRenameRule(t *testing.T) {
 			{Field: "date-of-birth", Order: im.AscOrder},
 		}, q)
 }
+
+func TestDocumentedField(t *testing.T) {
+	b := NewOrderParserBuilder()
+	field := "the-field"
+	description := "the-description"
+	b.AddField(field, WithDescription(description))
+	p := b.Build()
+	assert.Equal(t, 1, len(p.DescribeOrderingFields()))
+	assert.Equal(t, field, p.DescribeOrderingFields()[0].Name)
+	assert.Equal(t, description, p.DescribeOrderingFields()[0].Description)
+}
+func TestDocumentedRegexpField(t *testing.T) {
+	b := NewOrderParserBuilder()
+	field := "the-field"
+	description := "the-description"
+	b.AddRegExpField(field, WithRegexpDescription(description))
+	p := b.Build()
+	assert.Equal(t, 1, len(p.DescribeOrderingFields()))
+	assert.Equal(t, field, p.DescribeOrderingFields()[0].Name)
+	assert.Equal(t, description, p.DescribeOrderingFields()[0].Description)
+}
