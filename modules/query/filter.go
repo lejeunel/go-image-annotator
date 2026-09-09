@@ -13,9 +13,50 @@ type FilterSQLizer interface {
 	ParseToSql(string) (*SQLizer, error)
 }
 
+type FilterParserBuilder struct {
+	fields        []Field
+	descriptions  []string
+	schemaBuilder schema.SchemaBuilder
+	renameBuilder query.FieldRenamerBuilder
+}
+
+func NewFilterParserBuilder() FilterParserBuilder {
+	return FilterParserBuilder{schemaBuilder: schema.NewSchemaBuilder(),
+		renameBuilder: query.NewRenamerBuilder()}
+}
+
+func (b *FilterParserBuilder) AddField(field FieldName, rule RuleFunc, opts ...FieldOption) *FilterParserBuilder {
+	new := Field{Name: field}
+	for _, opt := range opts {
+		opt(&new)
+	}
+	b.fields = append(b.fields, new)
+	b.schemaBuilder.AddField(schema.Field(field), rule)
+	return b
+}
+func (b *FilterParserBuilder) AddRegExpField(field FieldName, rule RuleFunc, opts ...FieldOption) *FilterParserBuilder {
+	new := Field{Name: field}
+	for _, opt := range opts {
+		opt(&new)
+	}
+	b.fields = append(b.fields, new)
+	b.schemaBuilder.AddRegExpField(field, rule)
+	return b
+}
+
+func (b *FilterParserBuilder) AddRenameRule(rex string, template string) *FilterParserBuilder {
+	b.renameBuilder.Add(rex, template)
+	return b
+}
+
+func (b *FilterParserBuilder) Build() FilterParser {
+	return NewFilterParser(b.schemaBuilder.Build(), b.fields, WithRenamer(b.renameBuilder.Build()))
+}
+
 type FilterParser struct {
 	Schema       schema.Schema
 	FieldRenamer *query.FieldRenamer
+	Fields       []Field
 }
 
 type FilterParserOption func(*FilterParser)
@@ -26,8 +67,8 @@ func WithRenamer(renamer query.FieldRenamer) FilterParserOption {
 	}
 }
 
-func NewFilterParser(schm schema.Schema, opts ...FilterParserOption) FilterParser {
-	p := &FilterParser{Schema: schm}
+func NewFilterParser(schm schema.Schema, fields []Field, opts ...FilterParserOption) FilterParser {
+	p := &FilterParser{Schema: schm, Fields: fields}
 	for _, opt := range opts {
 		opt(p)
 	}
@@ -68,9 +109,14 @@ func (v FilterParser) ParseToSql(q string) (*SQLizer, error) {
 	sqlizer := NewSQLizer(sql, args)
 	return &sqlizer, nil
 }
-func (v FilterParser)	DescribeFilteringFields() []FieldDescription{
-	return []FieldDescription{}
+func (v FilterParser) DescribeFilteringFields() []FieldDescription {
+	descriptions := []FieldDescription{}
+	for _, f := range v.Fields {
+		descriptions = append(descriptions, FieldDescription{Name: f.Name, Description: f.Description})
+	}
+	return descriptions
+
 }
-func (v FilterParser)	Examples() []string{
+func (v FilterParser) Examples() []string {
 	return []string{"first-example", "second-example"}
 }

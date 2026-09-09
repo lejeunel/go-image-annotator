@@ -4,17 +4,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.tomakado.io/dumbql/query"
 	"go.tomakado.io/dumbql/schema"
 )
 
-func Setup() FilterParser {
-	b := schema.NewSchemaBuilder()
-	b.AddField("collection", schema.Is[string]())
-	return NewFilterParser(b.Build())
-}
 func TestParse(t *testing.T) {
-	p := Setup()
+	b := NewFilterParserBuilder()
+	b.AddField("collection", schema.Is[string]())
+	p := b.Build()
 	expr, err := p.Parse("collection:\"a-collection\"")
 	assert.NoError(t, err)
 	sql, args, err := expr.ToSql()
@@ -24,11 +20,10 @@ func TestParse(t *testing.T) {
 }
 
 func TestParseWithFieldNameMapping(t *testing.T) {
-	sb := schema.NewSchemaBuilder()
-	sb.AddField("collection", schema.Is[string]())
-	rb := query.NewRenamerBuilder()
-	rb.Add(`\bcollection\b`, `collections.name`)
-	p := NewFilterParser(sb.Build(), WithRenamer(rb.Build()))
+	b := NewFilterParserBuilder()
+	b.AddField("collection", schema.Is[string]())
+	b.AddRenameRule(`\bcollection\b`, `collections.name`)
+	p := b.Build()
 
 	expr, err := p.Parse("collection:\"a-collection\"")
 	assert.NoError(t, err)
@@ -39,11 +34,10 @@ func TestParseWithFieldNameMapping(t *testing.T) {
 }
 
 func TestParseWithJSONExtractMapping(t *testing.T) {
-	sb := schema.NewSchemaBuilder()
-	sb.AddRegExpField(`^meta\..*$`, schema.Is[string]())
-	rb := query.NewRenamerBuilder()
-	rb.Add(`\bmeta\.(.*)\b`, `json_extract(metadata.meta, '$1')`)
-	p := NewFilterParser(sb.Build(), WithRenamer(rb.Build()))
+	b := NewFilterParserBuilder()
+	b.AddRegExpField(`^meta\..*$`, schema.Is[string]())
+	b.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(metadata.meta, '$1')`)
+	p := b.Build()
 
 	expr, err := p.Parse("meta.name:\"a-name\"")
 	assert.NoError(t, err)
@@ -52,3 +46,32 @@ func TestParseWithJSONExtractMapping(t *testing.T) {
 	assert.Equal(t, `json_extract(metadata.meta, 'name') = ?`, sql)
 	assert.Equal(t, "a-name", args[0])
 }
+func TestDocumentedFilteringField(t *testing.T) {
+	b := NewFilterParserBuilder()
+	field := "the-field"
+	description := "the-description"
+	b.AddField(field, schema.Is[string](), WithDescription(description))
+	p := b.Build()
+	assert.Equal(t, 1, len(p.DescribeFilteringFields()))
+	assert.Equal(t, field, p.DescribeFilteringFields()[0].Name)
+	assert.Equal(t, description, p.DescribeFilteringFields()[0].Description)
+}
+
+func TestDocumentedFilteringRegexpField(t *testing.T) {
+	b := NewFilterParserBuilder()
+	field := "the-field"
+	description := "the-description"
+	b.AddRegExpField(field, schema.Is[string](), WithDescription(description))
+	p := b.Build()
+	assert.Equal(t, 1, len(p.DescribeFilteringFields()))
+	assert.Equal(t, field, p.DescribeFilteringFields()[0].Name)
+	assert.Equal(t, description, p.DescribeFilteringFields()[0].Description)
+}
+
+// func TestExampleFiltering(t *testing.T) {
+// 	b := NewOrderParserBuilder()
+// 	example := "ingested_at:desc"
+// 	b.AddExample(example)
+// 	p := b.Build()
+// 	assert.Contains(t, p.Examples(), example)
+// }

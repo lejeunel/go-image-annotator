@@ -4,8 +4,10 @@ import (
 	"regexp"
 )
 
+type FieldName = string
+
 type Field struct {
-	Name        string
+	Name        FieldName
 	Description string
 }
 

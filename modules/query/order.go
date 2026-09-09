@@ -19,6 +19,7 @@ type OrderParser struct {
 	Fields      []Field
 	RegExps     []RegExpField
 	RenameTasks []RenameTask
+	examples    []string
 }
 
 type OrderParserBuilder struct {
@@ -26,6 +27,7 @@ type OrderParserBuilder struct {
 	regexps      []RegExpField
 	descriptions []string
 	renames      []RenameTask
+	examples     []string
 }
 
 func WithDescription(desc string) FieldOption {
@@ -63,9 +65,12 @@ func (o *OrderParserBuilder) AddRenameRule(rex string, template string) *OrderPa
 	return o
 
 }
-
+func (o *OrderParserBuilder) AddExample(example string) *OrderParserBuilder {
+	o.examples = append(o.examples, example)
+	return o
+}
 func (o *OrderParserBuilder) Build() OrderParser {
-	return OrderParser{Fields: o.fields, RegExps: o.regexps, RenameTasks: o.renames}
+	return OrderParser{Fields: o.fields, RegExps: o.regexps, RenameTasks: o.renames, examples: o.examples}
 }
 
 func (v OrderParser) Validate(q string) error {
@@ -178,4 +183,4 @@ func (v OrderParser) DescribeOrderingFields() []FieldDescription {
 
 }
 
-func (v OrderParser) Examples() []string { return []string{} }
+func (v OrderParser) Examples() []string { return v.examples }
