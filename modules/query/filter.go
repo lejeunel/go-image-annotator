@@ -109,7 +109,7 @@ func (v FilterParser) ParseToSql(q string) (*SQLizer, error) {
 	sqlizer := NewSQLizer(sql, args)
 	return &sqlizer, nil
 }
-func (v FilterParser) DescribeFilteringFields() []FieldDescription {
+func (v FilterParser) DescribeFields() []FieldDescription {
 	descriptions := []FieldDescription{}
 	for _, f := range v.Fields {
 		descriptions = append(descriptions, FieldDescription{Name: f.Name, Description: f.Description})

@@ -14,7 +14,7 @@ import (
 )
 
 type ImageFilterDocumenter interface {
-	DescribeFilteringFields() []q.FieldDescription
+	DescribeFields() []q.FieldDescription
 	Examples() []string
 }
 type ImageSortDocumenter interface {

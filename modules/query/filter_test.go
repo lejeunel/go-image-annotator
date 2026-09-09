@@ -52,9 +52,9 @@ func TestDocumentedFilteringField(t *testing.T) {
 	description := "the-description"
 	b.AddField(field, schema.Is[string](), WithDescription(description))
 	p := b.Build()
-	assert.Equal(t, 1, len(p.DescribeFilteringFields()))
-	assert.Equal(t, field, p.DescribeFilteringFields()[0].Name)
-	assert.Equal(t, description, p.DescribeFilteringFields()[0].Description)
+	assert.Equal(t, 1, len(p.DescribeFields()))
+	assert.Equal(t, field, p.DescribeFields()[0].Name)
+	assert.Equal(t, description, p.DescribeFields()[0].Description)
 }
 
 func TestDocumentedFilteringRegexpField(t *testing.T) {
@@ -63,9 +63,9 @@ func TestDocumentedFilteringRegexpField(t *testing.T) {
 	description := "the-description"
 	b.AddRegExpField(field, schema.Is[string](), WithDescription(description))
 	p := b.Build()
-	assert.Equal(t, 1, len(p.DescribeFilteringFields()))
-	assert.Equal(t, field, p.DescribeFilteringFields()[0].Name)
-	assert.Equal(t, description, p.DescribeFilteringFields()[0].Description)
+	assert.Equal(t, 1, len(p.DescribeFields()))
+	assert.Equal(t, field, p.DescribeFields()[0].Name)
+	assert.Equal(t, description, p.DescribeFields()[0].Description)
 }
 
 // func TestExampleFiltering(t *testing.T) {

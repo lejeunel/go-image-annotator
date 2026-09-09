@@ -4,7 +4,6 @@ import (
 	"errors"
 	"strings"
 
-	"go.tomakado.io/dumbql/query"
 	"go.tomakado.io/dumbql/schema"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
@@ -67,18 +66,12 @@ func makeWindowExpr(parser OrderStrParser, function string, ordering im.OrderStr
 }
 
 func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
-	sb := schema.NewSchemaBuilder()
-	sb.AddField("collection", schema.Is[string]())
-	sb.AddField("ingested_at", schema.Is[string]())
-	sb.AddRegExpField(`^meta\..*$`, schema.Any(schema.Is[float64](), schema.Is[string](), schema.Is[bool]()))
+	fb := qu.NewFilterParserBuilder()
+	fb.AddField("collection", schema.Is[string]())
+	fb.AddField("ingested_at", schema.Is[string]())
+	fb.AddRegExpField(`^meta\..*$`, schema.Any(schema.Is[float64](), schema.Is[string](), schema.Is[bool]()))
+	fb.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
 
-	rb := query.NewRenamerBuilder()
-	rb.Add(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
-
-	filterParser := qu.NewFilterParser(
-		sb.Build(),
-		qu.WithRenamer(rb.Build()),
-	)
 	ob := qu.NewOrderParserBuilder()
 	ob.AddField("image_id")
 	ob.AddField("ingested_at")
@@ -88,7 +81,7 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 
 	orderParser := ob.Build()
 
-	return filterParser, orderParser
+	return fb.Build(), orderParser
 }
 
 type OrderStrParser interface {

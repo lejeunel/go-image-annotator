@@ -12,9 +12,9 @@ import (
 )
 
 func SetupList() Interactor {
-	b := schema.NewSchemaBuilder()
+	b := q.NewFilterParserBuilder()
 	b.AddField("collection", schema.Is[string]())
-	fv := q.NewFilterParser(b.Build())
+	fv := b.Build()
 	ov := q.NewOrderParserBuilder().AddField("ingested_at").Build()
 	repo := &fk.ImageRepo{}
 	st := &fk.ImageStore{}
