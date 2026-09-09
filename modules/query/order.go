@@ -34,7 +34,7 @@ func WithDescription(desc string) FieldOption {
 	return func(f *Field) { f.Description = desc }
 }
 
-func WithRegexpDescription(desc string) RegExpFieldOption {
+func WithRegExpDescription(desc string) RegExpFieldOption {
 	return func(f *RegExpField) { f.Description = desc }
 }
 
@@ -50,9 +50,9 @@ func (o *OrderParserBuilder) AddField(field string, opts ...FieldOption) *OrderP
 	o.fields = append(o.fields, new)
 	return o
 }
-func (o *OrderParserBuilder) AddRegExpField(r string, opts ...RegExpFieldOption) *OrderParserBuilder {
+func (o *OrderParserBuilder) AddRegExpField(r string, displayName string, opts ...RegExpFieldOption) *OrderParserBuilder {
 	re := regexp.MustCompile(r)
-	new := RegExpField{RegExp: re}
+	new := RegExpField{RegExp: re, DisplayName: displayName}
 	for _, opt := range opts {
 		opt(&new)
 	}
@@ -177,7 +177,7 @@ func (v OrderParser) DescribeOrderingFields() []FieldDescription {
 		descriptions = append(descriptions, FieldDescription{Name: f.Name, Description: f.Description})
 	}
 	for _, r := range v.RegExps {
-		descriptions = append(descriptions, FieldDescription{Name: r.RegExp.String(), Description: r.Description})
+		descriptions = append(descriptions, FieldDescription{Name: r.DisplayName, Description: r.Description})
 	}
 	return descriptions
 

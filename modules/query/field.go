@@ -13,6 +13,7 @@ type Field struct {
 
 type RegExpField struct {
 	RegExp      *regexp.Regexp
+	DisplayName string
 	Description string
 }
 

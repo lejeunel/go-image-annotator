@@ -75,7 +75,7 @@ func TestParseMultipleOrderings(t *testing.T) {
 
 func TestParseWithRegexp(t *testing.T) {
 	b := NewOrderParserBuilder()
-	p := b.AddRegExpField(`^subject\..*$`).Build()
+	p := b.AddRegExpField(`^subject\..*$`, "subject.<CUSTOM>").Build()
 	q, err := p.Parse("subject.age:desc")
 	assert.NoError(t, err)
 	assert.Equal(t, im.OrderingArgs{{Field: "subject.age", Order: im.DescOrder}}, q)
@@ -84,7 +84,7 @@ func TestParseWithRegexp(t *testing.T) {
 func TestParseWithRenameRule(t *testing.T) {
 	b := NewOrderParserBuilder()
 	b.AddField(`date-of-birth`)
-	b.AddRegExpField(`^meta\..*$`)
+	b.AddRegExpField(`^meta\..*$`, "meta.<CUSTOM>")
 	b.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
 	p := b.Build()
 	q, err := p.Parse("meta.age:desc date-of-birth")
@@ -110,7 +110,8 @@ func TestDocumentedOrderingRegexpField(t *testing.T) {
 	b := NewOrderParserBuilder()
 	field := "the-field"
 	description := "the-description"
-	b.AddRegExpField(field, WithRegexpDescription(description))
+	displayName := "the-display-name"
+	b.AddRegExpField(field, displayName, WithRegExpDescription(description))
 	p := b.Build()
 	assert.Equal(t, 1, len(p.DescribeOrderingFields()))
 	assert.Equal(t, field, p.DescribeOrderingFields()[0].Name)

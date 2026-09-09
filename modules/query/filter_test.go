@@ -35,7 +35,7 @@ func TestParseWithFieldNameMapping(t *testing.T) {
 
 func TestParseWithJSONExtractMapping(t *testing.T) {
 	b := NewFilterParserBuilder()
-	b.AddRegExpField(`^meta\..*$`, schema.Is[string]())
+	b.AddRegExpField(`^meta\..*$`, "meta.<CUSTOM>", schema.Is[string]())
 	b.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(metadata.meta, '$1')`)
 	p := b.Build()
 
@@ -61,10 +61,11 @@ func TestDocumentedFilteringRegexpField(t *testing.T) {
 	b := NewFilterParserBuilder()
 	field := "the-field"
 	description := "the-description"
-	b.AddRegExpField(field, schema.Is[string](), WithDescription(description))
+	displayName := "meta.<CUSTOM>"
+	b.AddRegExpField(field, displayName, schema.Is[string](), WithRegExpDescription(description))
 	p := b.Build()
 	assert.Equal(t, 1, len(p.DescribeFields()))
-	assert.Equal(t, field, p.DescribeFields()[0].Name)
+	assert.Equal(t, displayName, p.DescribeFields()[0].Name)
 	assert.Equal(t, description, p.DescribeFields()[0].Description)
 }
 

@@ -15,7 +15,7 @@
                     type="text"
                     id="filterInput"
                     name="{{.FilterQueryArgName}}"
-                    placeholder="Filters"
+                    placeholder="Filtering"
                     autofocus="true"
                     class="bg-surface 
 
@@ -73,6 +73,18 @@
                 </div>
                 <input type="submit" style="display: none" />
             </form>
+	  <div>
+	    <div class="text-lg">Filtering</div>
+	    {{ range .QueryDocs.Filtering }}
+              <div>- {{ .Name }}:<span class="italic"> {{ .Description }}</span></div>
+            {{ end }}
+	  </div>
+	  <div>
+	    <div class="text-lg">Ordering</div>
+	    {{ range .QueryDocs.Ordering }}
+              <div>- {{ .Name }}:<span class="italic"> {{ .Description }}</span></div>
+            {{ end }}
+	  </div>
         </div>
     </div>
 </div>

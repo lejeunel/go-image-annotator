@@ -40,7 +40,14 @@ func Make(port int) http.Handler {
 
 	currentVersion := g.Info{Version: g.Version, Date: g.Date}
 	basePageBuilder := b.NewBasePageBuilder()
-	pageBuilder := b.NewPageBuilder(basePageBuilder, currentVersion)
+
+	queryDocs := b.QueryDocs{
+		Filtering:         app.ImageFilterDocumenter.DescribeFields(),
+		FilteringExamples: app.ImageFilterDocumenter.Examples(),
+		Ordering:          app.ImageSortDocumenter.DescribeOrderingFields(),
+		OrderingExamples:  app.ImageSortDocumenter.Examples(),
+	}
+	pageBuilder := b.NewPageBuilder(basePageBuilder, currentVersion, queryDocs)
 
 	a.BootstrapInitialAdmin(
 		app.Itrs.Bootstrap,

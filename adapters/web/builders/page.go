@@ -12,6 +12,7 @@ import (
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	g "github.com/lejeunel/go-image-annotator/globals"
+	q "github.com/lejeunel/go-image-annotator/modules/query"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/yuin/goldmark"
 	. "maragu.dev/gomponents"
@@ -45,10 +46,20 @@ var detectOs string
 //go:embed templates/query_modal.html
 var queryModal string
 
-type QueryModalData struct {
+type QueryDocs struct {
+	Filtering         []q.FieldDescription
+	FilteringExamples []string
+	Ordering          []q.FieldDescription
+	OrderingExamples  []string
+}
+type QueryURLs struct {
 	SubmitURL            string
 	FilterQueryArgName   string
 	OrderingQueryArgName string
+}
+type QueryModalData struct {
+	QueryURLs
+	QueryDocs
 }
 
 type PageBuilder struct {
@@ -66,13 +77,21 @@ type PageBuilder struct {
 	content             Node
 	Title               string
 	columnMode          PageColumnMode
+	QueryModalData
 	BasePageBuilder
 }
 
-func NewPageBuilder(base BasePageBuilder, version g.Info) PageBuilder {
+func NewPageBuilder(base BasePageBuilder, version g.Info, queryDocs QueryDocs) PageBuilder {
+	queryModalData := QueryModalData{
+		QueryURLs: QueryURLs{SubmitURL: rt.SliceUrl,
+			FilterQueryArgName:   rt.FilterQueryArgName,
+			OrderingQueryArgName: rt.OrderingQueryArgName},
+		QueryDocs: queryDocs,
+	}
 	pb := PageBuilder{
 		BasePageBuilder: base, APIPath: rt.APIRootUrl, RepoURL: g.RepoURL, DocsURL: g.DocsURL,
 		Version: version, SidebarEntries: make(map[string]cmp.SidebarEntry),
+		QueryModalData: queryModalData,
 	}
 	pb.AddScripts(Script(Raw(detectOs)))
 	return pb
@@ -223,14 +242,11 @@ func (b *PageBuilder) Render(w io.Writer) {
 		return
 	}
 	var queryBuf bytes.Buffer
+	fmt.Printf("%+v\n", b.QueryModalData)
 	if err := queryModalTemplate.ExecuteTemplate(
 		&queryBuf,
 		"query",
-		QueryModalData{
-			SubmitURL:            rt.SliceUrl,
-			FilterQueryArgName:   rt.FilterQueryArgName,
-			OrderingQueryArgName: rt.OrderingQueryArgName,
-		}); err != nil {
+		b.QueryModalData); err != nil {
 		Text(err.Error()).Render(w)
 		return
 	}
