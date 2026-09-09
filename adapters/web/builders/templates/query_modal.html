@@ -73,17 +73,39 @@
                 </div>
                 <input type="submit" style="display: none" />
             </form>
-	  <div>
+	  <div class="text-on-surface dark:text-on-surface-dark">
 	    <div class="text-lg">Filtering</div>
-	    {{ range .QueryDocs.Filtering }}
-              <div>- {{ .Name }}:<span class="italic"> {{ .Description }}</span></div>
-            {{ end }}
+	    <div class="pl-4">
+	      <div class="font-semibold">Fields</div>
+	      <div class="pl-4 text-sm">
+		{{ range .QueryDocs.Filtering }}
+		     <div>- {{ .Name }}:<span class="italic"> {{ .Description }}</span></div>
+		 {{ end }}
+	      </div>
+	      <div class="font-semibold">Examples</div>
+	      <div class="pl-4 text-sm">
+	      	 {{ range .QueryDocs.FilteringExamples }}
+		     <div>- {{ . }}</div>
+		{{ end }}
+	      </div>
+	    </div>
 	  </div>
 	  <div>
 	    <div class="text-lg">Ordering</div>
-	    {{ range .QueryDocs.Ordering }}
-              <div>- {{ .Name }}:<span class="italic"> {{ .Description }}</span></div>
-            {{ end }}
+	    <div class="pl-4">
+	      <div class="font-semibold">Fields</div>
+	      <div class="pl-4 text-sm">
+		{{ range .QueryDocs.Ordering }}
+		     <div>- {{ .Name }}:<span class="italic"> {{ .Description }}</span></div>
+		 {{ end }}
+	      </div>
+	      <div class="font-semibold">Examples</div>
+	      <div class="pl-4 text-sm">
+	      	 {{ range .QueryDocs.OrderingExamples }}
+		     <div>- {{ . }}</div>
+		{{ end }}
+	      </div>
+	    </div>
 	  </div>
         </div>
     </div>

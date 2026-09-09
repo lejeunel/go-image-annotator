@@ -124,5 +124,7 @@ func (v FilterParser) DescribeFields() []FieldDescription {
 
 }
 func (v FilterParser) Examples() []string {
-	return []string{"first-example", "second-example"}
+	return []string{
+		"collection:my-collection and (ingested_at>2026-08-01T13:04 or meta.is_recent)",
+		"(meta.score>10) and (meta.score<20)"}
 }

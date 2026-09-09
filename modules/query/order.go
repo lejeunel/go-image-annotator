@@ -183,4 +183,9 @@ func (v OrderParser) DescribeOrderingFields() []FieldDescription {
 
 }
 
-func (v OrderParser) Examples() []string { return v.examples }
+func (v OrderParser) Examples() []string {
+	return []string{
+		"ingested_at",
+		"meta.score:asc",
+		"ingested_at:desc meta.score"}
+}
