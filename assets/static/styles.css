@@ -2107,6 +2107,9 @@
   :where(.dark\:divide-outline-dark:where(.dark, .dark *) > :not(:last-child)) {
     border-color: var(--color-outline-dark);
   }
+  .dark\:border-gray-700:where(.dark, .dark *) {
+    border-color: var(--color-gray-700);
+  }
   .dark\:border-outline-dark:where(.dark, .dark *) {
     border-color: var(--color-outline-dark);
   }

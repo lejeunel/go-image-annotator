@@ -19,13 +19,17 @@ type FilterParserBuilder struct {
 	descriptions  []string
 	schemaBuilder schema.SchemaBuilder
 	renameBuilder query.FieldRenamerBuilder
+	examples      []string
 }
 
 func NewFilterParserBuilder() FilterParserBuilder {
 	return FilterParserBuilder{schemaBuilder: schema.NewSchemaBuilder(),
 		renameBuilder: query.NewRenamerBuilder()}
 }
-
+func (b *FilterParserBuilder) AddExample(example string) *FilterParserBuilder {
+	b.examples = append(b.examples, example)
+	return b
+}
 func (b *FilterParserBuilder) AddField(field FieldName, rule RuleFunc, opts ...FieldOption) *FilterParserBuilder {
 	new := Field{Name: field}
 	for _, opt := range opts {
@@ -51,7 +55,10 @@ func (b *FilterParserBuilder) AddRenameRule(rex string, template string) *Filter
 }
 
 func (b *FilterParserBuilder) Build() FilterParser {
-	return NewFilterParser(b.schemaBuilder.Build(), b.fields, b.regexpFields, WithRenamer(b.renameBuilder.Build()))
+	return NewFilterParser(b.schemaBuilder.Build(), b.fields, b.regexpFields,
+		WithRenamer(b.renameBuilder.Build()),
+		WithExamples(b.examples),
+	)
 }
 
 type FilterParser struct {
@@ -59,6 +66,7 @@ type FilterParser struct {
 	FieldRenamer *query.FieldRenamer
 	Fields       []Field
 	RegExpFields []RegExpField
+	examples     []string
 }
 
 type FilterParserOption func(*FilterParser)
@@ -66,6 +74,12 @@ type FilterParserOption func(*FilterParser)
 func WithRenamer(renamer query.FieldRenamer) FilterParserOption {
 	return func(p *FilterParser) {
 		p.FieldRenamer = &renamer
+	}
+}
+
+func WithExamples(examples []string) FilterParserOption {
+	return func(p *FilterParser) {
+		p.examples = examples
 	}
 }
 
@@ -124,7 +138,5 @@ func (v FilterParser) DescribeFields() []FieldDescription {
 
 }
 func (v FilterParser) Examples() []string {
-	return []string{
-		"collection:my-collection and (ingested_at>2026-08-01T13:04 or meta.is_recent)",
-		"(meta.score>10) and (meta.score<20)"}
+	return v.examples
 }

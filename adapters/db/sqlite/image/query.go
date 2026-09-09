@@ -73,6 +73,8 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 		schema.Any(schema.Is[float64](), schema.Is[string](), schema.Is[bool]()),
 		qu.WithRegExpDescription("Custom meta-data field"))
 	fb.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
+	fb.AddExample("collection:my-collection and (ingested_at>2026-08-01T13:04 or meta.is_recent)")
+	fb.AddExample("(meta.score>10) and (meta.score<20)")
 
 	ob := qu.NewOrderParserBuilder()
 	ob.AddField("image_id", qu.WithDescription("id of image"))
@@ -80,7 +82,9 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 	ob.AddField("collection", qu.WithDescription("Name of collection"))
 	ob.AddRegExpField(`^meta\..*$`, "meta.<CUSTOM-FIELD>", qu.WithRegExpDescription("Custom meta-data field"))
 	ob.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(meta, '$.$1')`)
-
+	ob.AddExample("ingested_at")
+	ob.AddExample("meta.score:asc")
+	ob.AddExample("ingested_at:desc meta.score")
 	orderParser := ob.Build()
 
 	return fb.Build(), orderParser

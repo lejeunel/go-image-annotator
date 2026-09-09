@@ -41,7 +41,10 @@ func WithRegExpDescription(desc string) RegExpFieldOption {
 func NewOrderParserBuilder() *OrderParserBuilder {
 	return &OrderParserBuilder{}
 }
-
+func (b *OrderParserBuilder) AddExample(example string) *OrderParserBuilder {
+	b.examples = append(b.examples, example)
+	return b
+}
 func (o *OrderParserBuilder) AddField(field string, opts ...FieldOption) *OrderParserBuilder {
 	new := Field{Name: field}
 	for _, opt := range opts {
@@ -64,10 +67,6 @@ func (o *OrderParserBuilder) AddRenameRule(rex string, template string) *OrderPa
 	o.renames = append(o.renames, RenameTask{re, template})
 	return o
 
-}
-func (o *OrderParserBuilder) AddExample(example string) *OrderParserBuilder {
-	o.examples = append(o.examples, example)
-	return o
 }
 func (o *OrderParserBuilder) Build() OrderParser {
 	return OrderParser{Fields: o.fields, RegExps: o.regexps, RenameTasks: o.renames, examples: o.examples}
@@ -184,8 +183,5 @@ func (v OrderParser) DescribeOrderingFields() []FieldDescription {
 }
 
 func (v OrderParser) Examples() []string {
-	return []string{
-		"ingested_at",
-		"meta.score:asc",
-		"ingested_at:desc meta.score"}
+	return v.examples
 }

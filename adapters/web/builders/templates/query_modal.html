@@ -74,7 +74,10 @@
                 <input type="submit" style="display: none" />
             </form>
 	  <div class="text-on-surface dark:text-on-surface-dark">
-	    <div class="text-lg">Filtering</div>
+	      <div class="flex items-center gap-2">
+		<span class="text-lg">Filtering</span>
+		<div class="flex-1 border-t border-gray-300 dark:border-gray-700"></div>
+	      </div>
 	    <div class="pl-4">
 	      <div class="font-semibold">Fields</div>
 	      <div class="pl-4 text-sm">
@@ -89,9 +92,10 @@
 		{{ end }}
 	      </div>
 	    </div>
-	  </div>
-	  <div>
-	    <div class="text-lg">Ordering</div>
+	      <div class="flex items-center gap-2">
+		<span class="text-lg">Ordering</span>
+		<div class="flex-1 border-t border-gray-300 dark:border-gray-700"></div>
+	      </div>
 	    <div class="pl-4">
 	      <div class="font-semibold">Fields</div>
 	      <div class="pl-4 text-sm">
