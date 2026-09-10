@@ -114,7 +114,7 @@ func TestDocumentedOrderingRegexpField(t *testing.T) {
 	b.AddRegExpField(field, displayName, WithRegExpDescription(description))
 	p := b.Build()
 	assert.Equal(t, 1, len(p.DescribeOrderingFields()))
-	assert.Equal(t, field, p.DescribeOrderingFields()[0].Name)
+	assert.Equal(t, displayName, p.DescribeOrderingFields()[0].Name)
 	assert.Equal(t, description, p.DescribeOrderingFields()[0].Description)
 }
 func TestExampleOrdering(t *testing.T) {

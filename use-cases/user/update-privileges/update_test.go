@@ -36,7 +36,6 @@ func TestMissingGroupShouldFail(t *testing.T) {
 	itr := New(&fk.UserRepo{}, &fk.GroupRepo{}, &fk.RoleRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: "user@example.com", Groups: []string{"my-group"}}, p)
-	fmt.Println(p.GotErr)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }

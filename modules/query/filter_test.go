@@ -68,11 +68,3 @@ func TestDocumentedFilteringRegexpField(t *testing.T) {
 	assert.Equal(t, displayName, p.DescribeFields()[0].Name)
 	assert.Equal(t, description, p.DescribeFields()[0].Description)
 }
-
-// func TestExampleFiltering(t *testing.T) {
-// 	b := NewOrderParserBuilder()
-// 	example := "ingested_at:desc"
-// 	b.AddExample(example)
-// 	p := b.Build()
-// 	assert.Contains(t, p.Examples(), example)
-// }
