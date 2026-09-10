@@ -12,8 +12,8 @@
 			  localStorage.setItem('dark', this.darkMode);
 			  document.documentElement.classList.toggle('dark', this.darkMode)
 			  }}"
-      x-init="init()"
-      x-bind:class="{ 'dark': darkMode }">
+  x-init="init()"
+  x-bind:class="{ 'dark': darkMode }">
   <head>
     <title>{{.HTMLTitle}}</title>
     <meta charset="utf-8">
@@ -22,7 +22,7 @@
 	  if (localStorage.getItem('dark') === 'true') {
 		  document.documentElement.classList.add('dark');
 	  }
-	</script>
+    </script>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&amp;display=swap">
@@ -51,7 +51,7 @@
 		  Alpine.store('notifications').message = evt.detail.message;
 		  window.location.reload();
 	  });
-	</script>
+    </script>
     <script>
 	  document.addEventListener('htmx-notify-and-redirect', (evt) => {
 		  Alpine.store('notifications').variant = evt.detail.variant;
@@ -59,12 +59,12 @@
 		  Alpine.store('notifications').message = evt.detail.message;
           window.location = evt.detail.redirect;
 	  });
-	</script>
+    </script>
     <script>
 	  document.addEventListener('htmx-notify', (evt) => {
 		  notify(evt.detail.variant, evt.detail.title, evt.detail.message);
 	  });
-	</script>
+    </script>
     <script>
 	  document.addEventListener('alpine:init', () => {
 		  Alpine.store('notifications', {
@@ -111,7 +111,7 @@
                  }, 400);
                  },
                  }"
-         x-on:notify.window="addNotification({
+      x-on:notify.window="addNotification({
                              variant: $event.detail.variant,
                              sender: $event.detail.sender,
                              title: $event.detail.title,
