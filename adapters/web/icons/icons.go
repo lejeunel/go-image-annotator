@@ -8,6 +8,9 @@ import (
 //go:embed svg/google.svg
 var Google string
 
+//go:embed svg/github.svg
+var Github string
+
 //go:embed svg/magnify.svg
 var Magnify string
 

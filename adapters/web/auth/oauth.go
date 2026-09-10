@@ -10,6 +10,7 @@ import (
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/google"
 )
 
@@ -35,5 +36,14 @@ func MaybeSetupGoogle(pb *b.LoginPageBuilder, baseURL string, logger slog.Logger
 		logger.Info("setting up google auth")
 		pb.AddOAuthProvider(ProviderNameGoogle, rt.MakeOAuthLoginURL(ProviderNameGoogle), ic.Google)
 		goth.UseProviders(google.New(id, secret, rt.MakeOAuthCallbackURL(baseURL, ProviderNameGoogle)))
+	}
+}
+func MaybeSetupGithub(pb *b.LoginPageBuilder, baseURL string, logger slog.Logger) {
+	id := os.Getenv("GOIA_GITHUB_CLIENT_ID")
+	secret := os.Getenv("GOIA_GITHUB_CLIENT_SECRET")
+	if (id != "") && (secret != "") {
+		logger.Info("setting up github auth")
+		pb.AddOAuthProvider(ProviderNameGithub, rt.MakeOAuthLoginURL(ProviderNameGithub), ic.Github)
+		goth.UseProviders(github.New(id, secret, rt.MakeOAuthCallbackURL(baseURL, ProviderNameGithub), "user:email"))
 	}
 }

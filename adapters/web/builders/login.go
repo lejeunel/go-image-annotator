@@ -98,7 +98,7 @@ func (b *LoginPageBuilder) makeContent() Node {
 						Div(Class("h-px flex-1 bg-gray-300")),
 						Span(Class("text-xs"), Text("or")),
 						Div(Class("h-px flex-1 bg-gray-300"))),
-					Div(Class("flex justify-center"),
+					Div(Class("flex flex-col justify-center *:mb-2"),
 						Group(oauthButtons)),
 				),
 			),

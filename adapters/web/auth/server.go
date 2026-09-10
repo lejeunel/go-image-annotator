@@ -32,6 +32,7 @@ func New(
 ) Server {
 	loginPageBuilder := b.NewLoginPageBuilder(basePageBuilder)
 	MaybeSetupGoogle(&loginPageBuilder, baseURL, logger)
+	MaybeSetupGithub(&loginPageBuilder, baseURL, logger)
 	return Server{
 		loginPageBuilder,
 		b.NewForgotPasswordBuilder(basePageBuilder),
