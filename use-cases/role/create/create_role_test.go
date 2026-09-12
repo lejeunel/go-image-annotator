@@ -36,7 +36,7 @@ func TestHandleInternalError(t *testing.T) {
 func TestCreateWithInvalidNameShouldFail(t *testing.T) {
 	name := "my-role%/"
 	p := &FakePresenter{}
-	itr := New(&fk.RoleRepo{ExistingNames: []string{name}},
+	itr := New(&fk.RoleRepo{},
 		WithNameValidator(&fk.StringValidator{Invalid: true}))
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotValidationErr)

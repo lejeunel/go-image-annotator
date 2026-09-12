@@ -135,3 +135,7 @@ func (a VoidAuthorizer) ReadPolicies(ctx context.Context) error {
 func (a VoidAuthorizer) SetPolicies(ctx context.Context) error {
 	return nil
 }
+
+func (a VoidAuthorizer) CreateProfile(ctx context.Context) error {
+	return nil
+}
