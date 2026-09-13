@@ -17,7 +17,14 @@
           oapi-codegen
           redocly
           air
+          lefthook
         ];
+
+        shellHook = ''
+          if command -v lefthook &> /dev/null; then
+            lefthook install
+          fi
+          '';
       };
       devShells.test = pkgs.mkShell {
         packages = with pkgs; [

@@ -22,7 +22,7 @@ jobs:
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - name: Apply code formatting
+      - name: Check code formatting
         run: |
           nix develop .#format --command make format-check
 
