@@ -49,7 +49,8 @@ func TestNotAuthorizedWhenRequiredRoleIsMissing(t *testing.T) {
 	auth, err := New(policies)
 	assert.NoError(t, err)
 	ctx := u.AppendUserToContext(t.Context(), u.User{Roles: []string{"my-role"}})
-	err = auth.CreateCollection(ctx, "whatever")
+	group := "whatever"
+	err = auth.CreateCollection(ctx, &group)
 	assert.Error(t, err)
 }
 
@@ -59,7 +60,8 @@ func TestAuthorizedWhenRequiredRoleIsPresent(t *testing.T) {
 	assert.NoError(t, err)
 	ctx := u.AppendUserToContext(t.Context(),
 		u.User{Roles: []string{"a-role-that-i-have"}, Groups: []string{"my-group"}})
-	err = auth.CreateCollection(ctx, "my-group")
+	group := "my-group"
+	err = auth.CreateCollection(ctx, &group)
 	assert.NoError(t, err)
 }
 
@@ -71,7 +73,8 @@ func TestNotAuthorizedWhenNotInGroup(t *testing.T) {
 		Roles:  []string{"a-role-that-i-have"},
 		Groups: []string{"group-of-losers"},
 	})
-	err = auth.CreateCollection(ctx, "group-of-chads")
+	group := "group-of-chads"
+	err = auth.CreateCollection(ctx, &group)
 	assert.Error(t, err)
 }
 
@@ -83,7 +86,8 @@ func TestAuthorizedWhenMemberOfGroup(t *testing.T) {
 		Roles:  []string{"a-role-that-i-have"},
 		Groups: []string{"group-of-chads"},
 	})
-	err = auth.CreateCollection(ctx, "group-of-chads")
+	group := "group-of-chads"
+	err = auth.CreateCollection(ctx, &group)
 	assert.NoError(t, err)
 }
 
@@ -91,7 +95,8 @@ func TestAppendSetOfRules(t *testing.T) {
 	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
 	auth := NewDefault()
 	auth.SetAuthRules(policies)
-	err := auth.CreateCollection(t.Context(), "")
+	group := "the-group"
+	err := auth.CreateCollection(t.Context(), &group)
 	assert.Error(t, err)
 }
 
@@ -103,6 +108,7 @@ func TestAdminDoesNotNeedRoleNorGroup(t *testing.T) {
 	auth, _ := New(policies)
 	ctx := u.AppendUserToContext(t.Context(),
 		u.NewUser("admin@example.com", u.WithRoles([]string{"admin"})))
-	err := auth.Annotate(ctx, "a-group-i-am-not-member-of")
+	group := "a-group-i-am-not-member-of"
+	err := auth.Annotate(ctx, &group)
 	assert.NoError(t, err)
 }

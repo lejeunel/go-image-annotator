@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	CreateCollection(ctx context.Context, group string) error
+	CreateCollection(ctx context.Context, group *string) error
 }

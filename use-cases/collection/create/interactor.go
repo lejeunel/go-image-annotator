@@ -21,12 +21,11 @@ type Interactor struct {
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "creating collection"
-	if r.Group != nil {
-		if err := i.Auth.CreateCollection(ctx, *r.Group); err != nil {
-			out.Error(fmt.Errorf("%v: %w", errCtx, err))
-			return
-		}
+	if err := i.Auth.CreateCollection(ctx, r.Group); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
 	}
+
 	if err := i.validate(r.Name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

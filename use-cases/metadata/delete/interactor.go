@@ -15,7 +15,7 @@ type Interface interface {
 }
 
 type Auth interface {
-	DeleteMetadata(ctx context.Context, group string) error
+	DeleteMetadata(ctx context.Context, group *string) error
 }
 
 type Interactor struct {
@@ -52,11 +52,9 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if group != nil {
-		if err := i.Auth.DeleteMetadata(ctx, *group); err != nil {
-			out.Error(fmt.Errorf("%v: %w", errCtx, err))
-			return
-		}
+	if err := i.Auth.DeleteMetadata(ctx, group); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
 	}
 
 	imageId, err := im.NewImageIdFromString(r.ImageId)

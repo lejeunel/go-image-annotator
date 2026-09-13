@@ -64,11 +64,9 @@ func (i Interactor) Execute(ctx context.Context, name string, out OutputPort) {
 		out.Error(fmt.Errorf("%v: fetching collection: %w", errCtx, err))
 		return
 	}
-	if collection.Group != nil {
-		if err := i.Auth.DeleteCollection(ctx, *collection.Group); err != nil {
-			out.Error(fmt.Errorf("%v: %w", errCtx, err))
-			return
-		}
+	if err := i.Auth.DeleteCollection(ctx, collection.Group); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
 	}
 	user := u.IdentityFromContext(ctx)
 	if user == nil {

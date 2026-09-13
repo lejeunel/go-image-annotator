@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	IngestImage(ctx context.Context, group string) error
+	IngestImage(ctx context.Context, group *string) error
 }

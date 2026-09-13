@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	UpdateCollection(context.Context, string) error
+	UpdateCollection(context.Context, *string) error
 }

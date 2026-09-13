@@ -16,35 +16,35 @@ func (f *Auth) SetAuthRules(rules a.Policies) {
 	f.GotRules = &rules
 }
 
-func (f Auth) CreateCollection(ctx context.Context, g string) error {
+func (f Auth) CreateCollection(ctx context.Context, g *string) error {
 	return f.Err
 }
 
-func (f Auth) UpdateCollection(ctx context.Context, g string) error {
+func (f Auth) UpdateCollection(ctx context.Context, g *string) error {
 	return f.Err
 }
 
-func (f Auth) DeleteCollection(ctx context.Context, g string) error {
+func (f Auth) DeleteCollection(ctx context.Context, g *string) error {
 	return f.Err
 }
 
-func (f Auth) CloneCollection(ctx context.Context, g string) error {
+func (f Auth) CloneCollection(ctx context.Context, g *string) error {
 	return f.Err
 }
 
-func (f Auth) Annotate(ctx context.Context, g string) error {
+func (f Auth) Annotate(ctx context.Context, g *string) error {
 	return f.Err
 }
 
-func (f Auth) DeleteImage(ctx context.Context, g string) error {
+func (f Auth) DeleteImage(ctx context.Context, g *string) error {
 	return f.Err
 }
 
-func (f Auth) ImportImage(ctx context.Context, dstGroup string) error {
+func (f Auth) ImportImage(ctx context.Context, dstGroup *string) error {
 	return f.Err
 }
 
-func (f Auth) IngestImage(ctx context.Context, group string) error {
+func (f Auth) IngestImage(ctx context.Context, group *string) error {
 	return f.Err
 }
 
@@ -128,15 +128,15 @@ func (f Auth) SetPolicies(ctx context.Context) error {
 	return f.Err
 }
 
-func (f Auth) AddMetadata(ctx context.Context, group string) error {
+func (f Auth) AddMetadata(ctx context.Context, group *string) error {
 	return f.Err
 }
 
-func (f Auth) DeleteMetadata(ctx context.Context, group string) error {
+func (f Auth) DeleteMetadata(ctx context.Context, group *string) error {
 	return f.Err
 }
 
-func (f Auth) UpdateMetadata(ctx context.Context, group string) error {
+func (f Auth) UpdateMetadata(ctx context.Context, group *string) error {
 	return f.Err
 }
 

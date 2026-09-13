@@ -48,11 +48,9 @@ func (i Interactor) Execute(ctx context.Context, r ing.Request, out OutputPort) 
 		return
 	}
 
-	if collection.Group != nil {
-		if err := i.Auth.IngestImage(ctx, *collection.Group); err != nil {
-			out.Error(fmt.Errorf("%v: %w", errCtx, err))
-			return
-		}
+	if err := i.Auth.IngestImage(ctx, collection.Group); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
 	}
 
 	user := u.IdentityFromContext(ctx)

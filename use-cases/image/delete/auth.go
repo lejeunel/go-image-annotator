@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	DeleteImage(ctx context.Context, group string) error
+	DeleteImage(ctx context.Context, group *string) error
 }

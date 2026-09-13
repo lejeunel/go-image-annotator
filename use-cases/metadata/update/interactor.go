@@ -16,7 +16,7 @@ type Interface interface {
 }
 
 type Auth interface {
-	UpdateMetadata(ctx context.Context, group string) error
+	UpdateMetadata(ctx context.Context, group *string) error
 }
 
 type Interactor struct {
@@ -56,11 +56,9 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if group != nil {
-		if err := i.Auth.UpdateMetadata(ctx, *group); err != nil {
-			out.Error(fmt.Errorf("%v: %w", errCtx, err))
-			return
-		}
+	if err := i.Auth.UpdateMetadata(ctx, group); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
 	}
 
 	imageId, err := im.NewImageIdFromString(r.ImageId)

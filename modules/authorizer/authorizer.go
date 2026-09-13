@@ -78,16 +78,16 @@ func (a *Authorizer) SetAuthRules(rules Policies) {
 	a.Rules = rules
 }
 
-func (a Authorizer) CreateCollection(ctx context.Context, group string) error {
-	return a.check(ctx, "CreateCollection", &group)
+func (a Authorizer) CreateCollection(ctx context.Context, group *string) error {
+	return a.check(ctx, "CreateCollection", group)
 }
 
-func (a Authorizer) DeleteCollection(ctx context.Context, group string) error {
-	return a.check(ctx, "DeleteCollection", &group)
+func (a Authorizer) DeleteCollection(ctx context.Context, group *string) error {
+	return a.check(ctx, "DeleteCollection", group)
 }
 
-func (a Authorizer) UpdateCollection(ctx context.Context, group string) error {
-	return a.check(ctx, "UpdateCollection", &group)
+func (a Authorizer) UpdateCollection(ctx context.Context, group *string) error {
+	return a.check(ctx, "UpdateCollection", group)
 }
 
 func (a Authorizer) CreateLabel(ctx context.Context) error {
@@ -102,20 +102,20 @@ func (a Authorizer) UpdateLabel(ctx context.Context) error {
 	return a.check(ctx, "UpdateLabel", nil)
 }
 
-func (a Authorizer) Annotate(ctx context.Context, group string) error {
-	return a.check(ctx, "Annotate", &group)
+func (a Authorizer) Annotate(ctx context.Context, group *string) error {
+	return a.check(ctx, "Annotate", group)
 }
 
-func (a Authorizer) DeleteImage(ctx context.Context, group string) error {
-	return a.check(ctx, "DeleteImage", &group)
+func (a Authorizer) DeleteImage(ctx context.Context, group *string) error {
+	return a.check(ctx, "DeleteImage", group)
 }
 
-func (a Authorizer) ImportImage(ctx context.Context, group string) error {
-	return a.check(ctx, "ImportImage", &group)
+func (a Authorizer) ImportImage(ctx context.Context, group *string) error {
+	return a.check(ctx, "ImportImage", group)
 }
 
-func (a Authorizer) IngestImage(ctx context.Context, group string) error {
-	return a.check(ctx, "IngestImage", &group)
+func (a Authorizer) IngestImage(ctx context.Context, group *string) error {
+	return a.check(ctx, "IngestImage", group)
 }
 
 func (a Authorizer) CreateUser(ctx context.Context) error {
@@ -158,7 +158,7 @@ func (a Authorizer) UpdateRole(ctx context.Context) error {
 	return a.check(ctx, "UpdateRole", nil)
 }
 
-func (a Authorizer) CloneCollection(ctx context.Context, group string) error {
+func (a Authorizer) CloneCollection(ctx context.Context, group *string) error {
 	return a.check(ctx, "CloneCollection", nil)
 }
 
@@ -174,14 +174,14 @@ func (a Authorizer) SetPolicies(ctx context.Context) error {
 	return a.check(ctx, "SetPolicies", nil)
 }
 
-func (a Authorizer) AddMetadata(ctx context.Context, group string) error {
+func (a Authorizer) AddMetadata(ctx context.Context, group *string) error {
 	return a.check(ctx, "AddMetadata", nil)
 }
 
-func (a Authorizer) DeleteMetadata(ctx context.Context, group string) error {
+func (a Authorizer) DeleteMetadata(ctx context.Context, group *string) error {
 	return a.check(ctx, "DeleteMetadata", nil)
 }
 
-func (a Authorizer) UpdateMetadata(ctx context.Context, group string) error {
+func (a Authorizer) UpdateMetadata(ctx context.Context, group *string) error {
 	return a.check(ctx, "UpdateMetadata", nil)
 }

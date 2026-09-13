@@ -52,11 +52,9 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if image.Collection.Group != nil {
-		if err := i.Auth.DeleteImage(ctx, *image.Collection.Group); err != nil {
-			out.Error(fmt.Errorf("%v: %w", errCtx, err))
-			return
-		}
+	if err := i.Auth.DeleteImage(ctx, image.Collection.Group); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
 	}
 
 	if err := i.ImageStore.Delete(imageId, r.Collection); err != nil {

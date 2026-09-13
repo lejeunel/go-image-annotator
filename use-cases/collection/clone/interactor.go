@@ -65,20 +65,20 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	task := t.NewTask(t.NewTaskId(), user.Id, t.CollectionCloneTask)
 
+	if err := i.Auth.CloneCollection(ctx, r.DestinationGroup); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
+
 	var group *grp.Group
+	var err error
 	if r.DestinationGroup != nil {
-		if err := i.Auth.CloneCollection(ctx, *r.DestinationGroup); err != nil {
-			out.Error(fmt.Errorf("%v: %w", errCtx, err))
-			return
-		}
-		var err error
 		group, err = i.GroupRepo.Find(*r.DestinationGroup)
 		if err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 	}
-
 	if err := i.checkCollections(r.Source, r.Destination); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	ImportImage(ctx context.Context, destinationGroup string) error
+	ImportImage(ctx context.Context, destinationGroup *string) error
 }

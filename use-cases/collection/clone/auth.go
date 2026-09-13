@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	CloneCollection(ctx context.Context, group string) error
+	CloneCollection(ctx context.Context, group *string) error
 }

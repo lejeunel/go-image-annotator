@@ -39,11 +39,10 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	if group != nil {
-		if err := i.Auth.UpdateCollection(ctx, *group); err != nil {
-			out.Error(fmt.Errorf("%v: %w", errCtx, err))
-			return
-		}
+
+	if err := i.Auth.UpdateCollection(ctx, group); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
 	}
 
 	updateModel := clc.UpdateModel{NewDescription: r.NewDescription}
@@ -79,7 +78,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 			)
 			return
 		}
-		if err := i.Auth.UpdateCollection(ctx, *r.NewGroup); err != nil {
+		if err := i.Auth.UpdateCollection(ctx, r.NewGroup); err != nil {
 			out.Error(
 				fmt.Errorf(
 					"%v: authorizing assignment to new group %v: %w",

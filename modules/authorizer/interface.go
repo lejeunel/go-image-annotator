@@ -8,16 +8,16 @@ import (
 
 type Interface interface {
 	SetAuthRules(rules Policies)
-	CreateCollection(ctx context.Context, group string) error
-	DeleteCollection(ctx context.Context, group string) error
-	UpdateCollection(ctx context.Context, group string) error
+	CreateCollection(ctx context.Context, group *string) error
+	DeleteCollection(ctx context.Context, group *string) error
+	UpdateCollection(ctx context.Context, group *string) error
 	CreateLabel(ctx context.Context) error
 	DeleteLabel(ctx context.Context) error
 	UpdateLabel(ctx context.Context) error
-	Annotate(ctx context.Context, group string) error
-	DeleteImage(ctx context.Context, group string) error
-	ImportImage(ctx context.Context, group string) error
-	IngestImage(ctx context.Context, group string) error
+	Annotate(ctx context.Context, group *string) error
+	DeleteImage(ctx context.Context, group *string) error
+	ImportImage(ctx context.Context, group *string) error
+	IngestImage(ctx context.Context, group *string) error
 	CreateUser(ctx context.Context) error
 	DeleteUser(ctx context.Context) error
 	ListUsers(ctx context.Context) error
@@ -28,11 +28,11 @@ type Interface interface {
 	CreateRole(ctx context.Context) error
 	DeleteRole(ctx context.Context) error
 	UpdateRole(ctx context.Context) error
-	CloneCollection(ctx context.Context, group string) error
+	CloneCollection(ctx context.Context, group *string) error
 	UpdateUserPrivileges(ctx context.Context) error
-	AddMetadata(ctx context.Context, group string) error
-	UpdateMetadata(ctx context.Context, group string) error
-	DeleteMetadata(ctx context.Context, group string) error
+	AddMetadata(ctx context.Context, group *string) error
+	UpdateMetadata(ctx context.Context, group *string) error
+	DeleteMetadata(ctx context.Context, group *string) error
 	ReadPolicies(ctx context.Context) error
 	SetPolicies(ctx context.Context) error
 }

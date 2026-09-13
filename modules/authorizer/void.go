@@ -12,15 +12,15 @@ func NewVoidAuth() VoidAuthorizer {
 
 func (a VoidAuthorizer) SetAuthRules(rules Policies) {}
 
-func (a VoidAuthorizer) CreateCollection(ctx context.Context, group string) error {
+func (a VoidAuthorizer) CreateCollection(ctx context.Context, group *string) error {
 	return nil
 }
 
-func (a VoidAuthorizer) DeleteCollection(ctx context.Context, group string) error {
+func (a VoidAuthorizer) DeleteCollection(ctx context.Context, group *string) error {
 	return nil
 }
 
-func (a VoidAuthorizer) UpdateCollection(ctx context.Context, group string) error {
+func (a VoidAuthorizer) UpdateCollection(ctx context.Context, group *string) error {
 	return nil
 }
 
@@ -36,19 +36,19 @@ func (a VoidAuthorizer) UpdateLabel(ctx context.Context) error {
 	return nil
 }
 
-func (a VoidAuthorizer) Annotate(ctx context.Context, group string) error {
+func (a VoidAuthorizer) Annotate(ctx context.Context, group *string) error {
 	return nil
 }
 
-func (a VoidAuthorizer) DeleteImage(ctx context.Context, group string) error {
+func (a VoidAuthorizer) DeleteImage(ctx context.Context, group *string) error {
 	return nil
 }
 
-func (a VoidAuthorizer) ImportImage(ctx context.Context, group string) error {
+func (a VoidAuthorizer) ImportImage(ctx context.Context, group *string) error {
 	return nil
 }
 
-func (a VoidAuthorizer) IngestImage(ctx context.Context, group string) error {
+func (a VoidAuthorizer) IngestImage(ctx context.Context, group *string) error {
 	return nil
 }
 
@@ -108,19 +108,19 @@ func (a VoidAuthorizer) UpdateRole(ctx context.Context) error {
 	return nil
 }
 
-func (a VoidAuthorizer) CloneCollection(ctx context.Context, group string) error {
+func (a VoidAuthorizer) CloneCollection(ctx context.Context, group *string) error {
 	return nil
 }
 
-func (a VoidAuthorizer) AddMetadata(ctx context.Context, group string) error {
+func (a VoidAuthorizer) AddMetadata(ctx context.Context, group *string) error {
 	return nil
 }
 
-func (a VoidAuthorizer) DeleteMetadata(ctx context.Context, group string) error {
+func (a VoidAuthorizer) DeleteMetadata(ctx context.Context, group *string) error {
 	return nil
 }
 
-func (a VoidAuthorizer) UpdateMetadata(ctx context.Context, group string) error {
+func (a VoidAuthorizer) UpdateMetadata(ctx context.Context, group *string) error {
 	return nil
 }
 

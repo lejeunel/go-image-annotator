@@ -21,7 +21,7 @@ import (
 )
 
 type Auth interface {
-	IngestImage(ctx context.Context, group string) error
+	IngestImage(ctx context.Context, group *string) error
 }
 
 type ImageIngester interface {
@@ -92,11 +92,9 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if collection.Group != nil {
-		if err := i.Auth.IngestImage(ctx, *collection.Group); err != nil {
-			out.Error(fmt.Errorf("%v: %w", errCtx, err))
-			return
-		}
+	if err := i.Auth.IngestImage(ctx, collection.Group); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
 	}
 
 	user := u.IdentityFromContext(ctx)

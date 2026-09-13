@@ -53,11 +53,9 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if dstCollection.Group != nil {
-		if err := i.Auth.ImportImage(ctx, *dstCollection.Group); err != nil {
-			out.Error(fmt.Errorf("%v: %w", errCtx, err))
-			return
-		}
+	if err := i.Auth.ImportImage(ctx, dstCollection.Group); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
 	}
 
 	if err := i.ensureImageDoesNotAlreadyExistInCollection(
