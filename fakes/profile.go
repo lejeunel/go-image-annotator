@@ -3,22 +3,31 @@ package fake
 import (
 	"slices"
 
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 )
+
+type CreatedProfile struct {
+	Id          pr.ProfileId
+	Name        pr.ProfileName
+	Description pr.ProfileDescription
+}
 
 type ProfileRepo struct {
 	ErrOnCreate   error
 	ErrOnExists   error
+	ErrOnAddLabel error
 	ExistingNames []string
-	Created       []pr.Profile
+	Created       []CreatedProfile
+	AddedLabels   []lbl.LabelName
 }
 
-func (r *ProfileRepo) Create(profile pr.Profile) error {
+func (r *ProfileRepo) Create(id pr.ProfileId, name pr.ProfileName, desc pr.ProfileDescription) error {
 	if r.ErrOnCreate != nil {
 		return r.ErrOnCreate
 	}
 
-	r.Created = append(r.Created, profile)
+	r.Created = append(r.Created, CreatedProfile{Id: id, Name: name, Description: desc})
 	return nil
 }
 
@@ -33,4 +42,12 @@ func (r *ProfileRepo) Exists(name string) (*bool, error) {
 	}
 	exist = false
 	return &exist, nil
+}
+
+func (r *ProfileRepo) AddLabel(profileName pr.ProfileName, label lbl.LabelName) error {
+	if r.ErrOnAddLabel != nil {
+		return r.ErrOnAddLabel
+	}
+	r.AddedLabels = append(r.AddedLabels, label)
+	return nil
 }

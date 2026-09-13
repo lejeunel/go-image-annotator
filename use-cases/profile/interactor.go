@@ -11,25 +11,26 @@ import (
 )
 
 type Interactor struct {
-	Repo
+	ProfileRepo
+	LabelRepo
 	v.Validator
 	Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
-	errCtx := "creating profile"
+	errCtx := fmt.Errorf("creating profile with name %v", r.Name)
 	if err := i.Auth.CreateProfile(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	errBaseMsg := fmt.Sprintf("checking for duplicate profile with name %v", r.Name)
-	alreadyExists, err := i.Repo.Exists(r.Name)
+	errBase := fmt.Errorf("%w: checking for duplicate profile name %v", errCtx, r.Name)
+	alreadyExists, err := i.ProfileRepo.Exists(r.Name)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 	if *alreadyExists {
-		out.Error(fmt.Errorf("%v: %w", errBaseMsg, e.ErrDuplicate))
+		out.Error(fmt.Errorf("%w: %w", errBase, e.ErrDuplicate))
 		return
 	}
 	if err := i.Validator.Validate(r.Name); err != nil {
@@ -43,10 +44,33 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		pr.WithDescription(r.Description),
 		pr.WithLabels(r.Labels))
 
-	if err := i.Repo.Create(profile); err != nil {
+	if err := i.ProfileRepo.Create(profile.Id, profile.Name, profile.Description); err != nil {
 		out.Error(fmt.Errorf("creating profile with name %v: %w", r.Name, err))
 		return
 	}
+
+	for _, label := range profile.Labels {
+		errBase := fmt.Errorf("%w: checking for existence of label %v", errCtx, label)
+		exists, err := i.LabelRepo.Exists(label)
+		if err != nil {
+			out.Error(fmt.Errorf("%w: %w", errBase, err))
+			return
+		}
+		if !exists {
+			out.Error(fmt.Errorf("%w: %w", errBase, e.ErrValidation))
+			return
+		}
+	}
+
+	for _, label := range profile.Labels {
+		errBase := fmt.Errorf("%w: adding label %v", errCtx, label)
+		err := i.ProfileRepo.AddLabel(profile.Name, label)
+		if err != nil {
+			out.Error(fmt.Errorf("%w: %w", errBase, err))
+			return
+		}
+	}
+
 	out.SuccessCreateProfile(profile)
 
 }
@@ -64,10 +88,12 @@ func WithNameValidator(v v.Validator) Option {
 	}
 }
 
-func New(r Repo, opts ...Option) Interactor {
+func New(r ProfileRepo, l LabelRepo, opts ...Option) Interactor {
 	i := &Interactor{
-		Repo: r, Validator: v.NewNameValidator(),
-		Auth: auth.NewVoidAuth(),
+		ProfileRepo: r,
+		LabelRepo:   l,
+		Validator:   v.NewNameValidator(),
+		Auth:        auth.NewVoidAuth(),
 	}
 
 	for _, opt := range opts {

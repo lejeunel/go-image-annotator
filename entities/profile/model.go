@@ -1,13 +1,20 @@
 package role
 
+import (
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+)
+
+type ProfileName = string
+type ProfileDescription = string
+
 type Profile struct {
 	Id          ProfileId
-	Name        string
-	Description string
-	Labels      []string
+	Name        ProfileName
+	Description ProfileDescription
+	Labels      []lbl.LabelName
 }
 
-func NewProfile(id ProfileId, name string, opts ...Option) Profile {
+func NewProfile(id ProfileId, name lbl.LabelName, opts ...Option) Profile {
 	r := &Profile{Id: id, Name: name}
 	for _, opt := range opts {
 		opt(r)
@@ -17,21 +24,14 @@ func NewProfile(id ProfileId, name string, opts ...Option) Profile {
 
 type Option func(*Profile)
 
-func WithDescription(d string) Option {
+func WithDescription(d ProfileDescription) Option {
 	return func(r *Profile) {
 		r.Description = d
 	}
 }
 
-func WithLabels(labels []string) Option {
+func WithLabels(labels []lbl.LabelName) Option {
 	return func(r *Profile) {
 		r.Labels = labels
 	}
-}
-
-type UpdatableModel struct {
-	Name           string
-	NewName        string
-	NewDescription string
-	NewLabels      []string
 }

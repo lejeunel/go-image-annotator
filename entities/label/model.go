@@ -1,8 +1,10 @@
 package label
 
+type LabelName = string
+
 type Label struct {
 	Id          LabelId
-	Name        string
+	Name        LabelName
 	Description string
 }
 
