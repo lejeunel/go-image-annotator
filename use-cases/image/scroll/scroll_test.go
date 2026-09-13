@@ -11,7 +11,6 @@ import (
 
 func Setup() Interactor {
 	return New(&fk.ImageRepo{}, &fk.FilterValidator{}, &fk.FilterValidator{})
-
 }
 
 func TestErrOnInvalidImageId(t *testing.T) {
@@ -28,6 +27,7 @@ func TestErrOnCurrentImageExistsShouldFail(t *testing.T) {
 	itr.Execute(t.Context(), Request{CurrentImageId: im.NewImageId().String()}, p)
 	assert.ErrorIs(t, p.GotErr, e.ErrInternal)
 }
+
 func TestNonExistingCurrentImageExistsShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := Setup()
@@ -35,14 +35,17 @@ func TestNonExistingCurrentImageExistsShouldFail(t *testing.T) {
 	itr.Execute(t.Context(), Request{CurrentImageId: im.NewImageId().String()}, p)
 	assert.ErrorIs(t, p.GotErr, e.ErrNotFound)
 }
+
 func TestErrOnFilteringStrValidation(t *testing.T) {
 	p := &FakePresenter{}
 	itr := Setup()
 	v := fk.FilterValidator{Err: e.ErrValidation}
 	itr.FilterValidator = &v
 	queryStr := "collection:\"my-collection\""
-	itr.Execute(t.Context(), Request{CurrentImageId: im.NewImageId().String(),
-		FilterStr: queryStr}, p)
+	itr.Execute(t.Context(), Request{
+		CurrentImageId: im.NewImageId().String(),
+		FilterStr:      queryStr,
+	}, p)
 	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
 	assert.Equal(t, v.Got, queryStr)
 }
@@ -53,8 +56,10 @@ func TestErrOnOrderingStrValidation(t *testing.T) {
 	v := fk.FilterValidator{Err: e.ErrValidation}
 	itr.OrderingValidator = &v
 	orderStr := "ingested_at:desc"
-	itr.Execute(t.Context(), Request{CurrentImageId: im.NewImageId().String(),
-		OrderStr: orderStr}, p)
+	itr.Execute(t.Context(), Request{
+		CurrentImageId: im.NewImageId().String(),
+		OrderStr:       orderStr,
+	}, p)
 	assert.ErrorIs(t, p.GotErr, e.ErrValidation)
 	assert.Equal(t, v.Got, orderStr)
 }

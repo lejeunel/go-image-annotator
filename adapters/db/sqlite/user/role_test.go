@@ -3,8 +3,8 @@ package user
 import (
 	"testing"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	roleRepo "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	r "github.com/lejeunel/go-image-annotator/entities/role"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	"github.com/stretchr/testify/assert"

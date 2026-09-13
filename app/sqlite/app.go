@@ -31,5 +31,5 @@ func NewApp(cfg config.Config, auth auth.Interface, logger slog.Logger) app.App 
 		itrs.Metadata.Read, itrs.Metadata.Delete,
 	)
 
-	return app.NewApp(itrs, sessionManager, annotator,  infra.FilterParser,  infra.OrderParser)
+	return app.NewApp(itrs, sessionManager, annotator, infra.FilterParser, infra.OrderParser)
 }

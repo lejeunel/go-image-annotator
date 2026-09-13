@@ -29,7 +29,13 @@ type App struct {
 	ImageSortDocumenter
 }
 
-func NewApp(itrs itrs.Interactors, sm s.SessionManager, an a.Annotator, fd ImageFilterDocumenter, sd ImageSortDocumenter) App {
+func NewApp(
+	itrs itrs.Interactors,
+	sm s.SessionManager,
+	an a.Annotator,
+	fd ImageFilterDocumenter,
+	sd ImageSortDocumenter,
+) App {
 	return App{
 		Itrs:                  itrs,
 		SessionManager:        sm,

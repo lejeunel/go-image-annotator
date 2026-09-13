@@ -4,8 +4,10 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 )
 
-type ProfileName = string
-type ProfileDescription = string
+type (
+	ProfileName        = string
+	ProfileDescription = string
+)
 
 type Profile struct {
 	Id          ProfileId

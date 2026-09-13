@@ -58,7 +58,8 @@ func TestHandleErrorOnLabelExists(t *testing.T) {
 	req := Request{
 		Name:        "a-profile",
 		Description: "a-description",
-		Labels:      []string{"the-label"}}
+		Labels:      []string{"the-label"},
+	}
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -70,7 +71,8 @@ func TestMissingLabelShouldFail(t *testing.T) {
 	req := Request{
 		Name:        "a-profile",
 		Description: "a-description",
-		Labels:      []string{"the-label"}}
+		Labels:      []string{"the-label"},
+	}
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotValidationErr)
 	assert.False(t, p.GotSuccess)
@@ -84,7 +86,8 @@ func TestHandleErrorOnAddLabel(t *testing.T) {
 	req := Request{
 		Name:        "a-profile",
 		Description: "a-description",
-		Labels:      []string{labelName}}
+		Labels:      []string{labelName},
+	}
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -99,7 +102,8 @@ func TestCreate(t *testing.T) {
 	req := Request{
 		Name:        "a-profile",
 		Description: "a-description",
-		Labels:      []string{labelName}}
+		Labels:      []string{labelName},
+	}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, profileRepo.Created[0].Name, req.Name)
 	assert.Equal(t, profileRepo.Created[0].Description, req.Description)

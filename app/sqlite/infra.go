@@ -56,5 +56,4 @@ func BuildInfra(localPath string, imageStore fs.FileStore) Infra {
 		orderingParser,
 		db,
 	}
-
 }

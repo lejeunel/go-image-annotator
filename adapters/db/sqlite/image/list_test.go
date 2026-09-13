@@ -37,7 +37,11 @@ func TestListOneImageInGivenCollection(t *testing.T) {
 	firstImage, firstCollection := CreateSingleImageCollection(imr, cr, "first-collection")
 	CreateSingleImageCollection(imr, cr, "second-collection")
 
-	r, _ := imr.Slice("collection=\"first-collection\"", pa.PaginationParams{PageSize: 2, Page: 1}, "")
+	r, _ := imr.Slice(
+		"collection=\"first-collection\"",
+		pa.PaginationParams{PageSize: 2, Page: 1},
+		"",
+	)
 	assert.Equal(t, 1, len(r))
 	images := r
 	assert.True(t, images[0].ImageId == firstImage.Id)

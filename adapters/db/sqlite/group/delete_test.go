@@ -3,8 +3,8 @@ package group
 import (
 	"testing"
 
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	clcr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
+	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"

@@ -24,7 +24,7 @@ jobs:
 
       - name: Apply code formatting
         run: |
-          nix develop .#format --command make format
+          nix develop .#format --command make format-check
 
   test:
     name: Run tests

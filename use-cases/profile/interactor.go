@@ -72,7 +72,6 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	out.SuccessCreateProfile(profile)
-
 }
 
 type Option func(*Interactor)
@@ -82,6 +81,7 @@ func WithAuth(a Auth) Option {
 		i.Auth = a
 	}
 }
+
 func WithNameValidator(v v.Validator) Option {
 	return func(i *Interactor) {
 		i.Validator = v

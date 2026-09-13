@@ -35,9 +35,15 @@ func (b *LoginPageBuilder) AddOAuthProvider(provider, url, icon string) *LoginPa
 func (b *LoginPageBuilder) makeContent() Node {
 	oauthButtons := []Node{}
 	for _, p := range b.OAuthProviders {
-		button := A(Href(p.URL),
+		button := A(
+			Href(p.URL),
 			Class(s.OAuthButtonClass),
-			Div(Class("flex items-center justify-center gap-2"), Div(Class("w-5 h-5 shrink-0 [&>svg]:w-full [&>svg]:h-full"), Raw(p.Icon)), Text(fmt.Sprintf("Continue with %v", p.Name))))
+			Div(
+				Class("flex items-center justify-center gap-2"),
+				Div(Class("w-5 h-5 shrink-0 [&>svg]:w-full [&>svg]:h-full"), Raw(p.Icon)),
+				Text(fmt.Sprintf("Continue with %v", p.Name)),
+			),
+		)
 		oauthButtons = append(oauthButtons, button)
 	}
 	return Div(Class("flex justify-center"),

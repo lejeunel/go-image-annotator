@@ -83,9 +83,11 @@ type PageBuilder struct {
 
 func NewPageBuilder(base BasePageBuilder, version g.Info, queryDocs QueryDocs) PageBuilder {
 	queryModalData := QueryModalData{
-		QueryURLs: QueryURLs{SubmitURL: rt.SliceUrl,
+		QueryURLs: QueryURLs{
+			SubmitURL:            rt.SliceUrl,
 			FilterQueryArgName:   rt.FilterQueryArgName,
-			OrderingQueryArgName: rt.OrderingQueryArgName},
+			OrderingQueryArgName: rt.OrderingQueryArgName,
+		},
 		QueryDocs: queryDocs,
 	}
 	pb := PageBuilder{
@@ -210,7 +212,10 @@ func (b *PageBuilder) Render(w io.Writer) {
 			Article(Class("prose dark:prose-invert max-w-none"), Raw(b.postamble)))
 	}
 
-	content = Div(Class("flex-1 flex flex-col items-center"), Div(b.columnMode.Class(), content, b.content, postamble))
+	content = Div(
+		Class("flex-1 flex flex-col items-center"),
+		Div(b.columnMode.Class(), content, b.content, postamble),
+	)
 
 	if len(b.SidebarEntries) > 0 {
 		var bufSidebar bytes.Buffer
@@ -254,8 +259,12 @@ func (b *PageBuilder) Render(w io.Writer) {
 	b.BasePageBuilder.SetFrameContent(
 		Div(
 			Attr(`x-data="{ showSearch: false}"`),
-			Attr(`@keydown.cmd.k.window.prevent="showSearch = !showSearch, $dispatch('searchModalOpened')"`),
-			Attr(`@keydown.ctrl.k.window.prevent="showSearch = !showSearch, $dispatch('searchModalOpened')"`),
+			Attr(
+				`@keydown.cmd.k.window.prevent="showSearch = !showSearch, $dispatch('searchModalOpened')"`,
+			),
+			Attr(
+				`@keydown.ctrl.k.window.prevent="showSearch = !showSearch, $dispatch('searchModalOpened')"`,
+			),
 			Group(
 				[]Node{
 					cmp.MakeNavBar(

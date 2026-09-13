@@ -35,15 +35,25 @@ func MaybeSetupGoogle(pb *b.LoginPageBuilder, baseURL string, logger slog.Logger
 	if (id != "") && (secret != "") {
 		logger.Info("setting up google auth")
 		pb.AddOAuthProvider(ProviderNameGoogle, rt.MakeOAuthLoginURL(ProviderNameGoogle), ic.Google)
-		goth.UseProviders(google.New(id, secret, rt.MakeOAuthCallbackURL(baseURL, ProviderNameGoogle)))
+		goth.UseProviders(
+			google.New(id, secret, rt.MakeOAuthCallbackURL(baseURL, ProviderNameGoogle)),
+		)
 	}
 }
+
 func MaybeSetupGithub(pb *b.LoginPageBuilder, baseURL string, logger slog.Logger) {
 	id := os.Getenv("GOIA_GITHUB_CLIENT_ID")
 	secret := os.Getenv("GOIA_GITHUB_CLIENT_SECRET")
 	if (id != "") && (secret != "") {
 		logger.Info("setting up github auth")
 		pb.AddOAuthProvider(ProviderNameGithub, rt.MakeOAuthLoginURL(ProviderNameGithub), ic.Github)
-		goth.UseProviders(github.New(id, secret, rt.MakeOAuthCallbackURL(baseURL, ProviderNameGithub), "user:email"))
+		goth.UseProviders(
+			github.New(
+				id,
+				secret,
+				rt.MakeOAuthCallbackURL(baseURL, ProviderNameGithub),
+				"user:email",
+			),
+		)
 	}
 }

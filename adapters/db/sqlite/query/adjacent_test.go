@@ -66,7 +66,11 @@ func InitAdjacencyTest(repos ScrollerRepos, payloads []AdjTestPayload) {
 
 		image := im.NewImage(p.ImageId, *collection)
 		if !slices.Contains(createdImages, image.Id) {
-			if err := repos.ImageRepo.AddImage(image.Id, []byte(image.Id.String()), im.Specs{IngestedAt: p.IngestionTime}); err != nil {
+			if err := repos.ImageRepo.AddImage(
+				image.Id,
+				[]byte(image.Id.String()),
+				im.Specs{IngestedAt: p.IngestionTime},
+			); err != nil {
 				panic(err)
 			}
 			createdImages = append(createdImages, image.Id)
@@ -80,13 +84,14 @@ func InitAdjacencyTest(repos ScrollerRepos, payloads []AdjTestPayload) {
 			}
 		}
 	}
-
 }
 
 var adjTests = []AdjTest{
-	{"single image has no adjacents",
+	{
+		"single image has no adjacents",
 		[]AdjTestPayload{
-			{*st.IdFromInt(0), "a-collection", time.Now(), nil}},
+			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
+		},
 		"",
 		"",
 		*st.IdFromInt(0),
@@ -96,10 +101,12 @@ var adjTests = []AdjTest{
 		nil,
 		"",
 	},
-	{"one image per collection has no adjacents",
+	{
+		"one image per collection has no adjacents",
 		[]AdjTestPayload{
 			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
-			{*st.IdFromInt(1), "another-collection", time.Now(), nil}},
+			{*st.IdFromInt(1), "another-collection", time.Now(), nil},
+		},
 		"collection:\"a-collection\"",
 		"",
 		*st.IdFromInt(0),
@@ -109,11 +116,13 @@ var adjTests = []AdjTest{
 		nil,
 		"",
 	},
-	{"two images in one collection",
+	{
+		"two images in one collection",
 		[]AdjTestPayload{
 			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
 			{*st.IdFromInt(1), "a-collection", time.Now(), nil},
-			{*st.IdFromInt(2), "another-collection", time.Now(), nil}},
+			{*st.IdFromInt(2), "another-collection", time.Now(), nil},
+		},
 		"collection:\"a-collection\"",
 		"ingested_at",
 		*st.IdFromInt(0),
@@ -123,7 +132,8 @@ var adjTests = []AdjTest{
 		st.IdFromInt(1),
 		"a-collection",
 	},
-	{"order by ingestion time ascending",
+	{
+		"order by ingestion time ascending",
 		[]AdjTestPayload{
 			{*st.IdFromInt(2), "a-collection", time.Now(), nil},
 			{*st.IdFromInt(1), "a-collection", time.Now(), nil},
@@ -138,7 +148,8 @@ var adjTests = []AdjTest{
 		st.IdFromInt(0),
 		"a-collection",
 	},
-	{"order by ingestion time descending",
+	{
+		"order by ingestion time descending",
 		[]AdjTestPayload{
 			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
 			{*st.IdFromInt(1), "a-collection", time.Now(), nil},
@@ -153,7 +164,8 @@ var adjTests = []AdjTest{
 		st.IdFromInt(0),
 		"a-collection",
 	},
-	{"order by image id by default",
+	{
+		"order by image id by default",
 		[]AdjTestPayload{
 			{*st.IdFromInt(1), "a-collection", time.Now(), nil},
 			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
@@ -168,7 +180,8 @@ var adjTests = []AdjTest{
 		st.IdFromInt(2),
 		"a-collection",
 	},
-	{"order by id desc",
+	{
+		"order by id desc",
 		[]AdjTestPayload{
 			{*st.IdFromInt(1), "a-collection", time.Now(), nil},
 			{*st.IdFromInt(2), "a-collection", time.Now(), nil},
@@ -183,10 +196,12 @@ var adjTests = []AdjTest{
 		st.IdFromInt(0),
 		"a-collection",
 	},
-	{"same image in two collections",
+	{
+		"same image in two collections",
 		[]AdjTestPayload{
 			{*st.IdFromInt(0), "collection-v1", time.Now(), nil},
-			{*st.IdFromInt(0), "collection-v2", time.Now(), nil}},
+			{*st.IdFromInt(0), "collection-v2", time.Now(), nil},
+		},
 		"",
 		"collection",
 		*st.IdFromInt(0),
@@ -196,11 +211,23 @@ var adjTests = []AdjTest{
 		st.IdFromInt(0),
 		"collection-v2",
 	},
-	{"filter by meta",
+	{
+		"filter by meta",
 		[]AdjTestPayload{
 			{*st.IdFromInt(0), "a-collection", time.Now(), nil},
-			{*st.IdFromInt(1), "a-collection", time.Now(), []m.MetaData{{Key: "is-active", Value: true}}},
-			{*st.IdFromInt(2), "another-collection", time.Now(), []m.MetaData{{Key: "is-active", Value: true}}}},
+			{
+				*st.IdFromInt(1),
+				"a-collection",
+				time.Now(),
+				[]m.MetaData{{Key: "is-active", Value: true}},
+			},
+			{
+				*st.IdFromInt(2),
+				"another-collection",
+				time.Now(),
+				[]m.MetaData{{Key: "is-active", Value: true}},
+			},
+		},
 		"meta.is-active?",
 		"",
 		*st.IdFromInt(1),
@@ -210,10 +237,21 @@ var adjTests = []AdjTest{
 		st.IdFromInt(2),
 		"another-collection",
 	},
-	{"order by meta",
+	{
+		"order by meta",
 		[]AdjTestPayload{
-			{*st.IdFromInt(0), "a-collection", time.Now(), []m.MetaData{{Key: "captured-at", Value: time.Now()}}},
-			{*st.IdFromInt(1), "a-collection", time.Now(), []m.MetaData{{Key: "captured-at", Value: time.Now()}}},
+			{
+				*st.IdFromInt(0),
+				"a-collection",
+				time.Now(),
+				[]m.MetaData{{Key: "captured-at", Value: time.Now()}},
+			},
+			{
+				*st.IdFromInt(1),
+				"a-collection",
+				time.Now(),
+				[]m.MetaData{{Key: "captured-at", Value: time.Now()}},
+			},
 		},
 		"",
 		"meta.captured-at:desc",
@@ -232,7 +270,13 @@ func TestAdjacency(t *testing.T) {
 			repos := NewTestScrollerRepos(s.NewInMemory())
 			InitAdjacencyTest(repos, tt.images)
 
-			adj, err := repos.ImageRepo.GetAdjacent(tt.currentImage, tt.currentCollection, tt.FilterStr, tt.OrderStr, im.ScrollPrevious)
+			adj, err := repos.ImageRepo.GetAdjacent(
+				tt.currentImage,
+				tt.currentCollection,
+				tt.FilterStr,
+				tt.OrderStr,
+				im.ScrollPrevious,
+			)
 			assert.NoError(t, err)
 			if tt.wantPrev == nil {
 				assert.Nil(t, adj.Prev, "previous")

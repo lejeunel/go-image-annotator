@@ -41,10 +41,12 @@ func WithRegExpDescription(desc string) RegExpFieldOption {
 func NewOrderParserBuilder() *OrderParserBuilder {
 	return &OrderParserBuilder{}
 }
+
 func (b *OrderParserBuilder) AddExample(example string) *OrderParserBuilder {
 	b.examples = append(b.examples, example)
 	return b
 }
+
 func (o *OrderParserBuilder) AddField(field string, opts ...FieldOption) *OrderParserBuilder {
 	new := Field{Name: field}
 	for _, opt := range opts {
@@ -53,7 +55,12 @@ func (o *OrderParserBuilder) AddField(field string, opts ...FieldOption) *OrderP
 	o.fields = append(o.fields, new)
 	return o
 }
-func (o *OrderParserBuilder) AddRegExpField(r string, displayName string, opts ...RegExpFieldOption) *OrderParserBuilder {
+
+func (o *OrderParserBuilder) AddRegExpField(
+	r string,
+	displayName string,
+	opts ...RegExpFieldOption,
+) *OrderParserBuilder {
 	re := regexp.MustCompile(r)
 	new := RegExpField{RegExp: re, DisplayName: displayName}
 	for _, opt := range opts {
@@ -62,14 +69,20 @@ func (o *OrderParserBuilder) AddRegExpField(r string, displayName string, opts .
 	o.regexps = append(o.regexps, new)
 	return o
 }
+
 func (o *OrderParserBuilder) AddRenameRule(rex string, template string) *OrderParserBuilder {
 	re := regexp.MustCompile(rex)
 	o.renames = append(o.renames, RenameTask{re, template})
 	return o
-
 }
+
 func (o *OrderParserBuilder) Build() OrderParser {
-	return OrderParser{Fields: o.fields, RegExps: o.regexps, RenameTasks: o.renames, examples: o.examples}
+	return OrderParser{
+		Fields:      o.fields,
+		RegExps:     o.regexps,
+		RenameTasks: o.renames,
+		examples:    o.examples,
+	}
 }
 
 func (v OrderParser) Validate(q string) error {
@@ -87,13 +100,12 @@ func (v OrderParser) Validate(q string) error {
 			}
 		} else {
 			return fmt.Errorf("checking for field %v in known fields: %w", field, e.ErrValidation)
-
 		}
 	}
 	return nil
 }
-func (v OrderParser) validateOnFields(field string) error {
 
+func (v OrderParser) validateOnFields(field string) error {
 	for _, f := range v.Fields {
 		if f.Name == field {
 			return nil
@@ -101,7 +113,6 @@ func (v OrderParser) validateOnFields(field string) error {
 	}
 
 	return e.ErrValidation
-
 }
 
 func (v OrderParser) validateOnRegExps(field string) error {
@@ -173,13 +184,18 @@ func (v OrderParser) validateSuffix(term string) error {
 func (v OrderParser) DescribeOrderingFields() []FieldDescription {
 	descriptions := []FieldDescription{}
 	for _, f := range v.Fields {
-		descriptions = append(descriptions, FieldDescription{Name: f.Name, Description: f.Description})
+		descriptions = append(
+			descriptions,
+			FieldDescription{Name: f.Name, Description: f.Description},
+		)
 	}
 	for _, r := range v.RegExps {
-		descriptions = append(descriptions, FieldDescription{Name: r.DisplayName, Description: r.Description})
+		descriptions = append(
+			descriptions,
+			FieldDescription{Name: r.DisplayName, Description: r.Description},
+		)
 	}
 	return descriptions
-
 }
 
 func (v OrderParser) Examples() []string {

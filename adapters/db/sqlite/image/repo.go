@@ -5,14 +5,15 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"iter"
+	"time"
+
 	sq "github.com/Masterminds/squirrel"
 	adb "github.com/lejeunel/go-image-annotator/adapters/db"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
-	"iter"
-	"time"
 )
 
 type ImageRepo struct {
@@ -86,6 +87,7 @@ func (r ImageRepo) Count(f im.FilterStr) (*int64, error) {
 
 	return &count, nil
 }
+
 func (r ImageRepo) applyOrderingStr(q sq.SelectBuilder, o im.OrderStr) (*sq.SelectBuilder, error) {
 	if o != "" {
 		args, err := r.OrderStrParser.Parse(o)
@@ -295,7 +297,6 @@ func (r ImageRepo) applyFilters(q sq.SelectBuilder, f im.FilterStr) (*sq.SelectB
 	}
 
 	return &q, nil
-
 }
 
 func (r ImageRepo) makeBaseSelectQuery() sq.SelectBuilder {
@@ -309,7 +310,6 @@ func (r ImageRepo) makeBaseSelectQuery() sq.SelectBuilder {
 		"images AS i ON ic.image_id=i.id").Join(
 		"collections ON ic.collection_id=collections.id").LeftJoin(
 		"metadata AS m ON ic.image_id=m.image_id AND ic.collection_id=m.collection_id")
-
 }
 
 func (r ImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, error) {
@@ -354,7 +354,6 @@ func (r ImageRepo) GetAdjacent(
 	o im.OrderStr,
 	d im.ScrollingDirection,
 ) (*im.AdjacentImages, error) {
-
 	errCtx := fmt.Errorf("getting adjacent image records")
 
 	// fetch images images and apply filtering/ordering

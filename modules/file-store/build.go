@@ -2,8 +2,9 @@ package file_store
 
 import (
 	"fmt"
-	cfg "github.com/lejeunel/go-image-annotator/config"
 	"log/slog"
+
+	cfg "github.com/lejeunel/go-image-annotator/config"
 )
 
 func Build(cfg cfg.Config, logger slog.Logger) (FileStore, error) {
@@ -29,5 +30,4 @@ func Build(cfg cfg.Config, logger slog.Logger) (FileStore, error) {
 		imageStore = NewLocalFileStore(path)
 	}
 	return imageStore, nil
-
 }

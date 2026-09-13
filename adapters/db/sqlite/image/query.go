@@ -40,10 +40,14 @@ func makeAllWindowExprs(parser OrderStrParser, o im.OrderStr) (*windowExprs, err
 		errs = append(errs, err)
 	}
 	return &exprs, errors.Join(errs...)
-
 }
 
-func makeWindowExpr(parser OrderStrParser, function string, ordering im.OrderStr, outName string) (string, error) {
+func makeWindowExpr(
+	parser OrderStrParser,
+	function string,
+	ordering im.OrderStr,
+	outName string,
+) (string, error) {
 	if ordering == "" {
 		ordering = "image_id"
 	}
@@ -68,7 +72,11 @@ func makeWindowExpr(parser OrderStrParser, function string, ordering im.OrderStr
 func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 	fb := qu.NewFilterParserBuilder()
 	fb.AddField("collection", schema.Is[string](), qu.WithDescription("Name of collection"))
-	fb.AddField("ingested_at", schema.Is[string](), qu.WithDescription("Date/time of ingestion (ISO format)"))
+	fb.AddField(
+		"ingested_at",
+		schema.Is[string](),
+		qu.WithDescription("Date/time of ingestion (ISO format)"),
+	)
 	fb.AddRegExpField(`^meta\..*$`, "meta.<CUSTOM-FIELD>",
 		schema.Any(schema.Is[float64](), schema.Is[string](), schema.Is[bool]()),
 		qu.WithRegExpDescription("Custom meta-data field"))
@@ -80,7 +88,11 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 	ob.AddField("image_id", qu.WithDescription("id of image"))
 	ob.AddField("ingested_at", qu.WithDescription("Date/time of ingestion (ISO format)"))
 	ob.AddField("collection", qu.WithDescription("Name of collection"))
-	ob.AddRegExpField(`^meta\..*$`, "meta.<CUSTOM-FIELD>", qu.WithRegExpDescription("Custom meta-data field"))
+	ob.AddRegExpField(
+		`^meta\..*$`,
+		"meta.<CUSTOM-FIELD>",
+		qu.WithRegExpDescription("Custom meta-data field"),
+	)
 	ob.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(meta, '$.$1')`)
 	ob.AddExample("ingested_at")
 	ob.AddExample("meta.score:asc")

@@ -95,10 +95,11 @@ func DarkModeToggle() Node {
 }
 
 func MakeSearchButton() Node {
-
 	return Div(Class("bg-surface-alt p-0.5 dark:bg-surface-dark-alt"),
 		Button(
-			Class("btn-search flex h-8 w-full cursor-pointer items-center justify-between border-outline bg-surface px-2 font-light transition-all duration-200 dark:border-outline-dark dark:bg-surface-dark rounded-lg border"),
+			Class(
+				"btn-search flex h-8 w-full cursor-pointer items-center justify-between border-outline bg-surface px-2 font-light transition-all duration-200 dark:border-outline-dark dark:bg-surface-dark rounded-lg border",
+			),
 			Attr(`x-on:click="showSearch=true, $dispatch('searchModalOpened')"`),
 			Attr(`x-bind:class="['rounded-lg', 'border']"`),
 			Div(Class("flex items-center gap-2"),
@@ -110,14 +111,24 @@ func MakeSearchButton() Node {
 			`)),
 			Div(
 				Attr(`x-data="{ os: detectOS() }"`),
-				Class("flex items-center gap-1 text-xs text-on-surface-strong dark:text-on-surface-dark"),
+				Class(
+					"flex items-center gap-1 text-xs text-on-surface-strong dark:text-on-surface-dark",
+				),
 				Raw(`
 	        <svg x-show="os === 'Mac OS'" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="currentColor" viewBox="0 0 16 16" style="display: none;">
 	            <path d="M3.5 2A1.5 1.5 0 0 1 5 3.5V5H3.5a1.5 1.5 0 1 1 0-3zM6 5V3.5A2.5 2.5 0 1 0 3.5 6H5v4H3.5A2.5 2.5 0 1 0 6 12.5V11h4v1.5a2.5 2.5 0 1 0 2.5-2.5H11V6h1.5A2.5 2.5 0 1 0 10 3.5V5H6zm4 1v4H6V6h4zm1-1V3.5A1.5 1.5 0 1 1 12.5 5H11zm0 6h1.5a1.5 1.5 0 1 1-1.5 1.5V11zm-6 0v1.5A1.5 1.5 0 1 1 3.5 11H5z"></path>
 	        </svg>
 					`),
-				Span(Attr(`x-show="os === 'Windows' || os === 'Linux'" aria-hidden="true"`), Div(Class("pl-1 text-[10px]"), Text("Ctrl +"))),
-				Span(Attr(`x-show="os === 'Mac OS' || os === 'Linux' || os === 'Windows'" aria-hidden="true"`), Div(Class("text-[10px]"), Text("K"))),
+				Span(
+					Attr(`x-show="os === 'Windows' || os === 'Linux'" aria-hidden="true"`),
+					Div(Class("pl-1 text-[10px]"), Text("Ctrl +")),
+				),
+				Span(
+					Attr(
+						`x-show="os === 'Mac OS' || os === 'Linux' || os === 'Windows'" aria-hidden="true"`,
+					),
+					Div(Class("text-[10px]"), Text("K")),
+				),
 			),
 		),
 	)

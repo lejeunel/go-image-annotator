@@ -11,11 +11,11 @@ import (
 type Config struct {
 	LocalArtefactPath                    string   `required:"true" split_words:"true"`
 	ImagesURI                            string   `required:"true" split_words:"true"`
-	S3Endpoint                           string   `split_words:"true"`
-	S3Prefix                             string   `split_words:"true"`
-	S3Region                             string   `split_words:"true"`
-	S3AccessKey                          string   `split_words:"true"`
-	S3Secret                             string   `split_words:"true"`
+	S3Endpoint                           string   `                split_words:"true"`
+	S3Prefix                             string   `                split_words:"true"`
+	S3Region                             string   `                split_words:"true"`
+	S3AccessKey                          string   `                split_words:"true"`
+	S3Secret                             string   `                split_words:"true"`
 	InitialAdminEmail                    string   `required:"true" split_words:"true"`
 	InitialAdminPassword                 string   `required:"true" split_words:"true"`
 	URL                                  string   `required:"true" split_words:"true"`

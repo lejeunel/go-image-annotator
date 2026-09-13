@@ -69,8 +69,10 @@ func TestParseMultipleOrderings(t *testing.T) {
 	p := b.AddField("age").Build()
 	q, err := p.Parse("amount:desc age:asc")
 	assert.NoError(t, err)
-	assert.Equal(t, im.OrderingArgs{{Field: "amount", Order: im.DescOrder},
-		{Field: "age", Order: im.AscOrder}}, q)
+	assert.Equal(t, im.OrderingArgs{
+		{Field: "amount", Order: im.DescOrder},
+		{Field: "age", Order: im.AscOrder},
+	}, q)
 }
 
 func TestParseWithRegexp(t *testing.T) {
@@ -106,6 +108,7 @@ func TestDocumentedOrderingField(t *testing.T) {
 	assert.Equal(t, field, p.DescribeOrderingFields()[0].Name)
 	assert.Equal(t, description, p.DescribeOrderingFields()[0].Description)
 }
+
 func TestDocumentedOrderingRegexpField(t *testing.T) {
 	b := NewOrderParserBuilder()
 	field := "the-field"
@@ -117,6 +120,7 @@ func TestDocumentedOrderingRegexpField(t *testing.T) {
 	assert.Equal(t, displayName, p.DescribeOrderingFields()[0].Name)
 	assert.Equal(t, description, p.DescribeOrderingFields()[0].Description)
 }
+
 func TestExampleOrdering(t *testing.T) {
 	b := NewOrderParserBuilder()
 	example := "ingested_at:desc"

@@ -46,6 +46,7 @@ func TestParseWithJSONExtractMapping(t *testing.T) {
 	assert.Equal(t, `json_extract(metadata.meta, 'name') = ?`, sql)
 	assert.Equal(t, "a-name", args[0])
 }
+
 func TestDocumentedFilteringField(t *testing.T) {
 	b := NewFilterParserBuilder()
 	field := "the-field"

@@ -13,7 +13,7 @@ STATIC_DIR := assets/static
 CSS_MAIN := assets/app.css
 CSS_OUT := $(STATIC_DIR)/styles.css
 
-.PHONY: all api-code clean build node-deps build-ci format
+.PHONY: all api-code clean build node-deps build-ci format format-check
 
 node-deps:
 	npm ci
@@ -37,6 +37,26 @@ build-ci:
 format:
 	gofumpt -w .
 	golines -w .
+
+format-check:
+	@echo "Checking gofumpt formatting..."
+	@unformatted=$$(gofumpt -l .); \
+	if [ -n "$$unformatted" ]; then \
+		echo "The following files are not gofumpt'd:"; \
+		echo "$$unformatted"; \
+		echo ""; \
+		echo "Run 'make format' locally and commit the result."; \
+		exit 1; \
+	fi
+	@echo "Checking golines formatting..."
+	@unformatted=$$(golines -l .); \
+	if [ -n "$$unformatted" ]; then \
+		echo "The following files are not golines'd:"; \
+		echo "$$unformatted"; \
+		echo ""; \
+		echo "Run 'make format' locally and commit the result."; \
+		exit 1; \
+	fi
 
 test:
 	gotestsum ./...

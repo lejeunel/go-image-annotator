@@ -181,5 +181,4 @@ func (r *ImageRepo) GetAdjacent(
 		return nil, r.ErrOnGetAdjacent
 	}
 	return &r.Adjacent, nil
-
 }

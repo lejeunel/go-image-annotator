@@ -2,10 +2,11 @@ package sqlite
 
 import (
 	"crypto/sha256"
+	"log/slog"
+
 	itr "github.com/lejeunel/go-image-annotator/app/interactors"
 	cfg "github.com/lejeunel/go-image-annotator/config"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
-	"log/slog"
 
 	tra "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/transactors"
 	aig "github.com/lejeunel/go-image-annotator/modules/archive-ingester"
@@ -17,7 +18,13 @@ import (
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
 )
 
-func BuildInteractors(infra Infra, auth auth.Interface, logger slog.Logger, cfg cfg.Config, ts tk.TokenService) itr.Interactors {
+func BuildInteractors(
+	infra Infra,
+	auth auth.Interface,
+	logger slog.Logger,
+	cfg cfg.Config,
+	ts tk.TokenService,
+) itr.Interactors {
 	passwordTokenizer := tk.New(cfg.RandomPasswordLength)
 	forgottenPasswordGen := tk.New(cfg.RandomPasswordLength)
 	passwordValidator := pv.New(cfg.PasswordMinEntropy)
@@ -33,9 +40,16 @@ func BuildInteractors(infra Infra, auth auth.Interface, logger slog.Logger, cfg 
 		infra.ImageFileStore)
 	eventlogger := el.New(infra.EventRepo, el.WithMaxNumTasksPerUser(cfg.MaxNumTasksPerUser))
 
-	imageIngester := iig.New(infra.ImageRepo, infra.CollectionRepo, infra.LabelRepo, infra.AnnotationRepo,
+	imageIngester := iig.New(
+		infra.ImageRepo,
+		infra.CollectionRepo,
+		infra.LabelRepo,
+		infra.AnnotationRepo,
 		tra.NewIngestionTransactor(infra.DB),
-		infra.ImageFileStore, sha256.New(), rea.NewImageSpecsDetector(cfg.AllowedImageMIMETypes))
+		infra.ImageFileStore,
+		sha256.New(),
+		rea.NewImageSpecsDetector(cfg.AllowedImageMIMETypes),
+	)
 	archiveIngester := aig.New(imstore, imageIngester)
 
 	return itr.Interactors{
@@ -78,9 +92,15 @@ func BuildInteractors(infra Infra, auth auth.Interface, logger slog.Logger, cfg 
 			passwordTokenizer,
 			cfg.ForgotPasswordTokenExpirationMinutes,
 			forgottenPasswordGen, auth),
-		Annotation: NewAnnotationInteractors(imstore, infra.ImageRepo, infra.LabelRepo, infra.AnnotationRepo, auth),
-		Group:      NewGroupInteractors(infra.GroupRepo, auth),
-		Role:       NewRoleInteractors(infra.RoleRepo, auth),
+		Annotation: NewAnnotationInteractors(
+			imstore,
+			infra.ImageRepo,
+			infra.LabelRepo,
+			infra.AnnotationRepo,
+			auth,
+		),
+		Group: NewGroupInteractors(infra.GroupRepo, auth),
+		Role:  NewRoleInteractors(infra.RoleRepo, auth),
 		Bootstrap: NewBootstrapInteractor(
 			infra.UserRepo,
 			infra.RoleRepo,
@@ -88,9 +108,13 @@ func BuildInteractors(infra Infra, auth auth.Interface, logger slog.Logger, cfg 
 			passwordTokenizer,
 			passwordValidator,
 		),
-		Policy:   NewPolicyInteractors(infra.PolicyFileStore, auth),
-		Metadata: NewMetadataInteractors(infra.MetaRepo, infra.CollectionRepo, infra.ImageRepo, auth),
-		Log:      NewLogInteractors(eventlogger),
+		Policy: NewPolicyInteractors(infra.PolicyFileStore, auth),
+		Metadata: NewMetadataInteractors(
+			infra.MetaRepo,
+			infra.CollectionRepo,
+			infra.ImageRepo,
+			auth,
+		),
+		Log: NewLogInteractors(eventlogger),
 	}
-
 }

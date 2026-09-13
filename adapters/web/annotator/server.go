@@ -53,7 +53,16 @@ func (s *Server) MakeAnnotationPanel(w http.ResponseWriter, r *http.Request) {
 	p.SetView(view)
 	collection := r.URL.Query().Get("collection")
 	filter := fmt.Sprintf("collection:\"%v\"", collection)
-	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), collection, filter, "ingested_at", p, p, p)
+	s.Annotator.Init(
+		r.Context(),
+		r.URL.Query().Get("id"),
+		collection,
+		filter,
+		"ingested_at",
+		p,
+		p,
+		p,
+	)
 	view.RenderAnnotationList(w)
 }
 

@@ -57,6 +57,8 @@ func (s *Server) Slice(w http.ResponseWriter, r *http.Request) {
 	}
 	filters := r.FormValue(rt.FilterQueryArgName)
 	ordering := r.FormValue(rt.OrderingQueryArgName)
-	s.ListItr.Execute(list.Request{FilterStr: filters,
-		OrderStr: ordering}, NewSlicePresenter(w, s.PageBuilder, filters, ordering))
+	s.ListItr.Execute(list.Request{
+		FilterStr: filters,
+		OrderStr:  ordering,
+	}, NewSlicePresenter(w, s.PageBuilder, filters, ordering))
 }

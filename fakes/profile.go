@@ -22,12 +22,17 @@ type ProfileRepo struct {
 	AddedLabels   []lbl.LabelName
 }
 
-func (r *ProfileRepo) Create(id pr.ProfileId, name pr.ProfileName, desc pr.ProfileDescription) error {
+func (r *ProfileRepo) Create(
+	id pr.ProfileId,
+	name pr.ProfileName,
+	desc pr.ProfileDescription,
+) error {
 	if r.ErrOnCreate != nil {
 		return r.ErrOnCreate
 	}
 
-	r.Created = append(r.Created, CreatedProfile{Id: id, Name: name, Description: desc})
+	r.Created = append(r.Created,
+		CreatedProfile{Id: id, Name: name, Description: desc})
 	return nil
 }
 

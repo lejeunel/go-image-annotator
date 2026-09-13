@@ -67,12 +67,20 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	adj, err := i.ImageRepo.GetAdjacent(id, r.CurrentCollection, r.FilterStr, r.OrderStr, im.ScrollNext)
+	adj, err := i.ImageRepo.GetAdjacent(
+		id,
+		r.CurrentCollection,
+		r.FilterStr,
+		r.OrderStr,
+		im.ScrollNext,
+	)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	out.SuccessScroll(Response{Adj: *adj,
-		FilterStr: r.FilterStr, OrderStr: r.OrderStr})
+	out.SuccessScroll(Response{
+		Adj:       *adj,
+		FilterStr: r.FilterStr, OrderStr: r.OrderStr,
+	})
 }

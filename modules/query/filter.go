@@ -23,14 +23,22 @@ type FilterParserBuilder struct {
 }
 
 func NewFilterParserBuilder() FilterParserBuilder {
-	return FilterParserBuilder{schemaBuilder: schema.NewSchemaBuilder(),
-		renameBuilder: query.NewRenamerBuilder()}
+	return FilterParserBuilder{
+		schemaBuilder: schema.NewSchemaBuilder(),
+		renameBuilder: query.NewRenamerBuilder(),
+	}
 }
+
 func (b *FilterParserBuilder) AddExample(example string) *FilterParserBuilder {
 	b.examples = append(b.examples, example)
 	return b
 }
-func (b *FilterParserBuilder) AddField(field FieldName, rule RuleFunc, opts ...FieldOption) *FilterParserBuilder {
+
+func (b *FilterParserBuilder) AddField(
+	field FieldName,
+	rule RuleFunc,
+	opts ...FieldOption,
+) *FilterParserBuilder {
 	new := Field{Name: field}
 	for _, opt := range opts {
 		opt(&new)
@@ -39,7 +47,13 @@ func (b *FilterParserBuilder) AddField(field FieldName, rule RuleFunc, opts ...F
 	b.schemaBuilder.AddField(schema.Field(field), rule)
 	return b
 }
-func (b *FilterParserBuilder) AddRegExpField(rex string, displayName string, rule RuleFunc, opts ...RegExpFieldOption) *FilterParserBuilder {
+
+func (b *FilterParserBuilder) AddRegExpField(
+	rex string,
+	displayName string,
+	rule RuleFunc,
+	opts ...RegExpFieldOption,
+) *FilterParserBuilder {
 	new := RegExpField{DisplayName: displayName}
 	for _, opt := range opts {
 		opt(&new)
@@ -83,7 +97,12 @@ func WithExamples(examples []string) FilterParserOption {
 	}
 }
 
-func NewFilterParser(schm schema.Schema, fields []Field, regexpFields []RegExpField, opts ...FilterParserOption) FilterParser {
+func NewFilterParser(
+	schm schema.Schema,
+	fields []Field,
+	regexpFields []RegExpField,
+	opts ...FilterParserOption,
+) FilterParser {
 	p := &FilterParser{Schema: schm, Fields: fields, RegExpFields: regexpFields}
 	for _, opt := range opts {
 		opt(p)
@@ -125,18 +144,25 @@ func (v FilterParser) ParseToSql(q string) (*SQLizer, error) {
 	sqlizer := NewSQLizer(sql, args)
 	return &sqlizer, nil
 }
+
 func (v FilterParser) DescribeFields() []FieldDescription {
 	descriptions := []FieldDescription{}
 	for _, f := range v.Fields {
-		descriptions = append(descriptions, FieldDescription{Name: f.Name, Description: f.Description})
+		descriptions = append(
+			descriptions,
+			FieldDescription{Name: f.Name, Description: f.Description},
+		)
 	}
 	for _, f := range v.RegExpFields {
-		descriptions = append(descriptions, FieldDescription{Name: f.DisplayName, Description: f.Description})
+		descriptions = append(
+			descriptions,
+			FieldDescription{Name: f.DisplayName, Description: f.Description},
+		)
 	}
 
 	return descriptions
-
 }
+
 func (v FilterParser) Examples() []string {
 	return v.examples
 }
