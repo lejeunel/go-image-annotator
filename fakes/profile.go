@@ -17,9 +17,11 @@ type ProfileRepo struct {
 	ErrOnCreate   error
 	ErrOnExists   error
 	ErrOnAddLabel error
+	ErrOnFind     error
 	ExistingNames []string
 	Created       []CreatedProfile
 	AddedLabels   []lbl.LabelName
+	Return        pr.Profile
 }
 
 func (r *ProfileRepo) Create(
@@ -55,4 +57,12 @@ func (r *ProfileRepo) AddLabel(profileName pr.ProfileName, label lbl.LabelName) 
 	}
 	r.AddedLabels = append(r.AddedLabels, label)
 	return nil
+}
+
+func (r *ProfileRepo) Find(name string) (*pr.Profile, error) {
+	if r.ErrOnFind != nil {
+		return nil, r.ErrOnFind
+	}
+
+	return &r.Return, nil
 }
