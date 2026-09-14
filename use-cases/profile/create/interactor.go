@@ -19,7 +19,7 @@ type Interactor struct {
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := fmt.Errorf("creating profile with name %v", r.Name)
-	if err := i.Auth.CreateProfile(ctx); err != nil {
+	if err := i.Auth.CreateProfile(ctx, r.Group); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

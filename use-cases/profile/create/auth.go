@@ -5,5 +5,5 @@ import (
 )
 
 type Auth interface {
-	CreateProfile(ctx context.Context) error
+	CreateProfile(ctx context.Context, group *string) error
 }
