@@ -18,10 +18,13 @@ type ProfileRepo struct {
 	ErrOnExists   error
 	ErrOnAddLabel error
 	ErrOnFind     error
+	ErrOnDelete   error
+	ErrOnIsUsed   error
 	ExistingNames []string
 	Created       []CreatedProfile
 	AddedLabels   []lbl.LabelName
 	Return        pr.Profile
+	IsUsed_       bool
 }
 
 func (r *ProfileRepo) Create(
@@ -65,4 +68,24 @@ func (r *ProfileRepo) Find(name string) (*pr.Profile, error) {
 	}
 
 	return &r.Return, nil
+}
+
+func (r *ProfileRepo) Delete(name string) error {
+	if r.ErrOnDelete != nil {
+		return r.ErrOnDelete
+	}
+
+	return nil
+}
+
+func (r *ProfileRepo) IsUsed(n string) (*bool, error) {
+	res := true
+	if r.ErrOnIsUsed != nil {
+		return nil, r.ErrOnIsUsed
+	}
+	if r.IsUsed_ {
+		return &res, nil
+	}
+	res = false
+	return &res, nil
 }

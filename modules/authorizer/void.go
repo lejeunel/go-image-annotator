@@ -139,3 +139,7 @@ func (a VoidAuthorizer) SetPolicies(ctx context.Context) error {
 func (a VoidAuthorizer) CreateProfile(ctx context.Context, group *string) error {
 	return nil
 }
+
+func (a VoidAuthorizer) DeleteProfile(ctx context.Context, group *string) error {
+	return nil
+}

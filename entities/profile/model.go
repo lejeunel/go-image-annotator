@@ -14,6 +14,7 @@ type Profile struct {
 	Name        ProfileName
 	Description ProfileDescription
 	Labels      []lbl.LabelName
+	Group       *string
 }
 
 func NewProfile(id ProfileId, name lbl.LabelName, opts ...Option) Profile {

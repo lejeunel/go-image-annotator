@@ -143,3 +143,7 @@ func (f Auth) UpdateMetadata(ctx context.Context, group *string) error {
 func (f Auth) CreateProfile(ctx context.Context, group *string) error {
 	return f.Err
 }
+
+func (f Auth) DeleteProfile(ctx context.Context, group *string) error {
+	return f.Err
+}
