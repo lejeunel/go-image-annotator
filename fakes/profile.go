@@ -5,6 +5,7 @@ import (
 
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	pr "github.com/lejeunel/go-image-annotator/entities/profile"
+	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type CreatedProfile struct {
@@ -20,11 +21,14 @@ type ProfileRepo struct {
 	ErrOnFind     error
 	ErrOnDelete   error
 	ErrOnIsUsed   error
+	ErrOnList     error
+	ErrOnCount    error
 	ExistingNames []string
 	Created       []CreatedProfile
 	AddedLabels   []lbl.LabelName
 	Return        pr.Profile
 	IsUsed_       bool
+	Count_        int
 }
 
 func (r *ProfileRepo) Create(
@@ -88,4 +92,25 @@ func (r *ProfileRepo) IsUsed(n string) (*bool, error) {
 	}
 	res = false
 	return &res, nil
+}
+
+func (r *ProfileRepo) Count() (*int64, error) {
+	count := int64(0)
+	if r.ErrOnCount != nil {
+		return &count, r.ErrOnCount
+	}
+	res := int64(r.Count_)
+	return &res, nil
+}
+
+func (r *ProfileRepo) List(req pa.PaginationParams) ([]pr.Profile, error) {
+	if r.ErrOnList != nil {
+		return nil, r.ErrOnList
+	}
+
+	result := []pr.Profile{}
+	for range req.PageSize {
+		result = append(result, r.Return)
+	}
+	return result, nil
 }
