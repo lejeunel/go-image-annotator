@@ -13,6 +13,7 @@ import (
 type Interactor struct {
 	ProfileRepo
 	LabelRepo
+	GroupRepo
 	v.Validator
 	Auth
 }
@@ -42,7 +43,28 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		pr.NewProfileId(),
 		r.Name,
 		pr.WithDescription(r.Description),
-		pr.WithLabels(r.Labels))
+		pr.WithLabels(r.Labels),
+	)
+
+	if r.Group != nil {
+		exists, err := i.GroupRepo.Exists(*r.Group)
+		if err != nil {
+			out.Error(fmt.Errorf("%w: checking existence of group %v: %w", errCtx, *r.Group, err))
+			return
+		}
+		if !*exists {
+			out.Error(
+				fmt.Errorf(
+					"%w: checking existence of group %v: %w",
+					errCtx,
+					*r.Group,
+					e.ErrValidation,
+				),
+			)
+			return
+		}
+		profile.Group = r.Group
+	}
 
 	if err := i.ProfileRepo.Create(profile.Id, profile.Name, profile.Description); err != nil {
 		out.Error(fmt.Errorf("creating profile with name %v: %w", r.Name, err))
@@ -88,10 +110,11 @@ func WithNameValidator(v v.Validator) Option {
 	}
 }
 
-func New(r ProfileRepo, l LabelRepo, opts ...Option) Interactor {
+func New(r ProfileRepo, l LabelRepo, g GroupRepo, opts ...Option) Interactor {
 	i := &Interactor{
 		ProfileRepo: r,
 		LabelRepo:   l,
+		GroupRepo:   g,
 		Validator:   v.NewNameValidator(),
 		Auth:        auth.NewVoidAuth(),
 	}

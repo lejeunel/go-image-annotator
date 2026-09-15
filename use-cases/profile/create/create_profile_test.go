@@ -9,7 +9,12 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&fk.ProfileRepo{}, &fk.LabelRepo{}, WithAuth(fk.Auth{Err: e.ErrAuthorization}))
+	itr := New(
+		&fk.ProfileRepo{},
+		&fk.LabelRepo{},
+		&fk.GroupRepo{},
+		WithAuth(fk.Auth{Err: e.ErrAuthorization}),
+	)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotAuthErr)
@@ -19,7 +24,8 @@ func TestHandleAuthError(t *testing.T) {
 func TestHandleErrorOnCheckExistence(t *testing.T) {
 	name := "my-profile"
 	p := &FakePresenter{}
-	itr := New(&fk.ProfileRepo{ErrOnExists: e.ErrInternal}, &fk.LabelRepo{})
+	itr := New(&fk.ProfileRepo{ErrOnExists: e.ErrInternal}, &fk.LabelRepo{},
+		&fk.GroupRepo{})
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
@@ -28,7 +34,8 @@ func TestHandleErrorOnCheckExistence(t *testing.T) {
 func TestCreateProfileWithDuplicateNameShouldFail(t *testing.T) {
 	name := "my-profile"
 	p := &FakePresenter{}
-	itr := New(&fk.ProfileRepo{ExistingNames: []string{name}}, &fk.LabelRepo{})
+	itr := New(&fk.ProfileRepo{ExistingNames: []string{name}}, &fk.LabelRepo{},
+		&fk.GroupRepo{})
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
@@ -37,7 +44,7 @@ func TestCreateProfileWithDuplicateNameShouldFail(t *testing.T) {
 func TestCreateWithInvalidNameShouldFail(t *testing.T) {
 	name := "invalid-profile-name"
 	p := &FakePresenter{}
-	itr := New(&fk.ProfileRepo{}, &fk.LabelRepo{},
+	itr := New(&fk.ProfileRepo{}, &fk.LabelRepo{}, &fk.GroupRepo{},
 		WithNameValidator(&fk.StringValidator{Invalid: true}))
 	itr.Execute(t.Context(), Request{Name: name}, p)
 	assert.True(t, p.GotValidationErr)
@@ -46,7 +53,7 @@ func TestCreateWithInvalidNameShouldFail(t *testing.T) {
 func TestHandleInternalErrorOnCreate(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.ProfileRepo{ErrOnCreate: e.ErrInternal},
-		&fk.LabelRepo{},
+		&fk.LabelRepo{}, &fk.GroupRepo{},
 		WithNameValidator(&fk.StringValidator{}))
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotInternalErr)
@@ -54,7 +61,8 @@ func TestHandleInternalErrorOnCreate(t *testing.T) {
 
 func TestHandleErrorOnLabelExists(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.ProfileRepo{}, &fk.LabelRepo{ErrOnExists: e.ErrInternal})
+	itr := New(&fk.ProfileRepo{}, &fk.LabelRepo{ErrOnExists: e.ErrInternal},
+		&fk.GroupRepo{})
 	req := Request{
 		Name:        "a-profile",
 		Description: "a-description",
@@ -67,7 +75,7 @@ func TestHandleErrorOnLabelExists(t *testing.T) {
 
 func TestMissingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.ProfileRepo{}, &fk.LabelRepo{})
+	itr := New(&fk.ProfileRepo{}, &fk.LabelRepo{}, &fk.GroupRepo{})
 	req := Request{
 		Name:        "a-profile",
 		Description: "a-description",
@@ -82,7 +90,8 @@ func TestHandleErrorOnAddLabel(t *testing.T) {
 	p := &FakePresenter{}
 	labelName := "the-label"
 	itr := New(&fk.ProfileRepo{ErrOnAddLabel: e.ErrInternal},
-		&fk.LabelRepo{ExistingNames: []string{labelName}})
+		&fk.LabelRepo{ExistingNames: []string{labelName}},
+		&fk.GroupRepo{})
 	req := Request{
 		Name:        "a-profile",
 		Description: "a-description",
@@ -93,12 +102,28 @@ func TestHandleErrorOnAddLabel(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
+func TestHandleErrorOnGroupExists(t *testing.T) {
+	p := &FakePresenter{}
+	group := "the-group"
+	itr := New(&fk.ProfileRepo{},
+		&fk.LabelRepo{},
+		&fk.GroupRepo{ErrOnExists: e.ErrInternal})
+	req := Request{
+		Name:  "a-profile",
+		Group: &group,
+	}
+	itr.Execute(t.Context(), req, p)
+	assert.True(t, p.GotInternalErr)
+	assert.False(t, p.GotSuccess)
+}
+
 func TestCreate(t *testing.T) {
 	p := &FakePresenter{}
 	profileRepo := &fk.ProfileRepo{}
 	labelName := "the-label"
+	group := "the-group"
 	labelRepo := &fk.LabelRepo{ExistingNames: []string{labelName}}
-	itr := New(profileRepo, labelRepo)
+	itr := New(profileRepo, labelRepo, &fk.GroupRepo{ExistingNames: []string{group}})
 	req := Request{
 		Name:        "a-profile",
 		Description: "a-description",

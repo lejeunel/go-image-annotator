@@ -126,6 +126,14 @@ CREATE TABLE metadata (
     PRIMARY KEY (image_id, collection_id)
 );
 
+CREATE TABLE IF NOT EXISTS profiles (
+    id varchar(36),
+    name varchar(30) not null unique,
+    description text,
+    group_id varchar(36) NULL,
+    FOREIGN KEY (group_id) REFERENCES groups(id),
+    PRIMARY KEY (id)
+);
 -- +goose Down
 
 DROP TABLE labels;

@@ -39,6 +39,12 @@ func WithLabels(labels []lbl.LabelName) Option {
 	}
 }
 
+func WithGroup(group string) Option {
+	return func(r *Profile) {
+		r.Group = &group
+	}
+}
+
 type UpdateModel struct {
 	Name           string
 	NewName        string

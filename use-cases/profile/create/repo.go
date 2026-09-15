@@ -14,3 +14,7 @@ type ProfileRepo interface {
 type LabelRepo interface {
 	Exists(lbl.LabelName) (bool, error)
 }
+
+type GroupRepo interface {
+	Exists(string) (*bool, error)
+}
