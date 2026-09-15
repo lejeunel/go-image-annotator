@@ -35,4 +35,7 @@ type Interface interface {
 	DeleteMetadata(ctx context.Context, group *string) error
 	ReadPolicies(ctx context.Context) error
 	SetPolicies(ctx context.Context) error
+	CreateProfile(ctx context.Context, group *string) error
+	DeleteProfile(ctx context.Context, group *string) error
+	UpdateProfile(ctx context.Context, group *string) error
 }

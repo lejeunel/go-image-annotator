@@ -159,7 +159,7 @@ func (a Authorizer) UpdateRole(ctx context.Context) error {
 }
 
 func (a Authorizer) CloneCollection(ctx context.Context, group *string) error {
-	return a.check(ctx, "CloneCollection", nil)
+	return a.check(ctx, "CloneCollection", group)
 }
 
 func (a Authorizer) UpdateUserPrivileges(ctx context.Context) error {
@@ -175,13 +175,25 @@ func (a Authorizer) SetPolicies(ctx context.Context) error {
 }
 
 func (a Authorizer) AddMetadata(ctx context.Context, group *string) error {
-	return a.check(ctx, "AddMetadata", nil)
+	return a.check(ctx, "AddMetadata", group)
 }
 
 func (a Authorizer) DeleteMetadata(ctx context.Context, group *string) error {
-	return a.check(ctx, "DeleteMetadata", nil)
+	return a.check(ctx, "DeleteMetadata", group)
 }
 
 func (a Authorizer) UpdateMetadata(ctx context.Context, group *string) error {
-	return a.check(ctx, "UpdateMetadata", nil)
+	return a.check(ctx, "UpdateMetadata", group)
+}
+
+func (a Authorizer) CreateProfile(ctx context.Context, group *string) error {
+	return a.check(ctx, "CreateProfile", group)
+}
+
+func (a Authorizer) DeleteProfile(ctx context.Context, group *string) error {
+	return a.check(ctx, "DeleteProfile", group)
+}
+
+func (a Authorizer) UpdateProfile(ctx context.Context, group *string) error {
+	return a.check(ctx, "UpdateProfile", group)
 }

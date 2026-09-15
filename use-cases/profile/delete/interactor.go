@@ -74,7 +74,7 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(r Repo, opts ...Option) *Interactor {
+func New(r Repo, opts ...Option) Interactor {
 	i := &Interactor{
 		Repo: r,
 		Auth: auth.NewVoidAuth(),
@@ -82,5 +82,5 @@ func New(r Repo, opts ...Option) *Interactor {
 	for _, opt := range opts {
 		opt(i)
 	}
-	return i
+	return *i
 }

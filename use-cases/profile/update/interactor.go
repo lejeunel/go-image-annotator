@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -57,6 +58,8 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
+	updateModel := pr.UpdateModel{Name: r.Name, NewDescription: r.NewDescription}
+
 	if r.NewName != r.Name {
 		dstExists, err := i.ProfileRepo.Exists(r.NewName)
 		if err != nil {
@@ -78,6 +81,8 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
+	updateModel.NewName = r.NewName
+
 	for _, label := range r.NewLabels {
 		labelExists, err := i.LabelRepo.Exists(label)
 		if err != nil {
@@ -97,57 +102,43 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 
 	}
-	// updateModel := clc.UpdateModel{NewDescription: r.NewDescription}
+	updateModel.NewLabels = r.NewLabels
 
-	// if err := i.ensureCollectionNameExists(r.Name); err != nil {
-	// 	out.Error(fmt.Errorf("%v: %w", errCtx, err))
-	// 	return
-	// }
-	// updateModel.Name = r.Name
+	if r.NewGroup != nil {
+		groupExists, err := i.GroupRepo.Exists(*r.NewGroup)
+		if err != nil {
+			out.Error(fmt.Errorf("%v: checking existence of group: %w", errCtx, err))
+			return
+		}
+		if !*groupExists {
+			out.Error(
+				fmt.Errorf(
+					"%v: requested assignment to new group %v: %w",
+					errCtx,
+					*r.NewGroup,
+					err,
+				),
+			)
+			return
+		}
+		if err := i.Auth.UpdateProfile(ctx, r.NewGroup); err != nil {
+			out.Error(
+				fmt.Errorf(
+					"%v: authorizing assignment to new group %v: %w",
+					errCtx,
+					*r.NewGroup,
+					err,
+				),
+			)
+			return
+		}
+	}
+	updateModel.NewGroup = r.NewGroup
 
-	// if r.NewName != r.Name {
-	// 	if err := i.ensureCollectionNameDoesNotExist(r.NewName); err != nil {
-	// 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-	// 		return
-	// 	}
-	// }
-	// updateModel.NewName = r.NewName
-
-	// if r.NewGroup != nil {
-	// 	groupExists, err := i.GroupRepo.Exists(*r.NewGroup)
-	// 	if err != nil {
-	// 		out.Error(fmt.Errorf("%v: checking existence of group: %w", errCtx, err))
-	// 		return
-	// 	}
-	// 	if !*groupExists {
-	// 		out.Error(
-	// 			fmt.Errorf(
-	// 				"%v: requested assignment to new group %v: %w",
-	// 				errCtx,
-	// 				*r.NewGroup,
-	// 				err,
-	// 			),
-	// 		)
-	// 		return
-	// 	}
-	// 	if err := i.Auth.UpdateCollection(ctx, r.NewGroup); err != nil {
-	// 		out.Error(
-	// 			fmt.Errorf(
-	// 				"%v: authorizing assignment to new group %v: %w",
-	// 				errCtx,
-	// 				*r.NewGroup,
-	// 				err,
-	// 			),
-	// 		)
-	// 		return
-	// 	}
-	// }
-	// updateModel.NewGroup = r.NewGroup
-
-	// if err := i.CollectionRepo.Update(updateModel); err != nil {
-	// 	out.Error(fmt.Errorf("%v: %w", errCtx, err))
-	// 	return
-	// }
+	if err := i.ProfileRepo.Update(updateModel); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
 
 	out.SuccessUpdateProfile(
 		Response{

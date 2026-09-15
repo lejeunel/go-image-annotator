@@ -3,6 +3,7 @@ package update
 import (
 	"testing"
 
+	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -73,54 +74,42 @@ func TestLabelMustExist(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-// func TestUpdateCollection(t *testing.T) {
-// 	name := "name"
-// 	p := &FakePresenter{}
-// 	repo := &fk.CollectionRepo{
-// 		ExistingNames: []string{"name"},
-// 		Return:        clc.NewCollection(clc.NewCollectionId(), name),
-// 	}
-// 	itr := New(repo, &fk.GroupRepo{})
-// 	req := Request{
-// 		Name:           name,
-// 		NewName:        "updated-name",
-// 		NewDescription: "updated-description",
-// 	}
-// 	itr.Execute(t.Context(), req, p)
-// 	assert.True(t, p.GotSuccess)
-// 	assert.Equal(t, req.NewName, p.Got.Name)
-// 	assert.Equal(t, req.NewDescription, p.Got.Description)
-// }
+func TestUpdateGroup(t *testing.T) {
+	p := &FakePresenter{}
+	name := "profile-name"
+	currentGroup := "current-group"
+	newGroup := "new-group"
+	profileRepo := &fk.ProfileRepo{ExistingNames: []string{name}, ReturnGroup: currentGroup}
+	itr := New(profileRepo, &fk.GroupRepo{ExistingNames: []string{newGroup}}, &fk.LabelRepo{})
+	itr.Execute(t.Context(), Request{Name: name, NewName: name, NewGroup: &newGroup}, p)
+	assert.NotNil(t, profileRepo.GotUpdateModel.NewGroup)
+	assert.Equal(t, newGroup, *profileRepo.GotUpdateModel.NewGroup)
+	assert.True(t, p.GotSuccess)
+}
 
-// func TestUpdateCollectionWithNameAlreadyTakenShouldFail(t *testing.T) {
-// 	p := &FakePresenter{}
-// 	name := "name"
-// 	existing_name := "existing-name"
-// 	itr := New(&fk.CollectionRepo{ExistingNames: []string{name, existing_name}},
-// 		&fk.GroupRepo{})
-// 	itr.Execute(t.Context(), Request{Name: name, NewName: existing_name}, p)
-// 	assert.True(t, p.GotDuplicationErr)
-// 	assert.False(t, p.GotSuccess)
-// }
+func TestUpdateProfile(t *testing.T) {
+	p := &FakePresenter{}
+	name := "profile-name"
+	currentGroup := "current-group"
 
-// func TestUpdateCollectionWithNoGroup(t *testing.T) {
-// 	p := &FakePresenter{}
-// 	name := "name"
-// 	itr := New(&fk.CollectionRepo{ExistingNames: []string{name}, ErrOnGetGroup: e.ErrNotFound},
-// 		&fk.GroupRepo{})
-// 	itr.Execute(t.Context(), Request{Name: name, NewName: name}, p)
-// 	assert.True(t, p.GotSuccess)
-// }
+	newName := "new-profile-name"
+	newGroup := "new-group"
+	newDescription := "new-description"
+	newLabels := []string{"new-label"}
+	profileRepo := &fk.ProfileRepo{ExistingNames: []string{name}, ReturnGroup: currentGroup}
+	itr := New(profileRepo, &fk.GroupRepo{ExistingNames: []string{newGroup}},
+		&fk.LabelRepo{ExistingNames: newLabels})
 
-// func TestUpdateCollectionGroup(t *testing.T) {
-// 	p := &FakePresenter{}
-// 	name := "name"
-// 	currentGroup := "current-group"
-// 	newGroup := "my-group"
-// 	clcRepo := &fk.CollectionRepo{ExistingNames: []string{name}, ReturnGroup: currentGroup}
-// 	itr := New(clcRepo, &fk.GroupRepo{ExistingNames: []string{newGroup}})
-// 	itr.Execute(t.Context(), Request{Name: name, NewName: name, NewGroup: &newGroup}, p)
-// 	assert.NotNil(t, clcRepo.GotUpdateModel.NewGroup)
-// 	assert.Equal(t, newGroup, *clcRepo.GotUpdateModel.NewGroup)
-// 	assert.True(t, p.GotSuccess)
-// }
+	itr.Execute(t.Context(), Request{
+		Name: name, NewName: newName,
+		NewDescription: newDescription, NewLabels: newLabels,
+		NewGroup: &newGroup,
+	}, p)
+
+	want := pr.UpdateModel{
+		Name: name, NewName: newName, NewDescription: newDescription,
+		NewLabels: newLabels, NewGroup: &newGroup,
+	}
+	assert.Equal(t, want, profileRepo.GotUpdateModel)
+	assert.True(t, p.GotSuccess)
+}

@@ -10,6 +10,7 @@ import (
 	lg "github.com/lejeunel/go-image-annotator/use-cases/log"
 	md "github.com/lejeunel/go-image-annotator/use-cases/metadata"
 	pl "github.com/lejeunel/go-image-annotator/use-cases/policy"
+	pr "github.com/lejeunel/go-image-annotator/use-cases/profile"
 	rl "github.com/lejeunel/go-image-annotator/use-cases/role"
 	usr "github.com/lejeunel/go-image-annotator/use-cases/user"
 )
@@ -26,4 +27,5 @@ type Interactors struct {
 	Policy     pl.Interactors
 	Metadata   md.Interactors
 	Log        lg.Interactors
+	Profile    pr.Interactors
 }
