@@ -143,3 +143,7 @@ func (a VoidAuthorizer) CreateProfile(ctx context.Context, group *string) error 
 func (a VoidAuthorizer) DeleteProfile(ctx context.Context, group *string) error {
 	return nil
 }
+
+func (a VoidAuthorizer) UpdateProfile(ctx context.Context, group *string) error {
+	return nil
+}

@@ -38,3 +38,11 @@ func WithLabels(labels []lbl.LabelName) Option {
 		r.Labels = labels
 	}
 }
+
+type UpdateModel struct {
+	Name           string
+	NewName        string
+	NewDescription string
+	NewGroup       *string
+	NewLabels      []lbl.LabelName
+}

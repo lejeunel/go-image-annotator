@@ -15,20 +15,24 @@ type CreatedProfile struct {
 }
 
 type ProfileRepo struct {
-	ErrOnCreate   error
-	ErrOnExists   error
-	ErrOnAddLabel error
-	ErrOnFind     error
-	ErrOnDelete   error
-	ErrOnIsUsed   error
-	ErrOnList     error
-	ErrOnCount    error
-	ExistingNames []string
-	Created       []CreatedProfile
-	AddedLabels   []lbl.LabelName
-	Return        pr.Profile
-	IsUsed_       bool
-	Count_        int
+	ErrOnCreate    error
+	ErrOnExists    error
+	ErrOnAddLabel  error
+	ErrOnFind      error
+	ErrOnDelete    error
+	ErrOnIsUsed    error
+	ErrOnList      error
+	ErrOnCount     error
+	ErrOnGetGroup  error
+	ErrOnUpdate    error
+	ExistingNames  []string
+	Created        []CreatedProfile
+	AddedLabels    []lbl.LabelName
+	Return         pr.Profile
+	ReturnGroup    string
+	IsUsed_        bool
+	Count_         int
+	GotUpdateModel pr.UpdateModel
 }
 
 func (r *ProfileRepo) Create(
@@ -113,4 +117,19 @@ func (r *ProfileRepo) List(req pa.PaginationParams) ([]pr.Profile, error) {
 		result = append(result, r.Return)
 	}
 	return result, nil
+}
+
+func (r *ProfileRepo) GetGroup(name string) (*string, error) {
+	if r.ErrOnGetGroup != nil {
+		return nil, r.ErrOnGetGroup
+	}
+	return &r.ReturnGroup, nil
+}
+
+func (r *ProfileRepo) Update(m pr.UpdateModel) error {
+	if r.ErrOnUpdate != nil {
+		return r.ErrOnUpdate
+	}
+	r.GotUpdateModel = m
+	return nil
 }
