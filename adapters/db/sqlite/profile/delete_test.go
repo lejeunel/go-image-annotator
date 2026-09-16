@@ -8,26 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreatedProfileExists(t *testing.T) {
-	repo := NewProfileRepo(s.NewInMemory())
-	profile, _ := CreateProfile(repo, "a-profile")
-	exists, _ := repo.Exists(profile.Name)
-	assert.True(t, exists)
-}
-
-func TestNonExistingProfileDoesNotExists(t *testing.T) {
-	exists, _ := NewProfileRepo(s.NewInMemory()).Exists("non-existing-profile")
-	assert.False(t, exists)
-}
-
-func TestInternalErrOnProfileExistsShouldFail(t *testing.T) {
-	db := s.NewInMemory()
-	repo := NewProfileRepo(db)
-	db.Close()
-	_, err := repo.Exists("")
-	assert.ErrorIs(t, err, e.ErrInternal)
-}
-
 func TestInternalErrOnDeleteShouldFail(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewProfileRepo(db)
@@ -38,7 +18,7 @@ func TestInternalErrOnDeleteShouldFail(t *testing.T) {
 
 func TestDeleteProfile(t *testing.T) {
 	repo := NewProfileRepo(s.NewInMemory())
-	profile, _ := CreateProfile(repo, "a-profile")
+	profile, _ := CreateProfile(repo, "a-profile", nil)
 	err := repo.Delete(profile.Name)
 	assert.NoError(t, err)
 }

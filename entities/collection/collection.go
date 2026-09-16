@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	uuidw "github.com/lejeunel/go-image-annotator/shared/uuid"
 )
 
@@ -15,6 +16,7 @@ type Collection struct {
 	Description string
 	CreatedAt   time.Time
 	Group       *string
+	Profile     *pr.Profile
 }
 
 func NewCollection(id CollectionId, name string, opts ...Option) Collection {
@@ -30,6 +32,12 @@ type Option func(*Collection)
 func WithDescription(d string) Option {
 	return func(c *Collection) {
 		c.Description = d
+	}
+}
+
+func WithProfile(p pr.Profile) Option {
+	return func(c *Collection) {
+		c.Profile = &p
 	}
 }
 

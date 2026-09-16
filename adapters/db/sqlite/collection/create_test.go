@@ -4,9 +4,11 @@ import (
 	"testing"
 
 	grr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
+	prr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/profile"
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	grp "github.com/lejeunel/go-image-annotator/entities/group"
+	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -46,4 +48,33 @@ func TestCollectionWithoutGroupFailsWithNotFoundErr(t *testing.T) {
 	clcRepo.Create(collection)
 	group, _ := clcRepo.GetGroup("a-collection")
 	assert.Nil(t, group)
+}
+
+func TestNewProfileIsUnused(t *testing.T) {
+	db := s.NewInMemory()
+	profileRepo := prr.NewProfileRepo(db)
+	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
+	profileRepo.Create(profile)
+
+	isUsed, err := profileRepo.IsUsed(profile.Name)
+	assert.NoError(t, err)
+	assert.NotNil(t, isUsed)
+	assert.False(t, *isUsed)
+}
+
+func TestAttachProfileToCollection(t *testing.T) {
+	db := s.NewInMemory()
+	profileRepo := prr.NewProfileRepo(db)
+	collectionRepo := NewCollectionRepo(db)
+
+	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
+	profileRepo.Create(profile)
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection",
+		clc.WithProfile(profile))
+	collectionRepo.Create(collection)
+
+	isUsed, err := profileRepo.IsUsed(profile.Name)
+	assert.NoError(t, err)
+	assert.NotNil(t, isUsed)
+	assert.True(t, *isUsed)
 }

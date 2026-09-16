@@ -12,6 +12,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	lbl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
 	md "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/metadata"
+	pr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/profile"
 	r "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
 	usr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
@@ -26,6 +27,7 @@ type Infra struct {
 	grp.GroupRepo
 	r.RoleRepo
 	usr.UserRepo
+	pr.ProfileRepo
 	ev.EventRepo
 	md.MetaRepo
 	ImageFileStore  fs.FileStore
@@ -47,6 +49,7 @@ func BuildInfra(localPath string, imageStore fs.FileStore) Infra {
 		grp.NewGroupRepo(db),
 		r.NewRoleRepo(db),
 		usr.NewUserRepo(db),
+		pr.NewProfileRepo(db),
 		ev.NewEventRepo(db),
 		md.NewMetaRepo(db),
 		imageStore,

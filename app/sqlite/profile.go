@@ -3,7 +3,6 @@ package sqlite
 import (
 	"log/slog"
 
-	"github.com/jmoiron/sqlx"
 	gr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
 	lb "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
 	pr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/profile"
@@ -18,7 +17,6 @@ import (
 )
 
 func NewProfileInteractors(
-	db *sqlx.DB,
 	pr pr.ProfileRepo,
 	gr gr.GroupRepo,
 	lr lb.LabelRepo,
@@ -27,7 +25,7 @@ func NewProfileInteractors(
 ) clc.Interactors {
 	return clc.Interactors{
 		Find: find.New(pr),
-		Create: create.New(pr, lr, create.WithNameValidator(v.NewNameValidator()),
+		Create: create.New(pr, lr, gr, create.WithNameValidator(v.NewNameValidator()),
 			create.WithAuth(auth)),
 		Delete: delete.New(pr, delete.WithAuth(auth)),
 		List:   list.New(pr),

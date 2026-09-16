@@ -21,7 +21,6 @@ type Row struct {
 	Id          clc.ProfileId `db:"id"`
 	Name        string        `db:"name"`
 	Description string        `db:"description"`
-	CreatedAt   sql.NullTime  `db:"created_at"`
 	GroupId     *g.GroupId    `db:"group_id"`
 	GroupName   *string       `db:"group_name"`
 }
@@ -29,7 +28,7 @@ type Row struct {
 func (r ProfileRepo) Create(c clc.Profile) error {
 	var err error
 	if c.Group != nil {
-		query := `INSERT INTO profiles (id, name, description, group_id) VALUES ($1,$2,$3,(SELECT id FROM groups WHERE name=$5))`
+		query := `INSERT INTO profiles (id, name, description, group_id) VALUES ($1,$2,$3,(SELECT id FROM groups WHERE name=$4))`
 		_, err = r.Db.Exec(query, c.Id.String(), c.Name, c.Description, *c.Group)
 	} else {
 		query := `INSERT INTO profiles (id, name, description) VALUES ($1,$2,$3)`
@@ -54,7 +53,7 @@ func (r ProfileRepo) Find(name string) (*clc.Profile, error) {
 	row := Row{}
 	err := r.Db.Get(&row,
 		`
-		SELECT c.id,c.name,c.description,c.created_at,c.group_id,g.name AS group_name
+		SELECT c.id,c.name,c.description,c.group_id,g.name AS group_name
 		FROM profiles AS c
 		LEFT JOIN groups g ON g.id = c.group_id
 		WHERE c.name=$1`, name)
@@ -139,7 +138,7 @@ func (r ProfileRepo) Count() (*int64, error) {
 }
 
 func (r ProfileRepo) List(m pa.PaginationParams) ([]*clc.Profile, error) {
-	q := sq.StatementBuilder.Select(`c.id,c.name,c.description,c.created_at,c.group_id,g.name AS group_name`).
+	q := sq.StatementBuilder.Select(`c.id,c.name,c.description,c.group_id,g.name AS group_name`).
 		From("profiles AS c")
 	q = q.LeftJoin("groups g ON g.id=c.group_id")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
@@ -178,6 +177,11 @@ func (r ProfileRepo) GetGroup(name string) (*string, error) {
 	}
 
 	return &group, nil
+}
+
+func (r ProfileRepo) IsUsed(name string) (*bool, error) {
+	res := true
+	return &res, nil
 }
 
 func NewProfileRepo(db adb.Querier) ProfileRepo {

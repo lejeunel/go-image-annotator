@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS collections (
     description text,
     created_at DATETIME,
     group_id varchar(36) NULL,
+        profile_id varchar(36) NULL,
     FOREIGN KEY (group_id) REFERENCES groups(id),
     PRIMARY KEY (id)
 );

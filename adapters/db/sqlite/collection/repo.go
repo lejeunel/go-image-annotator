@@ -9,6 +9,7 @@ import (
 	adb "github.com/lejeunel/go-image-annotator/adapters/db"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
+	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
@@ -23,6 +24,7 @@ type Row struct {
 	Description string           `db:"description"`
 	CreatedAt   sql.NullTime     `db:"created_at"`
 	GroupId     *g.GroupId       `db:"group_id"`
+	ProfileId   *pr.ProfileId    `db:"profile_id"`
 	GroupName   *string          `db:"group_name"`
 }
 

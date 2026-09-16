@@ -19,7 +19,7 @@ func TestInternalErrOnProfileCountShouldFail(t *testing.T) {
 
 func TestCountProfiles(t *testing.T) {
 	repo := NewProfileRepo(s.NewInMemory())
-	CreateProfile(repo, "a-profile")
+	CreateProfile(repo, "a-profile", nil)
 	count, _ := repo.Count()
 	assert.Equal(t, 1, int(*count))
 }
@@ -34,8 +34,8 @@ func TestInternalErrOnProfileListShouldFail(t *testing.T) {
 
 func TestListProfiles(t *testing.T) {
 	repo := NewProfileRepo(s.NewInMemory())
-	CreateProfile(repo, "a-profile")
-	CreateProfile(repo, "another-profile")
+	CreateProfile(repo, "a-profile", nil)
+	CreateProfile(repo, "another-profile", nil)
 	cs, err := repo.List(pa.PaginationParams{Page: 1, PageSize: 2})
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(cs))

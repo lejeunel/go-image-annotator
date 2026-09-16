@@ -1,6 +1,7 @@
 #+title: Tasks
 
-* TODO ordering with meta-data field
+* TODO Create collection with profile
+* TODO Update profile of collection
 
   
   

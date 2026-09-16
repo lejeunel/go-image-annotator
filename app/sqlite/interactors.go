@@ -117,6 +117,7 @@ func BuildInteractors(
 		),
 		Log: NewLogInteractors(eventlogger),
 		Profile: NewProfileInteractors(infra.ProfileRepo, infra.GroupRepo,
-			infra.LabelRepo, logger, cfg.DefaultPageSize, auth),
+			infra.LabelRepo, logger,
+			cfg.DefaultPageSize, auth),
 	}
 }
