@@ -6,9 +6,8 @@ import (
 )
 
 type ProfileRepo interface {
-	Create(pr.ProfileId, pr.ProfileName, pr.ProfileDescription) error
+	Create(pr.Profile) error
 	Exists(pr.ProfileName) (*bool, error)
-	AddLabel(pr.ProfileName, lbl.LabelName) error
 }
 
 type LabelRepo interface {

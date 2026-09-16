@@ -86,22 +86,6 @@ func TestMissingLabelShouldFail(t *testing.T) {
 	assert.False(t, p.GotSuccess)
 }
 
-func TestHandleErrorOnAddLabel(t *testing.T) {
-	p := &FakePresenter{}
-	labelName := "the-label"
-	itr := New(&fk.ProfileRepo{ErrOnAddLabel: e.ErrInternal},
-		&fk.LabelRepo{ExistingNames: []string{labelName}},
-		&fk.GroupRepo{})
-	req := Request{
-		Name:        "a-profile",
-		Description: "a-description",
-		Labels:      []string{labelName},
-	}
-	itr.Execute(t.Context(), req, p)
-	assert.True(t, p.GotInternalErr)
-	assert.False(t, p.GotSuccess)
-}
-
 func TestHandleErrorOnGroupExists(t *testing.T) {
 	p := &FakePresenter{}
 	group := "the-group"
@@ -132,7 +116,5 @@ func TestCreate(t *testing.T) {
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, profileRepo.Created[0].Name, req.Name)
 	assert.Equal(t, profileRepo.Created[0].Description, req.Description)
-	assert.Equal(t, 1, len(profileRepo.AddedLabels))
-	assert.Equal(t, labelName, profileRepo.AddedLabels[0])
 	assert.True(t, p.GotSuccess)
 }

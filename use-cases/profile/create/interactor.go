@@ -66,11 +66,6 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		profile.Group = r.Group
 	}
 
-	if err := i.ProfileRepo.Create(profile.Id, profile.Name, profile.Description); err != nil {
-		out.Error(fmt.Errorf("creating profile with name %v: %w", r.Name, err))
-		return
-	}
-
 	for _, label := range profile.Labels {
 		errBase := fmt.Errorf("%w: checking for existence of label %v", errCtx, label)
 		exists, err := i.LabelRepo.Exists(label)
@@ -84,13 +79,9 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	for _, label := range profile.Labels {
-		errBase := fmt.Errorf("%w: adding label %v", errCtx, label)
-		err := i.ProfileRepo.AddLabel(profile.Name, label)
-		if err != nil {
-			out.Error(fmt.Errorf("%w: %w", errBase, err))
-			return
-		}
+	if err := i.ProfileRepo.Create(profile); err != nil {
+		out.Error(fmt.Errorf("creating profile with name %v: %w", r.Name, err))
+		return
 	}
 
 	out.SuccessCreateProfile(profile)

@@ -135,6 +135,16 @@ CREATE TABLE IF NOT EXISTS profiles (
     FOREIGN KEY (group_id) REFERENCES groups(id),
     PRIMARY KEY (id)
 );
+
+
+CREATE TABLE IF NOT EXISTS profiles_labels (
+  profile_id varchar(36) REFERENCES profiles(id),
+  label_id varchar(36) REFERENCES labels(id),
+  PRIMARY KEY (profile_id, label_id)
+);
+CREATE INDEX idx_profiles_labels
+ON profiles_labels(profile_id, label_id);
+
 -- +goose Down
 
 DROP TABLE labels;
@@ -150,3 +160,5 @@ DROP TABLE users_roles;
 DROP TABLE users_groups;
 DROP TABLE tasks;
 DROP TABLE events;
+DROP TABLE profiles_labels;
+

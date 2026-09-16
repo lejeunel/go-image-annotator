@@ -18,7 +18,7 @@ func TestInternalErrOnDeleteShouldFail(t *testing.T) {
 
 func TestDeleteProfile(t *testing.T) {
 	repo := NewProfileRepo(s.NewInMemory())
-	profile, _ := CreateProfile(repo, "a-profile", nil)
+	profile, _ := CreateProfile(repo, "a-profile", nil, nil)
 	err := repo.Delete(profile.Name)
 	assert.NoError(t, err)
 }

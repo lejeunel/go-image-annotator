@@ -8,7 +8,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	adb "github.com/lejeunel/go-image-annotator/adapters/db"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
-	clc "github.com/lejeunel/go-image-annotator/entities/profile"
+	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
@@ -18,38 +18,62 @@ type ProfileRepo struct {
 }
 
 type Row struct {
-	Id          clc.ProfileId `db:"id"`
-	Name        string        `db:"name"`
-	Description string        `db:"description"`
-	GroupId     *g.GroupId    `db:"group_id"`
-	GroupName   *string       `db:"group_name"`
+	Id          pr.ProfileId `db:"id"`
+	Name        string       `db:"name"`
+	Description string       `db:"description"`
+	GroupId     *g.GroupId   `db:"group_id"`
+	GroupName   *string      `db:"group_name"`
 }
 
-func (r ProfileRepo) Create(c clc.Profile) error {
+func (r ProfileRepo) Create(p pr.Profile) error {
 	var err error
-	if c.Group != nil {
+	if p.Group != nil {
 		query := `INSERT INTO profiles (id, name, description, group_id) VALUES ($1,$2,$3,(SELECT id FROM groups WHERE name=$4))`
-		_, err = r.Db.Exec(query, c.Id.String(), c.Name, c.Description, *c.Group)
+		_, err = r.Db.Exec(query, p.Id, p.Name, p.Description, *p.Group)
 	} else {
 		query := `INSERT INTO profiles (id, name, description) VALUES ($1,$2,$3)`
-		_, err = r.Db.Exec(query, c.Id.String(), c.Name, c.Description)
+		_, err = r.Db.Exec(query, p.Id, p.Name, p.Description)
 	}
 	if err != nil {
-		return fmt.Errorf("creating record: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf("creating profile record: %v: %w", err, e.ErrInternal)
+	}
+
+	for _, label := range p.Labels {
+		_, err := r.Db.Exec(
+			`INSERT INTO profiles_labels (profile_id,label_id) VALUES ($1, (SELECT id FROM labels WHERE name=$2))`,
+			p.Id,
+			label,
+		)
+		if err != nil {
+			return fmt.Errorf(
+				"creating profile record: adding label %v: %v: %w",
+				label,
+				err,
+				e.ErrInternal,
+			)
+		}
 	}
 	return nil
 }
 
-func (r ProfileRepo) build(row Row) clc.Profile {
-	c := clc.NewProfile(row.Id, row.Name,
-		clc.WithDescription(row.Description))
-	if row.GroupName != nil {
-		c.Group = row.GroupName
+func (r ProfileRepo) build(row Row) (*pr.Profile, error) {
+	var labels []string
+	if err := r.Db.Select(
+		&labels,
+		`SELECT name FROM labels WHERE id IN (SELECT label_id FROM profiles_labels WHERE profile_id=$1)`,
+		row.Id,
+	); err != nil {
+		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
-	return c
+	p := pr.NewProfile(row.Id, row.Name,
+		pr.WithDescription(row.Description), pr.WithLabels(labels))
+	if row.GroupName != nil {
+		p.Group = row.GroupName
+	}
+	return &p, nil
 }
 
-func (r ProfileRepo) Find(name string) (*clc.Profile, error) {
+func (r ProfileRepo) Find(name string) (*pr.Profile, error) {
 	row := Row{}
 	err := r.Db.Get(&row,
 		`
@@ -66,20 +90,21 @@ func (r ProfileRepo) Find(name string) (*clc.Profile, error) {
 		}
 	}
 
-	entity := r.build(row)
-
-	return &entity, nil
+	entity, err := r.build(row)
+	if err != nil {
+		return nil, err
+	}
+	return entity, nil
 }
 
-func (r ProfileRepo) Exists(name string) (bool, error) {
+func (r ProfileRepo) Exists(name string) (*bool, error) {
 	var exists bool
 
 	err := r.Db.Get(&exists, `SELECT EXISTS (SELECT 1 FROM profiles WHERE name = $1)`, name)
 	if err != nil {
-		return false, fmt.Errorf("checking whether record exists: %v: %w", err, e.ErrInternal)
+		return &exists, fmt.Errorf("checking whether record exists: %v: %w", err, e.ErrInternal)
 	}
-
-	return exists, nil
+	return &exists, nil
 }
 
 func (r ProfileRepo) Delete(name string) error {
@@ -90,7 +115,7 @@ func (r ProfileRepo) Delete(name string) error {
 	return nil
 }
 
-func (r ProfileRepo) Update(m clc.UpdateModel) error {
+func (r ProfileRepo) Update(m pr.UpdateModel) error {
 	var err error
 	if m.NewGroup != nil {
 		query := "UPDATE profiles SET name=$1,description=$2,group_id=(SELECT id FROM groups WHERE name=$3) WHERE name=$4"
@@ -137,7 +162,7 @@ func (r ProfileRepo) Count() (*int64, error) {
 	return &count, nil
 }
 
-func (r ProfileRepo) List(m pa.PaginationParams) ([]*clc.Profile, error) {
+func (r ProfileRepo) List(m pa.PaginationParams) ([]pr.Profile, error) {
 	q := sq.StatementBuilder.Select(`c.id,c.name,c.description,c.group_id,g.name AS group_name`).
 		From("profiles AS c")
 	q = q.LeftJoin("groups g ON g.id=c.group_id")
@@ -151,10 +176,13 @@ func (r ProfileRepo) List(m pa.PaginationParams) ([]*clc.Profile, error) {
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
 
-	objects := []*clc.Profile{}
+	objects := []pr.Profile{}
 	for _, rec := range records {
-		e := r.build(rec)
-		objects = append(objects, &e)
+		obj, err := r.build(rec)
+		if err != nil {
+			return nil, err
+		}
+		objects = append(objects, *obj)
 	}
 
 	return objects, nil
@@ -180,8 +208,24 @@ func (r ProfileRepo) GetGroup(name string) (*string, error) {
 }
 
 func (r ProfileRepo) IsUsed(name string) (*bool, error) {
-	res := true
-	return &res, nil
+	var isUsed bool
+	var count int64
+	query := "SELECT COUNT(*) FROM collections WHERE profile_id=(SELECT id FROM profiles where name=$1)"
+	err := r.Db.QueryRow(query, name).Scan(&count)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"checking whether profile %v is used: %v: %w",
+			name,
+			err,
+			e.ErrInternal,
+		)
+	}
+	if count == 0 {
+		isUsed = false
+	} else {
+		isUsed = true
+	}
+	return &isUsed, nil
 }
 
 func NewProfileRepo(db adb.Querier) ProfileRepo {

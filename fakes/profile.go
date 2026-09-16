@@ -8,12 +8,6 @@ import (
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
-type CreatedProfile struct {
-	Id          pr.ProfileId
-	Name        pr.ProfileName
-	Description pr.ProfileDescription
-}
-
 type ProfileRepo struct {
 	ErrOnCreate    error
 	ErrOnExists    error
@@ -26,7 +20,7 @@ type ProfileRepo struct {
 	ErrOnGetGroup  error
 	ErrOnUpdate    error
 	ExistingNames  []string
-	Created        []CreatedProfile
+	Created        []pr.Profile
 	AddedLabels    []lbl.LabelName
 	Return         pr.Profile
 	ReturnGroup    string
@@ -35,17 +29,12 @@ type ProfileRepo struct {
 	GotUpdateModel pr.UpdateModel
 }
 
-func (r *ProfileRepo) Create(
-	id pr.ProfileId,
-	name pr.ProfileName,
-	desc pr.ProfileDescription,
-) error {
+func (r *ProfileRepo) Create(p pr.Profile) error {
 	if r.ErrOnCreate != nil {
 		return r.ErrOnCreate
 	}
 
-	r.Created = append(r.Created,
-		CreatedProfile{Id: id, Name: name, Description: desc})
+	r.Created = append(r.Created, p)
 	return nil
 }
 

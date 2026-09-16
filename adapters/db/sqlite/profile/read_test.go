@@ -11,7 +11,7 @@ import (
 
 func TestRetrieveNonExistingShouldFail(t *testing.T) {
 	repo := NewProfileRepo(s.NewInMemory())
-	CreateProfile(repo, "a-profile", nil)
+	CreateProfile(repo, "a-profile", nil, nil)
 	_, err := repo.Find("non-existing-profile")
 	assert.ErrorIs(t, err, e.ErrNotFound)
 }
@@ -19,7 +19,7 @@ func TestRetrieveNonExistingShouldFail(t *testing.T) {
 func TestInternalErrOnFindShouldFail(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewProfileRepo(db)
-	CreateProfile(repo, "a-profile", nil)
+	CreateProfile(repo, "a-profile", nil, nil)
 	db.Close()
 	_, err := repo.Find("a-profile")
 	assert.ErrorIs(t, err, e.ErrInternal)
