@@ -24,19 +24,41 @@ type Row struct {
 	Description string           `db:"description"`
 	CreatedAt   sql.NullTime     `db:"created_at"`
 	GroupId     *g.GroupId       `db:"group_id"`
-	ProfileId   *pr.ProfileId    `db:"profile_id"`
 	GroupName   *string          `db:"group_name"`
+	ProfileId   *pr.ProfileId    `db:"profile_id"`
+	ProfileName *string          `db:"profile_name"`
 }
 
 func (r CollectionRepo) Create(c clc.Collection) error {
 	var err error
+	var groupId *g.GroupId
+	var profileId *pr.ProfileId
+
+	errCtx := fmt.Errorf("creating collection record")
 	if c.Group != nil {
-		query := `INSERT INTO collections (id, name, description, created_at, group_id) VALUES ($1,$2,$3,$4,(SELECT id FROM groups WHERE name=$5))`
-		_, err = r.Db.Exec(query, c.Id.String(), c.Name, c.Description, c.CreatedAt, *c.Group)
-	} else {
-		query := `INSERT INTO collections (id, name, description, created_at) VALUES ($1,$2,$3,$4)`
-		_, err = r.Db.Exec(query, c.Id.String(), c.Name, c.Description, c.CreatedAt)
+		var gid g.GroupId
+		if err := r.Db.Get(&gid, `SELECT id FROM groups WHERE name=$1`, *c.Group); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return fmt.Errorf("%w: fetching group %q: %w", errCtx, *c.Group, e.ErrNotFound)
+			}
+			return fmt.Errorf("%w: fetching group %v: %w", err, *c.Group, e.ErrInternal)
+		}
+		groupId = &gid
 	}
+
+	if c.Profile != nil {
+		var pid pr.ProfileId
+		if err := r.Db.Get(&pid, `SELECT id FROM profiles WHERE name=$1`, *c.Profile); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return fmt.Errorf("%w: fetching profile %q: %w", errCtx, *c.Profile, e.ErrNotFound)
+			}
+			return fmt.Errorf("%w: fetching profile %v: %w", err, *c.Profile, e.ErrInternal)
+		}
+		profileId = &pid
+	}
+
+	query := `INSERT INTO collections (id, name, description, created_at,group_id,profile_id) VALUES ($1,$2,$3,$4,$5,$6)`
+	_, err = r.Db.Exec(query, c.Id.String(), c.Name, c.Description, c.CreatedAt, groupId, profileId)
 	if err != nil {
 		return fmt.Errorf("creating record: %v: %w", err, e.ErrInternal)
 	}
@@ -52,6 +74,9 @@ func (r CollectionRepo) build(row Row) clc.Collection {
 	if row.GroupName != nil {
 		c.Group = row.GroupName
 	}
+	if row.ProfileName != nil {
+		c.Profile = row.ProfileName
+	}
 	return c
 }
 
@@ -59,9 +84,10 @@ func (r CollectionRepo) Find(name string) (*clc.Collection, error) {
 	row := Row{}
 	err := r.Db.Get(&row,
 		`
-		SELECT c.id,c.name,c.description,c.created_at,c.group_id,g.name AS group_name
+		SELECT c.id,c.name,c.description,c.created_at,c.group_id,g.name AS group_name,c.profile_id,p.name AS profile_name
 		FROM collections AS c
 		LEFT JOIN groups g ON g.id = c.group_id
+		LEFT JOIN profiles p ON p.id = c.profile_id
 		WHERE c.name=$1`, name)
 	if err != nil {
 		switch {

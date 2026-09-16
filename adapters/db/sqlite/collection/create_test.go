@@ -70,11 +70,16 @@ func TestAttachProfileToCollection(t *testing.T) {
 	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
 	profileRepo.Create(profile)
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection",
-		clc.WithProfile(profile))
+		clc.WithProfile(profile.Name))
 	collectionRepo.Create(collection)
 
 	isUsed, err := profileRepo.IsUsed(profile.Name)
 	assert.NoError(t, err)
 	assert.NotNil(t, isUsed)
 	assert.True(t, *isUsed)
+
+	r, err := collectionRepo.Find(collection.Name)
+	assert.NoError(t, err)
+	assert.NotNil(t, r.Profile)
+	assert.Equal(t, profile.Name, *r.Profile)
 }

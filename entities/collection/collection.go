@@ -16,7 +16,7 @@ type Collection struct {
 	Description string
 	CreatedAt   time.Time
 	Group       *string
-	Profile     *pr.Profile
+	Profile     *pr.ProfileName
 }
 
 func NewCollection(id CollectionId, name string, opts ...Option) Collection {
@@ -35,7 +35,7 @@ func WithDescription(d string) Option {
 	}
 }
 
-func WithProfile(p pr.Profile) Option {
+func WithProfile(p pr.ProfileName) Option {
 	return func(c *Collection) {
 		c.Profile = &p
 	}
