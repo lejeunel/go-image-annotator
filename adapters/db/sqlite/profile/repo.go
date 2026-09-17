@@ -37,11 +37,28 @@ func (r ProfileRepo) Create(p pr.Profile) error {
 	if err != nil {
 		return fmt.Errorf("creating profile record: %v: %w", err, e.ErrInternal)
 	}
+	if err := r.addLabels(p.Name, p.Labels); err != nil {
+		return fmt.Errorf("adding labels to profile: %w", err)
+	}
+	return nil
+}
 
-	for _, label := range p.Labels {
+func (r ProfileRepo) removeLabels(name pr.ProfileName) error {
+	_, err := r.Db.Exec(
+		"DELETE FROM profiles_labels WHERE profile_id=(SELECT id FROM profiles WHERE name=$1)",
+		name,
+	)
+	if err != nil {
+		return fmt.Errorf("deleting labels from profile %v: %v: %w", name, err, e.ErrInternal)
+	}
+	return nil
+}
+
+func (r ProfileRepo) addLabels(profile pr.ProfileName, labels []string) error {
+	for _, label := range labels {
 		_, err := r.Db.Exec(
-			`INSERT INTO profiles_labels (profile_id,label_id) VALUES ($1, (SELECT id FROM labels WHERE name=$2))`,
-			p.Id,
+			`INSERT INTO profiles_labels (profile_id,label_id) VALUES ((SELECT id FROM profiles WHERE name=$1), (SELECT id FROM labels WHERE name=$2))`,
+			profile,
 			label,
 		)
 		if err != nil {
@@ -116,6 +133,7 @@ func (r ProfileRepo) Delete(name string) error {
 }
 
 func (r ProfileRepo) Update(m pr.UpdateModel) error {
+	errCtx := fmt.Errorf("updating profile record")
 	var err error
 	if m.NewGroup != nil {
 		query := "UPDATE profiles SET name=$1,description=$2,group_id=(SELECT id FROM groups WHERE name=$3) WHERE name=$4"
@@ -126,7 +144,14 @@ func (r ProfileRepo) Update(m pr.UpdateModel) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("updating record: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf("%v: %v: %w", errCtx, err, e.ErrInternal)
+	}
+
+	if err := r.removeLabels(m.NewName); err != nil {
+		return fmt.Errorf("%w: %w", errCtx, err)
+	}
+	if err := r.addLabels(m.NewName, m.NewLabels); err != nil {
+		return fmt.Errorf("%w: %w", errCtx, err)
 	}
 
 	return nil
