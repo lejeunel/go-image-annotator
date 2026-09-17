@@ -37,10 +37,15 @@ in
         # Run `go test` as the check phase instead of building the binary.
         doCheck = true;
         checkFlags = [ "-v" ];
-
+        checkPhase = ''
+              runHook preCheck
+              go test -v -race ./...
+              runHook postCheck
+              '';
+          
         # Skip the actual binary build+install; we only want the test run.
         dontBuild = true;
-        installPhase = ''
+        installphase = ''
           mkdir -p $out
           touch $out/tests-passed
         '';
