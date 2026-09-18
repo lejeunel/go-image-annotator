@@ -87,6 +87,7 @@
             x-ref="archiveForm"
             hx-post="{{.ArchiveIngestUrl}}"
             hx-encoding="multipart/form-data"
+	    hx-indicator="#upload-indicator-{{.DivId}}"
             hx-swap="none"
           >
             <div
@@ -119,8 +120,19 @@
               <small x-show="fileName && !uploadError" x-text="fileName"></small>
               <small x-show="uploadError" x-text="uploadError" class="text-error"></small>
             </div>
+	    <div id="upload-indicator-{{.DivId}}" class="htmx-indicator flex items-center gap-2 mt-2 text-sm">
+	      <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+		<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+		<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+	      </svg>
+	      <span>Uploading…</span>
+	    </div>
           </form>
-
+	  <style>
+  .htmx-indicator { opacity: 0; transition: opacity 150ms ease-in; }
+  .htmx-request .htmx-indicator,
+  .htmx-request.htmx-indicator { opacity: 1; }
+	  </style>
           <div id="ingest-result-{{.DivId}}"></div>
         </div>
       </div>

@@ -247,7 +247,6 @@ func (b *PageBuilder) Render(w io.Writer) {
 		return
 	}
 	var queryBuf bytes.Buffer
-	fmt.Printf("%+v\n", b.QueryModalData)
 	if err := queryModalTemplate.ExecuteTemplate(
 		&queryBuf,
 		"query",

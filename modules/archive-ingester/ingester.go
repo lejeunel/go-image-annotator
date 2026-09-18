@@ -40,7 +40,12 @@ func (i ArchiveIngester) IngestArchive(r Request) (Response, error) {
 	var lastErr error
 	for _, file := range zr.File {
 		if file.FileInfo().IsDir() {
-			lastErr = fmt.Errorf("%w: found directory %v: %w", errCtx, file, e.ErrValidation)
+			lastErr = fmt.Errorf(
+				"%w: found directory %v: %w",
+				errCtx,
+				file.FileHeader.Name,
+				e.ErrValidation,
+			)
 			break
 		}
 
