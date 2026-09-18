@@ -16,9 +16,12 @@ var LabelModalSearchCombobox string
 var MultilabelSearch string
 
 type LabelModalData struct {
-	Labels         []string
-	SelectorIsOpen bool
-	Selected       *string
+	Labels []string
+}
+
+type MultiselectLabelData struct {
+	Labels    []string
+	FieldName string
 }
 
 type LabelModalKind int
@@ -45,7 +48,7 @@ func NewLabelModal(labels []string) string {
 	return buf.String()
 }
 
-func NewMultiLabelCombobox(labels []string) string {
+func NewMultiLabelCombobox(labels []string, fieldName string) string {
 	tModal := template.New("")
 	template.Must(tModal.Parse(MultilabelSearch))
 
@@ -53,7 +56,7 @@ func NewMultiLabelCombobox(labels []string) string {
 	if err := tModal.ExecuteTemplate(
 		&buf,
 		"multilabel_search",
-		LabelModalData{Labels: labels},
+		MultiselectLabelData{Labels: labels, FieldName: fieldName},
 	); err != nil {
 		panic(err)
 	}

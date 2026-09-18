@@ -35,9 +35,11 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
+
 	s.CreateItr.Execute(r.Context(), create.Request{
 		Name:        r.FormValue(createNameFieldName),
 		Description: r.FormValue(createDescriptionFieldName),
+		Labels:      r.Form[createLabelsFieldName],
 	}, NewCreateProfilePresenter(w))
 }
 
@@ -46,7 +48,8 @@ func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b.AddTitle("Create a new profile")
 	b.AddTextField(createNameFieldName, "Name", bf.WithRequired())
 	b.AddTextField(createDescriptionFieldName, "Description")
-	labelPicker := se.NewMultiLabelCombobox([]string{"first-label", "second-label"})
+	labelPicker := se.NewMultiLabelCombobox([]string{"first-label", "second-label"},
+		createLabelsFieldName)
 	b.AddRaw("Labels", labelPicker)
 	b.Render(w)
 }

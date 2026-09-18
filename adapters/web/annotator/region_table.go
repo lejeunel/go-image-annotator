@@ -11,10 +11,9 @@ import (
 )
 
 type LabelSelector struct {
-	Labels         []string
-	SelectorIsOpen bool
-	Selected       *string
-	AnnotationId   string
+	Labels       []string
+	Selected     *string
+	AnnotationId string
 }
 
 type RegionKind int

@@ -44,7 +44,7 @@
 
             <!-- Hidden inputs for each selected value, submitted as part of the form -->
             <template x-for="option in selectedOptions" x-bind:key="option.value">
-                <input type="hidden" name="label" x-bind:value="option.value" />
+                <input type="hidden" name="{{.FieldName}}" x-bind:value="option.value" />
             </template>
 
             <div
