@@ -22,6 +22,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/adapters/web/collection"
 	im "github.com/lejeunel/go-image-annotator/adapters/web/image"
 	lbl "github.com/lejeunel/go-image-annotator/adapters/web/label"
+	pr "github.com/lejeunel/go-image-annotator/adapters/web/profile"
 	a "github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
@@ -98,6 +99,17 @@ func Make(port int) http.Handler {
 		app.Itrs.Image.IngestArchive,
 	)
 	imagesServer.Route(router, webAuth)
+
+	profilesServer := pr.New(
+		pageBuilder,
+		cfg.DefaultPageSize,
+		app.Itrs.Profile.Create,
+		app.Itrs.Profile.List,
+		app.Itrs.Profile.Update,
+		app.Itrs.Profile.Delete,
+		app.Itrs.Profile.Find,
+	)
+	profilesServer.Route(router, webAuth)
 
 	adminPageBuilder := adm.NewPageBuilder(pageBuilder)
 	adminUserServer := admusr.New(

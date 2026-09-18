@@ -26,6 +26,7 @@ const (
 	CollectionsUrl = "/collections"
 	ImagesUrl      = "/images"
 	LabelsUrl      = "/labels"
+	ProfilesUrl    = "/profiles"
 	DashboardUrl   = "/dashboard"
 
 	AdminUrl         = "/admin"

@@ -180,6 +180,9 @@ func MakeNavBar(
 				MakeMenuItem("Labels", rt.LabelsUrl, isActivated == LabelsPageActive),
 			),
 			Li(
+				MakeMenuItem("Profiles", rt.ProfilesUrl, isActivated == ProfilesPageActive),
+			),
+			Li(
 				MakeMenuItem("API", rt.APIDocsUrl, isActivated == APIDocsPageActive),
 			),
 			Li(
