@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
+	se "github.com/lejeunel/go-image-annotator/adapters/web/components/select"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	"github.com/lejeunel/go-image-annotator/use-cases/profile/create"
@@ -45,5 +46,7 @@ func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	b.AddTitle("Create a new profile")
 	b.AddTextField(createNameFieldName, "Name", bf.WithRequired())
 	b.AddTextField(createDescriptionFieldName, "Description")
+	labelPicker := se.NewMultiLabelCombobox([]string{"first-label", "second-label"})
+	b.AddRaw("Labels", labelPicker)
 	b.Render(w)
 }

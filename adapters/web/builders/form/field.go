@@ -90,7 +90,7 @@ func (f FormField) label() Node {
 	return Label(
 		For(f.fieldName),
 		Text(displayName),
-		Class("w-fit pl-0.5 text-sm text-on-surface dark:text-on-surface-dark"),
+		Class(FormFieldClass),
 	)
 }
 

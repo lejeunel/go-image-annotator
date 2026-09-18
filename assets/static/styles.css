@@ -2035,6 +2035,9 @@
   .disabled\:cursor-not-allowed:disabled {
     cursor: not-allowed;
   }
+  .disabled\:opacity-50:disabled {
+    opacity: 50%;
+  }
   .disabled\:opacity-75:disabled {
     opacity: 75%;
   }

@@ -1,11 +1,11 @@
 package annotator
 
 import (
-	"embed"
 	"fmt"
 	"net/http"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	se "github.com/lejeunel/go-image-annotator/adapters/web/components/select"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
@@ -14,9 +14,6 @@ import (
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
-
-//go:embed templates/*
-var templatesFiles embed.FS
 
 type AnnotationView struct {
 	QueryView
@@ -153,7 +150,7 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 	pb.AddScripts(AnnotoriousLib()...)
 	pb.AddScripts(*script)
 
-	labelModal := makeLabelModal(v.availableLabels)
+	labelModal := se.NewLabelModal(v.availableLabels)
 
 	pb.SetContent(
 		Group([]Node{

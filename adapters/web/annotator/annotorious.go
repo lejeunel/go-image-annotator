@@ -4,9 +4,14 @@ import (
 	"bytes"
 	"text/template"
 
+	_ "embed"
+
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
+
+//go:embed templates/annotator.js
+var AnnotatorJS string
 
 type AnnotatorData struct {
 	URLs             AnnotatorURLs
@@ -40,7 +45,7 @@ var annotatorURLs = AnnotatorURLs{
 }
 
 func MakeAnnotoriousScript(imageId string, collection string) (*Node, error) {
-	tAnnot, err := template.New("annotator").ParseFS(templatesFiles, "templates/annotator.js")
+	tAnnot, err := template.New("annotator").Parse(AnnotatorJS)
 	if err != nil {
 		return nil, err
 	}
