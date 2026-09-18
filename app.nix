@@ -60,6 +60,7 @@ in
         nativeBuildInputs = with pkgs; [
           gofumpt
           golines
+          gnumake
         ];
 
         dontBuild = true;
@@ -67,21 +68,7 @@ in
 
         checkPhase = ''
           runHook preCheck
-
-          unformatted=$(gofumpt -l .)
-          if [ -n "$unformatted" ]; then
-            echo "gofumpt: the following files are not formatted:"
-            echo "$unformatted"
-            exit 1
-          fi
-
-          toolong=$(golines -l .)
-          if [ -n "$toolong" ]; then
-            echo "golines: the following files need reformatting:"
-            echo "$toolong"
-            exit 1
-          fi
-
+          make format-check
           runHook postCheck
         '';
 
