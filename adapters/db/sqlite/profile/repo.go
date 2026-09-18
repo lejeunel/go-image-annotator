@@ -43,55 +43,9 @@ func (r ProfileRepo) Create(p pr.Profile) error {
 	return nil
 }
 
-func (r ProfileRepo) removeLabels(name pr.ProfileName) error {
-	_, err := r.Db.Exec(
-		"DELETE FROM profiles_labels WHERE profile_id=(SELECT id FROM profiles WHERE name=$1)",
-		name,
-	)
-	if err != nil {
-		return fmt.Errorf("deleting labels from profile %v: %v: %w", name, err, e.ErrInternal)
-	}
-	return nil
-}
-
-func (r ProfileRepo) addLabels(profile pr.ProfileName, labels []string) error {
-	for _, label := range labels {
-		_, err := r.Db.Exec(
-			`INSERT INTO profiles_labels (profile_id,label_id) VALUES ((SELECT id FROM profiles WHERE name=$1), (SELECT id FROM labels WHERE name=$2))`,
-			profile,
-			label,
-		)
-		if err != nil {
-			return fmt.Errorf(
-				"creating profile record: adding label %v: %v: %w",
-				label,
-				err,
-				e.ErrInternal,
-			)
-		}
-	}
-	return nil
-}
-
-func (r ProfileRepo) build(row Row) (*pr.Profile, error) {
-	var labels []string
-	if err := r.Db.Select(
-		&labels,
-		`SELECT name FROM labels WHERE id IN (SELECT label_id FROM profiles_labels WHERE profile_id=$1)`,
-		row.Id,
-	); err != nil {
-		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
-	}
-	p := pr.NewProfile(row.Id, row.Name,
-		pr.WithDescription(row.Description), pr.WithLabels(labels))
-	if row.GroupName != nil {
-		p.Group = row.GroupName
-	}
-	return &p, nil
-}
-
 func (r ProfileRepo) Find(name string) (*pr.Profile, error) {
 	row := Row{}
+	errCtx := fmt.Errorf("fetching profile record")
 	err := r.Db.Get(&row,
 		`
 		SELECT c.id,c.name,c.description,c.group_id,g.name AS group_name
@@ -101,9 +55,9 @@ func (r ProfileRepo) Find(name string) (*pr.Profile, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, e.ErrNotFound
+			return nil, fmt.Errorf("%w: %w", err, e.ErrNotFound)
 		default:
-			return nil, fmt.Errorf("fetching record by name: %v: %w", err, e.ErrInternal)
+			return nil, fmt.Errorf("%w: %v: %w", errCtx, err, e.ErrInternal)
 		}
 	}
 
@@ -155,24 +109,6 @@ func (r ProfileRepo) Update(m pr.UpdateModel) error {
 	}
 
 	return nil
-}
-
-func (r ProfileRepo) IsPopulated(name string) (*bool, error) {
-	var count int64
-
-	var query string
-	var err error
-	query = "SELECT COUNT(*) FROM images_profiles WHERE profile_id=(SELECT id FROM profiles WHERE name=$1)"
-	err = r.Db.QueryRow(query, name).Scan(&count)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"checking whether profile is populated: %v: %w",
-			err,
-			e.ErrInternal,
-		)
-	}
-	isPopulated := count > 0
-	return &isPopulated, nil
 }
 
 func (r ProfileRepo) Count() (*int64, error) {
@@ -251,6 +187,53 @@ func (r ProfileRepo) IsUsed(name string) (*bool, error) {
 		isUsed = true
 	}
 	return &isUsed, nil
+}
+
+func (r ProfileRepo) removeLabels(name pr.ProfileName) error {
+	_, err := r.Db.Exec(
+		"DELETE FROM profiles_labels WHERE profile_id=(SELECT id FROM profiles WHERE name=$1)",
+		name,
+	)
+	if err != nil {
+		return fmt.Errorf("deleting labels from profile %v: %v: %w", name, err, e.ErrInternal)
+	}
+	return nil
+}
+
+func (r ProfileRepo) addLabels(profile pr.ProfileName, labels []string) error {
+	for _, label := range labels {
+		_, err := r.Db.Exec(
+			`INSERT INTO profiles_labels (profile_id,label_id) VALUES ((SELECT id FROM profiles WHERE name=$1), (SELECT id FROM labels WHERE name=$2))`,
+			profile,
+			label,
+		)
+		if err != nil {
+			return fmt.Errorf(
+				"creating profile record: adding label %v: %v: %w",
+				label,
+				err,
+				e.ErrInternal,
+			)
+		}
+	}
+	return nil
+}
+
+func (r ProfileRepo) build(row Row) (*pr.Profile, error) {
+	var labels []string
+	if err := r.Db.Select(
+		&labels,
+		`SELECT name FROM labels WHERE id IN (SELECT label_id FROM profiles_labels WHERE profile_id=$1)`,
+		row.Id,
+	); err != nil {
+		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
+	}
+	p := pr.NewProfile(row.Id, row.Name,
+		pr.WithDescription(row.Description), pr.WithLabels(labels))
+	if row.GroupName != nil {
+		p.Group = row.GroupName
+	}
+	return &p, nil
 }
 
 func NewProfileRepo(db adb.Querier) ProfileRepo {
