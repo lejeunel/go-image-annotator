@@ -211,6 +211,25 @@ func (r CollectionRepo) GetGroup(name string) (*string, error) {
 	return &group, nil
 }
 
+func (r CollectionRepo) GetProfile(name string) (*string, error) {
+	var profile string
+	errCtx := fmt.Errorf("retrieving profile of collection with name %v", name)
+
+	err := r.Db.Get(
+		&profile,
+		`SELECT name FROM profiles WHERE id=(SELECT profile_id FROM collections WHERE name=$1)`,
+		name,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: %w", errCtx, e.ErrNotFound)
+		}
+		return nil, fmt.Errorf("%w: %w: %w", errCtx, err, e.ErrInternal)
+	}
+
+	return &profile, nil
+}
+
 func NewCollectionRepo(db adb.Querier) CollectionRepo {
 	return CollectionRepo{Db: db}
 }

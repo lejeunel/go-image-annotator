@@ -8,21 +8,23 @@ import (
 )
 
 type CollectionRepo struct {
-	ErrOnCreate    error
-	ErrOnExists    error
-	ErrOnFind      error
-	ErrOnDelete    error
-	ErrOnCount     error
-	ErrOnList      error
-	ErrOnUpdate    error
-	ErrOnGetGroup  error
-	ExistingNames  []string
-	IsPopulated_   bool
-	Return         clc.Collection
-	Count_         int
-	Got            clc.Collection
-	GotUpdateModel clc.UpdateModel
-	ReturnGroup    string
+	ErrOnCreate     error
+	ErrOnExists     error
+	ErrOnFind       error
+	ErrOnDelete     error
+	ErrOnCount      error
+	ErrOnList       error
+	ErrOnUpdate     error
+	ErrOnGetGroup   error
+	ErrOnGetProfile error
+	ExistingNames   []string
+	IsPopulated_    bool
+	Return          clc.Collection
+	Count_          int
+	Got             clc.Collection
+	GotUpdateModel  clc.UpdateModel
+	ReturnGroup     string
+	ReturnProfile   string
 }
 
 func (r *CollectionRepo) Create(c clc.Collection) error {
@@ -102,4 +104,11 @@ func (r *CollectionRepo) GetGroup(name string) (*string, error) {
 		return nil, r.ErrOnGetGroup
 	}
 	return &r.ReturnGroup, nil
+}
+
+func (r *CollectionRepo) GetProfile(name string) (*string, error) {
+	if r.ErrOnGetProfile != nil {
+		return nil, r.ErrOnGetProfile
+	}
+	return &r.ReturnProfile, nil
 }

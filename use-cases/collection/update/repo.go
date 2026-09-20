@@ -8,8 +8,13 @@ type CollectionRepo interface {
 	Update(clc.UpdateModel) error
 	Exists(string) (bool, error)
 	GetGroup(string) (*string, error)
+	GetProfile(string) (*string, error)
 }
 
 type GroupRepo interface {
+	Exists(string) (*bool, error)
+}
+
+type ProfileRepo interface {
 	Exists(string) (*bool, error)
 }

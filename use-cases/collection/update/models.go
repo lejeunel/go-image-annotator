@@ -5,6 +5,7 @@ type Request struct {
 	NewName        string
 	NewDescription string
 	NewGroup       *string
+	NewProfile     *string
 }
 
 type Response struct {

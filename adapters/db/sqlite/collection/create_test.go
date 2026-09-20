@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	grr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
+
 	prr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/profile"
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
@@ -39,6 +40,21 @@ func TestCreateCollectionInGroup(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, r)
 	assert.Equal(t, "a-group", *r)
+}
+
+func TestCreateCollectionWithProfile(t *testing.T) {
+	db := s.NewInMemory()
+	profileRepo := prr.NewProfileRepo(db)
+	collectionRepo := NewCollectionRepo(db)
+	profile := pr.NewProfile(pr.NewProfileId(), "my-profile")
+	profileRepo.Create(profile)
+	c := clc.NewCollection(clc.NewCollectionId(), "a-collection",
+		clc.WithProfile(profile.Name))
+	collectionRepo.Create(c)
+	r, err := collectionRepo.GetProfile(c.Name)
+	assert.NoError(t, err)
+	assert.NotNil(t, r)
+	assert.Equal(t, profile.Name, *r)
 }
 
 func TestCollectionWithoutGroupFailsWithNotFoundErr(t *testing.T) {

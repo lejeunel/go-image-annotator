@@ -60,6 +60,7 @@ func BuildInteractors(
 			infra.ImageRepo,
 			infra.AnnotationRepo,
 			infra.GroupRepo,
+			infra.ProfileRepo,
 			imstore,
 			eventlogger,
 			logger,

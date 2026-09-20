@@ -14,6 +14,7 @@ import (
 type Interactor struct {
 	CollectionRepo
 	GroupRepo
+	ProfileRepo
 	v.Validator
 	clockwork.Clock
 	Auth
@@ -49,6 +50,13 @@ func (i Interactor) create(r Request) error {
 			return err
 		}
 		collection.Group = &group.Name
+	}
+	if r.Profile != nil {
+		profile, err := i.ProfileRepo.Find(*r.Profile)
+		if err != nil {
+			return err
+		}
+		collection.Profile = &profile.Name
 	}
 	if err := i.CollectionRepo.Create(collection); err != nil {
 		return err
@@ -98,10 +106,11 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(rc CollectionRepo, rg GroupRepo, opts ...Option) Interactor {
+func New(rc CollectionRepo, rg GroupRepo, pr ProfileRepo, opts ...Option) Interactor {
 	i := &Interactor{
 		CollectionRepo: rc,
 		GroupRepo:      rg,
+		ProfileRepo:    pr,
 		Validator:      v.NewNameValidator(),
 		Clock:          clockwork.NewRealClock(),
 		Auth:           auth.NewVoidAuth(),
