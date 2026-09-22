@@ -38,5 +38,5 @@ func TestFetchLabels(t *testing.T) {
 	itr := New(&fk.LabelRepo{ExistingNames: labels})
 	itr.Execute(t.Context(), p)
 	assert.True(t, p.GotSuccess)
-	assert.True(t, slices.Equal(p.Got.Labels, labels))
+	assert.True(t, slices.Equal(p.Got, labels))
 }

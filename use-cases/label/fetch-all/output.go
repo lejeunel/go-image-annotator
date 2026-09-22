@@ -1,6 +1,6 @@
 package fetchall
 
 type OutputPort interface {
-	SuccessFetchLabels(Response)
+	SuccessFetchLabels([]string)
 	Error(error)
 }

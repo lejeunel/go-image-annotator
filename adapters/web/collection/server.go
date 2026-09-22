@@ -9,6 +9,7 @@ import (
 	listclc "github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
 	listgrp "github.com/lejeunel/go-image-annotator/use-cases/group/list"
+	listpr "github.com/lejeunel/go-image-annotator/use-cases/profile/list-all"
 )
 
 type Server struct {
@@ -17,6 +18,7 @@ type Server struct {
 	DefaultPageSize   int
 	ListCollectionItr listclc.Interactor
 	ListGroupItr      listgrp.Interactor
+	ListProfileItr    listpr.Interactor
 	CreateItr         create.Interactor
 	UpdateItr         update.Interactor
 	DeleteItr         delete.Interactor
@@ -29,9 +31,10 @@ func New(pb b.PageBuilder, defaultPageSize int,
 	u update.Interactor,
 	d delete.Interactor, cl clone.Interactor, f find.Interactor,
 	lg listgrp.Interactor,
+	lp listpr.Interactor,
 ) Server {
 	return Server{
 		pb, b.NewRowURLWithId(CollectionUrl, resourceUrlFieldName), defaultPageSize,
-		lc, lg, c, u, d, cl, f,
+		lc, lg, lp, c, u, d, cl, f,
 	}
 }

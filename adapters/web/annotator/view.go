@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
-	se "github.com/lejeunel/go-image-annotator/adapters/web/components/select"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
@@ -150,7 +149,7 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 	pb.AddScripts(AnnotoriousLib()...)
 	pb.AddScripts(*script)
 
-	labelModal := se.NewLabelModal(v.availableLabels)
+	labelModal := NewLabelModal(v.availableLabels)
 
 	pb.SetContent(
 		Group([]Node{

@@ -30,7 +30,7 @@ func (s *FakeScroller) Execute(ctx context.Context, r scroll.Request, o scroll.O
 type FakeLabelFetcher struct{}
 
 func (f *FakeLabelFetcher) Execute(ctx context.Context, o fetchlbl.OutputPort) {
-	o.SuccessFetchLabels(fetchlbl.Response{Labels: []string{"a-label"}})
+	o.SuccessFetchLabels([]string{"a-label"})
 }
 
 type FakeImageReader struct{}

@@ -9,7 +9,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
-	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
+
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	e "github.com/lejeunel/go-image-annotator/adapters/web/error"
 	pg "github.com/lejeunel/go-image-annotator/adapters/web/pagination"
@@ -19,9 +19,6 @@ import (
 )
 
 var listCollectionsFields = []string{"name", "description", "group", "created", "actions"}
-
-//go:embed preamble.md
-var preamble string
 
 type MetaDeletePresenter struct {
 	writer http.ResponseWriter
@@ -64,14 +61,6 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 		s.FindItr.Execute(r.Context(), name,
 			NewViewPresenter(w, s.RowURL))
 	}
-}
-
-func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXCreateFormBuilder(CollectionUrl, createCollectionTargetDiv)
-	b.AddTitle("Create a new collection")
-	b.AddTextField(nameFieldName, "Name", bf.WithRequired())
-	b.AddTextField(descriptionFieldName, "Description")
-	b.Render(w)
 }
 
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {

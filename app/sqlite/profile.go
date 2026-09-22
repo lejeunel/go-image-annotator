@@ -8,11 +8,12 @@ import (
 	pr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/profile"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	v "github.com/lejeunel/go-image-annotator/modules/string-validator"
-	clc "github.com/lejeunel/go-image-annotator/use-cases/profile"
+	p "github.com/lejeunel/go-image-annotator/use-cases/profile"
 	"github.com/lejeunel/go-image-annotator/use-cases/profile/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/profile/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/profile/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/profile/list"
+	list_all "github.com/lejeunel/go-image-annotator/use-cases/profile/list-all"
 	"github.com/lejeunel/go-image-annotator/use-cases/profile/update"
 )
 
@@ -22,13 +23,14 @@ func NewProfileInteractors(
 	lr lb.LabelRepo,
 	logger slog.Logger,
 	pageSize int, auth auth.Interface,
-) clc.Interactors {
-	return clc.Interactors{
+) p.Interactors {
+	return p.Interactors{
 		Find: find.New(pr),
 		Create: create.New(pr, lr, gr, create.WithNameValidator(v.NewNameValidator()),
 			create.WithAuth(auth)),
-		Delete: delete.New(pr, delete.WithAuth(auth)),
-		List:   list.New(pr),
-		Update: update.New(pr, gr, lr, update.WithAuth(auth)),
+		Delete:  delete.New(pr, delete.WithAuth(auth)),
+		List:    list.New(pr),
+		ListAll: list_all.New(pr),
+		Update:  update.New(pr, gr, lr, update.WithAuth(auth)),
 	}
 }

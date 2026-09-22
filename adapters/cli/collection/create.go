@@ -15,7 +15,7 @@ type CreatePresenter struct {
 	cli.ErrorPresenter
 }
 
-func (p CreatePresenter) Success(r clc.Response) {
+func (p CreatePresenter) SuccessCreateCollection(r clc.Response) {
 	p.Logger.Info("created collection", "name", r.Name, "description", r.Description)
 }
 

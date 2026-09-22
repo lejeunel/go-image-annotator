@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strings"
 
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	st "github.com/lejeunel/go-image-annotator/adapters/web/styles"
@@ -98,6 +99,16 @@ func (b *HTMXInlineFormBuilder) AddCombobox(title, id, defaultValue string) *Com
 func (b *HTMXInlineFormBuilder) AddCheckbox(fieldName, displayName string) *HTMXInlineFormBuilder {
 	field := NewFormCheckboxField(fieldName, displayName)
 	b.fields = append(b.fields, field)
+	return b
+}
+
+func (b *HTMXInlineFormBuilder) AddRaw(fieldName string, s string) *HTMXInlineFormBuilder {
+	var sb strings.Builder
+	node := Div(Div(Class(FormFieldClass), Text(fieldName)), Raw(s))
+	if err := node.Render(&sb); err != nil {
+		panic(err)
+	}
+	b.fields = append(b.fields, RawStringRenderer{sb.String()})
 	return b
 }
 

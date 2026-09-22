@@ -1,4 +1,4 @@
-package fetchall
+package list
 
 import (
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
@@ -10,7 +10,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) SuccessFetchLabels(labels []string) {
+func (p *FakePresenter) SuccessListAllProfiles(r []string) {
 	p.GotSuccess = true
-	p.Got = labels
+	p.Got = r
 }

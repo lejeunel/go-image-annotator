@@ -12,9 +12,10 @@ import (
 )
 
 type CreateProfilePresenter struct {
-	writer        http.ResponseWriter
-	task          string
-	okMessageFunc func(pr.Profile) string
+	writer          http.ResponseWriter
+	task            string
+	okMessageFunc   func(pr.Profile) string
+	availableLabels []string
 	htmx.ErrorPresenter
 }
 
@@ -23,11 +24,30 @@ func NewCreateProfilePresenter(w http.ResponseWriter) CreateProfilePresenter {
 	okMessageFunc := func(p pr.Profile) string {
 		return fmt.Sprintf("Successfully created profile %v", p.Name)
 	}
-	return CreateProfilePresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
+	return CreateProfilePresenter{
+		writer: w,
+		task:   task, okMessageFunc: okMessageFunc,
+		ErrorPresenter: htmx.NewErrorPresenter(task, w),
+	}
 }
 
 func (p CreateProfilePresenter) SuccessCreateProfile(profile pr.Profile) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(profile))
+}
+
+func (p *CreateProfilePresenter) SuccessFetchLabels(labels []string) {
+	p.availableLabels = labels
+}
+
+func (p *CreateProfilePresenter) Render() {
+	b := bf.NewHTMXCreateFormBuilder(ProfileUrl, createProfileTargetDiv)
+	b.AddTitle("Create a new profile")
+	b.AddTextField(NameFieldName, "Name", bf.WithRequired())
+	b.AddTextField(DescriptionFieldName, "Description")
+	labelPicker := se.NewMultiSelectCombobox(p.availableLabels,
+		LabelsFieldName)
+	b.AddRaw("Labels", labelPicker)
+	b.Render(p.writer)
 }
 
 func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
@@ -37,19 +57,14 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.CreateItr.Execute(r.Context(), create.Request{
-		Name:        r.FormValue(createNameFieldName),
-		Description: r.FormValue(createDescriptionFieldName),
-		Labels:      r.Form[createLabelsFieldName],
+		Name:        r.FormValue(NameFieldName),
+		Description: r.FormValue(DescriptionFieldName),
+		Labels:      r.Form[LabelsFieldName],
 	}, NewCreateProfilePresenter(w))
 }
 
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXCreateFormBuilder(ProfileUrl, createProfileTargetDiv)
-	b.AddTitle("Create a new profile")
-	b.AddTextField(createNameFieldName, "Name", bf.WithRequired())
-	b.AddTextField(createDescriptionFieldName, "Description")
-	labelPicker := se.NewMultiLabelCombobox([]string{"first-label", "second-label"},
-		createLabelsFieldName)
-	b.AddRaw("Labels", labelPicker)
-	b.Render(w)
+	p := NewCreateProfilePresenter(w)
+	s.ListAllLabelsItr.Execute(r.Context(), &p)
+	p.Render()
 }

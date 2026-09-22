@@ -7,7 +7,10 @@ const (
 	nameFieldName              = "name"
 	descriptionFieldName       = "description"
 	groupFieldName             = "group"
+	profileFieldLabel          = "Profile"
+	profileFieldName           = "profile"
 	deepFieldName              = "with_annotations"
 	resourceUrlFieldName       = "name"
 	publicGroupPlaceholderName = "( public )"
+	VoidProfilePlaceholderName = "( none )"
 )

@@ -1,3 +1,3 @@
 package form
 
-var FormFieldClass = "w-fit pl-0.5 text-sm text-on-surface dark:text-on-surface-dark"
+var FormFieldClass = "w-full mb-1 text-sm text-on-surface dark:text-on-surface-dark"

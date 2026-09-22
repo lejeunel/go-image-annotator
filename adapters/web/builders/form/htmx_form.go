@@ -23,7 +23,7 @@ func (r RawStringRenderer) Render(w io.Writer) {
 
 func (b *FormBuilder) AddRaw(fieldName string, s string) *FormBuilder {
 	var sb strings.Builder
-	node := Div(Class(FormFieldClass), Text(fieldName), Div(Raw(s)))
+	node := Div(Div(Class(FormFieldClass), Text(fieldName)), Raw(s))
 	if err := node.Render(&sb); err != nil {
 		panic(err)
 	}

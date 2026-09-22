@@ -4,7 +4,6 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/scroll"
-	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 )
 
 type AnnotationPagePresenter struct {
@@ -35,8 +34,8 @@ func (p AnnotationPagePresenter) SuccessReadImage(im im.Image) {
 	p.View.SetMetaData(im.Meta)
 }
 
-func (p AnnotationPagePresenter) SuccessFetchLabels(r fetchlbl.Response) {
-	p.View.SetAvailableLabels(r.Labels)
+func (p AnnotationPagePresenter) SuccessFetchLabels(labels []string) {
+	p.View.SetAvailableLabels(labels)
 }
 
 func (p AnnotationPagePresenter) Error(err error) {

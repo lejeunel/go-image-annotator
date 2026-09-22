@@ -54,6 +54,9 @@ func (p EditPresenter) SuccessUpdateCollection(r update.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 
+func (p *EditPresenter) SuccessListProfiles(c clc.Collection) {
+}
+
 func (p *EditPresenter) SuccessFindCollection(c clc.Collection) {
 	if c.Group != nil {
 		p.groupOfCollection = c.Group

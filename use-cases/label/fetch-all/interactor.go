@@ -35,7 +35,7 @@ func (i Interactor) Execute(ctx context.Context, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	out.SuccessFetchLabels(Response{labels})
+	out.SuccessFetchLabels(labels)
 }
 
 func New(r Repo, opts ...Option) *Interactor {
