@@ -6,7 +6,6 @@ import (
 	rmlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/scroll"
-	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 )
 
 type FakeScrollerPresenter struct {
@@ -22,7 +21,7 @@ type FakeLabelFetchPresenter struct {
 	Called bool
 }
 
-func (p *FakeLabelFetchPresenter) SuccessFetchLabels(fetchlbl.Response) {
+func (p *FakeLabelFetchPresenter) SuccessFetchLabels([]string) {
 	p.Called = true
 }
 func (p FakeLabelFetchPresenter) Error(error) {}

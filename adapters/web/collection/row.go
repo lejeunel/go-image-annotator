@@ -35,6 +35,13 @@ func MakeRow(u b.RowURL, c clc.Collection) tb.Row {
 		groupName = *c.Group
 	}
 
+	var profileName string
+	if c.Profile == nil {
+		profileName = "n/a"
+	} else {
+		profileName = *c.Profile
+	}
+
 	u.SetId(c.Name)
 	actions := b.NewActionsPanelBuilder()
 	actions.SetEdit(u.SetMode(b.ModeEdit).Url)
@@ -45,6 +52,7 @@ func MakeRow(u b.RowURL, c clc.Collection) tb.Row {
 	row.AddCell(tb.NewCell(cmp.MakeTextLink(rt.MakeImagesURL(c.Name), c.Name)))
 	row.AddCell(tb.NewCell(Text(c.Description)))
 	row.AddCell(tb.NewCell(Text(groupName)))
+	row.AddCell(tb.NewCell(Text(profileName)))
 	row.AddCell(tb.NewCell(Text(cmp.DateTimeToStr(c.CreatedAt))))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row

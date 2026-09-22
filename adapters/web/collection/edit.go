@@ -28,8 +28,14 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 		req.NewGroup = &group
 	}
 
-	s.UpdateItr.Execute(r.Context(), req,
-		NewEditPresenter(w, s.RowURL))
+	profile := r.FormValue(profileFieldName)
+	if profile != "" {
+		req.NewProfile = &profile
+	}
+
+	p := NewEditPresenter(w, s.RowURL)
+	s.UpdateItr.Execute(r.Context(), req, &p)
+	p.Render()
 }
 
 type EditPresenter struct {
@@ -38,7 +44,8 @@ type EditPresenter struct {
 	okMessageFunc func(update.Response) string
 	Form          bf.HTMXInlineFormBuilder
 	htmx.ErrorPresenter
-	groupOfCollection *string
+	groupOfCollection   *string
+	profileOfCollection *string
 }
 
 func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
@@ -47,19 +54,35 @@ func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 		return fmt.Sprintf("Successfully updated %v", r.OriginalName)
 	}
 	form := bf.NewHTMXInlineFormBuilder(len(listCollectionsFields), u.Url)
-	return EditPresenter{w, task, okMessageFunc, form, htmx.NewErrorPresenter(task, w), nil}
+	return EditPresenter{
+		writer: w,
+		task:   task, okMessageFunc: okMessageFunc,
+		Form:           form,
+		ErrorPresenter: htmx.NewErrorPresenter(task, w),
+	}
 }
 
 func (p EditPresenter) SuccessUpdateCollection(r update.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 
-func (p *EditPresenter) SuccessListProfiles(c clc.Collection) {
+func (p *EditPresenter) SuccessListAllProfiles(profiles []string) {
+	cb := p.Form.AddCombobox("Profile", profileFieldName, voidProfilePlaceholderName)
+	cb.AddField(voidProfilePlaceholderName)
+	for _, profile := range profiles {
+		cb.AddField(profile)
+	}
+	if p.profileOfCollection != nil {
+		cb.SetSelectedValue(*p.profileOfCollection)
+	}
 }
 
 func (p *EditPresenter) SuccessFindCollection(c clc.Collection) {
 	if c.Group != nil {
 		p.groupOfCollection = c.Group
+	}
+	if c.Profile != nil {
+		p.profileOfCollection = c.Profile
 	}
 	p.Form.SetResourceName(c.Name)
 	p.Form.AddTextField("name", "Name", bf.WithRequired(), bf.WithDefault(c.Name))
@@ -75,5 +98,8 @@ func (p *EditPresenter) SuccessListGroups(groups []grp.Group) {
 	if p.groupOfCollection != nil {
 		cb.SetSelectedValue(*p.groupOfCollection)
 	}
+}
+
+func (p *EditPresenter) Render() {
 	p.Form.Render(p.writer)
 }

@@ -80,27 +80,54 @@ func (r CollectionRepo) build(row Row) clc.Collection {
 	return c
 }
 
+func (r CollectionRepo) baseSelectQuery() sq.SelectBuilder {
+	q := sq.StatementBuilder.Select(`c.id,c.name,c.description,c.created_at,c.group_id,g.name AS group_name, p.id AS profile_id, p.name AS profile_name`).
+		From("collections AS c")
+	q = q.LeftJoin("groups g ON g.id=c.group_id")
+	q = q.LeftJoin("profiles p ON p.id = c.profile_id")
+	return q
+}
+
 func (r CollectionRepo) Find(name string) (*clc.Collection, error) {
+	errBase := fmt.Errorf("fetching collection record with name %v", name)
 	row := Row{}
-	err := r.Db.Get(&row,
-		`
-		SELECT c.id,c.name,c.description,c.created_at,c.group_id,g.name AS group_name,c.profile_id,p.name AS profile_name
-		FROM collections AS c
-		LEFT JOIN groups g ON g.id = c.group_id
-		LEFT JOIN profiles p ON p.id = c.profile_id
-		WHERE c.name=$1`, name)
+	q := r.baseSelectQuery().Where("c.name=?", name)
+	sql_, args, err := q.ToSql()
 	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return nil, e.ErrNotFound
-		default:
-			return nil, fmt.Errorf("fetching record by name: %v: %w", err, e.ErrInternal)
-		}
+		return nil, fmt.Errorf("%w: %v: %w", errBase, err, e.ErrInternal)
+	}
+	err = r.Db.Get(&row, sql_, args...)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("%w: %w", errBase, e.ErrNotFound)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", errBase, e.ErrInternal)
 	}
 
 	entity := r.build(row)
 
 	return &entity, nil
+}
+
+func (r CollectionRepo) List(m pa.PaginationParams) ([]*clc.Collection, error) {
+	q := r.baseSelectQuery()
+	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
+	sql, args, err := q.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
+	}
+	records := []Row{}
+	if err := r.Db.Select(&records, sql, args...); err != nil {
+		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
+	}
+
+	objects := []*clc.Collection{}
+	for _, rec := range records {
+		e := r.build(rec)
+		objects = append(objects, &e)
+	}
+
+	return objects, nil
 }
 
 func (r CollectionRepo) Exists(name string) (bool, error) {
@@ -119,23 +146,6 @@ func (r CollectionRepo) Delete(name string) error {
 	if err != nil {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
 	}
-	return nil
-}
-
-func (r CollectionRepo) Update(m clc.UpdateModel) error {
-	var err error
-	if m.NewGroup != nil {
-		query := "UPDATE collections SET name=$1,description=$2,group_id=(SELECT id FROM groups WHERE name=$3) WHERE name=$4"
-		_, err = r.Db.Exec(query, m.NewName, m.NewDescription, *m.NewGroup, m.Name)
-	} else {
-		query := "UPDATE collections SET name=$1,description=$2,group_id=NULL WHERE name=$3"
-		_, err = r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
-	}
-
-	if err != nil {
-		return fmt.Errorf("updating record: %v: %w", err, e.ErrInternal)
-	}
-
 	return nil
 }
 
@@ -167,29 +177,6 @@ func (r CollectionRepo) Count() (*int64, error) {
 	}
 
 	return &count, nil
-}
-
-func (r CollectionRepo) List(m pa.PaginationParams) ([]*clc.Collection, error) {
-	q := sq.StatementBuilder.Select(`c.id,c.name,c.description,c.created_at,c.group_id,g.name AS group_name`).
-		From("collections AS c")
-	q = q.LeftJoin("groups g ON g.id=c.group_id")
-	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
-	sql, args, err := q.ToSql()
-	if err != nil {
-		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
-	}
-	records := []Row{}
-	if err := r.Db.Select(&records, sql, args...); err != nil {
-		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
-	}
-
-	objects := []*clc.Collection{}
-	for _, rec := range records {
-		e := r.build(rec)
-		objects = append(objects, &e)
-	}
-
-	return objects, nil
 }
 
 func (r CollectionRepo) GetGroup(name string) (*string, error) {
@@ -228,6 +215,51 @@ func (r CollectionRepo) GetProfile(name string) (*string, error) {
 	}
 
 	return &profile, nil
+}
+
+func (r CollectionRepo) Update(m clc.UpdateModel) error {
+	errCtx := fmt.Errorf("updating collection record")
+
+	var groupId *g.GroupId
+	var profileId *pr.ProfileId
+
+	if m.NewGroup != nil {
+		var gid g.GroupId
+		if err := r.Db.Get(&gid, "SELECT id FROM groups WHERE name=$1", *m.NewGroup); err != nil {
+			return fmt.Errorf(
+				"%w: fetching group id with name %v: %w",
+				errCtx,
+				*m.NewGroup,
+				e.ErrInternal,
+			)
+		}
+		groupId = &gid
+	}
+
+	if m.NewProfile != nil {
+		var pid pr.ProfileId
+		if err := r.Db.Get(
+			&pid,
+			"SELECT id FROM profiles WHERE name=$1",
+			*m.NewProfile,
+		); err != nil {
+			return fmt.Errorf(
+				"%w: fetching profile id with name %v: %w",
+				errCtx,
+				*m.NewProfile,
+				e.ErrInternal,
+			)
+		}
+		profileId = &pid
+	}
+
+	query := "UPDATE collections SET name=$1, description=$2, group_id=$3, profile_id=$4 WHERE name=$5"
+	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, groupId, profileId, m.Name)
+	if err != nil {
+		return fmt.Errorf("updating record: %v: %w", err, e.ErrInternal)
+	}
+
+	return nil
 }
 
 func NewCollectionRepo(db adb.Querier) CollectionRepo {

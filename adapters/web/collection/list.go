@@ -18,7 +18,14 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 )
 
-var listCollectionsFields = []string{"name", "description", "group", "created", "actions"}
+var listCollectionsFields = []string{
+	"name",
+	"description",
+	"group",
+	"profile",
+	"created",
+	"actions",
+}
 
 type MetaDeletePresenter struct {
 	writer http.ResponseWriter
@@ -50,7 +57,9 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	case b.ModeEdit.String():
 		p := NewEditPresenter(w, s.RowURL)
 		s.FindItr.Execute(r.Context(), name, &p)
+		s.ListProfileItr.Execute(r.Context(), &p)
 		s.ListGroupItr.Execute(r.Context(), &p)
+		p.Render()
 	case b.ModeConfirmDelete.String():
 		s.FindItr.Execute(r.Context(), name,
 			NewDeletePresenter(w, s.RowURL))

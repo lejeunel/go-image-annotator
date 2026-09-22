@@ -12,5 +12,5 @@ const (
 	deepFieldName              = "with_annotations"
 	resourceUrlFieldName       = "name"
 	publicGroupPlaceholderName = "( public )"
-	VoidProfilePlaceholderName = "( none )"
+	voidProfilePlaceholderName = "( none )"
 )
