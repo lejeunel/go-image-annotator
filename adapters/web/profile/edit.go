@@ -1,7 +1,9 @@
 package profile
 
 import (
+	"bytes"
 	"net/http"
+	"slices"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
@@ -36,14 +38,18 @@ func (p *EditProfilePresenter) SuccessFetchLabels(labels []string) {
 	p.availableLabels = labels
 }
 
-func (p EditProfilePresenter) SuccessFindProfile(l pr.Profile) {
+func (p EditProfilePresenter) SuccessFindProfile(profile pr.Profile) {
 	b := bf.NewHTMXInlineFormBuilder(len(listProfilesFields), p.Url)
-	labelPicker := se.NewMultiSelectCombobox(p.availableLabels,
-		LabelsFieldName)
-	b.AddRaw("Labels", labelPicker)
-
-	b.SetResourceName(l.Name)
-	b.AddTextField("description", "Description", bf.WithDefault(l.Description))
+	sb := se.NewMultiSelectBuilder(LabelsFieldName)
+	for _, l := range p.availableLabels {
+		sb.AddItem(l, slices.Contains(profile.Labels, l))
+	}
+	var buf bytes.Buffer
+	sb.Render(&buf)
+	b.AddRaw("Labels", buf.String())
+	b.SetResourceName(profile.Name)
+	b.AddTextField(NameFieldName, "Name", bf.WithDefault(profile.Name))
+	b.AddTextField(DescriptionFieldName, "Description", bf.WithDefault(profile.Description))
 	b.Render(p.writer)
 }
 
@@ -60,7 +66,9 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 	s.UpdateItr.Execute(r.Context(),
 		update.Request{
 			Name:           r.URL.Query().Get(resourceUrlFieldName),
+			NewName:        r.FormValue(NameFieldName),
 			NewDescription: r.FormValue(DescriptionFieldName),
+			NewLabels:      r.Form[LabelsFieldName],
 		},
 		NewEditProfilePresenter(w, s.RowURL))
 }

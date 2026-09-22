@@ -43,7 +43,7 @@ func (p CreateCollectionPresenter) Render() {
 	b.AddTextField(nameFieldName, "Name", bf.WithRequired())
 	b.AddTextField(descriptionFieldName, "Description")
 
-	profilePicker := se.NewSingleSelectCombobox(p.profiles,
+	profilePicker := se.NewSingleSelect(p.profiles,
 		profileFieldName)
 	b.AddRaw(profileFieldLabel, profilePicker)
 	b.Render(p.writer)

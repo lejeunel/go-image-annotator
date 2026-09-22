@@ -3,6 +3,7 @@ package selector
 import (
 	"bytes"
 	_ "embed"
+	"io"
 	"text/template"
 )
 
@@ -17,8 +18,13 @@ type SearchableData struct {
 	FieldName string
 }
 
-type MultiselectLabelData struct {
-	Labels    []string
+type Item struct {
+	Name     string
+	IsActive bool
+}
+
+type MultiSelectData struct {
+	Items     []Item
 	FieldName string
 }
 
@@ -29,7 +35,7 @@ const (
 	ImageLabelModal
 )
 
-func NewSingleSelectCombobox(items []string, fieldName string) string {
+func NewSingleSelect(items []string, fieldName string) string {
 	tModal := template.New("")
 	template.Must(tModal.Parse(SingleSearch))
 
@@ -45,18 +51,29 @@ func NewSingleSelectCombobox(items []string, fieldName string) string {
 	return buf.String()
 }
 
-func NewMultiSelectCombobox(labels []string, fieldName string) string {
+type MultiSelectBuilder struct {
+	fieldName string
+	items     []Item
+}
+
+func NewMultiSelectBuilder(fieldName string) MultiSelectBuilder {
+	return MultiSelectBuilder{fieldName: fieldName}
+}
+
+func (b *MultiSelectBuilder) AddItem(name string, isActive bool) *MultiSelectBuilder {
+	b.items = append(b.items, Item{Name: name, IsActive: isActive})
+	return b
+}
+
+func (b MultiSelectBuilder) Render(w io.Writer) {
 	tModal := template.New("")
 	template.Must(tModal.Parse(MultiSearch))
 
-	var buf bytes.Buffer
 	if err := tModal.ExecuteTemplate(
-		&buf,
+		w,
 		"multi_search",
-		MultiselectLabelData{Labels: labels, FieldName: fieldName},
+		MultiSelectData{Items: b.items, FieldName: b.fieldName},
 	); err != nil {
 		panic(err)
 	}
-
-	return buf.String()
 }

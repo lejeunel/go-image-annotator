@@ -2,8 +2,8 @@
 <div class="align-top py-2">
     <div x-data="{
             allOptions: [
-                    {{range .Labels}}
-                    {value: '{{.}}', label: '{{.}}'},
+                    {{range .Items}}
+                    {value: '{{.Name}}', label: '{{.Name}}', active: {{.IsActive}}},
                     {{end}}
             ],
             options: [],
@@ -37,7 +37,7 @@
             }"
             class="flex w-full flex-col gap-1"
             x-on:keydown="handleKeydownOnOptions($event)"
-            x-init="options = allOptions">
+            x-init="options = allOptions; selectedOptions = allOptions.filter(o => o.active)">
       <div
         x-on:keydown.window.slash.prevent="$refs.searchField.focus()"
         class="relative">

@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 
@@ -44,9 +45,14 @@ func (p *CreateProfilePresenter) Render() {
 	b.AddTitle("Create a new profile")
 	b.AddTextField(NameFieldName, "Name", bf.WithRequired())
 	b.AddTextField(DescriptionFieldName, "Description")
-	labelPicker := se.NewMultiSelectCombobox(p.availableLabels,
-		LabelsFieldName)
-	b.AddRaw("Labels", labelPicker)
+
+	sb := se.NewMultiSelectBuilder(LabelsFieldName)
+	for _, l := range p.availableLabels {
+		sb.AddItem(l, false)
+	}
+	var buf bytes.Buffer
+	sb.Render(&buf)
+	b.AddRaw("Labels", buf.String())
 	b.Render(p.writer)
 }
 
