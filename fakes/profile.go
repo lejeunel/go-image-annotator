@@ -108,6 +108,15 @@ func (r *ProfileRepo) List(req pa.PaginationParams) ([]pr.Profile, error) {
 	return result, nil
 }
 
+func (r *ProfileRepo) ListAll() ([]string, error) {
+	if r.ErrOnList != nil {
+		return nil, r.ErrOnList
+	}
+
+	result := []string{r.Return.Name}
+	return result, nil
+}
+
 func (r *ProfileRepo) GetGroup(name string) (*string, error) {
 	if r.ErrOnGetGroup != nil {
 		return nil, r.ErrOnGetGroup

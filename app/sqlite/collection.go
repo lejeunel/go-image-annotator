@@ -9,6 +9,7 @@ import (
 	cr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	gr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
 	ir "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
+	pr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/profile"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
@@ -29,6 +30,7 @@ func NewCollectionInteractors(
 	ir ir.ImageRepo,
 	ar ar.AnnotationRepo,
 	gr gr.GroupRepo,
+	pr pr.ProfileRepo,
 	ims ims.ImageStore,
 	el el.EventLogger,
 	logger slog.Logger,
@@ -36,12 +38,12 @@ func NewCollectionInteractors(
 ) clc.Interactors {
 	return clc.Interactors{
 		Find: find.New(cr),
-		Create: create.New(cr, gr, create.WithNameValidator(v.NewNameValidator()),
+		Create: create.New(cr, gr, pr, create.WithNameValidator(v.NewNameValidator()),
 			create.WithClock(clockwork.NewRealClock()), create.WithAuth(auth)),
 		Delete: delete.New(ims, ir, cr,
 			q.NewAsyncJobQueue(), el, logger, delete.WithAuth(auth)),
 		List:   list.New(cr),
-		Update: update.New(cr, gr, update.WithAuth(auth)),
+		Update: update.New(cr, gr, pr, update.WithAuth(auth)),
 		Clone: clone.New(
 			ims,
 			ir,

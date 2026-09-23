@@ -9,7 +9,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
-	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
+
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	e "github.com/lejeunel/go-image-annotator/adapters/web/error"
 	pg "github.com/lejeunel/go-image-annotator/adapters/web/pagination"
@@ -18,10 +18,14 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 )
 
-var listCollectionsFields = []string{"name", "description", "group", "created", "actions"}
-
-//go:embed preamble.md
-var preamble string
+var listCollectionsFields = []string{
+	"name",
+	"description",
+	"group",
+	"profile",
+	"created",
+	"actions",
+}
 
 type MetaDeletePresenter struct {
 	writer http.ResponseWriter
@@ -53,7 +57,9 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	case b.ModeEdit.String():
 		p := NewEditPresenter(w, s.RowURL)
 		s.FindItr.Execute(r.Context(), name, &p)
+		s.ListProfileItr.Execute(r.Context(), &p)
 		s.ListGroupItr.Execute(r.Context(), &p)
+		p.Render()
 	case b.ModeConfirmDelete.String():
 		s.FindItr.Execute(r.Context(), name,
 			NewDeletePresenter(w, s.RowURL))
@@ -64,14 +70,6 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 		s.FindItr.Execute(r.Context(), name,
 			NewViewPresenter(w, s.RowURL))
 	}
-}
-
-func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXCreateFormBuilder(CollectionUrl, createCollectionTargetDiv)
-	b.AddTitle("Create a new collection")
-	b.AddTextField(nameFieldName, "Name", bf.WithRequired())
-	b.AddTextField(descriptionFieldName, "Description")
-	b.Render(w)
 }
 
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {

@@ -2,7 +2,9 @@ package clone
 
 import (
 	"testing"
+	"time"
 
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	"github.com/lejeunel/go-image-annotator/entities/task"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
@@ -68,18 +70,23 @@ func TestErrorOnFindGroup(t *testing.T) {
 func TestClone(t *testing.T) {
 	itr := NewTestingCloner()
 	dst := "destination-collection"
-	src := "source-collection"
+	src := clc.NewCollection(clc.NewCollectionId(), "source-collection",
+		clc.WithCreatedAt(time.Now()), clc.WithGroup("a-group"), clc.WithProfile("a-profile"))
 	s := fk.ImageStore{}
 	itr.ImageStore = &s
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{src}}
+	collectionRepo := &fk.CollectionRepo{ExistingNames: []string{src.Name}, Return: src}
+	itr.CollectionRepo = collectionRepo
 	itr.ImageRepo = &fk.ImageRepo{
 		IterateBaseImages: []im.BaseImage{
-			{ImageId: im.NewImageId(), Collection: src},
-			{ImageId: im.NewImageId(), Collection: src},
+			{ImageId: im.NewImageId(), Collection: src.Name},
+			{ImageId: im.NewImageId(), Collection: src.Name},
 		},
 	}
 	p := &FakePresenter{}
 	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
-		Request{Source: src, Destination: dst}, p)
+		Request{Source: src.Name, Destination: dst}, p)
 	assert.Equal(t, dst, s.CopiedToCollection)
+	assert.Equal(t, *src.Group, *collectionRepo.Created.Group)
+	assert.Equal(t, *src.Profile, *collectionRepo.Created.Profile)
+	assert.NotEqual(t, src.Id, collectionRepo.Created.Id)
 }

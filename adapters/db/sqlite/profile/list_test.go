@@ -41,3 +41,13 @@ func TestListProfiles(t *testing.T) {
 	assert.Equal(t, 2, len(cs))
 	assert.False(t, cs[0].Name == cs[1].Name)
 }
+
+func TestListAllProfiles(t *testing.T) {
+	repo := NewProfileRepo(s.NewInMemory())
+	CreateProfile(repo, "a-profile", nil, nil)
+	CreateProfile(repo, "another-profile", nil, nil)
+	names, err := repo.ListAll()
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(names))
+	assert.False(t, names[0] == names[1])
+}

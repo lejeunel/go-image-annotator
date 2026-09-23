@@ -1,7 +1,6 @@
 package annotator
 
 import (
-	"embed"
 	"fmt"
 	"net/http"
 
@@ -14,9 +13,6 @@ import (
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
-
-//go:embed templates/*
-var templatesFiles embed.FS
 
 type AnnotationView struct {
 	QueryView
@@ -153,7 +149,7 @@ func (v *AnnotationView) render(w http.ResponseWriter) {
 	pb.AddScripts(AnnotoriousLib()...)
 	pb.AddScripts(*script)
 
-	labelModal := makeLabelModal(v.availableLabels)
+	labelModal := NewLabelModal(v.availableLabels)
 
 	pb.SetContent(
 		Group([]Node{

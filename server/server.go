@@ -87,7 +87,7 @@ func Make(port int) http.Handler {
 	collectionServer := clc.New(pageBuilder, cfg.DefaultPageSize,
 		app.Itrs.Collection.Create, app.Itrs.Collection.List, app.Itrs.Collection.Update,
 		app.Itrs.Collection.Delete, app.Itrs.Collection.Clone, app.Itrs.Collection.Find,
-		app.Itrs.Group.List)
+		app.Itrs.Group.List, app.Itrs.Profile.ListAll)
 	collectionServer.Route(router, webAuth)
 
 	imagesServer := im.New(
@@ -105,6 +105,7 @@ func Make(port int) http.Handler {
 		cfg.DefaultPageSize,
 		app.Itrs.Profile.Create,
 		app.Itrs.Profile.List,
+		app.Itrs.Annotation.PickLabel,
 		app.Itrs.Profile.Update,
 		app.Itrs.Profile.Delete,
 		app.Itrs.Profile.Find,

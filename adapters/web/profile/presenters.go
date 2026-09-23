@@ -4,11 +4,10 @@ import (
 	_ "embed"
 	"io"
 	"net/http"
+	"strings"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
-	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	tb "github.com/lejeunel/go-image-annotator/adapters/web/builders/table"
-
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	e "github.com/lejeunel/go-image-annotator/adapters/web/error"
 	pr "github.com/lejeunel/go-image-annotator/entities/profile"
@@ -17,7 +16,7 @@ import (
 	. "maragu.dev/gomponents"
 )
 
-var listProfilesFields = []string{"name", "description", "actions"}
+var listProfilesFields = []string{"name", "description", "labels", "actions"}
 
 type ListPresenter struct {
 	b.PaginatedListBuilder
@@ -62,17 +61,7 @@ type EditPresenter struct {
 	io.Writer
 	b.RowURL
 	e.ErrorPresenter
-}
-
-func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
-	return EditPresenter{w, u, e.NewErrorPresenter(w)}
-}
-
-func (p EditPresenter) SuccessFindProfile(l pr.Profile) {
-	b := bf.NewHTMXInlineFormBuilder(len(listProfilesFields), p.Url)
-	b.SetResourceName(l.Name)
-	b.AddTextField("description", "Description", bf.WithDefault(l.Description))
-	b.Render(p.Writer)
+	availableLabels []string
 }
 
 type DeletePresenter struct {
@@ -98,6 +87,8 @@ func MakeRow(u b.RowURL, l pr.Profile) tb.Row {
 	row := tb.NewRow()
 	row.AddCell(tb.NewCell(Text(l.Name)))
 	row.AddCell(tb.NewCell(Text(l.Description)))
+	row.AddCell(tb.NewCell(Text(strings.Join(l.Labels, " / "))))
 	row.AddCell(tb.NewCell(actions.Build()))
+
 	return row
 }

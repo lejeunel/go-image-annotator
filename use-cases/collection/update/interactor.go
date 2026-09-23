@@ -13,6 +13,7 @@ import (
 type Interactor struct {
 	CollectionRepo
 	GroupRepo
+	ProfileRepo
 	Auth
 }
 
@@ -24,8 +25,8 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(cr CollectionRepo, gr GroupRepo, opts ...Option) Interactor {
-	i := &Interactor{cr, gr, auth.NewVoidAuth()}
+func New(cr CollectionRepo, gr GroupRepo, pr ProfileRepo, opts ...Option) Interactor {
+	i := &Interactor{cr, gr, pr, auth.NewVoidAuth()}
 	for _, opt := range opts {
 		opt(i)
 	}
@@ -90,7 +91,57 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 			return
 		}
 	}
+
+	if r.NewGroup != nil {
+		groupExists, err := i.GroupRepo.Exists(*r.NewGroup)
+		if err != nil {
+			out.Error(fmt.Errorf("%v: checking existence of group: %w", errCtx, err))
+			return
+		}
+		if !*groupExists {
+			out.Error(
+				fmt.Errorf(
+					"%v: requested assignment to new group %v: %w",
+					errCtx,
+					*r.NewGroup,
+					err,
+				),
+			)
+			return
+		}
+		if err := i.Auth.UpdateCollection(ctx, r.NewGroup); err != nil {
+			out.Error(
+				fmt.Errorf(
+					"%v: authorizing assignment to new group %v: %w",
+					errCtx,
+					*r.NewGroup,
+					err,
+				),
+			)
+			return
+		}
+	}
 	updateModel.NewGroup = r.NewGroup
+
+	if r.NewProfile != nil {
+		profileExists, err := i.ProfileRepo.Exists(*r.NewProfile)
+		if err != nil {
+			out.Error(fmt.Errorf("%v: checking existence of profile: %w", errCtx, err))
+			return
+		}
+		if !*profileExists {
+			out.Error(
+				fmt.Errorf(
+					"%v: requested assignment to new profile %v: %w",
+					errCtx,
+					*r.NewGroup,
+					err,
+				),
+			)
+			return
+		}
+	}
+	updateModel.NewProfile = r.NewProfile
 
 	if err := i.CollectionRepo.Update(updateModel); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))

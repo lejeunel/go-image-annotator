@@ -11,6 +11,7 @@ import (
 
 func TestHandleAuthError(t *testing.T) {
 	itr := New(&fk.CollectionRepo{ReturnGroup: "a-group"}, &fk.GroupRepo{},
+		&fk.ProfileRepo{},
 		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
@@ -21,7 +22,7 @@ func TestHandleAuthError(t *testing.T) {
 func TestUpdateNonExistingCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	non_existing_name := "non-existing-name"
-	itr := New(&fk.CollectionRepo{}, &fk.GroupRepo{})
+	itr := New(&fk.CollectionRepo{}, &fk.GroupRepo{}, &fk.ProfileRepo{})
 	itr.Execute(t.Context(), Request{Name: non_existing_name, NewName: "new-name"}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
@@ -34,7 +35,7 @@ func TestUpdateCollection(t *testing.T) {
 		ExistingNames: []string{"name"},
 		Return:        clc.NewCollection(clc.NewCollectionId(), name),
 	}
-	itr := New(repo, &fk.GroupRepo{})
+	itr := New(repo, &fk.GroupRepo{}, &fk.ProfileRepo{})
 	req := Request{
 		Name:           name,
 		NewName:        "updated-name",
@@ -51,7 +52,7 @@ func TestUpdateCollectionWithNameAlreadyTakenShouldFail(t *testing.T) {
 	name := "name"
 	existing_name := "existing-name"
 	itr := New(&fk.CollectionRepo{ExistingNames: []string{name, existing_name}},
-		&fk.GroupRepo{})
+		&fk.GroupRepo{}, &fk.ProfileRepo{})
 	itr.Execute(t.Context(), Request{Name: name, NewName: existing_name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
@@ -61,7 +62,7 @@ func TestUpdateCollectionWithNoGroup(t *testing.T) {
 	p := &FakePresenter{}
 	name := "name"
 	itr := New(&fk.CollectionRepo{ExistingNames: []string{name}, ErrOnGetGroup: e.ErrNotFound},
-		&fk.GroupRepo{})
+		&fk.GroupRepo{}, &fk.ProfileRepo{})
 	itr.Execute(t.Context(), Request{Name: name, NewName: name}, p)
 	assert.True(t, p.GotSuccess)
 }
@@ -72,9 +73,22 @@ func TestUpdateCollectionGroup(t *testing.T) {
 	currentGroup := "current-group"
 	newGroup := "my-group"
 	clcRepo := &fk.CollectionRepo{ExistingNames: []string{name}, ReturnGroup: currentGroup}
-	itr := New(clcRepo, &fk.GroupRepo{ExistingNames: []string{newGroup}})
+	itr := New(clcRepo, &fk.GroupRepo{ExistingNames: []string{newGroup}}, &fk.ProfileRepo{})
 	itr.Execute(t.Context(), Request{Name: name, NewName: name, NewGroup: &newGroup}, p)
 	assert.NotNil(t, clcRepo.GotUpdateModel.NewGroup)
 	assert.Equal(t, newGroup, *clcRepo.GotUpdateModel.NewGroup)
+	assert.True(t, p.GotSuccess)
+}
+
+func TestUpdateCollectionProfile(t *testing.T) {
+	p := &FakePresenter{}
+	name := "name"
+	currentProfile := "current-profile"
+	newProfile := "new-profile"
+	clcRepo := &fk.CollectionRepo{ExistingNames: []string{name}, ReturnProfile: currentProfile}
+	itr := New(clcRepo, &fk.GroupRepo{}, &fk.ProfileRepo{ExistingNames: []string{newProfile}})
+	itr.Execute(t.Context(), Request{Name: name, NewName: name, NewProfile: &newProfile}, p)
+	assert.NotNil(t, clcRepo.GotUpdateModel.NewProfile)
+	assert.Equal(t, newProfile, *clcRepo.GotUpdateModel.NewProfile)
 	assert.True(t, p.GotSuccess)
 }

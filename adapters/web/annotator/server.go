@@ -40,10 +40,27 @@ func (s *Server) AnnotateImage(w http.ResponseWriter, r *http.Request) {
 	view := NewAnnotationView(s.PageBuilder)
 	p := ap.NewAnnotationPagePresenter(ap.NewCyclicColorizer(ap.Palette))
 	p.SetView(view)
-	collection := r.URL.Query().Get("collection")
+	collection := r.URL.Query().Get(rt.CollectionArgName)
 	filters := r.URL.Query().Get(rt.FilterQueryArgName)
 	ordering := r.URL.Query().Get(rt.OrderingQueryArgName)
-	s.Annotator.Init(r.Context(), r.URL.Query().Get("id"), collection, filters, ordering, p, p, p)
+
+	var profilePtr *string
+	profile := r.URL.Query().Get(rt.ProfileArgName)
+	if profile != "" {
+		profilePtr = &profile
+	}
+
+	s.Annotator.Init(
+		r.Context(),
+		r.URL.Query().Get(rt.ImageIdArgName),
+		collection,
+		profilePtr,
+		filters,
+		ordering,
+		p,
+		p,
+		p,
+	)
 	view.Render(w)
 }
 
@@ -51,12 +68,19 @@ func (s *Server) MakeAnnotationPanel(w http.ResponseWriter, r *http.Request) {
 	view := NewAnnotationView(s.PageBuilder)
 	p := ap.NewAnnotationPagePresenter(ap.NewCyclicColorizer(ap.Palette))
 	p.SetView(view)
-	collection := r.URL.Query().Get("collection")
+	collection := r.URL.Query().Get(rt.CollectionArgName)
 	filter := fmt.Sprintf("collection:\"%v\"", collection)
+
+	var profilePtr *string
+	profile := r.URL.Query().Get(rt.ProfileArgName)
+	if profile != "" {
+		profilePtr = &profile
+	}
 	s.Annotator.Init(
 		r.Context(),
-		r.URL.Query().Get("id"),
+		r.URL.Query().Get(rt.ImageIdArgName),
 		collection,
+		profilePtr,
 		filter,
 		"ingested_at",
 		p,
@@ -68,8 +92,8 @@ func (s *Server) MakeAnnotationPanel(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) SubmitLabel(w http.ResponseWriter, r *http.Request) {
 	req := assign_label.Request{
-		ImageId:    r.URL.Query().Get("image_id"),
-		Collection: r.URL.Query().Get("collection"), Label: r.URL.Query().Get("label"),
+		ImageId:    r.URL.Query().Get(rt.ImageIdArgName),
+		Collection: r.URL.Query().Get(rt.CollectionArgName), Label: r.URL.Query().Get("label"),
 	}
 
 	p := ap.NewAnnotoriousPresenter(w)
@@ -179,6 +203,6 @@ func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) GetRegionsAsJSON(w http.ResponseWriter, r *http.Request) {
 	p := ap.NewAnnotoriousPresenter(w)
-	s.Annotator.ReadImage(r.URL.Query().Get("id"), r.URL.Query().Get("collection"), &p)
+	s.Annotator.ReadImage(r.URL.Query().Get("id"), r.URL.Query().Get(rt.CollectionArgName), &p)
 	p.RenderRegionAnnotationsAsJSON(w)
 }

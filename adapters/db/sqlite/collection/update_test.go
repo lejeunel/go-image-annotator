@@ -5,9 +5,11 @@ import (
 	"time"
 
 	gr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/group"
+	pr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/profile"
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	g "github.com/lejeunel/go-image-annotator/entities/group"
+	p "github.com/lejeunel/go-image-annotator/entities/profile"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/stretchr/testify/assert"
@@ -21,21 +23,22 @@ func TestInternalErrOnCollectionUpdateShouldFail(t *testing.T) {
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
-func Setup() (CollectionRepo, clc.Collection, gr.GroupRepo, g.Group) {
+func Setup() (CollectionRepo, clc.Collection, gr.GroupRepo, pr.ProfileRepo, g.Group) {
 	db := s.NewInMemory()
 	clcRepo := NewCollectionRepo(db)
 	grpRepo := gr.NewGroupRepo(db)
+	prfRepo := pr.NewProfileRepo(db)
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection",
 		clc.WithDescription("a-description"), clc.WithCreatedAt(time.Now()))
 	clcRepo.Create(collection)
 
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	grpRepo.Create(group)
-	return clcRepo, collection, grpRepo, group
+	return clcRepo, collection, grpRepo, prfRepo, group
 }
 
 func TestUpdateNameAndDescription(t *testing.T) {
-	clcRepo, collection, _, _ := Setup()
+	clcRepo, collection, _, _, _ := Setup()
 	req := clc.UpdateModel{
 		Name: collection.Name, NewName: "new-collection-name",
 		NewDescription: "new-description",
@@ -49,7 +52,7 @@ func TestUpdateNameAndDescription(t *testing.T) {
 }
 
 func TestUpdateGroupFromPublic(t *testing.T) {
-	clcRepo, collection, _, group := Setup()
+	clcRepo, collection, _, _, group := Setup()
 	req := clc.UpdateModel{
 		Name: collection.Name, NewName: collection.Name,
 		NewDescription: collection.Description,
@@ -63,7 +66,7 @@ func TestUpdateGroupFromPublic(t *testing.T) {
 }
 
 func TestUpdateGroupToPublic(t *testing.T) {
-	clcRepo, collection, _, group := Setup()
+	clcRepo, collection, _, _, group := Setup()
 	req := clc.UpdateModel{
 		Name: collection.Name, NewName: collection.Name,
 		NewDescription: collection.Description,
@@ -77,8 +80,25 @@ func TestUpdateGroupToPublic(t *testing.T) {
 	assert.Nil(t, r.Group)
 }
 
+func TestUpdateProfile(t *testing.T) {
+	clcRepo, collection, _, profileRepo, _ := Setup()
+
+	profile := p.NewProfile(p.NewProfileId(), "my-profile")
+	profileRepo.Create(profile)
+	req := clc.UpdateModel{
+		Name: collection.Name, NewName: collection.Name,
+		NewDescription: collection.Description,
+		NewProfile:     &profile.Name,
+	}
+	err := clcRepo.Update(req)
+	assert.NoError(t, err)
+	r, err := clcRepo.Find(req.NewName)
+	assert.NoError(t, err)
+	assert.NotNil(t, r.Profile)
+}
+
 func TestUpdateAndListCollections(t *testing.T) {
-	clcRepo, collection, _, group := Setup()
+	clcRepo, collection, _, _, group := Setup()
 	req := clc.UpdateModel{
 		Name: collection.Name, NewName: "new-collection-name",
 		NewDescription: "new-description",

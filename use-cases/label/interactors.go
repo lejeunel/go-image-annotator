@@ -4,7 +4,6 @@ import (
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/delete"
-	fetchall "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/update"
@@ -16,7 +15,6 @@ type Interactors struct {
 	Delete          delete.Interactor
 	List            list.Interactor
 	Update          update.Interactor
-	FetchAll        fetchall.Interactor
 	DefaultPageSize int
 	Authorizer      auth.Authorizer
 }

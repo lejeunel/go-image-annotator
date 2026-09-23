@@ -2,32 +2,25 @@ package annotator
 
 import (
 	"bytes"
+	_ "embed"
 	"text/template"
+
+	s "github.com/lejeunel/go-image-annotator/adapters/web/components/select"
 )
 
-type NewLabelModal struct {
-	Labels         []string
-	SelectorIsOpen bool
-	Selected       *string
-}
+//go:embed templates/label_modal.html
+var LabelModal string
 
-type LabelModalKind int
-
-const (
-	RegionLabelModal LabelModalKind = iota
-	ImageLabelModal
-)
-
-func makeLabelModal(labels []string) string {
+func NewLabelModal(labels []string) string {
 	tModal := template.New("")
-	template.Must(tModal.ParseFS(templatesFiles, "templates/label_modal_search_combobox.html"))
-	template.Must(tModal.ParseFS(templatesFiles, "templates/label_modal.html"))
+	template.Must(tModal.Parse(LabelModal))
+	template.Must(tModal.Parse(s.SingleSearch))
 
 	var buf bytes.Buffer
 	if err := tModal.ExecuteTemplate(
 		&buf,
 		"label_modal",
-		NewLabelModal{Labels: labels},
+		s.SearchableData{Items: labels, FieldName: "label"},
 	); err != nil {
 		panic(err)
 	}

@@ -26,7 +26,7 @@ func NewApp(cfg config.Config, auth auth.Interface, logger slog.Logger) app.App 
 		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox,
 		itrs.Annotation.AddPolygon, itrs.Annotation.UpdatePolygon,
 		itrs.Annotation.Delete,
-		itrs.Label.FetchAll, itrs.Annotation.UpdateLabel,
+		itrs.Annotation.PickLabel, itrs.Annotation.UpdateLabel,
 		itrs.Annotation.AddImageLabel, itrs.Metadata.Add, itrs.Metadata.List,
 		itrs.Metadata.Read, itrs.Metadata.Delete,
 	)

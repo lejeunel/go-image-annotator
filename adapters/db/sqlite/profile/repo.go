@@ -149,6 +149,21 @@ func (r ProfileRepo) List(m pa.PaginationParams) ([]pr.Profile, error) {
 	return objects, nil
 }
 
+func (r ProfileRepo) ListAll() ([]string, error) {
+	q := sq.StatementBuilder.Select(`name`).
+		From("profiles")
+	sql, args, err := q.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
+	}
+	names := []string{}
+	if err := r.Db.Select(&names, sql, args...); err != nil {
+		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
+	}
+
+	return names, nil
+}
+
 func (r ProfileRepo) GetGroup(name string) (*string, error) {
 	var group string
 	errCtx := fmt.Errorf("retrieving group of profile with name %v", name)

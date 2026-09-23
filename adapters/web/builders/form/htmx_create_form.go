@@ -44,6 +44,7 @@ func (b *HTMXCreateFormBuilder) AddButtonAttr(attr string) *HTMXCreateFormBuilde
 
 func (b HTMXCreateFormBuilder) Build() Node {
 	var title Node
+
 	if b.title != nil {
 		title = Div(Class("ml-auto flex gap-2 font-bold"),
 			Text(*b.title))
@@ -60,7 +61,7 @@ func (b HTMXCreateFormBuilder) Build() Node {
 				"bg-surface-alt/50 dark:bg-surface-dark-alt/50 p-4 rounded-lg shadow-md w-80 mb-4",
 			),
 			title,
-			Map(b.fields, func(f Renderer) Node {
+			Map(b.FormBuilder.fields, func(f Renderer) Node {
 				var buf bytes.Buffer
 				f.Render(&buf)
 				return Group([]Node{Div(Class("mb-3"), Raw(buf.String()))})

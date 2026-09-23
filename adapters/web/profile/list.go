@@ -17,7 +17,10 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	s.RowURL.SetId(name)
 	switch r.URL.Query().Get("mode") {
 	case b.ModeEdit.String():
-		s.FindItr.Execute(r.Context(), name, NewEditPresenter(w, s.RowURL))
+		p := NewEditProfilePresenter(w, s.RowURL)
+		s.ListAllLabelsItr.Execute(r.Context(), nil, &p)
+		s.FindItr.Execute(r.Context(), name, &p)
+
 	case b.ModeConfirmDelete.String():
 		s.FindItr.Execute(r.Context(), name, NewDeletePresenter(w, s.RowURL))
 	default:

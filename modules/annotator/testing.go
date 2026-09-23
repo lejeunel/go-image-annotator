@@ -10,11 +10,11 @@ import (
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
 	updpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-polygon"
+	pick "github.com/lejeunel/go-image-annotator/use-cases/annotate/pick-label"
 	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	imread "github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/scroll"
-	fetchlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
 	addmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/add"
 	delmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/delete"
 	listmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/list"
@@ -29,8 +29,8 @@ func (s *FakeScroller) Execute(ctx context.Context, r scroll.Request, o scroll.O
 
 type FakeLabelFetcher struct{}
 
-func (f *FakeLabelFetcher) Execute(ctx context.Context, o fetchlbl.OutputPort) {
-	o.SuccessFetchLabels(fetchlbl.Response{Labels: []string{"a-label"}})
+func (f *FakeLabelFetcher) Execute(ctx context.Context, o pick.OutputPort) {
+	o.SuccessFetchLabels([]string{"a-label"})
 }
 
 type FakeImageReader struct{}

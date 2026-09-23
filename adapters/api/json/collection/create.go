@@ -14,7 +14,7 @@ type Create struct {
 	json.ErrorPresenter
 }
 
-func (p Create) Success(r create.Response) {
+func (p Create) SuccessCreateCollection(r create.Response) {
 	response := models.Collection{
 		Name:        r.Name,
 		Description: &r.Description,
