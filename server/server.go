@@ -74,7 +74,8 @@ func Make(port int) http.Handler {
 	RouteWebPages(router, home.HandlerFunc(pageBuilder), webAuth)
 
 	udb := userDashboard.New(pageBuilder, cfg.DefaultPageSize, app.Itrs.User.RenewToken,
-		app.Itrs.User.ChangePassword, app.Itrs.Log.ListTasks, app.Itrs.Log.FindTask)
+		app.Itrs.User.ChangePassword, app.Itrs.Log.ListTasks, app.Itrs.Log.FindTask,
+		defaultAuth.Rules)
 	udb.Route(router, webAuth)
 
 	RouteAPI(router, *api.NewServer(&app.Itrs, *logger), apiAuth)
