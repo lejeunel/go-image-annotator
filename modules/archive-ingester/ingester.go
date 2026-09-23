@@ -7,7 +7,6 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	ii "github.com/lejeunel/go-image-annotator/modules/image-ingester"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type ImageIngester interface {
@@ -40,13 +39,10 @@ func (i ArchiveIngester) IngestArchive(r Request) (Response, error) {
 	var lastErr error
 	for _, file := range zr.File {
 		if file.FileInfo().IsDir() {
-			lastErr = fmt.Errorf(
-				"%w: found directory %v: %w",
-				errCtx,
-				file.FileHeader.Name,
-				e.ErrValidation,
-			)
-			break
+			// Directory entries carry no content of their own; the files
+			// they contain appear elsewhere in zr.File with their full
+			// path already in file.Name. Nothing to ingest here.
+			continue
 		}
 
 		reader, err := file.Open()

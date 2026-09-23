@@ -3,6 +3,5 @@
 * DONE Create collection with profile
 * DONE Update profile of collection
 * DONE Clone collection must transfer description, profile and group
-
   
   
