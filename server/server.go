@@ -20,6 +20,7 @@ import (
 	wauth "github.com/lejeunel/go-image-annotator/adapters/web/auth"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	clc "github.com/lejeunel/go-image-annotator/adapters/web/collection"
+	home "github.com/lejeunel/go-image-annotator/adapters/web/home"
 	im "github.com/lejeunel/go-image-annotator/adapters/web/image"
 	lbl "github.com/lejeunel/go-image-annotator/adapters/web/label"
 	pr "github.com/lejeunel/go-image-annotator/adapters/web/profile"
@@ -70,7 +71,7 @@ func Make(port int) http.Handler {
 		ApiRequireLogin,
 	)
 
-	RouteWebPages(router, HomePageHandlerFunc(pageBuilder), webAuth)
+	RouteWebPages(router, home.HandlerFunc(pageBuilder), webAuth)
 
 	udb := userDashboard.New(pageBuilder, cfg.DefaultPageSize, app.Itrs.User.RenewToken,
 		app.Itrs.User.ChangePassword, app.Itrs.Log.ListTasks, app.Itrs.Log.FindTask)
