@@ -18,6 +18,9 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/list"
 )
 
+//go:embed preamble.md
+var preamble string
+
 var listCollectionsFields = []string{
 	"name",
 	"description",
@@ -92,6 +95,7 @@ func NewListPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ListPr
 	p.SetTitle("Collections").
 		SetHTMLTitle("Collections").
 		SetActiveSection(cmp.CollectionsPageActive)
+	p.AddMarkdownPreamble(preamble)
 	b := b.NewPaginatedListBuilder(p, listCollectionsFields)
 	return ListPresenter{b, u, w, e.NewErrorPresenter(w)}
 }

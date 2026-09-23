@@ -1,1 +1,1 @@
-*Review the access privileges of current account and manage credentials*
+*Change or generate authentication credentials to connect to this application.*

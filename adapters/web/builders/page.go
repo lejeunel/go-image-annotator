@@ -34,7 +34,7 @@ func (m PageColumnMode) Class() Node {
 	case PageColumnExpandMode:
 		return Class("flex flex-col w-full")
 	case PageColumnSidebarMode:
-		return Class("flex flex-col pt-10 pl-30 w-230")
+		return Class("flex flex-col pt-10 pb-7 pl-30 w-230")
 	default:
 		return Class("flex flex-col w-250")
 	}
