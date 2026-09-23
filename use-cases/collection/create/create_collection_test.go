@@ -87,10 +87,10 @@ func TestCreateCollection(t *testing.T) {
 		Profile:     &profile.Name,
 	}
 	itr.Execute(t.Context(), req, p)
-	assert.Equal(t, req.Name, repo.Got.Name)
-	assert.Equal(t, *req.Group, *repo.Got.Group)
-	assert.Equal(t, *req.Profile, *repo.Got.Profile)
-	assert.Equal(t, req.Description, repo.Got.Description)
-	assert.Equal(t, now, repo.Got.CreatedAt)
-	assert.False(t, repo.Got.Id.IsNil())
+	assert.Equal(t, req.Name, repo.Created.Name)
+	assert.Equal(t, *req.Group, *repo.Created.Group)
+	assert.Equal(t, *req.Profile, *repo.Created.Profile)
+	assert.Equal(t, req.Description, repo.Created.Description)
+	assert.Equal(t, now, repo.Created.CreatedAt)
+	assert.False(t, repo.Created.Id.IsNil())
 }

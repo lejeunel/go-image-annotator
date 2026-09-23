@@ -105,7 +105,7 @@ func Make(port int) http.Handler {
 		cfg.DefaultPageSize,
 		app.Itrs.Profile.Create,
 		app.Itrs.Profile.List,
-		app.Itrs.Label.FetchAll,
+		app.Itrs.Annotation.PickLabel,
 		app.Itrs.Profile.Update,
 		app.Itrs.Profile.Delete,
 		app.Itrs.Profile.Find,

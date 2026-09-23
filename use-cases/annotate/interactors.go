@@ -7,6 +7,7 @@ import (
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
 	updpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-polygon"
+	pick "github.com/lejeunel/go-image-annotator/use-cases/annotate/pick-label"
 	"github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
@@ -19,5 +20,6 @@ type Interactors struct {
 	Delete        remove.Interactor
 	UpdateLabel   updlbl.Interactor
 	AddImageLabel addlbl.Interactor
+	PickLabel     pick.Interactor
 	Authorizer    auth.Authorizer
 }

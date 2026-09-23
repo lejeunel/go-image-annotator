@@ -15,6 +15,7 @@ type ImageRepo interface {
 type CollectionRepo interface {
 	Create(clc.Collection) error
 	Exists(string) (bool, error)
+	Find(string) (*clc.Collection, error)
 }
 
 type GroupRepo interface {

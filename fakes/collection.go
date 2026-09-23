@@ -21,7 +21,7 @@ type CollectionRepo struct {
 	IsPopulated_    bool
 	Return          clc.Collection
 	Count_          int
-	Got             clc.Collection
+	Created         clc.Collection
 	GotUpdateModel  clc.UpdateModel
 	ReturnGroup     string
 	ReturnProfile   string
@@ -32,7 +32,7 @@ func (r *CollectionRepo) Create(c clc.Collection) error {
 		return r.ErrOnCreate
 	}
 
-	r.Got = c
+	r.Created = c
 	return nil
 }
 

@@ -43,6 +43,7 @@ const (
 	OrderingQueryArgName = "ordering"
 	CollectionArgName    = "collection"
 	ImageIdArgName       = "id"
+	ProfileArgName       = "profile"
 )
 
 func MakeOAuthCallbackURL(baseURL string, provider string) string {

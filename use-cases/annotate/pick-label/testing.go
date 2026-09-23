@@ -1,4 +1,4 @@
-package fetchall
+package pick
 
 import (
 	t "github.com/lejeunel/go-image-annotator/shared/testing"

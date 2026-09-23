@@ -4,6 +4,7 @@ import (
 	anr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/annotation"
 	imr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	lbr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
+	prr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/profile"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
 	an "github.com/lejeunel/go-image-annotator/use-cases/annotate"
@@ -12,6 +13,7 @@ import (
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
 	updpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-polygon"
+	pick "github.com/lejeunel/go-image-annotator/use-cases/annotate/pick-label"
 	remano "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
@@ -19,6 +21,7 @@ import (
 func NewAnnotationInteractors(ims ims.ImageStore,
 	imr imr.ImageRepo,
 	lbr lbr.LabelRepo,
+	prr prr.ProfileRepo,
 	anr anr.AnnotationRepo,
 	auth auth.Interface,
 ) an.Interactors {
@@ -30,5 +33,6 @@ func NewAnnotationInteractors(ims ims.ImageStore,
 		Delete:        remano.New(anr, remano.WithAuth(auth)),
 		UpdateLabel:   updlbl.New(anr, lbr, updlbl.WithAuth(auth)),
 		AddImageLabel: addlbl.New(anr, lbr, ims, addlbl.WithAuth(auth)),
+		PickLabel:     pick.New(lbr, prr),
 	}
 }

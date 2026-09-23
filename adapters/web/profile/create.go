@@ -71,6 +71,6 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
 	p := NewCreateProfilePresenter(w)
-	s.ListAllLabelsItr.Execute(r.Context(), &p)
+	s.ListAllLabelsItr.Execute(r.Context(), nil, &p)
 	p.Render()
 }

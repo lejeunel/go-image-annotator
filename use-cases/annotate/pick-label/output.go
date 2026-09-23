@@ -1,4 +1,4 @@
-package fetchall
+package pick
 
 type OutputPort interface {
 	SuccessFetchLabels([]string)

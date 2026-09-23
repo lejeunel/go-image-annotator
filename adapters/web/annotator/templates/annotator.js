@@ -74,7 +74,7 @@ const Annotator = (() => {
         async addImageLabel(label) {
             const url = newURLFromString(endpoints.submitImageLabel);
             url.searchParams.set("label", label);
-            url.searchParams.set("image_id", "{{.ImageId}}");
+            url.searchParams.set("id", "{{.ImageId}}");
             url.searchParams.set("collection", "{{.Collection}}");
             await apiFetch(url.toString(), {method: "POST"}, "Could not submit image label");
         },
@@ -82,14 +82,14 @@ const Annotator = (() => {
             await apiFetch(endpoints.submitBox, {
                 method: "POST",
                 headers: { "Content-type": "application/json; charset=UTF-8" },
-                body: JSON.stringify({ image_id: "{{.ImageId}}", collection: "{{.Collection}}", label, annotation })
+                body: JSON.stringify({ id: "{{.ImageId}}", collection: "{{.Collection}}", label, annotation })
             }, "Could not submit bounding-box");
         },
         async submitPolygon(label, annotation) {
             await apiFetch(endpoints.submitPolygon, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ image_id: "{{.ImageId}}", collection: "{{.Collection}}", label, annotation })
+                body: JSON.stringify({ id: "{{.ImageId}}", collection: "{{.Collection}}", label, annotation })
             }, "Could not submit polygon");
         },
         async remove(id) {

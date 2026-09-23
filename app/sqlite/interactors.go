@@ -97,6 +97,7 @@ func BuildInteractors(
 			imstore,
 			infra.ImageRepo,
 			infra.LabelRepo,
+			infra.ProfileRepo,
 			infra.AnnotationRepo,
 			auth,
 		),

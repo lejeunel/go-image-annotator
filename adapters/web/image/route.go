@@ -34,6 +34,15 @@ func BaseAnnotateImageURLFunc(image im.Image) string {
 	withQuery := rt.AddQueryParams(base,
 		rt.FilterQueryArgName, fmt.Sprintf("collection:\"%v\"", image.Collection.Name),
 		rt.OrderingQueryArgName, "ingested_at")
+
+	if image.Collection.Profile != nil {
+		withQuery = rt.AddQueryParams(
+			withQuery.String(),
+			rt.ProfileArgName,
+			*image.Collection.Profile,
+		)
+	}
+
 	return withQuery.String()
 }
 

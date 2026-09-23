@@ -1,7 +1,8 @@
 #+title: Tasks
 
-* TODO Create collection with profile
-* TODO Update profile of collection
+* DONE Create collection with profile
+* DONE Update profile of collection
+* DONE Clone collection must transfer description, profile and group
 
   
   

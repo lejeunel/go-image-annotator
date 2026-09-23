@@ -134,21 +134,21 @@ func (i *Interactor) LogError(id t.TaskId, err error) {
 
 func (i *Interactor) runTask(
 	task t.Task,
-	source string,
-	destination string,
+	sourceName string,
+	destinationName string,
 	group *grp.Group,
 	deep bool,
 ) {
 	errCtx := fmt.Errorf("running collection cloning task")
 	i.Logger.Info(fmt.Sprintf("started clone task %v", task.Id))
 
-	if err := i.checkCollections(source, destination); err != nil {
+	if err := i.checkCollections(sourceName, destinationName); err != nil {
 		i.LogError(task.Id, fmt.Errorf("%w: %w", errCtx, err))
 		return
 	}
 	extra := map[string]string{
-		"source-collection":      source,
-		"destination-collection": destination,
+		"source-collection":      sourceName,
+		"destination-collection": destinationName,
 		"deep-copy":              strconv.FormatBool(deep),
 	}
 	if err := i.IEventLogger.AddEvent(
@@ -161,7 +161,19 @@ func (i *Interactor) runTask(
 		return
 	}
 
-	dst := clc.NewCollection(clc.NewCollectionId(), destination, clc.WithCreatedAt(i.Clock.Now()))
+	src, err := i.CollectionRepo.Find(sourceName)
+	if err != nil {
+		i.Logger.Error(
+			fmt.Errorf("%w: fetching source collection with name %v: %w", errCtx, sourceName, err).
+				Error(),
+		)
+		return
+	}
+	dst := *src
+	dst.Id = clc.NewCollectionId()
+	dst.Name = destinationName
+	dst.CreatedAt = i.Clock.Now()
+
 	if group != nil {
 		dst.Group = &group.Name
 	}
@@ -175,12 +187,12 @@ func (i *Interactor) runTask(
 		return
 	}
 
-	for baseImage, err := range i.ImageRepo.Iterate("collection="+source, 1) {
+	for baseImage, err := range i.ImageRepo.Iterate("collection="+sourceName, 1) {
 		if err != nil {
 			i.LogError(task.Id, err)
 			return
 		}
-		if err := i.ImageStore.Copy(source, baseImage.ImageId, dst.Name, deep); err != nil {
+		if err := i.ImageStore.Copy(sourceName, baseImage.ImageId, dst.Name, deep); err != nil {
 			i.LogError(task.Id, err)
 			return
 

@@ -2,7 +2,8 @@ package profile
 
 import (
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
-	listlbl "github.com/lejeunel/go-image-annotator/use-cases/label/fetch-all"
+
+	pick "github.com/lejeunel/go-image-annotator/use-cases/annotate/pick-label"
 	"github.com/lejeunel/go-image-annotator/use-cases/profile/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/profile/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/profile/find"
@@ -15,7 +16,7 @@ type Server struct {
 	b.RowURL
 	DefaultPageSize  int
 	ListItr          list.Interactor
-	ListAllLabelsItr listlbl.Interactor
+	ListAllLabelsItr pick.Interactor
 	CreateItr        create.Interactor
 	UpdateItr        update.Interactor
 	DeleteItr        delete.Interactor
@@ -27,7 +28,7 @@ func New(
 	defaultPageSize int,
 	c create.Interactor,
 	l list.Interactor,
-	llbl listlbl.Interactor,
+	llbl pick.Interactor,
 	u update.Interactor,
 	d delete.Interactor,
 	f find.Interactor,
