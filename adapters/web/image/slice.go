@@ -9,7 +9,7 @@ import (
 	htmx "github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	rt "github.com/lejeunel/go-image-annotator/routes"
-	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
 )
 
 type SlicePresenter struct {
@@ -36,7 +36,7 @@ func NewSlicePresenter(
 	return SlicePresenter{b, w, htmx.NewErrorPresenter("querying", w), filters, ordering}
 }
 
-func (p SlicePresenter) SuccessListImages(r list.Response) {
+func (p SlicePresenter) SuccessSliceImages(r slice.Response) {
 	baseURL := rt.AddQueryParams(rt.SliceUrl,
 		rt.FilterQueryArgName, r.FilterStr,
 		rt.OrderingQueryArgName, r.OrderStr)
@@ -57,7 +57,7 @@ func (s *Server) Slice(w http.ResponseWriter, r *http.Request) {
 	}
 	filters := r.FormValue(rt.FilterQueryArgName)
 	ordering := r.FormValue(rt.OrderingQueryArgName)
-	s.ListItr.Execute(list.Request{
+	s.ListItr.Execute(slice.Request{
 		FilterStr: filters,
 		OrderStr:  ordering,
 	}, NewSlicePresenter(w, s.PageBuilder, filters, ordering))

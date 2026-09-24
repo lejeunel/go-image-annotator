@@ -12,7 +12,7 @@ import (
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
-	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
 )
 
 func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +69,7 @@ func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionNam
 }
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams) {
-	req := list.Request{
+	req := slice.Request{
 		PaginationParams: pa.PaginationParams{
 			PageSize: *params.PageSize,
 			Page:     *params.Page,
@@ -81,7 +81,7 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 	if params.Order != nil {
 		req.OrderStr = *params.Order
 	}
-	s.Image.List.Execute(req, presenter.NewListPresenter(w, s.Logger))
+	s.Image.Slice.Execute(req, presenter.NewListPresenter(w, s.Logger))
 }
 
 func NewIngestImageRequest(meta models.NewImage, reader io.Reader) ig.Request {

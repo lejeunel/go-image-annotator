@@ -11,8 +11,11 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
+	q "github.com/lejeunel/go-image-annotator/modules/query"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/stretchr/testify/assert"
+	"go.tomakado.io/dumbql/schema"
 )
 
 type TestingTransactor struct {
@@ -25,6 +28,21 @@ func (m *TestingTransactor) RunInTx(
 	return fn(m.Repos)
 }
 
+func SetupRepos(image im.Image) Repos {
+	return Repos{
+		&fk.ImageRepo{
+			ImageIsInCollection: true,
+			ReturnSpecs:         &image.Specs,
+			IterateBaseImages: []im.BaseImage{
+				{ImageId: image.Id, Collection: image.Collection.Name},
+			},
+		},
+		&fk.CollectionRepo{Return: image.Collection},
+		&fk.AnnotationRepo{},
+		&fk.MetaDataRepo{ReturnList: image.Meta},
+	}
+}
+
 func Setup() (ImageStore, clc.Collection, im.Image, []byte) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "the-collection")
 	image := im.NewImage(im.NewImageId(), collection)
@@ -33,18 +51,38 @@ func Setup() (ImageStore, clc.Collection, im.Image, []byte) {
 	image.Specs = specs
 	image.Meta = meta
 	data := []byte("test-data")
-	repos := Repos{
-		&fk.ImageRepo{
-			ImageIsInCollection: true,
-			ReturnSpecs:         &specs,
-		},
-		&fk.CollectionRepo{Return: collection},
-		&fk.AnnotationRepo{},
-		&fk.MetaDataRepo{ReturnList: meta},
+	b := q.NewFilterParserBuilder()
+	b.AddField("collection", schema.Is[string]())
+	fv := b.Build()
+	ov := q.NewOrderParserBuilder().AddField("ingested_at").Build()
+	repos := SetupRepos(image)
+	store := New(repos, &TestingTransactor{repos},
+		&fk.FileStore{Data: data}, &fv, &ov)
+	return store, collection, image, data
+}
+
+func SetupCopy() (ImageStore, clc.Collection, im.Image, clc.Collection, *fk.ImageRepo, *fk.AnnotationRepo) {
+	store, _, _, _ := Setup()
+	srcCollection := clc.NewCollection(clc.NewCollectionId(), "src")
+	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst")
+	image := im.NewImage(im.NewImageId(), srcCollection)
+	image.AddLabel(lbl.NewLabel(lbl.NewLabelId(), "a-label"))
+	imrepo := fk.ImageRepo{
+		IterateBaseImages:   []im.BaseImage{{ImageId: image.Id, Collection: srcCollection.Name}},
+		ImageIsInCollection: true,
+		ReturnSpecs:         &im.Specs{MIMEType: "image/jpeg"},
 	}
-	itr := New(repos, &TestingTransactor{repos},
-		&fk.FileStore{Data: data})
-	return itr, collection, image, data
+	anrepo := fk.AnnotationRepo{Labels: image.Labels}
+	repos := Repos{
+		ImageRepo:      &imrepo,
+		CollectionRepo: &fk.CollectionRepo{},
+		AnnotationRepo: &anrepo,
+		MetaRepo:       &fk.MetaDataRepo{},
+	}
+	transactor := TestingTransactor{repos}
+	store.Transactor = &transactor
+	store.Repos = repos
+	return store, srcCollection, image, dstCollection, &imrepo, &anrepo
 }
 
 func TestNonExistingCollectionShouldFail(t *testing.T) {
@@ -148,28 +186,6 @@ func TestRetrieveMetaData(t *testing.T) {
 	assert.Equal(t, image.Meta, r.Meta)
 }
 
-func SetupCopy() (ImageStore, clc.Collection, im.Image, clc.Collection, *fk.ImageRepo, *fk.AnnotationRepo) {
-	srcCollection := clc.NewCollection(clc.NewCollectionId(), "src")
-	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst")
-	image := im.NewImage(im.NewImageId(), srcCollection)
-	image.AddLabel(lbl.NewLabel(lbl.NewLabelId(), "a-label"))
-	imrepo := fk.ImageRepo{
-		IterateBaseImages:   []im.BaseImage{{ImageId: image.Id, Collection: srcCollection.Name}},
-		ImageIsInCollection: true,
-		ReturnSpecs:         &im.Specs{MIMEType: "image/jpeg"},
-	}
-	anrepo := fk.AnnotationRepo{Labels: image.Labels}
-	repos := Repos{
-		ImageRepo:      &imrepo,
-		CollectionRepo: &fk.CollectionRepo{},
-		AnnotationRepo: &anrepo,
-		MetaRepo:       &fk.MetaDataRepo{},
-	}
-	transactor := TestingTransactor{repos}
-	s := New(repos, &transactor, &fk.FileStore{})
-	return s, srcCollection, image, dstCollection, &imrepo, &anrepo
-}
-
 func TestShallowCopyOneImage(t *testing.T) {
 	store, srcCollection, image, dstCollection, imrepo, _ := SetupCopy()
 	err := store.Copy(srcCollection.Name, image.Id, dstCollection.Name, false)
@@ -182,4 +198,13 @@ func TestDeepCopyOneImage(t *testing.T) {
 	err := store.Copy(srcCollection.Name, image.Id, dstCollection.Name, true)
 	assert.NoError(t, err)
 	assert.NotNil(t, anrepo.AddedAnnotationId)
+}
+
+func TestPaginateCollection(t *testing.T) {
+	store, collection, _, _ := Setup()
+	images, _, _ := store.PaginateCollection(
+		collection.Name,
+		pag.PaginationParams{Page: 1, PageSize: 1},
+	)
+	assert.Equal(t, 1, len(images))
 }

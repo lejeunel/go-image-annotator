@@ -7,6 +7,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type ImageRepo struct {
@@ -87,15 +88,14 @@ func (r *ImageRepo) AddToCollection(imageId im.ImageId, collection clc.Collectio
 
 func (r *ImageRepo) Slice(
 	f im.FilterStr,
-	p pa.PaginationParams,
-	o im.OrderStr,
-) ([]im.BaseImage, error) {
+	o im.OrderStr, p pa.PaginationParams,
+) ([]im.BaseImage, *int64, error) {
 	r.GotFilters = f
 	r.GotPagination = p
 	r.GotOrdering = o
 
 	if r.ErrOnSlice != nil {
-		return nil, r.ErrOnSlice
+		return nil, nil, r.ErrOnSlice
 	}
 
 	result := []im.BaseImage{}
@@ -107,8 +107,8 @@ func (r *ImageRepo) Slice(
 				ImageId:    im.NewImageId(),
 			})
 	}
-
-	return result, nil
+	count := int64(p.PageSize)
+	return result, &count, nil
 }
 
 func (r *ImageRepo) AddImage(imageId im.ImageId, hash []byte, specs im.Specs) error {
@@ -181,4 +181,12 @@ func (r *ImageRepo) GetAdjacent(
 		return nil, r.ErrOnGetAdjacent
 	}
 	return &r.Adjacent, nil
+}
+
+func (r *ImageRepo) PaginateCollection(
+	name clc.CollectionName,
+	pag pag.PaginationParams,
+) ([]im.BaseImage, *int64, error) {
+	count := int64(len(r.IterateBaseImages))
+	return r.IterateBaseImages, &count, nil
 }

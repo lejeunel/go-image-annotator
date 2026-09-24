@@ -37,7 +37,7 @@ func BuildInteractors(
 			MetaRepo:       infra.MetaRepo,
 		},
 		tra.NewStoreTransactor(infra.DB, infra.FilterParser, infra.OrderStrParser),
-		infra.ImageFileStore)
+		infra.ImageFileStore, infra.FilterParser, infra.OrderParser)
 	eventlogger := el.New(infra.EventRepo, el.WithMaxNumTasksPerUser(cfg.MaxNumTasksPerUser))
 
 	imageIngester := iig.New(

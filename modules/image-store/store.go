@@ -9,10 +9,29 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
+
+func New(
+	r Repos,
+	t Transactor,
+	f fs.FileStore,
+	fv FilterValidator,
+	ov OrderingValidator,
+) ImageStore {
+	return ImageStore{r, t, f, fv, ov}
+}
 
 type Transactor interface {
 	RunInTx(fn func(Repos) error) error
+}
+
+type FilterValidator interface {
+	Validate(im.FilterStr) error
+}
+
+type OrderingValidator interface {
+	Validate(im.OrderStr) error
 }
 
 type Repos struct {
@@ -26,6 +45,8 @@ type ImageStore struct {
 	Repos
 	Transactor
 	fs.FileStore
+	FilterValidator
+	OrderingValidator
 }
 
 func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
@@ -84,6 +105,27 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 		Meta:          meta,
 		Reader:        reader,
 	}, nil
+}
+
+func (s ImageStore) PaginateCollection(
+	name clc.CollectionName,
+	p pag.PaginationParams,
+) ([]im.Image, *pag.Pagination, error) {
+	errCtx := fmt.Errorf("pagination collection %v", name)
+	base, count, err := s.ImageRepo.PaginateCollection(name, p)
+	if err != nil {
+		return nil, nil, fmt.Errorf("%w: %w", errCtx, err)
+	}
+	images := []im.Image{}
+	for _, base := range base {
+		image, err := s.Find(base)
+		if err != nil {
+			return nil, nil, fmt.Errorf("%w: %w", errCtx, err)
+		}
+		images = append(images, *image)
+	}
+	pagination := pag.New(p.Page, p.PageSize, *count)
+	return images, &pagination, nil
 }
 
 func (s ImageStore) DeleteAsset(id im.ImageId) error {
@@ -208,6 +250,34 @@ func (s ImageStore) Copy(
 	return nil
 }
 
-func New(r Repos, t Transactor, f fs.FileStore) ImageStore {
-	return ImageStore{r, t, f}
+func (s ImageStore) Slice(
+	f im.FilterStr,
+	o im.OrderStr,
+	p pag.PaginationParams,
+) ([]im.Image, *pag.Pagination, error) {
+	errCtx := "listing images"
+
+	if err := s.FilterValidator.Validate(f); err != nil {
+		return nil, nil, fmt.Errorf("%v: validating query %v: %w", errCtx, f, err)
+	}
+
+	if err := s.OrderingValidator.Validate(o); err != nil {
+		return nil, nil, fmt.Errorf("%v: validating ordering %v: %w", errCtx, o, err)
+	}
+
+	baseImages, count, err := s.ImageRepo.Slice(f, o, p)
+	if err != nil {
+		return nil, nil, fmt.Errorf("%v: %w", errCtx, err)
+	}
+
+	images := []im.Image{}
+	for _, b := range baseImages {
+		image, err := s.Find(b)
+		if err != nil {
+			return nil, nil, fmt.Errorf("%v: building aggregate: %w", errCtx, err)
+		}
+		images = append(images, *image)
+	}
+	pagination := pag.New(p.Page, p.PageSize, *count)
+	return images, &pagination, nil
 }

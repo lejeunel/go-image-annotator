@@ -1,17 +1,19 @@
-package list
+package slice
 
 import (
-	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type Request struct {
-	clc.CollectionName
+	im.FilterStr
 	pa.PaginationParams
+	im.OrderStr
 }
 
 type Response struct {
 	Images     []im.Image
 	Pagination pa.Pagination
+	im.FilterStr
+	im.OrderStr
 }

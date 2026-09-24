@@ -16,9 +16,9 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	ing "github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 	ia "github.com/lejeunel/go-image-annotator/use-cases/image/ingest-archive"
-	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/raw"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/scroll"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
 )
 
 func NewImageInteractors(
@@ -30,8 +30,8 @@ func NewImageInteractors(
 	tmpfs fs.LocalFileStore,
 	imageIngester ing.Ingester,
 	archiveIngester ia.ArchiveIngester,
-	fv list.FilterValidator,
-	ov list.OrderingValidator,
+	fv slice.FilterValidator,
+	ov slice.OrderingValidator,
 	maxArchiveMB int64,
 	el el.EventLogger,
 	logger slog.Logger,
@@ -53,7 +53,7 @@ func NewImageInteractors(
 		),
 		Find:   find.New(ims),
 		Raw:    raw.New(imfs, imr),
-		List:   list.New(imr, fv, ov, ims, defaultPageSize, maxPageSize),
+		Slice:  slice.New(ims, fv, ov, defaultPageSize, maxPageSize),
 		Scroll: scroll.New(imr, fv, ov),
 		Delete: delete.New(ims),
 	}

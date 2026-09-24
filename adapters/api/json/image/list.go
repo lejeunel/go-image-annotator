@@ -6,7 +6,7 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
-	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
 )
 
 type List struct {
@@ -14,7 +14,7 @@ type List struct {
 	json.ErrorPresenter
 }
 
-func (p List) SuccessListImages(r list.Response) {
+func (p List) SuccessSliceImages(r slice.Response) {
 	response := models.ListImagesResponse{
 		Pagination: json.BuildPaginationResponse(r.Pagination),
 	}

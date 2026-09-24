@@ -8,6 +8,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type AnnotationRepo interface {
@@ -31,6 +32,8 @@ type ImageRepo interface {
 	IsUsed(im.ImageId) (*bool, error)
 	AddToCollection(im.ImageId, clc.CollectionName) error
 	Delete(im.ImageId) error
+	PaginateCollection(clc.CollectionName, pag.PaginationParams) ([]im.BaseImage, *int64, error)
+	Slice(im.FilterStr, im.OrderStr, pag.PaginationParams) ([]im.BaseImage, *int64, error)
 }
 
 type MetaRepo interface {

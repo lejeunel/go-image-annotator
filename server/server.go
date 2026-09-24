@@ -95,7 +95,7 @@ func Make(port int) http.Handler {
 	imagesServer := im.New(
 		pageBuilder,
 		cfg.MaxArchiveMB,
-		app.Itrs.Image.List,
+		app.Itrs.Image.Slice,
 		app.Itrs.Image.Delete,
 		app.Itrs.Image.Find,
 		app.Itrs.Image.IngestArchive,

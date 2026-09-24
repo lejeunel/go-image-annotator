@@ -17,8 +17,7 @@ import (
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	uuid "github.com/lejeunel/go-image-annotator/shared/uuid"
 	find_im "github.com/lejeunel/go-image-annotator/use-cases/image/find"
-	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
-	list_im "github.com/lejeunel/go-image-annotator/use-cases/image/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
 	. "maragu.dev/gomponents"
 )
 
@@ -46,7 +45,7 @@ func (p ListImagesPresenter) SuccessReadImage(image im.Image) {
 	makeImageRow(image, BaseAnnotateImageURLFunc).Render(p.Writer)
 }
 
-func (p ListImagesPresenter) SuccessListImages(r list.Response) {
+func (p ListImagesPresenter) SuccessSliceImages(r slice.Response) {
 	baseURL := rt.AddQueryParams(rt.ImagesUrl,
 		rt.CollectionArgName, p.collection)
 	p.SetPagination(r.Pagination, baseURL.String())
@@ -86,7 +85,7 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 		)
 		s.PageBuilder.Render(w)
 	}
-	s.ListItr.Execute(list_im.Request{
+	s.ListItr.Execute(slice.Request{
 		FilterStr:        fmt.Sprintf("collection=\"%v\"", collection),
 		PaginationParams: pa.PaginationParams{Page: pg.GetPageFromRequest(r)},
 		OrderStr:         "ingested_at:asc",

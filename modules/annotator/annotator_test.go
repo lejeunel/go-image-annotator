@@ -43,7 +43,7 @@ func TestDrawScrollerOnStart(t *testing.T) {
 	a, image := createAnnotator()
 	p := &FakeScrollerPresenter{}
 	a.Init(t.Context(), image.Id.String(),
-		"a-collection", "", "", &FakeImageReadPresenter{}, &FakeLabelFetchPresenter{}, p)
+		"a-collection", nil, "", "", &FakeImageReadPresenter{}, &FakeLabelFetchPresenter{}, p)
 	assert.True(t, p.Called)
 }
 
@@ -51,7 +51,7 @@ func TestFetchLabelsOnInit(t *testing.T) {
 	a, image := createAnnotator()
 	lp := FakeLabelFetchPresenter{}
 	a.Init(t.Context(), image.Id.String(),
-		"a-collection", "", "", &FakeImageReadPresenter{}, &lp, &FakeScrollerPresenter{})
+		"a-collection", nil, "", "", &FakeImageReadPresenter{}, &lp, &FakeScrollerPresenter{})
 	assert.NotNil(t, lp.Called)
 }
 
@@ -59,7 +59,7 @@ func TestDrawImageOnInit(t *testing.T) {
 	a, image := createAnnotator()
 	ip := &FakeImageReadPresenter{}
 	a.Init(t.Context(), image.Id.String(),
-		"a-collection", "", "", ip, &FakeLabelFetchPresenter{}, &FakeScrollerPresenter{})
+		"a-collection", nil, "", "", ip, &FakeLabelFetchPresenter{}, &FakeScrollerPresenter{})
 	assert.True(t, ip.Called)
 }
 

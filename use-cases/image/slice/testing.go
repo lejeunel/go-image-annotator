@@ -1,4 +1,4 @@
-package list
+package slice
 
 import (
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
@@ -10,7 +10,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) SuccessPaginateImages(r Response) {
+func (p *FakePresenter) SuccessSliceImages(r Response) {
 	p.GotSuccess = true
 	p.Got = r
 }

@@ -107,18 +107,18 @@ func (r ImageRepo) applyOrderingStr(q sq.SelectBuilder, o im.OrderStr) (*sq.Sele
 
 func (r ImageRepo) Slice(
 	f im.FilterStr,
-	p pa.PaginationParams,
 	o im.OrderStr,
-) ([]im.BaseImage, error) {
+	p pa.PaginationParams,
+) ([]im.BaseImage, *int64, error) {
 	q := r.makeBaseSelectQuery()
 	qf, err := r.applyFilters(q, f)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	qfo, err := r.applyOrderingStr(*qf, o)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	qs := *qfo
@@ -127,9 +127,36 @@ func (r ImageRepo) Slice(
 	qs = qs.OrderBy("ic.image_id")
 	images, err := r.fetchBaseImages(qs)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return images, nil
+	count, err := r.Count(f)
+	if err != nil {
+		return nil, nil, err
+	}
+	return images, count, nil
+}
+
+func (r ImageRepo) PaginateCollection(
+	name clc.CollectionName,
+	p pa.PaginationParams,
+) ([]im.BaseImage, *int64,
+	error,
+) {
+	q := r.makeBaseSelectQuery()
+	q = q.Limit(uint64(p.PageSize))
+	q = q.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
+	q = q.OrderBy("ic.image_id")
+	images, err := r.fetchBaseImages(q)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	count, err := r.Count(fmt.Sprintf("collection:%v", name))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return images, count, nil
 }
 
 func (r ImageRepo) sliceAfterId(

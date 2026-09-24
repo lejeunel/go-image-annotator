@@ -29,7 +29,7 @@ func (s *FakeScroller) Execute(ctx context.Context, r scroll.Request, o scroll.O
 
 type FakeLabelFetcher struct{}
 
-func (f *FakeLabelFetcher) Execute(ctx context.Context, o pick.OutputPort) {
+func (f *FakeLabelFetcher) Execute(ctx context.Context, p *string, o pick.OutputPort) {
 	o.SuccessFetchLabels([]string{"a-label"})
 }
 

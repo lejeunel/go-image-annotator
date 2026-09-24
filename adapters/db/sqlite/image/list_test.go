@@ -11,14 +11,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInternalErrOnImageListShouldFail(t *testing.T) {
+func TestInternalErrOnImageSliceShouldFail(t *testing.T) {
 	imr, _, db := SetupList()
 	db.Close()
-	_, err := imr.Slice("collection:\"my-collection\"", pa.PaginationParams{}, "")
+	_, _, err := imr.Slice("collection:\"my-collection\"", "", pa.PaginationParams{})
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
-func TestListOneImage(t *testing.T) {
+func TestSliceOneImage(t *testing.T) {
 	imr, cr, _ := SetupList()
 	collectionName := "a-collection"
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
@@ -27,20 +27,20 @@ func TestListOneImage(t *testing.T) {
 	imr.AddImage(image.Id, nil, im.Specs{})
 	imr.AddToCollection(image.Id, collection.Name)
 
-	r, err := imr.Slice("", pa.PaginationParams{PageSize: 2, Page: 1}, "")
+	r, _, err := imr.Slice("", "", pa.PaginationParams{PageSize: 2, Page: 1})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(r))
 }
 
-func TestListOneImageInGivenCollection(t *testing.T) {
+func TestSliceOneImageInGivenCollection(t *testing.T) {
 	imr, cr, _ := SetupList()
 	firstImage, firstCollection := CreateSingleImageCollection(imr, cr, "first-collection")
 	CreateSingleImageCollection(imr, cr, "second-collection")
 
-	r, _ := imr.Slice(
+	r, _, _ := imr.Slice(
 		"collection=\"first-collection\"",
-		pa.PaginationParams{PageSize: 2, Page: 1},
 		"",
+		pa.PaginationParams{PageSize: 2, Page: 1},
 	)
 	assert.Equal(t, 1, len(r))
 	images := r
@@ -60,7 +60,7 @@ func CreateImageInCollectionFromString(
 	return image
 }
 
-func TestListImagesOrderedById(t *testing.T) {
+func TestSliceImagesOrderedById(t *testing.T) {
 	imr, cr, _ := SetupList()
 	collectionName := "a-collection"
 	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
@@ -76,8 +76,7 @@ func TestListImagesOrderedById(t *testing.T) {
 		st.FakeUUIDFromInt(0),
 	)
 
-	r, _ := imr.Slice(
-		"", pa.PaginationParams{PageSize: 2, Page: 1}, "")
+	r, _, _ := imr.Slice("", "", pa.PaginationParams{PageSize: 2, Page: 1})
 	got := r[0].ImageId
 	assert.Equal(t, image0.Id, got)
 }
@@ -95,4 +94,27 @@ func TestCountAllImages(t *testing.T) {
 	count, err := imr.Count("")
 	assert.NoError(t, err)
 	assert.Equal(t, int64(3), *count)
+}
+
+func TestPaginateImagesInCollection(t *testing.T) {
+	imr, cr, _ := SetupList()
+	collectionName := "a-collection"
+	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
+	cr.Create(collection)
+	CreateImageInCollectionFromString(
+		imr,
+		collection,
+		st.FakeUUIDFromInt(1),
+	)
+	image0 := CreateImageInCollectionFromString(
+		imr,
+		collection,
+		st.FakeUUIDFromInt(0),
+	)
+
+	r, count, err := imr.PaginateCollection(
+		collection.Name, pa.PaginationParams{PageSize: 2, Page: 1})
+	assert.NoError(t, err)
+	assert.Equal(t, image0.Id, r[0].ImageId)
+	assert.Equal(t, int64(2), *count)
 }

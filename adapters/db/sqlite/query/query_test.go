@@ -151,7 +151,11 @@ func TestFiltering(t *testing.T) {
 			count, err := imr.Count(tt.Filter)
 			assert.NoError(t, err, tt.name)
 			assert.Equal(t, int64(tt.WantCount), *count, tt.name)
-			slice, err := imr.Slice(tt.Filter, pa.PaginationParams{Page: 1, PageSize: 10}, tt.Order)
+			slice, _, err := imr.Slice(
+				tt.Filter,
+				tt.Order,
+				pa.PaginationParams{Page: 1, PageSize: 10},
+			)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.WantFirstId.String(), slice[0].ImageId.String(), tt.name)
 		})

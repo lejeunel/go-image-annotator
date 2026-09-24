@@ -5,7 +5,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/image/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	ia "github.com/lejeunel/go-image-annotator/use-cases/image/ingest-archive"
-	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -13,7 +13,7 @@ import (
 type Server struct {
 	b.PageBuilder
 	maxArchiveMB     int
-	ListItr          list.Interactor
+	ListItr          slice.Interactor
 	DeleteItr        delete.Interactor
 	FindItr          find.Interactor
 	IngestArchiveItr ia.Interactor
@@ -29,7 +29,7 @@ func CodeHighlightingLibs() []Node {
 
 func New(
 	pb b.PageBuilder, maxArchiveMB int,
-	l list.Interactor, d delete.Interactor, f find.Interactor,
+	l slice.Interactor, d delete.Interactor, f find.Interactor,
 	i ia.Interactor,
 ) Server {
 	pb.AddScripts(CodeHighlightingLibs()...)

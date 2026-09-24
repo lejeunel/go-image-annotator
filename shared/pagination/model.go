@@ -2,7 +2,6 @@ package pagination
 
 import (
 	"fmt"
-	"math"
 
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -19,7 +18,7 @@ func New(page int64, pageSize int, totalRecords int64) Pagination {
 		TotalRecords: totalRecords,
 		Page:         page,
 		PageSize:     pageSize,
-		TotalPages:   int64(math.Ceil(float64(totalRecords) / float64(pageSize))),
+		TotalPages:   (totalRecords + int64(pageSize) - 1) / int64(pageSize),
 	}
 }
 

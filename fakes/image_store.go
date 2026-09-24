@@ -3,16 +3,23 @@ package fake
 import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type ImageStore struct {
-	ErrOnFind          error
-	ErrOnDelete        error
-	Return             *im.Image
-	DeletedAssetId     *im.ImageId
-	DeletedId          *im.ImageId
-	DeletedBatch       bool
-	CopiedToCollection string
+	ErrOnFind               error
+	ErrOnDelete             error
+	ErrOnPaginateCollection error
+	ErrOnSlice              error
+	Return                  *im.Image
+	DeletedAssetId          *im.ImageId
+	DeletedId               *im.ImageId
+	DeletedBatch            bool
+	CopiedToCollection      string
+	ReturnPaginated         []im.Image
+	ReturnCount             int64
+	ReturnPagination        pag.Pagination
+	GotPagination           pag.PaginationParams
 }
 
 func (s *ImageStore) Find(baseImage im.BaseImage) (*im.Image, error) {
@@ -23,6 +30,29 @@ func (s *ImageStore) Find(baseImage im.BaseImage) (*im.Image, error) {
 		return s.Return, nil
 	}
 	return &im.Image{}, nil
+}
+
+func (s *ImageStore) PaginateCollection(
+	name clc.CollectionName,
+	pag pag.PaginationParams,
+) ([]im.Image, *int64, error) {
+	if s.ErrOnPaginateCollection != nil {
+		return nil, nil, s.ErrOnPaginateCollection
+	}
+	s.GotPagination = pag
+	return s.ReturnPaginated, &s.ReturnCount, nil
+}
+
+func (s *ImageStore) Slice(
+	f im.FilterStr,
+	o im.OrderStr,
+	pag pag.PaginationParams,
+) ([]im.Image, *pag.Pagination, error) {
+	if s.ErrOnSlice != nil {
+		return nil, nil, s.ErrOnSlice
+	}
+	s.GotPagination = pag
+	return s.ReturnPaginated, &s.ReturnPagination, nil
 }
 
 func (s *ImageStore) DeleteAsset(id im.ImageId) error {
