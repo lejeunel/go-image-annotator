@@ -110,7 +110,7 @@
                     accept=".zip,application/zip,application/x-zip-compressed"
                     class="sr-only"
                     aria-describedby="validFileFormats-{{.DivId}}"
-                    x-on:change="fileName = $event.target.files[0]?.name ?? fileName"
+                    x-on:change="handleFiles($event.target.files)"
                   />
                   Browse
                 </label>
