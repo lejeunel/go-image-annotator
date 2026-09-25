@@ -24,7 +24,7 @@ type ListPresenter struct {
 }
 
 func NewListPresenter(w http.ResponseWriter, p b.PaginatedListBuilder, u b.RowURL) ListPresenter {
-	return ListPresenter{p, u, w, e.NewErrorPresenter(w)}
+	return ListPresenter{p, u, w, e.NewErrorPresenter(w, p.PageBuilder)}
 }
 
 func (p ListPresenter) SuccessListGroups(groups []g.Group) {
@@ -42,8 +42,8 @@ type ViewPresenter struct {
 	e.ErrorPresenter
 }
 
-func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
-	return ViewPresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w)}
+func NewViewPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ViewPresenter {
+	return ViewPresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w, p)}
 }
 
 func (p ViewPresenter) SuccessFindGroup(group g.Group) {
@@ -56,8 +56,8 @@ type DeletePresenter struct {
 	e.ErrorPresenter
 }
 
-func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
-	return DeletePresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w)}
+func NewDeletePresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) DeletePresenter {
+	return DeletePresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w, p)}
 }
 
 func (p DeletePresenter) SuccessFindGroup(group g.Group) {

@@ -59,7 +59,7 @@ type ViewPresenter struct {
 }
 
 func NewViewPresenter(w http.ResponseWriter, p b.PageBuilder) ViewPresenter {
-	return ViewPresenter{p, w, e.NewErrorPresenter(w)}
+	return ViewPresenter{p, w, e.NewErrorPresenter(w, p)}
 }
 
 func (p ViewPresenter) SuccessReadPolicy(policies string) {

@@ -175,10 +175,15 @@ func (b *PageBuilder) SetContent(content Node) *PageBuilder {
 	return b
 }
 
+func (b *PageBuilder) SetError(err error) *PageBuilder {
+	b.SetTitle("Something went wrong...")
+	b.SetContent(Text(err.Error()))
+	return b
+}
+
 func (b *PageBuilder) Render(w io.Writer) {
 	if b.User == nil {
-		b.BasePageBuilder.SetError(fmt.Errorf("current user has not been set"))
-		b.BasePageBuilder.Render(w)
+		Text(fmt.Errorf("current user has not been set").Error()).Render(w)
 		return
 	}
 

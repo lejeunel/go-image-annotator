@@ -44,7 +44,7 @@ func NewTaskListPresenter(w http.ResponseWriter, p b.PageBuilder) TaskListPresen
 	p.ActivateSidebarEntry(LogsPageName)
 	p.AddMarkdownPreamble(logsPreamble)
 	b := b.NewPaginatedListBuilder(p, listEventsFields)
-	return TaskListPresenter{b, w, e.NewErrorPresenter(w)}
+	return TaskListPresenter{b, w, e.NewErrorPresenter(w, p)}
 }
 
 func (p TaskListPresenter) SuccessListTasks(r list.Response) {
@@ -61,8 +61,8 @@ type TaskRowPresenter struct {
 	e.ErrorPresenter
 }
 
-func NewTaskRowPresenter(w http.ResponseWriter) TaskRowPresenter {
-	return TaskRowPresenter{w, e.NewErrorPresenter(w)}
+func NewTaskRowPresenter(w http.ResponseWriter, p b.PageBuilder) TaskRowPresenter {
+	return TaskRowPresenter{w, e.NewErrorPresenter(w, p)}
 }
 
 func (p TaskRowPresenter) SuccessFindTask(t t.Task) {

@@ -72,7 +72,7 @@ type Event struct {
 
 func (s *Server) TaskRow(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get(TaskIdQueryArg)
-	p := NewTaskRowPresenter(w)
+	p := NewTaskRowPresenter(w, s.PageBuilder)
 	s.FindTaskItr.Execute(r.Context(), id, &p)
 }
 

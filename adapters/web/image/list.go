@@ -17,7 +17,7 @@ import (
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	uuid "github.com/lejeunel/go-image-annotator/shared/uuid"
 	find_im "github.com/lejeunel/go-image-annotator/use-cases/image/find"
-	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	. "maragu.dev/gomponents"
 )
 
@@ -38,14 +38,14 @@ func NewListImagesPresenter(
 	p.SetTitle(fmt.Sprintf("%v / Images", collection)).SetHTMLTitle("Images")
 	p.SetActiveSection(cmp.NoPageActive)
 	b := b.NewPaginatedListBuilder(p, listImagesFields)
-	return ListImagesPresenter{b, w, ew.NewErrorPresenter(w), collection}
+	return ListImagesPresenter{b, w, ew.NewErrorPresenter(w, p), collection}
 }
 
 func (p ListImagesPresenter) SuccessReadImage(image im.Image) {
 	makeImageRow(image, BaseAnnotateImageURLFunc).Render(p.Writer)
 }
 
-func (p ListImagesPresenter) SuccessSliceImages(r slice.Response) {
+func (p ListImagesPresenter) SuccessPaginateImages(r list.Response) {
 	baseURL := rt.AddQueryParams(rt.ImagesUrl,
 		rt.CollectionArgName, p.collection)
 	p.SetPagination(r.Pagination, baseURL.String())
@@ -85,10 +85,9 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 		)
 		s.PageBuilder.Render(w)
 	}
-	s.ListItr.Execute(slice.Request{
-		FilterStr:        fmt.Sprintf("collection=\"%v\"", collection),
+	s.ListItr.Execute(list.Request{
+		CollectionName:   collection,
 		PaginationParams: pa.PaginationParams{Page: pg.GetPageFromRequest(r)},
-		OrderStr:         "ingested_at:asc",
 	},
 		NewListImagesPresenter(w, s.PageBuilder, collection))
 }

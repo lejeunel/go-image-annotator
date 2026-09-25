@@ -9,7 +9,10 @@ import (
 )
 
 type ImageStore interface {
-	PaginateCollection(clc.CollectionName, pagination.PaginationParams) ([]im.Image, *int64, error)
+	PaginateCollection(
+		clc.CollectionName,
+		pagination.PaginationParams,
+	) ([]im.Image, *pagination.Pagination, error)
 }
 
 type Interactor struct {
@@ -31,13 +34,14 @@ func (i Interactor) Execute(r Request, out OutputPort) {
 
 	r.PaginationParams.Sanitize(i.DefaultPageSize, i.MaxPageSize)
 
-	images, count, err := i.ImageStore.PaginateCollection(r.CollectionName, r.PaginationParams)
+	images, pagination, err := i.ImageStore.PaginateCollection(r.CollectionName, r.PaginationParams)
 	if err != nil {
 		out.Error(fmt.Errorf("%w: %w", errCtx, err))
+		return
 	}
 	response := Response{
 		Images:     images,
-		Pagination: pagination.New(r.Page, r.PageSize, *count),
+		Pagination: *pagination,
 	}
 
 	out.SuccessPaginateImages(response)

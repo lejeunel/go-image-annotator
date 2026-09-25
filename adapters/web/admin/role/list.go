@@ -24,9 +24,9 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	case b.ModeEdit.String():
 		s.Roles.Find.Execute(r.Context(), name, NewEditPresenter(w, s.RowUrl))
 	case b.ModeConfirmDelete.String():
-		s.Roles.Find.Execute(r.Context(), name, NewDeletePresenter(w, s.RowUrl))
+		s.Roles.Find.Execute(r.Context(), name, NewDeletePresenter(w, s.Page.PageBuilder, s.RowUrl))
 	default:
-		s.Roles.Find.Execute(r.Context(), name, NewViewPresenter(w, s.RowUrl))
+		s.Roles.Find.Execute(r.Context(), name, NewViewPresenter(w, s.Page.PageBuilder, s.RowUrl))
 	}
 }
 

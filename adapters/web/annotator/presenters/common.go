@@ -1,7 +1,7 @@
 package presenters
 
 type BaseAnnotoriousRequest struct {
-	ImageId    string `json:"image_id"`
+	ImageId    string `json:"id"`
 	Collection string `json:"collection"`
 	Label      string `json:"label"`
 }

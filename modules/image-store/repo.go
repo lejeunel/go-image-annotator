@@ -23,6 +23,7 @@ type AnnotationRepo interface {
 
 type CollectionRepo interface {
 	Find(string) (*clc.Collection, error)
+	Exists(string) (bool, error)
 }
 
 type ImageRepo interface {

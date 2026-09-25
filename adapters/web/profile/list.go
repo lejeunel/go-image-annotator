@@ -22,9 +22,9 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 		s.FindItr.Execute(r.Context(), name, &p)
 
 	case b.ModeConfirmDelete.String():
-		s.FindItr.Execute(r.Context(), name, NewDeletePresenter(w, s.RowURL))
+		s.FindItr.Execute(r.Context(), name, NewDeletePresenter(w, s.PageBuilder, s.RowURL))
 	default:
-		s.FindItr.Execute(r.Context(), name, NewViewPresenter(w, s.RowURL))
+		s.FindItr.Execute(r.Context(), name, NewViewPresenter(w, s.PageBuilder, s.RowURL))
 	}
 }
 

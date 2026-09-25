@@ -19,8 +19,8 @@ type ViewPresenter struct {
 	e.ErrorPresenter
 }
 
-func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
-	return ViewPresenter{w, u, e.NewErrorPresenter(w)}
+func NewViewPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ViewPresenter {
+	return ViewPresenter{w, u, e.NewErrorPresenter(w, p)}
 }
 
 func (p ViewPresenter) SuccessFindCollection(c clc.Collection) {

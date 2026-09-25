@@ -111,6 +111,7 @@ func (r ImageRepo) Slice(
 	p pa.PaginationParams,
 ) ([]im.BaseImage, *int64, error) {
 	q := r.makeBaseSelectQuery()
+	fmt.Println(f, o, p)
 	qf, err := r.applyFilters(q, f)
 	if err != nil {
 		return nil, nil, err
@@ -143,6 +144,7 @@ func (r ImageRepo) PaginateCollection(
 	error,
 ) {
 	q := r.makeBaseSelectQuery()
+	q = q.Where("collection = ?", name)
 	q = q.Limit(uint64(p.PageSize))
 	q = q.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
 	q = q.OrderBy("ic.image_id")

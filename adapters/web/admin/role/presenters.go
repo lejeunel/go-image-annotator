@@ -24,7 +24,7 @@ type ListPresenter struct {
 }
 
 func NewListPresenter(w http.ResponseWriter, p b.PaginatedListBuilder, u b.RowURL) ListPresenter {
-	return ListPresenter{p, u, w, e.NewErrorPresenter(w)}
+	return ListPresenter{p, u, w, e.NewErrorPresenter(w, p.PageBuilder)}
 }
 
 func (p ListPresenter) SuccessListRoles(roles []r.Role) {
@@ -42,8 +42,8 @@ type ViewPresenter struct {
 	e.ErrorPresenter
 }
 
-func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
-	return ViewPresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w)}
+func NewViewPresenter(w http.ResponseWriter, pb b.PageBuilder, u b.RowURL) ViewPresenter {
+	return ViewPresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w, pb)}
 }
 
 func (p ViewPresenter) SuccessFindRole(role r.Role) {
@@ -56,8 +56,8 @@ type DeletePresenter struct {
 	e.ErrorPresenter
 }
 
-func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
-	return DeletePresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w)}
+func NewDeletePresenter(w http.ResponseWriter, pb b.PageBuilder, u b.RowURL) DeletePresenter {
+	return DeletePresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w, pb)}
 }
 
 func (p DeletePresenter) SuccessFindRole(role r.Role) {

@@ -28,7 +28,7 @@ type ListPresenter struct {
 func NewListPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ListPresenter {
 	p.SetTitle("Labels").SetHTMLTitle("Labels").SetActiveSection(cmp.LabelsPageActive)
 	pb := b.NewPaginatedListBuilder(p, listLabelsFields)
-	return ListPresenter{pb, u, w, e.NewErrorPresenter(w)}
+	return ListPresenter{pb, u, w, e.NewErrorPresenter(w, p)}
 }
 
 func (p ListPresenter) SuccessListLabels(r list.Response) {
@@ -49,8 +49,8 @@ type ViewPresenter struct {
 	e.ErrorPresenter
 }
 
-func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
-	return ViewPresenter{w, u, e.NewErrorPresenter(w)}
+func NewViewPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ViewPresenter {
+	return ViewPresenter{w, u, e.NewErrorPresenter(w, p)}
 }
 
 func (p ViewPresenter) SuccessFindLabel(l lbl.Label) {
@@ -63,8 +63,8 @@ type EditPresenter struct {
 	e.ErrorPresenter
 }
 
-func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
-	return EditPresenter{w, u, e.NewErrorPresenter(w)}
+func NewEditPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) EditPresenter {
+	return EditPresenter{w, u, e.NewErrorPresenter(w, p)}
 }
 
 func (p EditPresenter) SuccessFindLabel(l lbl.Label) {
@@ -80,8 +80,8 @@ type DeletePresenter struct {
 	e.ErrorPresenter
 }
 
-func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
-	return DeletePresenter{w, u, e.NewErrorPresenter(w)}
+func NewDeletePresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) DeletePresenter {
+	return DeletePresenter{w, u, e.NewErrorPresenter(w, p)}
 }
 
 func (p DeletePresenter) SuccessFindLabel(l lbl.Label) {

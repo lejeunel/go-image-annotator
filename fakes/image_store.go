@@ -35,12 +35,12 @@ func (s *ImageStore) Find(baseImage im.BaseImage) (*im.Image, error) {
 func (s *ImageStore) PaginateCollection(
 	name clc.CollectionName,
 	pag pag.PaginationParams,
-) ([]im.Image, *int64, error) {
+) ([]im.Image, *pag.Pagination, error) {
 	if s.ErrOnPaginateCollection != nil {
 		return nil, nil, s.ErrOnPaginateCollection
 	}
 	s.GotPagination = pag
-	return s.ReturnPaginated, &s.ReturnCount, nil
+	return s.ReturnPaginated, &s.ReturnPagination, nil
 }
 
 func (s *ImageStore) Slice(

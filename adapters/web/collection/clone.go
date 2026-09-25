@@ -32,7 +32,7 @@ func (s *Server) Clone(w http.ResponseWriter, r *http.Request) {
 		NewClonePresenter(w, s.RowURL))
 
 	s.FindItr.Execute(r.Context(), source,
-		NewViewPresenter(w, s.RowURL))
+		NewViewPresenter(w, s.PageBuilder, s.RowURL))
 }
 
 type ClonePresenter struct {

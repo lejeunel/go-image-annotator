@@ -8,7 +8,7 @@ import (
 )
 
 type Server struct {
-	Page            b.PaginatedListBuilder
+	b.PaginatedListBuilder
 	RowUrl          b.RowURL
 	Users           u.Interactors
 	Roles           r.Interactors

@@ -111,7 +111,26 @@ func (s ImageStore) PaginateCollection(
 	name clc.CollectionName,
 	p pag.PaginationParams,
 ) ([]im.Image, *pag.Pagination, error) {
-	errCtx := fmt.Errorf("pagination collection %v", name)
+	errCtx := fmt.Errorf("paginating collection %v", name)
+
+	clcExists, err := s.CollectionRepo.Exists(name)
+	if err != nil {
+		return nil, nil, fmt.Errorf(
+			"%w: checking existence of collection with name %v: %w",
+			errCtx,
+			name,
+			err,
+		)
+	}
+	if !clcExists {
+		return nil, nil, fmt.Errorf(
+			"%w: checking existence of collection with name %v: %w",
+			errCtx,
+			name,
+			e.ErrNotFound,
+		)
+	}
+
 	base, count, err := s.ImageRepo.PaginateCollection(name, p)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%w: %w", errCtx, err)

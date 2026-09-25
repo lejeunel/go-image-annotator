@@ -55,8 +55,14 @@ func CreateImageInCollectionFromString(
 ) im.Image {
 	id, _ := im.NewImageIdFromString(imageId)
 	image := im.NewImage(id, collection)
-	repo.AddImage(image.Id, []byte(image.Id.String()), im.Specs{})
-	repo.AddToCollection(image.Id, collection.Name)
+	err := repo.AddImage(image.Id, []byte(image.Id.String()), im.Specs{})
+	if err != nil {
+		panic(err)
+	}
+	err = repo.AddToCollection(image.Id, collection.Name)
+	if err != nil {
+		panic(err)
+	}
 	return image
 }
 
@@ -98,23 +104,27 @@ func TestCountAllImages(t *testing.T) {
 
 func TestPaginateImagesInCollection(t *testing.T) {
 	imr, cr, _ := SetupList()
-	collectionName := "a-collection"
-	collection := clc.NewCollection(clc.NewCollectionId(), collectionName)
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
 	cr.Create(collection)
-	CreateImageInCollectionFromString(
-		imr,
-		collection,
-		st.FakeUUIDFromInt(1),
-	)
+
+	otherCollection := clc.NewCollection(clc.NewCollectionId(), "other-collection")
+	cr.Create(otherCollection)
+
 	image0 := CreateImageInCollectionFromString(
 		imr,
 		collection,
 		st.FakeUUIDFromInt(0),
 	)
+	CreateImageInCollectionFromString(
+		imr,
+		otherCollection,
+		st.FakeUUIDFromInt(1),
+	)
 
 	r, count, err := imr.PaginateCollection(
 		collection.Name, pa.PaginationParams{PageSize: 2, Page: 1})
 	assert.NoError(t, err)
+	assert.Equal(t, 1, len(r))
 	assert.Equal(t, image0.Id, r[0].ImageId)
-	assert.Equal(t, int64(2), *count)
+	assert.Equal(t, int64(1), *count)
 }

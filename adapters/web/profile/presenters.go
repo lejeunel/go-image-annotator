@@ -28,7 +28,7 @@ type ListPresenter struct {
 func NewListPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ListPresenter {
 	p.SetTitle("Profiles").SetHTMLTitle("Profiles").SetActiveSection(cmp.ProfilesPageActive)
 	pb := b.NewPaginatedListBuilder(p, listProfilesFields)
-	return ListPresenter{pb, u, w, e.NewErrorPresenter(w)}
+	return ListPresenter{pb, u, w, e.NewErrorPresenter(w, p)}
 }
 
 func (p ListPresenter) SuccessListProfiles(r list.Response) {
@@ -49,8 +49,8 @@ type ViewPresenter struct {
 	e.ErrorPresenter
 }
 
-func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
-	return ViewPresenter{w, u, e.NewErrorPresenter(w)}
+func NewViewPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ViewPresenter {
+	return ViewPresenter{w, u, e.NewErrorPresenter(w, p)}
 }
 
 func (p ViewPresenter) SuccessFindProfile(l pr.Profile) {
@@ -70,8 +70,8 @@ type DeletePresenter struct {
 	e.ErrorPresenter
 }
 
-func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
-	return DeletePresenter{w, u, e.NewErrorPresenter(w)}
+func NewDeletePresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) DeletePresenter {
+	return DeletePresenter{w, u, e.NewErrorPresenter(w, p)}
 }
 
 func (p DeletePresenter) SuccessFindProfile(l pr.Profile) {

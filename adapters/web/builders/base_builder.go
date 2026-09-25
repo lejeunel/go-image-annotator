@@ -45,16 +45,7 @@ func (b *BasePageBuilder) SetFrameContent(c Node) *BasePageBuilder {
 	return b
 }
 
-func (b *BasePageBuilder) SetError(err error) *BasePageBuilder {
-	b.Error = err
-	return b
-}
-
 func (b *BasePageBuilder) Render(w io.Writer) {
-	if b.Error != nil {
-		Text(b.Error.Error()).Render(w)
-		return
-	}
 	if b.Content == nil {
 		Text("error generating page content").Render(w)
 		return

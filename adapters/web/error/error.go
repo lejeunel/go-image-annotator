@@ -15,6 +15,6 @@ func (p ErrorPresenter) Error(err error) {
 	p.PageBuilder.SetError(err).Render(p.writer)
 }
 
-func NewErrorPresenter(w http.ResponseWriter) ErrorPresenter {
-	return ErrorPresenter{writer: w}
+func NewErrorPresenter(w http.ResponseWriter, pb b.PageBuilder) ErrorPresenter {
+	return ErrorPresenter{PageBuilder: pb, writer: w}
 }

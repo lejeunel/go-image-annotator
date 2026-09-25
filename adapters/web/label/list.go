@@ -17,11 +17,11 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 	s.RowURL.SetId(name)
 	switch r.URL.Query().Get("mode") {
 	case b.ModeEdit.String():
-		s.FindItr.Execute(r.Context(), name, NewEditPresenter(w, s.RowURL))
+		s.FindItr.Execute(r.Context(), name, NewEditPresenter(w, s.PageBuilder, s.RowURL))
 	case b.ModeConfirmDelete.String():
-		s.FindItr.Execute(r.Context(), name, NewDeletePresenter(w, s.RowURL))
+		s.FindItr.Execute(r.Context(), name, NewDeletePresenter(w, s.PageBuilder, s.RowURL))
 	default:
-		s.FindItr.Execute(r.Context(), name, NewViewPresenter(w, s.RowURL))
+		s.FindItr.Execute(r.Context(), name, NewViewPresenter(w, s.PageBuilder, s.RowURL))
 	}
 }
 

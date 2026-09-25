@@ -71,7 +71,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 			NewClonePresenter(w, s.RowURL))
 	default:
 		s.FindItr.Execute(r.Context(), name,
-			NewViewPresenter(w, s.RowURL))
+			NewViewPresenter(w, s.PageBuilder, s.RowURL))
 	}
 }
 
@@ -97,7 +97,7 @@ func NewListPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ListPr
 		SetActiveSection(cmp.CollectionsPageActive)
 	p.AddMarkdownPreamble(preamble)
 	b := b.NewPaginatedListBuilder(p, listCollectionsFields)
-	return ListPresenter{b, u, w, e.NewErrorPresenter(w)}
+	return ListPresenter{b, u, w, e.NewErrorPresenter(w, p)}
 }
 
 func (p ListPresenter) SuccessListCollections(r list.Response) {

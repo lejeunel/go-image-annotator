@@ -148,6 +148,7 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p := ap.NewAnnotoriousPresenter(w)
+	fmt.Printf("%+v", boxreq)
 	s.Annotator.AddBox.Execute(r.Context(), ap.ToAddBoxRequest(boxreq), &p)
 }
 

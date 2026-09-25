@@ -28,7 +28,7 @@ type ListPresenter struct {
 }
 
 func NewListPresenter(w http.ResponseWriter, p b.PaginatedListBuilder, u b.RowURL) ListPresenter {
-	return ListPresenter{p, u, w, e.NewErrorPresenter(w)}
+	return ListPresenter{p, u, w, e.NewErrorPresenter(w, p.PageBuilder)}
 }
 
 func (p ListPresenter) SuccessListUsers(r list.Response) {
@@ -48,8 +48,8 @@ type ViewPresenter struct {
 	e.ErrorPresenter
 }
 
-func NewViewPresenter(w http.ResponseWriter, u b.RowURL) ViewPresenter {
-	return ViewPresenter{u, w, e.NewErrorPresenter(w)}
+func NewViewPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ViewPresenter {
+	return ViewPresenter{u, w, e.NewErrorPresenter(w, p)}
 }
 
 func (p ViewPresenter) SuccessFindUser(user u.User) {
@@ -62,8 +62,8 @@ type DeletePresenter struct {
 	e.ErrorPresenter
 }
 
-func NewDeletePresenter(w http.ResponseWriter, u b.RowURL) DeletePresenter {
-	return DeletePresenter{w, u, e.NewErrorPresenter(w)}
+func NewDeletePresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) DeletePresenter {
+	return DeletePresenter{w, u, e.NewErrorPresenter(w, p)}
 }
 
 func (p DeletePresenter) SuccessFindUser(user u.User) {
@@ -80,8 +80,8 @@ type EditPresenter struct {
 	user   u.User
 }
 
-func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
-	return EditPresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w)}
+func NewEditPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) EditPresenter {
+	return EditPresenter{Writer: w, RowURL: u, ErrorPresenter: e.NewErrorPresenter(w, p)}
 }
 
 func (p *EditPresenter) SuccessFindUser(user u.User) {

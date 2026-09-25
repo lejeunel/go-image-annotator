@@ -6,6 +6,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
 	aig "github.com/lejeunel/go-image-annotator/use-cases/image/ingest-archive"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/list"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/raw"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/scroll"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
@@ -16,6 +17,7 @@ type Interactors struct {
 	IngestArchive   aig.Interactor
 	Find            find.Interactor
 	Slice           slice.Interactor
+	List            list.Interactor
 	Scroll          scroll.Interactor
 	Raw             raw.Interactor
 	Delete          delete.Interactor

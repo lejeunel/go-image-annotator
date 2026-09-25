@@ -37,7 +37,10 @@ func SetupRepos(image im.Image) Repos {
 				{ImageId: image.Id, Collection: image.Collection.Name},
 			},
 		},
-		&fk.CollectionRepo{Return: image.Collection},
+		&fk.CollectionRepo{
+			Return:        image.Collection,
+			ExistingNames: []string{image.Collection.Name},
+		},
 		&fk.AnnotationRepo{},
 		&fk.MetaDataRepo{ReturnList: image.Meta},
 	}
@@ -198,6 +201,15 @@ func TestDeepCopyOneImage(t *testing.T) {
 	err := store.Copy(srcCollection.Name, image.Id, dstCollection.Name, true)
 	assert.NoError(t, err)
 	assert.NotNil(t, anrepo.AddedAnnotationId)
+}
+
+func TestPaginateNonExistingCollectionShouldFail(t *testing.T) {
+	store, _, _, _ := Setup()
+	_, _, err := store.PaginateCollection(
+		"non-existing-collection",
+		pag.PaginationParams{Page: 1, PageSize: 1},
+	)
+	assert.Error(t, err)
 }
 
 func TestPaginateCollection(t *testing.T) {
