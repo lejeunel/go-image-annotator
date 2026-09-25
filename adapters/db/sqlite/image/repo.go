@@ -147,6 +147,7 @@ func (r ImageRepo) PaginateCollection(
 	q = q.Where("collection = ?", name)
 	q = q.Limit(uint64(p.PageSize))
 	q = q.Offset((uint64(p.Page-1) * uint64(p.PageSize)))
+	q = q.OrderBy("ingested_at")
 	q = q.OrderBy("ic.image_id")
 	images, err := r.fetchBaseImages(q)
 	if err != nil {
