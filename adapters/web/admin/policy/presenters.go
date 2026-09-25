@@ -89,7 +89,7 @@ func (p ViewPresenter) SuccessReadPolicy(policies string) {
 	p.AddMarkdownPreamble(bufPre.String())
 	textArea := Textarea(
 		Name(PolicyFieldName),
-		Class(`w-150 h-90 rounded-lg border-2 border-surface-alt dark:border-surface-dark-alt p-3
+		Class(`w-full h-90 rounded-lg border-2 border-surface-alt dark:border-surface-dark-alt p-3
          focus:outline-none focus:border-primary focus:dark:border-primary-dark
          resize-none`),
 		Text(policies))
