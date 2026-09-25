@@ -1,10 +1,13 @@
 package server
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"syscall"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
 	userDashboard "github.com/lejeunel/go-image-annotator/adapters/web/dashboard"
@@ -152,6 +155,16 @@ func Make(port int) http.Handler {
 }
 
 func Serve(handler http.Handler, port int) {
-	fmt.Println("serving on port:", port)
-	http.ListenAndServe(fmt.Sprintf(":%v", port), handler)
+	err := http.ListenAndServe(fmt.Sprintf(":%v", port), handler)
+	switch {
+	case errors.Is(err, http.ErrServerClosed):
+		log.Println("serving on port:", port)
+	case errors.Is(err, syscall.EADDRINUSE):
+		log.Fatalf("port %d is already in use", port)
+	case errors.Is(err, syscall.EACCES):
+		log.Fatalf("permission denied binding port %d", port)
+	default:
+		log.Fatalf("server error: %v", err)
+
+	}
 }
