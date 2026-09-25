@@ -111,7 +111,6 @@ func (r ImageRepo) Slice(
 	p pa.PaginationParams,
 ) ([]im.BaseImage, *int64, error) {
 	q := r.makeBaseSelectQuery()
-	fmt.Println(f, o, p)
 	qf, err := r.applyFilters(q, f)
 	if err != nil {
 		return nil, nil, err
