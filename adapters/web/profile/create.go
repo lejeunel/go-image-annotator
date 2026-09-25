@@ -41,7 +41,7 @@ func (p *CreateProfilePresenter) SuccessFetchLabels(labels []string) {
 }
 
 func (p *CreateProfilePresenter) Render() {
-	b := bf.NewHTMXCreateFormBuilder(ProfileUrl, createProfileTargetDiv)
+	b := bf.NewHTMXFormBuilder(ProfileUrl, createProfileTargetDiv)
 	b.AddTitle("Create a new profile")
 	b.AddTextField(NameFieldName, "Name", bf.WithRequired())
 	b.AddTextField(DescriptionFieldName, "Description")

@@ -38,7 +38,7 @@ func (p *CreateCollectionPresenter) SuccessListAllProfiles(profiles []string) {
 }
 
 func (p CreateCollectionPresenter) Render() {
-	b := bf.NewHTMXCreateFormBuilder(CollectionUrl, createCollectionTargetDiv)
+	b := bf.NewHTMXFormBuilder(CollectionUrl, createCollectionTargetDiv)
 	b.AddTitle("Create a new collection")
 	b.AddTextField(nameFieldName, "Name", bf.WithRequired())
 	b.AddTextField(descriptionFieldName, "Description")

@@ -42,7 +42,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXCreateFormBuilder(UserUrl, createUserTargetDiv)
+	b := bf.NewHTMXFormBuilder(UserUrl, createUserTargetDiv)
 	b.AddTitle("Create a new User")
 	b.AddTextField(createEmailFieldName, "Email", bf.WithRequired())
 	b.AddCheckbox(createIsAdminFieldName, "Admin")

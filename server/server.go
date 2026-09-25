@@ -3,8 +3,8 @@ package server
 import (
 	"errors"
 	"fmt"
-	"log"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"syscall"
@@ -36,7 +36,7 @@ import (
 )
 
 // Make initializes the root handler and listens on the given port.
-func Make(port int) http.Handler {
+func Make(port int) (http.Handler, *slog.Logger) {
 	cfg := config.Parse()
 	defaultAuth := auth.NewDefault()
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
@@ -151,20 +151,30 @@ func Make(port int) http.Handler {
 	authServer.Route(router,
 		app.SessionManager.LoadAndSave)
 
-	return router
+	return router, logger
 }
 
-func Serve(handler http.Handler, port int) {
-	err := http.ListenAndServe(fmt.Sprintf(":%v", port), handler)
-	switch {
-	case errors.Is(err, http.ErrServerClosed):
-		log.Println("serving on port:", port)
-	case errors.Is(err, syscall.EADDRINUSE):
-		log.Fatalf("port %d is already in use", port)
-	case errors.Is(err, syscall.EACCES):
-		log.Fatalf("permission denied binding port %d", port)
-	default:
-		log.Fatalf("server error: %v", err)
+func Serve(port int) {
+	handler, logger := Make(port)
+	addr := fmt.Sprintf(":%d", port)
 
+	ln, err := net.Listen("tcp", addr)
+	if err != nil {
+		switch {
+		case errors.Is(err, syscall.EADDRINUSE):
+			logger.Error("port is already in use", "port", port)
+		case errors.Is(err, syscall.EACCES):
+			logger.Error("permission denied binding port", "port", port)
+		default:
+			logger.Error("cannot listen", "port", port, "err", err)
+		}
+		os.Exit(1)
+	}
+
+	logger.Info("started server", "port", port)
+
+	if err := http.Serve(ln, handler); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		logger.Error("server error", "err", err)
+		os.Exit(1)
 	}
 }

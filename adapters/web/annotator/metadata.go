@@ -123,7 +123,7 @@ func (s *Server) MetaDataForm(w http.ResponseWriter, r *http.Request) {
 		MetaImageIdArg, r.FormValue(MetaImageIdArg),
 	)
 
-	b := bf.NewHTMXCreateFormBuilder(url.String(), MetaFormId)
+	b := bf.NewHTMXFormBuilder(url.String(), MetaFormId)
 	b.AddButtonAttr(fmt.Sprintf("hx-target=#%v", MetaDivId))
 	b.AddTextField(MetaKeyArg, "Key", bf.WithRequired())
 	switch r.FormValue(MetaTypeQueryArg) {

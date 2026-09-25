@@ -12,37 +12,37 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-type HTMXCreateFormBuilder struct {
+type HTMXFormBuilder struct {
 	containerId string
 	buttonAttrs []string
 	title       *string
 	FormBuilder
 }
 
-func NewHTMXCreateFormBuilder(submitEndpoint string, containerId string) HTMXCreateFormBuilder {
-	return HTMXCreateFormBuilder{
+func NewHTMXFormBuilder(submitEndpoint string, containerId string) HTMXFormBuilder {
+	return HTMXFormBuilder{
 		FormBuilder: FormBuilder{submitEndpoint: submitEndpoint},
 		containerId: containerId,
 	}
 }
 
-func (b *HTMXCreateFormBuilder) AddSubmitQueryParam(key, value string) *HTMXCreateFormBuilder {
+func (b *HTMXFormBuilder) AddSubmitQueryParam(key, value string) *HTMXFormBuilder {
 	url := rt.AddQueryParams(b.FormBuilder.submitEndpoint, key, value)
 	b.FormBuilder.submitEndpoint = url.String()
 	return b
 }
 
-func (b *HTMXCreateFormBuilder) AddTitle(title string) *HTMXCreateFormBuilder {
+func (b *HTMXFormBuilder) AddTitle(title string) *HTMXFormBuilder {
 	b.title = &title
 	return b
 }
 
-func (b *HTMXCreateFormBuilder) AddButtonAttr(attr string) *HTMXCreateFormBuilder {
+func (b *HTMXFormBuilder) AddButtonAttr(attr string) *HTMXFormBuilder {
 	b.buttonAttrs = append(b.buttonAttrs, attr)
 	return b
 }
 
-func (b HTMXCreateFormBuilder) Build() Node {
+func (b HTMXFormBuilder) Build() Node {
 	var title Node
 
 	if b.title != nil {
@@ -58,7 +58,7 @@ func (b HTMXCreateFormBuilder) Build() Node {
 		Form(
 			Group(attrs),
 			Class(
-				"bg-surface-alt/50 dark:bg-surface-dark-alt/50 p-4 rounded-lg shadow-md w-80 mb-4",
+				"w-120 bg-surface-alt dark:bg-surface-dark-alt border-outline dark:border-outline-dark p-4 rounded-lg shadow-md mb-4",
 			),
 			title,
 			Map(b.FormBuilder.fields, func(f Renderer) Node {
@@ -83,6 +83,6 @@ func (b HTMXCreateFormBuilder) Build() Node {
 		))
 }
 
-func (b HTMXCreateFormBuilder) Render(w io.Writer) {
+func (b HTMXFormBuilder) Render(w io.Writer) {
 	b.Build().Render(w)
 }

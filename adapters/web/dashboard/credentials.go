@@ -8,11 +8,12 @@ import (
 	"net/http"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
-	st "github.com/lejeunel/go-image-annotator/adapters/web/styles"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	cpw "github.com/lejeunel/go-image-annotator/use-cases/user/change-password"
+
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 )
@@ -30,39 +31,22 @@ func RenderCredentialsPage(ctx context.Context, pb b.PageBuilder, w io.Writer) {
 			Text("Generate a secret token to authenticate your API requests. ")),
 		Raw(cmp.ApiTokenFrame))
 
+	form := bf.NewHTMXFormBuilder(ChangePasswordUrl, "change-password-form")
+	form.AddTextField(
+		CurrentPasswordFieldName,
+		"Current password",
+		bf.WithRequired(),
+		bf.WithHidden(),
+	)
+	form.AddTextField(NewPasswordFieldName, "New password", bf.WithRequired(), bf.WithHidden())
+	form.AddTextField(
+		RepeatPasswordFieldName,
+		"New password (bis)",
+		bf.WithRequired(),
+		bf.WithHidden(),
+	)
 	changePassword := Div(Class("mt-2"), makeSectionTitle("Reset password"),
-		cmp.MakeCard(Form(
-			Attr(fmt.Sprintf(`hx-post=%v`, ChangePasswordUrl)),
-			Class("m-2"),
-			Label(For("Current password"), Text("Current password"), Class(st.FormLabel)),
-			Input(
-				Type("password"),
-				ID("password-current"),
-				Name("password-current"),
-				Required(),
-				Class(st.FormInput),
-			),
-			Label(For("New password"), Text("New password"), Class(st.FormLabel)),
-			Input(
-				Type("password"),
-				ID("password"),
-				Name("password"),
-				Required(),
-				Class(st.FormInput),
-			),
-			Label(For("New password (repeat)"), Text("New password (repeat)"), Class(st.FormLabel)),
-			Input(
-				Type("password"),
-				ID("password-repeat"),
-				Name("password-repeat"),
-				Required(),
-				Class(st.FormInput),
-			),
-			Button(Type("submit"),
-				Text("Submit"),
-				Class(st.SuccessButton)),
-		),
-		))
+		form.Build())
 
 	content := Div(Class("flex flex-col w-120"), Div(APIToken, cmp.Separator, changePassword))
 	pb.SetActiveSection(cmp.NoPageActive)
@@ -97,9 +81,14 @@ func (s *Server) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
+	fmt.Println(r.Form)
 	s.ChangePasswordItr.Execute(r.Context(), cpw.Request{
-		Id: user.Id, CurrentPassword: r.FormValue("password-current"),
-		FirstPassword: r.FormValue("password"), SecondPassword: r.FormValue("password-repeat"),
+		Id:              user.Id,
+		CurrentPassword: r.FormValue(CurrentPasswordFieldName),
+		FirstPassword: r.FormValue(
+			NewPasswordFieldName,
+		),
+		SecondPassword: r.FormValue(RepeatPasswordFieldName),
 	},
 		NewChangePasswordPresenter(w))
 }

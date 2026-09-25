@@ -9,6 +9,9 @@ const (
 	TaskRowUrl          = "/ui/dashboard/logs/row"
 	TaskIdQueryArg      = "task_id"
 
-	NewAPITokenUrl    = "/ui/new-api-token"
-	ChangePasswordUrl = "/change-password"
+	NewAPITokenUrl           = "/ui/new-api-token"
+	ChangePasswordUrl        = "/change-password"
+	CurrentPasswordFieldName = "current-password"
+	NewPasswordFieldName     = "new-password"
+	RepeatPasswordFieldName  = "repeat-password"
 )

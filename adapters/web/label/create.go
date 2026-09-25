@@ -40,7 +40,7 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXCreateFormBuilder(LabelUrl, createLabelTargetDiv)
+	b := bf.NewHTMXFormBuilder(LabelUrl, createLabelTargetDiv)
 	b.AddTitle("Create a new label")
 	b.AddTextField(createNameFieldName, "Name", bf.WithRequired())
 	b.AddTextField(createDescriptionFieldName, "Description")

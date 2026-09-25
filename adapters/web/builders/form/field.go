@@ -7,13 +7,14 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-type InputNodeFunc func(string, *string, bool) Node
+type InputNodeFunc func(string, *string, bool, bool) Node
 
 type FormField struct {
 	fieldName   string
 	displayName string
 	value       *string
 	required    bool
+	hidden      bool
 	InputNodeFunc
 }
 type FormFieldOption func(*FormField)
@@ -21,6 +22,12 @@ type FormFieldOption func(*FormField)
 func WithRequired() FormFieldOption {
 	return func(c *FormField) {
 		c.required = true
+	}
+}
+
+func WithHidden() FormFieldOption {
+	return func(c *FormField) {
+		c.hidden = true
 	}
 }
 
@@ -95,12 +102,15 @@ func (f FormField) label() Node {
 }
 
 func makeInputNodeFunc(inputType string, extra ...Node) InputNodeFunc {
-	return func(fieldName string, defaultValue *string, required bool) Node {
+	return func(fieldName string, defaultValue *string, required bool, hidden bool) Node {
 		var value string
 		if defaultValue != nil {
 			value = *defaultValue
 		}
 
+		if hidden {
+			inputType = "password"
+		}
 		nodes := []Node{
 			Type(inputType),
 			ID(fieldName),
@@ -113,7 +123,7 @@ func makeInputNodeFunc(inputType string, extra ...Node) InputNodeFunc {
 			If(required, Required()),
 			If(value != "", Value(value)),
 			Class(
-				"w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+				"w-full py-2 border border-outline dark:border-outline-dark rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
 			),
 		)
 
@@ -122,7 +132,7 @@ func makeInputNodeFunc(inputType string, extra ...Node) InputNodeFunc {
 }
 
 func (f FormField) input() Node {
-	return f.InputNodeFunc(f.fieldName, f.value, f.required)
+	return f.InputNodeFunc(f.fieldName, f.value, f.required, f.hidden)
 }
 
 func (f FormField) Render(w io.Writer) {

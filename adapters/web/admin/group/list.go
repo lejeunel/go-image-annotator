@@ -35,7 +35,7 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXCreateFormBuilder(GroupRowUrl, createGroupTargetDiv)
+	b := bf.NewHTMXFormBuilder(GroupRowUrl, createGroupTargetDiv)
 	b.AddTitle("Create a new group")
 	b.AddTextField(createNameFieldName, "Name", bf.WithRequired())
 	b.AddTextField(createDescriptionFieldName, "Description")
