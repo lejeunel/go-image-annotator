@@ -42,26 +42,27 @@ func New(
 }
 
 func (i Interactor) Execute(r Request, out OutputPort) {
-	errCtx := "listing images"
+	errCtx := "slicing images"
 
 	r.PaginationParams.Sanitize(i.DefaultPageSize, i.MaxPageSize)
 
 	if r.FilterStr != "" {
 		if err := i.FilterValidator.Validate(r.FilterStr); err != nil {
-			out.Error(fmt.Errorf("%v: validating query %v: %w", errCtx, r.FilterStr, err))
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 	}
 
 	if r.OrderStr != "" {
 		if err := i.OrderingValidator.Validate(r.OrderStr); err != nil {
-			out.Error(fmt.Errorf("%v: validating ordering %v: %w", errCtx, r.OrderStr, err))
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
 			return
 		}
 	}
+
 	images, pagination, err := i.ImageStore.Slice(r.FilterStr, r.OrderStr, r.PaginationParams)
 	if err != nil {
-		out.Error(fmt.Errorf("%v: slicing images: %w", errCtx, err))
+		out.Error(err)
 		return
 	}
 

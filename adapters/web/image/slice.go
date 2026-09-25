@@ -49,14 +49,25 @@ func (p SlicePresenter) SuccessSliceImages(r slice.Response) {
 	p.Render(p.Writer)
 }
 
-func (s *Server) Slice(w http.ResponseWriter, r *http.Request) {
-	s.PageBuilder.SetUserIdentity(r.Context())
+func (s *Server) SliceFromForm(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
 	filters := r.FormValue(rt.FilterQueryArgName)
 	ordering := r.FormValue(rt.OrderingQueryArgName)
+	s.doSlice(w, r, filters, ordering)
+}
+
+func (s *Server) Slice(w http.ResponseWriter, r *http.Request) {
+	filters := r.URL.Query().Get(rt.FilterQueryArgName)
+	ordering := r.URL.Query().Get(rt.OrderingQueryArgName)
+	s.doSlice(w, r, filters, ordering)
+}
+
+func (s *Server) doSlice(w http.ResponseWriter, r *http.Request, filters string, ordering string) {
+	s.PageBuilder.SetUserIdentity(r.Context())
+
 	s.SliceItr.Execute(slice.Request{
 		FilterStr: filters,
 		OrderStr:  ordering,

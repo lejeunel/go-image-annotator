@@ -274,16 +274,7 @@ func (s ImageStore) Slice(
 	o im.OrderStr,
 	p pag.PaginationParams,
 ) ([]im.Image, *pag.Pagination, error) {
-	errCtx := "listing images"
-
-	if err := s.FilterValidator.Validate(f); err != nil {
-		return nil, nil, fmt.Errorf("%v: validating query %v: %w", errCtx, f, err)
-	}
-
-	if err := s.OrderingValidator.Validate(o); err != nil {
-		return nil, nil, fmt.Errorf("%v: validating ordering %v: %w", errCtx, o, err)
-	}
-
+	errCtx := "slicing images"
 	baseImages, count, err := s.ImageRepo.Slice(f, o, p)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%v: %w", errCtx, err)
