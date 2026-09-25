@@ -148,7 +148,6 @@ func (s *Server) SubmitBox(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p := ap.NewAnnotoriousPresenter(w)
-	fmt.Printf("%+v", boxreq)
 	s.Annotator.AddBox.Execute(r.Context(), ap.ToAddBoxRequest(boxreq), &p)
 }
 
@@ -204,6 +203,10 @@ func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) GetRegionsAsJSON(w http.ResponseWriter, r *http.Request) {
 	p := ap.NewAnnotoriousPresenter(w)
-	s.Annotator.ReadImage(r.URL.Query().Get("id"), r.URL.Query().Get(rt.CollectionArgName), &p)
+	s.Annotator.ReadImage(
+		r.URL.Query().Get(rt.ImageIdArgName),
+		r.URL.Query().Get(rt.CollectionArgName),
+		&p,
+	)
 	p.RenderRegionAnnotationsAsJSON(w)
 }

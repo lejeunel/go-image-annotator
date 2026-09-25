@@ -106,6 +106,7 @@ func (v *AnnotationView) ShapeSelector() Node {
 					s.InactiveButton,
 				),
 			),
+			Type("button"),
 			Attr("@click", "Annotator.rectangleMode(); active = 'rectangle';"),
 			Div(
 				Class("flex items-center gap-1"),
@@ -122,6 +123,7 @@ func (v *AnnotationView) ShapeSelector() Node {
 					s.InactiveButton,
 				),
 			),
+			Type("button"),
 			Attr("@click", "Annotator.polygonMode(); active = 'polygon';"),
 			Div(
 				Class("flex items-center gap-1"),

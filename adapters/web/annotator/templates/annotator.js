@@ -136,10 +136,10 @@ const Annotator = (() => {
         imageLabelMode(){
             currentMode = IMAGE_MODE;
         },
-        polygonMode() {
-            instance.setDrawingTool('polygon');
+        polygonMode(){
+	    instance.setDrawingTool('polygon');
             currentMode = POLYGON_MODE;
-        },
+	},
         rectangleMode() {
             instance.setDrawingTool('rectangle');
             currentMode = BOX_MODE;
@@ -203,7 +203,7 @@ const Annotator = (() => {
 
         async submit(label) {
             try {
-                switch (currentMode){
+		switch (currentMode){
                 case BOX_MODE:
                     await AnnotationAPI.submitBox(label, lastCreatedAnnotation);
                     break;
