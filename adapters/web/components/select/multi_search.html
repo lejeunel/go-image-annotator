@@ -78,7 +78,8 @@
                         <span>No matches found</span>
                     </li>
                     <template x-for="(item, index) in options" x-bind:key="item.value">
-                        <li class="combobox-option inline-flex justify-between gap-6 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/5 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong" role="option" x-on:click="toggleOption(item)" x-on:keydown.enter="toggleOption(item)" x-bind:id="'option-' + index" x-bind:aria-selected="isSelected(item)" tabindex="0">
+                      <li
+			class="combobox-option inline-flex justify-between gap-6 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/5 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong cursor-pointer" role="option" x-on:click="toggleOption(item)" x-on:keydown.enter="toggleOption(item)" x-bind:id="'option-' + index" x-bind:aria-selected="isSelected(item)" tabindex="0">
                             <!-- Label  -->
                             <span x-bind:class="isSelected(item) ? 'font-bold' : null" x-text="item.label"></span>
                             <!-- Screen reader 'selected' indicator  -->
