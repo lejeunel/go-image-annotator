@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS annotations (
   author varchar(60) NULL,
   touched_at DATETIME,
   type varchar(15),
-  coordinates varchar(100),
+  coordinates TEXT,
   FOREIGN KEY (author) REFERENCES users(id),
   PRIMARY KEY (id)
 );
