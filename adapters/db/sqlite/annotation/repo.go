@@ -25,7 +25,7 @@ type AnnotationRow struct {
 	Id          a.AnnotationId `db:"id"`
 	LabelId     l.LabelId      `db:"label_id"`
 	Type        string         `db:"type"`
-	Coordinates string         `db:"coordinates"`
+	Coordinates *string        `db:"coordinates"`
 	Author      *u.UserId      `db:"author"`
 	Time        *time.Time     `db:"touched_at"`
 }
@@ -74,21 +74,32 @@ func (r AnnotationRepo) findLabelById(labelId l.LabelId) (*l.Label, error) {
 	return &l.Label{Id: rec.Id, Name: rec.Name, Description: rec.Description}, nil
 }
 
+func (r AnnotationRepo) findAnnotations(
+	imageId i.ImageId,
+	collection c.CollectionName,
+	annotationType string,
+) ([]AnnotationRow, error) {
+	query := fmt.Sprintf(`SELECT id,label_id,type,author,touched_at,coordinates FROM annotations
+	WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2) AND type='%v' ORDER BY touched_at`, annotationType)
+	records := []AnnotationRow{}
+	if err := r.Db.Select(&records, query, imageId, collection); err != nil {
+		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
+	}
+	return records, nil
+}
+
 func (r AnnotationRepo) FindImageLabels(
 	imageId i.ImageId,
 	collection c.CollectionName,
 ) ([]a.ImageLabel, error) {
-	query := `SELECT id,label_id,type,author,touched_at FROM annotations
-	WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2) AND type='image'`
-
-	errCtx := "querying image annotations"
-	records := []AnnotationRow{}
-	if err := r.Db.Select(&records, query, imageId, collection); err != nil {
-		return nil, fmt.Errorf("%v: applying query: %v: %w", errCtx, err, e.ErrInternal)
+	errCtx := fmt.Errorf("fetching image labels")
+	annotations, err := r.findAnnotations(imageId, collection, "image")
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}
 
 	imageLabels := []a.ImageLabel{}
-	for _, rec := range records {
+	for _, rec := range annotations {
 		label, err := r.findLabelById(rec.LabelId)
 		if err != nil {
 			return nil, fmt.Errorf("%v: %w", errCtx, err)
@@ -176,20 +187,20 @@ func (r AnnotationRepo) FindPolygons(
 	imageId i.ImageId,
 	collection c.CollectionName,
 ) ([]a.Polygon, error) {
-	query := `SELECT id,label_id,type,coordinates,author,touched_at
-		FROM annotations
-		WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2) AND type='polygon'`
-
-	errCtx := "querying polygon annotations"
-	records := []AnnotationRow{}
-	if err := r.Db.Select(&records, query, imageId, collection); err != nil {
-		return nil, fmt.Errorf("%v: applying query: %v: %w", errCtx, err, e.ErrInternal)
+	errCtx := fmt.Errorf("fetching polygons")
+	annotations, err := r.findAnnotations(imageId, collection, "polygon")
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}
 
 	polygons := []a.Polygon{}
-	for _, rec := range records {
+	for _, rec := range annotations {
 		var specs PolygonSpecs
-		err := json.Unmarshal([]byte(rec.Coordinates), &specs)
+		if rec.Coordinates == nil {
+			return nil, fmt.Errorf("%v: found nil coordinates: %w",
+				errCtx, e.ErrInternal)
+		}
+		err := json.Unmarshal([]byte(*rec.Coordinates), &specs)
 		if err != nil {
 			return nil, fmt.Errorf("%v: unmarshaling polygon specs: %+v: %w: %w",
 				errCtx, rec.Coordinates, err, e.ErrInternal)
@@ -255,20 +266,19 @@ func (r AnnotationRepo) FindBoundingBoxes(
 	imageId i.ImageId,
 	collection c.CollectionName,
 ) ([]a.BoundingBox, error) {
-	query := `SELECT id,label_id,type,coordinates,author,touched_at
-		FROM annotations
-		WHERE image_id=$1 AND collection_id=(SELECT id FROM collections WHERE name=$2) AND type='bounding_box'`
-
-	errCtx := "querying bounding-box annotations"
-	records := []AnnotationRow{}
-	if err := r.Db.Select(&records, query, imageId, collection); err != nil {
-		return nil, fmt.Errorf("%v: applying query: %v: %w", errCtx, err, e.ErrInternal)
+	errCtx := fmt.Errorf("fetching bounding boxes")
+	annotations, err := r.findAnnotations(imageId, collection, "bounding_box")
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}
-
 	boxes := []a.BoundingBox{}
-	for _, rec := range records {
+	for _, rec := range annotations {
 		var specs BoundingBoxSpecs
-		err := json.Unmarshal([]byte(rec.Coordinates), &specs)
+
+		if rec.Coordinates == nil {
+			return nil, fmt.Errorf("%w: found nil coordinates: %w", errCtx, e.ErrInternal)
+		}
+		err := json.Unmarshal([]byte(*rec.Coordinates), &specs)
 		if err != nil {
 			return nil, fmt.Errorf("%v: unmarshaling bounding box specs: %+v: %w: %w",
 				errCtx, rec.Coordinates, err, e.ErrInternal)

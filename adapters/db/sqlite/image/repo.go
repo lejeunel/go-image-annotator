@@ -385,7 +385,6 @@ func (r ImageRepo) GetAdjacent(
 ) (*im.AdjacentImages, error) {
 	errCtx := fmt.Errorf("getting adjacent image records")
 
-	// fetch images images and apply filtering/ordering
 	images := r.makeBaseSelectQuery()
 	filtered, err := r.applyFilters(images, f)
 	if err != nil {

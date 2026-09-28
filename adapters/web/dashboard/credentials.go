@@ -48,7 +48,10 @@ func RenderCredentialsPage(ctx context.Context, pb b.PageBuilder, w io.Writer) {
 	changePassword := Div(Class("mt-2"), makeSectionTitle("Reset password"),
 		form.Build())
 
-	content := Div(Class("flex flex-col w-120"), Div(APIToken, cmp.Separator, changePassword))
+	content := Div(
+		Class("flex flex-col w-120"),
+		Div(cmp.Separator, APIToken, cmp.Separator, changePassword),
+	)
 	pb.SetActiveSection(cmp.NoPageActive)
 	pb.AddMarkdownPreamble(credentialsPreamble)
 	pb.SetContent(content)

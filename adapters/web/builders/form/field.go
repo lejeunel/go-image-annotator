@@ -123,7 +123,7 @@ func makeInputNodeFunc(inputType string, extra ...Node) InputNodeFunc {
 			If(required, Required()),
 			If(value != "", Value(value)),
 			Class(
-				"w-full py-2 border border-outline dark:border-outline-dark rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+				"w-full px-3 py-2 border border-outline dark:border-outline-dark rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
 			),
 		)
 

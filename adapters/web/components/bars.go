@@ -58,8 +58,10 @@ func MakeRepoButton(repoName string, currentVersion, url string) Node {
 		Div(
 			Class("flex items-center gap-1"),
 			Span(Raw(ic.GitHub)),
-			Span(Text(repoName)),
-			Span(Text(currentVersion)),
+			Span(
+				Class("hover:text-gray-500, hover:dark:text-gray-500"),
+				Text(repoName+" "+currentVersion),
+			),
 		),
 	)
 }
@@ -200,7 +202,7 @@ func MakeDocsButton() Node {
 		Div(
 			Class("flex items-center gap-1"),
 			Span(Raw(ic.Book)),
-			Span(Text("Docs")),
+			Span(Class("hover:text-gray-500 hover:dark:text-gray-500"), Text("Docs")),
 		),
 	)
 }
@@ -212,7 +214,7 @@ func MakeFooter(currentVersion g.Info) Node {
 		),
 		Div(
 			Class(
-				"flex items-center gap-2 py-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 hover:dark:text-gray-500",
+				"flex items-center gap-2 py-1 text-gray-400 dark:text-gray-400",
 			),
 			Div(
 				MakeDocsButton(),
