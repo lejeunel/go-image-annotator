@@ -29,7 +29,7 @@ GOIA_LOCAL_ARTEFACT_PATH=/home/user/.cache/go-image-annotator
 Next, define a URI where raw images will be stored, e.g.
 
 ``` sh
-GOIA_ARTEFACT_DIR=file:///home/user/.cache/go-image-annotator/images
+GOIA_IMAGES_URI=file:///home/user/.cache/go-image-annotator/images
 ```
 
 Next, you must define initial credentials for the admin user, e.g.
