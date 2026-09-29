@@ -17,7 +17,7 @@ in
 
         vendorHash = "sha256-rgTdLVCVA5QopmuIC9H4OPTG6pgoXcG1t2xNH1dRVhA";
 
-        env.COG_ENABLED = 0;
+        env.CGO_ENABLED = 0;
         nativeBuildInputs = with pkgs; [
           go
           git

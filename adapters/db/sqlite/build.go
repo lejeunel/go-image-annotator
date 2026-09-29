@@ -30,7 +30,6 @@ func NewSQLiteConnection(path string) *sqlx.DB {
 		panic(fmt.Sprintf("sqlite: cannot resolve %q: %v", path, err))
 	}
 
-	// The database path must not be an existing directory.
 	if info, err := os.Stat(abs); err == nil && info.IsDir() {
 		panic(fmt.Sprintf("sqlite: %q is a directory, expected a database file", abs))
 	}
