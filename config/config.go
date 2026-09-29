@@ -18,7 +18,7 @@ type Config struct {
 	S3Secret                             string   `                split_words:"true"`
 	InitialAdminEmail                    string   `required:"true" split_words:"true"`
 	InitialAdminPassword                 string   `required:"true" split_words:"true"`
-	URL                                  string   `required:"true" split_words:"true"`
+	URL                                  string   `                split_words:"true" default:"localhost"`
 	AllowedImageMIMETypes                []string `                split_words:"true" default:"image/jpeg,image/png"`
 	DefaultPageSize                      int      `                split_words:"true" default:"20"`
 	MaxPageSize                          int      `                split_words:"true" default:"50"`

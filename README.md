@@ -19,24 +19,27 @@ built in [Go](https://go.dev/).
     
 ## Usage
 
-### Configuration
-
-This application stores meta and raw-data on a local mount.
-In particular, define a path for the SQLite database, e.g.
+This application stores meta and raw-data on a SQLite database
+stored on the local filesystem. For example, set its path to:
 
 ``` sh
-GOIA_DB_PATH=/home/user/.cache/go-image-annotator/db.sqlite
+GOIA_LOCAL_ARTEFACT_PATH=/home/user/.cache/go-image-annotator
 ```
 
-Next, define a path where images will be stored, e.g.
+Next, define a URI where raw images will be stored, e.g.
 
 ``` sh
-GOIA_ARTEFACT_DIR=/home/user/.cache/go-image-annotator/artefacts
+GOIA_ARTEFACT_DIR=file:///home/user/.cache/go-image-annotator/images
 ```
 
-`
+Next, you must define initial credentials for the admin user, e.g.
 
-### Building
+``` sh
+export GOIA_INITIAL_ADMIN_EMAIL=user@mail.com
+export GOIA_INITIAL_ADMIN_PASSWORD=sup3rs3cre7p455w0rd
+```
+
+## Building
 
 To build the binary, run
 
