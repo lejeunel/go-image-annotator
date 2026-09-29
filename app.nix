@@ -43,6 +43,9 @@ in
               go test -v -race ./...
               runHook postCheck
               '';
+
+        # testing needs the -race flag
+        env.CGO_ENABLED = 1;
           
         # Skip the actual binary build+install; we only want the test run.
         dontBuild = true;
