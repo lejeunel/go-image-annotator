@@ -39,6 +39,12 @@ export GOIA_INITIAL_ADMIN_EMAIL=user@mail.com
 export GOIA_INITIAL_ADMIN_PASSWORD=sup3rs3cre7p455w0rd
 ```
 
+Last, launch the server with:
+
+``` sh
+go-image-annotator serve
+```
+
 ## Building
 
 To build the binary, run
