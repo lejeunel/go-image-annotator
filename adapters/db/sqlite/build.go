@@ -4,10 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"fmt"
 	"io/fs"
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	goose "github.com/pressly/goose/v3"
@@ -19,10 +21,25 @@ import (
 var MigrationsFS embed.FS
 
 func NewSQLiteConnection(path string) *sqlx.DB {
-	err := os.MkdirAll(filepath.Dir(path), 0o755)
-	if err != nil {
-		panic(err)
+	if path == "" {
+		panic("sqlite: database path is empty")
 	}
+
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		panic(fmt.Sprintf("sqlite: cannot resolve %q: %v", path, err))
+	}
+
+	// The database path must not be an existing directory.
+	if info, err := os.Stat(abs); err == nil && info.IsDir() {
+		panic(fmt.Sprintf("sqlite: %q is a directory, expected a database file", abs))
+	}
+
+	dir := filepath.Dir(abs)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		panic(fmt.Sprintf("sqlite: cannot create directory %q for database %q: %v", dir, path, err))
+	}
+
 	q := url.Values{
 		"_time_format": {"sqlite"},
 		"_pragma": {
@@ -36,16 +53,27 @@ func NewSQLiteConnection(path string) *sqlx.DB {
 		},
 	}
 
+	// Absolute + forward slashes + leading "/" gives file:///abs/path on Unix
+	// and file:///C:/abs/path on Windows.
+	uriPath := filepath.ToSlash(abs)
+	if !strings.HasPrefix(uriPath, "/") {
+		uriPath = "/" + uriPath
+	}
 	u := url.URL{
 		Scheme:   "file",
-		Path:     path,
+		Path:     uriPath,
 		RawQuery: q.Encode(),
 	}
 
 	db, err := sqlx.Open("sqlite", u.String())
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("sqlite: open %q: %v", abs, err))
 	}
+	if err := db.Ping(); err != nil {
+		db.Close()
+		panic(fmt.Sprintf("sqlite: cannot connect to %q (from %q): %v", abs, path, err))
+	}
+
 	db.SetMaxOpenConns(4)
 	db.SetMaxIdleConns(4)
 
