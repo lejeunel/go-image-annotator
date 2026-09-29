@@ -85,19 +85,18 @@ type RegionRow struct {
 }
 
 func (r RegionRow) Render(w io.Writer) {
-	Div(
-		Td(Class("ps-1 py-2"),
-			Div(Class("flex flex-col"),
-				Div(Class(authorInfo), Text(r.Author)),
-				Div(Class(authorInfo), Text(r.Time)),
-			),
+	Div(Td(Class("ps-1 py-1"),
+		Div(Class("flex flex-col"),
+			Div(Class(authorInfo), Text(r.Author)),
+			Div(Class(authorInfo), Text(r.Time)),
 		),
-		Td(Class("ps-1 py-2"),
+	),
+		Td(Class("ps-1 py-1"),
 			Raw(r.Icon),
 		),
 		Td(Text(r.Label)),
 		Td(
-			Class("flex  justify-end items-center pr-1 gap-1 ps-1 py-2"),
+			Class("flex justify-end items-center pr-1 gap-1 ps-1 py-1"),
 			cmp.MakeIconizedButton(ic.Edit, "edit",
 				Attr(fmt.Sprintf(
 					`onclick="
