@@ -59,7 +59,7 @@ format-check:
 	fi
 
 test:
-	gotestsum ./...
+	go test -v ./...
 
 css:
 	tailwindcss -i $(CSS_MAIN) -o $(CSS_OUT) --minify

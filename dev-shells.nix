@@ -12,7 +12,6 @@
           gopls
           gofumpt
           golines
-          gotestsum
           tailwindcss_4
           oapi-codegen
           redocly

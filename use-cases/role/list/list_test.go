@@ -18,7 +18,7 @@ func TestHandleInternalErrOnList(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	r0 := r.NewRole(r.NewRoleId(), "a-role")
+	r0 := r.NewRole(r.NewRoleId(), "a-role", r.WithMethods([]string{"a-method"}))
 	r1 := r.NewRole(r.NewRoleId(), "another-role")
 	repo := &fk.RoleRepo{ReturnList: []r.Role{r0, r1}}
 	p := &FakePresenter{}
