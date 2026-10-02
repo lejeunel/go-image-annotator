@@ -26,7 +26,8 @@ stored on the local filesystem. For example, set its path to:
 GOIA_LOCAL_ARTEFACT_PATH=/home/user/.cache/go-image-annotator
 ```
 
-Next, define a URI where raw images will be stored, e.g.
+Next, define a URI where raw images will be stored. 
+For instance, to store images on the local file-system, use:
 
 ``` sh
 GOIA_IMAGES_URI=file:///home/user/.cache/go-image-annotator/images

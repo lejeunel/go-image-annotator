@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
-	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 )
 
 //go:embed preamble.md
@@ -32,12 +31,4 @@ func (s *Server) TableRow(w http.ResponseWriter, r *http.Request) {
 		p := NewViewPresenter(w, s.Page.PageBuilder, s.RowUrl)
 		s.Roles.Find.Execute(r.Context(), name, &p)
 	}
-}
-
-func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {
-	b := bf.NewHTMXFormBuilder(RoleRowUrl, createRoleTargetDiv)
-	b.AddTitle("Create a new role")
-	b.AddTextField(NameFieldName, "Name", bf.WithRequired())
-	b.AddTextField(DescriptionFieldName, "Description")
-	b.Render(w)
 }
