@@ -24,7 +24,7 @@ func TestSubmitTaskWithoutIdentity(t *testing.T) {
 func TestHandleAuthErr(t *testing.T) {
 	group := "my-group"
 	itr := NewTestingCloner()
-	itr.Auth = fk.Auth{Err: e.ErrAuthorization}
+	itr.Auth = fk.Auth{ErrOnAuth: e.ErrAuthorization}
 	p := &FakePresenter{}
 	itr.Execute(
 		st.CreateCtxWithUserId(t.Context(), "user@mail.com"),

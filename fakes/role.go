@@ -11,6 +11,7 @@ type RoleRepo struct {
 	ErrOnDelete   error
 	ErrOnFind     error
 	ErrOnList     error
+	ErrOnExists   error
 	ErrOnUpdate   error
 	ExistingNames []string
 	Created       []rl.Role
@@ -30,6 +31,10 @@ func (r *RoleRepo) Create(role rl.Role) error {
 }
 
 func (r *RoleRepo) Exists(name string) (*bool, error) {
+	if r.ErrOnExists != nil {
+		return nil, r.ErrOnExists
+	}
+
 	exist := true
 	if slices.Contains(r.ExistingNames, name) {
 		return &exist, nil

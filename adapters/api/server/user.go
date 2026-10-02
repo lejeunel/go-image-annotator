@@ -34,8 +34,8 @@ func (s *Server) WhoAmI(w http.ResponseWriter, r *http.Request) {
 	if user != nil {
 		json.WriteJSON(w, 200, User{
 			Id:     user.Id,
-			Groups: user.Groups,
-			Roles:  user.Roles,
+			Groups: user.GroupNames(),
+			Roles:  user.RoleNames(),
 		})
 		return
 	}

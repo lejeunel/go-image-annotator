@@ -1,43 +1,31 @@
 package authorizer
 
 import (
-	"fmt"
-	"slices"
-
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	rl "github.com/lejeunel/go-image-annotator/entities/role"
 )
 
-type Policies map[string][]string
+type MethodName = string
 
-func (p Policies) Validate() error {
-	invalidMethods := []string{}
-	for _, methods := range p {
-		for _, method := range methods {
-			if !slices.Contains(ValidMethods, method) {
-				invalidMethods = append(invalidMethods, method)
-			}
-		}
-	}
-	if len(invalidMethods) > 0 {
-		return fmt.Errorf(
-			"validating methods: found invalid names %v: %w",
-			invalidMethods,
-			e.ErrValidation,
-		)
-	}
-	return nil
+type Policy struct {
+	Role        rl.RoleName
+	Methods     []string
+	Description string
 }
 
-var DefaultPolicyFileName = "policies.yaml"
+type Policies []Policy
 
 var DefaultPolicies = Policies{
-	"annotator": {"Annotate"},
-	"image-contributor": {
+	{
+		"annotator",
+		[]string{"Annotate", "AddMetadata", "UpdateMetadata", "DeleteMetadata"},
+		"Annotate and add meta-data",
+	},
+	{"image-contributor", []string{
 		"IngestImage",
 		"ImportImage",
 		"CreateCollection",
 		"CloneCollection",
 		"DeleteCollection",
-	},
-	"admin": {"*"},
+	}, "Manage collections and ingest images"},
+	{"admin", []string{"*"}, "Can do anything"},
 }

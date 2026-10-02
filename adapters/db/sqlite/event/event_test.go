@@ -25,8 +25,8 @@ func TestErrOnInitTaskShouldFail(t *testing.T) {
 func TestCreateAndRetrieveTaskOfUser(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewEventRepo(db)
-	firstUser := u.NewUser("first")
-	secondUser := u.NewUser("second")
+	firstUser := u.BaseUser{Id: "first"}
+	secondUser := u.BaseUser{Id: "second"}
 	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(firstUser)
 	userRepo.Create(secondUser)
@@ -41,7 +41,7 @@ func TestCreateAndRetrieveTaskOfUser(t *testing.T) {
 func TestTasksAreRetrievedInInverseChronologicalOrder(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewEventRepo(db)
-	user := u.NewUser("first")
+	user := u.BaseUser{Id: "first"}
 	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(user)
 	t0 := ta.NewTaskId()
@@ -62,7 +62,7 @@ func TestAddingEventToNonExistingTaskShouldFail(t *testing.T) {
 func TestAddEventToTask(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewEventRepo(db)
-	user := u.NewUser("first")
+	user := u.BaseUser{Id: "first"}
 	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(user)
 	tid := ta.NewTaskId()
@@ -81,7 +81,7 @@ func TestAddEventToTask(t *testing.T) {
 func TestCountTasks(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewEventRepo(db)
-	user := u.NewUser("first")
+	user := u.BaseUser{Id: "first"}
 	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(user)
 	tid := ta.NewTaskId()
@@ -94,7 +94,7 @@ func TestCountTasks(t *testing.T) {
 func TestFindTask(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewEventRepo(db)
-	user := u.NewUser("first")
+	user := u.BaseUser{Id: "first"}
 	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(user)
 	tid := ta.NewTaskId()
@@ -108,7 +108,7 @@ func TestFindTask(t *testing.T) {
 func TestClipNumTasksPerUser(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewEventRepo(db)
-	user := u.NewUser("first")
+	user := u.BaseUser{Id: "first"}
 	userRepo := ur.NewUserRepo(db)
 	userRepo.Create(user)
 	firstId := ta.NewTaskId()

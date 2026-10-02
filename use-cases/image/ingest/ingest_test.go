@@ -18,7 +18,7 @@ func TestHandleAuthError(t *testing.T) {
 			"a-collection",
 			clc.WithGroup(group.Name)),
 	},
-		WithAuth(&fk.Auth{Err: e.ErrAuthorization}))
+		WithAuth(&fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), ig.Request{}, p)
 	assert.True(t, p.GotAuthErr)

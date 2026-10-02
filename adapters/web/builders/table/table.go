@@ -80,7 +80,7 @@ func (r Row) Build() Node {
 		Class("even:bg-primary/5 dark:even:bg-primary-dark/10"),
 		Map(r.Cells, func(c Cell) Node {
 			return Td(
-				Class(strings.Join([]string{"p-2 break-all", c.ExtraClass}, " ")),
+				Class(strings.Join([]string{"p-2 break-normal", c.ExtraClass}, " ")),
 				Attr(c.ExtraAttr),
 				c.Content)
 		}))

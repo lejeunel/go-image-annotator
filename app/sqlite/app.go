@@ -11,16 +11,18 @@ import (
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
 )
 
-func NewApp(cfg config.Config, auth auth.Interface, logger slog.Logger) app.App {
+func NewApp(cfg config.Config, logger slog.Logger) app.App {
 	imageStore, err := fs.Build(cfg, logger)
 	if err != nil {
 		panic(err)
 	}
 
 	infra := BuildInfra(cfg.LocalArtefactPath, imageStore)
+
+	auth := auth.New(auth.ValidMethods, infra.RoleRepo)
 	apiTokenGen := tk.New(cfg.ApiTokenLength)
 	itrs := BuildInteractors(infra, auth, logger, cfg, apiTokenGen)
-	sessionManager := NewSessionManager(infra.DB.DB, infra.UserRepo, apiTokenGen)
+	sessionManager := NewSessionManager(infra.DB.DB, infra.UserStore, apiTokenGen)
 
 	annotator := a.NewAnnotator(itrs.Image.Scroll, itrs.Image.Find,
 		itrs.Annotation.AddBox, itrs.Annotation.UpdateBox,
@@ -31,5 +33,5 @@ func NewApp(cfg config.Config, auth auth.Interface, logger slog.Logger) app.App 
 		itrs.Metadata.Read, itrs.Metadata.Delete,
 	)
 
-	return app.NewApp(itrs, sessionManager, annotator, infra.FilterParser, infra.OrderParser)
+	return app.NewApp(itrs, sessionManager, annotator, infra.FilterParser, infra.OrderParser, auth)
 }

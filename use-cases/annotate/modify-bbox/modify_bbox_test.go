@@ -38,7 +38,7 @@ func AssertUpdated(t *testing.T, expected, got a.BoundingBoxUpdatables) {
 func TestHandleAuthError(t *testing.T) {
 	itr := New(&fk.AnnotationRepo{},
 		&fk.LabelRepo{},
-		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
+		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{AnnotationId: a.NewAnnotationId().String()},

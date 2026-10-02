@@ -3,9 +3,9 @@ package create
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	rl "github.com/lejeunel/go-image-annotator/entities/role"
-	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	v "github.com/lejeunel/go-image-annotator/modules/string-validator"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -28,6 +28,21 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
+	existingMethods := i.Auth.ListMethods()
+	for _, m := range r.Methods {
+		if !slices.Contains(existingMethods, m) {
+			out.Error(
+				fmt.Errorf(
+					"%v: checking whether method %v is allowed: %w",
+					errCtx,
+					m,
+					e.ErrValidation,
+				),
+			)
+			return
+		}
+	}
+
 	if err := i.create(r); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -37,7 +52,12 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 }
 
 func (i *Interactor) create(r Request) error {
-	role := rl.NewRole(rl.NewRoleId(), r.Name, rl.WithDescription(r.Description))
+	role := rl.NewRole(
+		rl.NewRoleId(),
+		r.Name,
+		rl.WithDescription(r.Description),
+		rl.WithMethods(r.Methods),
+	)
 	if err := i.Repo.Create(role); err != nil {
 		return err
 	}
@@ -74,16 +94,10 @@ func WithNameValidator(v v.Validator) Option {
 	}
 }
 
-func WithAuth(a Auth) Option {
-	return func(i *Interactor) {
-		i.Auth = a
-	}
-}
-
-func New(r Repo, opts ...Option) Interactor {
+func New(r Repo, a Auth, opts ...Option) Interactor {
 	i := &Interactor{
 		Repo: r, Validator: v.NewNameValidator(),
-		Auth: auth.NewVoidAuth(),
+		Auth: a,
 	}
 
 	for _, opt := range opts {

@@ -1,113 +1,66 @@
 package authorizer
 
 import (
-	"strings"
 	"testing"
 
+	g "github.com/lejeunel/go-image-annotator/entities/group"
+	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	fk "github.com/lejeunel/go-image-annotator/fakes"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFailOnIllFormed(t *testing.T) {
-	_, err := NewAuthRulesFromYaml(strings.NewReader("xy///"))
-	assert.Error(t, err)
-}
-
-func TestFailOnNonExistingMethod(t *testing.T) {
-	_, err := NewAuthRulesFromYaml(
-		strings.NewReader(
-			`
-version: 1
-rules:
-  viewer:
-    - NonExistingMethod
-`,
-		))
-	assert.Error(t, err)
-}
-
-var validSpec = `
-version: 1
-rules:
-  a-role:
-    - CreateCollection
-  another-role:
-    - CreateCollection
-  admin:
-    - "*"
-`
-
-func TestValidRules(t *testing.T) {
-	authRules, err := NewAuthRulesFromYaml(
-		strings.NewReader(validSpec))
-	assert.NoError(t, err)
-	assert.Equal(t, 3, len(*authRules))
-}
-
-func TestNotAuthorizedWhenRequiredRoleIsMissing(t *testing.T) {
-	policies := map[string][]string{"super-role": {"CreatedCollection"}}
-	auth, err := New(policies)
-	assert.NoError(t, err)
-	ctx := u.AppendUserToContext(t.Context(), u.User{Roles: []string{"my-role"}})
+func TestNotAuthorizedWhenRequiredMethodIsMissing(t *testing.T) {
+	role := rl.NewRole(rl.NewRoleId(), "a-role-with-no-method")
+	auth := New([]string{}, &fk.RoleRepo{Return: role})
+	ctx := u.AppendUserToContext(t.Context(), u.User{})
 	group := "whatever"
-	err = auth.CreateCollection(ctx, &group)
+	err := auth.CreateCollection(ctx, &group)
 	assert.Error(t, err)
 }
 
 func TestAuthorizedWhenRequiredRoleIsPresent(t *testing.T) {
-	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
-	auth, err := New(policies)
-	assert.NoError(t, err)
+	role := rl.NewRole(
+		rl.NewRoleId(),
+		"a-role-with-needed-method",
+		rl.WithMethods([]string{"CreateCollection"}),
+	)
+	auth := New([]string{}, &fk.RoleRepo{Return: role})
+	group := g.NewGroup(g.NewGroupId(), "my-group")
 	ctx := u.AppendUserToContext(t.Context(),
-		u.User{Roles: []string{"a-role-that-i-have"}, Groups: []string{"my-group"}})
-	group := "my-group"
-	err = auth.CreateCollection(ctx, &group)
+		u.NewUser("user@example.com", u.WithRoles([]rl.Role{role}),
+			u.WithGroups([]g.Group{group})))
+	err := auth.CreateCollection(ctx, &group.Name)
 	assert.NoError(t, err)
 }
 
 func TestNotAuthorizedWhenNotInGroup(t *testing.T) {
-	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
-	auth, err := New(policies)
-	assert.NoError(t, err)
-	ctx := u.AppendUserToContext(t.Context(), u.User{
-		Roles:  []string{"a-role-that-i-have"},
-		Groups: []string{"group-of-losers"},
-	})
-	group := "group-of-chads"
-	err = auth.CreateCollection(ctx, &group)
+	role := rl.NewRole(rl.NewRoleId(), "a-role", rl.WithMethods([]string{"CreateCollection"}))
+	user := u.NewUser("user@example.com", u.WithRoles([]rl.Role{role}))
+	auth := New([]string{}, &fk.RoleRepo{Return: role})
+	ctx := u.AppendUserToContext(t.Context(), user)
+	group := "not-my-group"
+	err := auth.CreateCollection(ctx, &group)
 	assert.Error(t, err)
 }
 
 func TestAuthorizedWhenMemberOfGroup(t *testing.T) {
-	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
-	auth, err := New(policies)
-	assert.NoError(t, err)
-	ctx := u.AppendUserToContext(t.Context(), u.User{
-		Roles:  []string{"a-role-that-i-have"},
-		Groups: []string{"group-of-chads"},
-	})
-	group := "group-of-chads"
-	err = auth.CreateCollection(ctx, &group)
-	assert.NoError(t, err)
-}
+	role := rl.NewRole(rl.NewRoleId(), "a-role", rl.WithMethods([]string{"CreateCollection"}))
+	group := g.NewGroup(g.NewGroupId(), "a-group")
+	auth := New([]string{}, &fk.RoleRepo{Return: role})
+	user := u.NewUser("user@example.com", u.WithRoles([]rl.Role{role}),
+		u.WithGroups([]g.Group{group}))
+	ctx := u.AppendUserToContext(t.Context(), user)
 
-func TestAppendSetOfRules(t *testing.T) {
-	policies := map[string][]string{"a-role-that-i-have": {"CreateCollection"}}
-	auth := NewDefault()
-	auth.SetAuthRules(policies)
-	group := "the-group"
-	err := auth.CreateCollection(t.Context(), &group)
-	assert.Error(t, err)
+	err := auth.CreateCollection(ctx, &group.Name)
+	assert.NoError(t, err)
 }
 
 func TestAdminDoesNotNeedRoleNorGroup(t *testing.T) {
-	policies := map[string][]string{
-		"a-role-that-i-dont-have": {"CreateCollection"},
-		"admin":                   {"*"},
-	}
-	auth, _ := New(policies)
-	ctx := u.AppendUserToContext(t.Context(),
-		u.NewUser("admin@example.com", u.WithRoles([]string{"admin"})))
+	role := rl.NewRole(rl.NewRoleId(), "admin", rl.WithMethods([]string{"*"}))
+	auth := New([]string{}, &fk.RoleRepo{Return: role})
+	user := u.NewUser("admin@example.com", u.WithRoles([]rl.Role{role}))
+	ctx := u.AppendUserToContext(t.Context(), user)
 	group := "a-group-i-am-not-member-of"
 	err := auth.Annotate(ctx, &group)
 	assert.NoError(t, err)

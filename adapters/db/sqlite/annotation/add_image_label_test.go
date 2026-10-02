@@ -39,7 +39,7 @@ func TestAddAndRetrieveImageLabels(t *testing.T) {
 	repos := NewAnnotationTestRepos(s.NewInMemory())
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
 
-	user := u.NewUser("user@example.com")
+	user := u.BaseUser{Id: "user@example.com"}
 	repos.User.Create(user)
 	now := time.Now()
 	repos.Annotation.AddImageLabel(

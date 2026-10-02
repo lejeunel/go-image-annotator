@@ -9,7 +9,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&fk.RoleRepo{}, WithAuth(fk.Auth{Err: e.ErrAuthorization}))
+	itr := New(&fk.RoleRepo{}, WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.False(t, p.GotSuccess)
@@ -23,21 +23,6 @@ func TestUpdateNonExistingRoleShouldFail(t *testing.T) {
 	itr.Execute(t.Context(), Request{Name: non_existing_name, NewName: "new-name"}, p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
-}
-
-func TestUpdateRole(t *testing.T) {
-	name := "name"
-	p := &FakePresenter{}
-	repo := &fk.RoleRepo{ExistingNames: []string{name}}
-	itr := New(repo)
-	req := Request{
-		Name:           name,
-		NewName:        "updated-name",
-		NewDescription: "updated-description",
-	}
-	itr.Execute(t.Context(), req, p)
-	assert.Equal(t, req.NewName, p.Got.Name)
-	assert.Equal(t, req.NewDescription, p.Got.Description)
 }
 
 func TestUpdateRoleWithNameAlreadyTakenShouldFail(t *testing.T) {
@@ -68,4 +53,21 @@ func TestHandleInternalError(t *testing.T) {
 	itr.Execute(t.Context(),
 		Request{Name: name, NewName: name}, p)
 	assert.True(t, p.GotInternalErr)
+}
+
+func TestUpdateRole(t *testing.T) {
+	name := "name"
+	p := &FakePresenter{}
+	repo := &fk.RoleRepo{ExistingNames: []string{name}}
+	itr := New(repo)
+	req := Request{
+		Name:           name,
+		NewName:        "updated-name",
+		NewDescription: "updated-description",
+		NewMethods:     []string{"new-method"},
+	}
+	itr.Execute(t.Context(), req, p)
+	assert.Equal(t, req.NewName, p.Got.Name)
+	assert.Equal(t, req.NewDescription, p.Got.Description)
+	assert.Equal(t, req.NewMethods, p.Got.Methods)
 }

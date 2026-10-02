@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	grp "github.com/lejeunel/go-image-annotator/entities/group"
 	r "github.com/lejeunel/go-image-annotator/entities/role"
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
@@ -15,7 +16,7 @@ func TestHandleAuthError(t *testing.T) {
 	itr := New(&fk.UserRepo{},
 		&fk.GroupRepo{},
 		&fk.RoleRepo{},
-		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
+		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.True(t, p.GotAuthErr)
@@ -53,21 +54,21 @@ func TestHandleErrorOnFindUser(t *testing.T) {
 }
 
 func TestAssignUserWhoIsAlreadyAssignedHasNoEffect(t *testing.T) {
-	groups := []string{"a-group"}
+	groups := []grp.Group{grp.NewGroup(grp.NewGroupId(), "a-group")}
 	user := usr.NewUser("user@example.com",
-		usr.WithGroups(groups))
+		usr.WithGroups(groups)).ToBase()
 	repo := &fk.UserRepo{Return: &user}
 	itr := New(repo, &fk.GroupRepo{ExistingNames: []string{"a-group"}}, &fk.RoleRepo{})
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Id: user.Id, Groups: []string{"a-group"}}, p)
 	assert.True(t, p.GotSuccess)
-	assert.Equal(t, groups, p.Got.Groups)
+	assert.Equal(t, groups[0].Name, p.Got.Groups[0])
 	assert.Nil(t, repo.GotNewGroup)
 }
 
 func TestUpdateGroups(t *testing.T) {
 	user := usr.NewUser("user@example.com",
-		usr.WithGroups([]string{"a-group"}))
+		usr.WithGroups([]grp.Group{grp.NewGroup(grp.NewGroupId(), "a-group")})).ToBase()
 	repo := &fk.UserRepo{Return: &user}
 	itr := New(
 		repo,
@@ -84,7 +85,7 @@ func TestUpdateGroups(t *testing.T) {
 
 func TestUpdateRoles(t *testing.T) {
 	user := usr.NewUser("user@example.com",
-		usr.WithRoles([]string{"a-role"}))
+		usr.WithRoles([]r.Role{r.NewRole(r.NewRoleId(), "a-role")})).ToBase()
 	newRole := "a-new-role"
 	updatedRoles := []string{newRole}
 	usrRepo := &fk.UserRepo{Return: &user}
@@ -99,7 +100,7 @@ func TestUpdateRoles(t *testing.T) {
 
 func TestRemovingAdminRoleWhenNoOtherAdminShouldFail(t *testing.T) {
 	user := usr.NewUser("user@example.com",
-		usr.WithRoles([]string{r.AdminRoleName}))
+		usr.WithRoles([]r.Role{r.NewRole(r.NewRoleId(), r.AdminRoleName)})).ToBase()
 	usrRepo := &fk.UserRepo{Return: &user, CountAdmins_: 1}
 	roleRepo := &fk.RoleRepo{ExistingNames: []string{r.AdminRoleName}}
 	itr := New(usrRepo, &fk.GroupRepo{}, roleRepo)

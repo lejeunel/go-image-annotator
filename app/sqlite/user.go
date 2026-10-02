@@ -7,6 +7,7 @@ import (
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	pw "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
+	usrs "github.com/lejeunel/go-image-annotator/modules/user-store"
 	usr "github.com/lejeunel/go-image-annotator/use-cases/user"
 	cpw "github.com/lejeunel/go-image-annotator/use-cases/user/change-password"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
@@ -21,6 +22,7 @@ import (
 
 func NewUserInteractors(
 	userRepo sqliteusr.UserRepo,
+	userStore usrs.UserStore,
 	grpRepo sqlitegrp.GroupRepo,
 	roleRepo sqliterol.RoleRepo,
 	ApitokenGen create.APITokenGenerator,
@@ -33,7 +35,7 @@ func NewUserInteractors(
 	auth auth.Interface,
 ) usr.Interactors {
 	return usr.Interactors{
-		Find:             find.New(userRepo, find.WithAuth(auth)),
+		Find:             find.New(userStore, find.WithAuth(auth)),
 		Create:           create.New(userRepo, ApitokenGen, pwGen, create.WithAuth(auth)),
 		Delete:           delete.New(userRepo, delete.WithAuth(auth)),
 		List:             list.New(userRepo, list.WithAuth(auth)),

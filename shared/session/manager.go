@@ -18,7 +18,7 @@ var UserIdKey = "user-id"
 
 type SessionManager struct {
 	*scs.SessionManager
-	readusr.Repo
+	readusr.UserStore
 	tk.TokenVerifier
 }
 
@@ -36,7 +36,7 @@ func (m SessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, e
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", errCtx, err)
 	}
-	user, err := m.Repo.Find(token.UserId)
+	user, err := m.UserStore.Find(token.UserId)
 	if err != nil {
 		return nil, fmt.Errorf("%w: fetching user: %w", errCtx, err)
 	}
@@ -77,7 +77,7 @@ func (m SessionManager) AuthFromSessionId(next http.Handler) http.Handler {
 			return
 		}
 
-		user, err := m.Repo.Find(id)
+		user, err := m.UserStore.Find(id)
 		if err != nil {
 			next.ServeHTTP(w, r)
 			return
@@ -96,7 +96,7 @@ func (m SessionManager) Logout(ctx context.Context) error {
 
 func (m SessionManager) FinishOAuthLogin(ctx context.Context, id string) error {
 	errCtx := fmt.Errorf("logging in user %v", id)
-	if _, err := m.Repo.Find(id); err != nil {
+	if _, err := m.UserStore.Find(id); err != nil {
 		return fmt.Errorf("%w: checking if user is registered: %w", errCtx, err)
 	}
 
@@ -108,7 +108,7 @@ func (m SessionManager) FinishOAuthLogin(ctx context.Context, id string) error {
 
 func (m SessionManager) PasswordLogin(ctx context.Context, email, password string) error {
 	errCtx := fmt.Errorf("logging in user %v using password method", email)
-	user, err := m.Repo.Find(email)
+	user, err := m.UserStore.Find(email)
 	if err != nil {
 		return fmt.Errorf("%w: fetching user from email: %w", errCtx, err)
 	}

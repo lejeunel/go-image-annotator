@@ -3,7 +3,7 @@ package update
 import usr "github.com/lejeunel/go-image-annotator/entities/user"
 
 type UserRepo interface {
-	Find(usr.UserId) (*usr.User, error)
+	Find(usr.UserId) (*usr.BaseUser, error)
 	SetGroups(usr.UserId, []string) error
 	SetRoles(usr.UserId, []string) error
 	CountAdmins() (int64, error)

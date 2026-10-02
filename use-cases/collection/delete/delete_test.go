@@ -16,7 +16,7 @@ func Setup(t *testing.T) (Interactor, clc.Collection, grp.Group, context.Context
 	group := grp.NewGroup(grp.NewGroupId(), "my-group")
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection",
 		clc.WithGroup(group.Name))
-	user := u.NewUser("user@mail.com", u.WithGroups([]string{"my-group"}))
+	user := u.NewUser("user@mail.com", u.WithGroups([]grp.Group{group}))
 
 	itr := New(
 		&fk.ImageStore{},
@@ -33,7 +33,7 @@ func Setup(t *testing.T) (Interactor, clc.Collection, grp.Group, context.Context
 func TestHandleAuthError(t *testing.T) {
 	itr, _, _, _ := Setup(t)
 	p := &FakePresenter{}
-	itr.Auth = &fk.Auth{Err: e.ErrAuthorization}
+	itr.Auth = &fk.Auth{ErrOnAuth: e.ErrAuthorization}
 	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)

@@ -30,7 +30,7 @@ type ForgottenPasswordStateRecord struct {
 	ExpiresAt time.Time `db:"expires_at"`
 }
 
-func (r UserRepo) Create(usr u.User) error {
+func (r UserRepo) Create(usr u.BaseUser) error {
 	query := "INSERT INTO users (id,api_token_hash,password_hash) VALUES ($1,$2,$3)"
 	_, err := r.Db.Exec(
 		query,
@@ -142,7 +142,7 @@ func (r UserRepo) getRoleNames(userId string) ([]string, error) {
 	return roles, nil
 }
 
-func (r UserRepo) recordToEntity(rec Record) (*u.User, error) {
+func (r UserRepo) recordToEntity(rec Record) (*u.BaseUser, error) {
 	groups, err := r.getGroupNames(rec.Id)
 	if err != nil {
 		return nil, err
@@ -161,13 +161,13 @@ func (r UserRepo) recordToEntity(rec Record) (*u.User, error) {
 		return nil, err
 	}
 
-	user := u.NewUser(rec.Id, u.WithRoles(roles), u.WithGroups(groups),
-		u.WithHashedPersonalAccessToken(patHash),
-		u.WithPasswordHash(pwHash))
-	return &user, nil
+	return &u.BaseUser{
+		Id: rec.Id, HashPAT: patHash, HashPassword: pwHash,
+		Roles: roles, Groups: groups,
+	}, nil
 }
 
-func (r UserRepo) Find(id u.UserId) (*u.User, error) {
+func (r UserRepo) Find(id u.UserId) (*u.BaseUser, error) {
 	record := Record{}
 	err := r.Db.Get(&record,
 		"SELECT id,api_token_hash,password_hash FROM users WHERE id=$1", id)
@@ -218,7 +218,7 @@ func (r UserRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (r UserRepo) List(m pag.PaginationParams) ([]u.User, error) {
+func (r UserRepo) List(m pag.PaginationParams) ([]u.BaseUser, error) {
 	q := sq.StatementBuilder.Select("id,api_token_hash,password_hash").From("users")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
@@ -230,7 +230,7 @@ func (r UserRepo) List(m pag.PaginationParams) ([]u.User, error) {
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
 
-	users := []u.User{}
+	users := []u.BaseUser{}
 	for _, rec := range records {
 		user, err := r.recordToEntity(rec)
 		if err != nil {

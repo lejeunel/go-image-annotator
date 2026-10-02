@@ -17,6 +17,7 @@ import (
 	usr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	q "github.com/lejeunel/go-image-annotator/modules/query"
+	usrs "github.com/lejeunel/go-image-annotator/modules/user-store"
 )
 
 type Infra struct {
@@ -27,6 +28,7 @@ type Infra struct {
 	grp.GroupRepo
 	r.RoleRepo
 	usr.UserRepo
+	usrs.UserStore
 	pr.ProfileRepo
 	ev.EventRepo
 	md.MetaRepo
@@ -41,14 +43,18 @@ type Infra struct {
 func BuildInfra(localPath string, imageStore fs.FileStore) Infra {
 	filterParser, orderingParser := im.MakeQueryParsers()
 	db := db.NewSQLiteDB(localPath + "/" + "db.sqlite")
+	userRepo := usr.NewUserRepo(db)
+	roleRepo := r.NewRoleRepo(db)
+	groupRepo := grp.NewGroupRepo(db)
 	return Infra{
 		im.NewImageRepo(db, filterParser, orderingParser),
 		clc.NewCollectionRepo(db),
 		an.NewAnnotationRepo(db),
 		lbl.NewLabelRepo(db),
-		grp.NewGroupRepo(db),
-		r.NewRoleRepo(db),
-		usr.NewUserRepo(db),
+		groupRepo,
+		roleRepo,
+		userRepo,
+		usrs.NewUserStore(userRepo, roleRepo, groupRepo),
 		pr.NewProfileRepo(db),
 		ev.NewEventRepo(db),
 		md.NewMetaRepo(db),

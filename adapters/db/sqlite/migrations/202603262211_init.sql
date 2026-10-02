@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS roles (
     id varchar(36),
     name varchar(30) not null unique,
     description text,
+    methods text,
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX idx_roles_name ON roles(name);

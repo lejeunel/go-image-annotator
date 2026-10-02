@@ -17,7 +17,7 @@ func TestHandleAuthError(t *testing.T) {
 	itr := New(&fk.CollectionRepo{},
 		&fk.GroupRepo{Return: g.NewGroup(g.NewGroupId(), "a-group")},
 		&fk.ProfileRepo{},
-		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
+		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{Group: &group}, p)
 	assert.True(t, p.GotAuthErr)

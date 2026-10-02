@@ -6,7 +6,7 @@ import (
 
 	itr "github.com/lejeunel/go-image-annotator/app/interactors"
 	cfg "github.com/lejeunel/go-image-annotator/config"
-	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	"github.com/lejeunel/go-image-annotator/modules/authorizer"
 
 	tra "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/transactors"
 	aig "github.com/lejeunel/go-image-annotator/modules/archive-ingester"
@@ -20,7 +20,7 @@ import (
 
 func BuildInteractors(
 	infra Infra,
-	auth auth.Interface,
+	auth authorizer.Interface,
 	logger slog.Logger,
 	cfg cfg.Config,
 	ts tk.TokenService,
@@ -85,7 +85,8 @@ func BuildInteractors(
 			cfg.MaxPageSize,
 			auth,
 		),
-		User: NewUserInteractors(infra.UserRepo, infra.GroupRepo, infra.RoleRepo,
+		User: NewUserInteractors(infra.UserRepo, infra.UserStore,
+			infra.GroupRepo, infra.RoleRepo,
 			ts,
 			forgottenPasswordGen,
 			passwordValidator,
@@ -110,7 +111,6 @@ func BuildInteractors(
 			passwordTokenizer,
 			passwordValidator,
 		),
-		Policy: NewPolicyInteractors(infra.PolicyFileStore, auth),
 		Metadata: NewMetadataInteractors(
 			infra.MetaRepo,
 			infra.CollectionRepo,

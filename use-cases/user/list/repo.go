@@ -6,6 +6,6 @@ import (
 )
 
 type Repo interface {
-	List(pag.PaginationParams) ([]u.User, error)
+	List(pag.PaginationParams) ([]u.BaseUser, error)
 	Count() (int64, error)
 }

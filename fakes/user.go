@@ -22,14 +22,14 @@ type UserRepo struct {
 	ErrOnSetGroups                 error
 	ErrOnSetRoles                  error
 	Missing                        bool
-	Return                         *usr.User
+	Return                         *usr.BaseUser
 	GotNewGroup                    *string
 	ExistingIds                    []string
 	GotNewRole                     *string
 	GotId                          usr.UserId
 	GotHash                        []byte
 	ReturnPasswordState            *usr.ForgotPasswordState
-	Created                        *usr.User
+	Created                        *usr.BaseUser
 	DeletedPreviousTokens          bool
 	GotExpiresAt                   time.Time
 	Count_                         int64
@@ -42,7 +42,7 @@ type UserRepo struct {
 	SetRolesToUser                 usr.UserId
 }
 
-func (r *UserRepo) Find(id string) (*usr.User, error) {
+func (r *UserRepo) Find(id string) (*usr.BaseUser, error) {
 	if r.Missing {
 		return nil, e.ErrNotFound
 	}
@@ -69,7 +69,7 @@ func (r *UserRepo) UpdatePassword(id usr.UserId, hash []byte) error {
 	return nil
 }
 
-func (r *UserRepo) Create(u usr.User) error {
+func (r *UserRepo) Create(u usr.BaseUser) error {
 	if r.ErrOnCreate != nil {
 		return r.ErrOnCreate
 	}
@@ -113,15 +113,15 @@ func (r *UserRepo) Count() (int64, error) {
 	return int64(r.Count_), nil
 }
 
-func (r *UserRepo) List(req pag.PaginationParams) ([]usr.User, error) {
+func (r *UserRepo) List(req pag.PaginationParams) ([]usr.BaseUser, error) {
 	if r.ErrOnList != nil {
 		return nil, r.ErrOnList
 	}
 
-	result := []usr.User{}
+	result := []usr.BaseUser{}
 	for range req.PageSize {
 		usr := usr.NewUser("the-id")
-		result = append(result, usr)
+		result = append(result, usr.ToBase())
 	}
 	return result, nil
 }

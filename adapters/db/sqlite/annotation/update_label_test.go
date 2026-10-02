@@ -30,7 +30,7 @@ func TestUpdateLabelOfAnnotation(t *testing.T) {
 	repos.Annotation.AddBoundingBox(image.Id, collection.Name, bbox, nil, nil)
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
 	repos.Label.Create(newLabel)
-	user := u.NewUser("user@example.com")
+	user := u.BaseUser{Id: "user@example.com"}
 	repos.User.Create(user)
 	now := time.Now()
 	repos.Annotation.UpdateLabelOfAnnotation(bbox.Id, newLabel.Id, &user.Id, &now)

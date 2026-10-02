@@ -3,55 +3,53 @@ package authorizer
 import (
 	"context"
 	"fmt"
-	"io"
 	"slices"
 
+	gr "github.com/lejeunel/go-image-annotator/entities/group"
+	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
+type RoleRepo interface {
+	Find(role rl.RoleName) (*rl.Role, error)
+}
+
 type Authorizer struct {
-	Rules Policies
+	Methods []string
+	RoleRepo
 }
 
-func NewDefault() Authorizer {
-	r := Authorizer{Rules: DefaultPolicies}
-	return r
+func New(methods []string, rr RoleRepo) Authorizer {
+	return Authorizer{methods, rr}
 }
 
-func New(rules Policies) (*Authorizer, error) {
-	return &Authorizer{rules}, nil
+func (a Authorizer) ListMethods() []string {
+	return a.Methods
 }
 
-func NewFromYaml(r io.Reader) (*Authorizer, error) {
-	rules, err := NewAuthRulesFromYaml(r)
-	if err != nil {
-		return nil, fmt.Errorf("building authorizer from yaml: %w", err)
-	}
-	return New(*rules)
-}
-
-func (a Authorizer) checkForGroup(userGroups []string, neededGroup string) error {
-	for _, userGroup := range userGroups {
-		if userGroup == neededGroup {
+func (a Authorizer) checkForGroup(userGroups []gr.Group, neededGroup string) error {
+	for _, group := range userGroups {
+		if group.Name == neededGroup {
 			return nil
 		}
 	}
 	return fmt.Errorf("checking membership to group %v: %w", neededGroup, e.ErrAuthorization)
 }
 
-func (a Authorizer) checkForRole(userRoles []string, method string) error {
-	for _, role := range userRoles {
-		if slices.Contains(a.Rules[role], method) {
+func (a Authorizer) checkForRole(roles []rl.Role, method string) error {
+	errCtx := fmt.Errorf("checking for role access")
+	for _, role := range roles {
+		if slices.Contains(role.Methods, method) {
 			return nil
 		}
-		if slices.Contains(a.Rules[role], "*") {
+		if slices.Contains(role.Methods, "*") {
 			return nil
 		}
 	}
 	return fmt.Errorf(
-		"checking for role access given user roles %v: %w",
-		userRoles,
+		"%w: %w",
+		errCtx,
 		e.ErrAuthorization,
 	)
 }
@@ -72,10 +70,6 @@ func (a Authorizer) check(ctx context.Context, method string, group *string) err
 		}
 	}
 	return nil
-}
-
-func (a *Authorizer) SetAuthRules(rules Policies) {
-	a.Rules = rules
 }
 
 func (a Authorizer) CreateCollection(ctx context.Context, group *string) error {

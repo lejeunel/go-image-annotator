@@ -34,7 +34,7 @@ func TestHandleAuthError(t *testing.T) {
 	itr.CollectionRepo = &fk.CollectionRepo{
 		Return: collection,
 	}
-	itr.Auth = &fk.Auth{Err: e.ErrAuthorization}
+	itr.Auth = &fk.Auth{ErrOnAuth: e.ErrAuthorization}
 	p := &FakePresenter{}
 	itr.Execute(ctx, Request{}, p)
 	assert.True(t, p.GotAuthErr)

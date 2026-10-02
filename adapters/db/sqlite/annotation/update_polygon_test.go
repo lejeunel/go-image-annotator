@@ -39,7 +39,7 @@ func TestUpdatePolygon(t *testing.T) {
 	repos.Annotation.AddPolygon(image.Id, collection.Name, polygon, nil, nil)
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "a-new-label")
 	repos.Label.Create(newLabel)
-	user := u.NewUser("user@example.com")
+	user := u.BaseUser{Id: "user@example.com"}
 	repos.User.Create(user)
 
 	newPolygon := a.PolygonUpdatables{

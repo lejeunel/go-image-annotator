@@ -3,7 +3,6 @@ package user
 import (
 	"io"
 	"net/http"
-	"slices"
 	"strings"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
@@ -53,7 +52,7 @@ func NewViewPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) ViewPr
 }
 
 func (p ViewPresenter) SuccessFindUser(user u.User) {
-	MakeRow(p.RowURL, user).Render(p.Writer)
+	MakeRow(p.RowURL, user.ToBase()).Render(p.Writer)
 }
 
 type DeletePresenter struct {
@@ -101,16 +100,17 @@ func (p EditPresenter) Render(w io.Writer) {
 	form.SetResourceName(p.user.Id)
 	roleSelect := form.AddSelectableCombobox(rolesFieldLabelName, rolesFieldName)
 	for _, role := range p.roles {
-		roleSelect.AddField(role.Name, slices.Contains(p.user.Roles, role.Name))
+		roleSelect.AddField(role.Name, p.user.HasRole(role.Name))
 	}
 	groupSelect := form.AddSelectableCombobox(groupsFieldLabelName, groupsFieldName)
 	for _, grp := range p.groups {
-		groupSelect.AddField(grp.Name, slices.Contains(p.user.Groups, grp.Name))
+		groupSelect.AddField(grp.Name,
+			p.user.IsInGroup(grp.Name))
 	}
 	form.Render(p.Writer)
 }
 
-func MakeRow(url b.RowURL, user u.User) tb.Row {
+func MakeRow(url b.RowURL, user u.BaseUser) tb.Row {
 	url.SetId(user.Id)
 	actions := b.NewActionsPanelBuilder()
 	actions.SetEdit(url.SetMode(b.ModeEdit).Url)

@@ -56,9 +56,13 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 			return
 		}
 	}
-	user := usr.NewUser(r.Id, usr.WithHashedPersonalAccessToken(token.Hash),
-		usr.WithPasswordHash(passwordHash),
-		usr.WithGroups(r.Groups), usr.WithRoles(r.Roles))
+	user := usr.BaseUser{
+		Id:           r.Id,
+		HashPAT:      token.Hash,
+		HashPassword: passwordHash,
+		Groups:       r.Groups,
+		Roles:        r.Roles,
+	}
 	if err := i.Repo.Create(user); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

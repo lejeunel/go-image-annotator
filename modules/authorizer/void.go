@@ -10,7 +10,9 @@ func NewVoidAuth() VoidAuthorizer {
 	return VoidAuthorizer{}
 }
 
-func (a VoidAuthorizer) SetAuthRules(rules Policies) {}
+func (a VoidAuthorizer) ListMethods() []string {
+	return ValidMethods
+}
 
 func (a VoidAuthorizer) CreateCollection(ctx context.Context, group *string) error {
 	return nil

@@ -6,8 +6,10 @@ import (
 	"os"
 
 	itrs "github.com/lejeunel/go-image-annotator/app/interactors"
+	r "github.com/lejeunel/go-image-annotator/entities/role"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
+	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	q "github.com/lejeunel/go-image-annotator/modules/query"
 	s "github.com/lejeunel/go-image-annotator/shared/session"
 	bst "github.com/lejeunel/go-image-annotator/use-cases/bootstrap"
@@ -27,6 +29,7 @@ type App struct {
 	a.Annotator
 	ImageFilterDocumenter
 	ImageSortDocumenter
+	auth.Authorizer
 }
 
 func NewApp(
@@ -35,6 +38,7 @@ func NewApp(
 	an a.Annotator,
 	fd ImageFilterDocumenter,
 	sd ImageSortDocumenter,
+	auth auth.Authorizer,
 ) App {
 	return App{
 		Itrs:                  itrs,
@@ -42,6 +46,7 @@ func NewApp(
 		Annotator:             an,
 		ImageFilterDocumenter: fd,
 		ImageSortDocumenter:   sd,
+		Authorizer:            auth,
 	}
 }
 
@@ -61,7 +66,8 @@ func (p InitialAdminPresenter) Error(err error) {
 }
 
 func BootstrapInitialAdmin(itr bst.Interactor, email, password string, logger slog.Logger) {
-	user := u.NewUser("anonymous", u.WithRoles([]string{"admin"}))
+	role := r.NewRole(r.NewRoleId(), "admin", r.WithMethods([]string{"*"}))
+	user := u.NewUser("anonymous", u.WithRoles([]r.Role{role}))
 	ctx := u.AppendUserToContext(context.Background(), user)
 	pres := InitialAdminPresenter{logger}
 	itr.Execute(ctx, bst.Request{InitialAdminEmail: email, InitialAdminPassword: password}, pres)

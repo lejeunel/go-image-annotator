@@ -23,7 +23,7 @@ func TestCreateUserWithOneRole(t *testing.T) {
 	db := s.NewInMemory()
 	repo := NewUserRepo(db)
 	roleRepo := roleRepo.NewRoleRepo(db)
-	user := u.NewUser(userId, u.WithRoles([]string{"a-role"}))
+	user := u.BaseUser{Id: userId, Roles: []string{"a-role"}}
 	roleRepo.Create(r.NewRole(r.NewRoleId(), "a-role"))
 	repo.Create(user)
 	r, _ := repo.Find(userId)

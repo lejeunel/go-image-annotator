@@ -27,7 +27,7 @@ func Setup() (Interactor, clc.Collection, im.Image, g.Group) {
 func TestHandleAuthError(t *testing.T) {
 	itr, collection, image, group := Setup()
 	itr.CollectionRepo = &fk.CollectionRepo{ReturnGroup: group.Name}
-	itr.Auth = &fk.Auth{Err: e.ErrAuthorization}
+	itr.Auth = &fk.Auth{ErrOnAuth: e.ErrAuthorization}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{ImageId: image.Id.String(), Collection: collection.Name},

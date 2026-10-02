@@ -21,7 +21,7 @@ func CreateTestRequest() Request {
 func TestHandleAuthError(t *testing.T) {
 	itr := New(&fk.AnnotationRepo{},
 		&fk.LabelRepo{},
-		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
+		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), CreateTestRequest(), p)
 	assert.True(t, p.GotAuthErr)

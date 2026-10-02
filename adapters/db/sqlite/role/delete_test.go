@@ -48,7 +48,7 @@ func TestRoleUsedByUser(t *testing.T) {
 	usrRepo := usrRepo.NewUserRepo(db)
 	roleRepo := NewRoleRepo(db)
 	role, _ := CreateRole(roleRepo, "a-role")
-	user := usr.NewUser("user@mail.com", usr.WithRoles([]string{"a-role"}))
+	user := usr.BaseUser{Id: "user@mail.com", Roles: []string{"a-role"}}
 	usrRepo.Create(user)
 	isPopulated, err := roleRepo.IsAssigned(role.Name)
 	assert.NoError(t, err)

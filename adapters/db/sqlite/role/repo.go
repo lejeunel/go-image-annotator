@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	ro "github.com/lejeunel/go-image-annotator/entities/role"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -20,11 +20,18 @@ type Row struct {
 	Id          ro.RoleId `db:"id"`
 	Name        string    `db:"name"`
 	Description string    `db:"description"`
+	Methods     string    `db:"methods"`
 }
 
 func (r RoleRepo) Create(role ro.Role) error {
-	query := `INSERT INTO roles (id, name, description) VALUES ($1,$2,$3)`
-	_, err := r.Db.Exec(query, role.Id, role.Name, role.Description)
+	query := `INSERT INTO roles (id, name, description, methods) VALUES ($1,$2,$3,$4)`
+	_, err := r.Db.Exec(
+		query,
+		role.Id,
+		role.Name,
+		role.Description,
+		strings.Join(role.Methods, ","),
+	)
 	if err != nil {
 		return fmt.Errorf("creating role: %v: %w", err, e.ErrInternal)
 	}
@@ -33,16 +40,31 @@ func (r RoleRepo) Create(role ro.Role) error {
 }
 
 func (r RoleRepo) rowToEntity(row Row) ro.Role {
+	var methods []string
+	if row.Methods != "" {
+		methods = strings.Split(row.Methods, ",")
+	}
+
 	c := ro.NewRole(row.Id, row.Name,
-		ro.WithDescription(row.Description))
+		ro.WithDescription(row.Description), ro.WithMethods(methods))
 	return c
+}
+
+func (r RoleRepo) baseQuery() sq.SelectBuilder {
+	return sq.StatementBuilder.Select(`id,name,description,methods`).From("roles")
 }
 
 func (r RoleRepo) Find(name string) (*ro.Role, error) {
 	errCtx := fmt.Errorf("fetching role with name %v", name)
+
+	q := r.baseQuery().Where("name = ?", name)
+	sql_, args, err := q.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v: %w", errCtx, err, e.ErrInternal)
+	}
+
 	row := Row{}
-	err := r.Db.Get(&row,
-		`SELECT id,name,description FROM roles WHERE name=$1`, name)
+	err = r.Db.Get(&row, sql_, args...)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -80,8 +102,8 @@ func (r RoleRepo) Delete(name string) error {
 }
 
 func (r RoleRepo) Update(m ro.UpdatableModel) error {
-	query := "UPDATE roles SET name=$1,description=$2 WHERE name=$3"
-	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, m.Name)
+	query := "UPDATE roles SET name=$1,description=$2,methods=$3 WHERE name=$4"
+	_, err := r.Db.Exec(query, m.NewName, m.NewDescription, strings.Join(m.NewMethods, ","), m.Name)
 	if err != nil {
 		return fmt.Errorf("updating record: %v: %w", err, e.ErrInternal)
 	}
@@ -110,7 +132,7 @@ func (r RoleRepo) IsAssigned(name string) (*bool, error) {
 }
 
 func (r RoleRepo) List() ([]ro.Role, error) {
-	q := sq.StatementBuilder.Select(`id,name,description`).From("roles")
+	q := r.baseQuery()
 	sql, args, err := q.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building query: %v: %w", err, e.ErrInternal)
@@ -131,8 +153,4 @@ func (r RoleRepo) List() ([]ro.Role, error) {
 
 func NewRoleRepo(db *sqlx.DB) RoleRepo {
 	return RoleRepo{Db: db}
-}
-
-func NewTestRoleRepo() RoleRepo {
-	return NewRoleRepo(s.NewInMemory())
 }

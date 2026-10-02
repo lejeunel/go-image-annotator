@@ -1089,9 +1089,6 @@
   .resize {
     resize: both;
   }
-  .resize-none {
-    resize: none;
-  }
   .appearance-none {
     appearance: none;
   }
@@ -1598,6 +1595,10 @@
   }
   .text-pretty {
     text-wrap: pretty;
+  }
+  .break-normal {
+    overflow-wrap: normal;
+    word-break: normal;
   }
   .break-words {
     overflow-wrap: break-word;

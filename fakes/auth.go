@@ -3,151 +3,154 @@ package fake
 import (
 	"context"
 
+	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
-	a "github.com/lejeunel/go-image-annotator/modules/authorizer"
 )
 
 type Auth struct {
-	Err      error
-	GotRules *a.Policies
+	ErrOnAuth       error
+	ErrOnSetMethods error
+	GotRole         *rl.RoleName
+	GotMethods      *[]string
+	ExistingMethods []string
 }
 
-func (f *Auth) SetAuthRules(rules a.Policies) {
-	f.GotRules = &rules
+func (f *Auth) ListMethods() []string {
+	return f.ExistingMethods
 }
 
 func (f Auth) CreateCollection(ctx context.Context, g *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) UpdateCollection(ctx context.Context, g *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) DeleteCollection(ctx context.Context, g *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) CloneCollection(ctx context.Context, g *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) Annotate(ctx context.Context, g *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) DeleteImage(ctx context.Context, g *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) ImportImage(ctx context.Context, dstGroup *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) IngestImage(ctx context.Context, group *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) CreateLabel(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) DeleteLabel(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) FetchAllLabels(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) ReadLabel(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) ListLabels(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) UpdateLabel(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) CreateRole(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) DeleteRole(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) UpdateRole(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) ChangePassword(ctx context.Context, id u.UserId) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) CreateUser(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) DeleteUser(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) FindUser(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) RequestForgottenPasswordToken(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) ListUsers(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) RenewToken(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) UpdateUserPrivileges(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) UpdateGroup(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) ReadPolicies(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) SetPolicies(ctx context.Context) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) AddMetadata(ctx context.Context, group *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) DeleteMetadata(ctx context.Context, group *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) UpdateMetadata(ctx context.Context, group *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) CreateProfile(ctx context.Context, group *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) DeleteProfile(ctx context.Context, group *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }
 
 func (f Auth) UpdateProfile(ctx context.Context, g *string) error {
-	return f.Err
+	return f.ErrOnAuth
 }

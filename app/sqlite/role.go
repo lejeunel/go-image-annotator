@@ -14,7 +14,7 @@ import (
 func NewRoleInteractors(repo ri.RoleRepo, a auth.Interface) r.Interactors {
 	return r.Interactors{
 		Find:   find.New(repo),
-		Create: create.New(repo, create.WithAuth(a)),
+		Create: create.New(repo, a),
 		Delete: delete.New(repo, delete.WithAuth(a)),
 		List:   list.New(repo),
 		Update: update.New(repo, update.WithAuth(a)),

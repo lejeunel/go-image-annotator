@@ -12,7 +12,7 @@ import (
 func TestHandleAuthError(t *testing.T) {
 	itr := New(&fk.ProfileRepo{ReturnGroup: "a-group"}, &fk.GroupRepo{},
 		&fk.LabelRepo{},
-		WithAuth(fk.Auth{Err: e.ErrAuthorization}))
+		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.False(t, p.GotSuccess)

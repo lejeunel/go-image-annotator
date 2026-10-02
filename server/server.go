@@ -11,12 +11,10 @@ import (
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
 	userDashboard "github.com/lejeunel/go-image-annotator/adapters/web/dashboard"
-	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 
 	adm "github.com/lejeunel/go-image-annotator/adapters/web/admin"
 	admgrp "github.com/lejeunel/go-image-annotator/adapters/web/admin/group"
-	admpl "github.com/lejeunel/go-image-annotator/adapters/web/admin/policy"
 	admrl "github.com/lejeunel/go-image-annotator/adapters/web/admin/role"
 	admusr "github.com/lejeunel/go-image-annotator/adapters/web/admin/user"
 	an "github.com/lejeunel/go-image-annotator/adapters/web/annotator"
@@ -38,10 +36,9 @@ import (
 // Make initializes the root handler and listens on the given port.
 func Make(port int) (http.Handler, *slog.Logger) {
 	cfg := config.Parse()
-	defaultAuth := auth.NewDefault()
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	app := sqlite.NewApp(cfg, &defaultAuth, *logger)
+	app := sqlite.NewApp(cfg, *logger)
 
 	currentVersion := g.Info{Version: g.Version, Date: g.Date}
 	basePageBuilder := b.NewBasePageBuilder()
@@ -77,8 +74,8 @@ func Make(port int) (http.Handler, *slog.Logger) {
 	RouteWebPages(router, home.HandlerFunc(pageBuilder), webAuth)
 
 	udb := userDashboard.New(pageBuilder, cfg.DefaultPageSize, app.Itrs.User.RenewToken,
-		app.Itrs.User.ChangePassword, app.Itrs.Log.ListTasks, app.Itrs.Log.FindTask,
-		defaultAuth.Rules)
+		app.Itrs.User.ChangePassword, app.Itrs.Log.ListTasks, app.Itrs.Log.FindTask)
+
 	udb.Route(router, webAuth)
 
 	RouteAPI(router, *api.NewServer(&app.Itrs, *logger), apiAuth)
@@ -129,10 +126,8 @@ func Make(port int) (http.Handler, *slog.Logger) {
 	adminUserServer.Route(router, webAuth)
 	adminGroupServer := admgrp.New(adminPageBuilder, app.Itrs.Group)
 	adminGroupServer.Route(router, webAuth)
-	adminRoleServer := admrl.New(adminPageBuilder, app.Itrs.Role)
+	adminRoleServer := admrl.New(adminPageBuilder, app.Itrs.Role, app)
 	adminRoleServer.Route(router, webAuth)
-	adminPolicyServer := admpl.New(adminPageBuilder, app.Itrs.Policy)
-	adminPolicyServer.Route(router, webAuth)
 
 	labelServer := lbl.New(pageBuilder, cfg.DefaultPageSize,
 		app.Itrs.Label.Create, app.Itrs.Label.List, app.Itrs.Label.Update,

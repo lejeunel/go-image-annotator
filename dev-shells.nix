@@ -18,6 +18,7 @@
           redocly
           air
           lefthook
+          hugo
         ];
 
         shellHook = ''

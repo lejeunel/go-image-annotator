@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func CreateUser(repo UserRepo, id string, opts ...u.Option) (*u.User, error) {
-	user := u.NewUser(id, opts...)
+func CreateUser(repo UserRepo, id string) (*u.BaseUser, error) {
+	user := u.BaseUser{Id: id}
 	if err := repo.Create(user); err != nil {
 		return nil, err
 	}
@@ -47,8 +47,10 @@ func TestNoCreatedUserDoNotExist(t *testing.T) {
 func TestPersonalAccessTokenHash(t *testing.T) {
 	hash := []byte("pat-hash")
 	repo := NewUserRepo(s.NewInMemory())
-	user := u.NewUser("user@example.com",
-		u.WithHashedPersonalAccessToken(hash))
+	user := u.BaseUser{
+		Id:      "user@example.com",
+		HashPAT: hash,
+	}
 	repo.Create(user)
 	r, err := repo.Find("user@example.com")
 	assert.NoError(t, err)
@@ -58,8 +60,10 @@ func TestPersonalAccessTokenHash(t *testing.T) {
 func TestPasswordHash(t *testing.T) {
 	hash := []byte("password-hash")
 	repo := NewUserRepo(s.NewInMemory())
-	user := u.NewUser("user@example.com",
-		u.WithPasswordHash(hash))
+	user := u.BaseUser{
+		Id:           "user@example.com",
+		HashPassword: hash,
+	}
 	repo.Create(user)
 	r, err := repo.Find("user@example.com")
 	assert.NoError(t, err)
@@ -80,9 +84,11 @@ func TestCreateAdminInGroup(t *testing.T) {
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	groupRepo.Create(group)
 
-	user := u.NewUser("user@example.com",
-		u.WithRoles([]string{role.Name}),
-		u.WithGroups([]string{group.Name}))
+	user := u.BaseUser{
+		Id:     "user@example.com",
+		Roles:  []string{role.Name},
+		Groups: []string{group.Name},
+	}
 	err := repo.Create(user)
 	assert.NoError(t, err)
 	r, err := repo.Find("user@example.com")

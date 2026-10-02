@@ -48,7 +48,7 @@ func TestUpdateBoundingBox(t *testing.T) {
 	repos.Annotation.AddBoundingBox(image.Id, collection.Name, bbox, nil, nil)
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "a-new-label")
 	repos.Label.Create(newLabel)
-	user := u.NewUser("user@example.com")
+	user := u.BaseUser{Id: "user@example.com"}
 	repos.User.Create(user)
 
 	newBox := a.BoundingBoxUpdatables{

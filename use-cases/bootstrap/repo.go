@@ -6,7 +6,7 @@ import (
 )
 
 type UserRepo interface {
-	Create(u.User) error
+	Create(u.BaseUser) error
 }
 
 type RoleRepo interface {

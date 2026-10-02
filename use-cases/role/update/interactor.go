@@ -54,13 +54,20 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if err := i.Repo.Update(
-		rl.UpdatableModel{Name: r.Name, NewName: r.NewName, NewDescription: r.NewDescription},
+		rl.UpdatableModel{
+			Name:           r.Name,
+			NewName:        r.NewName,
+			NewDescription: r.NewDescription,
+			NewMethods:     r.NewMethods,
+		},
 	); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	out.SuccessUpdateRole(Response{Name: r.NewName, Description: r.NewDescription})
+	out.SuccessUpdateRole(
+		Response{Name: r.NewName, Description: r.NewDescription, Methods: r.NewMethods},
+	)
 }
 
 func (i *Interactor) ensureNameExists(name string) error {

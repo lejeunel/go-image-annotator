@@ -25,4 +25,5 @@ func TestList(t *testing.T) {
 	itr := New(repo)
 	itr.Execute(t.Context(), p)
 	assert.Equal(t, 2, len(p.Got))
+	assert.Equal(t, 1, len(p.Got[0].Methods))
 }

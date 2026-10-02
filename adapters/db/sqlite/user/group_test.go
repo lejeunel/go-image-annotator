@@ -23,7 +23,7 @@ func TestCreateUserWithOneGroup(t *testing.T) {
 	userRepo := NewUserRepo(db)
 	groupRepo := grpr.NewGroupRepo(db)
 	groupRepo.Create(group)
-	user := u.NewUser(userId, u.WithGroups([]string{group.Name}))
+	user := u.BaseUser{Id: userId, Groups: []string{group.Name}}
 	err := userRepo.Create(user)
 	assert.NoError(t, err)
 	r, err := userRepo.Find(user.Id)
@@ -38,7 +38,7 @@ func TestAssignToNewGroup(t *testing.T) {
 
 	group := g.NewGroup(g.NewGroupId(), "a-group")
 	groupRepo.Create(group)
-	user := u.NewUser(userId, u.WithGroups([]string{group.Name}))
+	user := u.BaseUser{Id: userId, Groups: []string{group.Name}}
 	userRepo.Create(user)
 
 	g0 := g.NewGroup(g.NewGroupId(), "a-new-group")

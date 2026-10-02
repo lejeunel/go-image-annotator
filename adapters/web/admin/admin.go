@@ -2,7 +2,6 @@ package admin
 
 import (
 	grp "github.com/lejeunel/go-image-annotator/adapters/web/admin/group"
-	pl "github.com/lejeunel/go-image-annotator/adapters/web/admin/policy"
 	rl "github.com/lejeunel/go-image-annotator/adapters/web/admin/role"
 	usr "github.com/lejeunel/go-image-annotator/adapters/web/admin/user"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
@@ -22,6 +21,5 @@ func NewPageBuilder(pb b.PageBuilder) b.PageBuilder {
 	pb.AddSidebarEntry(usr.PageName, icons.User, rt.AdminUsersUrl, false)
 	pb.AddSidebarEntry(grp.PageName, icons.Group, rt.AdminGroupsUrl, false)
 	pb.AddSidebarEntry(rl.PageName, icons.Rocket, rt.AdminRolesUrl, false)
-	pb.AddSidebarEntry(pl.PageName, icons.Shield, rt.AdminPoliciesUrl, false)
 	return pb
 }

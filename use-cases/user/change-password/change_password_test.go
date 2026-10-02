@@ -11,7 +11,7 @@ import (
 
 func TestPasswordMismatchShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	user := u.NewUser("user@example.com")
+	user := u.NewUser("user@example.com").ToBase()
 	itr := New(&fk.UserRepo{Return: &user}, &fk.Tokenizer{}, &fk.StringValidator{})
 	itr.Execute(t.Context(), Request{FirstPassword: "1", SecondPassword: "2"}, p)
 	assert.ErrorIs(t, p.GotErr, e.ErrPasswordMismatch)
@@ -19,7 +19,7 @@ func TestPasswordMismatchShouldFail(t *testing.T) {
 
 func TestInvalidPasswordShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	user := u.NewUser("user@example.com")
+	user := u.NewUser("user@example.com").ToBase()
 	itr := New(&fk.UserRepo{Return: &user}, &fk.Tokenizer{}, &fk.StringValidator{Invalid: true})
 	itr.Execute(t.Context(), Request{FirstPassword: "1", SecondPassword: "1"}, p)
 	assert.ErrorIs(t, p.GotErr, e.ErrInvalidPassword)
@@ -27,7 +27,7 @@ func TestInvalidPasswordShouldFail(t *testing.T) {
 
 func TestHandleErrorOnUpdatePassword(t *testing.T) {
 	p := &FakePresenter{}
-	user := u.NewUser("user@example.com")
+	user := u.NewUser("user@example.com").ToBase()
 	itr := New(&fk.UserRepo{Return: &user, ErrOnUpdatePassword: e.ErrInternal},
 		&fk.Tokenizer{}, &fk.StringValidator{})
 	itr.Execute(t.Context(), Request{FirstPassword: "1", SecondPassword: "1"}, p)
@@ -37,7 +37,7 @@ func TestHandleErrorOnUpdatePassword(t *testing.T) {
 
 func TestFailWhenCurrentPasswordIsWrong(t *testing.T) {
 	p := &FakePresenter{}
-	user := u.NewUser("user@mail.com")
+	user := u.NewUser("user@mail.com").ToBase()
 	repo := &fk.UserRepo{Return: &user}
 	itr := New(repo, &fk.Tokenizer{FailVerify: true}, &fk.StringValidator{})
 	current := "asdf"
@@ -50,7 +50,7 @@ func TestFailWhenCurrentPasswordIsWrong(t *testing.T) {
 func TestChangePassword(t *testing.T) {
 	p := &FakePresenter{}
 	hash := []byte("the-hash")
-	user := u.NewUser("user@mail.com")
+	user := u.NewUser("user@mail.com").ToBase()
 	repo := &fk.UserRepo{Return: &user}
 	itr := New(repo, &fk.Tokenizer{ReturnHash: hash}, &fk.StringValidator{})
 	itr.Execute(t.Context(), Request{Id: user.Id, FirstPassword: "1", SecondPassword: "1"}, p)

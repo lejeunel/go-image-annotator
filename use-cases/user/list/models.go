@@ -6,6 +6,6 @@ import (
 )
 
 type Response struct {
-	Users      []u.User
+	Users      []u.BaseUser
 	Pagination pagination.Pagination
 }

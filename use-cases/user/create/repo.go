@@ -5,6 +5,6 @@ import (
 )
 
 type Repo interface {
-	Create(usr.User) error
+	Create(usr.BaseUser) error
 	Exists(string) (bool, error)
 }

@@ -39,7 +39,7 @@ func TestAddBoundingBox(t *testing.T) {
 	image, collection, label := CreateAnnotableImage(repos, "a-collection", labelName, nil)
 	bbox := a.NewBoundingBox(a.NewAnnotationId(), 1, 1, 1, 1, label,
 		a.WithAngle(float32(15.)))
-	user := u.NewUser("user@example.com")
+	user := u.BaseUser{Id: "user@example.com"}
 	repos.User.Create(user)
 	now := time.Now()
 	err := repos.Annotation.AddBoundingBox(image.Id, collection.Name, bbox, &user.Id, &now)

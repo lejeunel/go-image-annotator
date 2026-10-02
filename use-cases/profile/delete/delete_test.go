@@ -10,7 +10,7 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&fk.ProfileRepo{}, WithAuth(fk.Auth{Err: e.ErrAuthorization}))
+	itr := New(&fk.ProfileRepo{}, WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotAuthErr)

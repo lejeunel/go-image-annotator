@@ -7,7 +7,7 @@ import (
 )
 
 type Interface interface {
-	SetAuthRules(rules Policies)
+	ListMethods() []string
 	CreateCollection(ctx context.Context, group *string) error
 	DeleteCollection(ctx context.Context, group *string) error
 	UpdateCollection(ctx context.Context, group *string) error

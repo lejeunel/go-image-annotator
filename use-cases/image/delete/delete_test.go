@@ -16,7 +16,7 @@ func TestHandleAuthError(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection",
 		clc.WithGroup(group.Name))
 	image := im.NewImage(im.NewImageId(), collection)
-	itr := New(&fk.ImageStore{Return: &image}, WithAuth(fk.Auth{Err: e.ErrAuthorization}))
+	itr := New(&fk.ImageStore{Return: &image}, WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{ImageId: im.NewImageId().String(), Collection: "a-collection"},

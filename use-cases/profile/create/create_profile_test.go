@@ -13,7 +13,7 @@ func TestHandleAuthError(t *testing.T) {
 		&fk.ProfileRepo{},
 		&fk.LabelRepo{},
 		&fk.GroupRepo{},
-		WithAuth(fk.Auth{Err: e.ErrAuthorization}),
+		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}),
 	)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)

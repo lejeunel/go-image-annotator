@@ -13,5 +13,5 @@ func NewBootstrapInteractor(userRepo ur.UserRepo, roleRepo rr.RoleRepo,
 	fileStore fs.FileStore,
 	t tk.TokenHasher, pv pw.PasswordValidator,
 ) bst.Interactor {
-	return bst.New(userRepo, roleRepo, fileStore, t, pv)
+	return bst.New(userRepo, roleRepo, t, pv)
 }
