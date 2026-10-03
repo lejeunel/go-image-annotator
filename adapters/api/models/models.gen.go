@@ -7,6 +7,33 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// AddBoundingBox defines model for AddBoundingBox.
+type AddBoundingBox struct {
+	// Angle angle of the bounding box
+	Angle float32 `json:"angle"`
+
+	// Collection name of collection
+	Collection string `json:"collection"`
+
+	// Height height of the bounding box
+	Height float32 `json:"height"`
+
+	// ImageId id of image
+	ImageId string `json:"imageId"`
+
+	// Label label
+	Label string `json:"label"`
+
+	// Width width of the bounding box
+	Width float32 `json:"width"`
+
+	// Xc x coordinate of the center point
+	Xc float32 `json:"xc"`
+
+	// Yc y coordinate of the center point
+	Yc float32 `json:"yc"`
+}
+
 // BoundingBox defines model for BoundingBox.
 type BoundingBox struct {
 	// Height height of the bounding box
@@ -66,6 +93,24 @@ type ImageIngestionResponse struct {
 	Id *string `json:"id,omitempty"`
 }
 
+// IngestBoundingBox defines model for IngestBoundingBox.
+type IngestBoundingBox struct {
+	// Height height of the bounding box
+	Height float32 `json:"height"`
+
+	// Label label
+	Label string `json:"label"`
+
+	// Width width of the bounding box
+	Width float32 `json:"width"`
+
+	// Xc x coordinate of the center point
+	Xc float32 `json:"xc"`
+
+	// Yc y coordinate of the center point
+	Yc float32 `json:"yc"`
+}
+
 // Label defines model for Label.
 type Label struct {
 	// Description Description of the label
@@ -93,24 +138,6 @@ type ListLabelsResponse struct {
 	Pagination Pagination `json:"pagination"`
 }
 
-// NewBoundingBox defines model for NewBoundingBox.
-type NewBoundingBox struct {
-	// Height height of the bounding box
-	Height float32 `json:"height"`
-
-	// Label label
-	Label string `json:"label"`
-
-	// Width width of the bounding box
-	Width float32 `json:"width"`
-
-	// Xc x coordinate of the center point
-	Xc float32 `json:"xc"`
-
-	// Yc y coordinate of the center point
-	Yc float32 `json:"yc"`
-}
-
 // NewCollection defines model for NewCollection.
 type NewCollection struct {
 	// Description Description of the collection
@@ -122,7 +149,7 @@ type NewCollection struct {
 
 // NewImage defines model for NewImage.
 type NewImage struct {
-	BoundingBoxes *[]NewBoundingBox `json:"bounding_boxes,omitempty"`
+	BoundingBoxes *[]IngestBoundingBox `json:"bounding_boxes,omitempty"`
 
 	// Collection name of collection in which to add the image
 	Collection string    `json:"collection"`
@@ -232,6 +259,9 @@ type ListLabelsParams struct {
 	// PageSize maximum number of labels to return
 	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
 }
+
+// AddBoundingBoxJSONRequestBody defines body for AddBoundingBox for application/json ContentType.
+type AddBoundingBoxJSONRequestBody = AddBoundingBox
 
 // CreateCollectionJSONRequestBody defines body for CreateCollection for application/json ContentType.
 type CreateCollectionJSONRequestBody = NewCollection

@@ -920,9 +920,6 @@
   .h-64 {
     height: calc(var(--spacing) * 64);
   }
-  .h-90 {
-    height: calc(var(--spacing) * 90);
-  }
   .h-min {
     height: min-content;
   }
@@ -971,11 +968,11 @@
   .w-180 {
     width: calc(var(--spacing) * 180);
   }
-  .w-230 {
-    width: calc(var(--spacing) * 230);
-  }
   .w-250 {
     width: calc(var(--spacing) * 250);
+  }
+  .w-290 {
+    width: calc(var(--spacing) * 290);
   }
   .w-fit {
     width: fit-content;
@@ -1192,10 +1189,6 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
-  .border-2 {
-    border-style: var(--tw-border-style);
-    border-width: 2px;
-  }
   .border-t {
     border-top-style: var(--tw-border-style);
     border-top-width: 1px;
@@ -1396,9 +1389,6 @@
   }
   .p-2 {
     padding: calc(var(--spacing) * 2);
-  }
-  .p-3 {
-    padding: calc(var(--spacing) * 3);
   }
   .p-4 {
     padding: calc(var(--spacing) * 4);
@@ -1913,9 +1903,6 @@
       opacity: 75%;
     }
   }
-  .focus\:border-primary:focus {
-    border-color: var(--color-primary);
-  }
   .focus\:border-transparent:focus {
     border-color: transparent;
   }
@@ -2301,9 +2288,6 @@
     .hover\:dark\:text-gray-500:hover:where(.dark, .dark *) {
       color: var(--color-gray-500);
     }
-  }
-  .focus\:dark\:border-primary-dark:focus:where(.dark, .dark *) {
-    border-color: var(--color-primary-dark);
   }
   .dark\:focus\:bg-surface\/5:where(.dark, .dark *):focus {
     background-color: color-mix(in srgb, #fff 5%, transparent);

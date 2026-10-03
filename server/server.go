@@ -79,7 +79,7 @@ func Make(port int) (http.Handler, *slog.Logger) {
 	udb.Route(router, webAuth)
 
 	RouteAPI(router, *api.NewServer(&app.Itrs, *logger), apiAuth)
-	RouteAPIDocs(router, APIDocsHandlerFunc(rt.APISpecsUrl, pageBuilder), webAuth)
+	RouteAPIDocs(router, ApiDocsHandlerFunc(rt.APISpecsUrl, pageBuilder), webAuth)
 	RouteAPISpecs(router)
 	RouteStaticFiles(router)
 

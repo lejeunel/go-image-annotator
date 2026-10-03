@@ -275,6 +275,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /annotate/box:
+    post:
+      summary: Add a bounding-box
+      description: Add a bounding-box to an image given its id and collection name.
+      operationId: addBoundingBox
+      tags: [Annotate]
+      requestBody:
+        description: Bounding-box and target specification
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddBoundingBox'
+      responses:
+      '204':
+        description: New bounding-box response
+      default:
+        description: unexpected error
+        content:
+          application/json:
+            schema:
+              schema:
+                $ref: '#/components/schemas/Error'
   /users:
     post:
       summary: Create a new user
@@ -601,8 +624,8 @@ components:
         bounding_boxes:
           type: array
           items:
-            $ref: '#/components/schemas/NewBoundingBox'
-    NewBoundingBox:
+            $ref: '#/components/schemas/IngestBoundingBox'
+    IngestBoundingBox:
       required:
         - label
         - xc
@@ -625,6 +648,41 @@ components:
         height:
           type: number
           description: height of the bounding box
+    AddBoundingBox:
+      required:
+        - imageId
+        - collection
+        - label
+        - xc
+        - yc
+        - width
+        - height
+        - angle
+      properties:
+        imageId:
+          type: string
+          description: id of image
+        collection:
+          type: string
+          description: name of collection
+        label:
+          type: string
+          description: label
+        xc:
+          type: number
+          description: x coordinate of the center point
+        yc:
+          type: number
+          description: y coordinate of the center point
+        width:
+          type: number
+          description: width of the bounding box
+        height:
+          type: number
+          description: height of the bounding box
+        angle:
+          type: number
+          description: angle of the bounding box
     BoundingBox:
       required:
         - label

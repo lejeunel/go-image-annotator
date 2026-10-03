@@ -55,7 +55,7 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing image part", http.StatusBadRequest)
 		return
 	}
-	s.Image.Ingest.Execute(r.Context(), NewIngestImageRequest(meta, imageReader),
+	s.Image.Ingest.Execute(r.Context(), NewImageIngestRequest(meta, imageReader),
 		presenter.NewIngestPresenter(w, s.Logger))
 }
 
@@ -84,7 +84,7 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 	s.Image.Slice.Execute(req, presenter.NewListPresenter(w, s.Logger))
 }
 
-func NewIngestImageRequest(meta models.NewImage, reader io.Reader) ig.Request {
+func NewImageIngestRequest(meta models.NewImage, reader io.Reader) ig.Request {
 	ingestReq := ig.Request{
 		Collection: meta.Collection,
 		Reader:     reader,
@@ -94,7 +94,7 @@ func NewIngestImageRequest(meta models.NewImage, reader io.Reader) ig.Request {
 	return ingestReq
 }
 
-func appendBoundingBoxesToIngestImageRequest(req *ig.Request, boxes *[]models.NewBoundingBox) {
+func appendBoundingBoxesToIngestImageRequest(req *ig.Request, boxes *[]models.IngestBoundingBox) {
 	if boxes != nil {
 		for _, box := range *boxes {
 			req.BoundingBoxes = append(req.BoundingBoxes,

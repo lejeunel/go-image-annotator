@@ -14,6 +14,33 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// AddBoundingBox defines model for AddBoundingBox.
+type AddBoundingBox struct {
+	// Angle angle of the bounding box
+	Angle float32 `json:"angle"`
+
+	// Collection name of collection
+	Collection string `json:"collection"`
+
+	// Height height of the bounding box
+	Height float32 `json:"height"`
+
+	// ImageId id of image
+	ImageId string `json:"imageId"`
+
+	// Label label
+	Label string `json:"label"`
+
+	// Width width of the bounding box
+	Width float32 `json:"width"`
+
+	// Xc x coordinate of the center point
+	Xc float32 `json:"xc"`
+
+	// Yc y coordinate of the center point
+	Yc float32 `json:"yc"`
+}
+
 // BoundingBox defines model for BoundingBox.
 type BoundingBox struct {
 	// Height height of the bounding box
@@ -73,6 +100,24 @@ type ImageIngestionResponse struct {
 	Id *string `json:"id,omitempty"`
 }
 
+// IngestBoundingBox defines model for IngestBoundingBox.
+type IngestBoundingBox struct {
+	// Height height of the bounding box
+	Height float32 `json:"height"`
+
+	// Label label
+	Label string `json:"label"`
+
+	// Width width of the bounding box
+	Width float32 `json:"width"`
+
+	// Xc x coordinate of the center point
+	Xc float32 `json:"xc"`
+
+	// Yc y coordinate of the center point
+	Yc float32 `json:"yc"`
+}
+
 // Label defines model for Label.
 type Label struct {
 	// Description Description of the label
@@ -100,24 +145,6 @@ type ListLabelsResponse struct {
 	Pagination Pagination `json:"pagination"`
 }
 
-// NewBoundingBox defines model for NewBoundingBox.
-type NewBoundingBox struct {
-	// Height height of the bounding box
-	Height float32 `json:"height"`
-
-	// Label label
-	Label string `json:"label"`
-
-	// Width width of the bounding box
-	Width float32 `json:"width"`
-
-	// Xc x coordinate of the center point
-	Xc float32 `json:"xc"`
-
-	// Yc y coordinate of the center point
-	Yc float32 `json:"yc"`
-}
-
 // NewCollection defines model for NewCollection.
 type NewCollection struct {
 	// Description Description of the collection
@@ -129,7 +156,7 @@ type NewCollection struct {
 
 // NewImage defines model for NewImage.
 type NewImage struct {
-	BoundingBoxes *[]NewBoundingBox `json:"bounding_boxes,omitempty"`
+	BoundingBoxes *[]IngestBoundingBox `json:"bounding_boxes,omitempty"`
 
 	// Collection name of collection in which to add the image
 	Collection string    `json:"collection"`
@@ -240,6 +267,9 @@ type ListLabelsParams struct {
 	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
 }
 
+// AddBoundingBoxJSONRequestBody defines body for AddBoundingBox for application/json ContentType.
+type AddBoundingBoxJSONRequestBody = AddBoundingBox
+
 // CreateCollectionJSONRequestBody defines body for CreateCollection for application/json ContentType.
 type CreateCollectionJSONRequestBody = NewCollection
 
@@ -257,6 +287,9 @@ type CreateUserJSONRequestBody = NewUser
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// AddBoundingBox Add a bounding-box
+	// (POST /annotate/box)
+	AddBoundingBox(w http.ResponseWriter, r *http.Request)
 	// ListCollections List collections
 	// (GET /collections)
 	ListCollections(w http.ResponseWriter, r *http.Request, params ListCollectionsParams)
@@ -312,6 +345,20 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// AddBoundingBox operation middleware
+func (siw *ServerInterfaceWrapper) AddBoundingBox(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddBoundingBox(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
 
 // ListCollections operation middleware
 func (siw *ServerInterfaceWrapper) ListCollections(w http.ResponseWriter, r *http.Request) {
@@ -866,6 +913,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/collections/{name}", wrapper.DeleteCollectionByName)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/collections/{name}", wrapper.FindCollectionByName)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/collections/{name}", wrapper.UpdateCollectionByName)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/box", wrapper.AddBoundingBox)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/users", wrapper.CreateUser)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/collections", wrapper.ListCollections)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/collections", wrapper.CreateCollection)

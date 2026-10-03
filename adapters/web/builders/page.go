@@ -19,6 +19,12 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
+//go:embed scripts/detect_os.js
+var detectOs string
+
+//go:embed templates/query_modal.html
+var queryModal string
+
 type PageColumnMode int
 
 const (
@@ -34,17 +40,11 @@ func (m PageColumnMode) Class() Node {
 	case PageColumnExpandMode:
 		return Class("flex flex-col w-full")
 	case PageColumnSidebarMode:
-		return Class("flex flex-col pt-10 pb-7 pl-30 w-230")
+		return Class("flex flex-col pt-10 pb-7 pl-30 w-290")
 	default:
 		return Class("flex flex-col w-250")
 	}
 }
-
-//go:embed scripts/detect_os.js
-var detectOs string
-
-//go:embed templates/query_modal.html
-var queryModal string
 
 type QueryDocs struct {
 	Filtering         []q.FieldDescription

@@ -10,7 +10,7 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func APIDocsHandlerFunc(specsPath string, pb b.PageBuilder) http.HandlerFunc {
+func ApiDocsHandlerFunc(specsPath string, pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		content := Div(Raw("<redoc spec-url='/api/openapi.yaml'></redoc>"),
 			Script(Src("/static/redoc.standalone.js")))
