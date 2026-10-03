@@ -73,7 +73,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    
+
   /images/{collection_name}/{image_id}:
     get:
       summary: Read image meta-data
@@ -124,7 +124,7 @@ paths:
             default: 1
         - name: page_size
           in: query
-          description: maximum number of collections to return
+          description: maximum number of images to return
           required: false
           schema:
             type: integer
@@ -184,11 +184,11 @@ paths:
                   type: string
                   format: binary
                   description: Raw image data
-              encoding:
-                metadata:
-                  contentType: application/json
-                image:
-                  contentType: image/*
+            encoding:
+              metadata:
+                contentType: application/json
+              image:
+                contentType: image/*
       responses:
         '201':
           description: image ingestion response
@@ -289,13 +289,34 @@ paths:
             schema:
               $ref: '#/components/schemas/AddBoundingBox'
       responses:
-      '204':
-        description: New bounding-box response
-      default:
-        description: unexpected error
+        '204':
+          description: New bounding-box response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /annotate/polygon:
+    post:
+      summary: Add a polygon
+      description: Add a polygon to an image given its id and collection name.
+      operationId: addPolygon
+      tags: [Annotate]
+      requestBody:
+        description: Polygon and target specification
+        required: true
         content:
           application/json:
             schema:
+              $ref: '#/components/schemas/AddPolygon'
+      responses:
+        '204':
+          description: New polygon response
+        default:
+          description: unexpected error
+          content:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
   /users:
@@ -324,7 +345,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  
+
   /collections:
     get:
       summary: List collections
@@ -611,7 +632,6 @@ components:
           additionalProperties: {}
     NewImage:
       required:
-        - data
         - collection
       properties:
         collection:
@@ -683,6 +703,26 @@ components:
         angle:
           type: number
           description: angle of the bounding box
+    AddPolygon:
+      required:
+        - imageId
+        - collection
+        - label
+        - points
+      properties:
+        imageId:
+          type: string
+          description: ID of the image
+        collection:
+          type: string
+          description: name of the collection
+        label:
+          type: string
+          description: Label of the polygon
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/Point'
     BoundingBox:
       required:
         - label

@@ -6,6 +6,7 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
+	addply "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 )
 
 type AnnotationPresenter struct {
@@ -15,6 +16,10 @@ type AnnotationPresenter struct {
 
 func (p AnnotationPresenter) SuccessAddBox(r addbox.Response) {
 	json.WriteJSON(p.Writer, 200, "successfully added box")
+}
+
+func (p AnnotationPresenter) SuccessAddPolygon(r addply.Response) {
+	json.WriteJSON(p.Writer, 200, "successfully added polygon")
 }
 
 func NewAnnotationPresenter(w http.ResponseWriter, l slog.Logger) AnnotationPresenter {

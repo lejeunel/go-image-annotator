@@ -41,6 +41,19 @@ type AddBoundingBox struct {
 	Yc float32 `json:"yc"`
 }
 
+// AddPolygon defines model for AddPolygon.
+type AddPolygon struct {
+	// Collection name of the collection
+	Collection string `json:"collection"`
+
+	// ImageId ID of the image
+	ImageId string `json:"imageId"`
+
+	// Label Label of the polygon
+	Label  string  `json:"label"`
+	Points []Point `json:"points"`
+}
+
 // BoundingBox defines model for BoundingBox.
 type BoundingBox struct {
 	// Height height of the bounding box
@@ -241,7 +254,7 @@ type ListImagesParams struct {
 	// Page page number
 	Page *int64 `form:"page,omitempty" json:"page,omitempty"`
 
-	// PageSize maximum number of collections to return
+	// PageSize maximum number of images to return
 	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
 
 	// Filter filtering expression
@@ -270,6 +283,9 @@ type ListLabelsParams struct {
 // AddBoundingBoxJSONRequestBody defines body for AddBoundingBox for application/json ContentType.
 type AddBoundingBoxJSONRequestBody = AddBoundingBox
 
+// AddPolygonJSONRequestBody defines body for AddPolygon for application/json ContentType.
+type AddPolygonJSONRequestBody = AddPolygon
+
 // CreateCollectionJSONRequestBody defines body for CreateCollection for application/json ContentType.
 type CreateCollectionJSONRequestBody = NewCollection
 
@@ -290,6 +306,9 @@ type ServerInterface interface {
 	// AddBoundingBox Add a bounding-box
 	// (POST /annotate/box)
 	AddBoundingBox(w http.ResponseWriter, r *http.Request)
+	// AddPolygon Add a polygon
+	// (POST /annotate/polygon)
+	AddPolygon(w http.ResponseWriter, r *http.Request)
 	// ListCollections List collections
 	// (GET /collections)
 	ListCollections(w http.ResponseWriter, r *http.Request, params ListCollectionsParams)
@@ -351,6 +370,20 @@ func (siw *ServerInterfaceWrapper) AddBoundingBox(w http.ResponseWriter, r *http
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.AddBoundingBox(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AddPolygon operation middleware
+func (siw *ServerInterfaceWrapper) AddPolygon(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddPolygon(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -914,6 +947,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/collections/{name}", wrapper.FindCollectionByName)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/collections/{name}", wrapper.UpdateCollectionByName)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/box", wrapper.AddBoundingBox)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/polygon", wrapper.AddPolygon)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/users", wrapper.CreateUser)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/collections", wrapper.ListCollections)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/collections", wrapper.CreateCollection)

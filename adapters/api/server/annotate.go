@@ -6,7 +6,8 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/json/annotate"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
-	add "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
+	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
+	addply "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 )
 
 func (s *Server) AddBoundingBox(w http.ResponseWriter, r *http.Request) {
@@ -14,7 +15,7 @@ func (s *Server) AddBoundingBox(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	req := add.Request{
+	req := addbox.Request{
 		ImageId:    body.ImageId,
 		Collection: body.Collection,
 		Label:      body.Label,
@@ -25,4 +26,21 @@ func (s *Server) AddBoundingBox(w http.ResponseWriter, r *http.Request) {
 		Angle:      body.Angle,
 	}
 	s.Annotation.AddBox.Execute(r.Context(), req, annotate.NewAnnotationPresenter(w, s.Logger))
+}
+
+func (s *Server) AddPolygon(w http.ResponseWriter, r *http.Request) {
+	body, ok := json.MustDecodeJSON[models.AddPolygon](w, r)
+	if !ok {
+		return
+	}
+	req := addply.Request{
+		ImageId:    body.ImageId,
+		Collection: body.Collection,
+		Label:      body.Label,
+	}
+
+	for _, point := range body.Points {
+		req.Points.Append(point[0], point[1])
+	}
+	s.Annotation.AddPolygon.Execute(r.Context(), req, annotate.NewAnnotationPresenter(w, s.Logger))
 }

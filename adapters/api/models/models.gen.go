@@ -34,6 +34,19 @@ type AddBoundingBox struct {
 	Yc float32 `json:"yc"`
 }
 
+// AddPolygon defines model for AddPolygon.
+type AddPolygon struct {
+	// Collection name of the collection
+	Collection string `json:"collection"`
+
+	// ImageId ID of the image
+	ImageId string `json:"imageId"`
+
+	// Label Label of the polygon
+	Label  string  `json:"label"`
+	Points []Point `json:"points"`
+}
+
 // BoundingBox defines model for BoundingBox.
 type BoundingBox struct {
 	// Height height of the bounding box
@@ -234,7 +247,7 @@ type ListImagesParams struct {
 	// Page page number
 	Page *int64 `form:"page,omitempty" json:"page,omitempty"`
 
-	// PageSize maximum number of collections to return
+	// PageSize maximum number of images to return
 	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
 
 	// Filter filtering expression
@@ -262,6 +275,9 @@ type ListLabelsParams struct {
 
 // AddBoundingBoxJSONRequestBody defines body for AddBoundingBox for application/json ContentType.
 type AddBoundingBoxJSONRequestBody = AddBoundingBox
+
+// AddPolygonJSONRequestBody defines body for AddPolygon for application/json ContentType.
+type AddPolygonJSONRequestBody = AddPolygon
 
 // CreateCollectionJSONRequestBody defines body for CreateCollection for application/json ContentType.
 type CreateCollectionJSONRequestBody = NewCollection

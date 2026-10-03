@@ -35,6 +35,10 @@ type Points struct {
 	Coordinates [][2]float32
 }
 
+func (p *Points) Append(x, y float32) {
+	p.Coordinates = append(p.Coordinates, [2]float32{x, y})
+}
+
 func (p Points) MaxX() float32 {
 	if len(p.Coordinates) == 0 {
 		return float32(math.Inf(1))
