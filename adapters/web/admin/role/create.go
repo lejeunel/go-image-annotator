@@ -39,6 +39,7 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		create.Request{
 			Name:        r.FormValue(NameFieldName),
 			Description: r.FormValue(DescriptionFieldName),
+			Methods:     r.Form[MethodsFieldName],
 		},
 		NewCreateRolePresenter(w))
 }
