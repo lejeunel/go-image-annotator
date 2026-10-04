@@ -4,6 +4,3 @@
 * DONE Update profile of collection
 * DONE Clone collection must transfer description, profile and group
 * DONE make ingest archive dialog work with both drag-and-drop and file dialog 
-* TODO clearer error messages on missing env var (mention name of env variable)
-* TODO when path variable is set, it panics without mentioning which variable should be
-changed

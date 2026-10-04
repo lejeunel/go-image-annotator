@@ -277,7 +277,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /annotate/{id}:
     delete:
-      summary: Delete by id
+      summary: Delete annotation by id
       description: Delete an annotation based on its id
       operationId: deleteAnnotationById
       tags: [Annotate]

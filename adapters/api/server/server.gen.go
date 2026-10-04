@@ -309,7 +309,7 @@ type ServerInterface interface {
 	// AddPolygon Add a polygon
 	// (POST /annotate/polygon)
 	AddPolygon(w http.ResponseWriter, r *http.Request)
-	// DeleteAnnotationById Delete by id
+	// DeleteAnnotationById Delete annotation by id
 	// (DELETE /annotate/{id})
 	DeleteAnnotationById(w http.ResponseWriter, r *http.Request, id string)
 	// UpdateAnnotationById Change label
