@@ -41,7 +41,7 @@ func TestReceiveTaskPayload(t *testing.T) {
 	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{"source-collection"}}
 	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
 		Request{Source: "source-collection", Destination: "destination-collection"}, p)
-	assert.Equal(t, task.CollectionCloneTask, p.Got.Type)
+	assert.Equal(t, task.CollectionCloneTask.String(), p.Got.Type)
 	assert.True(t, p.GotSuccess)
 }
 

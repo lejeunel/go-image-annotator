@@ -97,10 +97,19 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
+	var deep bool
+	if r.Deep != nil {
+		if *r.Deep == true {
+			deep = true
+		}
+	}
 	i.JobQueue.Submit(func() {
-		i.runTask(task, r.Source, r.Destination, group, r.Deep)
+		i.runTask(task, r.Source, r.Destination, group, deep)
 	})
-	out.SuccessSubmitCloneTask(Response{Id: task.Id, Issuer: task.Issuer, Type: task.Type})
+
+	out.SuccessSubmitCloneTask(
+		Response{Id: task.Id.String(), Issuer: task.Issuer, Type: task.Type.String()},
+	)
 }
 
 func (i *Interactor) checkCollections(source, destination string) error {

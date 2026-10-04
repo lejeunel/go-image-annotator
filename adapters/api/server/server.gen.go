@@ -75,6 +75,21 @@ type BoundingBox struct {
 	Yc float32 `json:"yc"`
 }
 
+// CloneCollection defines model for CloneCollection.
+type CloneCollection struct {
+	// Deep Also clone annotations and meta-data
+	Deep *bool `json:"deep,omitempty"`
+
+	// Destination Name of the destination collection
+	Destination string `json:"destination"`
+
+	// Group Name of the group of destination collection
+	Group *string `json:"group,omitempty"`
+
+	// Source Name of the existing source collection
+	Source string `json:"source"`
+}
+
 // Collection defines model for Collection.
 type Collection struct {
 	// Description Description of the collection
@@ -222,6 +237,18 @@ type Polygon struct {
 	Points []Point `json:"points"`
 }
 
+// TaskResponse defines model for TaskResponse.
+type TaskResponse struct {
+	// Issuer Id of the issuing user
+	Issuer string `json:"issuer"`
+
+	// TaskId Id of the generated background task
+	TaskId string `json:"task_id"`
+
+	// Type Type of submitted task
+	Type string `json:"type"`
+}
+
 // UpdateCollection defines model for UpdateCollection.
 type UpdateCollection struct {
 	// Description New description of the collection
@@ -289,6 +316,9 @@ type AddPolygonJSONRequestBody = AddPolygon
 // CreateCollectionJSONRequestBody defines body for CreateCollection for application/json ContentType.
 type CreateCollectionJSONRequestBody = NewCollection
 
+// CloneCollectionJSONRequestBody defines body for CloneCollection for application/json ContentType.
+type CloneCollectionJSONRequestBody = CloneCollection
+
 // UpdateCollectionByNameJSONRequestBody defines body for UpdateCollectionByName for application/json ContentType.
 type UpdateCollectionByNameJSONRequestBody = UpdateCollection
 
@@ -321,6 +351,9 @@ type ServerInterface interface {
 	// CreateCollection Create a new collection
 	// (POST /collections)
 	CreateCollection(w http.ResponseWriter, r *http.Request)
+	// CloneCollection Clone a collection
+	// (POST /collections/clone)
+	CloneCollection(w http.ResponseWriter, r *http.Request)
 	// DeleteCollectionByName Delete a collection by name
 	// (DELETE /collections/{name})
 	DeleteCollectionByName(w http.ResponseWriter, r *http.Request, name string)
@@ -511,6 +544,20 @@ func (siw *ServerInterfaceWrapper) CreateCollection(w http.ResponseWriter, r *ht
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CreateCollection(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CloneCollection operation middleware
+func (siw *ServerInterfaceWrapper) CloneCollection(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CloneCollection(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1020,6 +1067,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/users", wrapper.CreateUser)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/collections", wrapper.ListCollections)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/collections", wrapper.CreateCollection)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/collections/clone", wrapper.CloneCollection)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/labels/{name}", wrapper.DeleteLabelByName)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/labels/{name}", wrapper.FindLabelByName)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/labels", wrapper.ListLabels)

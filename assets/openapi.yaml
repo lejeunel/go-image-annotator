@@ -465,6 +465,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /collections/clone:
+    post:
+      summary: Clone a collection
+      description: Clone an existing collection
+      operationId: cloneCollection
+      tags: [Collection]
+      requestBody:
+        description: Clone collection payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloneCollection'
+      responses:
+        '200':
+          description: task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      
   /labels/{name}:
     get:
       summary: Find a label by name
@@ -630,7 +663,24 @@ components:
         description:
           type: string
           description: New description of the collection
-
+    CloneCollection:
+      type: object
+      required:
+        - source
+        - destination
+      properties:
+        source:
+          type: string
+          description: Name of the existing source collection
+        destination:
+          type: string
+          description: Name of the destination collection
+        group:
+          type: string
+          description: Name of the group of destination collection
+        deep:
+          type: boolean
+          description: Also clone annotations and meta-data
     ListCollectionsResponse:
       type: object
       required:
@@ -888,6 +938,21 @@ components:
             $ref: '#/components/schemas/Label'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    TaskResponse:
+      required:
+        - task_id
+        - issuer
+        - type
+      properties:
+        task_id:
+          type: string
+          description: Id of the generated background task
+        issuer:
+          type: string
+          description: Id of the issuing user
+        type:
+          type: string
+          description: Type of submitted task
     NewLabel:
       required:
         - name

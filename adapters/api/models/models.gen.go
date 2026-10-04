@@ -68,6 +68,21 @@ type BoundingBox struct {
 	Yc float32 `json:"yc"`
 }
 
+// CloneCollection defines model for CloneCollection.
+type CloneCollection struct {
+	// Deep Also clone annotations and meta-data
+	Deep *bool `json:"deep,omitempty"`
+
+	// Destination Name of the destination collection
+	Destination string `json:"destination"`
+
+	// Group Name of the group of destination collection
+	Group *string `json:"group,omitempty"`
+
+	// Source Name of the existing source collection
+	Source string `json:"source"`
+}
+
 // Collection defines model for Collection.
 type Collection struct {
 	// Description Description of the collection
@@ -215,6 +230,18 @@ type Polygon struct {
 	Points []Point `json:"points"`
 }
 
+// TaskResponse defines model for TaskResponse.
+type TaskResponse struct {
+	// Issuer Id of the issuing user
+	Issuer string `json:"issuer"`
+
+	// TaskId Id of the generated background task
+	TaskId string `json:"task_id"`
+
+	// Type Type of submitted task
+	Type string `json:"type"`
+}
+
 // UpdateCollection defines model for UpdateCollection.
 type UpdateCollection struct {
 	// Description New description of the collection
@@ -281,6 +308,9 @@ type AddPolygonJSONRequestBody = AddPolygon
 
 // CreateCollectionJSONRequestBody defines body for CreateCollection for application/json ContentType.
 type CreateCollectionJSONRequestBody = NewCollection
+
+// CloneCollectionJSONRequestBody defines body for CloneCollection for application/json ContentType.
+type CloneCollectionJSONRequestBody = CloneCollection
 
 // UpdateCollectionByNameJSONRequestBody defines body for UpdateCollectionByName for application/json ContentType.
 type UpdateCollectionByNameJSONRequestBody = UpdateCollection

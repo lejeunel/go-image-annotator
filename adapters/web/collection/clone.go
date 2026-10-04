@@ -27,7 +27,7 @@ func (s *Server) Clone(w http.ResponseWriter, r *http.Request) {
 		clone.Request{
 			Source:      source,
 			Destination: r.FormValue(nameFieldName),
-			Deep:        deep,
+			Deep:        &deep,
 		},
 		NewClonePresenter(w, s.RowURL))
 

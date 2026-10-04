@@ -12,7 +12,7 @@ import (
 
 func ApiDocsHandlerFunc(specsPath string, pb b.PageBuilder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		content := Div(Raw("<redoc spec-url='/api/openapi.yaml' scroll-y-offset='nav'></redoc>"),
+		content := Div(Raw("<redoc spec-url='/api/openapi.yaml' scroll-y-offset='72'></redoc>"),
 			Script(Src("/static/redoc.standalone.js")))
 		pb.SetUserIdentity(r.Context())
 		pb.SetExpanded()
