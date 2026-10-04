@@ -13,7 +13,6 @@ import (
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	s "github.com/lejeunel/go-image-annotator/shared/session"
 	assign_label "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
-	"github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
@@ -172,7 +171,7 @@ func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
 	p := ap.NewAnnotoriousPresenter(w)
 	s.Annotator.DeleteAnnotation.Execute(
 		r.Context(),
-		remove.Request{Id: r.URL.Query().Get("id")},
+		r.URL.Query().Get("id"),
 		&p,
 	)
 }

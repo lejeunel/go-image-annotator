@@ -9,6 +9,6 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) SuccessDeleteAnnotation(Response) {
+func (p *FakePresenter) SuccessDeleteAnnotation(string) {
 	p.GotSuccess = true
 }

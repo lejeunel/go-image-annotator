@@ -14,7 +14,7 @@ func TestHandleAuthError(t *testing.T) {
 		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
-		Request{Id: a.NewAnnotationId().String()},
+		a.NewAnnotationId().String(),
 		p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
@@ -23,7 +23,7 @@ func TestHandleAuthError(t *testing.T) {
 func TestNonExistingBoxShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.AnnotationRepo{ErrOnRemoveAnnotation: e.ErrNotFound})
-	itr.Execute(t.Context(), Request{Id: a.NewAnnotationId().String()}, p)
+	itr.Execute(t.Context(), a.NewAnnotationId().String(), p)
 	assert.True(t, p.GotNotFoundErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -31,7 +31,7 @@ func TestNonExistingBoxShouldFail(t *testing.T) {
 func TestInternalErrShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.AnnotationRepo{Err: e.ErrInternal})
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(), "", p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -41,7 +41,7 @@ func TestRemoveBoxWithNoGroup(t *testing.T) {
 	repo := &fk.AnnotationRepo{NoGroup: true}
 	itr := New(repo)
 	annotationId := a.NewAnnotationId()
-	itr.Execute(t.Context(), Request{Id: annotationId.String()}, p)
+	itr.Execute(t.Context(), annotationId.String(), p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, annotationId, repo.GotRemovedAnnotation)
 }
@@ -51,7 +51,7 @@ func TestRemoveBox(t *testing.T) {
 	repo := &fk.AnnotationRepo{}
 	itr := New(repo)
 	annotationId := a.NewAnnotationId()
-	itr.Execute(t.Context(), Request{Id: annotationId.String()}, p)
+	itr.Execute(t.Context(), annotationId.String(), p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, annotationId, repo.GotRemovedAnnotation)
 }

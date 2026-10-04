@@ -8,7 +8,6 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
-	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	"github.com/stretchr/testify/assert"
 )
@@ -80,6 +79,6 @@ func TestUpdateLabel(t *testing.T) {
 func TestDeleteAnnotation(t *testing.T) {
 	a, _ := createAnnotator()
 	p := &FakeRemoveLabelPresenter{}
-	a.DeleteAnnotation.Execute(t.Context(), del.Request{}, p)
+	a.DeleteAnnotation.Execute(t.Context(), "", p)
 	assert.True(t, p.Called)
 }

@@ -3,7 +3,6 @@ package annotator
 import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
-	rmlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/scroll"
 )
@@ -57,7 +56,7 @@ type FakeRemoveLabelPresenter struct {
 	Called bool
 }
 
-func (p *FakeRemoveLabelPresenter) SuccessDeleteAnnotation(rmlbl.Response) {
+func (p *FakeRemoveLabelPresenter) SuccessDeleteAnnotation(string) {
 	p.Called = true
 }
 func (p FakeRemoveLabelPresenter) Error(error) {}

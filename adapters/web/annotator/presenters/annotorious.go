@@ -11,7 +11,6 @@ import (
 	addlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/assign-label"
 	updbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-bbox"
 	updpoly "github.com/lejeunel/go-image-annotator/use-cases/annotate/modify-polygon"
-	del "github.com/lejeunel/go-image-annotator/use-cases/annotate/remove"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
@@ -42,7 +41,7 @@ func (p AnnotoriousPresenter) SuccessAddPolygon(r addpoly.Response)    {}
 func (p AnnotoriousPresenter) SuccessUpdatePolygon(r updpoly.Response) {}
 func (p AnnotoriousPresenter) SuccessUpdateBox(r updbox.Response)      {}
 func (p AnnotoriousPresenter) SuccessUpdateLabel(r updlbl.Response)    {}
-func (p AnnotoriousPresenter) SuccessDeleteAnnotation(r del.Response)  {}
+func (p AnnotoriousPresenter) SuccessDeleteAnnotation(string)          {}
 
 func (p *AnnotoriousPresenter) RenderRegionAnnotationsAsJSON(w http.ResponseWriter) {
 	boxes := ConvertBoxesToAnnotorious(p.boxes)

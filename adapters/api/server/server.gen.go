@@ -309,6 +309,9 @@ type ServerInterface interface {
 	// AddPolygon Add a polygon
 	// (POST /annotate/polygon)
 	AddPolygon(w http.ResponseWriter, r *http.Request)
+	// DeleteAnnotationById Delete by id
+	// (DELETE /annotate/{id})
+	DeleteAnnotationById(w http.ResponseWriter, r *http.Request, id string)
 	// ListCollections List collections
 	// (GET /collections)
 	ListCollections(w http.ResponseWriter, r *http.Request, params ListCollectionsParams)
@@ -384,6 +387,32 @@ func (siw *ServerInterfaceWrapper) AddPolygon(w http.ResponseWriter, r *http.Req
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.AddPolygon(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteAnnotationById operation middleware
+func (siw *ServerInterfaceWrapper) DeleteAnnotationById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteAnnotationById(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -946,6 +975,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/collections/{name}", wrapper.DeleteCollectionByName)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/collections/{name}", wrapper.FindCollectionByName)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/collections/{name}", wrapper.UpdateCollectionByName)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/annotate/{id}", wrapper.DeleteAnnotationById)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/box", wrapper.AddBoundingBox)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/polygon", wrapper.AddPolygon)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/users", wrapper.CreateUser)

@@ -10,7 +10,7 @@ import (
 )
 
 type Interface interface {
-	Execute(context.Context, Request, OutputPort)
+	Execute(context.Context, string, OutputPort)
 }
 
 type Interactor struct {
@@ -37,15 +37,15 @@ func New(repo Repo, opts ...Option) Interactor {
 	return *i
 }
 
-func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
+func (i Interactor) Execute(ctx context.Context, id string, out OutputPort) {
 	errCtx := "removing annotation"
-	id, err := a.NewAnnotationIdFromString(r.Id)
+	idParsed, err := a.NewAnnotationIdFromString(id)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	group, err := i.Repo.GroupOfAnnotation(*id)
+	group, err := i.Repo.GroupOfAnnotation(*idParsed)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
@@ -56,10 +56,10 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.Repo.RemoveAnnotation(*id); err != nil {
+	if err := i.Repo.RemoveAnnotation(*idParsed); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	out.SuccessDeleteAnnotation(Response{Id: *id})
+	out.SuccessDeleteAnnotation(id)
 }

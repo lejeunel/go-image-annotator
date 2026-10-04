@@ -44,3 +44,7 @@ func (s *Server) AddPolygon(w http.ResponseWriter, r *http.Request) {
 	}
 	s.Annotation.AddPolygon.Execute(r.Context(), req, annotate.NewAnnotationPresenter(w, s.Logger))
 }
+
+func (s *Server) DeleteAnnotationById(w http.ResponseWriter, r *http.Request, id string) {
+	s.Annotation.Delete.Execute(r.Context(), id, annotate.NewAnnotationPresenter(w, s.Logger))
+}

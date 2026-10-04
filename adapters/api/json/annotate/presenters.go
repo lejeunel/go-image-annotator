@@ -22,6 +22,10 @@ func (p AnnotationPresenter) SuccessAddPolygon(r addply.Response) {
 	json.WriteJSON(p.Writer, 200, "successfully added polygon")
 }
 
+func (p AnnotationPresenter) SuccessDeleteAnnotation(id string) {
+	json.WriteJSON(p.Writer, 200, "successfully deleted annotation")
+}
+
 func NewAnnotationPresenter(w http.ResponseWriter, l slog.Logger) AnnotationPresenter {
 	return AnnotationPresenter{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
 }

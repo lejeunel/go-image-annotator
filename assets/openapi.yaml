@@ -275,6 +275,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /annotate/{id}:
+    delete:
+      summary: Delete by id
+      description: Delete an annotation based on its id
+      operationId: deleteAnnotationById
+      tags: [Annotate]
+      parameters:
+        - name: id
+          in: path
+          description: Id of annotation to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: annotation deleted
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /annotate/box:
     post:
       summary: Add a bounding-box

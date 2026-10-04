@@ -79,8 +79,8 @@ func (b *FakeLabelUpdater) Execute(ctx context.Context, r updlbl.Request, o updl
 
 type FakeAnnotationDeleter struct{}
 
-func (b *FakeAnnotationDeleter) Execute(c context.Context, r del.Request, o del.OutputPort) {
-	o.SuccessDeleteAnnotation(del.Response{})
+func (b *FakeAnnotationDeleter) Execute(c context.Context, id string, o del.OutputPort) {
+	o.SuccessDeleteAnnotation(id)
 }
 
 type FakeMetaAdder struct{}
