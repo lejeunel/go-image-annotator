@@ -297,6 +297,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /annotate/{id}/{label}:
+    put:
+      summary: Change label
+      description: Change annotation label given its id
+      operationId: updateAnnotationById
+      tags: [Annotate]
+      parameters:
+        - name: label
+          in: path
+          description: Label to assign
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Id of annotation to update
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: annotation updated
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /annotate/box:
     post:
       summary: Add a bounding-box

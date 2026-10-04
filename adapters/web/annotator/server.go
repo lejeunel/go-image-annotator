@@ -197,7 +197,7 @@ func (s *Server) SetLabel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := ap.NewAnnotoriousPresenter(w)
-	s.Annotator.UpdateLabel.Execute(r.Context(), updlbl.Request{AnnotationId: id, Label: label}, &p)
+	s.Annotator.UpdateLabel.Execute(r.Context(), updlbl.Request{Id: id, Label: label}, &p)
 }
 
 func (s *Server) GetRegionsAsJSON(w http.ResponseWriter, r *http.Request) {

@@ -8,6 +8,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addply "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
+	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
 )
 
 func (s *Server) AddBoundingBox(w http.ResponseWriter, r *http.Request) {
@@ -47,4 +48,17 @@ func (s *Server) AddPolygon(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) DeleteAnnotationById(w http.ResponseWriter, r *http.Request, id string) {
 	s.Annotation.Delete.Execute(r.Context(), id, annotate.NewAnnotationPresenter(w, s.Logger))
+}
+
+func (s *Server) UpdateAnnotationById(
+	w http.ResponseWriter,
+	r *http.Request,
+	id string,
+	label string,
+) {
+	s.Annotation.UpdateLabel.Execute(
+		r.Context(),
+		updlbl.Request{Id: id, Label: label},
+		annotate.NewAnnotationPresenter(w, s.Logger),
+	)
 }

@@ -57,7 +57,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	id, err := a.NewAnnotationIdFromString(r.AnnotationId)
+	id, err := a.NewAnnotationIdFromString(r.Id)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

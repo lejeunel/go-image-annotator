@@ -15,7 +15,7 @@ import (
 
 func CreateTestRequest() Request {
 	newLabel := lbl.NewLabel(lbl.NewLabelId(), "another-label")
-	return Request{AnnotationId: a.NewAnnotationId().String(), Label: newLabel.Name}
+	return Request{Id: a.NewAnnotationId().String(), Label: newLabel.Name}
 }
 
 func TestHandleAuthError(t *testing.T) {
@@ -77,7 +77,7 @@ func TestUpdateLabelNoGroup(t *testing.T) {
 	itr := New(repo, &fk.LabelRepo{Return: newLabel})
 	req := CreateTestRequest()
 	itr.Execute(t.Context(), req, p)
-	assert.Equal(t, req.AnnotationId, repo.UpdatedAnnotationId.String())
+	assert.Equal(t, req.Id, repo.UpdatedAnnotationId.String())
 	assert.Equal(t, repo.UpdatedLabelId, newLabel.Id)
 }
 
@@ -88,6 +88,6 @@ func TestUpdateLabel(t *testing.T) {
 	itr := New(repo, &fk.LabelRepo{Return: newLabel})
 	req := CreateTestRequest()
 	itr.Execute(t.Context(), req, p)
-	assert.Equal(t, req.AnnotationId, repo.UpdatedAnnotationId.String())
+	assert.Equal(t, req.Id, repo.UpdatedAnnotationId.String())
 	assert.Equal(t, repo.UpdatedLabelId, newLabel.Id)
 }
