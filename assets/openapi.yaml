@@ -395,7 +395,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+  /users/{id}:
+    put:
+      summary: Update user privileges
+      description: Update privileges of a user given its id
+      operationId: updateUser
+      tags: [User]
+      parameters:
+        - name: id
+          in: path
+          description: Id of user
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: User privileges
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPrivileges'
+      responses:
+        '204':
+          description: annotation updated
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a user
+      description: Delete a user by id
+      operationId: deleteUserById
+      tags: [User]
+      parameters:
+        - name: id
+          in: path
+          description: Id of the user to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: user deleted
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /collections:
     get:
       summary: List collections
@@ -909,6 +958,19 @@ components:
           type: array
           items:
             type: string
+    UserPrivileges:
+      required:
+        - groups
+        - roles
+      properties:
+        roles:
+          type: array
+          items:
+            type: string
+        groups:
+          type: array
+          items:
+            type: string        
     NewCollection:
       required:
         - name

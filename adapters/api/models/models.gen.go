@@ -260,6 +260,12 @@ type User struct {
 	Roles []string `json:"roles"`
 }
 
+// UserPrivileges defines model for UserPrivileges.
+type UserPrivileges struct {
+	Groups []string `json:"groups"`
+	Roles  []string `json:"roles"`
+}
+
 // ListCollectionsParams defines parameters for ListCollections.
 type ListCollectionsParams struct {
 	// Page page number
@@ -323,3 +329,6 @@ type CreateLabelJSONRequestBody = NewLabel
 
 // CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
 type CreateUserJSONRequestBody = NewUser
+
+// UpdateUserJSONRequestBody defines body for UpdateUser for application/json ContentType.
+type UpdateUserJSONRequestBody = UserPrivileges

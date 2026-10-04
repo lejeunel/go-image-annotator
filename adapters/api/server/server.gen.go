@@ -267,6 +267,12 @@ type User struct {
 	Roles []string `json:"roles"`
 }
 
+// UserPrivileges defines model for UserPrivileges.
+type UserPrivileges struct {
+	Groups []string `json:"groups"`
+	Roles  []string `json:"roles"`
+}
+
 // ListCollectionsParams defines parameters for ListCollections.
 type ListCollectionsParams struct {
 	// Page page number
@@ -331,6 +337,9 @@ type CreateLabelJSONRequestBody = NewLabel
 // CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
 type CreateUserJSONRequestBody = NewUser
 
+// UpdateUserJSONRequestBody defines body for UpdateUser for application/json ContentType.
+type UpdateUserJSONRequestBody = UserPrivileges
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// AddBoundingBox Add a bounding-box
@@ -390,6 +399,12 @@ type ServerInterface interface {
 	// CreateUser Create a new user
 	// (POST /users)
 	CreateUser(w http.ResponseWriter, r *http.Request)
+	// DeleteUserById Delete a user
+	// (DELETE /users/{id})
+	DeleteUserById(w http.ResponseWriter, r *http.Request, id string)
+	// UpdateUser Update user privileges
+	// (PUT /users/{id})
+	UpdateUser(w http.ResponseWriter, r *http.Request, id string)
 	// WhoAmI Get current user's identity
 	// (GET /whoami)
 	WhoAmI(w http.ResponseWriter, r *http.Request)
@@ -918,6 +933,58 @@ func (siw *ServerInterfaceWrapper) CreateUser(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
+// DeleteUserById operation middleware
+func (siw *ServerInterfaceWrapper) DeleteUserById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteUserById(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateUser operation middleware
+func (siw *ServerInterfaceWrapper) UpdateUser(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateUser(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // WhoAmI operation middleware
 func (siw *ServerInterfaceWrapper) WhoAmI(w http.ResponseWriter, r *http.Request) {
 
@@ -1065,6 +1132,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/box", wrapper.AddBoundingBox)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/polygon", wrapper.AddPolygon)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/users", wrapper.CreateUser)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/users/{id}", wrapper.DeleteUserById)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/users/{id}", wrapper.UpdateUser)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/collections", wrapper.ListCollections)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/collections", wrapper.CreateCollection)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/collections/clone", wrapper.CloneCollection)

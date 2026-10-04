@@ -1,20 +1,23 @@
 package user
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	u "github.com/lejeunel/go-image-annotator/entities/user"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
+	upd "github.com/lejeunel/go-image-annotator/use-cases/user/update-privileges"
 )
 
-type Create struct {
+type Presenter struct {
 	Writer http.ResponseWriter
 	json.ErrorPresenter
 }
 
-func (p Create) SuccessCreateUser(r create.Response) {
+func (p Presenter) SuccessCreateUser(r create.Response) {
 	response := models.User{
 		Id:     r.Id,
 		Roles:  r.Roles,
@@ -24,6 +27,14 @@ func (p Create) SuccessCreateUser(r create.Response) {
 	json.WriteJSON(p.Writer, 200, response)
 }
 
-func NewCreatePresenter(w http.ResponseWriter, l slog.Logger) Create {
-	return Create{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
+func (p Presenter) SuccessDeleteUser(id u.UserId) {
+	json.WriteJSON(p.Writer, 204, fmt.Sprintf("successfully delete user %v", id))
+}
+
+func (p Presenter) SuccessUpdate(r upd.Response) {
+	json.WriteJSON(p.Writer, 204, fmt.Sprintf("successfully updated user %v", r.Id))
+}
+
+func NewPresenter(w http.ResponseWriter, l slog.Logger) Presenter {
+	return Presenter{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
 }
