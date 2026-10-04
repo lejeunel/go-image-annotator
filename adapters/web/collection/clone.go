@@ -5,9 +5,11 @@ import (
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
+	se "github.com/lejeunel/go-image-annotator/adapters/web/components/select"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	s "github.com/lejeunel/go-image-annotator/adapters/web/shared"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	g "github.com/lejeunel/go-image-annotator/entities/group"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/clone"
 )
 
@@ -41,6 +43,7 @@ type ClonePresenter struct {
 	task          string
 	okMessageFunc func(clone.Response) string
 	htmx.ErrorPresenter
+	groups []string
 }
 
 func NewClonePresenter(w http.ResponseWriter, u b.RowURL) ClonePresenter {
@@ -48,7 +51,20 @@ func NewClonePresenter(w http.ResponseWriter, u b.RowURL) ClonePresenter {
 	okMessageFunc := func(r clone.Response) string {
 		return s.MakeNewTaskMessage()
 	}
-	return ClonePresenter{w, u, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
+	return ClonePresenter{
+		writer: w, RowURL: u, task: task,
+		okMessageFunc: okMessageFunc, ErrorPresenter: htmx.NewErrorPresenter(task, w),
+	}
+}
+
+func (p ClonePresenter) SuccessSubmitCloneTask(r clone.Response) {
+	htmx.NotifySuccessPayload(p.writer, p.task, p.okMessageFunc(r))
+}
+
+func (p *ClonePresenter) SuccessListGroups(groups []g.Group) {
+	for _, g := range groups {
+		p.groups = append(p.groups, g.Name)
+	}
 }
 
 func (p ClonePresenter) SuccessFindCollection(c clc.Collection) {
@@ -56,10 +72,9 @@ func (p ClonePresenter) SuccessFindCollection(c clc.Collection) {
 	b.SetResourceName(c.Name)
 	b.AddTextField(nameFieldName, "Name", bf.WithRequired(), bf.WithDefault(c.Name))
 	b.AddTextField(descriptionFieldName, "Description", bf.WithDefault(c.Description))
+
+	groupSelect := se.NewSingleSelect(p.groups, groupFieldName)
+	b.AddRaw(groupFieldName, groupSelect)
 	b.AddCheckbox(deepFieldName, "Deep")
 	b.Render(p.writer)
-}
-
-func (p ClonePresenter) SuccessSubmitCloneTask(r clone.Response) {
-	htmx.NotifySuccessPayload(p.writer, p.task, p.okMessageFunc(r))
 }

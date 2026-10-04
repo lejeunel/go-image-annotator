@@ -135,7 +135,7 @@ func (b HTMXInlineFormBuilder) Render(w io.Writer) {
 				Attr(`hx-swap=outerHTML`),
 				Div(
 					caption,
-					Class("ml-auto flex items-center gap-2"),
+					Class("ml-auto flex items-start gap-2"),
 					Map(b.fields, func(f Renderer) Node {
 						var buf bytes.Buffer
 						f.Render(&buf)
