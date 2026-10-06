@@ -351,8 +351,8 @@ type CreateCollectionJSONRequestBody = NewCollection
 // CloneCollectionJSONRequestBody defines body for CloneCollection for application/json ContentType.
 type CloneCollectionJSONRequestBody = CloneCollection
 
-// UpdateCollectionByNameJSONRequestBody defines body for UpdateCollectionByName for application/json ContentType.
-type UpdateCollectionByNameJSONRequestBody = UpdateCollection
+// UpdateCollectionJSONRequestBody defines body for UpdateCollection for application/json ContentType.
+type UpdateCollectionJSONRequestBody = UpdateCollection
 
 // IngestImageMultipartRequestBody defines body for IngestImage for multipart/form-data ContentType.
 type IngestImageMultipartRequestBody IngestImageMultipartBody

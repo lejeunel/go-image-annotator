@@ -223,7 +223,7 @@ paths:
       summary: Update a collection
       description: >-
         Replace the collection's representation.
-      operationId: updateCollectionByName
+      operationId: updateCollection
       tags: [Collection]
       parameters:
         - name: name
@@ -261,7 +261,7 @@ paths:
     delete:
       summary: Delete a collection by name
       description: Delete a collection based on its name
-      operationId: deleteCollectionByName
+      operationId: deleteCollection
       tags: [Collection]
       parameters:
         - name: name
@@ -285,7 +285,7 @@ paths:
     delete:
       summary: Delete annotation by id
       description: Delete an annotation based on its id
-      operationId: deleteAnnotationById
+      operationId:  deleteAnnotation
       tags: [Annotate]
       parameters:
         - name: id
@@ -309,7 +309,7 @@ paths:
     put:
       summary: Change label
       description: Change annotation label given its id
-      operationId: updateAnnotationById
+      operationId: updateAnnotation
       tags: [Annotate]
       parameters:
         - name: label
@@ -453,7 +453,7 @@ paths:
     delete:
       summary: Delete a user
       description: Delete a user by id
-      operationId: deleteUserById
+      operationId: deleteUser
       tags: [User]
       parameters:
         - name: id
@@ -576,7 +576,7 @@ paths:
     get:
       summary: Find a label by name
       description: Returns a label based on its name
-      operationId: findLabelByName
+      operationId: findLabel
       tags: [Label]
       parameters:
         - name: name
@@ -601,7 +601,7 @@ paths:
     delete:
       summary: Delete a label by name
       description: Delete a label based on its name
-      operationId: deleteLabelByName
+      operationId: deleteLabel
       tags: [Label]
       parameters:
         - name: name

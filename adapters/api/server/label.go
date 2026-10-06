@@ -10,7 +10,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 )
 
-func (s *Server) FindLabelByName(w http.ResponseWriter, r *http.Request, name string) {
+func (s *Server) FindLabel(w http.ResponseWriter, r *http.Request, name string) {
 	s.Label.Find.Execute(r.Context(), name, p.NewFindPresenter(w, s.Logger))
 }
 
@@ -27,7 +27,7 @@ func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
 	s.Label.Create.Execute(r.Context(), req, p.NewCreatePresenter(w, s.Logger))
 }
 
-func (s *Server) DeleteLabelByName(w http.ResponseWriter, r *http.Request, name string) {
+func (s *Server) DeleteLabel(w http.ResponseWriter, r *http.Request, name string) {
 	s.Label.Delete.Execute(r.Context(), name, p.NewDeletePresenter(w, s.Logger))
 }
 

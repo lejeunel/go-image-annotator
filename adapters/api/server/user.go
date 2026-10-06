@@ -25,7 +25,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 		}, p.NewPresenter(w, s.Logger))
 }
 
-func (s *Server) DeleteUserById(w http.ResponseWriter, r *http.Request, id string) {
+func (s *Server) DeleteUser(w http.ResponseWriter, r *http.Request, id string) {
 	s.User.Delete.Execute(r.Context(), id, p.NewPresenter(w, s.Logger))
 }
 

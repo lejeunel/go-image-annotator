@@ -29,7 +29,7 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 		presenter.NewCreatePresenter(w, s.Logger))
 }
 
-func (s *Server) DeleteCollectionByName(w http.ResponseWriter, r *http.Request, name string) {
+func (s *Server) DeleteCollection(w http.ResponseWriter, r *http.Request, name string) {
 	s.Collection.Delete.Execute(r.Context(), name, presenter.NewDeletePresenter(w, s.Logger))
 }
 
@@ -49,7 +49,7 @@ func (s *Server) ListCollections(
 		presenter.NewListPresenter(w, s.Logger))
 }
 
-func (s *Server) UpdateCollectionByName(w http.ResponseWriter, r *http.Request, name string) {
+func (s *Server) UpdateCollection(w http.ResponseWriter, r *http.Request, name string) {
 	body, ok := json.MustDecodeJSON[models.UpdateCollection](w, r)
 	if !ok {
 		return

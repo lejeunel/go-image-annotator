@@ -358,8 +358,8 @@ type CreateCollectionJSONRequestBody = NewCollection
 // CloneCollectionJSONRequestBody defines body for CloneCollection for application/json ContentType.
 type CloneCollectionJSONRequestBody = CloneCollection
 
-// UpdateCollectionByNameJSONRequestBody defines body for UpdateCollectionByName for application/json ContentType.
-type UpdateCollectionByNameJSONRequestBody = UpdateCollection
+// UpdateCollectionJSONRequestBody defines body for UpdateCollection for application/json ContentType.
+type UpdateCollectionJSONRequestBody = UpdateCollection
 
 // IngestImageMultipartRequestBody defines body for IngestImage for multipart/form-data ContentType.
 type IngestImageMultipartRequestBody IngestImageMultipartBody
@@ -381,12 +381,12 @@ type ServerInterface interface {
 	// AddPolygon Add a polygon
 	// (POST /annotate/polygon)
 	AddPolygon(w http.ResponseWriter, r *http.Request)
-	// DeleteAnnotationById Delete annotation by id
+	// DeleteAnnotation Delete annotation by id
 	// (DELETE /annotate/{id})
-	DeleteAnnotationById(w http.ResponseWriter, r *http.Request, id string)
-	// UpdateAnnotationById Change label
+	DeleteAnnotation(w http.ResponseWriter, r *http.Request, id string)
+	// UpdateAnnotation Change label
 	// (PUT /annotate/{id}/{label})
-	UpdateAnnotationById(w http.ResponseWriter, r *http.Request, id string, label string)
+	UpdateAnnotation(w http.ResponseWriter, r *http.Request, id string, label string)
 	// ListCollections List collections
 	// (GET /collections)
 	ListCollections(w http.ResponseWriter, r *http.Request, params ListCollectionsParams)
@@ -396,15 +396,15 @@ type ServerInterface interface {
 	// CloneCollection Clone a collection
 	// (POST /collections/clone)
 	CloneCollection(w http.ResponseWriter, r *http.Request)
-	// DeleteCollectionByName Delete a collection by name
+	// DeleteCollection Delete a collection by name
 	// (DELETE /collections/{name})
-	DeleteCollectionByName(w http.ResponseWriter, r *http.Request, name string)
+	DeleteCollection(w http.ResponseWriter, r *http.Request, name string)
 	// FindCollectionByName Find a collection by name
 	// (GET /collections/{name})
 	FindCollectionByName(w http.ResponseWriter, r *http.Request, name string)
-	// UpdateCollectionByName Update a collection
+	// UpdateCollection Update a collection
 	// (PUT /collections/{name})
-	UpdateCollectionByName(w http.ResponseWriter, r *http.Request, name string)
+	UpdateCollection(w http.ResponseWriter, r *http.Request, name string)
 	// ListImages List images
 	// (GET /images)
 	ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams)
@@ -420,21 +420,21 @@ type ServerInterface interface {
 	// CreateLabel Create a new label
 	// (POST /labels)
 	CreateLabel(w http.ResponseWriter, r *http.Request)
-	// DeleteLabelByName Delete a label by name
+	// DeleteLabel Delete a label by name
 	// (DELETE /labels/{name})
-	DeleteLabelByName(w http.ResponseWriter, r *http.Request, name string)
-	// FindLabelByName Find a label by name
+	DeleteLabel(w http.ResponseWriter, r *http.Request, name string)
+	// FindLabel Find a label by name
 	// (GET /labels/{name})
-	FindLabelByName(w http.ResponseWriter, r *http.Request, name string)
+	FindLabel(w http.ResponseWriter, r *http.Request, name string)
 	// ReadRawImage Read image raw-data
 	// (GET /raw/{image_id})
 	ReadRawImage(w http.ResponseWriter, r *http.Request, imageId string)
 	// CreateUser Create a new user
 	// (POST /users)
 	CreateUser(w http.ResponseWriter, r *http.Request)
-	// DeleteUserById Delete a user
+	// DeleteUser Delete a user
 	// (DELETE /users/{id})
-	DeleteUserById(w http.ResponseWriter, r *http.Request, id string)
+	DeleteUser(w http.ResponseWriter, r *http.Request, id string)
 	// UpdateUser Update user privileges
 	// (PUT /users/{id})
 	UpdateUser(w http.ResponseWriter, r *http.Request, id string)
@@ -480,8 +480,8 @@ func (siw *ServerInterfaceWrapper) AddPolygon(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
-// DeleteAnnotationById operation middleware
-func (siw *ServerInterfaceWrapper) DeleteAnnotationById(w http.ResponseWriter, r *http.Request) {
+// DeleteAnnotation operation middleware
+func (siw *ServerInterfaceWrapper) DeleteAnnotation(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	_ = err
@@ -496,7 +496,7 @@ func (siw *ServerInterfaceWrapper) DeleteAnnotationById(w http.ResponseWriter, r
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteAnnotationById(w, r, id)
+		siw.Handler.DeleteAnnotation(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -506,8 +506,8 @@ func (siw *ServerInterfaceWrapper) DeleteAnnotationById(w http.ResponseWriter, r
 	handler.ServeHTTP(w, r)
 }
 
-// UpdateAnnotationById operation middleware
-func (siw *ServerInterfaceWrapper) UpdateAnnotationById(w http.ResponseWriter, r *http.Request) {
+// UpdateAnnotation operation middleware
+func (siw *ServerInterfaceWrapper) UpdateAnnotation(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	_ = err
@@ -531,7 +531,7 @@ func (siw *ServerInterfaceWrapper) UpdateAnnotationById(w http.ResponseWriter, r
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateAnnotationById(w, r, id, label)
+		siw.Handler.UpdateAnnotation(w, r, id, label)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -615,8 +615,8 @@ func (siw *ServerInterfaceWrapper) CloneCollection(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r)
 }
 
-// DeleteCollectionByName operation middleware
-func (siw *ServerInterfaceWrapper) DeleteCollectionByName(w http.ResponseWriter, r *http.Request) {
+// DeleteCollection operation middleware
+func (siw *ServerInterfaceWrapper) DeleteCollection(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	_ = err
@@ -631,7 +631,7 @@ func (siw *ServerInterfaceWrapper) DeleteCollectionByName(w http.ResponseWriter,
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteCollectionByName(w, r, name)
+		siw.Handler.DeleteCollection(w, r, name)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -667,8 +667,8 @@ func (siw *ServerInterfaceWrapper) FindCollectionByName(w http.ResponseWriter, r
 	handler.ServeHTTP(w, r)
 }
 
-// UpdateCollectionByName operation middleware
-func (siw *ServerInterfaceWrapper) UpdateCollectionByName(w http.ResponseWriter, r *http.Request) {
+// UpdateCollection operation middleware
+func (siw *ServerInterfaceWrapper) UpdateCollection(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	_ = err
@@ -683,7 +683,7 @@ func (siw *ServerInterfaceWrapper) UpdateCollectionByName(w http.ResponseWriter,
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateCollectionByName(w, r, name)
+		siw.Handler.UpdateCollection(w, r, name)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -874,8 +874,8 @@ func (siw *ServerInterfaceWrapper) CreateLabel(w http.ResponseWriter, r *http.Re
 	handler.ServeHTTP(w, r)
 }
 
-// DeleteLabelByName operation middleware
-func (siw *ServerInterfaceWrapper) DeleteLabelByName(w http.ResponseWriter, r *http.Request) {
+// DeleteLabel operation middleware
+func (siw *ServerInterfaceWrapper) DeleteLabel(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	_ = err
@@ -890,7 +890,7 @@ func (siw *ServerInterfaceWrapper) DeleteLabelByName(w http.ResponseWriter, r *h
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteLabelByName(w, r, name)
+		siw.Handler.DeleteLabel(w, r, name)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -900,8 +900,8 @@ func (siw *ServerInterfaceWrapper) DeleteLabelByName(w http.ResponseWriter, r *h
 	handler.ServeHTTP(w, r)
 }
 
-// FindLabelByName operation middleware
-func (siw *ServerInterfaceWrapper) FindLabelByName(w http.ResponseWriter, r *http.Request) {
+// FindLabel operation middleware
+func (siw *ServerInterfaceWrapper) FindLabel(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	_ = err
@@ -916,7 +916,7 @@ func (siw *ServerInterfaceWrapper) FindLabelByName(w http.ResponseWriter, r *htt
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.FindLabelByName(w, r, name)
+		siw.Handler.FindLabel(w, r, name)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -966,8 +966,8 @@ func (siw *ServerInterfaceWrapper) CreateUser(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
-// DeleteUserById operation middleware
-func (siw *ServerInterfaceWrapper) DeleteUserById(w http.ResponseWriter, r *http.Request) {
+// DeleteUser operation middleware
+func (siw *ServerInterfaceWrapper) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	_ = err
@@ -982,7 +982,7 @@ func (siw *ServerInterfaceWrapper) DeleteUserById(w http.ResponseWriter, r *http
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteUserById(w, r, id)
+		siw.Handler.DeleteUser(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1157,21 +1157,21 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/images/{collection_name}/{image_id}", wrapper.ReadImage)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/images", wrapper.ListImages)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/images", wrapper.IngestImage)
-	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/collections/{name}", wrapper.DeleteCollectionByName)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/collections/{name}", wrapper.DeleteCollection)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/collections/{name}", wrapper.FindCollectionByName)
-	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/collections/{name}", wrapper.UpdateCollectionByName)
-	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/annotate/{id}", wrapper.DeleteAnnotationById)
-	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/annotate/{id}/{label}", wrapper.UpdateAnnotationById)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/collections/{name}", wrapper.UpdateCollection)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/annotate/{id}", wrapper.DeleteAnnotation)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/annotate/{id}/{label}", wrapper.UpdateAnnotation)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/box", wrapper.AddBoundingBox)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/polygon", wrapper.AddPolygon)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/users", wrapper.CreateUser)
-	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/users/{id}", wrapper.DeleteUserById)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/users/{id}", wrapper.DeleteUser)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/users/{id}", wrapper.UpdateUser)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/collections", wrapper.ListCollections)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/collections", wrapper.CreateCollection)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/collections/clone", wrapper.CloneCollection)
-	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/labels/{name}", wrapper.DeleteLabelByName)
-	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/labels/{name}", wrapper.FindLabelByName)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/labels/{name}", wrapper.DeleteLabel)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/labels/{name}", wrapper.FindLabel)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/labels", wrapper.ListLabels)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/labels", wrapper.CreateLabel)
 
