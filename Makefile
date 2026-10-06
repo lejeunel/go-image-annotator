@@ -7,7 +7,8 @@ MODELS_PKG := adapters/api/models
 SERVER_PKG := adapters/api/server
 MODELS_OUT := $(MODELS_PKG)/models.gen.go
 SERVER_OUT := $(SERVER_PKG)/server.gen.go
-VALID_AUTH_OUT := modules/authorizer/valid_methods.gen.go
+AUTH_IFACE := modules/authorizer/interface.go
+VALID_AUTH_OUT := modules/authorizer/validmethods.gen.go
 STATIC_DIR := assets/static
 
 CSS_MAIN := assets/app.css
@@ -94,7 +95,7 @@ $(SERVER_OUT): $(SPEC) $(MODELS_OUT)
 docs-dev:
 	cd docs && hugo server --gc --minify --disableFastRender --logLevel debug --baseURL http://localhost:1313
 
-$(VALID_AUTH_OUT):
+$(VALID_AUTH_OUT): $(AUTH_IFACE)
 	go generate ./modules/authorizer
 
 prism:
