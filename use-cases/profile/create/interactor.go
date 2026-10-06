@@ -39,12 +39,12 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	profile := pr.NewProfile(
-		pr.NewProfileId(),
-		r.Name,
-		pr.WithDescription(r.Description),
-		pr.WithLabels(r.Labels),
-	)
+	profile := pr.Profile{
+		Id:          pr.NewProfileId(),
+		Name:        r.Name,
+		Description: r.Description,
+		Labels:      r.Labels,
+	}
 
 	if r.Group != nil {
 		exists, err := i.GroupRepo.Exists(*r.Group)

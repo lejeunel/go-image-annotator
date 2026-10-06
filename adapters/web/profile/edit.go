@@ -16,7 +16,7 @@ import (
 type EditProfilePresenter struct {
 	writer        http.ResponseWriter
 	task          string
-	okMessageFunc func(update.Response) string
+	okMessageFunc func(pr.Profile) string
 	htmx.ErrorPresenter
 	b.RowURL
 	availableLabels []string
@@ -24,7 +24,7 @@ type EditProfilePresenter struct {
 
 func NewEditProfilePresenter(w http.ResponseWriter, url b.RowURL) EditProfilePresenter {
 	task := "Updating profile"
-	okMessageFunc := func(r update.Response) string {
+	okMessageFunc := func(r pr.Profile) string {
 		return "Successfully updated profile"
 	}
 	return EditProfilePresenter{
@@ -49,11 +49,16 @@ func (p EditProfilePresenter) SuccessFindProfile(profile pr.Profile) {
 	b.AddRaw("Labels", buf.String())
 	b.SetResourceName(profile.Name)
 	b.AddTextField(NameFieldName, "Name", bf.WithDefault(profile.Name))
-	b.AddTextField(DescriptionFieldName, "Description", bf.WithDefault(profile.Description))
+
+	var description string
+	if profile.Description != nil {
+		description = *profile.Description
+	}
+	b.AddTextField(DescriptionFieldName, "Description", bf.WithDefault(description))
 	b.Render(p.writer)
 }
 
-func (p EditProfilePresenter) SuccessUpdateProfile(r update.Response) {
+func (p EditProfilePresenter) SuccessUpdateProfile(r pr.Profile) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 
@@ -63,11 +68,16 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var description *string
+	descriptionField := r.FormValue(DescriptionFieldName)
+	if descriptionField != "" {
+		description = &descriptionField
+	}
 	s.UpdateItr.Execute(r.Context(),
 		update.Request{
 			Name:           r.URL.Query().Get(resourceUrlFieldName),
 			NewName:        r.FormValue(NameFieldName),
-			NewDescription: r.FormValue(DescriptionFieldName),
+			NewDescription: description,
 			NewLabels:      r.Form[LabelsFieldName],
 		},
 		NewEditProfilePresenter(w, s.RowURL))

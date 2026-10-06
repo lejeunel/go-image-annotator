@@ -86,7 +86,12 @@ func MakeRow(u b.RowURL, l pr.Profile) tb.Row {
 	actions.SetConfirmDelete(u.SetMode(b.ModeConfirmDelete).Url)
 	row := tb.NewRow()
 	row.AddCell(tb.NewCell(Text(l.Name)))
-	row.AddCell(tb.NewCell(Text(l.Description)))
+
+	var description string
+	if l.Description != nil {
+		description = *l.Description
+	}
+	row.AddCell(tb.NewCell(Text(description)))
 	row.AddCell(tb.NewCell(Text(strings.Join(l.Labels, " / "))))
 	row.AddCell(tb.NewCell(actions.Build()))
 

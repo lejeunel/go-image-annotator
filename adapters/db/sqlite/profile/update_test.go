@@ -46,9 +46,10 @@ func Setup(labels *[]string) (ProfileRepo, pr.Profile, gr.GroupRepo, lr.LabelRep
 
 func TestUpdateNameAndDescription(t *testing.T) {
 	prRepo, profile, _, _, _ := Setup(nil)
+	description := "new-description"
 	req := pr.UpdateModel{
 		Name: profile.Name, NewName: "new-profile-name",
-		NewDescription: "new-description",
+		NewDescription: &description,
 	}
 	err := prRepo.Update(req)
 	assert.NoError(t, err)

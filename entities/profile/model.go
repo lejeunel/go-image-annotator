@@ -12,7 +12,7 @@ type (
 type Profile struct {
 	Id          ProfileId
 	Name        ProfileName
-	Description ProfileDescription
+	Description *ProfileDescription
 	Labels      []lbl.LabelName
 	Group       *string
 }
@@ -29,7 +29,7 @@ type Option func(*Profile)
 
 func WithDescription(d ProfileDescription) Option {
 	return func(r *Profile) {
-		r.Description = d
+		r.Description = &d
 	}
 }
 
@@ -48,7 +48,7 @@ func WithGroup(group string) Option {
 type UpdateModel struct {
 	Name           string
 	NewName        string
-	NewDescription string
+	NewDescription *string
 	NewGroup       *string
 	NewLabels      []lbl.LabelName
 }

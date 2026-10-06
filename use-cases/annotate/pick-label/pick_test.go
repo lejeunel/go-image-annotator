@@ -46,7 +46,10 @@ func TestFetchLabelsInProfile(t *testing.T) {
 	p := &FakePresenter{}
 	labels := []string{"first-label", "second-labels"}
 	profile := pr.NewProfile(pr.NewProfileId(), "my-profile", pr.WithLabels(labels))
-	itr := New(&fk.LabelRepo{ExistingNames: labels}, &fk.ProfileRepo{Return: profile})
+	itr := New(
+		&fk.LabelRepo{ExistingNames: labels},
+		&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}},
+	)
 	itr.Execute(t.Context(), &profile.Name, p)
 	assert.True(t, p.GotSuccess)
 	assert.Equal(t, labels, p.Got)

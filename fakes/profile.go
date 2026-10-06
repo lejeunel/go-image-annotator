@@ -5,28 +5,30 @@ import (
 
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	pr "github.com/lejeunel/go-image-annotator/entities/profile"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type ProfileRepo struct {
-	ErrOnCreate    error
-	ErrOnExists    error
-	ErrOnAddLabel  error
-	ErrOnFind      error
-	ErrOnDelete    error
-	ErrOnIsUsed    error
-	ErrOnList      error
-	ErrOnCount     error
-	ErrOnGetGroup  error
-	ErrOnUpdate    error
-	ExistingNames  []string
-	Created        []pr.Profile
-	AddedLabels    []lbl.LabelName
-	Return         pr.Profile
-	ReturnGroup    string
-	IsUsed_        bool
-	Count_         int
-	GotUpdateModel pr.UpdateModel
+	ErrOnCreate      error
+	ErrOnExists      error
+	ErrOnAddLabel    error
+	ErrOnFind        error
+	ErrOnDelete      error
+	ErrOnIsUsed      error
+	ErrOnList        error
+	ErrOnCount       error
+	ErrOnGetGroup    error
+	ErrOnUpdate      error
+	ExistingNames    []string
+	ExistingProfiles []pr.Profile
+	Created          []pr.Profile
+	AddedLabels      []lbl.LabelName
+	Return           pr.Profile
+	ReturnGroup      string
+	IsUsed_          bool
+	Count_           int
+	GotUpdateModel   pr.UpdateModel
 }
 
 func (r *ProfileRepo) Create(p pr.Profile) error {
@@ -64,7 +66,13 @@ func (r *ProfileRepo) Find(name string) (*pr.Profile, error) {
 		return nil, r.ErrOnFind
 	}
 
-	return &r.Return, nil
+	for _, p := range r.ExistingProfiles {
+		if p.Name == name {
+			return &p, nil
+		}
+	}
+
+	return nil, e.ErrNotFound
 }
 
 func (r *ProfileRepo) Delete(name string) error {

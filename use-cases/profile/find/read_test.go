@@ -14,7 +14,7 @@ func TestReadProfile(t *testing.T) {
 	profile := pr.NewProfile(pr.NewProfileId(),
 		"my-profile",
 		pr.WithDescription("a-description"))
-	repo := &fk.ProfileRepo{Return: profile}
+	repo := &fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}}
 	p := &FakePresenter{}
 	itr := New(repo)
 	itr.Execute(t.Context(), profile.Name, p)

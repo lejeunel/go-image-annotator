@@ -10,30 +10,24 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&fk.ProfileRepo{ReturnGroup: "a-group"}, &fk.GroupRepo{},
+	profile := pr.NewProfile(pr.NewProfileId(), "a-profile", pr.WithGroup("a-group"))
+	itr := New(&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}},
+		&fk.GroupRepo{},
 		&fk.LabelRepo{},
 		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(), Request{Name: profile.Name}, p)
 	assert.False(t, p.GotSuccess)
 	assert.True(t, p.GotAuthErr)
 }
 
-func TestHandleErrorOnCheckSourceExists(t *testing.T) {
+func TestNonExistingSourceShouldFail(t *testing.T) {
+	profile := pr.NewProfile(pr.NewProfileId(), "a-profile", pr.WithGroup("a-group"))
 	p := &FakePresenter{}
-	itr := New(&fk.ProfileRepo{ErrOnExists: e.ErrInternal}, &fk.GroupRepo{},
+	itr := New(&fk.ProfileRepo{ExistingProfiles: []pr.Profile{}}, &fk.GroupRepo{},
 		&fk.LabelRepo{})
-	itr.Execute(t.Context(), Request{NewName: "new-name"}, p)
-	assert.True(t, p.GotInternalErr)
-	assert.False(t, p.GotSuccess)
-}
-
-func TestSourceMustExist(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&fk.ProfileRepo{}, &fk.GroupRepo{},
-		&fk.LabelRepo{})
-	itr.Execute(t.Context(), Request{Name: "profile-name"}, p)
-	assert.True(t, p.GotNotFoundErr)
+	itr.Execute(t.Context(), Request{Name: profile.Name}, p)
+	assert.True(t, p.GotValidationErr)
 	assert.False(t, p.GotSuccess)
 }
 
@@ -48,18 +42,24 @@ func TestDestinationMustNotExist(t *testing.T) {
 
 func TestDestinationCanExistWhenUnchanged(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.ProfileRepo{ExistingNames: []string{"name"}}, &fk.GroupRepo{},
+	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
+	itr := New(&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}}, &fk.GroupRepo{},
 		&fk.LabelRepo{})
-	itr.Execute(t.Context(), Request{Name: "name", NewName: "name"}, p)
+	itr.Execute(t.Context(), Request{Name: profile.Name, NewName: profile.Name}, p)
 	assert.True(t, p.GotSuccess)
 }
 
 func TestHandleErrorOnLabelExist(t *testing.T) {
 	p := &FakePresenter{}
 	label := "a-label"
-	itr := New(&fk.ProfileRepo{ExistingNames: []string{"name"}}, &fk.GroupRepo{},
+	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
+	itr := New(&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}}, &fk.GroupRepo{},
 		&fk.LabelRepo{ErrOnExists: e.ErrInternal})
-	itr.Execute(t.Context(), Request{Name: "name", NewName: "name", NewLabels: []string{label}}, p)
+	itr.Execute(
+		t.Context(),
+		Request{Name: profile.Name, NewName: profile.Name, NewLabels: []string{label}},
+		p,
+	)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -67,21 +67,33 @@ func TestHandleErrorOnLabelExist(t *testing.T) {
 func TestLabelMustExist(t *testing.T) {
 	p := &FakePresenter{}
 	label := "a-label"
-	itr := New(&fk.ProfileRepo{ExistingNames: []string{"name"}}, &fk.GroupRepo{},
+	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
+	itr := New(&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}}, &fk.GroupRepo{},
 		&fk.LabelRepo{})
-	itr.Execute(t.Context(), Request{Name: "name", NewName: "name", NewLabels: []string{label}}, p)
+	itr.Execute(
+		t.Context(),
+		Request{Name: profile.Name, NewName: profile.Name, NewLabels: []string{label}},
+		p,
+	)
 	assert.True(t, p.GotValidationErr)
 	assert.False(t, p.GotSuccess)
 }
 
 func TestUpdateGroup(t *testing.T) {
 	p := &FakePresenter{}
-	name := "profile-name"
 	currentGroup := "current-group"
 	newGroup := "new-group"
-	profileRepo := &fk.ProfileRepo{ExistingNames: []string{name}, ReturnGroup: currentGroup}
+	profile := pr.NewProfile(pr.NewProfileId(), "profile-name")
+	profileRepo := &fk.ProfileRepo{
+		ExistingProfiles: []pr.Profile{profile},
+		ReturnGroup:      currentGroup,
+	}
 	itr := New(profileRepo, &fk.GroupRepo{ExistingNames: []string{newGroup}}, &fk.LabelRepo{})
-	itr.Execute(t.Context(), Request{Name: name, NewName: name, NewGroup: &newGroup}, p)
+	itr.Execute(
+		t.Context(),
+		Request{Name: profile.Name, NewName: profile.Name, NewGroup: &newGroup},
+		p,
+	)
 	assert.NotNil(t, profileRepo.GotUpdateModel.NewGroup)
 	assert.Equal(t, newGroup, *profileRepo.GotUpdateModel.NewGroup)
 	assert.True(t, p.GotSuccess)
@@ -89,26 +101,24 @@ func TestUpdateGroup(t *testing.T) {
 
 func TestUpdateProfile(t *testing.T) {
 	p := &FakePresenter{}
-	name := "profile-name"
-	currentGroup := "current-group"
 
-	newName := "new-profile-name"
-	newGroup := "new-group"
+	current := pr.NewProfile(pr.NewProfileId(), "profile-name", pr.WithGroup("current-group"))
 	newDescription := "new-description"
-	newLabels := []string{"new-label"}
-	profileRepo := &fk.ProfileRepo{ExistingNames: []string{name}, ReturnGroup: currentGroup}
-	itr := New(profileRepo, &fk.GroupRepo{ExistingNames: []string{newGroup}},
-		&fk.LabelRepo{ExistingNames: newLabels})
-
-	itr.Execute(t.Context(), Request{
-		Name: name, NewName: newName,
-		NewDescription: newDescription, NewLabels: newLabels,
+	newGroup := "new-group"
+	req := Request{
+		Name: current.Name, NewName: "new-profile-name",
+		NewDescription: &newDescription, NewLabels: []string{"new-label"},
 		NewGroup: &newGroup,
-	}, p)
+	}
+
+	profileRepo := &fk.ProfileRepo{ExistingProfiles: []pr.Profile{current}}
+	itr := New(profileRepo, &fk.GroupRepo{ExistingNames: []string{newGroup}},
+		&fk.LabelRepo{ExistingNames: req.NewLabels})
+	itr.Execute(t.Context(), req, p)
 
 	want := pr.UpdateModel{
-		Name: name, NewName: newName, NewDescription: newDescription,
-		NewLabels: newLabels, NewGroup: &newGroup,
+		Name: current.Name, NewName: req.NewName, NewDescription: req.NewDescription,
+		NewLabels: req.NewLabels, NewGroup: req.NewGroup,
 	}
 	assert.Equal(t, want, profileRepo.GotUpdateModel)
 	assert.True(t, p.GotSuccess)

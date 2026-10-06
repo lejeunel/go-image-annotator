@@ -62,9 +62,15 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var description *string
+	descriptionField := r.FormValue(DescriptionFieldName)
+	if descriptionField != "" {
+		description = &descriptionField
+	}
+
 	s.CreateItr.Execute(r.Context(), create.Request{
 		Name:        r.FormValue(NameFieldName),
-		Description: r.FormValue(DescriptionFieldName),
+		Description: description,
 		Labels:      r.Form[LabelsFieldName],
 	}, NewCreateProfilePresenter(w))
 }

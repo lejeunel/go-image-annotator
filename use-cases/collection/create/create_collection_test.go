@@ -79,7 +79,7 @@ func TestCreateCollection(t *testing.T) {
 	description := "a-description"
 	itr := New(repo,
 		&fk.GroupRepo{Return: group},
-		&fk.ProfileRepo{Return: profile},
+		&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}},
 		WithClock(clockwork.NewFakeClockAt(now)))
 	req := Request{
 		Name:        "a-name",

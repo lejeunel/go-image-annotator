@@ -1,6 +1,10 @@
 package update
 
+import (
+	pr "github.com/lejeunel/go-image-annotator/entities/profile"
+)
+
 type OutputPort interface {
-	SuccessUpdateProfile(Response)
+	SuccessUpdateProfile(pr.Profile)
 	Error(error)
 }

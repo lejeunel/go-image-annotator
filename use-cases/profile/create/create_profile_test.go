@@ -63,9 +63,10 @@ func TestHandleErrorOnLabelExists(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.ProfileRepo{}, &fk.LabelRepo{ErrOnExists: e.ErrInternal},
 		&fk.GroupRepo{})
+	description := "a-description"
 	req := Request{
 		Name:        "a-profile",
-		Description: "a-description",
+		Description: &description,
 		Labels:      []string{"the-label"},
 	}
 	itr.Execute(t.Context(), req, p)
@@ -76,9 +77,10 @@ func TestHandleErrorOnLabelExists(t *testing.T) {
 func TestMissingLabelShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.ProfileRepo{}, &fk.LabelRepo{}, &fk.GroupRepo{})
+	description := "a-description"
 	req := Request{
 		Name:        "a-profile",
-		Description: "a-description",
+		Description: &description,
 		Labels:      []string{"the-label"},
 	}
 	itr.Execute(t.Context(), req, p)
@@ -108,9 +110,10 @@ func TestCreate(t *testing.T) {
 	group := "the-group"
 	labelRepo := &fk.LabelRepo{ExistingNames: []string{labelName}}
 	itr := New(profileRepo, labelRepo, &fk.GroupRepo{ExistingNames: []string{group}})
+	description := "a-description"
 	req := Request{
 		Name:        "a-profile",
-		Description: "a-description",
+		Description: &description,
 		Labels:      []string{labelName},
 	}
 	itr.Execute(t.Context(), req, p)

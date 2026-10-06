@@ -6,7 +6,7 @@ import (
 
 type ProfileRepo interface {
 	Update(pr.UpdateModel) error
-	Exists(string) (*bool, error)
+	Find(string) (*pr.Profile, error)
 	GetGroup(string) (*string, error)
 }
 

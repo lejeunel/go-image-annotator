@@ -35,43 +35,28 @@ func New(pr ProfileRepo, gr GroupRepo, lr LabelRepo, opts ...Option) Interactor 
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "updating profile"
-	group, err := i.ProfileRepo.GetGroup(r.Name)
-	if (err != nil) && !errors.Is(err, e.ErrNotFound) {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-
-	if err := i.Auth.UpdateProfile(ctx, group); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-
-	srcExists, err := i.ProfileRepo.Exists(r.Name)
+	src, err := i.ProfileRepo.Find(r.Name)
 	if err != nil {
-		out.Error(fmt.Errorf("%v: checking existence of profile %v: %w", errCtx, r.Name, err))
-		return
-	}
-	if !*srcExists {
 		out.Error(
-			fmt.Errorf("%v: checking existence of profile %v: %w", errCtx, r.Name, e.ErrNotFound),
+			fmt.Errorf("%v: fetching profile %v: %w", errCtx, r.Name, e.ErrValidation),
 		)
 		return
 	}
 
+	if src.Group != nil {
+		if err := i.Auth.UpdateProfile(ctx, src.Group); err != nil {
+			out.Error(fmt.Errorf("%v: %w", errCtx, err))
+			return
+		}
+	}
 	updateModel := pr.UpdateModel{Name: r.Name, NewDescription: r.NewDescription}
 
 	if r.NewName != r.Name {
-		dstExists, err := i.ProfileRepo.Exists(r.NewName)
-		if err != nil {
-			out.Error(
-				fmt.Errorf("%v: checking existence of profile %v: %w", errCtx, r.NewName, err),
-			)
-			return
-		}
-		if *dstExists {
+		_, err := i.ProfileRepo.Find(r.NewName)
+		if !errors.Is(err, e.ErrNotFound) {
 			out.Error(
 				fmt.Errorf(
-					"%v: checking existence of profile %v: %w",
+					"%v: making sure that profile %v does not exist: %w",
 					errCtx,
 					r.NewName,
 					e.ErrValidation,
@@ -140,10 +125,8 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.SuccessUpdateProfile(
-		Response{
-			Name: r.NewName, Description: r.NewDescription, Group: r.NewGroup,
-			Labels: r.NewLabels,
-		},
-	)
+	out.SuccessUpdateProfile(pr.Profile{
+		Id: src.Id, Name: r.NewName, Description: r.NewDescription,
+		Group: r.NewGroup, Labels: r.NewLabels,
+	})
 }

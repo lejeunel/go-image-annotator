@@ -2,7 +2,7 @@ package create
 
 type Request struct {
 	Name        string
-	Description string
+	Description *string
 	Labels      []string
 	Group       *string
 }
