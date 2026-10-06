@@ -32,8 +32,11 @@ type Config struct {
 	SMTPPassword                         string   `                split_words:"true"`
 	SMTPHost                             string   `                split_words:"true"`
 	SMTPPort                             int      `                split_words:"true"`
+	SessionSecret                        string   `                split_words:"true"`
 	GoogleClientId                       string   `                split_words:"true"`
 	GoogleClientSecret                   string   `                split_words:"true"`
+	GithubClientId                       string   `                split_words:"true"`
+	GithubClientSecret                   string   `                split_words:"true"`
 }
 
 func (c Config) S3Config() (*S3Config, error) {
