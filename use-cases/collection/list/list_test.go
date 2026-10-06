@@ -11,23 +11,15 @@ import (
 
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.CollectionRepo{ErrOnCount: e.ErrInternal})
+	itr := New(&fk.CollectionRepo{ErrOnCount: e.ErrInternal}, 1, 10)
 	itr.Execute(t.Context(), pa.PaginationParams{Page: 1, PageSize: 1}, p)
 	assert.Equal(t, p.GotInternalErr, true)
 	assert.Equal(t, p.GotSuccess, false)
 }
 
-func TestInvalidPageShouldFail(t *testing.T) {
-	p := &FakePresenter{}
-	itr := New(&fk.CollectionRepo{})
-	itr.Execute(t.Context(), pa.PaginationParams{Page: -1}, p)
-	assert.Equal(t, p.GotValidationErr, true)
-	assert.Equal(t, p.GotSuccess, false)
-}
-
 func TestHandleInternalErrOnList(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.CollectionRepo{ErrOnList: e.ErrInternal})
+	itr := New(&fk.CollectionRepo{ErrOnList: e.ErrInternal}, 1, 10)
 	itr.Execute(t.Context(), pa.PaginationParams{Page: 1, PageSize: 1}, p)
 	assert.Equal(t, p.GotInternalErr, true)
 	assert.Equal(t, p.GotSuccess, false)
@@ -40,7 +32,7 @@ func TestListCollection(t *testing.T) {
 
 	repo := &fk.CollectionRepo{Count_: count}
 	p := &FakePresenter{}
-	itr := New(repo)
+	itr := New(repo, 1, 10)
 	req := pa.PaginationParams{PageSize: pageSize, Page: page}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, len(p.Got.Collections), pageSize, "page size")

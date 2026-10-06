@@ -9,14 +9,13 @@ import (
 
 type Interactor struct {
 	Repo
+	DefaultPageSize int
+	MaxPageSize     int
 }
 
 func (i Interactor) Execute(ctx context.Context, r pa.PaginationParams, out OutputPort) {
 	errCtx := "listing collections"
-	if err := pa.Validate(r.Page, r.PageSize); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
+	r.Sanitize(i.DefaultPageSize, i.MaxPageSize)
 
 	found, err := i.Repo.List(r)
 	if err != nil {
@@ -39,8 +38,8 @@ func (i Interactor) Execute(ctx context.Context, r pa.PaginationParams, out Outp
 
 type Option func(*Interactor)
 
-func New(r Repo, opts ...Option) Interactor {
-	i := &Interactor{Repo: r}
+func New(r Repo, dps int, mps int, opts ...Option) Interactor {
+	i := &Interactor{Repo: r, DefaultPageSize: dps, MaxPageSize: mps}
 
 	for _, opt := range opts {
 		opt(i)

@@ -30,6 +30,13 @@ func Validate(page int64, pageSize int) error {
 			e.ErrValidation,
 		)
 	}
+	if pageSize < 1 {
+		return fmt.Errorf(
+			"validating page size: found pageSize < 1, value (%v): %w",
+			pageSize,
+			e.ErrValidation,
+		)
+	}
 	return nil
 }
 

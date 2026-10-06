@@ -42,7 +42,7 @@ func NewCollectionInteractors(
 			create.WithClock(clockwork.NewRealClock()), create.WithAuth(auth)),
 		Delete: delete.New(ims, ir, cr,
 			q.NewAsyncJobQueue(), el, logger, delete.WithAuth(auth)),
-		List:   list.New(cr),
+		List:   list.New(cr, pageSize, pageSize),
 		Update: update.New(cr, gr, pr, update.WithAuth(auth)),
 		Clone: clone.New(
 			ims,
