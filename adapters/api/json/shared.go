@@ -30,8 +30,9 @@ func WriteJSON(w http.ResponseWriter, status int, v any) {
 }
 
 func WriteError(w http.ResponseWriter, status int, msg string) {
-	WriteJSON(w, status, map[string]string{
-		"error": msg,
+	WriteJSON(w, status, models.Error{
+		Code:    int32(status),
+		Message: msg,
 	})
 }
 
