@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -41,7 +42,7 @@ func (m SessionManager) fetchUserFromBearerToken(bearerToken string) (*u.User, e
 		return nil, fmt.Errorf("%w: fetching user: %w", errCtx, err)
 	}
 	if match := m.TokenVerifier.Verify(token.APIToken, []byte(user.HashPAT)); !match {
-		return nil, fmt.Errorf("%w: verifying token: %w", errCtx, err)
+		return nil, fmt.Errorf("%w: verifying token: %w", errCtx, e.ErrAuthentication)
 	}
 	return user, nil
 }
@@ -55,13 +56,13 @@ func (m SessionManager) AuthBearerToken(next http.Handler) http.Handler {
 		}
 		bearerToken, ok := strings.CutPrefix(authHeader, "Bearer ")
 		if !ok || bearerToken == "" {
-			http.Error(w, "got invalid bearer token", http.StatusUnauthorized)
+			json.WriteError(w, http.StatusUnauthorized, "got invalid bearer token")
 			return
 		}
 
 		user, err := m.fetchUserFromBearerToken(bearerToken)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			json.WriteError(w, http.StatusUnauthorized, "error fetching user using bearer token")
 			return
 		}
 		ctx := u.AppendUserToContext(r.Context(), *user)

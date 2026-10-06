@@ -44,7 +44,8 @@ func (s *Server) WhoAmI(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	http.Error(w, "failed fetching user's identity", http.StatusBadRequest)
+
+	json.WriteError(w, http.StatusBadRequest, "failed fetching user's identity")
 }
 
 func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request, id string) {

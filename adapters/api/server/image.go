@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	apijson "github.com/lejeunel/go-image-annotator/adapters/api/json"
 	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/image"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
@@ -18,7 +19,7 @@ import (
 func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 	reader, err := r.MultipartReader()
 	if err != nil {
-		http.Error(w, "invalid multipart body", http.StatusBadRequest)
+		apijson.WriteError(w, http.StatusBadRequest, "invalid multipart body")
 		return
 	}
 
@@ -31,20 +32,20 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		if err != nil {
-			http.Error(w, "error reading multipart part", http.StatusBadRequest)
+			apijson.WriteError(w, http.StatusBadRequest, "error reading multipart body")
 			return
 		}
 
 		switch part.FormName() {
 		case "metadata":
 			if err := json.NewDecoder(part).Decode(&meta); err != nil {
-				http.Error(w, "invalid metadata json", http.StatusBadRequest)
+				apijson.WriteError(w, http.StatusBadRequest, "invalid metadata payload")
 				return
 			}
 		case "image":
 			buf, err := io.ReadAll(part) // or stream directly to your storage/hasher
 			if err != nil {
-				http.Error(w, "error reading image data", http.StatusInternalServerError)
+				apijson.WriteError(w, http.StatusBadRequest, "error reading image data")
 				return
 			}
 			imageReader = bytes.NewReader(buf)
@@ -52,7 +53,7 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if imageReader == nil {
-		http.Error(w, "missing image part", http.StatusBadRequest)
+		apijson.WriteError(w, http.StatusBadRequest, "missing image part")
 		return
 	}
 	s.Image.Ingest.Execute(r.Context(), NewImageIngestRequest(meta, imageReader),
