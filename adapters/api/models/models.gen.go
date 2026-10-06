@@ -199,6 +199,21 @@ type NewLabel struct {
 	Name string `json:"name"`
 }
 
+// NewProfile defines model for NewProfile.
+type NewProfile struct {
+	// Description Description of the profile
+	Description *string `json:"description,omitempty"`
+
+	// Group Group owning the profile
+	Group *string `json:"group,omitempty"`
+
+	// Labels Names of the labels the profile allows
+	Labels *[]string `json:"labels,omitempty"`
+
+	// Name Name of the profile
+	Name string `json:"name"`
+}
+
 // NewUser defines model for NewUser.
 type NewUser struct {
 	Groups *[]string `json:"groups,omitempty"`
@@ -236,6 +251,21 @@ type Polygon struct {
 	Points []Point `json:"points"`
 }
 
+// Profile defines model for Profile.
+type Profile struct {
+	// Description Description of the profile
+	Description *string `json:"description,omitempty"`
+
+	// Group Group owning the profile
+	Group *string `json:"group,omitempty"`
+
+	// Labels Names of the labels the profile allows
+	Labels []string `json:"labels"`
+
+	// Name Name of the profile
+	Name string `json:"name"`
+}
+
 // TaskResponse defines model for TaskResponse.
 type TaskResponse struct {
 	// Issuer Id of the issuing user
@@ -261,6 +291,21 @@ type UpdateCollection struct {
 
 	// Profile Profile of the collection
 	Profile *string `json:"profile,omitempty"`
+}
+
+// UpdateProfile defines model for UpdateProfile.
+type UpdateProfile struct {
+	// Description New description of the profile
+	Description *string `json:"description,omitempty"`
+
+	// Group New group owning the profile
+	Group *string `json:"group,omitempty"`
+
+	// Labels New names of the labels the profile allows
+	Labels *[]string `json:"labels,omitempty"`
+
+	// Name New name of the profile
+	Name string `json:"name"`
 }
 
 // User defines model for User.
@@ -359,6 +404,12 @@ type IngestImageMultipartRequestBody IngestImageMultipartBody
 
 // CreateLabelJSONRequestBody defines body for CreateLabel for application/json ContentType.
 type CreateLabelJSONRequestBody = NewLabel
+
+// CreateProfileJSONRequestBody defines body for CreateProfile for application/json ContentType.
+type CreateProfileJSONRequestBody = NewProfile
+
+// UpdateProfileJSONRequestBody defines body for UpdateProfile for application/json ContentType.
+type UpdateProfileJSONRequestBody = UpdateProfile
 
 // CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
 type CreateUserJSONRequestBody = NewUser

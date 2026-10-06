@@ -206,6 +206,21 @@ type NewLabel struct {
 	Name string `json:"name"`
 }
 
+// NewProfile defines model for NewProfile.
+type NewProfile struct {
+	// Description Description of the profile
+	Description *string `json:"description,omitempty"`
+
+	// Group Group owning the profile
+	Group *string `json:"group,omitempty"`
+
+	// Labels Names of the labels the profile allows
+	Labels *[]string `json:"labels,omitempty"`
+
+	// Name Name of the profile
+	Name string `json:"name"`
+}
+
 // NewUser defines model for NewUser.
 type NewUser struct {
 	Groups *[]string `json:"groups,omitempty"`
@@ -243,6 +258,21 @@ type Polygon struct {
 	Points []Point `json:"points"`
 }
 
+// Profile defines model for Profile.
+type Profile struct {
+	// Description Description of the profile
+	Description *string `json:"description,omitempty"`
+
+	// Group Group owning the profile
+	Group *string `json:"group,omitempty"`
+
+	// Labels Names of the labels the profile allows
+	Labels []string `json:"labels"`
+
+	// Name Name of the profile
+	Name string `json:"name"`
+}
+
 // TaskResponse defines model for TaskResponse.
 type TaskResponse struct {
 	// Issuer Id of the issuing user
@@ -268,6 +298,21 @@ type UpdateCollection struct {
 
 	// Profile Profile of the collection
 	Profile *string `json:"profile,omitempty"`
+}
+
+// UpdateProfile defines model for UpdateProfile.
+type UpdateProfile struct {
+	// Description New description of the profile
+	Description *string `json:"description,omitempty"`
+
+	// Group New group owning the profile
+	Group *string `json:"group,omitempty"`
+
+	// Labels New names of the labels the profile allows
+	Labels *[]string `json:"labels,omitempty"`
+
+	// Name New name of the profile
+	Name string `json:"name"`
 }
 
 // User defines model for User.
@@ -367,6 +412,12 @@ type IngestImageMultipartRequestBody IngestImageMultipartBody
 // CreateLabelJSONRequestBody defines body for CreateLabel for application/json ContentType.
 type CreateLabelJSONRequestBody = NewLabel
 
+// CreateProfileJSONRequestBody defines body for CreateProfile for application/json ContentType.
+type CreateProfileJSONRequestBody = NewProfile
+
+// UpdateProfileJSONRequestBody defines body for UpdateProfile for application/json ContentType.
+type UpdateProfileJSONRequestBody = UpdateProfile
+
 // CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
 type CreateUserJSONRequestBody = NewUser
 
@@ -426,6 +477,18 @@ type ServerInterface interface {
 	// FindLabel Find a label by name
 	// (GET /labels/{name})
 	FindLabel(w http.ResponseWriter, r *http.Request, name string)
+	// CreateProfile Create a new profile
+	// (POST /profiles)
+	CreateProfile(w http.ResponseWriter, r *http.Request)
+	// DeleteProfile Delete a profile by name
+	// (DELETE /profiles/{name})
+	DeleteProfile(w http.ResponseWriter, r *http.Request, name string)
+	// FindProfile Find a profile by name
+	// (GET /profiles/{name})
+	FindProfile(w http.ResponseWriter, r *http.Request, name string)
+	// UpdateProfile Update a profile
+	// (PUT /profiles/{name})
+	UpdateProfile(w http.ResponseWriter, r *http.Request, name string)
 	// ReadRawImage Read image raw-data
 	// (GET /raw/{image_id})
 	ReadRawImage(w http.ResponseWriter, r *http.Request, imageId string)
@@ -926,6 +989,98 @@ func (siw *ServerInterfaceWrapper) FindLabel(w http.ResponseWriter, r *http.Requ
 	handler.ServeHTTP(w, r)
 }
 
+// CreateProfile operation middleware
+func (siw *ServerInterfaceWrapper) CreateProfile(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateProfile(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteProfile operation middleware
+func (siw *ServerInterfaceWrapper) DeleteProfile(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "name" -------------
+	var name string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "name", r.PathValue("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteProfile(w, r, name)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// FindProfile operation middleware
+func (siw *ServerInterfaceWrapper) FindProfile(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "name" -------------
+	var name string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "name", r.PathValue("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.FindProfile(w, r, name)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateProfile operation middleware
+func (siw *ServerInterfaceWrapper) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "name" -------------
+	var name string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "name", r.PathValue("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateProfile(w, r, name)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ReadRawImage operation middleware
 func (siw *ServerInterfaceWrapper) ReadRawImage(w http.ResponseWriter, r *http.Request) {
 
@@ -1174,6 +1329,10 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/labels/{name}", wrapper.FindLabel)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/labels", wrapper.ListLabels)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/labels", wrapper.CreateLabel)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/profiles/{name}", wrapper.DeleteProfile)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/profiles/{name}", wrapper.FindProfile)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/profiles/{name}", wrapper.UpdateProfile)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/profiles", wrapper.CreateProfile)
 
 	return m
 }

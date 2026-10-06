@@ -14,7 +14,10 @@ import (
 	"unicode/utf8"
 )
 
-var SkipMethods = []string{"SetAuthRules"}
+// SkipMethods are interface methods that are not authorizable operations and
+// must stay out of the generated list, which is offered to admins as the set of
+// methods assignable to a role.
+var SkipMethods = []string{"ListMethods"}
 
 func isFirstLetterCapitalized(s string) bool {
 	if s == "" {

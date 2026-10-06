@@ -30,6 +30,7 @@ var ValidMethods = []string{
 	"UpdateGroup",
 	"UpdateLabel",
 	"UpdateMetadata",
+	"UpdateProfile",
 	"UpdateRole",
 	"UpdateUserPrivileges",
 	"*",

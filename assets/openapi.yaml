@@ -690,6 +690,123 @@ paths:
           $ref: '#/components/responses/Conflict'
         default:
           $ref: '#/components/responses/UnexpectedError'
+  /profiles/{name}:
+    get:
+      summary: Find a profile by name
+      description: Returns a profile based on its name
+      operationId: findProfile
+      tags: [Profile]
+      parameters:
+        - name: name
+          in: path
+          description: Name of profile to fetch
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: profile response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+    put:
+      summary: Update a profile
+      description: >-
+        Replace the profile's representation. Any optional field omitted from
+        the request body is cleared.
+      operationId: updateProfile
+      tags: [Profile]
+      parameters:
+        - name: name
+          in: path
+          description: Current name of the profile
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: New values for the profile
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfile'
+      responses:
+        '200':
+          description: profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+    delete:
+      summary: Delete a profile by name
+      description: Delete a profile based on its name
+      operationId: deleteProfile
+      tags: [Profile]
+      parameters:
+        - name: name
+          in: path
+          description: Name of profile to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: profile deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '424':
+          $ref: '#/components/responses/FailedDependency'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+  /profiles:
+    post:
+      summary: Create a new profile
+      description: Creates a new profile. Duplicate names are not allowed
+      operationId: createProfile
+      tags: [Profile]
+      requestBody:
+        description: Profile to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewProfile'
+      responses:
+        '200':
+          description: profile response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
 components:
   responses:
     BadRequest:
@@ -1118,6 +1235,61 @@ components:
         description:
           type: string
           description: Description of the label
+    Profile:
+      required:
+        - name
+        - labels
+      properties:
+        name:
+          type: string
+          description: Name of the profile
+        description:
+          type: string
+          description: Description of the profile
+        group:
+          type: string
+          description: Group owning the profile
+        labels:
+          type: array
+          description: Names of the labels the profile allows
+          items:
+            type: string
+    NewProfile:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the profile
+        description:
+          type: string
+          description: Description of the profile
+        group:
+          type: string
+          description: Group owning the profile
+        labels:
+          type: array
+          description: Names of the labels the profile allows
+          items:
+            type: string
+    UpdateProfile:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: New name of the profile
+        description:
+          type: string
+          description: New description of the profile
+        group:
+          type: string
+          description: New group owning the profile
+        labels:
+          type: array
+          description: New names of the labels the profile allows
+          items:
+            type: string
     Error:
       required:
         - code
