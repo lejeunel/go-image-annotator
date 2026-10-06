@@ -38,7 +38,7 @@ func TestListCollections(t *testing.T) {
 	CreateCollection(repo, "another-collection")
 	cs, err := repo.List(pa.PaginationParams{Page: 1, PageSize: 2})
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(cs))
-	assert.False(t, cs[0].Name == cs[1].Name)
-	assert.False(t, cs[0].CreatedAt.Equal(cs[1].CreatedAt))
+	assert.Equal(t, 2, len(*cs))
+	assert.False(t, (*cs)[0].Name == (*cs)[1].Name)
+	assert.False(t, (*cs)[0].CreatedAt.Equal((*cs)[1].CreatedAt))
 }

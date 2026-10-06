@@ -1,6 +1,10 @@
 package create
 
+import (
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+)
+
 type OutputPort interface {
-	Success(Response)
+	Success(lbl.Label)
 	Error(error)
 }

@@ -10,6 +10,15 @@ import (
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
+func TestErrorOnFInd(t *testing.T) {
+	repo := &fk.CollectionRepo{ErrOnFind: e.ErrNotFound}
+	p := &FakePresenter{}
+	itr := New(repo)
+	itr.Execute(t.Context(), "non-existing-collection", p)
+	assert.True(t, p.GotNotFoundErr)
+	assert.False(t, p.GotSuccess)
+}
+
 func TestReadCollection(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(),
 		"my-collection",
@@ -19,13 +28,4 @@ func TestReadCollection(t *testing.T) {
 	itr := New(repo)
 	itr.Execute(t.Context(), collection.Name, p)
 	assert.Equal(t, collection, p.Got)
-}
-
-func TestErrorOnFInd(t *testing.T) {
-	repo := &fk.CollectionRepo{ErrOnFind: e.ErrNotFound}
-	p := &FakePresenter{}
-	itr := New(repo)
-	itr.Execute(t.Context(), "non-existing-collection", p)
-	assert.True(t, p.GotNotFoundErr)
-	assert.False(t, p.GotSuccess)
 }

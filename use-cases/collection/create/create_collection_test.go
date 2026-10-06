@@ -94,4 +94,9 @@ func TestCreateCollection(t *testing.T) {
 	assert.Equal(t, *req.Description, *repo.Created.Description)
 	assert.Equal(t, now, repo.Created.CreatedAt)
 	assert.False(t, repo.Created.Id.IsNil())
+
+	assert.Equal(t, req.Name, p.Got.Name)
+	assert.Equal(t, req.Group, p.Got.Group)
+	assert.Equal(t, req.Profile, p.Got.Profile)
+	assert.Equal(t, req.Description, p.Got.Description)
 }

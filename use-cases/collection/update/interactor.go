@@ -46,7 +46,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	response := Response{
+	response := clc.Collection{
 		Name: r.NewName, Description: r.NewDescription,
 		Profile: r.NewProfile, Group: r.NewGroup,
 	}

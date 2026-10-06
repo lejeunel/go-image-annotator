@@ -27,7 +27,7 @@ build:
 dev:
 	@trap 'kill 0' SIGINT; \
 	air & \
-	npx @tailwindcss/cli -i $(CSS_MAIN) -o $(CSS_OUT) --watch & \
+	tailwindcss -i $(CSS_MAIN) -o $(CSS_OUT) --watch & \
 	wait
 
 build-ci:

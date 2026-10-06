@@ -17,5 +17,5 @@ func TestUpdateLabel(t *testing.T) {
 	assert.Nil(t, err)
 	r, err := repo.FindLabel(name)
 	assert.Nil(t, err)
-	assert.Equal(t, newDesc, r.Description)
+	assert.Equal(t, newDesc, *r.Description)
 }

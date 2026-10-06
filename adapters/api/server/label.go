@@ -19,9 +19,10 @@ func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	req := create.Request{Name: body.Name}
-	if body.Description != nil {
-		req.Description = *body.Description
+
+	req := create.Request{
+		Name:        body.Name,
+		Description: body.Description,
 	}
 	s.Label.Create.Execute(r.Context(), req, p.NewCreatePresenter(w, s.Logger))
 }

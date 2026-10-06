@@ -7,6 +7,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	l "github.com/lejeunel/go-image-annotator/entities/label"
+	s "github.com/lejeunel/go-image-annotator/shared"
 )
 
 type Find struct {
@@ -14,13 +15,15 @@ type Find struct {
 	json.ErrorPresenter
 }
 
-func (p Find) SuccessFindLabel(r l.Label) {
-	response := models.Label{
-		Name:        &r.Name,
-		Description: &r.Description,
+func MakeLabelResponse(l l.Label) models.Label {
+	return models.Label{
+		Name:        l.Name,
+		Description: l.Description,
 	}
+}
 
-	json.WriteJSON(p.Writer, 200, response)
+func (p Find) SuccessFindLabel(r l.Label) {
+	s.WriteJSON(p.Writer, 200, MakeLabelResponse(r))
 }
 
 func NewFindPresenter(w http.ResponseWriter, l slog.Logger) Find {

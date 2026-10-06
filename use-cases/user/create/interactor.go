@@ -60,8 +60,12 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		Id:           r.Id,
 		HashPAT:      token.Hash,
 		HashPassword: passwordHash,
-		Groups:       r.Groups,
-		Roles:        r.Roles,
+	}
+	if r.Groups != nil {
+		user.Groups = *r.Groups
+	}
+	if r.Roles != nil {
+		user.Roles = *r.Roles
 	}
 	if err := i.Repo.Create(user); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))

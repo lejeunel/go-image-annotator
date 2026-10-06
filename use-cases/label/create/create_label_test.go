@@ -43,7 +43,8 @@ func TestCreateLabel(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.LabelRepo{}
 	itr := New(repo)
-	req := Request{Name: "a-name", Description: "a-description"}
+	description := "a-description"
+	req := Request{Name: "a-name", Description: &description}
 	itr.Execute(t.Context(), req, p)
 
 	assert.Equal(t, p.Got.Name, req.Name)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	s "github.com/lejeunel/go-image-annotator/shared"
 )
 
 type ReadMeta struct {
@@ -15,7 +16,7 @@ type ReadMeta struct {
 
 func (p ReadMeta) SuccessReadImage(image im.Image) {
 	response := BuildImageResponse(image)
-	json.WriteJSON(p.Writer, 200, response)
+	s.WriteJSON(p.Writer, 200, response)
 }
 
 func NewReadMetaPresenter(w http.ResponseWriter, l slog.Logger) ReadMeta {

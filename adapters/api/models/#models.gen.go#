@@ -160,15 +160,15 @@ type ListCollections struct {
 	Pagination  Pagination   `json:"pagination"`
 }
 
-// ListImages defines model for ListImages.
-type ListImages struct {
+// ListImagesResponse defines model for ListImagesResponse.
+type ListImagesResponse struct {
 	Images     []Image    `json:"images"`
 	Pagination Pagination `json:"pagination"`
 }
 
 // ListLabels defines model for ListLabels.
 type ListLabels struct {
-	Labels     []Label    `json:"labels"`
+	Labels     []Label    `json:"labels,omitempty"`
 	Pagination Pagination `json:"pagination"`
 }
 

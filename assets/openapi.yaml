@@ -142,7 +142,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListImagesResponse'
+                $ref: '#/components/schemas/ListImages'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -242,6 +242,10 @@ paths:
       responses:
         '200':
           description: Collection updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -500,7 +504,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListCollectionsResponse'
+                $ref: '#/components/schemas/ListCollections'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -650,7 +654,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListLabelsResponse'
+                $ref: '#/components/schemas/ListLabels'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -815,18 +819,19 @@ components:
         deep:
           type: boolean
           description: Also clone annotations and meta-data
-    ListCollectionsResponse:
+    ListCollections:
       type: object
       required:
+        - collections
         - pagination
       properties:
-        data:
+        collections:
           type: array
           items:
             $ref: '#/components/schemas/Collection'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    ListImagesResponse:
+    ListImages:
       type: object
       required:
         - images
@@ -1067,6 +1072,8 @@ components:
           type: string
           description: Description of the collection
     Label:
+      required:
+        - name
       properties:
         name:
           type: string
@@ -1074,12 +1081,13 @@ components:
         description:
           type: string
           description: Description of the label
-    ListLabelsResponse:
+    ListLabels:
       type: object
       required:
         - pagination
+        - labels
       properties:
-        data:
+        labels:
           type: array
           items:
             $ref: '#/components/schemas/Label'

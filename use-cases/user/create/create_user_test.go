@@ -74,7 +74,7 @@ func TestCreateWithRolesAndGroups(t *testing.T) {
 	repo := &fk.UserRepo{}
 	itr := New(repo, &fk.Tokenizer{}, &fk.Tokenizer{})
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user", Roles: roles, Groups: groups}, p)
+	itr.Execute(t.Context(), Request{Id: "user", Roles: &roles, Groups: &groups}, p)
 	assert.Equal(t, roles, repo.Created.Roles)
 	assert.Equal(t, groups, repo.Created.Groups)
 }

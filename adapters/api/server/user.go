@@ -7,6 +7,7 @@ import (
 	p "github.com/lejeunel/go-image-annotator/adapters/api/json/user"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	"github.com/lejeunel/go-image-annotator/shared"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
 	upd "github.com/lejeunel/go-image-annotator/use-cases/user/update-privileges"
 )
@@ -16,17 +17,12 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-
-	req := create.Request{Id: body.Id}
-	if body.Roles != nil {
-		req.Roles = *body.Roles
-	}
-	if body.Groups != nil {
-		req.Groups = *body.Groups
-	}
-
 	s.User.Create.Execute(
-		r.Context(), req, p.NewPresenter(w, s.Logger))
+		r.Context(),
+		create.Request{
+			Id: body.Id, Roles: body.Roles,
+			Groups: body.Groups,
+		}, p.NewPresenter(w, s.Logger))
 }
 
 func (s *Server) DeleteUserById(w http.ResponseWriter, r *http.Request, id string) {
@@ -37,7 +33,7 @@ func (s *Server) WhoAmI(w http.ResponseWriter, r *http.Request) {
 	user := u.IdentityFromContext(r.Context())
 
 	if user != nil {
-		json.WriteJSON(w, 200, User{
+		shared.WriteJSON(w, 200, User{
 			Id:     user.Id,
 			Groups: user.GroupNames(),
 			Roles:  user.RoleNames(),

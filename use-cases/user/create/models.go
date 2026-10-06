@@ -8,7 +8,7 @@ type Response struct {
 
 type Request struct {
 	Id       string
-	Roles    []string
-	Groups   []string
+	Roles    *[]string
+	Groups   *[]string
 	Password *string
 }

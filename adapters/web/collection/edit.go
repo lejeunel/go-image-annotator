@@ -45,7 +45,7 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 type EditPresenter struct {
 	writer        http.ResponseWriter
 	task          string
-	okMessageFunc func(update.Response) string
+	okMessageFunc func(clc.Collection) string
 	Form          bf.HTMXInlineFormBuilder
 	htmx.ErrorPresenter
 	groupOfCollection   *string
@@ -54,7 +54,7 @@ type EditPresenter struct {
 
 func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 	task := "Updating collection"
-	okMessageFunc := func(r update.Response) string {
+	okMessageFunc := func(r clc.Collection) string {
 		return "successfully updated collection"
 	}
 	form := bf.NewHTMXInlineFormBuilder(len(listCollectionsFields), u.Url)
@@ -66,7 +66,7 @@ func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 	}
 }
 
-func (p EditPresenter) SuccessUpdateCollection(r update.Response) {
+func (p EditPresenter) SuccessUpdateCollection(r clc.Collection) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 

@@ -79,16 +79,16 @@ func (r *CollectionRepo) Count() (*int64, error) {
 	return &res, nil
 }
 
-func (r *CollectionRepo) List(req pa.PaginationParams) ([]*clc.Collection, error) {
+func (r *CollectionRepo) List(req pa.PaginationParams) (*[]clc.Collection, error) {
 	if r.ErrOnList != nil {
 		return nil, r.ErrOnList
 	}
 
-	result := []*clc.Collection{}
+	result := []clc.Collection{}
 	for range req.PageSize {
-		result = append(result, &r.Return)
+		result = append(result, r.Return)
 	}
-	return result, nil
+	return &result, nil
 }
 
 func (r *CollectionRepo) Update(m clc.UpdateModel) error {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	s "github.com/lejeunel/go-image-annotator/shared"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
 )
 
@@ -15,15 +16,15 @@ type List struct {
 }
 
 func (p List) SuccessSliceImages(r slice.Response) {
-	response := models.ListImagesResponse{
-		Pagination: json.BuildPaginationResponse(r.Pagination),
-	}
-
+	var images []models.Image
 	for _, image := range r.Images {
-		response.Images = append(response.Images, BuildImageResponse(image))
+		images = append(images, BuildImageResponse(image))
 	}
 
-	json.WriteJSON(p.Writer, 200, response)
+	s.WriteJSON(p.Writer, 200, models.ListImages{
+		Images:     images,
+		Pagination: json.BuildPaginationResponse(r.Pagination),
+	})
 }
 
 func NewListPresenter(w http.ResponseWriter, l slog.Logger) List {

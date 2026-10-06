@@ -110,8 +110,8 @@ func TestUpdateAndListCollections(t *testing.T) {
 	assert.NoError(t, err)
 	r, err := clcRepo.List(pagination.PaginationParams{Page: 1, PageSize: 1})
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(r))
-	assert.NotNil(t, r[0].Group)
+	assert.Equal(t, 1, len(*r))
+	assert.NotNil(t, (*r)[0].Group)
 }
 
 func TestUpdateClearsOmittedDescription(t *testing.T) {

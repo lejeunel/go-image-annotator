@@ -5,7 +5,7 @@ type LabelName = string
 type Label struct {
 	Id          LabelId
 	Name        LabelName
-	Description string
+	Description *string
 }
 
 func NewLabel(id LabelId, name string, opts ...Option) Label {
@@ -20,7 +20,7 @@ type Option func(*Label)
 
 func WithDescription(d string) Option {
 	return func(l *Label) {
-		l.Description = d
+		l.Description = &d
 	}
 }
 

@@ -1,16 +1,17 @@
 package create
 
 import (
+	l "github.com/lejeunel/go-image-annotator/entities/label"
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
 type FakePresenter struct {
-	Got        Response
+	Got        l.Label
 	GotSuccess bool
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(r Response) {
+func (p *FakePresenter) Success(r l.Label) {
 	p.GotSuccess = true
 	p.Got = r
 }

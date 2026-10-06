@@ -32,9 +32,7 @@ func (i *Interactor) Execute(ctx context.Context, r pag.PaginationParams, out Ou
 
 	response := Response{
 		Pagination: pag.New(int64(r.Page), r.PageSize, count),
-	}
-	for _, f := range found {
-		response.Labels = append(response.Labels, *f)
+		Labels:     *found,
 	}
 	out.SuccessListLabels(response)
 }

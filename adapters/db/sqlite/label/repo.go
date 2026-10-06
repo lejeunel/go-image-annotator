@@ -19,7 +19,7 @@ type LabelRepo struct {
 type LabelRecord struct {
 	Id          lbl.LabelId `db:"id"`
 	Name        string      `db:"name"`
-	Description string      `db:"description"`
+	Description *string     `db:"description"`
 }
 
 func (r LabelRepo) Create(l lbl.Label) error {
@@ -45,8 +45,7 @@ func (r LabelRepo) FindLabel(name string) (*lbl.Label, error) {
 		}
 	}
 
-	l := lbl.NewLabel(record.Id, record.Name, lbl.WithDescription(record.Description))
-	return &l, nil
+	return &lbl.Label{Id: record.Id, Name: record.Name, Description: record.Description}, nil
 }
 
 func (r LabelRepo) Delete(name string) error {
@@ -69,7 +68,7 @@ func (r LabelRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (r LabelRepo) List(m pag.PaginationParams) ([]*lbl.Label, error) {
+func (r LabelRepo) List(m pag.PaginationParams) (*[]lbl.Label, error) {
 	q := sq.StatementBuilder.Select("id,name,description").From("labels")
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
@@ -81,12 +80,12 @@ func (r LabelRepo) List(m pag.PaginationParams) ([]*lbl.Label, error) {
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
 
-	objects := []*lbl.Label{}
+	objects := []lbl.Label{}
 	for _, r := range records {
-		objects = append(objects, &lbl.Label{Id: r.Id, Name: r.Name, Description: r.Description})
+		objects = append(objects, lbl.Label{Id: r.Id, Name: r.Name, Description: r.Description})
 	}
 
-	return objects, nil
+	return &objects, nil
 }
 
 func (r LabelRepo) FetchAll() ([]string, error) {

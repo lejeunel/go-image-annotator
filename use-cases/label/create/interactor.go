@@ -32,12 +32,16 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	label := lbl.NewLabel(lbl.NewLabelId(), r.Name, lbl.WithDescription(r.Description))
+	label := lbl.Label{
+		Id:          lbl.NewLabelId(),
+		Name:        r.Name,
+		Description: r.Description,
+	}
 	if err := i.Repo.Create(label); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	out.Success(Response{Name: r.Name, Description: r.Description})
+	out.Success(label)
 }
 
 func (i *Interactor) checkDuplicate(name string) error {

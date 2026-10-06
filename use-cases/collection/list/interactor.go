@@ -30,9 +30,7 @@ func (i Interactor) Execute(ctx context.Context, r pa.PaginationParams, out Outp
 	}
 
 	response := Response{Pagination: pa.New(int64(r.Page), r.PageSize, *count)}
-	for _, f := range found {
-		response.Collections = append(response.Collections, *f)
-	}
+	response.Collections = *found
 	out.SuccessListCollections(response)
 }
 

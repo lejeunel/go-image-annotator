@@ -1,13 +1,13 @@
 package user
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	s "github.com/lejeunel/go-image-annotator/shared"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
 	upd "github.com/lejeunel/go-image-annotator/use-cases/user/update-privileges"
 )
@@ -24,15 +24,15 @@ func (p Presenter) SuccessCreateUser(r create.Response) {
 		Groups: r.Groups,
 	}
 
-	json.WriteJSON(p.Writer, 200, response)
+	s.WriteJSON(p.Writer, 200, response)
 }
 
 func (p Presenter) SuccessDeleteUser(id u.UserId) {
-	json.WriteJSON(p.Writer, 204, fmt.Sprintf("successfully delete user %v", id))
+	p.Writer.WriteHeader(http.StatusNoContent)
 }
 
 func (p Presenter) SuccessUpdate(r upd.Response) {
-	json.WriteJSON(p.Writer, 204, fmt.Sprintf("successfully updated user %v", r.Id))
+	p.Writer.WriteHeader(http.StatusNoContent)
 }
 
 func NewPresenter(w http.ResponseWriter, l slog.Logger) Presenter {

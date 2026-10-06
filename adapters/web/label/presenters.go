@@ -70,7 +70,11 @@ func NewEditPresenter(w http.ResponseWriter, p b.PageBuilder, u b.RowURL) EditPr
 func (p EditPresenter) SuccessFindLabel(l lbl.Label) {
 	b := bf.NewHTMXInlineFormBuilder(len(listLabelsFields), p.Url)
 	b.SetResourceName(l.Name)
-	b.AddTextField("description", "Description", bf.WithDefault(l.Description))
+	var description string
+	if l.Description != nil {
+		description = *l.Description
+	}
+	b.AddTextField("description", "Description", bf.WithDefault(description))
 	b.Render(p.Writer)
 }
 
@@ -96,7 +100,11 @@ func MakeRow(u b.RowURL, l lbl.Label) tb.Row {
 	actions.SetConfirmDelete(u.SetMode(b.ModeConfirmDelete).Url)
 	row := tb.NewRow()
 	row.AddCell(tb.NewCell(Text(l.Name)))
-	row.AddCell(tb.NewCell(Text(l.Description)))
+	var description string
+	if l.Description != nil {
+		description = *l.Description
+	}
+	row.AddCell(tb.NewCell(Text(description)))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row
 }

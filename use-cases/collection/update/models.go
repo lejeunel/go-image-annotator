@@ -7,10 +7,3 @@ type Request struct {
 	NewGroup       *string
 	NewProfile     *string
 }
-
-type Response struct {
-	Name        string
-	Description *string
-	Group       *string
-	Profile     *string
-}

@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
+	cfg "github.com/lejeunel/go-image-annotator/config"
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
 	reqpw "github.com/lejeunel/go-image-annotator/use-cases/user/forgot-password"
 	respw "github.com/lejeunel/go-image-annotator/use-cases/user/reset-forgotten-password"
@@ -23,6 +24,7 @@ type Server struct {
 
 func New(
 	baseURL string,
+	cfg cfg.Config,
 	basePageBuilder b.BasePageBuilder,
 	logger slog.Logger,
 	sm sm.SessionManager,
@@ -31,8 +33,9 @@ func New(
 	resForgottenPw respw.Interactor,
 ) Server {
 	loginPageBuilder := b.NewLoginPageBuilder(basePageBuilder)
-	MaybeSetupGoogle(&loginPageBuilder, baseURL, logger)
-	MaybeSetupGithub(&loginPageBuilder, baseURL, logger)
+	MaybeSetupGoogle(&loginPageBuilder, baseURL, logger, cfg.GoogleClientId, cfg.GoogleClientSecret)
+	MaybeSetupGithub(&loginPageBuilder, baseURL, logger, cfg.GithubClientId, cfg.GithubClientSecret)
+	SetupOAuthSessionStore(cfg.SessionSecret, logger)
 	return Server{
 		loginPageBuilder,
 		b.NewForgotPasswordBuilder(basePageBuilder),

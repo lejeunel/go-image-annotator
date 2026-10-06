@@ -6,6 +6,7 @@ import (
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
+	s "github.com/lejeunel/go-image-annotator/shared"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/list"
 )
 
@@ -15,21 +16,15 @@ type List struct {
 }
 
 func (p List) SuccessListLabels(r list.Response) {
-	data := []models.Label{}
+	labels := []models.Label{}
 	for _, label := range r.Labels {
-		data = append(data,
-			models.Label{
-				Name:        &label.Name,
-				Description: &label.Description,
-			})
+		labels = append(labels, MakeLabelResponse(label))
 	}
 
-	response := models.ListLabelsResponse{
-		Data:       &data,
+	s.WriteJSON(p.Writer, 200, models.ListLabels{
+		Labels:     labels,
 		Pagination: json.BuildPaginationResponse(r.Pagination),
-	}
-
-	json.WriteJSON(p.Writer, 200, response)
+	})
 }
 
 func NewListPresenter(w http.ResponseWriter, l slog.Logger) List {

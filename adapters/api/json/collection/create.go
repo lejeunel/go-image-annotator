@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
-	"github.com/lejeunel/go-image-annotator/adapters/api/models"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
+	c "github.com/lejeunel/go-image-annotator/entities/collection"
+	s "github.com/lejeunel/go-image-annotator/shared"
 )
 
 type Create struct {
@@ -14,13 +14,8 @@ type Create struct {
 	json.ErrorPresenter
 }
 
-func (p Create) SuccessCreateCollection(r create.Response) {
-	response := models.Collection{
-		Name:        r.Name,
-		Description: r.Description,
-	}
-
-	json.WriteJSON(p.Writer, 200, response)
+func (p Create) SuccessCreateCollection(r c.Collection) {
+	s.WriteJSON(p.Writer, 200, MakeCollectionResponse(r))
 }
 
 func NewCreatePresenter(w http.ResponseWriter, l slog.Logger) Create {

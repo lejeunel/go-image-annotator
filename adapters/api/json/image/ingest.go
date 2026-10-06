@@ -7,6 +7,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
+	s "github.com/lejeunel/go-image-annotator/shared"
 )
 
 type Ingest struct {
@@ -20,7 +21,7 @@ func (p Ingest) Success(r ig.Response) {
 		Id: &id,
 	}
 
-	json.WriteJSON(p.Writer, 200, response)
+	s.WriteJSON(p.Writer, 200, response)
 }
 
 func NewIngestPresenter(w http.ResponseWriter, l slog.Logger) Ingest {

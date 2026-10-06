@@ -32,15 +32,16 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.create(r); err != nil {
+	collection, err := i.create(r)
+	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	out.SuccessCreateCollection(Response{Name: r.Name, Description: r.Description})
+	out.SuccessCreateCollection(*collection)
 }
 
-func (i Interactor) create(r Request) error {
+func (i Interactor) create(r Request) (*clc.Collection, error) {
 	collection := clc.NewCollection(clc.NewCollectionId(), r.Name,
 		clc.WithCreatedAt(i.Clock.Now()))
 	if r.Description != nil {
@@ -49,21 +50,21 @@ func (i Interactor) create(r Request) error {
 	if r.Group != nil {
 		group, err := i.GroupRepo.Find(*r.Group)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		collection.Group = &group.Name
 	}
 	if r.Profile != nil {
 		profile, err := i.ProfileRepo.Find(*r.Profile)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		collection.Profile = &profile.Name
 	}
 	if err := i.CollectionRepo.Create(collection); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &collection, nil
 }
 
 func (i Interactor) validate(name string) error {

@@ -6,25 +6,26 @@ import (
 
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
+	l "github.com/lejeunel/go-image-annotator/entities/label"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 )
 
 type CreateLabelPresenter struct {
 	writer        http.ResponseWriter
 	task          string
-	okMessageFunc func(create.Response) string
+	okMessageFunc func(l.Label) string
 	htmx.ErrorPresenter
 }
 
 func NewCreateLabelPresenter(w http.ResponseWriter) CreateLabelPresenter {
 	task := "Creating label"
-	okMessageFunc := func(r create.Response) string {
+	okMessageFunc := func(r l.Label) string {
 		return fmt.Sprintf("Successfully created label %v", r.Name)
 	}
 	return CreateLabelPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 
-func (p CreateLabelPresenter) Success(r create.Response) {
+func (p CreateLabelPresenter) Success(r l.Label) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 
@@ -33,9 +34,14 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
+	var description *string
+	descriptionValue := r.FormValue(createDescriptionFieldName)
+	if descriptionValue != "" {
+		description = &descriptionValue
+	}
 	s.CreateItr.Execute(r.Context(), create.Request{
 		Name:        r.FormValue(createNameFieldName),
-		Description: r.FormValue(createDescriptionFieldName),
+		Description: description,
 	}, NewCreateLabelPresenter(w))
 }
 

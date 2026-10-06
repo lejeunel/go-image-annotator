@@ -105,7 +105,7 @@ func (r CollectionRepo) Find(name string) (*clc.Collection, error) {
 	return &entity, nil
 }
 
-func (r CollectionRepo) List(m pa.PaginationParams) ([]*clc.Collection, error) {
+func (r CollectionRepo) List(m pa.PaginationParams) (*[]clc.Collection, error) {
 	q := r.baseSelectQuery()
 	q = q.Limit(uint64(m.PageSize)).Offset((uint64(m.Page-1) * uint64(m.PageSize)))
 	sql, args, err := q.ToSql()
@@ -117,13 +117,13 @@ func (r CollectionRepo) List(m pa.PaginationParams) ([]*clc.Collection, error) {
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
 
-	objects := []*clc.Collection{}
+	objects := []clc.Collection{}
 	for _, rec := range records {
 		e := r.build(rec)
-		objects = append(objects, &e)
+		objects = append(objects, e)
 	}
 
-	return objects, nil
+	return &objects, nil
 }
 
 func (r CollectionRepo) Exists(name string) (bool, error) {

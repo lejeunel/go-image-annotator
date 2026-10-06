@@ -7,20 +7,21 @@ import (
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	se "github.com/lejeunel/go-image-annotator/adapters/web/components/select"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
+	c "github.com/lejeunel/go-image-annotator/entities/collection"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/create"
 )
 
 type CreateCollectionPresenter struct {
 	writer        http.ResponseWriter
 	task          string
-	okMessageFunc func(create.Response) string
+	okMessageFunc func(c.Collection) string
 	profiles      []string
 	htmx.ErrorPresenter
 }
 
 func NewCreateCollectionPresenter(w http.ResponseWriter) CreateCollectionPresenter {
 	task := "Creating collection"
-	okMessageFunc := func(r create.Response) string {
+	okMessageFunc := func(r c.Collection) string {
 		return fmt.Sprintf("Successfully created collection %v", r.Name)
 	}
 	return CreateCollectionPresenter{
@@ -29,7 +30,7 @@ func NewCreateCollectionPresenter(w http.ResponseWriter) CreateCollectionPresent
 	}
 }
 
-func (p CreateCollectionPresenter) SuccessCreateCollection(r create.Response) {
+func (p CreateCollectionPresenter) SuccessCreateCollection(r c.Collection) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 

@@ -85,17 +85,17 @@ func (r *LabelRepo) FetchAll() ([]string, error) {
 	return r.ExistingNames, nil
 }
 
-func (r *LabelRepo) List(req pag.PaginationParams) ([]*lbl.Label, error) {
+func (r *LabelRepo) List(req pag.PaginationParams) (*[]lbl.Label, error) {
 	if r.ErrOnList != nil {
 		return nil, r.ErrOnList
 	}
 
-	result := []*lbl.Label{}
+	result := []lbl.Label{}
 	for range req.PageSize {
 		l := lbl.NewLabel(lbl.NewLabelId(), "a-label")
-		result = append(result, &l)
+		result = append(result, l)
 	}
-	return result, nil
+	return &result, nil
 }
 
 func (r *LabelRepo) Update(m lbl.UpdatableModel) error {

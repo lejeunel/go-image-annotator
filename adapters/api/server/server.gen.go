@@ -158,24 +158,24 @@ type Label struct {
 	Description *string `json:"description,omitempty"`
 
 	// Name Name of the label
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 }
 
-// ListCollectionsResponse defines model for ListCollectionsResponse.
-type ListCollectionsResponse struct {
-	Data       *[]Collection `json:"data,omitempty"`
-	Pagination Pagination    `json:"pagination"`
+// ListCollections defines model for ListCollections.
+type ListCollections struct {
+	Collections []Collection `json:"collections"`
+	Pagination  Pagination   `json:"pagination"`
 }
 
-// ListImagesResponse defines model for ListImagesResponse.
-type ListImagesResponse struct {
+// ListImages defines model for ListImages.
+type ListImages struct {
 	Images     []Image    `json:"images"`
 	Pagination Pagination `json:"pagination"`
 }
 
-// ListLabelsResponse defines model for ListLabelsResponse.
-type ListLabelsResponse struct {
-	Data       *[]Label   `json:"data,omitempty"`
+// ListLabels defines model for ListLabels.
+type ListLabels struct {
+	Labels     []Label    `json:"labels"`
 	Pagination Pagination `json:"pagination"`
 }
 

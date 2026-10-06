@@ -5,7 +5,8 @@ import (
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
-	"github.com/lejeunel/go-image-annotator/use-cases/collection/update"
+	c "github.com/lejeunel/go-image-annotator/entities/collection"
+	s "github.com/lejeunel/go-image-annotator/shared"
 )
 
 type Update struct {
@@ -13,8 +14,8 @@ type Update struct {
 	json.ErrorPresenter
 }
 
-func (p Update) SuccessUpdateCollection(r update.Response) {
-	p.Writer.WriteHeader(http.StatusOK)
+func (p Update) SuccessUpdateCollection(r c.Collection) {
+	s.WriteJSON(p.Writer, 200, MakeCollectionResponse(r))
 }
 
 func NewUpdatePresenter(w http.ResponseWriter, l slog.Logger) Update {

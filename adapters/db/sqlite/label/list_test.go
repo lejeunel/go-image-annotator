@@ -39,6 +39,6 @@ func TestListLabels(t *testing.T) {
 	CreateLabel(repo, "another-label")
 	labels, err := repo.List(pag.PaginationParams{Page: 1, PageSize: 2})
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(labels))
-	assert.NotEqual(t, labels[0].Name, labels[1].Name)
+	assert.Equal(t, 2, len(*labels))
+	assert.NotEqual(t, (*labels)[0].Name, (*labels)[1].Name)
 }
