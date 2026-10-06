@@ -39,9 +39,10 @@ func Setup() (CollectionRepo, clc.Collection, gr.GroupRepo, pr.ProfileRepo, g.Gr
 
 func TestUpdateNameAndDescription(t *testing.T) {
 	clcRepo, collection, _, _, _ := Setup()
+	description := "new-description"
 	req := clc.UpdateModel{
 		Name: collection.Name, NewName: "new-collection-name",
-		NewDescription: "new-description",
+		NewDescription: &description,
 	}
 	err := clcRepo.Update(req)
 	assert.NoError(t, err)
@@ -99,9 +100,10 @@ func TestUpdateProfile(t *testing.T) {
 
 func TestUpdateAndListCollections(t *testing.T) {
 	clcRepo, collection, _, _, group := Setup()
+	description := "new-description"
 	req := clc.UpdateModel{
 		Name: collection.Name, NewName: "new-collection-name",
-		NewDescription: "new-description",
+		NewDescription: &description,
 		NewGroup:       &group.Name,
 	}
 	err := clcRepo.Update(req)
@@ -110,4 +112,17 @@ func TestUpdateAndListCollections(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(r))
 	assert.NotNil(t, r[0].Group)
+}
+
+func TestUpdateClearsOmittedDescription(t *testing.T) {
+	clcRepo, collection, _, _, _ := Setup()
+	assert.NotNil(t, collection.Description)
+	req := clc.UpdateModel{
+		Name: collection.Name, NewName: collection.Name,
+	}
+	err := clcRepo.Update(req)
+	assert.NoError(t, err)
+	r, err := clcRepo.Find(req.NewName)
+	assert.NoError(t, err)
+	assert.Nil(t, r.Description)
 }

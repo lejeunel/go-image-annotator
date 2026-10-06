@@ -20,7 +20,7 @@ func (p List) SuccessListCollections(r list.Response) {
 		data = append(data,
 			models.Collection{
 				Name:        c.Name,
-				Description: &c.Description,
+				Description: c.Description,
 			})
 	}
 

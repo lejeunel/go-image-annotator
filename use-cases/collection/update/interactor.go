@@ -46,7 +46,14 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	updateModel := clc.UpdateModel{NewDescription: r.NewDescription}
+	response := Response{
+		Name: r.NewName, Description: r.NewDescription,
+		Profile: r.NewProfile, Group: r.NewGroup,
+	}
+	updateModel := clc.UpdateModel{
+		Name: r.Name, NewName: r.NewName,
+		NewDescription: r.NewDescription,
+	}
 
 	if err := i.ensureCollectionNameExists(r.Name); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
@@ -61,36 +68,6 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 	updateModel.NewName = r.NewName
-
-	if r.NewGroup != nil {
-		groupExists, err := i.GroupRepo.Exists(*r.NewGroup)
-		if err != nil {
-			out.Error(fmt.Errorf("%v: checking existence of group: %w", errCtx, err))
-			return
-		}
-		if !*groupExists {
-			out.Error(
-				fmt.Errorf(
-					"%v: requested assignment to new group %v: %w",
-					errCtx,
-					*r.NewGroup,
-					err,
-				),
-			)
-			return
-		}
-		if err := i.Auth.UpdateCollection(ctx, r.NewGroup); err != nil {
-			out.Error(
-				fmt.Errorf(
-					"%v: authorizing assignment to new group %v: %w",
-					errCtx,
-					*r.NewGroup,
-					err,
-				),
-			)
-			return
-		}
-	}
 
 	if r.NewGroup != nil {
 		groupExists, err := i.GroupRepo.Exists(*r.NewGroup)
@@ -148,9 +125,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.SuccessUpdateCollection(
-		Response{OriginalName: r.Name, Name: r.NewName, Description: r.NewDescription},
-	)
+	out.SuccessUpdateCollection(response)
 }
 
 func (i Interactor) ensureCollectionNameExists(name string) error {

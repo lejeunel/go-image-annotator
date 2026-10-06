@@ -245,7 +245,7 @@ type TaskResponse struct {
 // UpdateCollection defines model for UpdateCollection.
 type UpdateCollection struct {
 	// Description New description of the collection
-	Description string `json:"description"`
+	Description *string `json:"description,omitempty"`
 
 	// Name New name of the collection
 	Name string `json:"name"`

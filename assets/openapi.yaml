@@ -230,7 +230,8 @@ paths:
                 $ref: '#/components/schemas/Error'
     put:
       summary: Update a collection
-      description: Update the name and description of a collection
+      description: >-
+        Replace the collection's representation.
       operationId: updateCollectionByName
       tags: [Collection]
       parameters:
@@ -704,7 +705,6 @@ components:
       type: object
       required:
         - name
-        - description
       properties:
         name:
           type: string

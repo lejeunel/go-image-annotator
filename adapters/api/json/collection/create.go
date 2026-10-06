@@ -17,7 +17,7 @@ type Create struct {
 func (p Create) SuccessCreateCollection(r create.Response) {
 	response := models.Collection{
 		Name:        r.Name,
-		Description: &r.Description,
+		Description: r.Description,
 	}
 
 	json.WriteJSON(p.Writer, 200, response)

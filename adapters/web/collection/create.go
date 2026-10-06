@@ -54,11 +54,15 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
+	req := create.Request{
+		Name: r.FormValue(nameFieldName),
+	}
+	description := r.FormValue(descriptionFieldName)
+	if description != "" {
+		req.Description = &description
+	}
 	s.CreateItr.Execute(r.Context(),
-		create.Request{
-			Name:        r.FormValue(nameFieldName),
-			Description: r.FormValue(descriptionFieldName),
-		}, NewCreateCollectionPresenter(w))
+		req, NewCreateCollectionPresenter(w))
 }
 
 func (s *Server) CreateForm(w http.ResponseWriter, r *http.Request) {

@@ -1,7 +1,6 @@
 package collection
 
 import (
-	"fmt"
 	"net/http"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
@@ -17,10 +16,15 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
+
 	req := update.Request{
-		Name:           r.URL.Query().Get(resourceUrlFieldName),
-		NewName:        r.FormValue(nameFieldName),
-		NewDescription: r.FormValue(descriptionFieldName),
+		Name:    r.URL.Query().Get(resourceUrlFieldName),
+		NewName: r.FormValue(nameFieldName),
+	}
+
+	description := r.FormValue(descriptionFieldName)
+	if description != "" {
+		req.NewDescription = &description
 	}
 
 	group := r.FormValue(groupFieldName)
@@ -51,7 +55,7 @@ type EditPresenter struct {
 func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 	task := "Updating collection"
 	okMessageFunc := func(r update.Response) string {
-		return fmt.Sprintf("Successfully updated %v", r.OriginalName)
+		return "successfully updated collection"
 	}
 	form := bf.NewHTMXInlineFormBuilder(len(listCollectionsFields), u.Url)
 	return EditPresenter{
@@ -86,7 +90,11 @@ func (p *EditPresenter) SuccessFindCollection(c clc.Collection) {
 	}
 	p.Form.SetResourceName(c.Name)
 	p.Form.AddTextField("name", "Name", bf.WithRequired(), bf.WithDefault(c.Name))
-	p.Form.AddTextField("description", "Description", bf.WithDefault(c.Description))
+	if c.Description != nil {
+		p.Form.AddTextField("description", "Description", bf.WithDefault(*c.Description))
+	} else {
+		p.Form.AddTextField("description", "Description")
+	}
 }
 
 func (p *EditPresenter) SuccessListGroups(groups []grp.Group) {

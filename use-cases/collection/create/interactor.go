@@ -42,8 +42,10 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 func (i Interactor) create(r Request) error {
 	collection := clc.NewCollection(clc.NewCollectionId(), r.Name,
-		clc.WithDescription(r.Description),
 		clc.WithCreatedAt(i.Clock.Now()))
+	if r.Description != nil {
+		collection.Description = r.Description
+	}
 	if r.Group != nil {
 		group, err := i.GroupRepo.Find(*r.Group)
 		if err != nil {

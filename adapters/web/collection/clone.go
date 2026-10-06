@@ -71,7 +71,12 @@ func (p ClonePresenter) SuccessFindCollection(c clc.Collection) {
 	b := bf.NewHTMXInlineFormBuilder(len(listCollectionsFields), p.Url, bf.WithMode(bf.CloneMode))
 	b.SetResourceName(c.Name)
 	b.AddTextField(nameFieldName, "Name", bf.WithRequired(), bf.WithDefault(c.Name))
-	b.AddTextField(descriptionFieldName, "Description", bf.WithDefault(c.Description))
+
+	if c.Description != nil {
+		b.AddTextField(descriptionFieldName, "Description", bf.WithDefault(*c.Description))
+	} else {
+		b.AddTextField(descriptionFieldName, "Description")
+	}
 
 	groupSelect := se.NewSingleSelect(p.groups, groupFieldName)
 	b.AddRaw(groupFieldName, groupSelect)

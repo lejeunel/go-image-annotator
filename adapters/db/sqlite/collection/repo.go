@@ -21,7 +21,7 @@ type CollectionRepo struct {
 type Row struct {
 	Id          clc.CollectionId `db:"id"`
 	Name        string           `db:"name"`
-	Description string           `db:"description"`
+	Description *string          `db:"description"`
 	CreatedAt   sql.NullTime     `db:"created_at"`
 	GroupId     *g.GroupId       `db:"group_id"`
 	GroupName   *string          `db:"group_name"`
@@ -66,17 +66,13 @@ func (r CollectionRepo) Create(c clc.Collection) error {
 }
 
 func (r CollectionRepo) build(row Row) clc.Collection {
-	c := clc.NewCollection(row.Id, row.Name,
-		clc.WithDescription(row.Description))
+	c := clc.NewCollection(row.Id, row.Name)
 	if row.CreatedAt.Valid {
 		c.CreatedAt = row.CreatedAt.Time
 	}
-	if row.GroupName != nil {
-		c.Group = row.GroupName
-	}
-	if row.ProfileName != nil {
-		c.Profile = row.ProfileName
-	}
+	c.Group = row.GroupName
+	c.Profile = row.ProfileName
+	c.Description = row.Description
 	return c
 }
 

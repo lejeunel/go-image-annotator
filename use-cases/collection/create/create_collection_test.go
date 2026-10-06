@@ -76,13 +76,14 @@ func TestCreateCollection(t *testing.T) {
 	now := time.Now()
 	group := g.NewGroup(g.NewGroupId(), "my-group")
 	profile := pr.NewProfile(pr.NewProfileId(), "my-profile")
+	description := "a-description"
 	itr := New(repo,
 		&fk.GroupRepo{Return: group},
 		&fk.ProfileRepo{Return: profile},
 		WithClock(clockwork.NewFakeClockAt(now)))
 	req := Request{
 		Name:        "a-name",
-		Description: "a-description",
+		Description: &description,
 		Group:       &group.Name,
 		Profile:     &profile.Name,
 	}
@@ -90,7 +91,7 @@ func TestCreateCollection(t *testing.T) {
 	assert.Equal(t, req.Name, repo.Created.Name)
 	assert.Equal(t, *req.Group, *repo.Created.Group)
 	assert.Equal(t, *req.Profile, *repo.Created.Profile)
-	assert.Equal(t, req.Description, repo.Created.Description)
+	assert.Equal(t, *req.Description, *repo.Created.Description)
 	assert.Equal(t, now, repo.Created.CreatedAt)
 	assert.False(t, repo.Created.Id.IsNil())
 }

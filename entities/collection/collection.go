@@ -13,7 +13,7 @@ type CollectionName = string
 type Collection struct {
 	Id          CollectionId
 	Name        string
-	Description string
+	Description *string
 	CreatedAt   time.Time
 	Group       *string
 	Profile     *pr.ProfileName
@@ -31,7 +31,7 @@ type Option func(*Collection)
 
 func WithDescription(d string) Option {
 	return func(c *Collection) {
-		c.Description = d
+		c.Description = &d
 	}
 }
 
@@ -56,7 +56,7 @@ func WithGroup(g string) Option {
 type UpdateModel struct {
 	Name           string
 	NewName        string
-	NewDescription string
+	NewDescription *string
 	NewGroup       *string
 	NewProfile     *string
 }

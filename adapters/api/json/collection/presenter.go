@@ -18,7 +18,7 @@ type Presenter struct {
 func (p Presenter) SuccessFindCollection(r clc.Collection) {
 	response := models.Collection{
 		Name:        r.Name,
-		Description: &r.Description,
+		Description: r.Description,
 	}
 
 	json.WriteJSON(p.Writer, 200, response)

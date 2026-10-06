@@ -36,10 +36,11 @@ func TestUpdateCollection(t *testing.T) {
 		Return:        clc.NewCollection(clc.NewCollectionId(), name),
 	}
 	itr := New(repo, &fk.GroupRepo{}, &fk.ProfileRepo{})
+	description := "updated-description"
 	req := Request{
 		Name:           name,
 		NewName:        "updated-name",
-		NewDescription: "updated-description",
+		NewDescription: &description,
 	}
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)

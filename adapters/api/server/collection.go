@@ -25,7 +25,7 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 
 	s.Collection.Create.Execute(
 		r.Context(),
-		create.Request{Name: body.Name, Description: *body.Description},
+		create.Request{Name: body.Name, Description: body.Description},
 		presenter.NewCreatePresenter(w, s.Logger))
 }
 
