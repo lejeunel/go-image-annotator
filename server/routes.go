@@ -29,7 +29,8 @@ func RouteAPI(r chi.Router, apiServer api.Server, mws ...func(http.Handler) http
 	r.Group(func(r chi.Router) {
 		r.Use(mws...)
 		handler := api.HandlerWithOptions(&apiServer, api.StdHTTPServerOptions{
-			BaseURL: rt.APIRootUrl,
+			BaseURL:          rt.APIRootUrl,
+			ErrorHandlerFunc: api.NewParamErrorHandler(apiServer.Logger),
 		})
 		r.Mount(rt.APIRootUrl, handler)
 	})
