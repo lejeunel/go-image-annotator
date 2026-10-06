@@ -65,6 +65,12 @@ func HTTPStatusCodeFromErr(err error) int {
 		return http.StatusFailedDependency
 	case errors.Is(err, e.ErrNotFound):
 		return http.StatusNotFound
+	case errors.Is(err, e.ErrAuthorization):
+		return http.StatusForbidden
+	case errors.Is(err, e.ErrForbiddenOp):
+		return http.StatusForbidden
+	case errors.Is(err, e.ErrAuthentication):
+		return http.StatusUnauthorized
 	default:
 		return http.StatusInternalServerError
 	}

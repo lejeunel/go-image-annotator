@@ -2,15 +2,11 @@ openapi: "3.0.0"
 info:
   version: 1.0.0
   title: go-image-annotator API
-  description: Image Annotation Service
-  termsOfService: https://swagger.io/terms/
-  contact:
-    name: Swagger API Team
-    email: apiteam@swagger.io
-    url: https://swagger.io
+  description: >-
+    Manage, store and annotate images with bounding boxes and polygons.
   license:
-    name: Apache 2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0.html
+    name: GPL-3.0-or-later
+    url: https://www.gnu.org/licenses/gpl-3.0.html
 servers:
   - url: /api
 paths:
@@ -27,12 +23,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /raw/{image_id}:
     get:
       summary: Read image raw-data
@@ -67,13 +61,12 @@ paths:
               description: Size of the image in bytes
               schema:
                 type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
+          $ref: '#/components/responses/UnexpectedError'
   /images/{collection_name}/{image_id}:
     get:
       summary: Read image meta-data
@@ -100,12 +93,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Image'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /images:
     get:
       summary: List images
@@ -151,17 +144,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ListImagesResponse'
         '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
     post:
       summary: Ingest a new image
       description: Ingest an image into a collection.
@@ -196,12 +183,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ImageIngestionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /collections/{name}:
     get:
       summary: Find a collection by name
@@ -222,12 +213,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Collection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
     put:
       summary: Update a collection
       description: >-
@@ -251,10 +242,18 @@ paths:
       responses:
         '200':
           description: Collection updated successfully
-        '404':
-          description: Collection not found
         '400':
-          description: Invalid input
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
     delete:
       summary: Delete a collection by name
       description: Delete a collection based on its name
@@ -270,12 +269,14 @@ paths:
       responses:
         '204':
           description: collection deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /annotate/{id}:
     delete:
       summary: Delete annotation by id
@@ -292,12 +293,14 @@ paths:
       responses:
         '204':
           description: annotation deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /annotate/{id}/{label}:
     put:
       summary: Change label
@@ -320,12 +323,14 @@ paths:
       responses:
         '204':
           description: annotation updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /annotate/box:
     post:
       summary: Add a bounding-box
@@ -342,12 +347,16 @@ paths:
       responses:
         '204':
           description: New bounding-box response
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /annotate/polygon:
     post:
       summary: Add a polygon
@@ -364,12 +373,16 @@ paths:
       responses:
         '204':
           description: New polygon response
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /users:
     post:
       summary: Create a new user
@@ -390,12 +403,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /users/{id}:
     put:
       summary: Update user privileges
@@ -419,12 +436,16 @@ paths:
       responses:
         '204':
           description: annotation updated
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
     delete:
       summary: Delete a user
       description: Delete a user by id
@@ -440,12 +461,14 @@ paths:
       responses:
         '204':
           description: user deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /collections:
     get:
       summary: List collections
@@ -479,17 +502,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ListCollectionsResponse'
         '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
     post:
       summary: Create a new collection
       description: Creates a new collection. Duplicate names are not allowed
@@ -509,12 +526,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Collection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /collections/clone:
     post:
       summary: Clone a collection
@@ -536,18 +559,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/TaskResponse'
         '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      
+          $ref: '#/components/responses/UnexpectedError'
   /labels/{name}:
     get:
       summary: Find a label by name
@@ -568,12 +588,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Label'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
     delete:
       summary: Delete a label by name
       description: Delete a label based on its name
@@ -589,12 +609,16 @@ paths:
       responses:
         '204':
           description: label deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '424':
+          $ref: '#/components/responses/FailedDependency'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
   /labels:
     get:
       summary: List labels
@@ -628,17 +652,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ListLabelsResponse'
         '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
     post:
       summary: Create a new label
       description: Creates a new label. Duplicate names are not allowed
@@ -658,13 +676,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Label'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
         default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnexpectedError'
 components:
+  responses:
+    BadRequest:
+      description: >-
+        The request body, a path parameter or a query parameter is malformed or
+        fails validation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: No credentials were supplied, or they are invalid or expired.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: >-
+        The caller is authenticated but lacks the role for this operation, or is
+        not a member of the group owning the target resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The target resource, or a resource it refers to, does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: A resource with the same unique identity already exists.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    FailedDependency:
+      description: >-
+        The operation is blocked by another resource that depends on the target,
+        for example deleting a label still in use by annotations.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnexpectedError:
+      description: >-
+        An error not otherwise documented for this operation, including
+        unexpected server-side faults.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   schemas:
     Pagination:
       required:
@@ -712,6 +785,12 @@ components:
         description:
           type: string
           description: New description of the collection
+        group:
+          type: string
+          description: Group of the collection
+        profile:
+          type: string
+          description: Profile of the collection
     CloneCollection:
       type: object
       required:

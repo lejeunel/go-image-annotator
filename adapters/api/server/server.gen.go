@@ -254,8 +254,14 @@ type UpdateCollection struct {
 	// Description New description of the collection
 	Description *string `json:"description,omitempty"`
 
+	// Group Group of the collection
+	Group *string `json:"group,omitempty"`
+
 	// Name New name of the collection
 	Name string `json:"name"`
+
+	// Profile Profile of the collection
+	Profile *string `json:"profile,omitempty"`
 }
 
 // User defines model for User.
@@ -272,6 +278,27 @@ type UserPrivileges struct {
 	Groups []string `json:"groups"`
 	Roles  []string `json:"roles"`
 }
+
+// BadRequest defines model for BadRequest.
+type BadRequest = Error
+
+// Conflict defines model for Conflict.
+type Conflict = Error
+
+// FailedDependency defines model for FailedDependency.
+type FailedDependency = Error
+
+// Forbidden defines model for Forbidden.
+type Forbidden = Error
+
+// NotFound defines model for NotFound.
+type NotFound = Error
+
+// Unauthorized defines model for Unauthorized.
+type Unauthorized = Error
+
+// UnexpectedError defines model for UnexpectedError.
+type UnexpectedError = Error
 
 // ListCollectionsParams defines parameters for ListCollections.
 type ListCollectionsParams struct {

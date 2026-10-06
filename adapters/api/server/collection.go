@@ -56,7 +56,10 @@ func (s *Server) UpdateCollectionByName(w http.ResponseWriter, r *http.Request, 
 	}
 
 	s.Collection.Update.Execute(r.Context(),
-		update.Request{Name: name, NewName: body.Name, NewDescription: body.Description},
+		update.Request{
+			Name: name, NewName: body.Name, NewDescription: body.Description,
+			NewGroup: body.Group, NewProfile: body.Profile,
+		},
 		presenter.NewUpdatePresenter(w, s.Logger))
 }
 
