@@ -38,6 +38,21 @@ type PaginationParams struct {
 	Page     int64
 }
 
+func NewPaginationParamsFromOptional(
+	pageSize *int,
+	page *int64,
+	defaultPageSize int,
+) PaginationParams {
+	r := PaginationParams{Page: 1, PageSize: defaultPageSize}
+	if pageSize != nil {
+		r.PageSize = *pageSize
+	}
+	if page != nil {
+		r.Page = *page
+	}
+	return r
+}
+
 func (p *PaginationParams) Sanitize(defaultPageSize int, maxPageSize int) {
 	if p.PageSize <= 0 {
 		p.PageSize = defaultPageSize

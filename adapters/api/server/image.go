@@ -69,11 +69,13 @@ func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionNam
 }
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams) {
+	pagination := pa.NewPaginationParamsFromOptional(
+		params.PageSize,
+		params.Page,
+		s.Image.DefaultPageSize,
+	)
 	req := slice.Request{
-		PaginationParams: pa.PaginationParams{
-			PageSize: *params.PageSize,
-			Page:     *params.Page,
-		},
+		PaginationParams: pagination,
 	}
 	if params.Filter != nil {
 		req.FilterStr = *params.Filter

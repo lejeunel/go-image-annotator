@@ -31,9 +31,6 @@ func (s *Server) DeleteLabelByName(w http.ResponseWriter, r *http.Request, name 
 }
 
 func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request, params ListLabelsParams) {
-	req := pa.PaginationParams{
-		PageSize: *params.PageSize,
-		Page:     *params.Page,
-	}
+	req := pa.NewPaginationParamsFromOptional(params.PageSize, params.Page, s.Label.DefaultPageSize)
 	s.Label.List.Execute(r.Context(), req, p.NewListPresenter(w, s.Logger))
 }
