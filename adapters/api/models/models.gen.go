@@ -88,8 +88,14 @@ type Collection struct {
 	// Description Description of the collection
 	Description *string `json:"description,omitempty"`
 
+	// Group Group of the collection
+	Group *string `json:"group,omitempty"`
+
 	// Name Name of the collection
 	Name string `json:"name"`
+
+	// Profile Profile of the collection
+	Profile *string `json:"profile,omitempty"`
 }
 
 // Error defines model for Error.

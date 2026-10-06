@@ -774,6 +774,12 @@ components:
         description:
           type: string
           description: Description of the collection
+        group:
+          type: string
+          description: Group of the collection
+        profile:
+          type: string
+          description: Profile of the collection
     UpdateCollection:
       type: object
       required:
