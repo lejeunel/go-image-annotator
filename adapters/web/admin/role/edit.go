@@ -15,17 +15,16 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get(resourceUrlFieldName)
 	methods := r.Form[MethodsFieldName]
 
-	var description *string
-	descriptionValue := r.FormValue(DescriptionFieldName)
-	if descriptionValue != "" {
-		description = &descriptionValue
+	req := update.Request{
+		Name:       name,
+		NewName:    name,
+		NewMethods: methods,
+	}
+	d := r.FormValue(DescriptionFieldName)
+	if d != "" {
+		req.NewDescription = &d
 	}
 	s.Roles.Update.Execute(r.Context(),
-		update.Request{
-			Name:           name,
-			NewName:        name,
-			NewDescription: description,
-			NewMethods:     methods,
-		},
+		req,
 		NewEditPresenter(w, s.RowUrl))
 }

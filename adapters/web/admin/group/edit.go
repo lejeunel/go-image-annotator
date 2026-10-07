@@ -31,16 +31,16 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
-	var description *string
-	descriptionValue := r.FormValue(DescriptionFieldName)
-	if descriptionValue != "" {
-		description = &descriptionValue
+
+	req := update.Request{
+		Name:    r.URL.Query().Get(resourceUrlFieldName),
+		NewName: r.FormValue("name"),
+	}
+	d := r.FormValue(DescriptionFieldName)
+	if d != "" {
+		req.NewDescription = &d
 	}
 	s.Groups.Update.Execute(r.Context(),
-		update.Request{
-			Name:           r.URL.Query().Get(resourceUrlFieldName),
-			NewName:        r.FormValue("name"),
-			NewDescription: description,
-		},
+		req,
 		NewEditPresenter(w, s.RowUrl))
 }

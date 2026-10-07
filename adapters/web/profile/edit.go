@@ -67,18 +67,17 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
+	req := update.Request{
+		Name:      r.URL.Query().Get(resourceUrlFieldName),
+		NewName:   r.FormValue(NameFieldName),
+		NewLabels: r.Form[LabelsFieldName],
+	}
 
-	var description *string
-	descriptionField := r.FormValue(DescriptionFieldName)
-	if descriptionField != "" {
-		description = &descriptionField
+	d := r.FormValue(DescriptionFieldName)
+	if d != "" {
+		req.NewDescription = &d
 	}
 	s.UpdateItr.Execute(r.Context(),
-		update.Request{
-			Name:           r.URL.Query().Get(resourceUrlFieldName),
-			NewName:        r.FormValue(NameFieldName),
-			NewDescription: description,
-			NewLabels:      r.Form[LabelsFieldName],
-		},
+		req,
 		NewEditProfilePresenter(w, s.RowURL))
 }

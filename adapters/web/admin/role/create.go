@@ -36,18 +36,17 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
+	req := create.Request{
+		Name:    r.FormValue(NameFieldName),
+		Methods: r.Form[MethodsFieldName],
+	}
 
-	var description string
-	descriptionValue := r.FormValue(DescriptionFieldName)
-	if descriptionValue != "" {
-		description = descriptionValue
+	d := r.FormValue(DescriptionFieldName)
+	if d != "" {
+		req.Description = &d
 	}
 	s.Roles.Create.Execute(r.Context(),
-		create.Request{
-			Name:        r.FormValue(NameFieldName),
-			Description: &description,
-			Methods:     r.Form[MethodsFieldName],
-		},
+		req,
 		NewCreateRolePresenter(w))
 }
 
