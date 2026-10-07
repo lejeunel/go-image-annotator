@@ -3,7 +3,7 @@ info:
   version: 1.0.0
   title: go-image-annotator API
   description: >-
-    Manage, store and annotate images with bounding boxes and polygons.
+    Manage, store and annotate images.
   license:
     name: GPL-3.0-or-later
     url: https://www.gnu.org/licenses/gpl-3.0.html
@@ -106,24 +106,8 @@ paths:
       operationId: listImages
       tags: [Image]
       parameters:
-        - name: page
-          in: query
-          description: page number
-          required: false
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-            default: 1
-        - name: page_size
-          in: query
-          description: maximum number of images to return
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
         - name: filter
           in: query
           description: filtering expression
@@ -221,19 +205,17 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     put:
       summary: Update a collection
-      description: >-
-        Replace the collection's representation.
       operationId: updateCollection
       tags: [Collection]
       parameters:
         - name: name
           in: path
           required: true
-          description: Current name of the collection
+          description: Name of the collection to update
           schema:
             type: string
       requestBody:
-        description: New values for the collection
+        description: Updated values
         required: true
         content:
           application/json:
@@ -417,6 +399,28 @@ paths:
           $ref: '#/components/responses/Conflict'
         default:
           $ref: '#/components/responses/UnexpectedError'
+    get:
+      summary: List users
+      description: Paginate users
+      operationId: listUsers
+      tags: [User]
+      parameters:
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: list users response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListUsers'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+
   /users/{id}:
     put:
       summary: Update user privileges
@@ -480,24 +484,8 @@ paths:
       operationId: listCollections
       tags: [Collection]
       parameters:
-        - name: page
-          in: query
-          description: page number
-          required: false
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-            default: 1
-        - name: page_size
-          in: query
-          description: maximum number of collections to return
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
       responses:
         '200':
           description: list collection response
@@ -630,24 +618,8 @@ paths:
       operationId: listLabels
       tags: [Label]
       parameters:
-        - name: page
-          in: query
-          description: page number
-          required: false
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-            default: 1
-        - name: page_size
-          in: query
-          description: maximum number of labels to return
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
       responses:
         '200':
           description: list label response
@@ -718,20 +690,17 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     put:
       summary: Update a profile
-      description: >-
-        Replace the profile's representation. Any optional field omitted from
-        the request body is cleared.
       operationId: updateProfile
       tags: [Profile]
       parameters:
         - name: name
           in: path
-          description: Current name of the profile
+          description: Name of profile to update
           required: true
           schema:
             type: string
       requestBody:
-        description: New values for the profile
+        description: Updated values
         required: true
         content:
           application/json:
@@ -808,6 +777,27 @@ paths:
         default:
           $ref: '#/components/responses/UnexpectedError'
 components:
+  parameters:
+    PageNumber:
+      name: page
+      in: query
+      description: page number
+      required: false
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+        default: 1
+    PageSize:
+      name: page_size
+      in: query
+      description: maximum number of items to return
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
   responses:
     BadRequest:
       description: >-
@@ -908,16 +898,16 @@ components:
       properties:
         name:
           type: string
-          description: New name of the collection
+          description: New name
         description:
           type: string
-          description: New description of the collection
+          description: New description
         group:
           type: string
-          description: Group of the collection
+          description: New group
         profile:
           type: string
-          description: Profile of the collection
+          description: New profile
     CloneCollection:
       type: object
       required:
@@ -1165,6 +1155,18 @@ components:
           type: array
           items:
             type: string
+    ListUsers:
+      type: object
+      required:
+        - users
+        - pagination
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     UserPrivileges:
       required:
         - groups
@@ -1287,7 +1289,7 @@ components:
           description: New group owning the profile
         labels:
           type: array
-          description: New names of the labels the profile allows
+          description: New label set
           items:
             type: string
     Error:

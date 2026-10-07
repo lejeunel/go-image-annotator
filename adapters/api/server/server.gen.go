@@ -179,6 +179,12 @@ type ListLabels struct {
 	Pagination Pagination `json:"pagination"`
 }
 
+// ListUsers defines model for ListUsers.
+type ListUsers struct {
+	Pagination Pagination `json:"pagination"`
+	Users      []User     `json:"users"`
+}
+
 // NewCollection defines model for NewCollection.
 type NewCollection struct {
 	// Description Description of the collection
@@ -287,16 +293,16 @@ type TaskResponse struct {
 
 // UpdateCollection defines model for UpdateCollection.
 type UpdateCollection struct {
-	// Description New description of the collection
+	// Description New description
 	Description *string `json:"description,omitempty"`
 
-	// Group Group of the collection
+	// Group New group
 	Group *string `json:"group,omitempty"`
 
-	// Name New name of the collection
+	// Name New name
 	Name string `json:"name"`
 
-	// Profile Profile of the collection
+	// Profile New profile
 	Profile *string `json:"profile,omitempty"`
 }
 
@@ -308,7 +314,7 @@ type UpdateProfile struct {
 	// Group New group owning the profile
 	Group *string `json:"group,omitempty"`
 
-	// Labels New names of the labels the profile allows
+	// Labels New label set
 	Labels *[]string `json:"labels,omitempty"`
 
 	// Name New name of the profile
@@ -329,6 +335,12 @@ type UserPrivileges struct {
 	Groups []string `json:"groups"`
 	Roles  []string `json:"roles"`
 }
+
+// PageNumber defines model for PageNumber.
+type PageNumber = int64
+
+// PageSize defines model for PageSize.
+type PageSize = int
 
 // BadRequest defines model for BadRequest.
 type BadRequest = Error
@@ -354,19 +366,19 @@ type UnexpectedError = Error
 // ListCollectionsParams defines parameters for ListCollections.
 type ListCollectionsParams struct {
 	// Page page number
-	Page *int64 `form:"page,omitempty" json:"page,omitempty"`
+	Page *PageNumber `form:"page,omitempty" json:"page,omitempty"`
 
-	// PageSize maximum number of collections to return
-	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+	// PageSize maximum number of items to return
+	PageSize *PageSize `form:"page_size,omitempty" json:"page_size,omitempty"`
 }
 
 // ListImagesParams defines parameters for ListImages.
 type ListImagesParams struct {
 	// Page page number
-	Page *int64 `form:"page,omitempty" json:"page,omitempty"`
+	Page *PageNumber `form:"page,omitempty" json:"page,omitempty"`
 
-	// PageSize maximum number of images to return
-	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+	// PageSize maximum number of items to return
+	PageSize *PageSize `form:"page_size,omitempty" json:"page_size,omitempty"`
 
 	// Filter filtering expression
 	Filter *string `form:"filter,omitempty" json:"filter,omitempty"`
@@ -385,10 +397,19 @@ type IngestImageMultipartBody struct {
 // ListLabelsParams defines parameters for ListLabels.
 type ListLabelsParams struct {
 	// Page page number
-	Page *int64 `form:"page,omitempty" json:"page,omitempty"`
+	Page *PageNumber `form:"page,omitempty" json:"page,omitempty"`
 
-	// PageSize maximum number of labels to return
-	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+	// PageSize maximum number of items to return
+	PageSize *PageSize `form:"page_size,omitempty" json:"page_size,omitempty"`
+}
+
+// ListUsersParams defines parameters for ListUsers.
+type ListUsersParams struct {
+	// Page page number
+	Page *PageNumber `form:"page,omitempty" json:"page,omitempty"`
+
+	// PageSize maximum number of items to return
+	PageSize *PageSize `form:"page_size,omitempty" json:"page_size,omitempty"`
 }
 
 // AddBoundingBoxJSONRequestBody defines body for AddBoundingBox for application/json ContentType.
@@ -492,6 +513,9 @@ type ServerInterface interface {
 	// ReadRawImage Read image raw-data
 	// (GET /raw/{image_id})
 	ReadRawImage(w http.ResponseWriter, r *http.Request, imageId string)
+	// ListUsers List users
+	// (GET /users)
+	ListUsers(w http.ResponseWriter, r *http.Request, params ListUsersParams)
 	// CreateUser Create a new user
 	// (POST /users)
 	CreateUser(w http.ResponseWriter, r *http.Request)
@@ -1107,6 +1131,52 @@ func (siw *ServerInterfaceWrapper) ReadRawImage(w http.ResponseWriter, r *http.R
 	handler.ServeHTTP(w, r)
 }
 
+// ListUsers operation middleware
+func (siw *ServerInterfaceWrapper) ListUsers(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListUsersParams
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "page", r.URL.Query(), &params.Page, runtime.BindQueryParameterOptions{Type: "integer", Format: "int64"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "page"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "page_size" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "page_size", r.URL.Query(), &params.PageSize, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "page_size"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page_size", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListUsers(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // CreateUser operation middleware
 func (siw *ServerInterfaceWrapper) CreateUser(w http.ResponseWriter, r *http.Request) {
 
@@ -1319,6 +1389,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/annotate/{id}/{label}", wrapper.UpdateAnnotation)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/box", wrapper.AddBoundingBox)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/polygon", wrapper.AddPolygon)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/users", wrapper.ListUsers)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/users", wrapper.CreateUser)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/users/{id}", wrapper.DeleteUser)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/users/{id}", wrapper.UpdateUser)

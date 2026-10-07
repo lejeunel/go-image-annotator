@@ -38,7 +38,7 @@ func NewUserInteractors(
 		Find:             find.New(userStore, find.WithAuth(auth)),
 		Create:           create.New(userRepo, ApitokenGen, pwGen, create.WithAuth(auth)),
 		Delete:           delete.New(userRepo, delete.WithAuth(auth)),
-		List:             list.New(userRepo, list.WithAuth(auth)),
+		List:             list.New(userStore, list.WithAuth(auth)),
 		RenewToken:       rt.New(userRepo, ApitokenGen),
 		UpdatePrivileges: upr.New(userRepo, grpRepo, roleRepo, upr.WithAuth(auth)),
 		RequestForgottenPassword: fp.New(

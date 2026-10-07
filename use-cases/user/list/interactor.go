@@ -9,7 +9,7 @@ import (
 )
 
 type Interactor struct {
-	Repo
+	Store
 	Auth
 }
 
@@ -20,23 +20,13 @@ func (i *Interactor) Execute(ctx context.Context, r pag.PaginationParams, out Ou
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	found, err := i.Repo.List(r)
+	users, pagination, err := i.Store.List(r)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	count, err := i.Repo.Count()
-	if err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-
-	response := Response{
-		Pagination: pag.New(int64(r.Page), r.PageSize, count),
-		Users:      found,
-	}
-	out.SuccessListUsers(response)
+	out.SuccessListUsers(Response{Users: users, Pagination: *pagination})
 }
 
 type Option func(*Interactor)
@@ -47,10 +37,10 @@ func WithAuth(a Auth) Option {
 	}
 }
 
-func New(r Repo, opts ...Option) Interactor {
+func New(r Store, opts ...Option) Interactor {
 	i := &Interactor{
-		Repo: r,
-		Auth: auth.NewVoidAuth(),
+		Store: r,
+		Auth:  auth.NewVoidAuth(),
 	}
 	for _, opt := range opts {
 		opt(i)

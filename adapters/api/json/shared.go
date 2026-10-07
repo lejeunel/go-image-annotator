@@ -38,6 +38,8 @@ func DecodeJSON[T any](r *http.Request) (*T, error) {
 	return &v, nil
 }
 
+// MustDecodeJSON attemps to decode a request into the provided struct T.
+// If it fails, we write an error and return.
 func MustDecodeJSON[T any](w http.ResponseWriter, r *http.Request) (*T, bool) {
 	body, err := DecodeJSON[T](r)
 	if err != nil {

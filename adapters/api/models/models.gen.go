@@ -172,6 +172,12 @@ type ListLabels struct {
 	Pagination Pagination `json:"pagination"`
 }
 
+// ListUsers defines model for ListUsers.
+type ListUsers struct {
+	Pagination Pagination `json:"pagination"`
+	Users      []User     `json:"users"`
+}
+
 // NewCollection defines model for NewCollection.
 type NewCollection struct {
 	// Description Description of the collection
@@ -280,16 +286,16 @@ type TaskResponse struct {
 
 // UpdateCollection defines model for UpdateCollection.
 type UpdateCollection struct {
-	// Description New description of the collection
+	// Description New description
 	Description *string `json:"description,omitempty"`
 
-	// Group Group of the collection
+	// Group New group
 	Group *string `json:"group,omitempty"`
 
-	// Name New name of the collection
+	// Name New name
 	Name string `json:"name"`
 
-	// Profile Profile of the collection
+	// Profile New profile
 	Profile *string `json:"profile,omitempty"`
 }
 
@@ -301,7 +307,7 @@ type UpdateProfile struct {
 	// Group New group owning the profile
 	Group *string `json:"group,omitempty"`
 
-	// Labels New names of the labels the profile allows
+	// Labels New label set
 	Labels *[]string `json:"labels,omitempty"`
 
 	// Name New name of the profile
@@ -322,6 +328,12 @@ type UserPrivileges struct {
 	Groups []string `json:"groups"`
 	Roles  []string `json:"roles"`
 }
+
+// PageNumber defines model for PageNumber.
+type PageNumber = int64
+
+// PageSize defines model for PageSize.
+type PageSize = int
 
 // BadRequest defines model for BadRequest.
 type BadRequest = Error
@@ -347,19 +359,19 @@ type UnexpectedError = Error
 // ListCollectionsParams defines parameters for ListCollections.
 type ListCollectionsParams struct {
 	// Page page number
-	Page *int64 `form:"page,omitempty" json:"page,omitempty"`
+	Page *PageNumber `form:"page,omitempty" json:"page,omitempty"`
 
-	// PageSize maximum number of collections to return
-	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+	// PageSize maximum number of items to return
+	PageSize *PageSize `form:"page_size,omitempty" json:"page_size,omitempty"`
 }
 
 // ListImagesParams defines parameters for ListImages.
 type ListImagesParams struct {
 	// Page page number
-	Page *int64 `form:"page,omitempty" json:"page,omitempty"`
+	Page *PageNumber `form:"page,omitempty" json:"page,omitempty"`
 
-	// PageSize maximum number of images to return
-	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+	// PageSize maximum number of items to return
+	PageSize *PageSize `form:"page_size,omitempty" json:"page_size,omitempty"`
 
 	// Filter filtering expression
 	Filter *string `form:"filter,omitempty" json:"filter,omitempty"`
@@ -378,10 +390,19 @@ type IngestImageMultipartBody struct {
 // ListLabelsParams defines parameters for ListLabels.
 type ListLabelsParams struct {
 	// Page page number
-	Page *int64 `form:"page,omitempty" json:"page,omitempty"`
+	Page *PageNumber `form:"page,omitempty" json:"page,omitempty"`
 
-	// PageSize maximum number of labels to return
-	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+	// PageSize maximum number of items to return
+	PageSize *PageSize `form:"page_size,omitempty" json:"page_size,omitempty"`
+}
+
+// ListUsersParams defines parameters for ListUsers.
+type ListUsersParams struct {
+	// Page page number
+	Page *PageNumber `form:"page,omitempty" json:"page,omitempty"`
+
+	// PageSize maximum number of items to return
+	PageSize *PageSize `form:"page_size,omitempty" json:"page_size,omitempty"`
 }
 
 // AddBoundingBoxJSONRequestBody defines body for AddBoundingBox for application/json ContentType.

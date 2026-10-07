@@ -206,16 +206,16 @@ func (r UserRepo) Exists(id string) (bool, error) {
 	return exists, nil
 }
 
-func (r UserRepo) Count() (int64, error) {
+func (r UserRepo) Count() (*int64, error) {
 	var count int64
 
 	query := "SELECT COUNT(*) FROM users"
 	err := r.Db.QueryRow(query).Scan(&count)
 	if err != nil {
-		return 0, fmt.Errorf("counting records: %v: %w", err, e.ErrInternal)
+		return nil, fmt.Errorf("counting records: %v: %w", err, e.ErrInternal)
 	}
 
-	return count, nil
+	return &count, nil
 }
 
 func (r UserRepo) List(m pag.PaginationParams) ([]u.BaseUser, error) {

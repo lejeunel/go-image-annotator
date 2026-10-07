@@ -6,10 +6,13 @@ import (
 	g "github.com/lejeunel/go-image-annotator/entities/group"
 	r "github.com/lejeunel/go-image-annotator/entities/role"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
+	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type UserRepo interface {
 	Find(u.UserId) (*u.BaseUser, error)
+	List(pag.PaginationParams) ([]u.BaseUser, error)
+	Count() (*int64, error)
 }
 
 type RoleRepo interface {
@@ -54,6 +57,27 @@ func (s UserStore) Find(id u.UserId) (*u.User, error) {
 	user := u.NewUser(base.Id, u.WithRoles(roles), u.WithGroups(groups),
 		u.WithPasswordHash(base.HashPassword), u.WithHashedPersonalAccessToken(base.HashPAT))
 	return &user, nil
+}
+
+func (s UserStore) List(p pag.PaginationParams) ([]u.User, *pag.Pagination, error) {
+	count, err := s.UserRepo.Count()
+	if err != nil {
+		return nil, nil, err
+	}
+	baseUsers, err := s.UserRepo.List(p)
+	if err != nil {
+		return nil, nil, err
+	}
+	var users []u.User
+	for _, b := range baseUsers {
+		user, err := s.Find(b.Id)
+		if err != nil {
+			return nil, nil, err
+		}
+		users = append(users, *user)
+	}
+	pagination := pag.New(p.Page, p.PageSize, *count)
+	return users, &pagination, nil
 }
 
 func NewUserStore(ur UserRepo, rr RoleRepo, gr GroupRepo) UserStore {

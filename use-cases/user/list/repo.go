@@ -5,7 +5,6 @@ import (
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
-type Repo interface {
-	List(pag.PaginationParams) ([]u.BaseUser, error)
-	Count() (int64, error)
+type Store interface {
+	List(pag.PaginationParams) ([]u.User, *pag.Pagination, error)
 }

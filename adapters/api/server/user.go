@@ -8,6 +8,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	"github.com/lejeunel/go-image-annotator/shared"
+	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/user/create"
 	upd "github.com/lejeunel/go-image-annotator/use-cases/user/update-privileges"
 )
@@ -33,11 +34,7 @@ func (s *Server) WhoAmI(w http.ResponseWriter, r *http.Request) {
 	user := u.IdentityFromContext(r.Context())
 
 	if user != nil {
-		shared.WriteJSON(w, 200, User{
-			Id:     user.Id,
-			Groups: user.GroupNames(),
-			Roles:  user.RoleNames(),
-		})
+		shared.WriteJSON(w, 200, p.MakeUserResponse(*user))
 		return
 	}
 
@@ -52,4 +49,9 @@ func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request, id string) {
 
 	req := upd.Request{Id: id, Groups: body.Groups, Roles: body.Roles}
 	s.User.UpdatePrivileges.Execute(r.Context(), req, p.NewPresenter(w, s.Logger))
+}
+
+func (s *Server) ListUsers(w http.ResponseWriter, r *http.Request, params ListUsersParams) {
+	req := pa.NewPaginationParamsFromOptional(params.PageSize, params.Page, s.Label.DefaultPageSize)
+	s.User.List.Execute(r.Context(), req, p.NewPresenter(w, s.Logger))
 }

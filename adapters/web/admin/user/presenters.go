@@ -33,7 +33,7 @@ func NewListPresenter(w http.ResponseWriter, p b.PaginatedListBuilder, u b.RowUR
 func (p ListPresenter) SuccessListUsers(r list.Response) {
 	p.SetPagination(r.Pagination, rt.AdminUsersUrl)
 	for _, user := range r.Users {
-		row := MakeRow(p.RowURL, user)
+		row := MakeRow(p.RowURL, user.ToBase())
 		p.AddRow(row)
 	}
 
