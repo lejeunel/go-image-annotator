@@ -30,10 +30,11 @@ func TestUpdateGroup(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &fk.GroupRepo{ExistingNames: []string{name}}
 	itr := New(repo)
+	description := "updated-description"
 	req := Request{
 		Name:           name,
 		NewName:        "updated-name",
-		NewDescription: "updated-description",
+		NewDescription: &description,
 	}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, req.NewName, p.Got.Name)

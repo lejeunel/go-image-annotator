@@ -107,6 +107,15 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// Group defines model for Group.
+type Group struct {
+	// Description Description of the group
+	Description *string `json:"description,omitempty"`
+
+	// Name Name of the group
+	Name string `json:"name"`
+}
+
 // Image defines model for Image.
 type Image struct {
 	BoundingBoxes *[]BoundingBox `json:"bounding_boxes,omitempty"`
@@ -160,6 +169,11 @@ type ListCollections struct {
 	Pagination  Pagination   `json:"pagination"`
 }
 
+// ListGroups defines model for ListGroups.
+type ListGroups struct {
+	Groups []Group `json:"groups"`
+}
+
 // ListImages defines model for ListImages.
 type ListImages struct {
 	Images     []Image    `json:"images"`
@@ -184,6 +198,15 @@ type NewCollection struct {
 	Description *string `json:"description,omitempty"`
 
 	// Name Name of the collection
+	Name string `json:"name"`
+}
+
+// NewGroup defines model for NewGroup.
+type NewGroup struct {
+	// Description Description of the group
+	Description *string `json:"description,omitempty"`
+
+	// Name Name of the group
 	Name string `json:"name"`
 }
 
@@ -297,6 +320,15 @@ type UpdateCollection struct {
 
 	// Profile New profile
 	Profile *string `json:"profile,omitempty"`
+}
+
+// UpdateGroup defines model for UpdateGroup.
+type UpdateGroup struct {
+	// Description New description of the group
+	Description *string `json:"description,omitempty"`
+
+	// Name New name of the group
+	Name string `json:"name"`
 }
 
 // UpdateProfile defines model for UpdateProfile.
@@ -419,6 +451,12 @@ type CloneCollectionJSONRequestBody = CloneCollection
 
 // UpdateCollectionJSONRequestBody defines body for UpdateCollection for application/json ContentType.
 type UpdateCollectionJSONRequestBody = UpdateCollection
+
+// CreateGroupJSONRequestBody defines body for CreateGroup for application/json ContentType.
+type CreateGroupJSONRequestBody = NewGroup
+
+// UpdateGroupJSONRequestBody defines body for UpdateGroup for application/json ContentType.
+type UpdateGroupJSONRequestBody = UpdateGroup
 
 // IngestImageMultipartRequestBody defines body for IngestImage for multipart/form-data ContentType.
 type IngestImageMultipartRequestBody IngestImageMultipartBody

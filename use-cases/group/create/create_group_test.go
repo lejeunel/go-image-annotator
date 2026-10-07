@@ -46,7 +46,8 @@ func TestCreate(t *testing.T) {
 	p := &FakePresenter{}
 	repo := &FakeRepo{}
 	itr := New(repo)
-	req := Request{Name: "a-group", Description: "a-description"}
+	description := "a-description"
+	req := Request{Name: "a-group", Description: &description}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, repo.Got.Name, req.Name)
 	assert.Equal(t, repo.Got.Description, req.Description)

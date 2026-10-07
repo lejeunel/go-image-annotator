@@ -1,4 +1,4 @@
-package role
+package profile
 
 import (
 	"github.com/google/uuid"

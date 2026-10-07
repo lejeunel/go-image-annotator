@@ -1,11 +1,11 @@
 package group
 
 const (
-	PageName                   = "Groups"
-	createNameFieldName        = "name"
-	createDescriptionFieldName = "description"
-	createGroupTargetDiv       = "create-group"
-	resourceUrlFieldName       = "name"
-	GroupRowUrl                = "/ui/group"
-	CreateGroupFormUrl         = "/ui/group/new"
+	PageName             = "Groups"
+	NameFieldName        = "name"
+	DescriptionFieldName = "description"
+	createGroupTargetDiv = "create-group"
+	resourceUrlFieldName = "name"
+	GroupRowUrl          = "/ui/group"
+	CreateGroupFormUrl   = "/ui/group/new"
 )

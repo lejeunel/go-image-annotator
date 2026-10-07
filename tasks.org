@@ -5,3 +5,5 @@
 * DONE Clone collection must transfer description, profile and group
 * DONE make ingest archive dialog work with both drag-and-drop and file dialog 
 * TODO test image store with s3 bucket
+* TODO fix web paginator
+It shows a single "1" when placed on the first page. This should have 1 and 2.

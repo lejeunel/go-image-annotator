@@ -32,10 +32,15 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
+	var description *string
+	descriptionValue := r.FormValue(DescriptionFieldName)
+	if descriptionValue != "" {
+		description = &descriptionValue
+	}
 	s.Groups.Create.Execute(r.Context(),
 		create.Request{
-			Name:        r.FormValue(createNameFieldName),
-			Description: r.FormValue(createDescriptionFieldName),
+			Name:        r.FormValue(NameFieldName),
+			Description: description,
 		},
 		NewCreateGroupPresenter(w))
 }

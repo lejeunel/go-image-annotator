@@ -3,10 +3,10 @@ package update
 type Request struct {
 	Name           string
 	NewName        string
-	NewDescription string
+	NewDescription *string
 }
 
 type Response struct {
 	Name        string
-	Description string
+	Description *string
 }

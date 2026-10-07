@@ -114,6 +114,15 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// Group defines model for Group.
+type Group struct {
+	// Description Description of the group
+	Description *string `json:"description,omitempty"`
+
+	// Name Name of the group
+	Name string `json:"name"`
+}
+
 // Image defines model for Image.
 type Image struct {
 	BoundingBoxes *[]BoundingBox `json:"bounding_boxes,omitempty"`
@@ -167,6 +176,11 @@ type ListCollections struct {
 	Pagination  Pagination   `json:"pagination"`
 }
 
+// ListGroups defines model for ListGroups.
+type ListGroups struct {
+	Groups []Group `json:"groups"`
+}
+
 // ListImages defines model for ListImages.
 type ListImages struct {
 	Images     []Image    `json:"images"`
@@ -191,6 +205,15 @@ type NewCollection struct {
 	Description *string `json:"description,omitempty"`
 
 	// Name Name of the collection
+	Name string `json:"name"`
+}
+
+// NewGroup defines model for NewGroup.
+type NewGroup struct {
+	// Description Description of the group
+	Description *string `json:"description,omitempty"`
+
+	// Name Name of the group
 	Name string `json:"name"`
 }
 
@@ -304,6 +327,15 @@ type UpdateCollection struct {
 
 	// Profile New profile
 	Profile *string `json:"profile,omitempty"`
+}
+
+// UpdateGroup defines model for UpdateGroup.
+type UpdateGroup struct {
+	// Description New description of the group
+	Description *string `json:"description,omitempty"`
+
+	// Name New name of the group
+	Name string `json:"name"`
 }
 
 // UpdateProfile defines model for UpdateProfile.
@@ -427,6 +459,12 @@ type CloneCollectionJSONRequestBody = CloneCollection
 // UpdateCollectionJSONRequestBody defines body for UpdateCollection for application/json ContentType.
 type UpdateCollectionJSONRequestBody = UpdateCollection
 
+// CreateGroupJSONRequestBody defines body for CreateGroup for application/json ContentType.
+type CreateGroupJSONRequestBody = NewGroup
+
+// UpdateGroupJSONRequestBody defines body for UpdateGroup for application/json ContentType.
+type UpdateGroupJSONRequestBody = UpdateGroup
+
 // IngestImageMultipartRequestBody defines body for IngestImage for multipart/form-data ContentType.
 type IngestImageMultipartRequestBody IngestImageMultipartBody
 
@@ -477,6 +515,21 @@ type ServerInterface interface {
 	// UpdateCollection Update a collection
 	// (PUT /collections/{name})
 	UpdateCollection(w http.ResponseWriter, r *http.Request, name string)
+	// ListGroups List groups
+	// (GET /groups)
+	ListGroups(w http.ResponseWriter, r *http.Request)
+	// CreateGroup Create a new group
+	// (POST /groups)
+	CreateGroup(w http.ResponseWriter, r *http.Request)
+	// DeleteGroup Delete a group by name
+	// (DELETE /groups/{name})
+	DeleteGroup(w http.ResponseWriter, r *http.Request, name string)
+	// FindGroup Find a group by name
+	// (GET /groups/{name})
+	FindGroup(w http.ResponseWriter, r *http.Request, name string)
+	// UpdateGroup Update a group
+	// (PUT /groups/{name})
+	UpdateGroup(w http.ResponseWriter, r *http.Request, name string)
 	// ListImages List images
 	// (GET /images)
 	ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams)
@@ -771,6 +824,112 @@ func (siw *ServerInterfaceWrapper) UpdateCollection(w http.ResponseWriter, r *ht
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateCollection(w, r, name)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListGroups operation middleware
+func (siw *ServerInterfaceWrapper) ListGroups(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListGroups(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateGroup operation middleware
+func (siw *ServerInterfaceWrapper) CreateGroup(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateGroup(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteGroup operation middleware
+func (siw *ServerInterfaceWrapper) DeleteGroup(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "name" -------------
+	var name string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "name", r.PathValue("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteGroup(w, r, name)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// FindGroup operation middleware
+func (siw *ServerInterfaceWrapper) FindGroup(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "name" -------------
+	var name string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "name", r.PathValue("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.FindGroup(w, r, name)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateGroup operation middleware
+func (siw *ServerInterfaceWrapper) UpdateGroup(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "name" -------------
+	var name string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "name", r.PathValue("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateGroup(w, r, name)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1404,6 +1563,11 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/profiles/{name}", wrapper.FindProfile)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/profiles/{name}", wrapper.UpdateProfile)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/profiles", wrapper.CreateProfile)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/groups/{name}", wrapper.DeleteGroup)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/groups/{name}", wrapper.FindGroup)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/groups/{name}", wrapper.UpdateGroup)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/groups", wrapper.ListGroups)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/groups", wrapper.CreateGroup)
 
 	return m
 }

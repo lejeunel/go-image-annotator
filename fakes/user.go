@@ -106,11 +106,11 @@ func (r *UserRepo) AddForgottenPasswordState(hash []byte, id usr.UserId, expires
 	return nil
 }
 
-func (r *UserRepo) Count() (int64, error) {
+func (r *UserRepo) Count() (*int64, error) {
 	if r.ErrOnCount != nil {
-		return 0, r.ErrOnCount
+		return nil, r.ErrOnCount
 	}
-	return int64(r.Count_), nil
+	return &r.Count_, nil
 }
 
 func (r *UserRepo) List(req pag.PaginationParams) ([]usr.BaseUser, error) {

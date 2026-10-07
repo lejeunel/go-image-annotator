@@ -22,8 +22,9 @@ func TestInternalErrOnCountShouldFail(t *testing.T) {
 func TestCount(t *testing.T) {
 	repo := NewUserRepo(s.NewInMemory())
 	CreateUser(repo, "user@example.com")
-	count, _ := repo.Count()
-	assert.Equal(t, 1, int(count))
+	count, err := repo.Count()
+	assert.NoError(t, err)
+	assert.Equal(t, 1, int(*count))
 }
 
 func TestInternalErrOnListShouldFail(t *testing.T) {

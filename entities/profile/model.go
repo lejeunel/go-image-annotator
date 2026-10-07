@@ -1,4 +1,4 @@
-package role
+package profile
 
 import (
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"

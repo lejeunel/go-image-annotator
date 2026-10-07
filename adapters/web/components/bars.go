@@ -97,7 +97,7 @@ func DarkModeToggle() Node {
 }
 
 func MakeSearchButton() Node {
-	return Div(Class("bg-surface-alt p-0.5 dark:bg-surface-dark-alt"),
+	return Div(
 		Button(
 			Class(
 				"btn-search flex h-8 w-full cursor-pointer items-center justify-between border-outline bg-surface px-2 font-light transition-all duration-200 dark:border-outline-dark dark:bg-surface-dark rounded-lg border",

@@ -8,7 +8,7 @@ import (
 type Group struct {
 	Id          GroupId
 	Name        string
-	Description string
+	Description *string
 }
 
 func NewGroup(id GroupId, name string, opts ...Option) Group {
@@ -23,7 +23,7 @@ type Option func(*Group)
 
 func WithDescription(d string) Option {
 	return func(c *Group) {
-		c.Description = d
+		c.Description = &d
 	}
 }
 
@@ -38,5 +38,5 @@ func NewGroupId() GroupId {
 type UpdateModel struct {
 	Name           string
 	NewName        string
-	NewDescription string
+	NewDescription *string
 }

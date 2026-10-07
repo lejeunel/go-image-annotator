@@ -33,7 +33,7 @@ func TestCreateAddsCount(t *testing.T) {
 	_, err := CreateUser(repo, userId)
 	assert.NoError(t, err)
 	count, err := repo.Count()
-	assert.Equal(t, int64(1), count)
+	assert.Equal(t, int64(1), *count)
 	assert.NoError(t, err)
 }
 

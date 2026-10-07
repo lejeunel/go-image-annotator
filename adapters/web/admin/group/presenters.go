@@ -90,7 +90,12 @@ func (p EditPresenter) SuccessFindGroup(group g.Group) {
 	b := bf.NewHTMXInlineFormBuilder(len(listGroupsFields), p.Url)
 	b.SetResourceName(group.Name)
 	b.AddTextField("name", "Name", bf.WithRequired(), bf.WithDefault(group.Name))
-	b.AddTextField("description", "Description", bf.WithDefault(group.Description))
+
+	var description string
+	if group.Description != nil {
+		description = *group.Description
+	}
+	b.AddTextField("description", "Description", bf.WithDefault(description))
 	b.Render(p.writer)
 }
 
@@ -104,8 +109,13 @@ func MakeRow(url b.RowURL, group g.Group) tb.Row {
 	actions.SetEdit(url.SetMode(b.ModeEdit).Url)
 	actions.SetConfirmDelete(url.SetMode(b.ModeConfirmDelete).Url)
 	row := tb.NewRow()
+
+	var description string
+	if group.Description != nil {
+		description = *group.Description
+	}
 	row.AddCell(tb.NewCell(Text(group.Name)))
-	row.AddCell(tb.NewCell(Text(group.Description)))
+	row.AddCell(tb.NewCell(Text(description)))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row
 }
