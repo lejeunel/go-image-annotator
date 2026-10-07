@@ -38,15 +38,15 @@ func (s *Server) ListCollections(
 	r *http.Request,
 	params ListCollectionsParams,
 ) {
-	req := pa.PaginationParams{Page: 1, PageSize: s.Collection.DefaultPageSize}
-	if p := params.Page; p != nil {
-		req.Page = *p
-	}
-	if p := params.PageSize; p != nil {
-		req.PageSize = *p
-	}
-	s.Collection.List.Execute(r.Context(), req,
-		presenter.NewListPresenter(w, s.Logger))
+	s.Collection.List.Execute(
+		r.Context(),
+		pa.NewPaginationParamsFromOptional(
+			params.PageSize,
+			params.Page,
+			s.Collection.DefaultPageSize,
+		),
+		presenter.NewListPresenter(w, s.Logger),
+	)
 }
 
 func (s *Server) UpdateCollection(w http.ResponseWriter, r *http.Request, name string) {
