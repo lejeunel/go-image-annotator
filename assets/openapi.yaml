@@ -10,23 +10,6 @@ info:
 servers:
   - url: /api
 paths:
-  /whoami:
-    get:
-      summary: Get current user's identity
-      description: Get user's identity, groups and roles
-      operationId: whoAmI
-      tags: [User]
-      responses:
-        '200':
-          description: User's identity
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        default:
-          $ref: '#/components/responses/UnexpectedError'
   /raw/{image_id}:
     get:
       summary: Read image raw-data
@@ -369,114 +352,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/UnexpectedError'
-  /users:
-    post:
-      summary: Create a new user
-      description: Creates a new user. Duplicate id are not allowed
-      operationId: createUser
-      tags: [User]
-      requestBody:
-        description: User to add
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NewUser'
-      responses:
-        '200':
-          description: user response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        default:
-          $ref: '#/components/responses/UnexpectedError'
-    get:
-      summary: List users
-      description: Paginate users
-      operationId: listUsers
-      tags: [User]
-      parameters:
-        - $ref: '#/components/parameters/PageNumber'
-        - $ref: '#/components/parameters/PageSize'
-      responses:
-        '200':
-          description: list users response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ListUsers'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        default:
-          $ref: '#/components/responses/UnexpectedError'
-
-  /users/{id}:
-    put:
-      summary: Update user privileges
-      description: Update privileges of a user given its id
-      operationId: updateUser
-      tags: [User]
-      parameters:
-        - name: id
-          in: path
-          description: Id of user
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: User privileges
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserPrivileges'
-      responses:
-        '204':
-          description: annotation updated
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/UnexpectedError'
-    delete:
-      summary: Delete a user
-      description: Delete a user by id
-      operationId: deleteUser
-      tags: [User]
-      parameters:
-        - name: id
-          in: path
-          description: Id of the user to delete
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: user deleted
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/UnexpectedError'
   /collections:
     get:
       summary: List collections
@@ -660,6 +535,131 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+  /users:
+    post:
+      summary: Create a new user
+      description: Creates a new user. Duplicate id are not allowed
+      operationId: createUser
+      tags: [User]
+      requestBody:
+        description: User to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '200':
+          description: user response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+    get:
+      summary: List users
+      description: Paginate users
+      operationId: listUsers
+      tags: [User]
+      parameters:
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: list users response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListUsers'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /users/{id}:
+    put:
+      summary: Update user privileges
+      description: Update privileges of a user given its id
+      operationId: updateUser
+      tags: [User]
+      parameters:
+        - name: id
+          in: path
+          description: Id of user
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: User privileges
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPrivileges'
+      responses:
+        '204':
+          description: annotation updated
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+    delete:
+      summary: Delete a user
+      description: Delete a user by id
+      operationId: deleteUser
+      tags: [User]
+      parameters:
+        - name: id
+          in: path
+          description: Id of the user to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: user deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+  /whoami:
+    get:
+      summary: Get current user's identity
+      description: Get user's identity, groups and roles
+      operationId: whoAmI
+      tags: [User]
+      responses:
+        '200':
+          description: User's identity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           $ref: '#/components/responses/UnexpectedError'
   /profiles/{name}:

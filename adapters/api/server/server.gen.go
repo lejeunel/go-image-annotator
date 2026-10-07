@@ -1536,7 +1536,6 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
-	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/whoami", wrapper.WhoAmI)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/raw/{image_id}", wrapper.ReadRawImage)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/images/{collection_name}/{image_id}", wrapper.ReadImage)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/images", wrapper.ListImages)
@@ -1548,10 +1547,6 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/annotate/{id}/{label}", wrapper.UpdateAnnotation)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/box", wrapper.AddBoundingBox)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/annotate/polygon", wrapper.AddPolygon)
-	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/users", wrapper.ListUsers)
-	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/users", wrapper.CreateUser)
-	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/users/{id}", wrapper.DeleteUser)
-	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/users/{id}", wrapper.UpdateUser)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/collections", wrapper.ListCollections)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/collections", wrapper.CreateCollection)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/collections/clone", wrapper.CloneCollection)
@@ -1559,6 +1554,11 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/labels/{name}", wrapper.FindLabel)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/labels", wrapper.ListLabels)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/labels", wrapper.CreateLabel)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/users", wrapper.ListUsers)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/users", wrapper.CreateUser)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/users/{id}", wrapper.DeleteUser)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/users/{id}", wrapper.UpdateUser)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/whoami", wrapper.WhoAmI)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/profiles/{name}", wrapper.DeleteProfile)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/profiles/{name}", wrapper.FindProfile)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/profiles/{name}", wrapper.UpdateProfile)
