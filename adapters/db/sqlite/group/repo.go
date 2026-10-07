@@ -19,7 +19,7 @@ type GroupRepo struct {
 type Row struct {
 	Id          g.GroupId `db:"id"`
 	Name        string    `db:"name"`
-	Description string    `db:"description"`
+	Description *string   `db:"description"`
 }
 
 func (r GroupRepo) Create(grp g.Group) error {
@@ -33,9 +33,10 @@ func (r GroupRepo) Create(grp g.Group) error {
 }
 
 func (r GroupRepo) rowToEntity(row Row) g.Group {
-	c := g.NewGroup(row.Id, row.Name,
-		g.WithDescription(row.Description))
-	return c
+	return g.Group{
+		Id: row.Id, Name: row.Name,
+		Description: row.Description,
+	}
 }
 
 func (r GroupRepo) Find(name string) (*g.Group, error) {

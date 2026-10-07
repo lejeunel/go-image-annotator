@@ -74,9 +74,6 @@
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
-.spotlight {
-  @import "./static/stoplight.css";
-}
 
 @source "../shared/html/**/.go";
 @source "../adapters/web/**/.go"

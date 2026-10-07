@@ -122,9 +122,5 @@ annotorious:
 	wget https://cdn.jsdelivr.net/npm/@annotorious/annotorious@3.8.0/dist/annotorious.js -O $(STATIC_DIR)/annotorious.js
 	wget https://cdn.jsdelivr.net/npm/@annotorious/annotorious@3.8.0/dist/annotorious.css -O $(STATIC_DIR)/annotorious.css
 
-stoplight:
-	wget https://unpkg.com/@stoplight/elements/web-components.min.js -O $(STATIC_DIR)/stoplight.js
-	wget https://unpkg.com/@stoplight/elements/styles.min.css -O $(STATIC_DIR)/stoplight.css
-
 clean:
 	rm -f $(MODELS_OUT) $(SERVER_OUT) $(CSS_OUT) $(VALID_AUTH_OUT)
