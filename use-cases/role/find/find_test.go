@@ -20,7 +20,7 @@ func TestHandleInternalError(t *testing.T) {
 func TestRead(t *testing.T) {
 	methods := []string{"a-method"}
 	role := rl.NewRole(rl.NewRoleId(), "my-role", rl.WithMethods(methods))
-	repo := &fk.RoleRepo{Return: role}
+	repo := &fk.RoleRepo{ExistingRoles: []rl.Role{role}}
 	p := &FakePresenter{}
 	itr := New(repo)
 	itr.Execute(t.Context(), role.Name, p)

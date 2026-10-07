@@ -913,6 +913,145 @@ paths:
           $ref: '#/components/responses/Conflict'
         default:
           $ref: '#/components/responses/UnexpectedError'
+  /roles/{name}:
+    get:
+      summary: Find a role by name
+      description: Returns a role based on its name
+      operationId: findRole
+      tags: [Role]
+      parameters:
+        - name: name
+          in: path
+          description: Name of role to fetch
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: role response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+    put:
+      summary: Update a role
+      description: >-
+        Replace the role's representation. Any optional field omitted from the
+        request body is cleared.
+      operationId: updateRole
+      tags: [Role]
+      parameters:
+        - name: name
+          in: path
+          description: Current name of the role
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: New values for the role
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRole'
+      responses:
+        '200':
+          description: role updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+    delete:
+      summary: Delete a role by name
+      description: Delete a role based on its name
+      operationId: deleteRole
+      tags: [Role]
+      parameters:
+        - name: name
+          in: path
+          description: Name of role to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: role deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '424':
+          $ref: '#/components/responses/FailedDependency'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+  /roles:
+    get:
+      summary: List roles
+      description: Returns all roles
+      operationId: listRoles
+      tags: [Role]
+      responses:
+        '200':
+          description: list role response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListRoles'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+    post:
+      summary: Create a new role
+      description: >-
+        Creates a new role. Duplicate names are not allowed, and every entry of
+        methods must name an authorizable operation.
+      operationId: createRole
+      tags: [Role]
+      requestBody:
+        description: Role to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewRole'
+      responses:
+        '200':
+          description: role response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
 components:
   parameters:
     PageNumber:
@@ -1471,6 +1610,64 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Group'
+    Role:
+      type: object
+      required:
+        - name
+        - methods
+      properties:
+        name:
+          type: string
+          description: Name of the role
+        description:
+          type: string
+          description: Description of the role
+        methods:
+          type: array
+          description: Authorizable operations the role grants
+          items:
+            type: string
+    NewRole:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the role
+        description:
+          type: string
+          description: Description of the role
+        methods:
+          type: array
+          description: Authorizable operations the role grants
+          items:
+            type: string
+    UpdateRole:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: New name of the role
+        description:
+          type: string
+          description: New description of the role
+        methods:
+          type: array
+          description: New authorizable operations the role grants
+          items:
+            type: string
+    ListRoles:
+      type: object
+      required:
+        - roles
+      properties:
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
     Error:
       required:
         - code

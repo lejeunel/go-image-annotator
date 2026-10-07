@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	rl "github.com/lejeunel/go-image-annotator/entities/role"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type RoleRepo struct {
@@ -14,6 +15,7 @@ type RoleRepo struct {
 	ErrOnExists   error
 	ErrOnUpdate   error
 	ExistingNames []string
+	ExistingRoles []rl.Role
 	Created       []rl.Role
 	IsAssigned_   bool
 	Return        rl.Role
@@ -63,8 +65,12 @@ func (r *RoleRepo) Find(name string) (*rl.Role, error) {
 	if r.ErrOnFind != nil {
 		return nil, r.ErrOnFind
 	}
-
-	return &r.Return, nil
+	for _, r := range r.ExistingRoles {
+		if r.Name == name {
+			return &r, nil
+		}
+	}
+	return nil, e.ErrNotFound
 }
 
 func (r *RoleRepo) List() ([]rl.Role, error) {

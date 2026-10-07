@@ -8,25 +8,26 @@ import (
 	bf "github.com/lejeunel/go-image-annotator/adapters/web/builders/form"
 	se "github.com/lejeunel/go-image-annotator/adapters/web/components/select"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
+	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	"github.com/lejeunel/go-image-annotator/use-cases/role/create"
 )
 
 type CreateRolePresenter struct {
 	writer        http.ResponseWriter
 	task          string
-	okMessageFunc func(create.Response) string
+	okMessageFunc func(rl.Role) string
 	htmx.ErrorPresenter
 }
 
 func NewCreateRolePresenter(w http.ResponseWriter) CreateRolePresenter {
 	task := "Creating role"
-	okMessageFunc := func(r create.Response) string {
+	okMessageFunc := func(r rl.Role) string {
 		return fmt.Sprintf("Successfully created role %v", r.Name)
 	}
 	return CreateRolePresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 
-func (p CreateRolePresenter) SuccessCreateRole(r create.Response) {
+func (p CreateRolePresenter) SuccessCreateRole(r rl.Role) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 
@@ -35,10 +36,16 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
 	}
+
+	var description string
+	descriptionValue := r.FormValue(DescriptionFieldName)
+	if descriptionValue != "" {
+		description = descriptionValue
+	}
 	s.Roles.Create.Execute(r.Context(),
 		create.Request{
 			Name:        r.FormValue(NameFieldName),
-			Description: r.FormValue(DescriptionFieldName),
+			Description: &description,
 			Methods:     r.Form[MethodsFieldName],
 		},
 		NewCreateRolePresenter(w))

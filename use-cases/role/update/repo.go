@@ -5,6 +5,6 @@ import (
 )
 
 type Repo interface {
+	Find(string) (*rl.Role, error)
 	Update(rl.UpdatableModel) error
-	Exists(string) (*bool, error)
 }

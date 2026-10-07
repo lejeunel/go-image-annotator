@@ -47,7 +47,8 @@ func TestCreate(t *testing.T) {
 	repo := &fk.RoleRepo{}
 	itr := New(repo, &fk.Auth{ExistingMethods: []string{"a-method"}})
 	methods := []string{"a-method"}
-	req := Request{Name: "a-role", Description: "a-description", Methods: methods}
+	description := "a-description"
+	req := Request{Name: "a-role", Description: &description, Methods: methods}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, repo.Created[0].Name, req.Name)
 	assert.Equal(t, repo.Created[0].Description, req.Description)

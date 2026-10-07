@@ -19,7 +19,7 @@ type RoleRepo struct {
 type Row struct {
 	Id          ro.RoleId `db:"id"`
 	Name        string    `db:"name"`
-	Description string    `db:"description"`
+	Description *string   `db:"description"`
 	Methods     string    `db:"methods"`
 }
 
@@ -45,8 +45,10 @@ func (r RoleRepo) rowToEntity(row Row) ro.Role {
 		methods = strings.Split(row.Methods, ",")
 	}
 
-	c := ro.NewRole(row.Id, row.Name,
-		ro.WithDescription(row.Description), ro.WithMethods(methods))
+	c := ro.Role{
+		Id: row.Id, Name: row.Name,
+		Description: row.Description, Methods: methods,
+	}
 	return c
 }
 

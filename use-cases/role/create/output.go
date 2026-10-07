@@ -1,6 +1,10 @@
 package create
 
+import (
+	rl "github.com/lejeunel/go-image-annotator/entities/role"
+)
+
 type OutputPort interface {
-	SuccessCreateRole(Response)
+	SuccessCreateRole(rl.Role)
 	Error(error)
 }

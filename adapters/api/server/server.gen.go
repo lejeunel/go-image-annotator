@@ -193,6 +193,11 @@ type ListLabels struct {
 	Pagination Pagination `json:"pagination"`
 }
 
+// ListRoles defines model for ListRoles.
+type ListRoles struct {
+	Roles []Role `json:"roles"`
+}
+
 // ListUsers defines model for ListUsers.
 type ListUsers struct {
 	Pagination Pagination `json:"pagination"`
@@ -250,6 +255,18 @@ type NewProfile struct {
 	Name string `json:"name"`
 }
 
+// NewRole defines model for NewRole.
+type NewRole struct {
+	// Description Description of the role
+	Description *string `json:"description,omitempty"`
+
+	// Methods Authorizable operations the role grants
+	Methods *[]string `json:"methods,omitempty"`
+
+	// Name Name of the role
+	Name string `json:"name"`
+}
+
 // NewUser defines model for NewUser.
 type NewUser struct {
 	Groups *[]string `json:"groups,omitempty"`
@@ -302,6 +319,18 @@ type Profile struct {
 	Name string `json:"name"`
 }
 
+// Role defines model for Role.
+type Role struct {
+	// Description Description of the role
+	Description *string `json:"description,omitempty"`
+
+	// Methods Authorizable operations the role grants
+	Methods []string `json:"methods"`
+
+	// Name Name of the role
+	Name string `json:"name"`
+}
+
 // TaskResponse defines model for TaskResponse.
 type TaskResponse struct {
 	// Issuer Id of the issuing user
@@ -350,6 +379,18 @@ type UpdateProfile struct {
 	Labels *[]string `json:"labels,omitempty"`
 
 	// Name New name of the profile
+	Name string `json:"name"`
+}
+
+// UpdateRole defines model for UpdateRole.
+type UpdateRole struct {
+	// Description New description of the role
+	Description *string `json:"description,omitempty"`
+
+	// Methods New authorizable operations the role grants
+	Methods *[]string `json:"methods,omitempty"`
+
+	// Name New name of the role
 	Name string `json:"name"`
 }
 
@@ -477,6 +518,12 @@ type CreateProfileJSONRequestBody = NewProfile
 // UpdateProfileJSONRequestBody defines body for UpdateProfile for application/json ContentType.
 type UpdateProfileJSONRequestBody = UpdateProfile
 
+// CreateRoleJSONRequestBody defines body for CreateRole for application/json ContentType.
+type CreateRoleJSONRequestBody = NewRole
+
+// UpdateRoleJSONRequestBody defines body for UpdateRole for application/json ContentType.
+type UpdateRoleJSONRequestBody = UpdateRole
+
 // CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
 type CreateUserJSONRequestBody = NewUser
 
@@ -566,6 +613,21 @@ type ServerInterface interface {
 	// ReadRawImage Read image raw-data
 	// (GET /raw/{image_id})
 	ReadRawImage(w http.ResponseWriter, r *http.Request, imageId string)
+	// ListRoles List roles
+	// (GET /roles)
+	ListRoles(w http.ResponseWriter, r *http.Request)
+	// CreateRole Create a new role
+	// (POST /roles)
+	CreateRole(w http.ResponseWriter, r *http.Request)
+	// DeleteRole Delete a role by name
+	// (DELETE /roles/{name})
+	DeleteRole(w http.ResponseWriter, r *http.Request, name string)
+	// FindRole Find a role by name
+	// (GET /roles/{name})
+	FindRole(w http.ResponseWriter, r *http.Request, name string)
+	// UpdateRole Update a role
+	// (PUT /roles/{name})
+	UpdateRole(w http.ResponseWriter, r *http.Request, name string)
 	// ListUsers List users
 	// (GET /users)
 	ListUsers(w http.ResponseWriter, r *http.Request, params ListUsersParams)
@@ -1290,6 +1352,112 @@ func (siw *ServerInterfaceWrapper) ReadRawImage(w http.ResponseWriter, r *http.R
 	handler.ServeHTTP(w, r)
 }
 
+// ListRoles operation middleware
+func (siw *ServerInterfaceWrapper) ListRoles(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListRoles(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateRole operation middleware
+func (siw *ServerInterfaceWrapper) CreateRole(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateRole(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteRole operation middleware
+func (siw *ServerInterfaceWrapper) DeleteRole(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "name" -------------
+	var name string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "name", r.PathValue("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteRole(w, r, name)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// FindRole operation middleware
+func (siw *ServerInterfaceWrapper) FindRole(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "name" -------------
+	var name string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "name", r.PathValue("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.FindRole(w, r, name)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateRole operation middleware
+func (siw *ServerInterfaceWrapper) UpdateRole(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "name" -------------
+	var name string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "name", r.PathValue("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateRole(w, r, name)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ListUsers operation middleware
 func (siw *ServerInterfaceWrapper) ListUsers(w http.ResponseWriter, r *http.Request) {
 
@@ -1568,6 +1736,11 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/groups/{name}", wrapper.UpdateGroup)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/groups", wrapper.ListGroups)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/groups", wrapper.CreateGroup)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/roles/{name}", wrapper.DeleteRole)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/roles/{name}", wrapper.FindRole)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/roles/{name}", wrapper.UpdateRole)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/roles", wrapper.ListRoles)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/roles", wrapper.CreateRole)
 
 	return m
 }

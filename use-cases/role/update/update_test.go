@@ -3,13 +3,14 @@ package update
 import (
 	"testing"
 
+	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleAuthError(t *testing.T) {
-	itr := New(&fk.RoleRepo{}, WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
+	itr := New(&fk.RoleRepo{}, WithAuth(&fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), Request{}, p)
 	assert.False(t, p.GotSuccess)
@@ -27,44 +28,51 @@ func TestUpdateNonExistingRoleShouldFail(t *testing.T) {
 
 func TestUpdateRoleWithNameAlreadyTakenShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	name := "name"
-	existing_name := "existing-name"
-	itr := New(&fk.RoleRepo{ExistingNames: []string{name, existing_name}})
-	itr.Execute(t.Context(), Request{Name: name, NewName: existing_name}, p)
+	currentRole := rl.NewRole(rl.NewRoleId(), "current-role")
+	existingRole := rl.NewRole(rl.NewRoleId(), "existing-role")
+	itr := New(&fk.RoleRepo{ExistingRoles: []rl.Role{existingRole, currentRole}})
+	itr.Execute(t.Context(), Request{Name: currentRole.Name, NewName: existingRole.Name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
 }
 
-func TestUpdateRoleWithUnchangedNameShouldSucceed(t *testing.T) {
-	p := &FakePresenter{}
-	name := "name"
-	itr := New(&fk.RoleRepo{ExistingNames: []string{name}})
-	itr.Execute(t.Context(), Request{Name: name, NewName: name}, p)
-	assert.True(t, p.GotSuccess)
-}
-
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	name := "name"
+	role := rl.NewRole(rl.NewRoleId(), "a-role")
 	itr := New(&fk.RoleRepo{
-		ExistingNames: []string{name},
+		ExistingRoles: []rl.Role{role},
 		ErrOnUpdate:   e.ErrInternal,
 	})
 	itr.Execute(t.Context(),
-		Request{Name: name, NewName: name}, p)
+		Request{Name: role.Name, NewName: role.Name}, p)
 	assert.True(t, p.GotInternalErr)
 }
 
-func TestUpdateRole(t *testing.T) {
-	name := "name"
+func TestUpdateWithInvalidMethodShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	repo := &fk.RoleRepo{ExistingNames: []string{name}}
-	itr := New(repo)
+	role := rl.NewRole(rl.NewRoleId(), "a-role")
+	itr := New(&fk.RoleRepo{ExistingRoles: []rl.Role{role}},
+		WithAuth(&fk.Auth{ExistingMethods: []string{"a-method"}}))
+	itr.Execute(t.Context(),
+		Request{
+			Name: role.Name, NewName: role.Name,
+			NewMethods: []string{"a-non-existing-method"},
+		}, p)
+	assert.True(t, p.GotValidationErr)
+	assert.False(t, p.GotSuccess)
+}
+
+func TestUpdateRole(t *testing.T) {
+	p := &FakePresenter{}
+	currentRole := rl.NewRole(rl.NewRoleId(), "a-role")
+	repo := &fk.RoleRepo{ExistingRoles: []rl.Role{currentRole}}
+	itr := New(repo, WithAuth(&fk.Auth{ExistingMethods: []string{"a-method"}}))
+	description := "updated-description"
 	req := Request{
-		Name:           name,
+		Name:           currentRole.Name,
 		NewName:        "updated-name",
-		NewDescription: "updated-description",
-		NewMethods:     []string{"new-method"},
+		NewDescription: &description,
+		NewMethods:     []string{"a-method"},
 	}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, req.NewName, p.Got.Name)

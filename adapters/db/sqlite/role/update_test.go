@@ -21,11 +21,11 @@ func TestUpdate(t *testing.T) {
 	newName := "new-role-name"
 	newDesc := "new-description"
 	err := repo.Update(
-		rl.UpdatableModel{Name: role.Name, NewName: newName, NewDescription: newDesc},
+		rl.UpdatableModel{Name: role.Name, NewName: newName, NewDescription: &newDesc},
 	)
 	assert.NoError(t, err)
 	r, err := repo.Find(newName)
 	assert.NoError(t, err)
 	assert.Equal(t, newName, r.Name)
-	assert.Equal(t, newDesc, r.Description)
+	assert.Equal(t, newDesc, *r.Description)
 }

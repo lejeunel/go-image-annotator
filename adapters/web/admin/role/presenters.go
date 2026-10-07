@@ -15,7 +15,6 @@ import (
 	e "github.com/lejeunel/go-image-annotator/adapters/web/error"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	r "github.com/lejeunel/go-image-annotator/entities/role"
-	"github.com/lejeunel/go-image-annotator/use-cases/role/update"
 	. "maragu.dev/gomponents"
 )
 
@@ -79,14 +78,14 @@ type EditPresenter struct {
 	b.RowURL
 	bf.HTMXInlineFormBuilder
 	task          string
-	okMessageFunc func(update.Response) string
+	okMessageFunc func(r.Role) string
 	htmx.ErrorPresenter
 	AllMethods []string
 }
 
 func NewEditPresenter(w http.ResponseWriter, u b.RowURL) EditPresenter {
 	task := "Updating role"
-	okMessageFunc := func(r update.Response) string {
+	okMessageFunc := func(r r.Role) string {
 		return "Successfully updated role"
 	}
 	return EditPresenter{
@@ -105,10 +104,15 @@ func (p *EditPresenter) SetValidMethods(methods []string) {
 func (p *EditPresenter) SuccessFindRole(role r.Role) {
 	p.HTMXInlineFormBuilder.SetResourceName(role.Name)
 	p.HTMXInlineFormBuilder.AddTextField(NameFieldName, "Name", bf.WithDefault(role.Name))
+
+	var description string
+	if role.Description != nil {
+		description = *role.Description
+	}
 	p.HTMXInlineFormBuilder.AddTextField(
 		DescriptionFieldName,
 		"Description",
-		bf.WithDefault(role.Description),
+		bf.WithDefault(description),
 	)
 
 	sb := se.NewMultiSelectBuilder(MethodsFieldName)
@@ -135,7 +139,7 @@ func (p *EditPresenter) SuccessListMethods(methods []string) {
 	p.AddRaw("Methods", buf.String())
 }
 
-func (p EditPresenter) SuccessUpdateRole(r update.Response) {
+func (p EditPresenter) SuccessUpdateRole(r r.Role) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 
@@ -146,7 +150,12 @@ func MakeRow(url b.RowURL, role r.Role) tb.Row {
 	actions.SetConfirmDelete(url.SetMode(b.ModeConfirmDelete).Url)
 	row := tb.NewRow()
 	row.AddCell(tb.NewCell(Text(role.Name)))
-	row.AddCell(tb.NewCell(Text(role.Description)))
+
+	var description string
+	if role.Description != nil {
+		description = *role.Description
+	}
+	row.AddCell(tb.NewCell(Text(description)))
 	row.AddCell(tb.NewCell(Text(strings.Join(role.Methods, ", "))))
 	row.AddCell(tb.NewCell(actions.Build()))
 	return row

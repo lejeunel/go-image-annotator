@@ -43,25 +43,26 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		}
 	}
 
-	if err := i.create(r); err != nil {
+	role, err := i.create(r)
+	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	out.SuccessCreateRole(Response{Name: r.Name, Description: r.Description})
+	out.SuccessCreateRole(*role)
 }
 
-func (i *Interactor) create(r Request) error {
-	role := rl.NewRole(
-		rl.NewRoleId(),
-		r.Name,
-		rl.WithDescription(r.Description),
-		rl.WithMethods(r.Methods),
-	)
-	if err := i.Repo.Create(role); err != nil {
-		return err
+func (i *Interactor) create(r Request) (*rl.Role, error) {
+	role := rl.Role{
+		Id:          rl.NewRoleId(),
+		Name:        r.Name,
+		Description: r.Description,
+		Methods:     r.Methods,
 	}
-	return nil
+	if err := i.Repo.Create(role); err != nil {
+		return nil, err
+	}
+	return &role, nil
 }
 
 func (i *Interactor) validate(name string) error {

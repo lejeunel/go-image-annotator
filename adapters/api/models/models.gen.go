@@ -186,6 +186,11 @@ type ListLabels struct {
 	Pagination Pagination `json:"pagination"`
 }
 
+// ListRoles defines model for ListRoles.
+type ListRoles struct {
+	Roles []Role `json:"roles"`
+}
+
 // ListUsers defines model for ListUsers.
 type ListUsers struct {
 	Pagination Pagination `json:"pagination"`
@@ -243,6 +248,18 @@ type NewProfile struct {
 	Name string `json:"name"`
 }
 
+// NewRole defines model for NewRole.
+type NewRole struct {
+	// Description Description of the role
+	Description *string `json:"description,omitempty"`
+
+	// Methods Authorizable operations the role grants
+	Methods *[]string `json:"methods,omitempty"`
+
+	// Name Name of the role
+	Name string `json:"name"`
+}
+
 // NewUser defines model for NewUser.
 type NewUser struct {
 	Groups *[]string `json:"groups,omitempty"`
@@ -295,6 +312,18 @@ type Profile struct {
 	Name string `json:"name"`
 }
 
+// Role defines model for Role.
+type Role struct {
+	// Description Description of the role
+	Description *string `json:"description,omitempty"`
+
+	// Methods Authorizable operations the role grants
+	Methods []string `json:"methods"`
+
+	// Name Name of the role
+	Name string `json:"name"`
+}
+
 // TaskResponse defines model for TaskResponse.
 type TaskResponse struct {
 	// Issuer Id of the issuing user
@@ -343,6 +372,18 @@ type UpdateProfile struct {
 	Labels *[]string `json:"labels,omitempty"`
 
 	// Name New name of the profile
+	Name string `json:"name"`
+}
+
+// UpdateRole defines model for UpdateRole.
+type UpdateRole struct {
+	// Description New description of the role
+	Description *string `json:"description,omitempty"`
+
+	// Methods New authorizable operations the role grants
+	Methods *[]string `json:"methods,omitempty"`
+
+	// Name New name of the role
 	Name string `json:"name"`
 }
 
@@ -469,6 +510,12 @@ type CreateProfileJSONRequestBody = NewProfile
 
 // UpdateProfileJSONRequestBody defines body for UpdateProfile for application/json ContentType.
 type UpdateProfileJSONRequestBody = UpdateProfile
+
+// CreateRoleJSONRequestBody defines body for CreateRole for application/json ContentType.
+type CreateRoleJSONRequestBody = NewRole
+
+// UpdateRoleJSONRequestBody defines body for UpdateRole for application/json ContentType.
+type UpdateRoleJSONRequestBody = UpdateRole
 
 // CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
 type CreateUserJSONRequestBody = NewUser

@@ -5,7 +5,7 @@ type RoleName = string
 type Role struct {
 	Id          RoleId
 	Name        RoleName
-	Description string
+	Description *string
 	Methods     []string
 }
 
@@ -21,7 +21,7 @@ type Option func(*Role)
 
 func WithDescription(d string) Option {
 	return func(r *Role) {
-		r.Description = d
+		r.Description = &d
 	}
 }
 
@@ -34,6 +34,6 @@ func WithMethods(methods []string) Option {
 type UpdatableModel struct {
 	Name           string
 	NewName        string
-	NewDescription string
+	NewDescription *string
 	NewMethods     []string
 }

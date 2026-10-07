@@ -6,4 +6,5 @@ import (
 
 type Auth interface {
 	UpdateRole(ctx context.Context) error
+	ListMethods() []string
 }

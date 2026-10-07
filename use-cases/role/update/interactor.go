@@ -2,7 +2,9 @@ package update
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"slices"
 
 	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
@@ -40,15 +42,30 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	if err := i.ensureNameExists(r.Name); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+	role, err := i.Repo.Find(r.Name)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: fetching role %v: %w", errCtx, r.Name, err))
 		return
-
 	}
 
 	if r.NewName != r.Name {
 		if err := i.ensureNameDoesNotExist(r.NewName); err != nil {
 			out.Error(fmt.Errorf("%v: %w", errCtx, err))
+			return
+		}
+	}
+
+	existingMethods := i.Auth.ListMethods()
+	for _, m := range r.NewMethods {
+		if !slices.Contains(existingMethods, m) {
+			out.Error(
+				fmt.Errorf(
+					"%v: checking whether method %v is allowed: %w",
+					errCtx,
+					m,
+					e.ErrValidation,
+				),
+			)
 			return
 		}
 	}
@@ -66,30 +83,18 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	out.SuccessUpdateRole(
-		Response{Name: r.NewName, Description: r.NewDescription, Methods: r.NewMethods},
+		rl.Role{Id: role.Id, Name: r.NewName, Description: r.NewDescription, Methods: r.NewMethods},
 	)
-}
-
-func (i *Interactor) ensureNameExists(name string) error {
-	baseErr := fmt.Errorf("ensuring that role with name %v exists", name)
-	exists, err := i.Repo.Exists(name)
-	if err != nil {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
-	}
-	if !*exists {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrNotFound)
-	}
-	return nil
 }
 
 func (i *Interactor) ensureNameDoesNotExist(name string) error {
 	baseErr := fmt.Errorf("ensuring that a role with name %v does not already exist", name)
-	exists, err := i.Repo.Exists(name)
-	if err != nil {
-		return fmt.Errorf("%w: %w", baseErr, e.ErrInternal)
+	_, err := i.Repo.Find(name)
+	if errors.Is(err, e.ErrNotFound) {
+		return nil
 	}
-	if *exists {
+	if err == nil {
 		return fmt.Errorf("%w: %w", baseErr, e.ErrDuplicate)
 	}
-	return nil
+	return err
 }

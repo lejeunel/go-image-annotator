@@ -19,7 +19,7 @@ func TestFindUser(t *testing.T) {
 	store := UserStore{
 		&fk.UserRepo{Return: &base},
 		&fk.GroupRepo{Return: groups[0]},
-		&fk.RoleRepo{Return: roles[0]},
+		&fk.RoleRepo{ExistingRoles: roles},
 	}
 
 	r, err := store.Find(user.Id)
