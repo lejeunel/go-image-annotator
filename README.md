@@ -54,6 +54,12 @@ To build the binary, run
 go build .
 ```
 
+To build using nix:
+
+``` sh
+nix build .#app
+```
+
 ### Ingesting images from a local directory
 
 Aside from the HTTP/REST endpoints, we
