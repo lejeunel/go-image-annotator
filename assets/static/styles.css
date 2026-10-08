@@ -1132,6 +1132,11 @@
   :where(.divide-outline > :not(:last-child)) {
     border-color: var(--color-outline);
   }
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .overflow-hidden {
     overflow: hidden;
   }

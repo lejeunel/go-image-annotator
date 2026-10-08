@@ -8,12 +8,20 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lejeunel/go-image-annotator/config"
 	goose "github.com/pressly/goose/v3"
 )
 
 type SQLiteDBManager struct {
 	*goose.Provider
 	*slog.Logger
+}
+
+func NewDBManagerFromEnv(logger *slog.Logger) SQLiteDBManager {
+	cfg := config.Parse()
+	conn := NewSQLiteConnection(DBPath(cfg.LocalArtefactPath))
+	manager := NewSQLiteDBManager(conn, logger)
+	return manager
 }
 
 func NewSQLiteDBManager(db *sqlx.DB, logger *slog.Logger) SQLiteDBManager {

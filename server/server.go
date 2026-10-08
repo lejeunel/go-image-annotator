@@ -35,7 +35,8 @@ import (
 
 // Make initializes the root handler and listens on the given port.
 func Make(port int) (http.Handler, *slog.Logger) {
-	app := sqlite.NewAppFromEnv()
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	app := sqlite.NewAppFromEnv(logger)
 	app.DBManager.Init(context.Background())
 	currentVersion := g.Info{Version: g.Version, Date: g.Date}
 	basePageBuilder := b.NewBasePageBuilder()
