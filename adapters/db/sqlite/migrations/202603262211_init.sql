@@ -148,18 +148,21 @@ ON profiles_labels(profile_id, label_id);
 
 -- +goose Down
 
-DROP TABLE labels;
-DROP TABLE collections;
-DROP TABLE images_collections;
-DROP TABLE images;
-DROP TABLE annotations;
-DROP TABLE sessions;
-DROP TABLE forgot_password;
-DROP TABLE groups;
-DROP TABLE users;
-DROP TABLE users_roles;
-DROP TABLE users_groups;
-DROP TABLE tasks;
-DROP TABLE events;
-DROP TABLE profiles_labels;
-
+-- Children before parents, so the drops hold with foreign keys enabled.
+DROP TABLE IF EXISTS profiles_labels;
+DROP TABLE IF EXISTS profiles;
+DROP TABLE IF EXISTS metadata;
+DROP TABLE IF EXISTS annotations;
+DROP TABLE IF EXISTS images_collections;
+DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS tasks;
+DROP TABLE IF EXISTS users_roles;
+DROP TABLE IF EXISTS users_groups;
+DROP TABLE IF EXISTS forgot_password;
+DROP TABLE IF EXISTS sessions;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS images;
+DROP TABLE IF EXISTS collections;
+DROP TABLE IF EXISTS labels;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS groups;

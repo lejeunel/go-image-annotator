@@ -20,6 +20,16 @@ import (
 //go:embed migrations/*.sql
 var MigrationsFS embed.FS
 
+// DBFileName is the name of the sqlite database file held in the local
+// artefact directory.
+const DBFileName = "db.sqlite"
+
+// DBPath returns the path of the database file within the local artefact
+// directory localPath.
+func DBPath(localPath string) string {
+	return filepath.Join(localPath, DBFileName)
+}
+
 func NewSQLiteConnection(path string) *sqlx.DB {
 	if path == "" {
 		panic("sqlite: database path is empty")
@@ -111,12 +121,4 @@ func ApplyMigrations(ctx context.Context, db *sql.DB, direction string) error {
 	}
 
 	return nil
-}
-
-func NewSQLiteDB(path string) *sqlx.DB {
-	db := NewSQLiteConnection(path)
-	if err := ApplyMigrations(context.Background(), db.DB, "up"); err != nil {
-		panic(err)
-	}
-	return db
 }

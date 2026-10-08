@@ -2,7 +2,9 @@ package sqlite
 
 import (
 	"log/slog"
+	"os"
 
+	sqldb "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	"github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/config"
 	a "github.com/lejeunel/go-image-annotator/modules/annotator"
@@ -10,6 +12,24 @@ import (
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
 )
+
+func NewAppFromEnv() app.App {
+	cfg, logger := configFromEnv()
+	return NewApp(cfg, *logger)
+}
+
+// NewDBManagerFromEnv builds the database manager alone, without the stores and
+// interactors an App pulls in, for entry points that only migrate.
+func NewDBManagerFromEnv() app.DBManager {
+	cfg, logger := configFromEnv()
+	conn := sqldb.NewSQLiteConnection(sqldb.DBPath(cfg.LocalArtefactPath))
+	manager := sqldb.NewSQLiteDBManager(conn, logger)
+	return &manager
+}
+
+func configFromEnv() (config.Config, *slog.Logger) {
+	return config.Parse(), slog.New(slog.NewJSONHandler(os.Stdout, nil))
+}
 
 func NewApp(cfg config.Config, logger slog.Logger) app.App {
 	imageStore, err := fs.Build(cfg, logger)
@@ -33,5 +53,16 @@ func NewApp(cfg config.Config, logger slog.Logger) app.App {
 		itrs.Metadata.Read, itrs.Metadata.Delete,
 	)
 
-	return app.NewApp(itrs, sessionManager, annotator, infra.FilterParser, infra.OrderParser, auth)
+	dbManager := sqldb.NewSQLiteDBManager(infra.DB, &logger)
+	return app.NewApp(
+		cfg,
+		itrs,
+		sessionManager,
+		annotator,
+		infra.FilterParser,
+		infra.OrderParser,
+		auth,
+		&dbManager,
+		logger,
+	)
 }

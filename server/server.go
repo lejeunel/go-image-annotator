@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -27,7 +28,6 @@ import (
 	pr "github.com/lejeunel/go-image-annotator/adapters/web/profile"
 	a "github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/app/sqlite"
-	"github.com/lejeunel/go-image-annotator/config"
 	g "github.com/lejeunel/go-image-annotator/globals"
 
 	"github.com/go-chi/chi/v5"
@@ -35,11 +35,8 @@ import (
 
 // Make initializes the root handler and listens on the given port.
 func Make(port int) (http.Handler, *slog.Logger) {
-	cfg := config.Parse()
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-
-	app := sqlite.NewApp(cfg, *logger)
-
+	app := sqlite.NewAppFromEnv()
+	app.DBManager.Init(context.Background())
 	currentVersion := g.Info{Version: g.Version, Date: g.Date}
 	basePageBuilder := b.NewBasePageBuilder()
 
@@ -53,9 +50,9 @@ func Make(port int) (http.Handler, *slog.Logger) {
 
 	a.BootstrapInitialAdmin(
 		app.Itrs.Bootstrap,
-		cfg.InitialAdminEmail,
-		cfg.InitialAdminPassword,
-		*logger,
+		app.Config.InitialAdminEmail,
+		app.Config.InitialAdminPassword,
+		app.Logger,
 	)
 
 	router := chi.NewRouter()
@@ -73,12 +70,12 @@ func Make(port int) (http.Handler, *slog.Logger) {
 
 	RouteWebPages(router, home.HandlerFunc(pageBuilder), webAuth)
 
-	udb := userDashboard.New(pageBuilder, cfg.DefaultPageSize, app.Itrs.User.RenewToken,
+	udb := userDashboard.New(pageBuilder, app.Config.DefaultPageSize, app.Itrs.User.RenewToken,
 		app.Itrs.User.ChangePassword, app.Itrs.Log.ListTasks, app.Itrs.Log.FindTask)
 
 	udb.Route(router, webAuth)
 
-	RouteAPI(router, *api.NewServer(&app.Itrs, *logger), apiAuth)
+	RouteAPI(router, *api.NewServer(&app.Itrs, app.Logger), apiAuth)
 	RouteAPIDocs(router, ApiDocsHandlerFunc(rt.APISpecsUrl, pageBuilder), webAuth)
 	RouteAPISpecs(router)
 	RouteStaticFiles(router)
@@ -86,7 +83,7 @@ func Make(port int) (http.Handler, *slog.Logger) {
 	annotatorServer := an.NewServer(app.Annotator, pageBuilder, app.SessionManager)
 	annotatorServer.Route(router, webAuth)
 
-	collectionServer := clc.New(pageBuilder, cfg.DefaultPageSize,
+	collectionServer := clc.New(pageBuilder, app.Config.DefaultPageSize,
 		app.Itrs.Collection.Create, app.Itrs.Collection.List, app.Itrs.Collection.Update,
 		app.Itrs.Collection.Delete, app.Itrs.Collection.Clone, app.Itrs.Collection.Find,
 		app.Itrs.Group.List, app.Itrs.Profile.ListAll)
@@ -94,7 +91,7 @@ func Make(port int) (http.Handler, *slog.Logger) {
 
 	imagesServer := im.New(
 		pageBuilder,
-		cfg.MaxArchiveMB,
+		app.Config.MaxArchiveMB,
 		app.Itrs.Image.Slice,
 		app.Itrs.Image.List,
 		app.Itrs.Image.Delete,
@@ -105,7 +102,7 @@ func Make(port int) (http.Handler, *slog.Logger) {
 
 	profilesServer := pr.New(
 		pageBuilder,
-		cfg.DefaultPageSize,
+		app.Config.DefaultPageSize,
 		app.Itrs.Profile.Create,
 		app.Itrs.Profile.List,
 		app.Itrs.Annotation.PickLabel,
@@ -121,7 +118,7 @@ func Make(port int) (http.Handler, *slog.Logger) {
 		app.Itrs.User,
 		app.Itrs.Group,
 		app.Itrs.Role,
-		cfg.DefaultPageSize,
+		app.Config.DefaultPageSize,
 	)
 	adminUserServer.Route(router, webAuth)
 	adminGroupServer := admgrp.New(adminPageBuilder, app.Itrs.Group)
@@ -129,17 +126,17 @@ func Make(port int) (http.Handler, *slog.Logger) {
 	adminRoleServer := admrl.New(adminPageBuilder, app.Itrs.Role, app)
 	adminRoleServer.Route(router, webAuth)
 
-	labelServer := lbl.New(pageBuilder, cfg.DefaultPageSize,
+	labelServer := lbl.New(pageBuilder, app.Config.DefaultPageSize,
 		app.Itrs.Label.Create, app.Itrs.Label.List, app.Itrs.Label.Update,
 		app.Itrs.Label.Delete, app.Itrs.Label.Find)
 	labelServer.Route(router, webAuth)
 
-	notifier := wauth.MakeNotifierFromEnv(*logger)
+	notifier := wauth.MakeNotifierFromEnv(app.Logger)
 	authServer := wauth.New(
-		fmt.Sprintf("%v:%v", cfg.URL, port),
-		cfg,
+		fmt.Sprintf("%v:%v", app.Config.URL, port),
+		app.Config,
 		basePageBuilder,
-		*logger,
+		app.Logger,
 		app.SessionManager,
 		notifier,
 		app.Itrs.User.RequestForgottenPassword,
@@ -147,7 +144,7 @@ func Make(port int) (http.Handler, *slog.Logger) {
 	authServer.Route(router,
 		app.SessionManager.LoadAndSave)
 
-	return router, logger
+	return router, &app.Logger
 }
 
 func Serve(port int) {
