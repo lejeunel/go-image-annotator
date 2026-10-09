@@ -728,6 +728,9 @@ type ServerInterface interface {
 	// IngestImage Ingest a new image
 	// (POST /images)
 	IngestImage(w http.ResponseWriter, r *http.Request)
+	// DeleteImage Delete an image
+	// (DELETE /images/{collection_name}/{image_id})
+	DeleteImage(w http.ResponseWriter, r *http.Request, collectionName string, imageId string)
 	// ReadImage Read image meta-data
 	// (GET /images/{collection_name}/{image_id})
 	ReadImage(w http.ResponseWriter, r *http.Request, collectionName string, imageId string)
@@ -1229,6 +1232,41 @@ func (siw *ServerInterfaceWrapper) IngestImage(w http.ResponseWriter, r *http.Re
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.IngestImage(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteImage operation middleware
+func (siw *ServerInterfaceWrapper) DeleteImage(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "collection_name" -------------
+	var collectionName string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "collection_name", r.PathValue("collection_name"), &collectionName, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "collection_name", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "image_id" -------------
+	var imageId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "image_id", r.PathValue("image_id"), &imageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "image_id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteImage(w, r, collectionName, imageId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1935,6 +1973,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/raw/{image_id}", wrapper.ReadRawImage)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/images/{collection_name}/{image_id}", wrapper.DeleteImage)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/images/{collection_name}/{image_id}", wrapper.ReadImage)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/images", wrapper.ListImages)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/images", wrapper.IngestImage)

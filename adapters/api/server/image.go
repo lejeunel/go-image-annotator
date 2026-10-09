@@ -12,6 +12,7 @@ import (
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
+	"github.com/lejeunel/go-image-annotator/use-cases/image/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
 )
@@ -67,6 +68,18 @@ func (s *Server) ReadRawImage(w http.ResponseWriter, r *http.Request, imageId st
 func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionName, imageId string) {
 	s.Image.Find.Execute(find.Request{ImageId: imageId, Collection: collectionName},
 		presenter.NewReadMetaPresenter(w, s.Logger))
+}
+
+func (s *Server) DeleteImage(
+	w http.ResponseWriter,
+	r *http.Request,
+	collectionName, imageId string,
+) {
+	s.Image.Delete.Execute(
+		r.Context(),
+		delete.Request{ImageId: imageId, Collection: collectionName},
+		presenter.NewDeleteImagePresenter(w, s.Logger),
+	)
 }
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams) {
