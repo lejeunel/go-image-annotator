@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
-	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/collection"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/collection/clone"
@@ -14,7 +13,7 @@ import (
 
 func (s *Server) FindCollectionByName(w http.ResponseWriter, r *http.Request, name string) {
 	s.Collection.Find.Execute(r.Context(), name,
-		presenter.NewPresenter(w, s.Logger))
+		json.NewCollectionPresenter(w, s.Logger))
 }
 
 func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
@@ -26,11 +25,11 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 	s.Collection.Create.Execute(
 		r.Context(),
 		create.Request{Name: body.Name, Description: body.Description},
-		presenter.NewCreatePresenter(w, s.Logger))
+		json.NewCollectionPresenter(w, s.Logger))
 }
 
 func (s *Server) DeleteCollection(w http.ResponseWriter, r *http.Request, name string) {
-	s.Collection.Delete.Execute(r.Context(), name, presenter.NewDeletePresenter(w, s.Logger))
+	s.Collection.Delete.Execute(r.Context(), name, json.NewCollectionPresenter(w, s.Logger))
 }
 
 func (s *Server) ListCollections(
@@ -45,7 +44,7 @@ func (s *Server) ListCollections(
 			params.Page,
 			s.Collection.DefaultPageSize,
 		),
-		presenter.NewListPresenter(w, s.Logger),
+		json.NewCollectionPresenter(w, s.Logger),
 	)
 }
 
@@ -60,7 +59,7 @@ func (s *Server) UpdateCollection(w http.ResponseWriter, r *http.Request, name s
 			Name: name, NewName: body.Name, NewDescription: body.Description,
 			NewGroup: body.Group, NewProfile: body.Profile,
 		},
-		presenter.NewUpdatePresenter(w, s.Logger))
+		json.NewCollectionPresenter(w, s.Logger))
 }
 
 func (s *Server) CloneCollection(w http.ResponseWriter, r *http.Request) {
@@ -74,5 +73,5 @@ func (s *Server) CloneCollection(w http.ResponseWriter, r *http.Request) {
 		DestinationGroup: body.Group, Deep: body.Deep,
 	}
 	s.Collection.Clone.Execute(r.Context(), req,
-		presenter.NewPresenter(w, s.Logger))
+		json.NewCollectionPresenter(w, s.Logger))
 }

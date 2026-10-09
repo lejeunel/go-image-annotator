@@ -41,7 +41,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	out.Success(label)
+	out.SuccessCreateLabel(label)
 }
 
 func (i *Interactor) checkDuplicate(name string) error {

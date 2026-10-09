@@ -25,7 +25,7 @@ func NewCreateLabelPresenter(w http.ResponseWriter) CreateLabelPresenter {
 	return CreateLabelPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 
-func (p CreateLabelPresenter) Success(r l.Label) {
+func (p CreateLabelPresenter) SuccessCreateLabel(r l.Label) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 

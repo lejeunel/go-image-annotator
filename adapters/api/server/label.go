@@ -4,14 +4,13 @@ import (
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
-	p "github.com/lejeunel/go-image-annotator/adapters/api/json/label"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	"github.com/lejeunel/go-image-annotator/use-cases/label/create"
 )
 
 func (s *Server) FindLabel(w http.ResponseWriter, r *http.Request, name string) {
-	s.Label.Find.Execute(r.Context(), name, p.NewFindPresenter(w, s.Logger))
+	s.Label.Find.Execute(r.Context(), name, json.NewLabelPresenter(w, s.Logger))
 }
 
 func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
@@ -24,14 +23,14 @@ func (s *Server) CreateLabel(w http.ResponseWriter, r *http.Request) {
 		Name:        body.Name,
 		Description: body.Description,
 	}
-	s.Label.Create.Execute(r.Context(), req, p.NewCreatePresenter(w, s.Logger))
+	s.Label.Create.Execute(r.Context(), req, json.NewLabelPresenter(w, s.Logger))
 }
 
 func (s *Server) DeleteLabel(w http.ResponseWriter, r *http.Request, name string) {
-	s.Label.Delete.Execute(r.Context(), name, p.NewDeletePresenter(w, s.Logger))
+	s.Label.Delete.Execute(r.Context(), name, json.NewLabelPresenter(w, s.Logger))
 }
 
 func (s *Server) ListLabels(w http.ResponseWriter, r *http.Request, params ListLabelsParams) {
 	req := pa.NewPaginationParamsFromOptional(params.PageSize, params.Page, s.Label.DefaultPageSize)
-	s.Label.List.Execute(r.Context(), req, p.NewListPresenter(w, s.Logger))
+	s.Label.List.Execute(r.Context(), req, json.NewLabelPresenter(w, s.Logger))
 }

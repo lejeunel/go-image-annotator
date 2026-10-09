@@ -1,10 +1,9 @@
-package role
+package json
 
 import (
 	"log/slog"
 	"net/http"
 
-	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	s "github.com/lejeunel/go-image-annotator/shared"
@@ -23,28 +22,28 @@ func MakeRoleResponse(role rl.Role) models.Role {
 	}
 }
 
-type Presenter struct {
+type RolePresenter struct {
 	Writer http.ResponseWriter
-	json.ErrorPresenter
+	ErrorPresenter
 }
 
-func (p Presenter) SuccessFindRole(r rl.Role) {
+func (p RolePresenter) SuccessFindRole(r rl.Role) {
 	s.WriteJSON(p.Writer, 200, MakeRoleResponse(r))
 }
 
-func (p Presenter) SuccessCreateRole(r rl.Role) {
+func (p RolePresenter) SuccessCreateRole(r rl.Role) {
 	s.WriteJSON(p.Writer, 200, MakeRoleResponse(r))
 }
 
-func (p Presenter) SuccessUpdateRole(r rl.Role) {
+func (p RolePresenter) SuccessUpdateRole(r rl.Role) {
 	s.WriteJSON(p.Writer, 200, MakeRoleResponse(r))
 }
 
-func (p Presenter) SuccessDeleteRole(string) {
+func (p RolePresenter) SuccessDeleteRole(string) {
 	p.Writer.WriteHeader(http.StatusNoContent)
 }
 
-func (p Presenter) SuccessListRoles(r []rl.Role) {
+func (p RolePresenter) SuccessListRoles(r []rl.Role) {
 	roles := []models.Role{}
 	for _, role := range r {
 		roles = append(roles, MakeRoleResponse(role))
@@ -53,6 +52,6 @@ func (p Presenter) SuccessListRoles(r []rl.Role) {
 	s.WriteJSON(p.Writer, 200, models.ListRoles{Roles: roles})
 }
 
-func NewPresenter(w http.ResponseWriter, l slog.Logger) Presenter {
-	return Presenter{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
+func NewRolePresenter(w http.ResponseWriter, l slog.Logger) RolePresenter {
+	return RolePresenter{Writer: w, ErrorPresenter: NewErrPresenter(w, l)}
 }

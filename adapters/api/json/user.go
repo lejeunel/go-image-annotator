@@ -1,10 +1,9 @@
-package user
+package json
 
 import (
 	"log/slog"
 	"net/http"
 
-	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	s "github.com/lejeunel/go-image-annotator/shared"
@@ -21,12 +20,12 @@ func MakeUserResponse(user u.User) models.User {
 	}
 }
 
-type Presenter struct {
+type UserPresenter struct {
 	Writer http.ResponseWriter
-	json.ErrorPresenter
+	ErrorPresenter
 }
 
-func (p Presenter) SuccessCreateUser(r create.Response) {
+func (p UserPresenter) SuccessCreateUser(r create.Response) {
 	response := models.User{
 		Id:     r.Id,
 		Roles:  r.Roles,
@@ -36,15 +35,15 @@ func (p Presenter) SuccessCreateUser(r create.Response) {
 	s.WriteJSON(p.Writer, 200, response)
 }
 
-func (p Presenter) SuccessDeleteUser(id u.UserId) {
+func (p UserPresenter) SuccessDeleteUser(id u.UserId) {
 	p.Writer.WriteHeader(http.StatusNoContent)
 }
 
-func (p Presenter) SuccessUpdate(r upd.Response) {
+func (p UserPresenter) SuccessUpdate(r upd.Response) {
 	p.Writer.WriteHeader(http.StatusNoContent)
 }
 
-func (p Presenter) SuccessListUsers(r list.Response) {
+func (p UserPresenter) SuccessListUsers(r list.Response) {
 	users := []models.User{}
 	for _, user := range r.Users {
 		users = append(users, MakeUserResponse(user))
@@ -52,10 +51,10 @@ func (p Presenter) SuccessListUsers(r list.Response) {
 
 	s.WriteJSON(p.Writer, 200, models.ListUsers{
 		Users:      users,
-		Pagination: json.BuildPaginationResponse(r.Pagination),
+		Pagination: BuildPaginationResponse(r.Pagination),
 	})
 }
 
-func NewPresenter(w http.ResponseWriter, l slog.Logger) Presenter {
-	return Presenter{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
+func NewUserPresenter(w http.ResponseWriter, l slog.Logger) UserPresenter {
+	return UserPresenter{Writer: w, ErrorPresenter: NewErrPresenter(w, l)}
 }

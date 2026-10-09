@@ -1,0 +1,123 @@
+package sqlite
+
+import (
+	"crypto/sha256"
+	"log/slog"
+
+	itr "github.com/lejeunel/go-image-annotator/app/interactors"
+	cfg "github.com/lejeunel/go-image-annotator/config"
+	"github.com/lejeunel/go-image-annotator/modules/authorizer"
+
+	tra "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/transactors"
+	aig "github.com/lejeunel/go-image-annotator/modules/archive-ingester"
+	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
+	iig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
+	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
+	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
+	rea "github.com/lejeunel/go-image-annotator/modules/reader"
+	tk "github.com/lejeunel/go-image-annotator/modules/token"
+)
+
+func BuildInteractors(
+	infra Infra,
+	auth authorizer.Interface,
+	logger slog.Logger,
+	cfg cfg.Config,
+	ts tk.TokenService,
+) itr.Interactors {
+	passwordTokenizer := tk.New(cfg.RandomPasswordLength)
+	forgottenPasswordGen := tk.New(cfg.RandomPasswordLength)
+	passwordValidator := pv.New(cfg.PasswordMinEntropy)
+
+	imstore := ims.New(
+		ims.Repos{
+			ImageRepo:      infra.ImageRepo,
+			CollectionRepo: infra.CollectionRepo,
+			AnnotationRepo: infra.AnnotationRepo,
+			MetaRepo:       infra.MetaRepo,
+		},
+		tra.NewStoreTransactor(infra.DB, infra.FilterParser, infra.OrderStrParser),
+		infra.ImageFileStore, infra.FilterParser, infra.OrderParser)
+	eventlogger := el.New(infra.EventRepo, el.WithMaxNumTasksPerUser(cfg.MaxNumTasksPerUser))
+
+	imageIngester := iig.New(
+		infra.ImageRepo,
+		infra.CollectionRepo,
+		infra.LabelRepo,
+		infra.AnnotationRepo,
+		tra.NewIngestionTransactor(infra.DB),
+		infra.ImageFileStore,
+		sha256.New(),
+		rea.NewImageSpecsDetector(cfg.AllowedImageMIMETypes),
+	)
+	archiveIngester := aig.New(imstore, imageIngester)
+
+	return itr.Interactors{
+		Label: NewLabelInteractors(infra.LabelRepo, cfg.DefaultPageSize, cfg.MaxPageSize, auth),
+		Collection: NewCollectionInteractors(
+			infra.DB,
+			infra.CollectionRepo,
+			infra.ImageRepo,
+			infra.AnnotationRepo,
+			infra.GroupRepo,
+			infra.ProfileRepo,
+			imstore,
+			eventlogger,
+			logger,
+			cfg.DefaultPageSize,
+			auth,
+		),
+		Image: NewImageInteractors(
+			infra.ImageRepo,
+			infra.CollectionRepo,
+			infra.AnnotationRepo,
+			imstore,
+			infra.ImageFileStore,
+			infra.TempFileStore,
+			imageIngester,
+			archiveIngester,
+			infra.FilterParser,
+			infra.OrderParser,
+			int64(cfg.MaxArchiveMB),
+			eventlogger,
+			logger,
+			cfg.DefaultPageSize,
+			cfg.MaxPageSize,
+			auth,
+		),
+		User: NewUserInteractors(infra.UserRepo, infra.UserStore,
+			infra.GroupRepo, infra.RoleRepo,
+			ts,
+			forgottenPasswordGen,
+			passwordValidator,
+			passwordTokenizer,
+			passwordTokenizer,
+			cfg.ForgotPasswordTokenExpirationMinutes,
+			forgottenPasswordGen, auth),
+		Annotation: NewAnnotationInteractors(
+			imstore,
+			infra.ImageRepo,
+			infra.LabelRepo,
+			infra.ProfileRepo,
+			infra.AnnotationRepo,
+			auth,
+		),
+		Group: NewGroupInteractors(infra.GroupRepo, auth),
+		Role:  NewRoleInteractors(infra.RoleRepo, auth),
+		Bootstrap: NewBootstrapInteractor(
+			infra.UserRepo,
+			infra.RoleRepo,
+			infra.PolicyFileStore,
+			passwordTokenizer,
+			passwordValidator,
+		),
+		Metadata: 
+			infra.MetaRepo,
+			auth,
+		),
+		Log: NewLogInteractors(eventlogger),
+		Profile: NewProfileInteractors(infra.ProfileRepo, infra.GroupRepo,
+			infra.LabelRepo, logger,
+			cfg.DefaultPageSize, auth),
+	}
+}

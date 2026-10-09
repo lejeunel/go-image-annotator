@@ -1,10 +1,9 @@
-package annotate
+package json
 
 import (
 	"log/slog"
 	"net/http"
 
-	"github.com/lejeunel/go-image-annotator/adapters/api/json"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addply "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
 	updlbl "github.com/lejeunel/go-image-annotator/use-cases/annotate/update-label"
@@ -12,7 +11,7 @@ import (
 
 type AnnotationPresenter struct {
 	Writer http.ResponseWriter
-	json.ErrorPresenter
+	ErrorPresenter
 }
 
 func (p AnnotationPresenter) SuccessAddBox(r addbox.Response) {
@@ -32,5 +31,5 @@ func (p AnnotationPresenter) SuccessUpdateLabel(r updlbl.Response) {
 }
 
 func NewAnnotationPresenter(w http.ResponseWriter, l slog.Logger) AnnotationPresenter {
-	return AnnotationPresenter{Writer: w, ErrorPresenter: json.NewErrPresenter(w, l)}
+	return AnnotationPresenter{Writer: w, ErrorPresenter: NewErrPresenter(w, l)}
 }

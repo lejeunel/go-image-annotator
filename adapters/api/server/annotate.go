@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
-	"github.com/lejeunel/go-image-annotator/adapters/api/json/annotate"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
 	addply "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-polygon"
@@ -26,7 +25,7 @@ func (s *Server) AddBoundingBox(w http.ResponseWriter, r *http.Request) {
 		Height:     body.Height,
 		Angle:      body.Angle,
 	}
-	s.Annotation.AddBox.Execute(r.Context(), req, annotate.NewAnnotationPresenter(w, s.Logger))
+	s.Annotation.AddBox.Execute(r.Context(), req, json.NewAnnotationPresenter(w, s.Logger))
 }
 
 func (s *Server) AddPolygon(w http.ResponseWriter, r *http.Request) {
@@ -43,11 +42,11 @@ func (s *Server) AddPolygon(w http.ResponseWriter, r *http.Request) {
 	for _, point := range body.Points {
 		req.Points.Append(point[0], point[1])
 	}
-	s.Annotation.AddPolygon.Execute(r.Context(), req, annotate.NewAnnotationPresenter(w, s.Logger))
+	s.Annotation.AddPolygon.Execute(r.Context(), req, json.NewAnnotationPresenter(w, s.Logger))
 }
 
 func (s *Server) DeleteAnnotation(w http.ResponseWriter, r *http.Request, id string) {
-	s.Annotation.Delete.Execute(r.Context(), id, annotate.NewAnnotationPresenter(w, s.Logger))
+	s.Annotation.Delete.Execute(r.Context(), id, json.NewAnnotationPresenter(w, s.Logger))
 }
 
 func (s *Server) UpdateAnnotation(
@@ -59,6 +58,6 @@ func (s *Server) UpdateAnnotation(
 	s.Annotation.UpdateLabel.Execute(
 		r.Context(),
 		updlbl.Request{Id: id, Label: label},
-		annotate.NewAnnotationPresenter(w, s.Logger),
+		json.NewAnnotationPresenter(w, s.Logger),
 	)
 }

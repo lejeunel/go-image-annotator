@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
-	p "github.com/lejeunel/go-image-annotator/adapters/api/json/meta"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	"github.com/lejeunel/go-image-annotator/use-cases/metadata/add"
 	"github.com/lejeunel/go-image-annotator/use-cases/metadata/delete"
@@ -26,7 +25,7 @@ func (s *Server) UpsertMetadata(
 		Key: body.Key, Value: body.Value,
 	}
 
-	s.Metadata.Add.Execute(r.Context(), req, p.NewPresenter(w, s.Logger))
+	s.Metadata.Add.Execute(r.Context(), req, json.NewMetaPresenter(w, s.Logger))
 }
 
 func (s *Server) DeleteMetadata(
@@ -41,5 +40,5 @@ func (s *Server) DeleteMetadata(
 		Key: key,
 	}
 
-	s.Metadata.Delete.Execute(r.Context(), req, p.NewPresenter(w, s.Logger))
+	s.Metadata.Delete.Execute(r.Context(), req, json.NewMetaPresenter(w, s.Logger))
 }

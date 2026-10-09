@@ -11,7 +11,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(r l.Label) {
+func (p *FakePresenter) SuccessCreateLabel(r l.Label) {
 	p.GotSuccess = true
 	p.Got = r
 }

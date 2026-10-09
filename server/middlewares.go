@@ -3,7 +3,6 @@ package server
 import (
 	"net/http"
 
-	json "github.com/lejeunel/go-image-annotator/adapters/api/json"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 )
@@ -28,7 +27,7 @@ func ApiRequireLogin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := u.IdentityFromContext(r.Context())
 		if user == nil {
-			json.WriteError(w, http.StatusUnauthorized, "failed fetching user identity")
+			http.Error(w, "failed fetching user identity", http.StatusUnauthorized)
 			return
 		}
 		next.ServeHTTP(w, r)

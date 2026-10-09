@@ -4,14 +4,13 @@ import (
 	"net/http"
 
 	"github.com/lejeunel/go-image-annotator/adapters/api/json"
-	p "github.com/lejeunel/go-image-annotator/adapters/api/json/profile"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	"github.com/lejeunel/go-image-annotator/use-cases/profile/create"
 	"github.com/lejeunel/go-image-annotator/use-cases/profile/update"
 )
 
 func (s *Server) FindProfile(w http.ResponseWriter, r *http.Request, name string) {
-	s.Profile.Find.Execute(r.Context(), name, p.NewFindPresenter(w, s.Logger))
+	s.Profile.Find.Execute(r.Context(), name, json.NewProfilePresenter(w, s.Logger))
 }
 
 func (s *Server) CreateProfile(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +28,7 @@ func (s *Server) CreateProfile(w http.ResponseWriter, r *http.Request) {
 		req.Labels = *body.Labels
 	}
 
-	s.Profile.Create.Execute(r.Context(), req, p.NewCreatePresenter(w, s.Logger))
+	s.Profile.Create.Execute(r.Context(), req, json.NewProfilePresenter(w, s.Logger))
 }
 
 func (s *Server) UpdateProfile(w http.ResponseWriter, r *http.Request, name string) {
@@ -48,9 +47,9 @@ func (s *Server) UpdateProfile(w http.ResponseWriter, r *http.Request, name stri
 		req.NewLabels = *body.Labels
 	}
 
-	s.Profile.Update.Execute(r.Context(), req, p.NewUpdatePresenter(w, s.Logger))
+	s.Profile.Update.Execute(r.Context(), req, json.NewProfilePresenter(w, s.Logger))
 }
 
 func (s *Server) DeleteProfile(w http.ResponseWriter, r *http.Request, name string) {
-	s.Profile.Delete.Execute(r.Context(), name, p.NewDeletePresenter(w, s.Logger))
+	s.Profile.Delete.Execute(r.Context(), name, json.NewProfilePresenter(w, s.Logger))
 }

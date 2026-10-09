@@ -5,6 +5,6 @@ import (
 )
 
 type OutputPort interface {
-	Success(lbl.Label)
+	SuccessCreateLabel(lbl.Label)
 	Error(error)
 }

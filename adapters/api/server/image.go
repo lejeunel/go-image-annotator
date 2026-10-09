@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	apijson "github.com/lejeunel/go-image-annotator/adapters/api/json"
-	presenter "github.com/lejeunel/go-image-annotator/adapters/api/json/image"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
@@ -44,7 +43,7 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case "image":
-			buf, err := io.ReadAll(part) // or stream directly to your storage/hasher
+			buf, err := io.ReadAll(part)
 			if err != nil {
 				apijson.WriteError(w, http.StatusBadRequest, "error reading image data")
 				return
@@ -58,16 +57,16 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.Image.Ingest.Execute(r.Context(), NewImageIngestRequest(meta, imageReader),
-		presenter.NewIngestPresenter(w, s.Logger))
+		apijson.NewImagePresenter(w, s.Logger))
 }
 
 func (s *Server) ReadRawImage(w http.ResponseWriter, r *http.Request, imageId string) {
-	s.Image.Raw.Execute(imageId, presenter.NewRawImagePresenter(w, s.Logger))
+	s.Image.Raw.Execute(imageId, apijson.NewImagePresenter(w, s.Logger))
 }
 
 func (s *Server) ReadImage(w http.ResponseWriter, r *http.Request, collectionName, imageId string) {
 	s.Image.Find.Execute(find.Request{ImageId: imageId, Collection: collectionName},
-		presenter.NewReadMetaPresenter(w, s.Logger))
+		apijson.NewImagePresenter(w, s.Logger))
 }
 
 func (s *Server) DeleteImage(
@@ -78,7 +77,7 @@ func (s *Server) DeleteImage(
 	s.Image.Delete.Execute(
 		r.Context(),
 		delete.Request{ImageId: imageId, Collection: collectionName},
-		presenter.NewDeleteImagePresenter(w, s.Logger),
+		apijson.NewImagePresenter(w, s.Logger),
 	)
 }
 
@@ -97,7 +96,7 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 	if params.Order != nil {
 		req.OrderStr = *params.Order
 	}
-	s.Image.Slice.Execute(req, presenter.NewListPresenter(w, s.Logger))
+	s.Image.Slice.Execute(req, apijson.NewImagePresenter(w, s.Logger))
 }
 
 func NewImageIngestRequest(meta models.NewImage, reader io.Reader) ig.Request {
