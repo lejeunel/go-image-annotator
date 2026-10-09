@@ -1,10 +1,10 @@
 package add
 
 import (
-	m "github.com/lejeunel/go-image-annotator/entities/meta"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
 
 type OutputPort interface {
 	Error(error)
-	SuccessAddMetadata(m.MetaData)
+	SuccessAddMetadata(im.Image)
 }

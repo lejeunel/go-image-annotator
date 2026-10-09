@@ -2,15 +2,12 @@ package add
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
-	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	sauth "github.com/lejeunel/go-image-annotator/modules/authorizer"
 	kv "github.com/lejeunel/go-image-annotator/modules/string-validator"
 	vv "github.com/lejeunel/go-image-annotator/modules/value-validator"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type Interface interface {
@@ -21,23 +18,25 @@ type Auth interface {
 	AddMetadata(ctx context.Context, group *string) error
 }
 
+type ImageStore interface {
+	Find(im.BaseImage) (*im.Image, error)
+}
+
 type Interactor struct {
-	CollectionRepo
-	ImageRepo
+	ImageStore
 	MetaDataRepo
 	KeyValidator   kv.Validator
 	ValueValidator vv.Validator
 	Auth
 }
 
-func New(c CollectionRepo, ir ImageRepo,
+func New(s ImageStore,
 	m MetaDataRepo,
 	kv kv.Validator, vv vv.Validator,
 	opts ...Option,
 ) Interactor {
 	i := &Interactor{
-		CollectionRepo: c,
-		ImageRepo:      ir,
+		ImageStore:     s,
 		MetaDataRepo:   m,
 		KeyValidator:   kv,
 		ValueValidator: vv,
@@ -60,93 +59,19 @@ func WithAuth(a Auth) Option {
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "adding metadata"
-	group, err := i.CollectionRepo.GetGroup(r.Collection)
-	if (err != nil) && !errors.Is(err, e.ErrNotFound) {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-
-	if err := i.Auth.AddMetadata(ctx, group); err != nil {
-		out.Error(fmt.Errorf("%v: %w", errCtx, err))
-		return
-	}
-
 	imageId, err := im.NewImageIdFromString(r.ImageId)
 	if err != nil {
-		out.Error(fmt.Errorf("%v: parsing image id %v: %w", errCtx, imageId, err))
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
+	image, err := i.ImageStore.Find(im.BaseImage{})
+	if err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
-	keyExists, err := i.MetaDataRepo.KeyExists(r.Collection, imageId, r.Key)
-	if err != nil {
-		out.Error(
-			fmt.Errorf(
-				"%v: checking existence of key %v: %v: %w",
-				errCtx,
-				r.Key,
-				err,
-				e.ErrInternal,
-			),
-		)
-		return
-	}
-	if keyExists {
-		out.Error(
-			fmt.Errorf("%v: checking existence of key %v: %w", errCtx, r.Key, e.ErrValidation),
-		)
-		return
-	}
-
-	collectionExists, err := i.CollectionRepo.Exists(r.Collection)
-	if err != nil {
-		out.Error(
-			fmt.Errorf(
-				"%v: checking existence of collection %v: %v: %w",
-				errCtx,
-				r.Collection,
-				err,
-				e.ErrInternal,
-			),
-		)
-		return
-	}
-	if !collectionExists {
-		out.Error(
-			fmt.Errorf(
-				"%v: checking existence of collection %v: %w",
-				errCtx,
-				r.Collection,
-				e.ErrValidation,
-			),
-		)
-		return
-	}
-
-	imageInCollection, err := i.ImageRepo.ImageExistsInCollection(imageId, r.Collection)
-	if err != nil {
-		out.Error(
-			fmt.Errorf(
-				"%v: checking whether image %v is in collection %v: %v: %w",
-				errCtx,
-				imageId,
-				r.Collection,
-				err,
-				e.ErrInternal,
-			),
-		)
-		return
-	}
-	if !imageInCollection {
-		out.Error(
-			fmt.Errorf(
-				"%v: checking whether image %v is in collection %v: %v: %w",
-				errCtx,
-				imageId,
-				r.Collection,
-				err,
-				e.ErrValidation,
-			),
-		)
+	if err := i.Auth.AddMetadata(ctx, image.Collection.Group); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
 
@@ -163,6 +88,14 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 			errCtx, r.Key, r.Value, err))
 		return
 	}
+	meta, err := i.MetaDataRepo.List(r.Collection, imageId)
+	if err != nil {
+		out.Error(fmt.Errorf("%v: fetching updated meta-data: %w",
+			errCtx, err))
+		return
+	}
 
-	out.SuccessAddMetadata(m.MetaData{Key: r.Key, Value: r.Value})
+	image.Meta = meta
+
+	out.SuccessAddMetadata(*image)
 }

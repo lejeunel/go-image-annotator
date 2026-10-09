@@ -4,6 +4,10 @@
 package models
 
 import (
+	"encoding/json"
+	"time"
+
+	"github.com/oapi-codegen/runtime"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
@@ -196,6 +200,32 @@ type ListUsers struct {
 	Pagination Pagination `json:"pagination"`
 	Users      []User     `json:"users"`
 }
+
+// Meta defines model for Meta.
+type Meta struct {
+	// Key Key of the meta-data entry
+	Key string `json:"key"`
+
+	// Value Value of the meta-data entry (integer, float, boolean or ISO 8601 date-time)
+	Value MetaValue `json:"value"`
+}
+
+// MetaValue Value of the meta-data entry (integer, float, boolean or ISO 8601 date-time)
+type MetaValue struct {
+	union json.RawMessage
+}
+
+// MetaValue0 defines model for MetaValue.0.
+type MetaValue0 = int64
+
+// MetaValue1 defines model for MetaValue.1.
+type MetaValue1 = float64
+
+// MetaValue2 defines model for MetaValue.2.
+type MetaValue2 = bool
+
+// MetaValue3 defines model for MetaValue.3.
+type MetaValue3 = time.Time
 
 // NewCollection defines model for NewCollection.
 type NewCollection struct {
@@ -505,6 +535,9 @@ type IngestImageMultipartRequestBody IngestImageMultipartBody
 // CreateLabelJSONRequestBody defines body for CreateLabel for application/json ContentType.
 type CreateLabelJSONRequestBody = NewLabel
 
+// UpsertMetadataJSONRequestBody defines body for UpsertMetadata for application/json ContentType.
+type UpsertMetadataJSONRequestBody = Meta
+
 // CreateProfileJSONRequestBody defines body for CreateProfile for application/json ContentType.
 type CreateProfileJSONRequestBody = NewProfile
 
@@ -522,3 +555,117 @@ type CreateUserJSONRequestBody = NewUser
 
 // UpdateUserJSONRequestBody defines body for UpdateUser for application/json ContentType.
 type UpdateUserJSONRequestBody = UserPrivileges
+
+// AsMetaValue0 returns the union data inside the MetaValue as a MetaValue0
+func (t MetaValue) AsMetaValue0() (MetaValue0, error) {
+	var body MetaValue0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromMetaValue0 overwrites any union data inside the MetaValue as the provided MetaValue0
+func (t *MetaValue) FromMetaValue0(v MetaValue0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeMetaValue0 performs a merge with any union data inside the MetaValue, using the provided MetaValue0
+func (t *MetaValue) MergeMetaValue0(v MetaValue0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsMetaValue1 returns the union data inside the MetaValue as a MetaValue1
+func (t MetaValue) AsMetaValue1() (MetaValue1, error) {
+	var body MetaValue1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromMetaValue1 overwrites any union data inside the MetaValue as the provided MetaValue1
+func (t *MetaValue) FromMetaValue1(v MetaValue1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeMetaValue1 performs a merge with any union data inside the MetaValue, using the provided MetaValue1
+func (t *MetaValue) MergeMetaValue1(v MetaValue1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsMetaValue2 returns the union data inside the MetaValue as a MetaValue2
+func (t MetaValue) AsMetaValue2() (MetaValue2, error) {
+	var body MetaValue2
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromMetaValue2 overwrites any union data inside the MetaValue as the provided MetaValue2
+func (t *MetaValue) FromMetaValue2(v MetaValue2) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeMetaValue2 performs a merge with any union data inside the MetaValue, using the provided MetaValue2
+func (t *MetaValue) MergeMetaValue2(v MetaValue2) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsMetaValue3 returns the union data inside the MetaValue as a MetaValue3
+func (t MetaValue) AsMetaValue3() (MetaValue3, error) {
+	var body MetaValue3
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromMetaValue3 overwrites any union data inside the MetaValue as the provided MetaValue3
+func (t *MetaValue) FromMetaValue3(v MetaValue3) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeMetaValue3 performs a merge with any union data inside the MetaValue, using the provided MetaValue3
+func (t *MetaValue) MergeMetaValue3(v MetaValue3) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t MetaValue) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *MetaValue) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}

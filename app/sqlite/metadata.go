@@ -16,6 +16,7 @@ import (
 )
 
 func NewMetadataInteractors(
+	is add.ImageStore,
 	mr mr.MetaRepo,
 	cr cr.CollectionRepo,
 	ir ir.ImageRepo,
@@ -23,8 +24,7 @@ func NewMetadataInteractors(
 ) mu.Interactors {
 	return mu.Interactors{
 		Add: add.New(
-			cr,
-			ir,
+			is,
 			mr,
 			kv.NewNameValidator(),
 			vv.BaseTypeValidator{},

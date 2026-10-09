@@ -537,6 +537,80 @@ paths:
           $ref: '#/components/responses/Conflict'
         default:
           $ref: '#/components/responses/UnexpectedError'
+  /meta/{collection_name}/{image_id}:
+    post:
+      summary: Upsert meta-data
+      description: Add or update meta-data to an image
+      operationId: upsertMetadata
+      tags: [Metadata]
+      parameters:
+        - name: collection_name
+          in: path
+          description: Name of collection
+          required: true
+          schema:
+            type: string
+        - name: image_id
+          in: path
+          description: ID of image
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Key and value to upsert 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Meta'
+      responses:
+        '200':
+          description: image meta-data response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+  /meta/{collection_name}/{image_id}/{key}:
+    delete:
+      summary: Delete a meta-data entry
+      description: Delete a meta-data entry given its collection, image id, and key
+      operationId: deleteMetadata
+      tags: [Metadata]
+      parameters:
+        - name: collection_name
+          in: path
+          description: Name of the collection
+          required: true
+          schema:
+            type: string
+        - name: image_id
+          in: path
+          description: Id of the image
+          schema:
+            type: string
+        - name: key
+          in: path
+          description: key of the meta-data entry to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: meta-data entry deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
   /users:
     post:
       summary: Create a new user
@@ -1345,6 +1419,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Point'
+    Meta:
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          description: Key of the meta-data entry
+        value:
+          $ref: '#/components/schemas/MetaValue'
+    MetaValue:
+      description: Value of the meta-data entry (integer, float, boolean or ISO 8601 date-time)
+      anyOf:
+        - type: integer
+          format: int64
+        - type: number
+          format: double
+        - type: boolean
+        - type: string
+          format: date-time
     BoundingBox:
       required:
         - label

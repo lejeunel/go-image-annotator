@@ -112,6 +112,7 @@ func BuildInteractors(
 			passwordValidator,
 		),
 		Metadata: NewMetadataInteractors(
+			imstore,
 			infra.MetaRepo,
 			infra.CollectionRepo,
 			infra.ImageRepo,

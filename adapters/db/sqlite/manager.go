@@ -2,12 +2,12 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"log/slog"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/lejeunel/go-image-annotator/config"
 	goose "github.com/pressly/goose/v3"
 )
@@ -20,17 +20,14 @@ type SQLiteDBManager struct {
 func NewDBManagerFromEnv(logger *slog.Logger) SQLiteDBManager {
 	cfg := config.Parse()
 	conn := NewSQLiteConnection(DBPath(cfg.LocalArtefactPath))
-	manager := NewSQLiteDBManager(conn, logger)
-	return manager
+	return NewSQLiteDBManager(conn.DB, logger)
 }
 
-func NewSQLiteDBManager(db *sqlx.DB, logger *slog.Logger) SQLiteDBManager {
-	errCtx := "creating SQLite database manager"
-	provider, err := NewMigrationProvider(db.DB)
+func NewSQLiteDBManager(db *sql.DB, logger *slog.Logger) SQLiteDBManager {
+	provider, err := NewMigrationProvider(db)
 	if err != nil {
-		panic(fmt.Errorf("%v: %w", errCtx, err))
+		panic(fmt.Errorf("creating SQLite database manager: %w", err))
 	}
-
 	return SQLiteDBManager{provider, logger}
 }
 

@@ -6,9 +6,11 @@
 package server
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/oapi-codegen/runtime"
 	openapi_types "github.com/oapi-codegen/runtime/types"
@@ -203,6 +205,32 @@ type ListUsers struct {
 	Pagination Pagination `json:"pagination"`
 	Users      []User     `json:"users"`
 }
+
+// Meta defines model for Meta.
+type Meta struct {
+	// Key Key of the meta-data entry
+	Key string `json:"key"`
+
+	// Value Value of the meta-data entry (integer, float, boolean or ISO 8601 date-time)
+	Value MetaValue `json:"value"`
+}
+
+// MetaValue Value of the meta-data entry (integer, float, boolean or ISO 8601 date-time)
+type MetaValue struct {
+	union json.RawMessage
+}
+
+// MetaValue0 defines model for MetaValue.0.
+type MetaValue0 = int64
+
+// MetaValue1 defines model for MetaValue.1.
+type MetaValue1 = float64
+
+// MetaValue2 defines model for MetaValue.2.
+type MetaValue2 = bool
+
+// MetaValue3 defines model for MetaValue.3.
+type MetaValue3 = time.Time
 
 // NewCollection defines model for NewCollection.
 type NewCollection struct {
@@ -512,6 +540,9 @@ type IngestImageMultipartRequestBody IngestImageMultipartBody
 // CreateLabelJSONRequestBody defines body for CreateLabel for application/json ContentType.
 type CreateLabelJSONRequestBody = NewLabel
 
+// UpsertMetadataJSONRequestBody defines body for UpsertMetadata for application/json ContentType.
+type UpsertMetadataJSONRequestBody = Meta
+
 // CreateProfileJSONRequestBody defines body for CreateProfile for application/json ContentType.
 type CreateProfileJSONRequestBody = NewProfile
 
@@ -529,6 +560,120 @@ type CreateUserJSONRequestBody = NewUser
 
 // UpdateUserJSONRequestBody defines body for UpdateUser for application/json ContentType.
 type UpdateUserJSONRequestBody = UserPrivileges
+
+// AsMetaValue0 returns the union data inside the MetaValue as a MetaValue0
+func (t MetaValue) AsMetaValue0() (MetaValue0, error) {
+	var body MetaValue0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromMetaValue0 overwrites any union data inside the MetaValue as the provided MetaValue0
+func (t *MetaValue) FromMetaValue0(v MetaValue0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeMetaValue0 performs a merge with any union data inside the MetaValue, using the provided MetaValue0
+func (t *MetaValue) MergeMetaValue0(v MetaValue0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsMetaValue1 returns the union data inside the MetaValue as a MetaValue1
+func (t MetaValue) AsMetaValue1() (MetaValue1, error) {
+	var body MetaValue1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromMetaValue1 overwrites any union data inside the MetaValue as the provided MetaValue1
+func (t *MetaValue) FromMetaValue1(v MetaValue1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeMetaValue1 performs a merge with any union data inside the MetaValue, using the provided MetaValue1
+func (t *MetaValue) MergeMetaValue1(v MetaValue1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsMetaValue2 returns the union data inside the MetaValue as a MetaValue2
+func (t MetaValue) AsMetaValue2() (MetaValue2, error) {
+	var body MetaValue2
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromMetaValue2 overwrites any union data inside the MetaValue as the provided MetaValue2
+func (t *MetaValue) FromMetaValue2(v MetaValue2) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeMetaValue2 performs a merge with any union data inside the MetaValue, using the provided MetaValue2
+func (t *MetaValue) MergeMetaValue2(v MetaValue2) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsMetaValue3 returns the union data inside the MetaValue as a MetaValue3
+func (t MetaValue) AsMetaValue3() (MetaValue3, error) {
+	var body MetaValue3
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromMetaValue3 overwrites any union data inside the MetaValue as the provided MetaValue3
+func (t *MetaValue) FromMetaValue3(v MetaValue3) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeMetaValue3 performs a merge with any union data inside the MetaValue, using the provided MetaValue3
+func (t *MetaValue) MergeMetaValue3(v MetaValue3) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t MetaValue) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *MetaValue) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -598,6 +743,12 @@ type ServerInterface interface {
 	// FindLabel Find a label by name
 	// (GET /labels/{name})
 	FindLabel(w http.ResponseWriter, r *http.Request, name string)
+	// UpsertMetadata Upsert meta-data
+	// (POST /meta/{collection_name}/{image_id})
+	UpsertMetadata(w http.ResponseWriter, r *http.Request, collectionName string, imageId string)
+	// DeleteMetadata Delete a meta-data entry
+	// (DELETE /meta/{collection_name}/{image_id}/{key})
+	DeleteMetadata(w http.ResponseWriter, r *http.Request, collectionName string, imageId string, key string)
 	// CreateProfile Create a new profile
 	// (POST /profiles)
 	CreateProfile(w http.ResponseWriter, r *http.Request)
@@ -1234,6 +1385,85 @@ func (siw *ServerInterfaceWrapper) FindLabel(w http.ResponseWriter, r *http.Requ
 	handler.ServeHTTP(w, r)
 }
 
+// UpsertMetadata operation middleware
+func (siw *ServerInterfaceWrapper) UpsertMetadata(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "collection_name" -------------
+	var collectionName string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "collection_name", r.PathValue("collection_name"), &collectionName, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "collection_name", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "image_id" -------------
+	var imageId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "image_id", r.PathValue("image_id"), &imageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "image_id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpsertMetadata(w, r, collectionName, imageId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteMetadata operation middleware
+func (siw *ServerInterfaceWrapper) DeleteMetadata(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "collection_name" -------------
+	var collectionName string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "collection_name", r.PathValue("collection_name"), &collectionName, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "collection_name", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "image_id" -------------
+	var imageId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "image_id", r.PathValue("image_id"), &imageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: false, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "image_id", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "key" -------------
+	var key string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", r.PathValue("key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteMetadata(w, r, collectionName, imageId, key)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // CreateProfile operation middleware
 func (siw *ServerInterfaceWrapper) CreateProfile(w http.ResponseWriter, r *http.Request) {
 
@@ -1722,6 +1952,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/labels/{name}", wrapper.FindLabel)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/labels", wrapper.ListLabels)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/labels", wrapper.CreateLabel)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/meta/{collection_name}/{image_id}", wrapper.UpsertMetadata)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/meta/{collection_name}/{image_id}/{key}", wrapper.DeleteMetadata)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/users", wrapper.ListUsers)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/users", wrapper.CreateUser)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/users/{id}", wrapper.DeleteUser)

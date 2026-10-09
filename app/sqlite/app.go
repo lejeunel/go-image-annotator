@@ -40,7 +40,7 @@ func NewApp(cfg config.Config, logger slog.Logger) app.App {
 		itrs.Metadata.Read, itrs.Metadata.Delete,
 	)
 
-	dbManager := sqldb.NewSQLiteDBManager(infra.DB, &logger)
+	dbManager := sqldb.NewSQLiteDBManager(infra.DB.DB, &logger)
 	return app.NewApp(
 		cfg,
 		itrs,

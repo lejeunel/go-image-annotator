@@ -10,6 +10,7 @@ import (
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	"github.com/lejeunel/go-image-annotator/adapters/web/htmx"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	listmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/list"
 	readmd "github.com/lejeunel/go-image-annotator/use-cases/metadata/read"
@@ -32,10 +33,10 @@ func NewAddMetaPresenter(w http.ResponseWriter, u b.RowURL) AddMetaPresenter {
 	}
 }
 
-func (p *AddMetaPresenter) SuccessAddMetadata(r m.MetaData) {
+func (p *AddMetaPresenter) SuccessAddMetadata(im im.Image) {
 	htmx.NotifySuccessPayload(p.Writer,
 		"adding meta-data",
-		fmt.Sprintf("Successfully added %v:%v", r.Key, r.Value))
+		"Successfully added meta-data")
 }
 
 func (p *AddMetaPresenter) SuccessListMetadata(r listmd.Response) {

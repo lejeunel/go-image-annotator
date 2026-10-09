@@ -3,6 +3,7 @@ package add
 import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 )
 
 type ImageRepo interface {
@@ -16,5 +17,5 @@ type CollectionRepo interface {
 
 type MetaDataRepo interface {
 	Add(clc.CollectionName, im.ImageId, string, any) error
-	KeyExists(clc.CollectionName, im.ImageId, string) (bool, error)
+	List(clc.CollectionName, im.ImageId) ([]m.MetaData, error)
 }
