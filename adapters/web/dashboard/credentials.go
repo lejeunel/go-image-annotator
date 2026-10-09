@@ -107,6 +107,6 @@ func NewChangePasswordPresenter(w http.ResponseWriter) ChangePasswordPresenter {
 	return ChangePasswordPresenter{w, task, htmx.NewErrorPresenter(task, w)}
 }
 
-func (p ChangePasswordPresenter) Success() {
+func (p ChangePasswordPresenter) SuccessChangePassword() {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, "Successfully changed password")
 }

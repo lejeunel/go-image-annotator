@@ -1,6 +1,6 @@
 package change_password
 
 type OutputPort interface {
-	Success()
+	SuccessChangePassword()
 	Error(error)
 }

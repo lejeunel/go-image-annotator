@@ -23,7 +23,7 @@ func NewCreateGroupPresenter(w http.ResponseWriter) CreateGroupPresenter {
 	return CreateGroupPresenter{w, task, okMessageFunc, htmx.NewErrorPresenter(task, w)}
 }
 
-func (p CreateGroupPresenter) Success(r create.Response) {
+func (p CreateGroupPresenter) SuccessCreateGroup(r create.Response) {
 	htmx.NotifySuccessPayloadAndReload(p.writer, p.task, p.okMessageFunc(r))
 }
 

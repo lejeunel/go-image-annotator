@@ -9,6 +9,6 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(Response) {
+func (p *FakePresenter) SuccessImportImage(Response) {
 	p.GotSuccess = true
 }

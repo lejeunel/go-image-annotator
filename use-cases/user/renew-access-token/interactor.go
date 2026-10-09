@@ -39,7 +39,7 @@ func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort)
 		out.Error(fmt.Errorf("%v: setting token hash: %w", errCtx, err))
 		return
 	}
-	out.Success(Response{Id: userId, PersonalAccessToken: token.Value})
+	out.SuccessRenewAPIToken(Response{Id: userId, PersonalAccessToken: token.Value})
 }
 
 type Option func(*Interactor)

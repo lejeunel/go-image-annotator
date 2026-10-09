@@ -18,7 +18,7 @@ type PasswordResetPresenter struct {
 	htmx.ErrorPresenter
 }
 
-func (p PasswordResetPresenter) Success() {
+func (p PasswordResetPresenter) SuccessResetForgottenPassword() {
 	Div(P(Text("Password changed successfully!")),
 		P(Text("Proceed to "), cmp.MakeTextLink(rt.HomePageUrl, "login"), Text("."))).Render(p.w)
 }

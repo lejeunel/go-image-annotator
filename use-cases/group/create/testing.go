@@ -39,7 +39,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(r Response) {
+func (p *FakePresenter) SuccessCreateGroup(r Response) {
 	p.GotSuccess = true
 	p.Got = r
 }

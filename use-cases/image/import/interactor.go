@@ -73,7 +73,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	// TODO import annotations here
 
-	out.Success(Response{})
+	out.SuccessImportImage(Response{})
 }
 
 func (i Interactor) ensureImageDoesNotAlreadyExistInCollection(

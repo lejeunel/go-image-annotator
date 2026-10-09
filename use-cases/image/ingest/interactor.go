@@ -73,7 +73,7 @@ func (i Interactor) Execute(ctx context.Context, r ing.Request, out OutputPort) 
 		return
 	}
 
-	out.Success(*response)
+	out.SuccessIngestImage(*response)
 }
 
 func (i Interactor) findCollectionByName(name string) (*clc.Collection, error) {

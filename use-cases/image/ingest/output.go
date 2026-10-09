@@ -5,6 +5,6 @@ import (
 )
 
 type OutputPort interface {
-	Success(ing.Response)
+	SuccessIngestImage(ing.Response)
 	Error(error)
 }

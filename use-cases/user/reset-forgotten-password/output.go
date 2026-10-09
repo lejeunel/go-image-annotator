@@ -1,6 +1,6 @@
 package reset_forgotten_password
 
 type OutputPort interface {
-	Success()
+	SuccessResetForgottenPassword()
 	Error(error)
 }

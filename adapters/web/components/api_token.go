@@ -29,7 +29,7 @@ type TokenData struct {
 	Token string
 }
 
-func (p APITokenPresenter) Success(resp rt.Response) {
+func (p APITokenPresenter) SuccessRenewAPIToken(resp rt.Response) {
 	t := template.New("")
 	template.Must(t.Parse(ApiTokenDisplay))
 	t.Execute(p.Writer,

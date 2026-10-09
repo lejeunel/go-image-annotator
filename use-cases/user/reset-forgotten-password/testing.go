@@ -9,6 +9,6 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success() {
+func (p *FakePresenter) SuccessResetForgottenPassword() {
 	p.GotSuccess = true
 }

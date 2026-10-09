@@ -50,7 +50,7 @@ func (i *Interactor) Execute(ctx context.Context, userId string, out OutputPort)
 		out.Error(fmt.Errorf("%v: storing token: %w", errCtx, err))
 		return
 	}
-	out.Success(Response{
+	out.SuccessGetForgotPasswordToken(Response{
 		Id: userId, Email: userId,
 		PasswordResetToken: token.Value,
 	})

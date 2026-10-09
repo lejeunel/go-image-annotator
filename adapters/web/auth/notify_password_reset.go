@@ -18,7 +18,7 @@ type NotifyPasswordResetPresenter struct {
 	baseURL string
 }
 
-func (p NotifyPasswordResetPresenter) Success(r fpw.Response) {
+func (p NotifyPasswordResetPresenter) SuccessGetForgotPasswordToken(r fpw.Response) {
 	url := rt.AddQueryParams(p.baseURL, "token", r.PasswordResetToken)
 	p.Notify(Notification{Email: r.Email, URL: url.String()})
 	p.redirect()

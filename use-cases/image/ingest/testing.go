@@ -34,7 +34,7 @@ type FakePresenter struct {
 	t.TestingErrPresenter
 }
 
-func (p *FakePresenter) Success(r ing.Response) {
+func (p *FakePresenter) SuccessIngestImage(r ing.Response) {
 	p.Got = &r
 	p.GotSuccess = true
 }

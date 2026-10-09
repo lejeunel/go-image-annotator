@@ -66,7 +66,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		return
 	}
 
-	out.Success()
+	out.SuccessResetForgottenPassword()
 }
 
 type Option func(*Interactor)

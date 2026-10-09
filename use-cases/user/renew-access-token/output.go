@@ -1,6 +1,6 @@
 package renew_token
 
 type OutputPort interface {
-	Success(Response)
+	SuccessRenewAPIToken(Response)
 	Error(error)
 }

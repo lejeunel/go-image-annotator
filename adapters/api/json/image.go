@@ -111,7 +111,7 @@ func (p ImagePresenter) SuccessReadRawImage(r raw.Response) {
 	p.Writer.Write(data)
 }
 
-func (p ImagePresenter) Success(r ig.Response) {
+func (p ImagePresenter) SuccessIngestImage(r ig.Response) {
 	id := r.ImageId.String()
 	response := models.ImageIngestionResponse{
 		Id: &id,

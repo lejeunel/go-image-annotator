@@ -27,7 +27,7 @@ func (p GroupPresenter) SuccessFindGroup(r g.Group) {
 	s.WriteJSON(p.Writer, 200, MakeGroupResponse(r))
 }
 
-func (p GroupPresenter) Success(r create.Response) {
+func (p GroupPresenter) SuccessCreateGroup(r create.Response) {
 	s.WriteJSON(p.Writer, 200, models.Group{
 		Name:        r.Name,
 		Description: r.Description,
