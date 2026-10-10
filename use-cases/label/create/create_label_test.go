@@ -3,6 +3,7 @@ package create
 import (
 	"testing"
 
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -17,10 +18,10 @@ func TestHandleAuthError(t *testing.T) {
 }
 
 func TestCreateLabelWithDuplicateNameShouldFail(t *testing.T) {
-	name := "my-label"
 	p := &FakePresenter{}
-	itr := New(&fk.LabelRepo{ExistingNames: []string{name}})
-	itr.Execute(t.Context(), Request{Name: name}, p)
+	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
+	itr := New(&fk.LabelRepo{Existing: []lbl.Label{label}})
+	itr.Execute(t.Context(), Request{Name: label.Name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
 }

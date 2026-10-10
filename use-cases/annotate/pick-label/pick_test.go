@@ -1,9 +1,9 @@
 package pick
 
 import (
-	"slices"
 	"testing"
 
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -35,22 +35,32 @@ func TestHandleErrOnFetch(t *testing.T) {
 
 func TestFetchLabels(t *testing.T) {
 	p := &FakePresenter{}
-	labels := []string{"first-label", "second-labels"}
-	itr := New(&fk.LabelRepo{ExistingNames: labels}, &fk.ProfileRepo{})
+	labels := []lbl.Label{
+		lbl.NewLabel(lbl.NewLabelId(), "fist-label"),
+		lbl.NewLabel(lbl.NewLabelId(), "second-label"),
+	}
+	itr := New(&fk.LabelRepo{Existing: labels}, &fk.ProfileRepo{})
 	itr.Execute(t.Context(), nil, p)
 	assert.True(t, p.GotSuccess)
-	assert.True(t, slices.Equal(p.Got, labels))
+	assert.Equal(t, p.Got[0], labels[0].Name)
 }
 
 func TestFetchLabelsInProfile(t *testing.T) {
 	p := &FakePresenter{}
-	labels := []string{"first-label", "second-labels"}
-	profile := pr.NewProfile(pr.NewProfileId(), "my-profile", pr.WithLabels(labels))
+	labels := []lbl.Label{
+		lbl.NewLabel(lbl.NewLabelId(), "first-label"),
+		lbl.NewLabel(lbl.NewLabelId(), "second-label"),
+	}
+	var labelNames []string
+	for _, l := range labels {
+		labelNames = append(labelNames, l.Name)
+	}
+	profile := pr.NewProfile(pr.NewProfileId(), "my-profile", pr.WithLabels(labelNames))
 	itr := New(
-		&fk.LabelRepo{ExistingNames: labels},
+		&fk.LabelRepo{Existing: labels},
 		&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}},
 	)
 	itr.Execute(t.Context(), &profile.Name, p)
 	assert.True(t, p.GotSuccess)
-	assert.Equal(t, labels, p.Got)
+	assert.Equal(t, labelNames, p.Got)
 }

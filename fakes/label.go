@@ -1,29 +1,27 @@
 package fake
 
 import (
-	"slices"
-
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
 type LabelRepo struct {
-	ErrOnFind     error
-	ErrOnCreate   error
-	ErrOnDelete   error
-	ErrOnIsUsed   error
-	ErrOnExists   error
-	ErrOnFetch    error
-	ErrOnList     error
-	ErrOnUpdate   error
-	ErrOnCount    error
-	Return        lbl.Label
-	FetchedName   string
-	ExistingNames []string
-	Created       lbl.Label
-	IsUsed_       bool
-	Count_        int64
-	GotUpdatable  lbl.UpdatableModel
+	ErrOnFind    error
+	ErrOnCreate  error
+	ErrOnDelete  error
+	ErrOnIsUsed  error
+	ErrOnExists  error
+	ErrOnFetch   error
+	ErrOnList    error
+	ErrOnUpdate  error
+	ErrOnCount   error
+	Return       lbl.Label
+	FetchedName  string
+	Existing     []lbl.Label
+	Created      lbl.Label
+	IsUsed_      bool
+	Count_       int64
+	GotUpdatable lbl.UpdatableModel
 }
 
 func (r *LabelRepo) FindLabel(name string) (*lbl.Label, error) {
@@ -46,8 +44,10 @@ func (r *LabelRepo) Exists(name string) (bool, error) {
 	if r.ErrOnExists != nil {
 		return false, r.ErrOnExists
 	}
-	if slices.Contains(r.ExistingNames, name) {
-		return true, nil
+	for _, l := range r.Existing {
+		if l.Name == name {
+			return true, nil
+		}
 	}
 	return false, nil
 }
@@ -82,7 +82,11 @@ func (r *LabelRepo) FetchAll() ([]string, error) {
 	if r.ErrOnFetch != nil {
 		return nil, r.ErrOnFetch
 	}
-	return r.ExistingNames, nil
+	var names []string
+	for _, l := range r.Existing {
+		names = append(names, l.Name)
+	}
+	return names, nil
 }
 
 func (r *LabelRepo) List(req pag.PaginationParams) (*[]lbl.Label, error) {

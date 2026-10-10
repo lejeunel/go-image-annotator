@@ -3,6 +3,7 @@ package delete
 import (
 	"testing"
 
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -50,7 +51,8 @@ func TestDeletingMissingLabelShouldFail(t *testing.T) {
 
 func TestDeleteLabel(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.LabelRepo{ExistingNames: []string{"my-label"}})
+	label := lbl.NewLabel(lbl.NewLabelId(), "my-label")
+	itr := New(&fk.LabelRepo{Existing: []lbl.Label{label}})
 	itr.Execute(t.Context(), "my-label", p)
 	assert.True(t, p.GotSuccess)
 }

@@ -3,6 +3,7 @@ package update
 import (
 	"testing"
 
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -105,15 +106,17 @@ func TestUpdateProfile(t *testing.T) {
 	current := pr.NewProfile(pr.NewProfileId(), "profile-name", pr.WithGroup("current-group"))
 	newDescription := "new-description"
 	newGroup := "new-group"
+	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	req := Request{
 		Name: current.Name, NewName: "new-profile-name",
-		NewDescription: &newDescription, NewLabels: []string{"new-label"},
+		NewDescription: &newDescription, NewLabels: []string{label.Name},
 		NewGroup: &newGroup,
 	}
 
 	profileRepo := &fk.ProfileRepo{ExistingProfiles: []pr.Profile{current}}
+
 	itr := New(profileRepo, &fk.GroupRepo{ExistingNames: []string{newGroup}},
-		&fk.LabelRepo{ExistingNames: req.NewLabels})
+		&fk.LabelRepo{Existing: []lbl.Label{label}})
 	itr.Execute(t.Context(), req, p)
 
 	want := pr.UpdateModel{

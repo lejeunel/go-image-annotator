@@ -3,6 +3,7 @@ package create
 import (
 	"testing"
 
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -106,15 +107,15 @@ func TestHandleErrorOnGroupExists(t *testing.T) {
 func TestCreate(t *testing.T) {
 	p := &FakePresenter{}
 	profileRepo := &fk.ProfileRepo{}
-	labelName := "the-label"
 	group := "the-group"
-	labelRepo := &fk.LabelRepo{ExistingNames: []string{labelName}}
+	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
+	labelRepo := &fk.LabelRepo{Existing: []lbl.Label{label}}
 	itr := New(profileRepo, labelRepo, &fk.GroupRepo{ExistingNames: []string{group}})
 	description := "a-description"
 	req := Request{
 		Name:        "a-profile",
 		Description: &description,
-		Labels:      []string{labelName},
+		Labels:      []string{label.Name},
 	}
 	itr.Execute(t.Context(), req, p)
 	assert.Equal(t, profileRepo.Created[0].Name, req.Name)

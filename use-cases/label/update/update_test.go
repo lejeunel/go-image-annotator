@@ -3,6 +3,7 @@ package update
 import (
 	"testing"
 
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -26,13 +27,12 @@ func TestUpdateNonExistingLabelShouldFail(t *testing.T) {
 }
 
 func TestUpdateLabel(t *testing.T) {
-	name := "name"
-
 	p := &FakePresenter{}
-	repo := &fk.LabelRepo{ExistingNames: []string{name}}
+	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
+	repo := &fk.LabelRepo{Existing: []lbl.Label{label}}
 	itr := New(repo)
 	req := Request{
-		Name:           name,
+		Name:           label.Name,
 		NewDescription: "updated-description",
 	}
 	itr.Execute(t.Context(), req, p)
@@ -41,9 +41,10 @@ func TestUpdateLabel(t *testing.T) {
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
+	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	itr := New(&fk.LabelRepo{
-		ExistingNames: []string{"a-label"},
-		ErrOnUpdate:   e.ErrInternal,
+		Existing:    []lbl.Label{label},
+		ErrOnUpdate: e.ErrInternal,
 	})
 	itr.Execute(t.Context(), Request{Name: "a-label"}, p)
 	assert.True(t, p.GotInternalErr)
