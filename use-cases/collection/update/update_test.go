@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -85,11 +86,15 @@ func TestUpdateCollectionProfile(t *testing.T) {
 	p := &FakePresenter{}
 	name := "name"
 	currentProfile := "current-profile"
-	newProfile := "new-profile"
+	newProfile := pr.NewProfile(pr.NewProfileId(), "new-profile")
 	clcRepo := &fk.CollectionRepo{ExistingNames: []string{name}, ReturnProfile: currentProfile}
-	itr := New(clcRepo, &fk.GroupRepo{}, &fk.ProfileRepo{ExistingNames: []string{newProfile}})
-	itr.Execute(t.Context(), Request{Name: name, NewName: name, NewProfile: &newProfile}, p)
+	itr := New(
+		clcRepo,
+		&fk.GroupRepo{},
+		&fk.ProfileRepo{ExistingProfiles: []pr.Profile{newProfile}},
+	)
+	itr.Execute(t.Context(), Request{Name: name, NewName: name, NewProfile: &newProfile.Name}, p)
 	assert.NotNil(t, clcRepo.GotUpdateModel.NewProfile)
-	assert.Equal(t, newProfile, *clcRepo.GotUpdateModel.NewProfile)
+	assert.Equal(t, newProfile.Name, *clcRepo.GotUpdateModel.NewProfile)
 	assert.True(t, p.GotSuccess)
 }

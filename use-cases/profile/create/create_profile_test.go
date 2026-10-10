@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -33,11 +34,11 @@ func TestHandleErrorOnCheckExistence(t *testing.T) {
 }
 
 func TestCreateProfileWithDuplicateNameShouldFail(t *testing.T) {
-	name := "my-profile"
 	p := &FakePresenter{}
-	itr := New(&fk.ProfileRepo{ExistingNames: []string{name}}, &fk.LabelRepo{},
+	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
+	itr := New(&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}}, &fk.LabelRepo{},
 		&fk.GroupRepo{})
-	itr.Execute(t.Context(), Request{Name: name}, p)
+	itr.Execute(t.Context(), Request{Name: profile.Name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
 }

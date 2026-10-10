@@ -34,8 +34,13 @@ func TestNonExistingSourceShouldFail(t *testing.T) {
 
 func TestDestinationMustNotExist(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.ProfileRepo{ExistingNames: []string{"name", "new-name"}}, &fk.GroupRepo{},
-		&fk.LabelRepo{})
+	source := pr.NewProfile(pr.NewProfileId(), "source-profile")
+	destination := pr.NewProfile(pr.NewProfileId(), "destination-profile")
+	itr := New(
+		&fk.ProfileRepo{ExistingProfiles: []pr.Profile{source, destination}},
+		&fk.GroupRepo{},
+		&fk.LabelRepo{},
+	)
 	itr.Execute(t.Context(), Request{Name: "name", NewName: "new-name"}, p)
 	assert.True(t, p.GotValidationErr)
 	assert.False(t, p.GotSuccess)

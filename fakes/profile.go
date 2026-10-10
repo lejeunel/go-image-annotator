@@ -1,8 +1,6 @@
 package fake
 
 import (
-	"slices"
-
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -20,7 +18,6 @@ type ProfileRepo struct {
 	ErrOnCount       error
 	ErrOnGetGroup    error
 	ErrOnUpdate      error
-	ExistingNames    []string
 	ExistingProfiles []pr.Profile
 	Created          []pr.Profile
 	AddedLabels      []lbl.LabelName
@@ -46,8 +43,10 @@ func (r *ProfileRepo) Exists(name string) (*bool, error) {
 	}
 
 	exist := true
-	if slices.Contains(r.ExistingNames, name) {
-		return &exist, nil
+	for _, pr := range r.ExistingProfiles {
+		if pr.Name == name {
+			return &exist, nil
+		}
 	}
 	exist = false
 	return &exist, nil
