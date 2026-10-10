@@ -23,7 +23,7 @@ func TestReadCollection(t *testing.T) {
 	collection := clc.NewCollection(clc.NewCollectionId(),
 		"my-collection",
 		clc.WithDescription("a-description"))
-	repo := &fk.CollectionRepo{Return: collection}
+	repo := &fk.CollectionRepo{Existing: []clc.Collection{collection}}
 	p := &FakePresenter{}
 	itr := New(repo)
 	itr.Execute(t.Context(), collection.Name, p)

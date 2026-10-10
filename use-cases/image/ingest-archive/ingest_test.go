@@ -21,7 +21,7 @@ func Setup(t *testing.T) (Interactor, clc.Collection, grp.Group, context.Context
 		clc.WithGroup(group.Name))
 	data := []byte("asdf")
 	itr := New(&FakeIngester{},
-		&fk.CollectionRepo{ExistingNames: []string{collection.Name}},
+		&fk.CollectionRepo{Existing: []clc.Collection{collection}},
 		&fk.FileStore{}, &fk.EventLogger{}, fk.NewLogger(), &fk.JobQueue{},
 		100)
 	ctx := u.AppendUserToContext(t.Context(), u.NewUser("user@mail.com"))
@@ -32,11 +32,11 @@ func Setup(t *testing.T) (Interactor, clc.Collection, grp.Group, context.Context
 func TestHandleAuthError(t *testing.T) {
 	itr, collection, _, ctx, _ := Setup(t)
 	itr.CollectionRepo = &fk.CollectionRepo{
-		Return: collection,
+		Existing: []clc.Collection{collection},
 	}
 	itr.Auth = &fk.Auth{ErrOnAuth: e.ErrAuthorization}
 	p := &FakePresenter{}
-	itr.Execute(ctx, Request{}, p)
+	itr.Execute(ctx, Request{Collection: collection.Name}, p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }

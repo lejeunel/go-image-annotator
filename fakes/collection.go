@@ -1,9 +1,8 @@
 package fake
 
 import (
-	"slices"
-
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
@@ -17,9 +16,8 @@ type CollectionRepo struct {
 	ErrOnUpdate     error
 	ErrOnGetGroup   error
 	ErrOnGetProfile error
-	ExistingNames   []string
+	Existing        []clc.Collection
 	IsPopulated_    bool
-	Return          clc.Collection
 	Count_          int
 	Created         clc.Collection
 	GotUpdateModel  clc.UpdateModel
@@ -40,8 +38,10 @@ func (r *CollectionRepo) Exists(name string) (bool, error) {
 	if r.ErrOnExists != nil {
 		return false, r.ErrOnExists
 	}
-	if slices.Contains(r.ExistingNames, name) {
-		return true, nil
+	for _, c := range r.Existing {
+		if c.Name == name {
+			return true, nil
+		}
 	}
 	return false, nil
 }
@@ -51,7 +51,12 @@ func (r *CollectionRepo) Find(name string) (*clc.Collection, error) {
 		return nil, r.ErrOnFind
 	}
 
-	return &r.Return, nil
+	for _, c := range r.Existing {
+		if c.Name == name {
+			return &c, nil
+		}
+	}
+	return nil, e.ErrNotFound
 }
 
 func (r *CollectionRepo) Delete(string) error {
@@ -75,7 +80,7 @@ func (r *CollectionRepo) Count() (*int64, error) {
 	if r.ErrOnCount != nil {
 		return &count, r.ErrOnCount
 	}
-	res := int64(r.Count_)
+	res := int64(len(r.Existing))
 	return &res, nil
 }
 
@@ -85,8 +90,11 @@ func (r *CollectionRepo) List(req pa.PaginationParams) (*[]clc.Collection, error
 	}
 
 	result := []clc.Collection{}
-	for range req.PageSize {
-		result = append(result, r.Return)
+	for i := range len(r.Existing) {
+		if i == req.PageSize {
+			break
+		}
+		result = append(result, r.Existing[i])
 	}
 	return &result, nil
 }

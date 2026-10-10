@@ -56,6 +56,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	if err := i.ensureCollectionNameExists(r.Name); err != nil {
+		fmt.Println(err)
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}

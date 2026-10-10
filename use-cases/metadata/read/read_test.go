@@ -13,7 +13,7 @@ import (
 func Setup() (Interactor, clc.Collection, im.Image) {
 	collection := clc.NewCollection(clc.NewCollectionId(), "my-collection")
 	image := im.NewImage(im.NewImageId(), collection)
-	return New(&fk.CollectionRepo{ExistingNames: []string{collection.Name}},
+	return New(&fk.CollectionRepo{Existing: []clc.Collection{collection}},
 		&fk.ImageRepo{ImageIsInCollection: true},
 		&fk.MetaDataRepo{}), collection, image
 }
@@ -39,7 +39,7 @@ func TestMissingCollectionShouldFail(t *testing.T) {
 
 func TestCheckImageInCollectionError(t *testing.T) {
 	itr, collection, image := Setup()
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{collection.Name}}
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
 	itr.ImageRepo = &fk.ImageRepo{ErrOnImageExistsInCollection: e.ErrInternal}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
@@ -50,7 +50,7 @@ func TestCheckImageInCollectionError(t *testing.T) {
 
 func TestImageNotInCollectionShouldFail(t *testing.T) {
 	itr, collection, image := Setup()
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{collection.Name}}
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
 	itr.ImageRepo = &fk.ImageRepo{ImageIsInCollection: false}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
@@ -63,7 +63,7 @@ func TestCheckExistenceOfKeyError(t *testing.T) {
 	itr, collection, image := Setup()
 	itr.MetaDataRepo = &fk.MetaDataRepo{ErrOnKeyExists: e.ErrInternal}
 	itr.ImageRepo = &fk.ImageRepo{ImageIsInCollection: true}
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{collection.Name}}
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
 	p := &FakePresenter{}
 	key := "the-key"
 	itr.Execute(t.Context(),

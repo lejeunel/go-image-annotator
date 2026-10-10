@@ -13,16 +13,22 @@ import (
 
 func TestHandleAuthError(t *testing.T) {
 	group := g.NewGroup(g.NewGroupId(), "dst-group")
+	srcCollection := clc.NewCollection(clc.NewCollectionId(), "src-collection",
+		clc.WithGroup(group.Name))
 	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection",
 		clc.WithGroup(group.Name))
-	itr := New(&fk.ImageRepo{}, &fk.CollectionRepo{Return: dstCollection},
-		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
+
+	itr := New(
+		&fk.ImageRepo{},
+		&fk.CollectionRepo{Existing: []clc.Collection{srcCollection, dstCollection}},
+		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}),
+	)
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{
 			ImageId:               im.NewImageId().String(),
-			SourceCollection:      "src-collection",
-			DestinationCollection: "dst-collection",
+			SourceCollection:      srcCollection.Name,
+			DestinationCollection: dstCollection.Name,
 		},
 		p)
 	assert.True(t, p.GotAuthErr)
@@ -49,34 +55,55 @@ func TestImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 
 	group := g.NewGroup(g.NewGroupId(), "dst-group")
-	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection",
+	source := clc.NewCollection(clc.NewCollectionId(), "source-collection",
 		clc.WithGroup(group.Name))
-	itr := New(&fk.ImageRepo{ImageIsInCollection: true}, &fk.CollectionRepo{Return: dstCollection})
-	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
+	destination := clc.NewCollection(clc.NewCollectionId(), "destination-collection",
+		clc.WithGroup(group.Name))
+	itr := New(
+		&fk.ImageRepo{ImageIsInCollection: true},
+		&fk.CollectionRepo{Existing: []clc.Collection{source, destination}},
+	)
+	itr.Execute(
+		t.Context(),
+		Request{
+			SourceCollection:      source.Name,
+			DestinationCollection: destination.Name,
+			ImageId:               im.NewImageId().String(),
+		},
+		p,
+	)
 	assert.True(t, p.GotDependencyErr)
 	assert.False(t, p.GotSuccess)
 }
 
 func TestInternalErrOnImageAlreadyExistsInCollectionShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
+	destination := clc.NewCollection(clc.NewCollectionId(), "destination-collection")
+	source := clc.NewCollection(clc.NewCollectionId(), "source-collection")
 	itr := New(
 		&fk.ImageRepo{ErrOnImageExistsInCollection: e.ErrInternal},
-		&fk.CollectionRepo{Return: dstCollection},
+		&fk.CollectionRepo{Existing: []clc.Collection{destination, source}},
 	)
-	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
+	itr.Execute(t.Context(), Request{
+		SourceCollection: source.Name, ImageId: im.NewImageId().String(),
+		DestinationCollection: destination.Name,
+	}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
 
 func TestInternalErrOnImportShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	dstCollection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
+	destination := clc.NewCollection(clc.NewCollectionId(), "destination-collection")
+	source := clc.NewCollection(clc.NewCollectionId(), "source-collection")
 	itr := New(
 		&fk.ImageRepo{ErrOnAddToCollection: e.ErrInternal},
-		&fk.CollectionRepo{Return: dstCollection},
+		&fk.CollectionRepo{Existing: []clc.Collection{source, destination}},
 	)
-	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
+	itr.Execute(t.Context(), Request{
+		SourceCollection: source.Name,
+		ImageId:          im.NewImageId().String(), DestinationCollection: destination.Name,
+	}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -86,7 +113,7 @@ func TestImportImageInCollection(t *testing.T) {
 	imageId := im.NewImageId()
 	collection := clc.NewCollection(clc.NewCollectionId(), "dst-collection")
 	repo := &fk.ImageRepo{}
-	itr := New(repo, &fk.CollectionRepo{Return: collection})
+	itr := New(repo, &fk.CollectionRepo{Existing: []clc.Collection{collection}})
 	itr.Execute(t.Context(),
 		Request{
 			ImageId:               imageId.String(),

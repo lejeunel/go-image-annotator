@@ -13,14 +13,15 @@ import (
 
 func TestHandleAuthError(t *testing.T) {
 	group := grp.NewGroup(grp.NewGroupId(), "a-group")
+	collection := clc.NewCollection(clc.NewCollectionId(),
+		"a-collection",
+		clc.WithGroup(group.Name))
 	itr := NewTestingInteractor(&fk.CollectionRepo{
-		Return: clc.NewCollection(clc.NewCollectionId(),
-			"a-collection",
-			clc.WithGroup(group.Name)),
+		Existing: []clc.Collection{collection},
 	},
 		WithAuth(&fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), ig.Request{}, p)
+	itr.Execute(t.Context(), ig.Request{Collection: collection.Name}, p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }

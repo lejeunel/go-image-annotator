@@ -38,8 +38,7 @@ func SetupRepos(image im.Image) Repos {
 			},
 		},
 		&fk.CollectionRepo{
-			Return:        image.Collection,
-			ExistingNames: []string{image.Collection.Name},
+			Existing: []clc.Collection{image.Collection},
 		},
 		&fk.AnnotationRepo{},
 		&fk.MetaDataRepo{ReturnList: image.Meta},
@@ -77,8 +76,10 @@ func SetupCopy() (ImageStore, clc.Collection, im.Image, clc.Collection, *fk.Imag
 	}
 	anrepo := fk.AnnotationRepo{Labels: image.Labels}
 	repos := Repos{
-		ImageRepo:      &imrepo,
-		CollectionRepo: &fk.CollectionRepo{},
+		ImageRepo: &imrepo,
+		CollectionRepo: &fk.CollectionRepo{
+			Existing: []clc.Collection{srcCollection, dstCollection},
+		},
 		AnnotationRepo: &anrepo,
 		MetaRepo:       &fk.MetaDataRepo{},
 	}

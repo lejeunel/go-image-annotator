@@ -22,7 +22,7 @@ func Setup(t *testing.T) (Interactor, clc.Collection, grp.Group, context.Context
 		&fk.ImageStore{},
 		&fk.ImageRepo{},
 		&fk.CollectionRepo{
-			Return: collection,
+			Existing: []clc.Collection{collection},
 		},
 		&fk.JobQueue{},
 		&fk.EventLogger{}, fk.NewLogger(),
@@ -33,8 +33,10 @@ func Setup(t *testing.T) (Interactor, clc.Collection, grp.Group, context.Context
 func TestHandleAuthError(t *testing.T) {
 	itr, _, _, _ := Setup(t)
 	p := &FakePresenter{}
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
 	itr.Auth = &fk.Auth{ErrOnAuth: e.ErrAuthorization}
-	itr.Execute(t.Context(), "", p)
+	itr.Execute(t.Context(), collection.Name, p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -49,15 +51,19 @@ func TestDeleteNonExistingCollectionShouldFail(t *testing.T) {
 }
 
 func TestHandleInternalErrorOnDelete(t *testing.T) {
-	itr, _, _, _ := Setup(t)
-	itr.CollectionRepo = &fk.CollectionRepo{ErrOnDelete: e.ErrInternal}
+	itr, collection, _, _ := Setup(t)
+	itr.CollectionRepo = &fk.CollectionRepo{
+		Existing:    []clc.Collection{collection},
+		ErrOnDelete: e.ErrInternal,
+	}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(), "my-collection", p)
 	assert.True(t, p.GotInternalErr)
 }
 
 func TestDeleteEmptyCollection(t *testing.T) {
-	itr, _, _, ctx := Setup(t)
+	itr, collection, _, ctx := Setup(t)
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
 	p := &FakePresenter{}
 	itr.Execute(ctx, "my-collection", p)
 	assert.True(t, p.GotSuccess)

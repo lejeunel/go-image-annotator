@@ -52,7 +52,7 @@ func TestMissingCollectionShouldFail(t *testing.T) {
 
 func TestCheckImageInCollectionError(t *testing.T) {
 	itr, collection, image, _ := Setup()
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{collection.Name}}
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
 	itr.ImageRepo = &fk.ImageRepo{ErrOnImageExistsInCollection: e.ErrInternal}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
@@ -63,7 +63,7 @@ func TestCheckImageInCollectionError(t *testing.T) {
 
 func TestImageNotInCollectionShouldFail(t *testing.T) {
 	itr, collection, image, _ := Setup()
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{collection.Name}}
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
 	itr.ImageRepo = &fk.ImageRepo{ImageIsInCollection: false}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
@@ -76,7 +76,7 @@ func TestCheckExistenceOfKeyError(t *testing.T) {
 	itr, collection, image, _ := Setup()
 	itr.MetaDataRepo = &fk.MetaDataRepo{ErrOnKeyExists: e.ErrInternal}
 	itr.ImageRepo = &fk.ImageRepo{ImageIsInCollection: true}
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{collection.Name}}
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
 	p := &FakePresenter{}
 	key, value := "the-key", "the-value"
 	itr.Execute(t.Context(),
@@ -137,7 +137,7 @@ func TestErrorOnUpdate(t *testing.T) {
 	}
 	itr.MetaDataRepo = m
 	itr.ImageRepo = &fk.ImageRepo{ImageIsInCollection: true}
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{collection.Name}}
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{
@@ -152,7 +152,7 @@ func TestErrorOnUpdate(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	itr, collection, image, _ := Setup()
 	itr.ImageRepo = &fk.ImageRepo{ImageIsInCollection: true}
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{collection.Name}}
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
 	key, value := "the-key", "the-value"
 	newValue := "the-new-value"
 	m := &fk.MetaDataRepo{

@@ -38,20 +38,26 @@ func TestHandleAuthErr(t *testing.T) {
 func TestReceiveTaskPayload(t *testing.T) {
 	itr := NewTestingCloner()
 	p := &FakePresenter{}
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{"source-collection"}}
+	sourceCollection := clc.NewCollection(clc.NewCollectionId(), "source-collection")
+	destinationCollection := clc.NewCollection(clc.NewCollectionId(), "destination-collection")
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{sourceCollection}}
 	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
-		Request{Source: "source-collection", Destination: "destination-collection"}, p)
+		Request{
+			Source:      sourceCollection.Name,
+			Destination: destinationCollection.Name,
+		}, p)
 	assert.Equal(t, task.CollectionCloneTask.String(), p.Got.Type)
 	assert.True(t, p.GotSuccess)
 }
 
 func TestCloningToAlreadyExistingCollectionShouldFail(t *testing.T) {
 	itr := NewTestingCloner()
-	itr.CollectionRepo = &fk.CollectionRepo{ExistingNames: []string{"destination-collection"}}
+	destinationCollection := clc.NewCollection(clc.NewCollectionId(), "destination-collection")
+	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{destinationCollection}}
 	p := &FakePresenter{}
 	itr.Execute(
 		st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
-		Request{Destination: "destination-collection"},
+		Request{Destination: destinationCollection.Name},
 		p,
 	)
 	assert.Error(t, p.GotErr)
@@ -74,7 +80,7 @@ func TestClone(t *testing.T) {
 		clc.WithCreatedAt(time.Now()), clc.WithGroup("a-group"), clc.WithProfile("a-profile"))
 	s := fk.ImageStore{}
 	itr.ImageStore = &s
-	collectionRepo := &fk.CollectionRepo{ExistingNames: []string{src.Name}, Return: src}
+	collectionRepo := &fk.CollectionRepo{Existing: []clc.Collection{src}}
 	itr.CollectionRepo = collectionRepo
 	itr.ImageRepo = &fk.ImageRepo{
 		IterateBaseImages: []im.BaseImage{

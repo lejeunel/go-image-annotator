@@ -3,6 +3,7 @@ package list
 import (
 	"testing"
 
+	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
@@ -11,7 +12,11 @@ import (
 
 func TestHandleInternalErrOnCount(t *testing.T) {
 	p := &FakePresenter{}
-	itr := New(&fk.CollectionRepo{ErrOnCount: e.ErrInternal}, 1, 10)
+
+	itr := New(&fk.CollectionRepo{
+		Existing:   []clc.Collection{clc.NewCollection(clc.NewCollectionId(), "a-collection")},
+		ErrOnCount: e.ErrInternal,
+	}, 1, 10)
 	itr.Execute(t.Context(), pa.PaginationParams{Page: 1, PageSize: 1}, p)
 	assert.Equal(t, p.GotInternalErr, true)
 	assert.Equal(t, p.GotSuccess, false)
@@ -26,18 +31,19 @@ func TestHandleInternalErrOnList(t *testing.T) {
 }
 
 func TestListCollection(t *testing.T) {
-	count := 3
-	pageSize := 2
+	pageSize := 1
 	page := int64(1)
 
-	repo := &fk.CollectionRepo{Count_: count}
+	repo := &fk.CollectionRepo{
+		Existing: []clc.Collection{clc.NewCollection(clc.NewCollectionId(), "a-collection")},
+	}
 	p := &FakePresenter{}
 	itr := New(repo, 1, 10)
 	req := pa.PaginationParams{PageSize: pageSize, Page: page}
 	itr.Execute(t.Context(), req, p)
-	assert.Equal(t, len(p.Got.Collections), pageSize, "page size")
-	assert.Equal(t, int(p.Got.Pagination.TotalRecords), count, "total records")
-	assert.Equal(t, int(p.Got.Pagination.TotalPages), 2, "total pages")
-	assert.Equal(t, p.Got.Pagination.Page, page, "page")
-	assert.Equal(t, p.Got.Pagination.PageSize, pageSize, "page size")
+	assert.Equal(t, pageSize, len(p.Got.Collections))
+	assert.Equal(t, 1, int(p.Got.Pagination.TotalRecords))
+	assert.Equal(t, 1, int(p.Got.Pagination.TotalPages))
+	assert.Equal(t, page, p.Got.Pagination.Page)
+	assert.Equal(t, pageSize, p.Got.Pagination.PageSize)
 }
