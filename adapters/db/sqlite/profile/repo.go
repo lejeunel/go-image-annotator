@@ -20,7 +20,7 @@ type ProfileRepo struct {
 type Row struct {
 	Id          pr.ProfileId `db:"id"`
 	Name        string       `db:"name"`
-	Description string       `db:"description"`
+	Description *string      `db:"description"`
 	GroupId     *g.GroupId   `db:"group_id"`
 	GroupName   *string      `db:"group_name"`
 }
@@ -79,7 +79,14 @@ func (r ProfileRepo) Exists(name string) (*bool, error) {
 }
 
 func (r ProfileRepo) Delete(name string) error {
-	_, err := r.Db.Exec("DELETE FROM profiles WHERE name=$1", name)
+	_, err := r.Db.Exec(
+		`DELETE FROM profiles_labels WHERE profile_id=(SELECT id FROM profiles WHERE name=$1)`,
+		name)
+	if err != nil {
+		return fmt.Errorf("deleting profile to label associations: %v: %w", err, e.ErrInternal)
+	}
+
+	_, err = r.Db.Exec("DELETE FROM profiles WHERE name=$1", name)
 	if err != nil {
 		return fmt.Errorf("deleting record: %v: %w", err, e.ErrInternal)
 	}
@@ -243,10 +250,10 @@ func (r ProfileRepo) build(row Row) (*pr.Profile, error) {
 	); err != nil {
 		return nil, fmt.Errorf("applying query: %v: %w", err, e.ErrInternal)
 	}
-	p := pr.NewProfile(row.Id, row.Name,
-		pr.WithDescription(row.Description), pr.WithLabels(labels))
-	if row.GroupName != nil {
-		p.Group = row.GroupName
+	p := pr.Profile{
+		Id: row.Id, Name: row.Name,
+		Description: row.Description, Labels: labels,
+		Group: row.GroupName,
 	}
 	return &p, nil
 }
