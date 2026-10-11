@@ -36,7 +36,7 @@ func TestHandleErrorOnCheckExistence(t *testing.T) {
 func TestCreateProfileWithDuplicateNameShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
-	itr := New(&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}}, &fk.LabelRepo{},
+	itr := New(&fk.ProfileRepo{Existing: []pr.Profile{profile}}, &fk.LabelRepo{},
 		&fk.GroupRepo{})
 	itr.Execute(t.Context(), Request{Name: profile.Name}, p)
 	assert.True(t, p.GotDuplicationErr)
@@ -108,10 +108,9 @@ func TestHandleErrorOnGroupExists(t *testing.T) {
 func TestCreate(t *testing.T) {
 	p := &FakePresenter{}
 	profileRepo := &fk.ProfileRepo{}
-	group := "the-group"
 	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
 	labelRepo := &fk.LabelRepo{Existing: []lbl.Label{label}}
-	itr := New(profileRepo, labelRepo, &fk.GroupRepo{ExistingNames: []string{group}})
+	itr := New(profileRepo, labelRepo, &fk.GroupRepo{})
 	description := "a-description"
 	req := Request{
 		Name:        "a-profile",

@@ -3,6 +3,7 @@ package list
 import (
 	"testing"
 
+	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
@@ -26,17 +27,16 @@ func TestHandleInternalErrOnCount(t *testing.T) {
 }
 
 func TestListProfiles(t *testing.T) {
-	count := 3
 	pageSize := 2
 	page := 1
-	repo := &fk.ProfileRepo{Count_: count}
+	repo := &fk.ProfileRepo{Existing: []pr.Profile{pr.NewProfile(pr.NewProfileId(), "a-profile")}}
 	p := &FakePresenter{}
 	itr := New(repo)
 	itr.Execute(t.Context(), pag.PaginationParams{PageSize: pageSize, Page: int64(page)}, p)
 
-	assert.Equal(t, len(p.Got.Profiles), pageSize, "page size")
-	assert.Equal(t, int(p.Got.Pagination.TotalRecords), count, "total records")
-	assert.Equal(t, int(p.Got.Pagination.TotalPages), 2, "total pages")
-	assert.Equal(t, int(p.Got.Pagination.Page), page, "page")
-	assert.Equal(t, p.Got.Pagination.PageSize, pageSize, "page size")
+	assert.Equal(t, 1, len(p.Got.Profiles))
+	assert.Equal(t, 1, int(p.Got.Pagination.TotalRecords))
+	assert.Equal(t, 1, int(p.Got.Pagination.TotalPages))
+	assert.Equal(t, page, int(p.Got.Pagination.Page))
+	assert.Equal(t, pageSize, p.Got.Pagination.PageSize)
 }

@@ -12,7 +12,7 @@ import (
 func TestHandleAuthError(t *testing.T) {
 	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
 	itr := New(
-		&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}},
+		&fk.ProfileRepo{Existing: []pr.Profile{profile}},
 		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}),
 	)
 	p := &FakePresenter{}
@@ -25,8 +25,8 @@ func TestHandleInternalErrOnIsUsed(t *testing.T) {
 	p := &FakePresenter{}
 	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
 	itr := New(&fk.ProfileRepo{
-		ExistingProfiles: []pr.Profile{profile},
-		ErrOnIsUsed:      e.ErrInternal,
+		Existing:    []pr.Profile{profile},
+		ErrOnIsUsed: e.ErrInternal,
 	})
 	itr.Execute(t.Context(), profile.Name, p)
 	assert.True(t, p.GotInternalErr)
@@ -37,8 +37,8 @@ func TestDeleteProfileWithAssociatedResourcesShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
 	itr := New(&fk.ProfileRepo{
-		ExistingProfiles: []pr.Profile{profile},
-		IsUsed_:          true,
+		Existing: []pr.Profile{profile},
+		IsUsed_:  true,
 	})
 
 	itr.Execute(t.Context(), profile.Name, p)
@@ -50,8 +50,8 @@ func TestHandleInternalErrOnDelete(t *testing.T) {
 	p := &FakePresenter{}
 	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
 	itr := New(&fk.ProfileRepo{
-		ExistingProfiles: []pr.Profile{profile},
-		ErrOnDelete:      e.ErrInternal,
+		Existing:    []pr.Profile{profile},
+		ErrOnDelete: e.ErrInternal,
 	})
 	itr.Execute(t.Context(), profile.Name, p)
 	assert.True(t, p.GotInternalErr)
@@ -61,7 +61,7 @@ func TestHandleInternalErrOnDelete(t *testing.T) {
 func TestDeleteProfile(t *testing.T) {
 	p := &FakePresenter{}
 	profile := pr.NewProfile(pr.NewProfileId(), "a-profile")
-	itr := New(&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}})
+	itr := New(&fk.ProfileRepo{Existing: []pr.Profile{profile}})
 	itr.Execute(t.Context(), profile.Name, p)
 	assert.True(t, p.GotSuccess)
 }

@@ -58,7 +58,7 @@ func TestFetchLabelsInProfile(t *testing.T) {
 	profile := pr.NewProfile(pr.NewProfileId(), "my-profile", pr.WithLabels(labelNames))
 	itr := New(
 		&fk.LabelRepo{Existing: labels},
-		&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}},
+		&fk.ProfileRepo{Existing: []pr.Profile{profile}},
 	)
 	itr.Execute(t.Context(), &profile.Name, p)
 	assert.True(t, p.GotSuccess)

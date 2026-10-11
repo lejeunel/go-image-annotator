@@ -3,6 +3,7 @@ package update
 import (
 	"testing"
 
+	g "github.com/lejeunel/go-image-annotator/entities/group"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -26,13 +27,13 @@ func TestUpdateNonExistingGroupShouldFail(t *testing.T) {
 }
 
 func TestUpdateGroup(t *testing.T) {
-	name := "name"
+	group := g.NewGroup(g.NewGroupId(), "a-group")
 	p := &FakePresenter{}
-	repo := &fk.GroupRepo{ExistingNames: []string{name}}
+	repo := &fk.GroupRepo{Existing: []g.Group{group}}
 	itr := New(repo)
 	description := "updated-description"
 	req := Request{
-		Name:           name,
+		Name:           group.Name,
 		NewName:        "updated-name",
 		NewDescription: &description,
 	}
@@ -43,30 +44,30 @@ func TestUpdateGroup(t *testing.T) {
 
 func TestUpdateGroupWithNameAlreadyTakenShouldFail(t *testing.T) {
 	p := &FakePresenter{}
-	name := "name"
-	existing_name := "existing-name"
-	itr := New(&fk.GroupRepo{ExistingNames: []string{name, existing_name}})
-	itr.Execute(t.Context(), Request{Name: name, NewName: existing_name}, p)
+	group := g.NewGroup(g.NewGroupId(), "a-group")
+	anotherGroup := g.NewGroup(g.NewGroupId(), "another-group")
+	itr := New(&fk.GroupRepo{Existing: []g.Group{group, anotherGroup}})
+	itr.Execute(t.Context(), Request{Name: group.Name, NewName: anotherGroup.Name}, p)
 	assert.True(t, p.GotDuplicationErr)
 	assert.False(t, p.GotSuccess)
 }
 
 func TestUpdateGroupWithUnchangedNameShouldSucceed(t *testing.T) {
 	p := &FakePresenter{}
-	name := "name"
-	itr := New(&fk.GroupRepo{ExistingNames: []string{name}})
-	itr.Execute(t.Context(), Request{Name: name, NewName: name}, p)
+	group := g.NewGroup(g.NewGroupId(), "a-group")
+	itr := New(&fk.GroupRepo{Existing: []g.Group{group}})
+	itr.Execute(t.Context(), Request{Name: group.Name, NewName: group.Name}, p)
 	assert.True(t, p.GotSuccess)
 }
 
 func TestHandleInternalError(t *testing.T) {
 	p := &FakePresenter{}
-	name := "name"
+	group := g.NewGroup(g.NewGroupId(), "a-group")
 	itr := New(&fk.GroupRepo{
-		ExistingNames: []string{name},
-		ErrOnUpdate:   e.ErrInternal,
+		Existing:    []g.Group{group},
+		ErrOnUpdate: e.ErrInternal,
 	})
 	itr.Execute(t.Context(),
-		Request{Name: name, NewName: name}, p)
+		Request{Name: group.Name, NewName: group.Name}, p)
 	assert.True(t, p.GotInternalErr)
 }

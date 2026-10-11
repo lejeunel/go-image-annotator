@@ -8,24 +8,21 @@ import (
 )
 
 type ProfileRepo struct {
-	ErrOnCreate      error
-	ErrOnExists      error
-	ErrOnAddLabel    error
-	ErrOnFind        error
-	ErrOnDelete      error
-	ErrOnIsUsed      error
-	ErrOnList        error
-	ErrOnCount       error
-	ErrOnGetGroup    error
-	ErrOnUpdate      error
-	ExistingProfiles []pr.Profile
-	Created          []pr.Profile
-	AddedLabels      []lbl.LabelName
-	Return           pr.Profile
-	ReturnGroup      string
-	IsUsed_          bool
-	Count_           int
-	GotUpdateModel   pr.UpdateModel
+	ErrOnCreate    error
+	ErrOnExists    error
+	ErrOnAddLabel  error
+	ErrOnFind      error
+	ErrOnDelete    error
+	ErrOnIsUsed    error
+	ErrOnList      error
+	ErrOnCount     error
+	ErrOnGetGroup  error
+	ErrOnUpdate    error
+	Existing       []pr.Profile
+	Created        []pr.Profile
+	AddedLabels    []lbl.LabelName
+	IsUsed_        bool
+	GotUpdateModel pr.UpdateModel
 }
 
 func (r *ProfileRepo) Create(p pr.Profile) error {
@@ -43,7 +40,7 @@ func (r *ProfileRepo) Exists(name string) (*bool, error) {
 	}
 
 	exist := true
-	for _, pr := range r.ExistingProfiles {
+	for _, pr := range r.Existing {
 		if pr.Name == name {
 			return &exist, nil
 		}
@@ -65,7 +62,7 @@ func (r *ProfileRepo) Find(name string) (*pr.Profile, error) {
 		return nil, r.ErrOnFind
 	}
 
-	for _, p := range r.ExistingProfiles {
+	for _, p := range r.Existing {
 		if p.Name == name {
 			return &p, nil
 		}
@@ -99,7 +96,7 @@ func (r *ProfileRepo) Count() (*int64, error) {
 	if r.ErrOnCount != nil {
 		return &count, r.ErrOnCount
 	}
-	res := int64(r.Count_)
+	res := int64(len(r.Existing))
 	return &res, nil
 }
 
@@ -109,8 +106,11 @@ func (r *ProfileRepo) List(req pa.PaginationParams) ([]pr.Profile, error) {
 	}
 
 	result := []pr.Profile{}
-	for range req.PageSize {
-		result = append(result, r.Return)
+	for i, p := range r.Existing {
+		result = append(result, p)
+		if i > req.PageSize {
+			break
+		}
 	}
 	return result, nil
 }
@@ -120,7 +120,10 @@ func (r *ProfileRepo) ListAll() ([]string, error) {
 		return nil, r.ErrOnList
 	}
 
-	result := []string{r.Return.Name}
+	var result []string
+	for _, p := range r.Existing {
+		result = append(result, p.Name)
+	}
 	return result, nil
 }
 
@@ -128,7 +131,12 @@ func (r *ProfileRepo) GetGroup(name string) (*string, error) {
 	if r.ErrOnGetGroup != nil {
 		return nil, r.ErrOnGetGroup
 	}
-	return &r.ReturnGroup, nil
+	for _, p := range r.Existing {
+		if p.Name == name {
+			return p.Group, nil
+		}
+	}
+	return nil, e.ErrNotFound
 }
 
 func (r *ProfileRepo) Update(m pr.UpdateModel) error {

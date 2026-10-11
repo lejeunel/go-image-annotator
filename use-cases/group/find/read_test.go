@@ -12,7 +12,7 @@ import (
 
 func TestRead(t *testing.T) {
 	group := grp.NewGroup(grp.NewGroupId(), "my-group")
-	repo := &fk.GroupRepo{Return: group}
+	repo := &fk.GroupRepo{Existing: []grp.Group{group}}
 	p := &FakePresenter{}
 	itr := New(repo)
 	itr.Execute(t.Context(), group.Name, p)

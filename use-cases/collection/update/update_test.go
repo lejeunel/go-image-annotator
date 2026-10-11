@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
+	g "github.com/lejeunel/go-image-annotator/entities/group"
 	pr "github.com/lejeunel/go-image-annotator/entities/profile"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -70,18 +71,25 @@ func TestUpdateCollectionWithNoGroup(t *testing.T) {
 
 func TestUpdateCollectionGroup(t *testing.T) {
 	p := &FakePresenter{}
-	currentGroup := "current-group"
-	newGroup := "my-group"
+	currentGroup := g.NewGroup(g.NewGroupId(), "current-group")
+	newGroup := g.NewGroup(g.NewGroupId(), "new-group")
 	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
-	clcRepo := &fk.CollectionRepo{Existing: []clc.Collection{collection}, ReturnGroup: currentGroup}
-	itr := New(clcRepo, &fk.GroupRepo{ExistingNames: []string{newGroup}}, &fk.ProfileRepo{})
+	clcRepo := &fk.CollectionRepo{
+		Existing:    []clc.Collection{collection},
+		ReturnGroup: currentGroup.Name,
+	}
+	itr := New(
+		clcRepo,
+		&fk.GroupRepo{Existing: []g.Group{currentGroup, newGroup}},
+		&fk.ProfileRepo{},
+	)
 	itr.Execute(
 		t.Context(),
-		Request{Name: collection.Name, NewName: collection.Name, NewGroup: &newGroup},
+		Request{Name: collection.Name, NewName: collection.Name, NewGroup: &newGroup.Name},
 		p,
 	)
 	assert.NotNil(t, clcRepo.GotUpdateModel.NewGroup)
-	assert.Equal(t, newGroup, *clcRepo.GotUpdateModel.NewGroup)
+	assert.Equal(t, newGroup.Name, *clcRepo.GotUpdateModel.NewGroup)
 	assert.True(t, p.GotSuccess)
 }
 
@@ -98,7 +106,7 @@ func TestUpdateCollectionProfile(t *testing.T) {
 	itr := New(
 		clcRepo,
 		&fk.GroupRepo{},
-		&fk.ProfileRepo{ExistingProfiles: []pr.Profile{newProfile}},
+		&fk.ProfileRepo{Existing: []pr.Profile{newProfile}},
 	)
 	itr.Execute(
 		t.Context(),

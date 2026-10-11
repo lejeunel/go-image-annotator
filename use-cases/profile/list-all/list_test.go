@@ -19,7 +19,7 @@ func TestHandleInternalErrOnList(t *testing.T) {
 
 func TestListProfiles(t *testing.T) {
 	profile := pr.NewProfile(pr.NewProfileId(), "my-profile")
-	repo := &fk.ProfileRepo{Return: profile}
+	repo := &fk.ProfileRepo{Existing: []pr.Profile{profile}}
 	p := &FakePresenter{}
 	itr := New(repo)
 	itr.Execute(t.Context(), p)

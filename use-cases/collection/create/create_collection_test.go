@@ -13,13 +13,13 @@ import (
 )
 
 func TestHandleAuthError(t *testing.T) {
-	group := "my-group"
+	group := g.NewGroup(g.NewGroupId(), "a-group")
 	itr := New(&fk.CollectionRepo{},
-		&fk.GroupRepo{Return: g.NewGroup(g.NewGroupId(), "a-group")},
+		&fk.GroupRepo{},
 		&fk.ProfileRepo{},
 		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
 	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Group: &group}, p)
+	itr.Execute(t.Context(), Request{Group: &group.Name}, p)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -78,8 +78,8 @@ func TestCreateCollection(t *testing.T) {
 	profile := pr.NewProfile(pr.NewProfileId(), "my-profile")
 	description := "a-description"
 	itr := New(repo,
-		&fk.GroupRepo{Return: group},
-		&fk.ProfileRepo{ExistingProfiles: []pr.Profile{profile}},
+		&fk.GroupRepo{Existing: []g.Group{group}},
+		&fk.ProfileRepo{Existing: []pr.Profile{profile}},
 		WithClock(clockwork.NewFakeClockAt(now)))
 	req := Request{
 		Name:        "a-name",

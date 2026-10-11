@@ -1,9 +1,8 @@
 package fake
 
 import (
-	"slices"
-
 	grp "github.com/lejeunel/go-image-annotator/entities/group"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type GroupRepo struct {
@@ -12,9 +11,7 @@ type GroupRepo struct {
 	ErrOnFind                 error
 	ErrOnList                 error
 	ErrOnUpdate               error
-	Return                    grp.Group
-	ReturnList                []grp.Group
-	ExistingNames             []string
+	Existing                  []grp.Group
 	GotUpdate                 grp.UpdateModel
 }
 
@@ -22,21 +19,27 @@ func (r *GroupRepo) Find(name string) (*grp.Group, error) {
 	if r.ErrOnFind != nil {
 		return nil, r.ErrOnFind
 	}
+	for _, g := range r.Existing {
+		if g.Name == name {
+			return &g, nil
+		}
+	}
 
-	return &r.Return, nil
+	return nil, e.ErrNotFound
 }
 
 func (r *GroupRepo) Exists(name string) (*bool, error) {
 	if r.ErrOnExists != nil {
 		return nil, r.ErrOnExists
 	}
-	var res bool
-	if slices.Contains(r.ExistingNames, name) {
-		res = true
-		return &res, nil
+	exists := false
+	for _, g := range r.Existing {
+		if g.Name == name {
+			exists = true
+			return &exists, nil
+		}
 	}
-	res = false
-	return &res, nil
+	return &exists, nil
 }
 
 func (r *GroupRepo) List() ([]grp.Group, error) {
@@ -44,7 +47,7 @@ func (r *GroupRepo) List() ([]grp.Group, error) {
 		return nil, r.ErrOnList
 	}
 
-	return r.ReturnList, nil
+	return r.Existing, nil
 }
 
 func (r *GroupRepo) Update(m grp.UpdateModel) error {
