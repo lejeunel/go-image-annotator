@@ -4,16 +4,25 @@ linkTitle: Home
 menu: { main: { weight: 1 } }
 ---
 
-A simple web application to manage, store, and annotate images
+A lightweight web application to manage, store, and annotate images
 built in [Go](https://go.dev/).
-This is especially suited for small/medium projects that involve downstream
-computer vision and machine learning pipelines.
 
-## Goals
+This application is well suited for small/medium sized teams
+working on computer vision projects, where annotating images 
+allow to train and evaluate Machine Learning models.
 
-The goals of this applications are to provide:
+Its primary aim is to be a lightweight and self-contained alternative
+to the more complex solution. Concretely, this app holds in a single binary
+and works without any moving parts by leveraging [SQLite](www.sqlite.org)
+as its backend database, thereby only needing a local file-system
+for persistence.
 
-- A way to organize and version images
-- Annotate images through a web interface
-- Retrieve images and their corresponding annotations
-- Easily integrate downstream data processing pipelines
+## Features
+
+- Annotate images with image-wise labels, bounding-boxes or polygons.
+- Clone image and re-define annotations.
+- Assign custom meta-data and apply filtering/querying using a custom query language.
+- Automate tasks with API calls.
+- Create annotation profiles to restrict pre-defined subsets of labels.
+- Leverage group and role-based access control for safer collaboration.
+- Authenticate users with simple password or use an OAuth provider.
