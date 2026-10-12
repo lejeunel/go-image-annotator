@@ -45,13 +45,14 @@ func NewS3FileStore(
 }
 
 func (s *S3FileStore) key(name string) string {
-	return s.prefix + name
+	return s.prefix + "/" + name
 }
 
 func (s *S3FileStore) Store(name string, r io.Reader) error {
+	key := s.key(name)
 	_, err := s.client.PutObject(context.Background(), &s3.PutObjectInput{
 		Bucket: &s.bucket,
-		Key:    &name,
+		Key:    &key,
 		Body:   r,
 	})
 	if err != nil {
@@ -62,9 +63,10 @@ func (s *S3FileStore) Store(name string, r io.Reader) error {
 }
 
 func (s *S3FileStore) Delete(name string) error {
+	key := s.key(name)
 	_, err := s.client.DeleteObject(context.Background(), &s3.DeleteObjectInput{
 		Bucket: &s.bucket,
-		Key:    &name,
+		Key:    &key,
 	})
 	if err != nil {
 		return fmt.Errorf("delete %q: %w", name, err)
@@ -73,10 +75,11 @@ func (s *S3FileStore) Delete(name string) error {
 	return nil
 }
 
-func (s *S3FileStore) Get(name string) (io.Reader, error) {
+func (s *S3FileStore) Get(name string) (io.ReadCloser, error) {
+	key := s.key(name)
 	result, err := s.client.GetObject(context.Background(), &s3.GetObjectInput{
 		Bucket: &s.bucket,
-		Key:    &name,
+		Key:    &key,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("get %q: %w", name, err)

@@ -15,10 +15,16 @@ type ImageView struct {
 }
 
 func (p *ImageView) Build(image view.Image) Node {
-	if image.Reader == nil {
+	if image.Opener == nil {
 		return Text("presenting image: got no reader")
 	}
-	bytes, err := io.ReadAll(image.Reader)
+	reader, err := image.Opener()
+	if err != nil {
+		return Text(err.Error())
+	}
+	defer reader.Close()
+
+	bytes, err := io.ReadAll(reader)
 	if err != nil {
 		return Text(err.Error())
 	}

@@ -48,7 +48,7 @@ func (r LocalFileStore) Delete(path string) error {
 	return nil
 }
 
-func (r LocalFileStore) Get(path string) (io.Reader, error) {
+func (r LocalFileStore) Get(path string) (io.ReadCloser, error) {
 	path = r.filePath(path)
 	reader, err := os.Open(path)
 	if err != nil {

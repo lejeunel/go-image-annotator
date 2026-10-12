@@ -13,7 +13,7 @@ type Interface interface {
 }
 
 type FileGetter interface {
-	Get(string) (io.Reader, error)
+	Get(string) (io.ReadCloser, error)
 }
 
 type Repo interface {
@@ -49,5 +49,5 @@ func (i Interactor) Execute(id string, out OutputPort) {
 		return
 	}
 
-	out.SuccessReadRawImage(Response{Reader: reader, Specs: *specs})
+	out.SuccessReadRawImage(Response{ReadCloser: reader, Specs: *specs})
 }

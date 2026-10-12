@@ -47,11 +47,11 @@ func (c Config) S3Config() (*S3Config, error) {
 
 	return &S3Config{
 		Bucket:    u.Host,
-		Prefix:    u.Path,
+		Prefix:    u.Path[1:],
 		Endpoint:  c.S3Endpoint,
 		Region:    c.S3Region,
 		AccessKey: c.S3AccessKey,
-		Secret:    c.S3AccessKey,
+		Secret:    c.S3Secret,
 	}, nil
 }
 

@@ -23,7 +23,17 @@ func Build(cfg cfg.Config, logger slog.Logger) (FileStore, error) {
 			s3cfg.Region,
 			s3cfg.AccessKey,
 			s3cfg.Secret, s3cfg.Bucket, s3cfg.Prefix)
-		logger.Info("using S3 image store", "bucket", s3cfg.Bucket, "prefix", s3cfg.Prefix)
+		logger.Info(
+			"using S3 image store",
+			"bucket",
+			s3cfg.Bucket,
+			"prefix",
+			s3cfg.Prefix,
+			"endpoint",
+			s3cfg.Endpoint,
+			"region",
+			s3cfg.Region,
+		)
 	} else {
 		path := fmt.Sprintf("%v/%v", cfg.LocalArtefactPath, "images")
 		logger.Info("using local file system image store", "path", path)

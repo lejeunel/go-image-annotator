@@ -168,8 +168,49 @@ func TestImageReaderGivesCorrectBytes(t *testing.T) {
 		ImageId:    im.NewImageId(),
 		Collection: "the-collection",
 	})
-	gotBytes, _ := io.ReadAll(image.Reader)
+	reader, err := image.Open()
+	assert.NoError(t, err)
+	defer reader.Close()
+
+	gotBytes, _ := io.ReadAll(reader)
 	assert.Equal(t, true, bytes.Equal(gotBytes, data))
+}
+
+func TestFindDoesNotFetchRawData(t *testing.T) {
+	s, _, _, _ := Setup()
+	fileStore := s.FileStore.(*fk.FileStore)
+
+	image, err := s.Find(im.BaseImage{
+		ImageId:    im.NewImageId(),
+		Collection: "the-collection",
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 0, fileStore.NumGets)
+
+	reader, err := image.Open()
+	assert.NoError(t, err)
+	defer reader.Close()
+	assert.Equal(t, 1, fileStore.NumGets)
+}
+
+func TestOpenImageWithoutSourceGivesError(t *testing.T) {
+	image := im.Image{Id: im.NewImageId()}
+	_, err := image.Open()
+	assert.ErrorIs(t, err, e.ErrInternal)
+}
+
+func TestHandleErrorOnOpen(t *testing.T) {
+	s, _, _, _ := Setup()
+	s.FileStore = &fk.FileStore{ErrOnGet: e.ErrNotFound}
+
+	image, err := s.Find(im.BaseImage{
+		ImageId:    im.NewImageId(),
+		Collection: "the-collection",
+	})
+	assert.NoError(t, err)
+
+	_, err = image.Open()
+	assert.ErrorIs(t, err, e.ErrNotFound)
 }
 
 func TestRetrieveSpecs(t *testing.T) {

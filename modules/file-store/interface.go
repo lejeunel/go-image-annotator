@@ -7,5 +7,5 @@ import (
 type FileStore interface {
 	Store(string, io.Reader) error
 	Delete(string) error
-	Get(string) (io.Reader, error)
+	Get(string) (io.ReadCloser, error)
 }

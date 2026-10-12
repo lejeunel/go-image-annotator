@@ -2,6 +2,7 @@ package image_store
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
@@ -90,21 +91,28 @@ func (s ImageStore) Find(base im.BaseImage) (*im.Image, error) {
 		return nil, fmt.Errorf("fetching image meta-data: %w", err)
 	}
 
-	reader, err := s.FileStore.Get(
-		fmt.Sprintf("%v.%v", base.ImageId, strings.Split(specs.MIMEType, "/")[1]),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("fetching raw data: %w", err)
-	}
-	return &im.Image{
+	image := &im.Image{
 		Id:         base.ImageId,
 		Collection: *collection, Labels: labels,
 		BoundingBoxes: boxes,
 		Polygons:      polygons,
 		Specs:         *specs,
 		Meta:          meta,
-		Reader:        reader,
-	}, nil
+	}
+	image.Opener = s.opener(image.Filename())
+
+	return image, nil
+}
+
+// opener defers fetching the raw-data of an image to the moment it is read.
+func (s ImageStore) opener(filename string) im.Opener {
+	return func() (io.ReadCloser, error) {
+		reader, err := s.FileStore.Get(filename)
+		if err != nil {
+			return nil, fmt.Errorf("fetching raw data: %w", err)
+		}
+		return reader, nil
+	}
 }
 
 func (s ImageStore) PaginateCollection(

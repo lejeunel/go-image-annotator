@@ -96,7 +96,8 @@ func (p ImagePresenter) SuccessSliceImages(r slice.Response) {
 }
 
 func (p ImagePresenter) SuccessReadRawImage(r raw.Response) {
-	data, err := io.ReadAll(r.Reader)
+	defer r.Close()
+	data, err := io.ReadAll(r)
 	if err != nil {
 		WriteError(p.Writer, http.StatusInternalServerError, err.Error())
 		return

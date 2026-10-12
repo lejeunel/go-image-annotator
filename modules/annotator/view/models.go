@@ -1,8 +1,6 @@
 package view
 
 import (
-	"io"
-
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 )
@@ -59,7 +57,7 @@ type Polygon struct {
 }
 
 type Image struct {
-	Reader     io.Reader
+	Opener     im.Opener
 	Id         string
 	Collection string
 	MIMEType   string
@@ -69,7 +67,7 @@ func NewImageInfo(imageId im.ImageId, collection string, specs im.Specs) ImageIn
 	return ImageInfo{Id: imageId.String(), Collection: collection, Specs: specs}
 }
 
-func NewImage(id im.ImageId, reader io.Reader, collection string, mimetype string,
+func NewImage(id im.ImageId, opener im.Opener, collection string, mimetype string,
 ) Image {
-	return Image{Id: id.String(), Collection: collection, Reader: reader, MIMEType: mimetype}
+	return Image{Id: id.String(), Collection: collection, Opener: opener, MIMEType: mimetype}
 }

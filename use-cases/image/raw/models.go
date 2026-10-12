@@ -11,6 +11,6 @@ type Request struct {
 }
 
 type Response struct {
-	io.Reader
+	io.ReadCloser
 	im.Specs
 }

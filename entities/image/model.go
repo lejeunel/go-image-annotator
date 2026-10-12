@@ -44,8 +44,23 @@ type Image struct {
 	BoundingBoxes []an.BoundingBox
 	Polygons      []an.Polygon
 	Meta          []m.MetaData
-	Reader        io.Reader
+	Opener        Opener
 	Hash          string
+}
+
+// Opener lazily yields the raw-data of an image.
+type Opener func() (io.ReadCloser, error)
+
+// Open returns a reader on the raw-data of the image.
+func (i Image) Open() (io.ReadCloser, error) {
+	if i.Opener == nil {
+		return nil, fmt.Errorf(
+			"opening raw-data of image %v: no source attached: %w",
+			i.Id,
+			e.ErrInternal,
+		)
+	}
+	return i.Opener()
 }
 
 func (i *Image) AddLabel(l lbl.Label) error {

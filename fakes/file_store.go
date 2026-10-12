@@ -9,6 +9,7 @@ type FileStore struct {
 	ErrOnStore      error
 	ErrOnGet        error
 	NumDeletedItems int
+	NumGets         int
 	Data            []byte
 	GotData         []byte
 }
@@ -34,9 +35,10 @@ func (r *FileStore) Delete(string) error {
 	return nil
 }
 
-func (r *FileStore) Get(string) (io.Reader, error) {
+func (r *FileStore) Get(string) (io.ReadCloser, error) {
+	r.NumGets += 1
 	if r.ErrOnGet != nil {
 		return nil, r.ErrOnGet
 	}
-	return bytes.NewBuffer(r.Data), nil
+	return io.NopCloser(bytes.NewBuffer(r.Data)), nil
 }
