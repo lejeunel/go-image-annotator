@@ -4,18 +4,9 @@ import (
 	"testing"
 
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
-	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
-
-func CreateLabel(repo LabelRepo, name string) (*lbl.Label, error) {
-	label := lbl.NewLabel(lbl.NewLabelId(), name, lbl.WithDescription("a-description"))
-	if err := repo.Create(label); err != nil {
-		return nil, err
-	}
-	return &label, nil
-}
 
 func TestInternalErrOnCreateShouldFail(t *testing.T) {
 	db := s.NewInMemory()

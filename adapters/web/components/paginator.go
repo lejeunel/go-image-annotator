@@ -12,10 +12,9 @@ import (
 )
 
 func MakePaginatorEllipsis() Node {
-	return Li(A(
-		Href("#"),
+	return Li(Span(
 		Class(
-			"flex size-6 items-center justify-center rounded-radius p-1 text-on-surface hover:text-primary dark:text-on-surface-dark dark:hover:text-primary-dark",
+			"flex size-6 items-center justify-center rounded-radius p-1 text-on-surface dark:text-on-surface-dark",
 		),
 		Aria("label", "more-pages"),
 		Raw(`

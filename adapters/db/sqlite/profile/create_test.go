@@ -7,7 +7,6 @@ import (
 	lr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	grp "github.com/lejeunel/go-image-annotator/entities/group"
-	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -65,16 +64,11 @@ func TestCreateProfileInGroup(t *testing.T) {
 
 func TestCreateProfileWithLabel(t *testing.T) {
 	db := s.NewInMemory()
-
 	labelRepo := lr.NewLabelRepo(db)
-	label := lbl.NewLabel(lbl.NewLabelId(), "a-label")
-	labelRepo.Create(label)
+	label, err := lr.CreateLabel(labelRepo, "a-label")
 
 	profileRepo := NewProfileRepo(db)
-	labels := []string{label.Name}
-	_, err := CreateProfile(profileRepo, "a-profile", nil, &labels)
-	assert.NoError(t, err)
-
+	CreateProfile(profileRepo, "a-profile", nil, &[]string{label.Name})
 	r, err := profileRepo.Find("a-profile")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(r.Labels))
