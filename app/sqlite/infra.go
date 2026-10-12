@@ -32,9 +32,8 @@ type Infra struct {
 	pr.ProfileRepo
 	ev.EventRepo
 	md.MetaRepo
-	ImageFileStore  fs.FileStore
-	TempFileStore   fs.LocalFileStore
-	PolicyFileStore fs.FileStore
+	ImageFileStore fs.FileStore
+	TempFileStore  fs.LocalFileStore
 	q.FilterParser
 	q.OrderParser
 	*sqlx.DB
@@ -60,7 +59,6 @@ func BuildInfra(localPath string, imageStore fs.FileStore) Infra {
 		md.NewMetaRepo(db),
 		imageStore,
 		fs.NewLocalFileStore(fmt.Sprintf("%v/%v", localPath, "tmp")),
-		fs.NewLocalFileStore(fmt.Sprintf("%v/%v", localPath, "assets")),
 		filterParser,
 		orderingParser,
 		db,

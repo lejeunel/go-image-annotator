@@ -4,18 +4,19 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strings"
 
 	"github.com/kelseyhightower/envconfig"
 )
 
 type Config struct {
-	LocalArtefactPath                    string   `required:"true" split_words:"true"`
+	DBPath                               string   `required:"true" split_words:"true"`
 	ImagesURI                            string   `required:"true" split_words:"true"`
 	S3Endpoint                           string   `                split_words:"true"`
-	S3Prefix                             string   `                split_words:"true"`
 	S3Region                             string   `                split_words:"true"`
 	S3AccessKey                          string   `                split_words:"true"`
 	S3Secret                             string   `                split_words:"true"`
+	S3UsePathStyle                       bool     `                split_words:"true"`
 	InitialAdminEmail                    string   `required:"true" split_words:"true"`
 	InitialAdminPassword                 string   `required:"true" split_words:"true"`
 	URL                                  string   `                split_words:"true" default:"localhost"`
@@ -46,13 +47,23 @@ func (c Config) S3Config() (*S3Config, error) {
 	}
 
 	return &S3Config{
-		Bucket:    u.Host,
-		Prefix:    u.Path[1:],
-		Endpoint:  c.S3Endpoint,
-		Region:    c.S3Region,
-		AccessKey: c.S3AccessKey,
-		Secret:    c.S3Secret,
+		Bucket:       u.Host,
+		Prefix:       strings.Trim(u.Path, "/"),
+		Endpoint:     c.S3Endpoint,
+		Region:       c.S3Region,
+		AccessKey:    c.S3AccessKey,
+		Secret:       c.S3Secret,
+		UsePathStyle: c.S3UsePathStyle,
 	}, nil
+}
+
+func (c Config) LocalImagePath() (*string, error) {
+	u, err := url.Parse(c.ImagesURI)
+	if err != nil {
+		return nil, fmt.Errorf("invalid IMAGE_URI: %w", err)
+	}
+
+	return &u.Path, nil
 }
 
 func (c Config) DefinesS3Store() (bool, error) {
@@ -78,10 +89,11 @@ func Parse() Config {
 }
 
 type S3Config struct {
-	Bucket    string
-	Prefix    string
-	Endpoint  string
-	Region    string
-	AccessKey string
-	Secret    string
+	Bucket       string
+	Prefix       string
+	Endpoint     string
+	Region       string
+	AccessKey    string
+	Secret       string
+	UsePathStyle bool
 }

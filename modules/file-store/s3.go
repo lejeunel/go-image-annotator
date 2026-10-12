@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	awscfg "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
@@ -16,6 +17,16 @@ type S3FileStore struct {
 	prefix string
 }
 
+// NewS3FileStore builds a store backed by an S3-compatible service.
+//
+// Credentials are resolved through the AWS default chain, which covers IAM
+// roles (EC2/ECS metadata, EKS web identity), SSO and shared profiles. Passing
+// a non-empty accessKeyID and secretAccessKey overrides that chain, which is
+// what non-AWS deployments (MinIO and friends) are expected to do.
+//
+// usePathStyle addresses buckets as endpoint/bucket/key instead of the
+// virtual-host form bucket.endpoint/key. Services reached through a custom
+// endpoint without wildcard DNS, MinIO most notably, need it.
 func NewS3FileStore(
 	endpoint string,
 	region string,
@@ -23,28 +34,41 @@ func NewS3FileStore(
 	secretAccessKey string,
 	bucket string,
 	prefix string,
-) *S3FileStore {
-	cfg := aws.Config{
-		Region: region,
-		Credentials: credentials.NewStaticCredentialsProvider(
-			accessKeyID,
-			secretAccessKey,
-			"",
-		),
+	usePathStyle bool,
+) (*S3FileStore, error) {
+	opts := []func(*awscfg.LoadOptions) error{}
+	if region != "" {
+		opts = append(opts, awscfg.WithRegion(region))
+	}
+	if accessKeyID != "" && secretAccessKey != "" {
+		opts = append(opts, awscfg.WithCredentialsProvider(
+			credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, ""),
+		))
+	}
+
+	cfg, err := awscfg.LoadDefaultConfig(context.Background(), opts...)
+	if err != nil {
+		return nil, fmt.Errorf("load AWS config: %w", err)
 	}
 
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
-		o.BaseEndpoint = aws.String(endpoint)
+		if endpoint != "" {
+			o.BaseEndpoint = aws.String(endpoint)
+		}
+		o.UsePathStyle = usePathStyle
 	})
 
 	return &S3FileStore{
 		client: client,
 		bucket: bucket,
 		prefix: prefix,
-	}
+	}, nil
 }
 
 func (s *S3FileStore) key(name string) string {
+	if s.prefix == "" {
+		return name
+	}
 	return s.prefix + "/" + name
 }
 

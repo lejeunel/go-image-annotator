@@ -19,7 +19,7 @@ type SQLiteDBManager struct {
 
 func NewDBManagerFromEnv(logger *slog.Logger) SQLiteDBManager {
 	cfg := config.Parse()
-	conn := NewSQLiteConnection(DBPath(cfg.LocalArtefactPath))
+	conn := NewSQLiteConnection(DBPath(cfg.DBPath))
 	return NewSQLiteDBManager(conn.DB, logger)
 }
 

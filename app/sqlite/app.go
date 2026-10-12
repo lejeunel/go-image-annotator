@@ -24,7 +24,7 @@ func NewApp(cfg config.Config, logger slog.Logger) app.App {
 		panic(err)
 	}
 
-	infra := BuildInfra(cfg.LocalArtefactPath, imageStore)
+	infra := BuildInfra(cfg.DBPath, imageStore)
 
 	auth := auth.New(auth.ValidMethods, infra.RoleRepo)
 	apiTokenGen := tk.New(cfg.ApiTokenLength)

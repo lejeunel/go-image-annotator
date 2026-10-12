@@ -107,7 +107,6 @@ func BuildInteractors(
 		Bootstrap: NewBootstrapInteractor(
 			infra.UserRepo,
 			infra.RoleRepo,
-			infra.PolicyFileStore,
 			passwordTokenizer,
 			passwordValidator,
 		),
