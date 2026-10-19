@@ -2,7 +2,7 @@
 title: Configuration
 linkTitle: Configuration
 menu: { main: { weight: 2 } }
-weight: 1
+weight: 3
 ---
 
 We explain here how to setup:

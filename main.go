@@ -11,7 +11,7 @@ import (
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 }

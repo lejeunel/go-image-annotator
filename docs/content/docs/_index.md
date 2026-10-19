@@ -5,13 +5,15 @@ menu: { main: { weight: 1 } }
 ---
 
 A lightweight and open source web app to manage, store, and annotate images.
+
+This application is well suited for small/medium sized teams and projects
+focused on computer vision problems, where annotating images 
+allow to train and evaluate predictive models.
+
 It aims to be a solution "without moving parts", i.e. bundles
 authentication, group and role-based access control, as well as
-a portable relational database driver.
-
-This application is well suited for small/medium sized teams
-working on computer vision projects, where annotating images 
-allow to train and evaluate Machine Learning models.
+a portable relational database driver, all in a single statically linked
+binary.
 
 ## Notable features
 

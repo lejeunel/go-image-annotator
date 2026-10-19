@@ -3,7 +3,7 @@ title: Access Restriction
 description: >
   Where we explain how to restrict access to your resources
 weight: 4
-linkTitle: Authorization
+linkTitle: Groups & Roles
 menu: { main: { weight: 20 } }
 ---
 

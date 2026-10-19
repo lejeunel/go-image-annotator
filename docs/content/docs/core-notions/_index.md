@@ -3,6 +3,7 @@ title: Notions
 description: >
     Where we develop on the core notions to organize, and version your work. 
 weight: 2
+menu: { main: { weight: 1 } }
 ---
 
 This project is meant as a starter-kit for small/medium sized
