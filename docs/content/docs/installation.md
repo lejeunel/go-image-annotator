@@ -1,15 +1,15 @@
 ---
-title: Configuration
-linkTitle: Configuration
-menu: { main: { weight: 2 } }
-weight: 3
+title: Installation
+linkTitle: Installation
+menu: { main: { weight: 1 } }
+weight: 1
 ---
 
-We explain here how to setup:
+This app requires to setup the following:
 
 1. The database location, i.e. where pretty much all the application state will reside.
-2. The raw image storage space.
-3. The SMTP service which will send e-mails to users.
+2. The raw image storage module.
+3. The SMTP notification service which will send e-mails to users.
 
 # Database Storage
 

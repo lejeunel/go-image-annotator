@@ -1,10 +1,9 @@
 ---
-title: Access Restriction
+title: Groups & Roles
 description: >
   Where we explain how to restrict access to your resources
 weight: 4
 linkTitle: Groups & Roles
-menu: { main: { weight: 20 } }
 ---
 
 To safely collaborate whithin a team, it is often
