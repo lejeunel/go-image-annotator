@@ -338,7 +338,10 @@ func (r ImageRepo) makeBaseSelectQuery() sq.SelectBuilder {
 		"images_collections AS ic").Join(
 		"images AS i ON ic.image_id=i.id").Join(
 		"collections ON ic.collection_id=collections.id").LeftJoin(
-		"metadata AS m ON ic.image_id=m.image_id AND ic.collection_id=m.collection_id")
+		"metadata AS m ON ic.image_id=m.image_id AND ic.collection_id=m.collection_id").LeftJoin(
+		"annotations AS a ON ic.image_id=a.image_id AND ic.collection_id=a.collection_id").LeftJoin(
+		"labels AS l ON a.label_id=l.id").GroupBy(
+		"ic.image_id", "ic.collection_id")
 }
 
 func (r ImageRepo) fetchBaseImages(q sq.SelectBuilder) ([]im.BaseImage, error) {

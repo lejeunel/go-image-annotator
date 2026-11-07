@@ -4,23 +4,29 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	sa "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/annotation"
 	sc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	si "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
+	sl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
 	sm "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/metadata"
 	s "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/testing"
 	_ "modernc.org/sqlite"
 
+	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	lbl "github.com/lejeunel/go-image-annotator/entities/label"
 )
 
-func Setup() (sc.CollectionRepo, si.ImageRepo, sm.MetaRepo) {
+func Setup() (sc.CollectionRepo, si.ImageRepo, sm.MetaRepo, sl.LabelRepo, sa.AnnotationRepo) {
 	db := s.NewInMemory()
 	filterParser, orderParser := si.MakeQueryParsers()
 	imr := si.NewImageRepo(db, filterParser, orderParser)
 	cr := sc.NewCollectionRepo(db)
 	mr := sm.NewMetaRepo(db)
-	return cr, imr, mr
+	lr := sl.NewLabelRepo(db)
+	ar := sa.NewAnnotationRepo(db)
+	return cr, imr, mr, lr, ar
 }
 
 func MustParseTime(s string) time.Time {
@@ -36,6 +42,7 @@ type QueryTestPayload struct {
 	Collection    string
 	IngestionTime time.Time
 	MetaData      map[string]any
+	ImageLabels   []string
 }
 type QueryTest struct {
 	name        string
@@ -59,9 +66,12 @@ func InitFilterTest(
 	imr si.ImageRepo,
 	cr sc.CollectionRepo,
 	sm sm.MetaRepo,
+	lr sl.LabelRepo,
+	ar sa.AnnotationRepo,
 	payloads []QueryTestPayload,
 ) {
 	var createdCollections []clc.Collection
+	createdLabels := map[string]lbl.Label{}
 	for _, p := range payloads {
 		collection := findCollectionByName(createdCollections, p.Collection)
 		if collection == nil {
@@ -76,6 +86,15 @@ func InitFilterTest(
 		imr.AddToCollection(image.Id, collection.Name)
 		for k, v := range p.MetaData {
 			sm.Add(collection.Name, image.Id, k, v)
+		}
+		for _, name := range p.ImageLabels {
+			label, ok := createdLabels[name]
+			if !ok {
+				label = lbl.NewLabel(lbl.NewLabelId(), name)
+				lr.Create(label)
+				createdLabels[name] = label
+			}
+			ar.AddImageLabel(image.Id, collection.Name, an.NewImageLabel(label), nil, nil)
 		}
 	}
 }

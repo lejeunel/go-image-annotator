@@ -77,11 +77,18 @@ func MakeQueryParsers() (qu.FilterParser, qu.OrderParser) {
 		schema.Is[string](),
 		qu.WithDescription("Date/time of ingestion (ISO format)"),
 	)
+	fb.AddField(
+		"annotation",
+		schema.Is[string](),
+		qu.WithDescription("Name of a label carried by any annotation of the image"),
+	)
+	fb.AddRenameRule(`^annotation$`, `l.name`)
 	fb.AddRegExpField(`^meta\..*$`, "meta.<CUSTOM-FIELD>",
 		schema.Any(schema.Is[float64](), schema.Is[string](), schema.Is[bool]()),
 		qu.WithRegExpDescription("Custom meta-data field"))
 	fb.AddRenameRule(`\bmeta\.(.*)\b`, `json_extract(m.meta, '$.$1')`)
 	fb.AddExample("collection:my-collection and (ingested_at>2026-08-01T13:04 or meta.is_recent)")
+	fb.AddExample("annotation:cat and collection:my-collection")
 	fb.AddExample("(meta.score>10) and (meta.score<20)")
 
 	ob := qu.NewOrderParserBuilder()

@@ -11,9 +11,6 @@ import (
 	"syscall"
 
 	api "github.com/lejeunel/go-image-annotator/adapters/api/server"
-	userDashboard "github.com/lejeunel/go-image-annotator/adapters/web/dashboard"
-	rt "github.com/lejeunel/go-image-annotator/routes"
-
 	adm "github.com/lejeunel/go-image-annotator/adapters/web/admin"
 	admgrp "github.com/lejeunel/go-image-annotator/adapters/web/admin/group"
 	admrl "github.com/lejeunel/go-image-annotator/adapters/web/admin/role"
@@ -22,6 +19,7 @@ import (
 	wauth "github.com/lejeunel/go-image-annotator/adapters/web/auth"
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	clc "github.com/lejeunel/go-image-annotator/adapters/web/collection"
+	userDashboard "github.com/lejeunel/go-image-annotator/adapters/web/dashboard"
 	home "github.com/lejeunel/go-image-annotator/adapters/web/home"
 	im "github.com/lejeunel/go-image-annotator/adapters/web/image"
 	lbl "github.com/lejeunel/go-image-annotator/adapters/web/label"
@@ -29,6 +27,7 @@ import (
 	a "github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/app/sqlite"
 	g "github.com/lejeunel/go-image-annotator/globals"
+	rt "github.com/lejeunel/go-image-annotator/routes"
 
 	"github.com/go-chi/chi/v5"
 )
