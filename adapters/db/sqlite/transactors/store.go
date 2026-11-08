@@ -1,6 +1,8 @@
 package uow
 
 import (
+	"fmt"
+
 	"github.com/jmoiron/sqlx"
 	an "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/annotation"
 	clc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
@@ -8,6 +10,7 @@ import (
 	m "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/metadata"
 	s "github.com/lejeunel/go-image-annotator/modules/image-store"
 	qu "github.com/lejeunel/go-image-annotator/modules/query"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type StoreTransactor struct {
@@ -29,7 +32,7 @@ func (u *StoreTransactor) RunInTx(
 ) error {
 	tx, err := u.db.Beginx()
 	if err != nil {
-		return err
+		return fmt.Errorf("beginning transaction: %v: %w", err, e.ErrInternal)
 	}
 	defer tx.Rollback()
 
@@ -43,5 +46,8 @@ func (u *StoreTransactor) RunInTx(
 	if err := fn(stores); err != nil {
 		return err
 	}
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("committing transaction: %v: %w", err, e.ErrInternal)
+	}
+	return nil
 }

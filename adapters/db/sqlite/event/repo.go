@@ -105,7 +105,7 @@ func (r EventRepo) AddEvent(id t.TaskId, event ev.Event) error {
 	extraStr, err := serialize(event.Extra)
 	if err != nil {
 		return fmt.Errorf(
-			"creating event record: serializing extra meta-data: %w: %w",
+			"creating event record: serializing extra meta-data: %v: %w",
 			err,
 			e.ErrInternal,
 		)

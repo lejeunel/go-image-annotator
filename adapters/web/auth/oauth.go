@@ -28,7 +28,8 @@ func (s Server) OAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.SessionManager.FinishOAuthLogin(r.Context(), user.Email); err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		s.Logger.Error("finishing oauth login", "error", err)
+		http.Error(w, "oauth login failed", http.StatusUnauthorized)
 		return
 	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)

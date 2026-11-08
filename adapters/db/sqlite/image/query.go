@@ -2,12 +2,14 @@ package image
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"go.tomakado.io/dumbql/schema"
 
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	qu "github.com/lejeunel/go-image-annotator/modules/query"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type windowExprs struct {
@@ -53,7 +55,7 @@ func makeWindowExpr(
 	}
 	args, err := parser.Parse(ordering)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("parsing ordering %v: %v: %w", ordering, err, e.ErrInternal)
 	}
 
 	var terms []string

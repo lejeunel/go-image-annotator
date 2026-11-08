@@ -1,6 +1,8 @@
 package uow
 
 import (
+	"fmt"
+
 	"github.com/jmoiron/sqlx"
 	an "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/annotation"
 	clc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
@@ -8,6 +10,7 @@ import (
 	lbl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	in "github.com/lejeunel/go-image-annotator/modules/image-ingester"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type IngestionTransactor struct{ db *sqlx.DB }
@@ -23,7 +26,7 @@ func (u *IngestionTransactor) RunInTx(
 ) error {
 	tx, err := u.db.Beginx()
 	if err != nil {
-		return err
+		return fmt.Errorf("beginning transaction: %v: %w", err, e.ErrInternal)
 	}
 	defer tx.Rollback()
 
@@ -37,5 +40,8 @@ func (u *IngestionTransactor) RunInTx(
 	if err := fn(stores); err != nil {
 		return err
 	}
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("committing transaction: %v: %w", err, e.ErrInternal)
+	}
+	return nil
 }

@@ -97,7 +97,7 @@ func (r CollectionRepo) Find(name string) (*clc.Collection, error) {
 		return nil, fmt.Errorf("%w: %w", errBase, e.ErrNotFound)
 	}
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", errBase, e.ErrInternal)
+		return nil, fmt.Errorf("%w: %v: %w", errBase, err, e.ErrInternal)
 	}
 
 	entity := r.build(row)

@@ -30,7 +30,7 @@ func (r MetaRepo) Add(
 ) error {
 	valueJSON, err := json.Marshal(value)
 	if err != nil {
-		return err
+		return fmt.Errorf("serializing metadata value: %v: %w", err, e.ErrInternal)
 	}
 
 	_, err = r.Db.Exec(`
@@ -134,7 +134,7 @@ func (r MetaRepo) UpdateValue(
 ) error {
 	valueJSON, err := json.Marshal(value)
 	if err != nil {
-		return err
+		return fmt.Errorf("serializing metadata value: %v: %w", err, e.ErrInternal)
 	}
 
 	res, err := r.Db.Exec(`
@@ -153,7 +153,7 @@ func (r MetaRepo) UpdateValue(
 		collection,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("%v: %w", err, e.ErrInternal)
 	}
 
 	n, err := res.RowsAffected()
@@ -201,7 +201,7 @@ func (r MetaRepo) Delete(
 		collection,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("%v: %w", err, e.ErrInternal)
 	}
 
 	n, err := res.RowsAffected()

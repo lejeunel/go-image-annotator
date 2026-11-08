@@ -69,7 +69,7 @@ func (r AnnotationRepo) findLabelById(labelId l.LabelId) (*l.Label, error) {
 	err := r.Db.Get(&rec,
 		"SELECT id,name,description FROM labels WHERE id=$1", labelId)
 	if err != nil {
-		return nil, fmt.Errorf("fetching label by id %v: %w", labelId, e.ErrInternal)
+		return nil, fmt.Errorf("fetching label by id %v: %v: %w", labelId, err, e.ErrInternal)
 	}
 	return &l.Label{Id: rec.Id, Name: rec.Name, Description: rec.Description}, nil
 }
@@ -202,10 +202,13 @@ func (r AnnotationRepo) FindPolygons(
 		}
 		err := json.Unmarshal([]byte(*rec.Coordinates), &specs)
 		if err != nil {
-			return nil, fmt.Errorf("%v: unmarshaling polygon specs: %+v: %w: %w",
+			return nil, fmt.Errorf("%v: unmarshaling polygon specs: %+v: %v: %w",
 				errCtx, rec.Coordinates, err, e.ErrInternal)
 		}
 		label, err := r.findLabelById(rec.LabelId)
+		if err != nil {
+			return nil, fmt.Errorf("%v: %w", errCtx, err)
+		}
 
 		points := a.Points{}
 		for _, p := range specs.Points {
@@ -280,10 +283,13 @@ func (r AnnotationRepo) FindBoundingBoxes(
 		}
 		err := json.Unmarshal([]byte(*rec.Coordinates), &specs)
 		if err != nil {
-			return nil, fmt.Errorf("%v: unmarshaling bounding box specs: %+v: %w: %w",
+			return nil, fmt.Errorf("%v: unmarshaling bounding box specs: %+v: %v: %w",
 				errCtx, rec.Coordinates, err, e.ErrInternal)
 		}
 		label, err := r.findLabelById(rec.LabelId)
+		if err != nil {
+			return nil, fmt.Errorf("%v: %w", errCtx, err)
+		}
 		box := a.NewBoundingBox(rec.Id, specs.Xc, specs.Yc, specs.Width, specs.Height, *label,
 			a.WithAngle(specs.Angle))
 		if rec.Author != nil {
@@ -346,7 +352,7 @@ func (r AnnotationRepo) UpdateAuthor(id a.AnnotationId, userId *u.UserId) error 
 	query := "UPDATE annotations SET author=$1 WHERE id=$2"
 	_, err := r.Db.Exec(query, userId, id)
 	if err != nil {
-		return fmt.Errorf("%w: %w", err, e.ErrInternal)
+		return fmt.Errorf("%v: %w", err, e.ErrInternal)
 	}
 
 	return nil
@@ -356,7 +362,7 @@ func (r AnnotationRepo) UpdateTime(id a.AnnotationId, t *time.Time) error {
 	query := "UPDATE annotations SET touched_at=$1 WHERE id=$2"
 	_, err := r.Db.Exec(query, t, id)
 	if err != nil {
-		return fmt.Errorf("%w: %w", err, e.ErrInternal)
+		return fmt.Errorf("%v: %w", err, e.ErrInternal)
 	}
 
 	return nil
@@ -430,7 +436,12 @@ func (r AnnotationRepo) GroupOfAnnotation(id a.AnnotationId) (*string, error) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("fetching group of annotation by id %v: %w", id, e.ErrInternal)
+		return nil, fmt.Errorf(
+			"fetching group of annotation by id %v: %v: %w",
+			id,
+			err,
+			e.ErrInternal,
+		)
 	}
 	return &group, nil
 }

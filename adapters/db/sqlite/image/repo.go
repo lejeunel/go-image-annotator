@@ -68,7 +68,7 @@ func (r ImageRepo) Count(f im.FilterStr) (*int64, error) {
 	if f != "" {
 		sqlizer, err := r.FilterParser.ParseToSql(f)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("parsing filters %v: %v: %w", f, err, e.ErrInternal)
 		}
 		inner = inner.Where(*sqlizer)
 	}
@@ -77,7 +77,7 @@ func (r ImageRepo) Count(f im.FilterStr) (*int64, error) {
 
 	sql, args, err := q.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%v: %w", errCtx, e.ErrInternal)
+		return nil, fmt.Errorf("%v: building query: %v: %w", errCtx, err, e.ErrInternal)
 	}
 
 	var count int64
@@ -92,7 +92,7 @@ func (r ImageRepo) applyOrderingStr(q sq.SelectBuilder, o im.OrderStr) (*sq.Sele
 	if o != "" {
 		args, err := r.OrderStrParser.Parse(o)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("parsing ordering %v: %v: %w", o, err, e.ErrInternal)
 		}
 		for _, a := range args {
 			if a.Order == im.DescOrder {
@@ -319,7 +319,7 @@ func (r ImageRepo) applyFilters(q sq.SelectBuilder, f im.FilterStr) (*sq.SelectB
 	if f != "" {
 		sqlizer, err := r.FilterParser.ParseToSql(f)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("parsing filters %v: %v: %w", f, err, e.ErrInternal)
 		}
 		q = q.Where(*sqlizer)
 		return &q, nil
