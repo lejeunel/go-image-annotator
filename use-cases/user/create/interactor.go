@@ -21,6 +21,8 @@ type PasswordGenerator interface {
 
 type Interactor struct {
 	Repo              Repo
+	GroupRepo         GroupRepo
+	RoleRepo          RoleRepo
 	APITokenGenerator APITokenGenerator
 	PasswordGenerator PasswordGenerator
 
@@ -35,6 +37,16 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	}
 	if err := i.checkDuplicate(r.Id); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
+
+	if err := i.checkGroupsExist(r.Groups); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
+
+	if err := i.checkRolesExist(r.Roles); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -90,6 +102,38 @@ func (i *Interactor) checkDuplicate(id string) error {
 	return nil
 }
 
+func (i *Interactor) checkGroupsExist(groups *[]string) error {
+	if groups == nil {
+		return nil
+	}
+	for _, g := range *groups {
+		exists, err := i.GroupRepo.Exists(g)
+		if err != nil {
+			return fmt.Errorf("checking whether group %v exists: %w", g, err)
+		}
+		if !*exists {
+			return fmt.Errorf("checking whether group %v exists: %w", g, e.ErrNotFound)
+		}
+	}
+	return nil
+}
+
+func (i *Interactor) checkRolesExist(roles *[]string) error {
+	if roles == nil {
+		return nil
+	}
+	for _, role := range *roles {
+		exists, err := i.RoleRepo.Exists(role)
+		if err != nil {
+			return fmt.Errorf("checking whether role %v exists: %w", role, err)
+		}
+		if !*exists {
+			return fmt.Errorf("checking whether role %v exists: %w", role, e.ErrNotFound)
+		}
+	}
+	return nil
+}
+
 type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
@@ -99,11 +143,15 @@ func WithAuth(a Auth) Option {
 }
 
 func New(r Repo,
+	gr GroupRepo,
+	rr RoleRepo,
 	tg APITokenGenerator,
 	pg PasswordGenerator, opts ...Option,
 ) Interactor {
 	i := &Interactor{
 		Repo:              r,
+		GroupRepo:         gr,
+		RoleRepo:          rr,
 		auth:              auth.NewVoidAuth(),
 		APITokenGenerator: tg,
 		PasswordGenerator: pg,

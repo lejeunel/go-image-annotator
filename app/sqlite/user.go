@@ -35,8 +35,15 @@ func NewUserInteractors(
 	auth auth.Interface,
 ) usr.Interactors {
 	return usr.Interactors{
-		Find:             find.New(userStore, find.WithAuth(auth)),
-		Create:           create.New(userRepo, ApitokenGen, pwGen, create.WithAuth(auth)),
+		Find: find.New(userStore, find.WithAuth(auth)),
+		Create: create.New(
+			userRepo,
+			grpRepo,
+			roleRepo,
+			ApitokenGen,
+			pwGen,
+			create.WithAuth(auth),
+		),
 		Delete:           delete.New(userRepo, delete.WithAuth(auth)),
 		List:             list.New(userStore, list.WithAuth(auth)),
 		RenewToken:       rt.New(userRepo, ApitokenGen),

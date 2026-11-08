@@ -64,6 +64,15 @@ func (r UserRepo) SetGroups(user u.UserId, groups []string) error {
 		res, err := r.Db.Exec(
 			"INSERT INTO users_groups (user_id, group_id) SELECT $1, id FROM groups WHERE name=$2",
 			user, group)
+		if err != nil {
+			return fmt.Errorf(
+				"assigning group %v to user %v: %v: %w",
+				group,
+				user,
+				err,
+				e.ErrInternal,
+			)
+		}
 		n, err := res.RowsAffected()
 		if err != nil {
 			return fmt.Errorf(
@@ -76,10 +85,10 @@ func (r UserRepo) SetGroups(user u.UserId, groups []string) error {
 		}
 		if n == 0 {
 			return fmt.Errorf(
-				"assigning group %v to user %v: checking whether group was added: %w",
+				"assigning group %v to user %v: group does not exist: %w",
 				group,
 				user,
-				e.ErrInternal,
+				e.ErrNotFound,
 			)
 		}
 	}
@@ -92,13 +101,22 @@ func (r UserRepo) SetRoles(userId string, roles []string) error {
 		userId,
 	)
 	if err != nil {
-		return fmt.Errorf("deleting user groups: %v: %w", err, e.ErrInternal)
+		return fmt.Errorf("deleting user roles: %v: %w", err, e.ErrInternal)
 	}
 
 	for _, role := range roles {
 		res, err := r.Db.Exec(
 			"INSERT INTO users_roles (user_id, role_id) SELECT $1, id FROM roles WHERE name=$2",
 			userId, role)
+		if err != nil {
+			return fmt.Errorf(
+				"inserting role %v to user %v: %v: %w",
+				role,
+				userId,
+				err,
+				e.ErrInternal,
+			)
+		}
 		n, err := res.RowsAffected()
 		if err != nil {
 			return fmt.Errorf(
@@ -111,10 +129,10 @@ func (r UserRepo) SetRoles(userId string, roles []string) error {
 		}
 		if n == 0 {
 			return fmt.Errorf(
-				"inserting role %v to user %v: checking whether role was added: %w",
+				"inserting role %v to user %v: role does not exist: %w",
 				role,
 				userId,
-				e.ErrInternal,
+				e.ErrNotFound,
 			)
 		}
 	}
@@ -154,11 +172,11 @@ func (r UserRepo) recordToEntity(rec Record) (*u.BaseUser, error) {
 
 	patHash, err := hex.DecodeString(rec.ApiTokenHash)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decoding api token hash: %v: %w", err, e.ErrInternal)
 	}
 	pwHash, err := hex.DecodeString(rec.PasswordHash)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decoding password hash: %v: %w", err, e.ErrInternal)
 	}
 
 	return &u.BaseUser{
@@ -287,7 +305,7 @@ func (r UserRepo) UpdatePassword(id u.UserId, hash []byte) error {
 	query := "UPDATE users SET password_hash=$1 WHERE id=$2"
 	_, err := r.Db.Exec(query, hex.EncodeToString(hash), id)
 	if err != nil {
-		return fmt.Errorf("updating password hash: %w: %w", err, e.ErrInternal)
+		return fmt.Errorf("updating password hash: %v: %w", err, e.ErrInternal)
 	}
 	return nil
 }
