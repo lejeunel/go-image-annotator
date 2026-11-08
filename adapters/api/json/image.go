@@ -3,6 +3,7 @@ package json
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	s "github.com/lejeunel/go-image-annotator/shared"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/raw"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
@@ -99,7 +101,7 @@ func (p ImagePresenter) SuccessReadRawImage(r raw.Response) {
 	defer r.Close()
 	data, err := io.ReadAll(r)
 	if err != nil {
-		WriteError(p.Writer, http.StatusInternalServerError, err.Error())
+		p.ErrorPresenter.Error(fmt.Errorf("reading raw image: %w: %w", err, e.ErrInternal))
 		return
 	}
 	sum := sha256.Sum256(data)
