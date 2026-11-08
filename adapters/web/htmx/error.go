@@ -3,6 +3,8 @@ package htmx
 import (
 	"fmt"
 	"net/http"
+
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type ErrorPresenter struct {
@@ -11,7 +13,7 @@ type ErrorPresenter struct {
 }
 
 func (p ErrorPresenter) Error(err error) {
-	NotifyError(p.writer, fmt.Sprintf("failed %v", p.task), err.Error())
+	NotifyError(p.writer, fmt.Sprintf("failed %v", p.task), e.PublicMessage(err))
 }
 
 func NewErrorPresenter(t string, w http.ResponseWriter) ErrorPresenter {

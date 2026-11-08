@@ -77,7 +77,7 @@ type ErrorPresenter struct {
 
 func (p ErrorPresenter) Error(err error) {
 	p.Logger.Error(err.Error())
-	WriteError(p.Writer, HTTPStatusCodeFromErr(err), err.Error())
+	WriteError(p.Writer, HTTPStatusCodeFromErr(err), e.PublicMessage(err))
 }
 
 func NewErrPresenter(w http.ResponseWriter, l slog.Logger) ErrorPresenter {

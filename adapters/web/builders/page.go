@@ -9,6 +9,8 @@ import (
 	"io"
 	"maps"
 
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+
 	cmp "github.com/lejeunel/go-image-annotator/adapters/web/components"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	g "github.com/lejeunel/go-image-annotator/globals"
@@ -177,7 +179,7 @@ func (b *PageBuilder) SetContent(content Node) *PageBuilder {
 
 func (b *PageBuilder) SetError(err error) *PageBuilder {
 	b.SetTitle("Something went wrong...")
-	b.SetContent(Text(err.Error()))
+	b.SetContent(Text(e.PublicMessage(err)))
 	return b
 }
 

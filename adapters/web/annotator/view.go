@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	ic "github.com/lejeunel/go-image-annotator/adapters/web/icons"
 	s "github.com/lejeunel/go-image-annotator/adapters/web/styles"
@@ -84,7 +86,7 @@ func (v *AnnotationView) RenderAnnotationList(w http.ResponseWriter) {
 
 func (v *AnnotationView) Render(w http.ResponseWriter) {
 	if v.err != nil {
-		http.Error(w, v.err.Error(), http.StatusBadRequest)
+		http.Error(w, e.PublicMessage(v.err), http.StatusBadRequest)
 		return
 	}
 

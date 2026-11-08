@@ -21,3 +21,11 @@ var (
 	ErrExpiredToken       = errors.New("expired token error")
 	ErrForbiddenOp        = errors.New("forbidden operation error")
 )
+
+// PublicMessage hides the details of internal errors.
+func PublicMessage(err error) string {
+	if errors.Is(err, ErrInternal) {
+		return ErrInternal.Error()
+	}
+	return err.Error()
+}

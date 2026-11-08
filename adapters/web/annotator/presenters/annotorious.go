@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	v "github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	addbox "github.com/lejeunel/go-image-annotator/use-cases/annotate/add-bbox"
@@ -28,7 +30,7 @@ func NewAnnotoriousPresenter(w http.ResponseWriter) AnnotoriousPresenter {
 }
 
 func (p *AnnotoriousPresenter) Error(err error) {
-	http.Error(p.Writer, err.Error(), http.StatusBadRequest)
+	http.Error(p.Writer, e.PublicMessage(err), http.StatusBadRequest)
 }
 
 func (p *AnnotoriousPresenter) SuccessReadImage(r im.Image) {

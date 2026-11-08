@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
+
 	"github.com/lejeunel/go-image-annotator/modules/annotator/view"
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
@@ -20,13 +22,13 @@ func (p *ImageView) Build(image view.Image) Node {
 	}
 	reader, err := image.Opener()
 	if err != nil {
-		return Text(err.Error())
+		return Text(e.PublicMessage(err))
 	}
 	defer reader.Close()
 
 	bytes, err := io.ReadAll(reader)
 	if err != nil {
-		return Text(err.Error())
+		return Text(e.PublicMessage(err))
 	}
 
 	b64Image := base64.StdEncoding.EncodeToString(bytes)
