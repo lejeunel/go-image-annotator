@@ -5,10 +5,12 @@ import (
 )
 
 type StringValidator struct {
-	Invalid bool
+	Invalid   bool
+	Validated string
 }
 
-func (v *StringValidator) Validate(string) error {
+func (v *StringValidator) Validate(s string) error {
+	v.Validated = s
 	if v.Invalid {
 		return e.ErrValidation
 	}

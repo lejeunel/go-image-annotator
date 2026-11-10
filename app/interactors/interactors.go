@@ -4,6 +4,7 @@ import (
 	an "github.com/lejeunel/go-image-annotator/use-cases/annotate"
 	bst "github.com/lejeunel/go-image-annotator/use-cases/bootstrap"
 	clc "github.com/lejeunel/go-image-annotator/use-cases/collection"
+	dr "github.com/lejeunel/go-image-annotator/use-cases/doctor"
 	grp "github.com/lejeunel/go-image-annotator/use-cases/group"
 	im "github.com/lejeunel/go-image-annotator/use-cases/image"
 	lbl "github.com/lejeunel/go-image-annotator/use-cases/label"
@@ -26,4 +27,5 @@ type Interactors struct {
 	Metadata   md.Interactors
 	Log        lg.Interactors
 	Profile    pr.Interactors
+	Doctor     dr.Interactor
 }

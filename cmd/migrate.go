@@ -1,4 +1,4 @@
-package migrate
+package cmd
 
 import (
 	"log/slog"
@@ -8,13 +8,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Cmd = &cobra.Command{
+var MigrateCmd = &cobra.Command{
 	Use:   "migrate",
 	Short: "Inspect and apply database migrations",
 }
 
 func init() {
-	Cmd.AddCommand(upCmd, downCmd, statusCmd)
+	MigrateCmd.AddCommand(upCmd, downCmd, statusCmd)
 }
 
 func NewCLIDBManager() *db.SQLiteDBManager {

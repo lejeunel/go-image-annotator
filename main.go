@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lejeunel/go-image-annotator/migrate"
-	"github.com/lejeunel/go-image-annotator/server"
+	"github.com/lejeunel/go-image-annotator/cmd"
 	"github.com/spf13/cobra"
 )
 
@@ -28,6 +27,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(server.Cmd)
-	rootCmd.AddCommand(migrate.Cmd)
+	rootCmd.AddCommand(cmd.ServerCmd)
+	rootCmd.AddCommand(cmd.MigrateCmd)
+	rootCmd.AddCommand(cmd.DoctorCmd)
 }

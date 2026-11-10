@@ -32,8 +32,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// Make initializes the root handler and listens on the given port.
-func Make(port int) (http.Handler, *slog.Logger) {
+// MakeRootHandler initializes the root handler and listens on the given port.
+func MakeRootHandler(port int) (http.Handler, *slog.Logger) {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	app := sqlite.NewAppFromEnv(logger)
 	app.DBManager.Init(context.Background())
@@ -148,7 +148,7 @@ func Make(port int) (http.Handler, *slog.Logger) {
 }
 
 func Serve(port int) {
-	handler, logger := Make(port)
+	handler, logger := MakeRootHandler(port)
 	addr := fmt.Sprintf(":%d", port)
 
 	ln, err := net.Listen("tcp", addr)
