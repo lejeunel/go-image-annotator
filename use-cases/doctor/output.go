@@ -1,5 +1,5 @@
 package doctor
 
 type OutputPort interface {
-	SuccessMeetTheDoctor(Response)
+	PresentExam(Response)
 }

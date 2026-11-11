@@ -20,7 +20,7 @@ func TestS3ConfigParsesBucketAndPrefix(t *testing.T) {
 		{"s3://my-bucket/", "my-bucket", ""},
 	} {
 		t.Run(tc.uri, func(t *testing.T) {
-			s3cfg, err := Config{ImagesURI: tc.uri}.S3Config()
+			s3cfg, err := Config{ImagesURI: tc.uri}.ParseS3Config(t.Context())
 			require.NoError(t, err)
 			assert.Equal(t, tc.bucket, s3cfg.Bucket)
 			assert.Equal(t, tc.prefix, s3cfg.Prefix)

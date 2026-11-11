@@ -4,6 +4,6 @@ type FakePresenter struct {
 	Got Response
 }
 
-func (p *FakePresenter) SuccessMeetTheDoctor(r Response) {
+func (p *FakePresenter) PresentExam(r Response) {
 	p.Got = r
 }

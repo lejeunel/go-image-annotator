@@ -6,9 +6,8 @@ import (
 	"io"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	awscfg "github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	cfg "github.com/lejeunel/go-image-annotator/config"
 )
 
 type S3FileStore struct {
@@ -18,51 +17,19 @@ type S3FileStore struct {
 }
 
 // NewS3FileStore builds a store backed by an S3-compatible service.
-//
-// Credentials are resolved through the AWS default chain, which covers IAM
-// roles (EC2/ECS metadata, EKS web identity), SSO and shared profiles. Passing
-// a non-empty accessKeyID and secretAccessKey overrides that chain, which is
-// what non-AWS deployments (MinIO and friends) are expected to do.
-//
-// usePathStyle addresses buckets as endpoint/bucket/key instead of the
-// virtual-host form bucket.endpoint/key. Services reached through a custom
-// endpoint without wildcard DNS, MinIO most notably, need it.
-func NewS3FileStore(
-	endpoint string,
-	region string,
-	accessKeyID string,
-	secretAccessKey string,
-	bucket string,
-	prefix string,
-	usePathStyle bool,
-) (*S3FileStore, error) {
-	opts := []func(*awscfg.LoadOptions) error{}
-	if region != "" {
-		opts = append(opts, awscfg.WithRegion(region))
-	}
-	if accessKeyID != "" && secretAccessKey != "" {
-		opts = append(opts, awscfg.WithCredentialsProvider(
-			credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, ""),
-		))
-	}
-
-	cfg, err := awscfg.LoadDefaultConfig(context.Background(), opts...)
-	if err != nil {
-		return nil, fmt.Errorf("load AWS config: %w", err)
-	}
-
-	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
-		if endpoint != "" {
-			o.BaseEndpoint = aws.String(endpoint)
+func NewS3FileStore(c cfg.S3Config) *S3FileStore {
+	client := s3.NewFromConfig(c.AWS, func(o *s3.Options) {
+		if c.Endpoint != "" {
+			o.BaseEndpoint = aws.String(c.Endpoint)
 		}
-		o.UsePathStyle = usePathStyle
+		o.UsePathStyle = c.UsePathStyle
 	})
 
 	return &S3FileStore{
 		client: client,
-		bucket: bucket,
-		prefix: prefix,
-	}, nil
+		bucket: c.Bucket,
+		prefix: c.Prefix,
+	}
 }
 
 func (s *S3FileStore) key(name string) string {

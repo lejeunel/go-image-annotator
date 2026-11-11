@@ -1,11 +1,15 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/url"
 	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awscfg "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -40,41 +44,42 @@ type Config struct {
 	GithubClientSecret                   string   `                split_words:"true"`
 }
 
-func (c Config) S3Config() (*S3Config, error) {
+// ParseS3Config builds the S3 bucket configuration by merging the GOIA_S3_*
+// variables and IMAGES_URI with the AWS SDK default chain.
+//
+// Credentials come from the default chain (env, shared profiles, SSO, IAM
+// roles) unless both S3AccessKey and S3Secret are set, in which case they
+// override it. A non-empty S3Region overrides the chain's region as well.
+func (c Config) ParseS3Config(ctx context.Context) (*S3Config, error) {
 	u, err := url.Parse(c.ImagesURI)
 	if err != nil {
 		return nil, fmt.Errorf("invalid IMAGE_URI: %w", err)
+	}
+
+	opts := []func(*awscfg.LoadOptions) error{}
+	if c.S3Region != "" {
+		opts = append(opts, awscfg.WithRegion(c.S3Region))
+	}
+	staticCredentials := c.S3AccessKey != "" && c.S3Secret != ""
+	if staticCredentials {
+		opts = append(opts, awscfg.WithCredentialsProvider(
+			credentials.NewStaticCredentialsProvider(c.S3AccessKey, c.S3Secret, ""),
+		))
+	}
+
+	awsCfg, err := awscfg.LoadDefaultConfig(ctx, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("load AWS config: %w", err)
 	}
 
 	return &S3Config{
-		Bucket:       u.Host,
-		Prefix:       strings.Trim(u.Path, "/"),
-		Endpoint:     c.S3Endpoint,
-		Region:       c.S3Region,
-		AccessKey:    c.S3AccessKey,
-		Secret:       c.S3Secret,
-		UsePathStyle: c.S3UsePathStyle,
+		Bucket:            u.Host,
+		Prefix:            strings.Trim(u.Path, "/"),
+		Endpoint:          c.S3Endpoint,
+		UsePathStyle:      c.S3UsePathStyle,
+		StaticCredentials: staticCredentials,
+		AWS:               awsCfg,
 	}, nil
-}
-
-func (c Config) LocalImagePath() (*string, error) {
-	u, err := url.Parse(c.ImagesURI)
-	if err != nil {
-		return nil, fmt.Errorf("invalid IMAGE_URI: %w", err)
-	}
-
-	return &u.Path, nil
-}
-
-func (c Config) DefinesS3Store() (bool, error) {
-	u, err := url.Parse(c.ImagesURI)
-	if err != nil {
-		return false, fmt.Errorf("invalid IMAGE_URI: %w", err)
-	}
-	if u.Scheme == "s3" {
-		return true, nil
-	}
-	return false, nil
 }
 
 // Parse builds the main Config struct
@@ -89,11 +94,10 @@ func Parse() Config {
 }
 
 type S3Config struct {
-	Bucket       string
-	Prefix       string
-	Endpoint     string
-	Region       string
-	AccessKey    string
-	Secret       string
-	UsePathStyle bool
+	Bucket            string
+	Prefix            string
+	Endpoint          string
+	UsePathStyle      bool
+	StaticCredentials bool
+	AWS               aws.Config
 }

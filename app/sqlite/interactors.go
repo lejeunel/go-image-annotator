@@ -121,6 +121,5 @@ func BuildInteractors(
 		Profile: NewProfileInteractors(infra.ProfileRepo, infra.GroupRepo,
 			infra.LabelRepo, logger,
 			cfg.DefaultPageSize, auth),
-		Doctor: NewDoctorInteractor(passwordValidator),
 	}
 }

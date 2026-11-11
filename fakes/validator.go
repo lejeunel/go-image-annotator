@@ -14,5 +14,6 @@ func (v *StringValidator) Validate(s string) error {
 	if v.Invalid {
 		return e.ErrValidation
 	}
+
 	return nil
 }
