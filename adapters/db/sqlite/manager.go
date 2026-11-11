@@ -17,10 +17,14 @@ type SQLiteDBManager struct {
 	*slog.Logger
 }
 
-func NewDBManagerFromEnv(logger *slog.Logger) SQLiteDBManager {
-	cfg := config.Parse()
+func NewDBManagerFromEnv(logger *slog.Logger) (*SQLiteDBManager, error) {
+	cfg, err := config.Parse()
+	if err != nil {
+		return nil, err
+	}
 	conn := NewSQLiteConnection(DBPath(cfg.DBPath))
-	return NewSQLiteDBManager(conn.DB, logger)
+	m := NewSQLiteDBManager(conn.DB, logger)
+	return &m, nil
 }
 
 func NewSQLiteDBManager(db *sql.DB, logger *slog.Logger) SQLiteDBManager {

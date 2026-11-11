@@ -20,6 +20,7 @@ var (
 	ErrInvalidPassword    = errors.New("invalid password error")
 	ErrExpiredToken       = errors.New("expired token error")
 	ErrForbiddenOp        = errors.New("forbidden operation error")
+	ErrConfigParsing      = errors.New("failed parsing config")
 )
 
 // PublicMessage hides the details of internal errors.

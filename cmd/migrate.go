@@ -17,10 +17,13 @@ func init() {
 	MigrateCmd.AddCommand(upCmd, downCmd, statusCmd)
 }
 
-func NewCLIDBManager() *db.SQLiteDBManager {
+func NewCLIDBManager() (*db.SQLiteDBManager, error) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	m := db.NewDBManagerFromEnv(logger)
-	return &m
+	m, err := db.NewDBManagerFromEnv(logger)
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 var upCmd = &cobra.Command{
@@ -28,7 +31,11 @@ var upCmd = &cobra.Command{
 	Short: "Apply the next pending migration",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		NewCLIDBManager().Up(cmd.Context())
+		manager, err := NewCLIDBManager()
+		if err != nil {
+			panic(err)
+		}
+		manager.Up(cmd.Context())
 	},
 }
 
@@ -37,7 +44,12 @@ var downCmd = &cobra.Command{
 	Short: "Roll back the most recently applied migration",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		NewCLIDBManager().Down(cmd.Context())
+		manager, err := NewCLIDBManager()
+		if err != nil {
+			panic(err)
+		}
+
+		manager.Down(cmd.Context())
 	},
 }
 
@@ -46,6 +58,11 @@ var statusCmd = &cobra.Command{
 	Short: "List migrations and whether they have been applied",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		NewCLIDBManager().Status(cmd.Context())
+		manager, err := NewCLIDBManager()
+		if err != nil {
+			panic(err)
+		}
+
+		manager.Status(cmd.Context())
 	},
 }

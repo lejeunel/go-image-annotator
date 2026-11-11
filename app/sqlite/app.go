@@ -14,8 +14,11 @@ import (
 )
 
 func NewAppFromEnv(logger *slog.Logger) app.App {
-	cfg := config.Parse()
-	return NewApp(cfg, *logger)
+	cfg, err := config.Parse()
+	if err != nil {
+		panic(err)
+	}
+	return NewApp(*cfg, *logger)
 }
 
 func NewApp(cfg config.Config, logger slog.Logger) app.App {

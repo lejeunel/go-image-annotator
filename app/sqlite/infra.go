@@ -45,6 +45,10 @@ func BuildInfra(localPath string, imageStore fs.FileStore) Infra {
 	userRepo := usr.NewUserRepo(db)
 	roleRepo := r.NewRoleRepo(db)
 	groupRepo := grp.NewGroupRepo(db)
+	localFileStore, err := fs.NewLocalFileStore(fmt.Sprintf("%v/%v", localPath, "tmp"))
+	if err != nil {
+		panic(err)
+	}
 	return Infra{
 		im.NewImageRepo(db, filterParser, orderingParser),
 		clc.NewCollectionRepo(db),
@@ -58,7 +62,7 @@ func BuildInfra(localPath string, imageStore fs.FileStore) Infra {
 		ev.NewEventRepo(db),
 		md.NewMetaRepo(db),
 		imageStore,
-		fs.NewLocalFileStore(fmt.Sprintf("%v/%v", localPath, "tmp")),
+		*localFileStore,
 		filterParser,
 		orderingParser,
 		db,

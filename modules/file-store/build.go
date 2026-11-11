@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/lejeunel/go-image-annotator/config"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type FileStoreType int
@@ -35,10 +36,18 @@ func ParseURI(uri string) (FileStoreType, string, error) {
 		return UnknownFileStoreType, "", fmt.Errorf("invalid IMAGE_URI: %w", err)
 	}
 
-	if u.Scheme == "s3" {
+	switch u.Scheme {
+	case "s3":
 		return S3FileStoreType, u.Host, nil
+	case "file":
+		return LocalFSFileStoreType, u.Path, nil
 	}
-	return LocalFSFileStoreType, u.Path, nil
+	return UnknownFileStoreType, "", fmt.Errorf(
+		"validating prefix %v in URI %v: %w",
+		u.Scheme,
+		uri,
+		e.ErrValidation,
+	)
 }
 
 func Build(cfg config.Config, logger slog.Logger) (FileStore, error) {
@@ -71,7 +80,7 @@ func Build(cfg config.Config, logger slog.Logger) (FileStore, error) {
 
 	case LocalFSFileStoreType:
 		logger.Info("using local file system image store", "path", path)
-		return NewLocalFileStore(path), nil
+		return NewLocalFileStore(path)
 	}
 	return nil, fmt.Errorf("unsupported image store type: %v", storeType)
 }

@@ -13,11 +13,11 @@ type LocalFileStore struct {
 	baseDir string
 }
 
-func NewLocalFileStore(path string) LocalFileStore {
+func NewLocalFileStore(path string) (*LocalFileStore, error) {
 	if err := os.MkdirAll(path, 0o755); err != nil {
-		panic(fmt.Sprintf("failed to create base directory: %v", err))
+		return nil, fmt.Errorf("failed to create base directory: %v", err)
 	}
-	return LocalFileStore{baseDir: path}
+	return &LocalFileStore{baseDir: path}, nil
 }
 
 func (r LocalFileStore) filePath(path string) string {

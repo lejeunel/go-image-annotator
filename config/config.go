@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/url"
 	"strings"
 
@@ -11,6 +10,7 @@ import (
 	awscfg "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/kelseyhightower/envconfig"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type Config struct {
@@ -84,13 +84,13 @@ func (c Config) ParseS3Config(ctx context.Context) (*S3Config, error) {
 
 // Parse builds the main Config struct
 // from environment variables
-func Parse() Config {
+func Parse() (*Config, error) {
 	var cfg Config
 	err := envconfig.Process("GOIA", &cfg)
 	if err != nil {
-		log.Fatal(err.Error())
+		return nil, fmt.Errorf("parsing config from environment: %v: :%w", err, e.ErrValidation)
 	}
-	return cfg
+	return &cfg, nil
 }
 
 type S3Config struct {
