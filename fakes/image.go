@@ -23,6 +23,7 @@ type ImageRepo struct {
 	ErrOnFindHash                error
 	ErrOnCount                   error
 	ErrOnIterate                 error
+	ErrOnIterateIDs              error
 	ErrOnIsUsed                  error
 	ErrOnGetAdjacent             error
 	AddedImageId                 im.ImageId
@@ -38,6 +39,7 @@ type ImageRepo struct {
 	NumDeletedImages             int
 	HashAlreadyExists            bool
 	Count_                       int64
+	IterateIDs_                  []im.ImageId
 	IterateBaseImages            []im.BaseImage
 	Adjacent                     im.AdjacentImages
 	ImageMissing                 bool
@@ -189,4 +191,18 @@ func (r *ImageRepo) PaginateCollection(
 ) ([]im.BaseImage, *int64, error) {
 	count := int64(len(r.IterateBaseImages))
 	return r.IterateBaseImages, &count, nil
+}
+
+func (r ImageRepo) IterateIDs(pageSize int) iter.Seq2[im.ImageId, error] {
+	return func(yield func(im.ImageId, error) bool) {
+		if r.ErrOnIterateIDs != nil {
+			yield(im.ImageId{}, r.ErrOnIterateIDs)
+			return
+		}
+		for id := range slices.Values(r.IterateIDs_) {
+			if !yield(id, nil) {
+				return
+			}
+		}
+	}
 }

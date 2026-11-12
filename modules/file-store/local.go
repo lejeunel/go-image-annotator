@@ -48,6 +48,8 @@ func (r LocalFileStore) Delete(path string) error {
 	return nil
 }
 
+// Get returns a byte reader given an input path.
+// Returns an error when the requested file does not exist.
 func (r LocalFileStore) Get(path string) (io.ReadCloser, error) {
 	path = r.filePath(path)
 	reader, err := os.Open(path)

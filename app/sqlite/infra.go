@@ -14,8 +14,10 @@ import (
 	md "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/metadata"
 	pr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/profile"
 	r "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
+	tra "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/transactors"
 	usr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
+	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
 	q "github.com/lejeunel/go-image-annotator/modules/query"
 	usrs "github.com/lejeunel/go-image-annotator/modules/user-store"
 )
@@ -67,4 +69,16 @@ func BuildInfra(localPath string, imageStore fs.FileStore) Infra {
 		orderingParser,
 		db,
 	}
+}
+
+func BuildImageStoreFromInfra(infra Infra) ims.ImageStore {
+	return ims.New(
+		ims.Repos{
+			ImageRepo:      infra.ImageRepo,
+			CollectionRepo: infra.CollectionRepo,
+			AnnotationRepo: infra.AnnotationRepo,
+			MetaRepo:       infra.MetaRepo,
+		},
+		tra.NewStoreTransactor(infra.DB, infra.FilterParser, infra.OrderStrParser),
+		infra.ImageFileStore, infra.FilterParser, infra.OrderParser)
 }

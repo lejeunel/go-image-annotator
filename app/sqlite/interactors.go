@@ -12,7 +12,6 @@ import (
 	aig "github.com/lejeunel/go-image-annotator/modules/archive-ingester"
 	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	iig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
-	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	rea "github.com/lejeunel/go-image-annotator/modules/reader"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
@@ -29,15 +28,7 @@ func BuildInteractors(
 	forgottenPasswordGen := tk.New(cfg.RandomPasswordLength)
 	passwordValidator := pv.New(cfg.PasswordMinEntropy)
 
-	imstore := ims.New(
-		ims.Repos{
-			ImageRepo:      infra.ImageRepo,
-			CollectionRepo: infra.CollectionRepo,
-			AnnotationRepo: infra.AnnotationRepo,
-			MetaRepo:       infra.MetaRepo,
-		},
-		tra.NewStoreTransactor(infra.DB, infra.FilterParser, infra.OrderStrParser),
-		infra.ImageFileStore, infra.FilterParser, infra.OrderParser)
+	imstore := BuildImageStoreFromInfra(infra)
 	eventlogger := el.New(infra.EventRepo, el.WithMaxNumTasksPerUser(cfg.MaxNumTasksPerUser))
 
 	imageIngester := iig.New(

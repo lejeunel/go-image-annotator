@@ -1,6 +1,7 @@
 package image_store
 
 import (
+	"iter"
 	"time"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
@@ -35,6 +36,7 @@ type ImageRepo interface {
 	Delete(im.ImageId) error
 	PaginateCollection(clc.CollectionName, pag.PaginationParams) ([]im.BaseImage, *int64, error)
 	Slice(im.FilterStr, im.OrderStr, pag.PaginationParams) ([]im.BaseImage, *int64, error)
+	IterateIDs(int) iter.Seq2[im.ImageId, error]
 }
 
 type MetaRepo interface {

@@ -5,9 +5,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"iter"
 	"time"
 
 	"github.com/lejeunel/go-image-annotator/config"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -20,6 +22,10 @@ type FileStoreProvider interface {
 	Get(config.Config) (fs.FileStore, error)
 }
 
+type DBStoreProvider interface {
+	Get(string) (fs.FileStore, error)
+}
+
 type ConfigProvider interface {
 	Get() (*config.Config, error)
 }
@@ -28,10 +34,29 @@ type PasswordValidatorProvider interface {
 	Get(minEntropy int) pv.PasswordValidator
 }
 
+type ImageStore interface {
+	IterateImageIDs(int) iter.Seq2[im.ImageId, error]
+	Exists(im.ImageId) (*bool, error)
+}
+
+type ImageStoreProvider interface {
+	Get(config.Config) (ImageStore, error)
+}
+
 type Interactor struct {
 	PasswordValidatorProvider
 	ConfigProvider
 	FileStoreProvider
+	DBStoreProvider
+	ImageStoreProvider
+}
+
+func New(cfgp ConfigProvider, pvp PasswordValidatorProvider, fsp FileStoreProvider,
+	dbdp DBStoreProvider, imsp ImageStoreProvider,
+) Interactor {
+	return Interactor{
+		pvp, cfgp, fsp, dbdp, imsp,
+	}
 }
 
 func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
@@ -45,7 +70,22 @@ func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 	out.PresentExam(parseResponse)
 
 	i.examinePassword(*config, out)
-	i.examineFileStore(*config, out)
+
+	fileStore, err := i.FileStoreProvider.Get(*config)
+	examineFileStore("file store", fileStore, err, out)
+
+	dbDir, err := i.DBStoreProvider.Get(config.DBPath)
+	examineFileStore("database store", dbDir, err, out)
+
+	imageStore, err := i.ImageStoreProvider.Get(*config)
+	if err != nil {
+		out.PresentExam(Response{
+			Description: "Instantiating image store",
+			Error:       err,
+		})
+	} else {
+		checkImageStoreIntegrity(imageStore, 10, out)
+	}
 }
 
 func (i *Interactor) examinePassword(c config.Config, out OutputPort) {
@@ -56,12 +96,11 @@ func (i *Interactor) examinePassword(c config.Config, out OutputPort) {
 	})
 }
 
-// examineFileStore skips the sanity check when the store cannot be
-// instantiated, but lets the following exams run.
-func (i *Interactor) examineFileStore(c config.Config, out OutputPort) {
-	store, err := i.FileStoreProvider.Get(c)
+// examineFileStore reports the error obtained when instantiating store, and
+// probes store only when it was instantiated.
+func examineFileStore(storeName string, store fs.FileStore, err error, out OutputPort) {
 	out.PresentExam(Response{
-		Description: "Instantiating file store",
+		Description: fmt.Sprintf("Instantiating %s", storeName),
 		Error:       err,
 	})
 	if err != nil {
@@ -69,12 +108,12 @@ func (i *Interactor) examineFileStore(c config.Config, out OutputPort) {
 	}
 
 	out.PresentExam(Response{
-		Description: "Writing, reading, and deleting to file store",
+		Description: fmt.Sprintf("Writing, reading, and deleting to %s", storeName),
 		Error:       checkFileStore(store),
 	})
 }
 
-// checkFileStore writes probePayload under a unique key, reads it back,
+// checkFileStore writes a testing blob under a unique key, reads it back,
 // compares it and deletes it.
 func checkFileStore(store fs.FileStore) error {
 	key := fmt.Sprintf(".goia-doctor-%d", time.Now().UnixNano())
@@ -102,10 +141,25 @@ func checkFileStore(store fs.FileStore) error {
 	return nil
 }
 
-type Option func(*Interactor)
+func checkImageStoreIntegrity(store ImageStore, pageSize int, out OutputPort) {
+	response := Response{Description: "Image store integrity"}
+	for id, err := range store.IterateImageIDs(pageSize) {
+		if err != nil {
+			response.Error = err
+			out.PresentExam(response)
+			return
+		}
+		exists, err := store.Exists(id)
+		if err != nil {
+			response.Error = err
+			out.PresentExam(response)
+			return
+		}
+		if !*exists {
+			out.ErrorCheckImageIntegrity(id)
+		} else {
+			out.SuccessCheckImageIntegrity(id)
+		}
 
-func New(cfgp ConfigProvider, pvp PasswordValidatorProvider, fsp FileStoreProvider) Interactor {
-	return Interactor{
-		pvp, cfgp, fsp,
 	}
 }

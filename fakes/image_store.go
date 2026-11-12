@@ -1,6 +1,9 @@
 package fake
 
 import (
+	"iter"
+	"slices"
+
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
@@ -20,6 +23,8 @@ type ImageStore struct {
 	ReturnCount             int64
 	ReturnPagination        pag.Pagination
 	GotPagination           pag.PaginationParams
+	IterateImageIds         []im.ImageId
+	ExistingImageFileIds    []im.ImageId
 }
 
 func (s *ImageStore) Find(baseImage im.BaseImage) (*im.Image, error) {
@@ -81,4 +86,23 @@ func (s *ImageStore) Copy(
 ) error {
 	s.CopiedToCollection = dst
 	return nil
+}
+
+func (s ImageStore) IterateImageIDs(pageSize int) iter.Seq2[im.ImageId, error] {
+	return func(yield func(im.ImageId, error) bool) {
+		for id := range slices.Values(s.IterateImageIds) {
+			if !yield(id, nil) {
+				return
+			}
+		}
+	}
+}
+
+func (s ImageStore) Exists(id im.ImageId) (*bool, error) {
+	result := false
+	if slices.Contains(s.ExistingImageFileIds, id) {
+		result = true
+		return &result, nil
+	}
+	return &result, nil
 }

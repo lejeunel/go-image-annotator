@@ -1,8 +1,10 @@
 package image_store
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"iter"
 	"strings"
 
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
@@ -298,4 +300,26 @@ func (s ImageStore) Slice(
 	}
 	pagination := pag.New(p.Page, p.PageSize, *count)
 	return images, &pagination, nil
+}
+
+func (s ImageStore) Exists(id im.ImageId) (*bool, error) {
+	specs, err := s.ImageRepo.GetSpecs(id)
+	if err != nil {
+		return nil, fmt.Errorf("fetching image specs: %w", err)
+	}
+	result := true
+
+	_, err = s.FileStore.Get(im.MakeImageFileName(id, specs.MIMEType))
+	if errors.Is(err, e.ErrNotFound) {
+		result = false
+		return &result, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &result, err
+}
+
+func (s ImageStore) IterateImageIDs(pageSize int) iter.Seq2[im.ImageId, error] {
+	return s.ImageRepo.IterateIDs(pageSize)
 }

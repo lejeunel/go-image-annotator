@@ -3,6 +3,8 @@ package doctor
 import (
 	"testing"
 
+	"github.com/lejeunel/go-image-annotator/config"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -12,6 +14,8 @@ func NewTestingInteractor() Interactor {
 	return New(FakeConfigProvider{},
 		&FakePasswordValidatorProvider{&fk.StringValidator{}},
 		&FakeFileStoreProvider{FileStore: &fk.FileStore{}},
+		&FakeDBStoreProvider{FileStore: &fk.FileStore{}},
+		&FakeImageStoreProvider{&fk.ImageStore{}},
 	)
 }
 
@@ -86,4 +90,49 @@ func TestFileStoreDeleteFailure(t *testing.T) {
 	itr.FileStoreProvider = &FakeFileStoreProvider{FileStore: store}
 	itr.Execute(t.Context(), p)
 	assert.True(t, p.GotErr(e.ErrInternal))
+}
+
+func TestInvalidDBStore(t *testing.T) {
+	p := &FakePresenter{}
+	itr := NewTestingInteractor()
+	itr.ConfigProvider = FakeConfigProvider{Config: config.Config{DBPath: "/some/db/dir"}}
+	provider := &FakeDBStoreProvider{Err: e.ErrValidation}
+	itr.DBStoreProvider = provider
+	itr.Execute(t.Context(), p)
+	assert.Equal(t, "/some/db/dir", provider.GotPath)
+	assert.True(t, p.GotErr(e.ErrValidation))
+}
+
+func TestDBStoreWriteFailure(t *testing.T) {
+	p := &FakePresenter{}
+	store := &fk.FileStore{ErrOnStore: e.ErrInternal}
+	itr := NewTestingInteractor()
+	itr.DBStoreProvider = &FakeDBStoreProvider{FileStore: store}
+	itr.Execute(t.Context(), p)
+	assert.True(t, p.GotErr(e.ErrInternal))
+}
+
+func TestMissingImageFileShouldFail(t *testing.T) {
+	p := &FakePresenter{}
+	itr := NewTestingInteractor()
+	id := im.NewImageId()
+	itr.ImageStoreProvider = FakeImageStoreProvider{
+		fk.ImageStore{IterateImageIds: []im.ImageId{id}},
+	}
+	itr.Execute(t.Context(), p)
+	assert.True(t, p.GotErr(e.ErrNotFound))
+	assert.Equal(t, 1, p.CheckedImages)
+}
+
+func TestExistingImageFileShouldSucceed(t *testing.T) {
+	p := &FakePresenter{}
+	itr := NewTestingInteractor()
+	id := im.NewImageId()
+	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+		IterateImageIds:      []im.ImageId{id},
+		ExistingImageFileIds: []im.ImageId{id},
+	}}
+	itr.Execute(t.Context(), p)
+	assert.False(t, p.GotErr(e.ErrNotFound))
+	assert.Equal(t, 1, p.CheckedImages)
 }

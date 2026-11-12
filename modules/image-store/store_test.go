@@ -129,7 +129,7 @@ func TestErrOnFindPolygonsShouldFail(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestErrOnExistsShouldFail(t *testing.T) {
+func TestErrOnImageExistsInCollectionShouldFail(t *testing.T) {
 	s, _, _, _ := Setup()
 	s.ImageRepo = &fk.ImageRepo{ErrOnImageExistsInCollection: e.ErrInternal}
 	_, err := s.Find(im.BaseImage{
@@ -261,4 +261,22 @@ func TestPaginateCollection(t *testing.T) {
 		pag.PaginationParams{Page: 1, PageSize: 1},
 	)
 	assert.Equal(t, 1, len(images))
+}
+
+func TestExistsOnMissingFileShouldReturnFalse(t *testing.T) {
+	store, _, _, _ := Setup()
+	store.FileStore = &fk.FileStore{ErrOnGet: e.ErrNotFound}
+	store.ImageRepo = &fk.ImageRepo{ReturnSpecs: &im.Specs{MIMEType: "image/jpeg"}}
+	exists, err := store.Exists(im.NewImageId())
+	assert.NoError(t, err)
+	assert.False(t, *exists)
+}
+
+func TestExistsOnExistingFileShouldReturnTrue(t *testing.T) {
+	store, _, _, _ := Setup()
+	store.FileStore = &fk.FileStore{}
+	store.ImageRepo = &fk.ImageRepo{ReturnSpecs: &im.Specs{MIMEType: "image/jpeg"}}
+	exists, err := store.Exists(im.NewImageId())
+	assert.NoError(t, err)
+	assert.True(t, *exists)
 }

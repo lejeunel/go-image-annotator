@@ -120,11 +120,15 @@ func (i *Image) BoundingBoxSummary() []an.BoundingBoxResponse {
 }
 
 func (i Image) Filename() string {
-	return fmt.Sprintf("%v.%v", i.Id.String(), strings.Split(i.Specs.MIMEType, "/")[1])
+	return MakeImageFileName(i.Id, i.Specs.MIMEType)
 }
 
 func NewImage(id ImageId, collection clc.Collection) Image {
 	return Image{Id: id, Collection: collection}
+}
+
+func MakeImageFileName(id ImageId, mimetype string) string {
+	return fmt.Sprintf("%v.%v", id.String(), strings.Split(mimetype, "/")[1])
 }
 
 type ScrollingDirection int

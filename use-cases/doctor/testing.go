@@ -6,9 +6,11 @@ import (
 	"strings"
 
 	"github.com/lejeunel/go-image-annotator/config"
+	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type FakeConfigProvider struct {
@@ -43,9 +45,26 @@ func (p *FakeFileStoreProvider) Get(config.Config) (fs.FileStore, error) {
 	return p.FileStore, nil
 }
 
+// FakeDBStoreProvider returns FileStore, or Err when set, and records the
+// path it was given.
+type FakeDBStoreProvider struct {
+	FileStore fs.FileStore
+	Err       error
+	GotPath   string
+}
+
+func (p *FakeDBStoreProvider) Get(path string) (fs.FileStore, error) {
+	p.GotPath = path
+	if p.Err != nil {
+		return nil, p.Err
+	}
+	return p.FileStore, nil
+}
+
 type FakePresenter struct {
-	LastExam Response
-	Errors   []error
+	LastExam      Response
+	Errors        []error
+	CheckedImages int
 }
 
 func (p *FakePresenter) PresentExam(r Response) {
@@ -53,6 +72,15 @@ func (p *FakePresenter) PresentExam(r Response) {
 	if r.Error != nil {
 		p.Errors = append(p.Errors, r.Error)
 	}
+}
+
+func (p *FakePresenter) SuccessCheckImageIntegrity(id im.ImageId) {
+	p.CheckedImages += 1
+}
+
+func (p *FakePresenter) ErrorCheckImageIntegrity(id im.ImageId) {
+	p.CheckedImages += 1
+	p.Errors = append(p.Errors, e.ErrNotFound)
 }
 
 func (p *FakePresenter) GotErr(target error) bool {
@@ -71,4 +99,12 @@ type CorruptedFileStore struct {
 
 func (s CorruptedFileStore) Get(string) (io.ReadCloser, error) {
 	return io.NopCloser(strings.NewReader("corrupted")), nil
+}
+
+type FakeImageStoreProvider struct {
+	ImageStore
+}
+
+func (p FakeImageStoreProvider) Get(config.Config) (ImageStore, error) {
+	return p.ImageStore, nil
 }

@@ -2,12 +2,15 @@ package file_store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	cfg "github.com/lejeunel/go-image-annotator/config"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
 
 type S3FileStore struct {
@@ -66,6 +69,8 @@ func (s *S3FileStore) Delete(name string) error {
 	return nil
 }
 
+// Get returns a byte reader given an input path.
+// Returns an error when the requested file does not exist.
 func (s *S3FileStore) Get(name string) (io.ReadCloser, error) {
 	key := s.key(name)
 	result, err := s.client.GetObject(context.Background(), &s3.GetObjectInput{
@@ -73,7 +78,11 @@ func (s *S3FileStore) Get(name string) (io.ReadCloser, error) {
 		Key:    &key,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("get %q: %w", name, err)
+		var noSuchKey *types.NoSuchKey
+		if errors.As(err, &noSuchKey) {
+			return nil, fmt.Errorf("get %q: %w: %w", name, err, e.ErrNotFound)
+		}
+		return nil, fmt.Errorf("get %q: %w: %w", name, err, e.ErrInternal)
 	}
 
 	return result.Body, nil

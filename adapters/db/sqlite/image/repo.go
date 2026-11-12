@@ -212,6 +212,38 @@ func (r ImageRepo) Iterate(f im.FilterStr, pageSize int) iter.Seq2[im.BaseImage,
 	}
 }
 
+// IterateIDs yields the id of every image, whether or not it belongs to a
+// collection, fetching pageSize ids per query.
+func (r ImageRepo) IterateIDs(pageSize int) iter.Seq2[im.ImageId, error] {
+	return func(yield func(im.ImageId, error) bool) {
+		if pageSize < 1 {
+			yield(
+				im.ImageId{},
+				fmt.Errorf("iterating image ids: page size %v: %w", pageSize, e.ErrValidation),
+			)
+			return
+		}
+		query := "SELECT id FROM images WHERE id > $1 ORDER BY id LIMIT $2"
+		after := ""
+		for {
+			var ids []im.ImageId
+			if err := r.Db.Select(&ids, query, after, pageSize); err != nil {
+				yield(im.ImageId{}, fmt.Errorf("iterating image ids: %v: %w", err, e.ErrInternal))
+				return
+			}
+			for _, id := range ids {
+				if !yield(id, nil) {
+					return // consumer stopped early
+				}
+			}
+			if len(ids) < pageSize {
+				return // last page
+			}
+			after = ids[len(ids)-1].String()
+		}
+	}
+}
+
 func (r ImageRepo) ImageExistsInCollection(
 	imageId im.ImageId,
 	collection clc.CollectionName,
