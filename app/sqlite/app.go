@@ -22,7 +22,7 @@ func NewAppFromEnv(logger *slog.Logger) app.App {
 }
 
 func NewApp(cfg config.Config, logger slog.Logger) app.App {
-	imageStore, err := fs.Build(cfg, logger)
+	imageStore, err := fs.Build(cfg)
 	if err != nil {
 		panic(err)
 	}

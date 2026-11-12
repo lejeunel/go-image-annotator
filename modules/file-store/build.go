@@ -3,7 +3,6 @@ package file_store
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/url"
 
 	"github.com/lejeunel/go-image-annotator/config"
@@ -50,7 +49,7 @@ func ParseURI(uri string) (FileStoreType, string, error) {
 	)
 }
 
-func Build(cfg config.Config, logger slog.Logger) (FileStore, error) {
+func Build(cfg config.Config) (FileStore, error) {
 	storeType, path, err := ParseURI(cfg.ImagesURI)
 	if err != nil {
 		return nil, err
@@ -61,33 +60,10 @@ func Build(cfg config.Config, logger slog.Logger) (FileStore, error) {
 		if err != nil {
 			return nil, err
 		}
-		logger.Info(
-			"using S3 image store",
-			"bucket",
-			s3cfg.Bucket,
-			"prefix",
-			s3cfg.Prefix,
-			"endpoint",
-			s3cfg.Endpoint,
-			"region",
-			s3cfg.AWS.Region,
-			"path_style",
-			s3cfg.UsePathStyle,
-			"credentials",
-			credentialSource(s3cfg.StaticCredentials),
-		)
 		return NewS3FileStore(*s3cfg), nil
 
 	case LocalFSFileStoreType:
-		logger.Info("using local file system image store", "path", path)
 		return NewLocalFileStore(path)
 	}
 	return nil, fmt.Errorf("unsupported image store type: %v", storeType)
-}
-
-func credentialSource(static bool) string {
-	if static {
-		return "static"
-	}
-	return "default AWS chain"
 }

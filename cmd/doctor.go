@@ -7,6 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/lejeunel/go-image-annotator/config"
+	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	dr "github.com/lejeunel/go-image-annotator/use-cases/doctor"
 	"github.com/spf13/cobra"
@@ -50,12 +51,19 @@ func (p PasswordValidatorProvider) Get(minEntropy int) pv.PasswordValidator {
 	return pv.New(minEntropy)
 }
 
+type FileStoreProvider struct{}
+
+func (p FileStoreProvider) Get(c config.Config) (fs.FileStore, error) {
+	return fs.Build(c)
+}
+
 var DoctorCmd = &cobra.Command{
 	Use:   "doctor",
 	Short: "Checks configuration variables and output a diagnoses",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		itr := dr.New(FromEnvConfigProvider{}, PasswordValidatorProvider{})
+		itr := dr.New(FromEnvConfigProvider{}, PasswordValidatorProvider{},
+			FileStoreProvider{})
 		p := &DoctorCLIPresenter{}
 		itr.Execute(context.Background(), p)
 		p.Summarize()
