@@ -4,7 +4,7 @@ import (
 	usr "github.com/lejeunel/go-image-annotator/entities/user"
 )
 
-type Repo interface {
+type UserRepo interface {
 	Create(usr.BaseUser) error
 	Exists(string) (bool, error)
 }

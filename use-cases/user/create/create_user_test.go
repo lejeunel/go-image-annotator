@@ -9,123 +9,131 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandleAuthError(t *testing.T) {
+func Setup() (Interactor, FakePresenter) {
 	itr := New(&fk.UserRepo{}, &fk.GroupRepo{}, &fk.RoleRepo{}, &fk.Tokenizer{},
-		&fk.Tokenizer{},
-		WithAuth(fk.Auth{ErrOnAuth: e.ErrAuthorization}))
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
-	assert.True(t, p.GotAuthErr)
-	assert.False(t, p.GotSuccess)
+		&fk.Tokenizer{}, &fk.StringValidator{})
+	p := FakePresenter{}
+	return itr, p
+}
+
+func TestHandleAuthError(t *testing.T) {
+	itr, presenter := Setup()
+	itr.Auth = fk.Auth{ErrOnAuth: e.ErrAuthorization}
+	itr.Execute(t.Context(), Request{}, &presenter)
+	assert.True(t, presenter.GotAuthErr)
+	assert.False(t, presenter.GotSuccess)
 }
 
 func TestHandleDuplicateError(t *testing.T) {
 	userId := "user@example.com"
-	itr := New(&fk.UserRepo{ExistingIds: []string{userId}}, &fk.GroupRepo{}, &fk.RoleRepo{},
-		&fk.Tokenizer{},
-		&fk.Tokenizer{},
-	)
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: userId}, p)
-	assert.True(t, p.GotDuplicationErr)
-	assert.False(t, p.GotSuccess)
+	itr, presenter := Setup()
+	itr.UserRepo = &fk.UserRepo{ExistingIds: []string{userId}}
+	itr.Execute(t.Context(), Request{Id: userId}, &presenter)
+	assert.True(t, presenter.GotDuplicationErr)
+	assert.False(t, presenter.GotSuccess)
+}
+
+func TestFailOnInvalidId(t *testing.T) {
+	itr, presenter := Setup()
+	itr.IdValidator = &fk.StringValidator{Invalid: true}
+	itr.Execute(t.Context(), Request{Id: "an-id"}, &presenter)
+	assert.True(t, presenter.GotValidationErr)
+	assert.False(t, presenter.GotSuccess)
 }
 
 func TestCreateWithTokenHash(t *testing.T) {
+	itr, presenter := Setup()
 	hash := []byte("the-hash")
-	repo := &fk.UserRepo{}
-	itr := New(repo, &fk.GroupRepo{}, &fk.RoleRepo{}, &fk.Tokenizer{ReturnHash: hash},
-		&fk.Tokenizer{},
-	)
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user"}, p)
-	assert.Equal(t, hash, repo.Created.HashPAT)
+	userRepo := &fk.UserRepo{}
+	itr.UserRepo = userRepo
+	itr.APITokenGenerator = &fk.Tokenizer{ReturnHash: hash}
+	itr.Execute(t.Context(), Request{Id: "user"}, &presenter)
+	assert.Equal(t, hash, userRepo.Created.HashPAT)
 }
 
 func TestCreateWithRandomPassword(t *testing.T) {
-	repo := &fk.UserRepo{}
+	userRepo := &fk.UserRepo{}
 	passwordHash := []byte("a-password-hash")
-	itr := New(repo, &fk.GroupRepo{}, &fk.RoleRepo{},
-		&fk.Tokenizer{},
-		&fk.Tokenizer{ReturnHash: passwordHash},
-	)
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user"}, p)
-	assert.Equal(t, passwordHash, repo.Created.HashPassword)
+	itr, presenter := Setup()
+	itr.PasswordGenerator = &fk.Tokenizer{ReturnHash: passwordHash}
+	itr.UserRepo = userRepo
+	itr.Execute(t.Context(), Request{Id: "user"}, &presenter)
+	assert.Equal(t, passwordHash, userRepo.Created.HashPassword)
 }
 
 func TestCreateWithPassword(t *testing.T) {
+	itr, presenter := Setup()
 	password := "a-password"
 	hash := []byte("the-hash")
-	repo := &fk.UserRepo{}
+	userRepo := &fk.UserRepo{}
 	pwGenerator := &fk.Tokenizer{ReturnHash: hash}
-	itr := New(repo, &fk.GroupRepo{}, &fk.RoleRepo{},
-		&fk.Tokenizer{},
-		pwGenerator,
-	)
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user", Password: &password}, p)
+	itr.UserRepo = userRepo
+	itr.PasswordGenerator = pwGenerator
+	itr.Execute(t.Context(), Request{Id: "user", Password: &password}, &presenter)
 	assert.Equal(t, password, pwGenerator.Hashed)
-	assert.Equal(t, hash, repo.Created.HashPassword)
+	assert.Equal(t, hash, userRepo.Created.HashPassword)
 }
 
 func TestCreateWithRolesAndGroups(t *testing.T) {
 	roles := []string{"a-role"}
 	groups := []string{"a-group"}
-	repo := &fk.UserRepo{}
-	itr := New(repo,
-		&fk.GroupRepo{Existing: []grp.Group{grp.NewGroup(grp.NewGroupId(), "a-group")}},
-		&fk.RoleRepo{ExistingNames: roles},
-		&fk.Tokenizer{}, &fk.Tokenizer{})
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user", Roles: &roles, Groups: &groups}, p)
-	assert.True(t, p.GotSuccess)
-	assert.Equal(t, roles, repo.Created.Roles)
-	assert.Equal(t, groups, repo.Created.Groups)
+	userRepo := &fk.UserRepo{}
+	groupRepo := &fk.GroupRepo{Existing: []grp.Group{grp.NewGroup(grp.NewGroupId(), "a-group")}}
+	roleRepo := &fk.RoleRepo{ExistingNames: roles}
+	itr, presenter := Setup()
+	itr.UserRepo = userRepo
+	itr.GroupRepo = groupRepo
+	itr.RoleRepo = roleRepo
+	itr.Execute(t.Context(), Request{Id: "user", Roles: &roles, Groups: &groups}, &presenter)
+	assert.True(t, presenter.GotSuccess)
+	assert.Equal(t, roles, userRepo.Created.Roles)
+	assert.Equal(t, groups, userRepo.Created.Groups)
 }
 
 func TestMissingGroupShouldFail(t *testing.T) {
+	itr, presenter := Setup()
 	groups := []string{"missing-group"}
-	repo := &fk.UserRepo{}
-	itr := New(repo, &fk.GroupRepo{}, &fk.RoleRepo{}, &fk.Tokenizer{}, &fk.Tokenizer{})
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user", Groups: &groups}, p)
-	assert.True(t, p.GotNotFoundErr)
-	assert.False(t, p.GotSuccess)
-	assert.Nil(t, repo.Created)
+	userRepo := &fk.UserRepo{}
+	itr.UserRepo = userRepo
+	itr.Execute(t.Context(), Request{Id: "user", Groups: &groups}, &presenter)
+	assert.True(t, presenter.GotNotFoundErr)
+	assert.False(t, presenter.GotSuccess)
+	assert.Nil(t, userRepo.Created)
 }
 
 func TestMissingRoleShouldFail(t *testing.T) {
+	itr, presenter := Setup()
 	roles := []string{"missing-role"}
-	repo := &fk.UserRepo{}
-	itr := New(repo, &fk.GroupRepo{}, &fk.RoleRepo{}, &fk.Tokenizer{}, &fk.Tokenizer{})
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user", Roles: &roles}, p)
-	assert.True(t, p.GotNotFoundErr)
-	assert.False(t, p.GotSuccess)
-	assert.Nil(t, repo.Created)
+	userRepo := &fk.UserRepo{}
+	itr.UserRepo = userRepo
+	itr.Execute(t.Context(), Request{Id: "user", Roles: &roles}, &presenter)
+	assert.True(t, presenter.GotNotFoundErr)
+	assert.False(t, presenter.GotSuccess)
+	assert.Nil(t, userRepo.Created)
 }
 
 func TestHandleErrorOnCheckingGroupExistence(t *testing.T) {
+	itr, presenter := Setup()
 	groups := []string{"a-group"}
-	repo := &fk.UserRepo{}
-	itr := New(repo, &fk.GroupRepo{ErrOnExists: e.ErrInternal}, &fk.RoleRepo{},
-		&fk.Tokenizer{}, &fk.Tokenizer{})
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user", Groups: &groups}, p)
-	assert.True(t, p.GotInternalErr)
-	assert.False(t, p.GotSuccess)
-	assert.Nil(t, repo.Created)
+	userRepo := &fk.UserRepo{}
+	groupRepo := &fk.GroupRepo{ErrOnExists: e.ErrInternal}
+	itr.UserRepo = userRepo
+	itr.GroupRepo = groupRepo
+	itr.Execute(t.Context(), Request{Id: "user", Groups: &groups}, &presenter)
+	assert.True(t, presenter.GotInternalErr)
+	assert.False(t, presenter.GotSuccess)
+	assert.Nil(t, userRepo.Created)
 }
 
 func TestHandleErrorOnCheckingRoleExistence(t *testing.T) {
+	itr, presenter := Setup()
 	roles := []string{"a-role"}
-	repo := &fk.UserRepo{}
-	itr := New(repo, &fk.GroupRepo{}, &fk.RoleRepo{ErrOnExists: e.ErrInternal},
-		&fk.Tokenizer{}, &fk.Tokenizer{})
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{Id: "user", Roles: &roles}, p)
-	assert.True(t, p.GotInternalErr)
-	assert.False(t, p.GotSuccess)
-	assert.Nil(t, repo.Created)
+	userRepo := &fk.UserRepo{}
+	roleRepo := &fk.RoleRepo{ErrOnExists: e.ErrInternal}
+	itr.UserRepo = userRepo
+	itr.RoleRepo = roleRepo
+	itr.Execute(t.Context(), Request{Id: "user", Roles: &roles}, &presenter)
+	assert.True(t, presenter.GotInternalErr)
+	assert.False(t, presenter.GotSuccess)
+	assert.Nil(t, userRepo.Created)
 }

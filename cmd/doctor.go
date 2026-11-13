@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	ev "github.com/lejeunel/go-image-annotator/modules/email-validator"
 	dr "github.com/lejeunel/go-image-annotator/use-cases/doctor"
 	"github.com/spf13/cobra"
 )
@@ -13,7 +14,7 @@ var DoctorCmd = &cobra.Command{
 	Short: "Checks configuration variables and output a diagnoses",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		itr := dr.New(FromEnvConfigProvider{}, PasswordValidatorProvider{},
+		itr := dr.New(FromEnvConfigProvider{}, PasswordValidatorProvider{}, ev.New(),
 			FileStoreProvider{}, DBStoreProvider{}, ImageStoreProvider{})
 		p := NewDoctorCLIPresenter()
 		itr.Execute(context.Background(), p)

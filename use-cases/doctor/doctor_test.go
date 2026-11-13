@@ -14,6 +14,7 @@ import (
 func NewTestingInteractor() Interactor {
 	return New(FakeConfigProvider{},
 		&FakePasswordValidatorProvider{&fk.StringValidator{}},
+		&fk.StringValidator{},
 		&FakeFileStoreProvider{FileStore: &fk.FileStore{}},
 		&FakeDBStoreProvider{FileStore: &fk.FileStore{}},
 		&FakeImageStoreProvider{&fk.ImageStore{}},
@@ -33,6 +34,14 @@ func TestInvalidAdminPasswordShouldFail(t *testing.T) {
 	pwval := &fk.StringValidator{Invalid: true}
 	itr := NewTestingInteractor()
 	itr.PasswordValidatorProvider = &FakePasswordValidatorProvider{pwval}
+	itr.Execute(t.Context(), p)
+	assert.True(t, p.GotErr(e.ErrValidation))
+}
+
+func TestInvalidAdminEmailShouldFail(t *testing.T) {
+	p := &FakePresenter{}
+	itr := NewTestingInteractor()
+	itr.EmailValidator = &fk.StringValidator{Invalid: true}
 	itr.Execute(t.Context(), p)
 	assert.True(t, p.GotErr(e.ErrValidation))
 }

@@ -8,41 +8,59 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Setup() (Interactor, FakePresenter) {
+	return New(
+			&fk.UserRepo{},
+			&fk.RoleRepo{},
+			&fk.Tokenizer{},
+			&fk.StringValidator{},
+			&fk.StringValidator{},
+		),
+		FakePresenter{}
+}
+
 func TestNoopIfAdminRoleExists(t *testing.T) {
+	itr, presenter := Setup()
 	roleRepo := &fk.RoleRepo{ExistingNames: []string{"admin"}}
-	itr := New(&fk.UserRepo{}, roleRepo, &fk.Tokenizer{}, &fk.StringValidator{})
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
-	assert.True(t, p.GotSuccess)
-	assert.True(t, p.Got.Skipped)
+	itr.RoleRepo = roleRepo
+	itr.Execute(t.Context(), Request{}, &presenter)
+	assert.True(t, presenter.GotSuccess)
+	assert.True(t, presenter.Got.Skipped)
 }
 
 func TestShouldCreateDefaultRoles(t *testing.T) {
 	roleRepo := &fk.RoleRepo{}
-	itr := New(&fk.UserRepo{}, roleRepo, &fk.Tokenizer{}, &fk.StringValidator{})
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
+	itr, presenter := Setup()
+	itr.RoleRepo = roleRepo
+	itr.Execute(t.Context(), Request{}, &presenter)
 	assert.NotNil(t, roleRepo.Created)
 	assert.Equal(t, len(r.DefaultRoleNames), len(roleRepo.Created))
 }
 
 func TestInvalidPassword(t *testing.T) {
-	itr := New(&fk.UserRepo{}, &fk.RoleRepo{},
-		&fk.Tokenizer{}, &fk.StringValidator{Invalid: true})
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
-	assert.True(t, p.GotValidationErr)
+	itr, presenter := Setup()
+	itr.PasswordValidator = &fk.StringValidator{Invalid: true}
+	itr.Execute(t.Context(), Request{}, &presenter)
+	assert.True(t, presenter.GotValidationErr)
+}
+
+func TestInvalidEmail(t *testing.T) {
+	itr, presenter := Setup()
+	itr.EmailValidator = &fk.StringValidator{Invalid: true}
+	itr.Execute(t.Context(), Request{}, &presenter)
+	assert.True(t, presenter.GotValidationErr)
 }
 
 func TestShouldCreateAdminUser(t *testing.T) {
+	itr, presenter := Setup()
 	userRepo := &fk.UserRepo{}
 	pwHash := []byte("the-hash")
 	tokenizer := &fk.Tokenizer{ReturnHash: pwHash}
-	itr := New(userRepo, &fk.RoleRepo{}, tokenizer, &fk.StringValidator{})
-	p := &FakePresenter{}
+	itr.UserRepo = userRepo
+	itr.PasswordHasher = tokenizer
 	id := "admin@mail.com"
 	pw := "the-admin-password"
-	itr.Execute(t.Context(), Request{id, pw}, p)
+	itr.Execute(t.Context(), Request{id, pw}, &presenter)
 	assert.NotNil(t, userRepo.Created)
 	assert.True(t, userRepo.Created.IsAdmin())
 	assert.Equal(t, id, userRepo.Created.Id)

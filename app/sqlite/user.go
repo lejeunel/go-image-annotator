@@ -5,6 +5,7 @@ import (
 	sqliterol "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
 	sqliteusr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	ev "github.com/lejeunel/go-image-annotator/modules/email-validator"
 	pw "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
 	usrs "github.com/lejeunel/go-image-annotator/modules/user-store"
@@ -28,6 +29,7 @@ func NewUserInteractors(
 	ApitokenGen create.APITokenGenerator,
 	forgotPasswordTokenGen fp.TokenGenerator,
 	passwordValidator pw.PasswordValidator,
+	emailValidator ev.EmailValidator,
 	passwordHasher tk.TokenHasher,
 	passwordVerifier cpw.TokenVerifier,
 	forgotPassworkTokenExpirationMinutes int,
@@ -42,6 +44,7 @@ func NewUserInteractors(
 			roleRepo,
 			ApitokenGen,
 			pwGen,
+			emailValidator,
 			create.WithAuth(auth),
 		),
 		Delete:           delete.New(userRepo, delete.WithAuth(auth)),

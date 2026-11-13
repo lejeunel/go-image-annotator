@@ -10,6 +10,7 @@ import (
 
 	tra "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/transactors"
 	aig "github.com/lejeunel/go-image-annotator/modules/archive-ingester"
+	ev "github.com/lejeunel/go-image-annotator/modules/email-validator"
 	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	iig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
@@ -27,6 +28,7 @@ func BuildInteractors(
 	passwordTokenizer := tk.New(cfg.RandomPasswordLength)
 	forgottenPasswordGen := tk.New(cfg.RandomPasswordLength)
 	passwordValidator := pv.New(cfg.PasswordMinEntropy)
+	emailValidator := ev.New()
 
 	imstore := BuildImageStoreFromInfra(infra)
 	eventlogger := el.New(infra.EventRepo, el.WithMaxNumTasksPerUser(cfg.MaxNumTasksPerUser))
@@ -81,6 +83,7 @@ func BuildInteractors(
 			ts,
 			forgottenPasswordGen,
 			passwordValidator,
+			emailValidator,
 			passwordTokenizer,
 			passwordTokenizer,
 			cfg.ForgotPasswordTokenExpirationMinutes,
@@ -100,6 +103,7 @@ func BuildInteractors(
 			infra.RoleRepo,
 			passwordTokenizer,
 			passwordValidator,
+			emailValidator,
 		),
 		Metadata: NewMetadataInteractors(
 			imstore,

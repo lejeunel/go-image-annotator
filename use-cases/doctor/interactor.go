@@ -45,8 +45,13 @@ type ImageStoreProvider interface {
 	Get(config.Config) (ImageStore, error)
 }
 
+type EmailValidator interface {
+	Validate(string) error
+}
+
 type Interactor struct {
 	PasswordValidatorProvider
+	EmailValidator
 	ConfigProvider
 	FileStoreProvider
 	DBStoreProvider
@@ -55,11 +60,16 @@ type Interactor struct {
 	ImageCheckNumWorkers int
 }
 
-func New(cfgp ConfigProvider, pvp PasswordValidatorProvider, fsp FileStoreProvider,
-	dbdp DBStoreProvider, imsp ImageStoreProvider,
+func New(
+	cfgp ConfigProvider,
+	pvp PasswordValidatorProvider,
+	ev EmailValidator,
+	fsp FileStoreProvider,
+	dbdp DBStoreProvider,
+	imsp ImageStoreProvider,
 ) Interactor {
 	return Interactor{
-		pvp, cfgp, fsp, dbdp, imsp, 10, 16,
+		pvp, ev, cfgp, fsp, dbdp, imsp, 10, 16,
 	}
 }
 
@@ -74,6 +84,7 @@ func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 	out.PresentExam(parseResponse)
 
 	i.examinePassword(*config, out)
+	i.examineEmail(config.InitialAdminEmail, out)
 
 	fileStore, err := i.FileStoreProvider.Get(*config)
 	examineFileStore("file store", fileStore, err, out)
@@ -106,6 +117,13 @@ func (i *Interactor) examinePassword(c config.Config, out OutputPort) {
 	})
 }
 
+func (i *Interactor) examineEmail(email string, out OutputPort) {
+	out.PresentExam(Response{
+		Description: "Initial administrator email",
+		Error:       i.EmailValidator.Validate(email),
+	})
+}
+
 // examineFileStore reports the error obtained when instantiating store, and
 // probes store only when it was instantiated.
 func examineFileStore(storeName string, store fs.FileStore, err error, out OutputPort) {
@@ -126,7 +144,7 @@ func examineFileStore(storeName string, store fs.FileStore, err error, out Outpu
 // checkFileStore writes a testing blob under a unique key, reads it back,
 // compares it and deletes it.
 func checkFileStore(store fs.FileStore) error {
-	key := fmt.Sprintf(".goia-doctor-%d", time.Now().UnixNano())
+	key := fmt.Sprintf(".probe-%d", time.Now().UnixNano())
 
 	if err := store.Store(key, bytes.NewReader(probePayload)); err != nil {
 		return fmt.Errorf("writing: %w", err)
@@ -163,8 +181,7 @@ func checkImageStoreIntegrity(ctx context.Context, store ImageStore, pageSize in
 }
 
 // checkImageFiles reports, for each image, whether its file exists in the
-// store. Workers report under a lock, so that out is never called
-// concurrently.
+// store.
 func checkImageFiles(ctx context.Context, store ImageStore, pageSize, workers int,
 	out OutputPort,
 ) error {

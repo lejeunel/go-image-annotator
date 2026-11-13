@@ -19,25 +19,35 @@ type PasswordGenerator interface {
 	Hash(string) []byte
 }
 
-type Interactor struct {
-	Repo              Repo
-	GroupRepo         GroupRepo
-	RoleRepo          RoleRepo
-	APITokenGenerator APITokenGenerator
-	PasswordGenerator PasswordGenerator
+type IdValidator interface {
+	Validate(string) error
+}
 
-	auth Auth
+type Interactor struct {
+	UserRepo
+	GroupRepo
+	RoleRepo
+	APITokenGenerator
+	PasswordGenerator
+	IdValidator
+
+	Auth
 }
 
 func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	errCtx := "creating user"
-	if err := i.auth.CreateUser(ctx); err != nil {
+	if err := i.Auth.CreateUser(ctx); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 
 	}
 	if err := i.checkDuplicate(r.Id); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
+
+	if err := i.IdValidator.Validate(r.Id); err != nil {
+		out.Error(fmt.Errorf("validating id %v: %w", r.Id, err))
 		return
 	}
 
@@ -79,7 +89,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	if r.Roles != nil {
 		user.Roles = *r.Roles
 	}
-	if err := i.Repo.Create(user); err != nil {
+	if err := i.UserRepo.Create(user); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
@@ -92,7 +102,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 func (i *Interactor) checkDuplicate(id string) error {
 	errBaseMsg := "checking for duplicate user with id %v: %w"
-	alreadyExists, err := i.Repo.Exists(id)
+	alreadyExists, err := i.UserRepo.Exists(id)
 	if err != nil {
 		return fmt.Errorf(errBaseMsg, id, e.ErrInternal)
 	}
@@ -138,23 +148,26 @@ type Option func(*Interactor)
 
 func WithAuth(a Auth) Option {
 	return func(i *Interactor) {
-		i.auth = a
+		i.Auth = a
 	}
 }
 
-func New(r Repo,
+func New(r UserRepo,
 	gr GroupRepo,
 	rr RoleRepo,
 	tg APITokenGenerator,
-	pg PasswordGenerator, opts ...Option,
+	pg PasswordGenerator,
+	idv IdValidator,
+	opts ...Option,
 ) Interactor {
 	i := &Interactor{
-		Repo:              r,
+		UserRepo:          r,
 		GroupRepo:         gr,
 		RoleRepo:          rr,
-		auth:              auth.NewVoidAuth(),
+		Auth:              auth.NewVoidAuth(),
 		APITokenGenerator: tg,
 		PasswordGenerator: pg,
+		IdValidator:       idv,
 	}
 
 	for _, opt := range opts {

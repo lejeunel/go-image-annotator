@@ -3,13 +3,14 @@ package sqlite
 import (
 	rr "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/role"
 	ur "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/user"
+	ev "github.com/lejeunel/go-image-annotator/modules/email-validator"
 	pw "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
 	bst "github.com/lejeunel/go-image-annotator/use-cases/bootstrap"
 )
 
 func NewBootstrapInteractor(userRepo ur.UserRepo, roleRepo rr.RoleRepo,
-	t tk.TokenHasher, pv pw.PasswordValidator,
+	t tk.TokenHasher, pv pw.PasswordValidator, ev ev.EmailValidator,
 ) bst.Interactor {
-	return bst.New(userRepo, roleRepo, t, pv)
+	return bst.New(userRepo, roleRepo, t, pv, ev)
 }

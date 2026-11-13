@@ -7,6 +7,7 @@ import (
 	rl "github.com/lejeunel/go-image-annotator/entities/role"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	a "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	ev "github.com/lejeunel/go-image-annotator/modules/email-validator"
 	pw "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -20,12 +21,13 @@ type Interactor struct {
 	RoleRepo
 	PasswordHasher
 	pw.PasswordValidator
+	ev.EmailValidator
 }
 
 func New(ur UserRepo, rr RoleRepo,
-	h PasswordHasher, v pw.PasswordValidator,
+	h PasswordHasher, v pw.PasswordValidator, ev ev.EmailValidator,
 ) Interactor {
-	return Interactor{ur, rr, h, v}
+	return Interactor{ur, rr, h, v, ev}
 }
 
 func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
@@ -64,6 +66,11 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 
 	if err := i.PasswordValidator.Validate(r.InitialAdminPassword); err != nil {
 		out.Error(fmt.Errorf("%w: validating initial password: %w", errCtx, err))
+		return
+	}
+
+	if err := i.EmailValidator.Validate(r.InitialAdminEmail); err != nil {
+		out.Error(fmt.Errorf("%w: validating initial admin email: %w", errCtx, err))
 		return
 	}
 

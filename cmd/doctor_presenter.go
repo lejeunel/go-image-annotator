@@ -52,6 +52,7 @@ type DoctorCLIPresenter struct {
 	NumMissingImages int
 	progress         Progress
 	lastRender       time.Time
+	lastCheck        time.Time
 }
 
 func NewDoctorCLIPresenter() *DoctorCLIPresenter {
@@ -72,6 +73,7 @@ func (p *DoctorCLIPresenter) PresentExam(r dr.Response) {
 }
 
 func (p *DoctorCLIPresenter) SuccessCheckImageIntegrity(id im.ImageId) {
+	p.lastCheck = time.Now()
 	p.NumImagesChecked += 1
 	p.renderImageIntegrity(false)
 }
@@ -79,6 +81,7 @@ func (p *DoctorCLIPresenter) SuccessCheckImageIntegrity(id im.ImageId) {
 // ErrorCheckImageIntegrity prints the missing image above the progress block,
 // so that it stays on screen.
 func (p *DoctorCLIPresenter) ErrorCheckImageIntegrity(id im.ImageId) {
+	p.lastCheck = time.Now()
 	p.NumImagesChecked += 1
 	p.NumMissingImages += 1
 	p.progress.Clear()
@@ -91,8 +94,10 @@ func (p *DoctorCLIPresenter) imageIntegrityLine() string {
 	if p.NumMissingImages > 0 {
 		missing = red(missing)
 	}
-	return fmt.Sprintf("Image store integrity: %d image(s) checked, %s missing",
-		p.NumImagesChecked, missing)
+
+	rate := 1 / time.Since(p.lastCheck).Seconds()
+	return fmt.Sprintf("Image store integrity: %d image(s) checked, %s missing [%.2f it/sec]",
+		p.NumImagesChecked, missing, rate)
 }
 
 func (p *DoctorCLIPresenter) renderImageIntegrity(force bool) {
