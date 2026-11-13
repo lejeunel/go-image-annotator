@@ -65,6 +65,14 @@ type FakePresenter struct {
 	LastExam      Response
 	Errors        []error
 	CheckedImages int
+	// CheckedImagesAtDone is CheckedImages when DoneCheckImageIntegrity was
+	// last called, or -1 if it was never called.
+	CheckedImagesAtDone int
+	NumDone             int
+}
+
+func NewFakePresenter() *FakePresenter {
+	return &FakePresenter{CheckedImagesAtDone: -1}
 }
 
 func (p *FakePresenter) PresentExam(r Response) {
@@ -81,6 +89,12 @@ func (p *FakePresenter) SuccessCheckImageIntegrity(id im.ImageId) {
 func (p *FakePresenter) ErrorCheckImageIntegrity(id im.ImageId) {
 	p.CheckedImages += 1
 	p.Errors = append(p.Errors, e.ErrNotFound)
+}
+
+func (p *FakePresenter) DoneCheckImageIntegrity() {
+	p.NumDone += 1
+	p.CheckedImagesAtDone = p.CheckedImages
+	p.LastExam = Response{}
 }
 
 func (p *FakePresenter) GotErr(target error) bool {

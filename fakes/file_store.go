@@ -7,9 +7,12 @@ import (
 
 // FileStore keeps stored files in memory, keyed by name.
 type FileStore struct {
-	ErrOnStore      error
-	ErrOnGet        error
-	ErrOnDelete     error
+	ErrOnStore  error
+	ErrOnGet    error
+	ErrOnDelete error
+	ErrOnExists error
+	// Missing makes Exists report names that were never stored as missing.
+	Missing         bool
 	NumDeletedItems int
 	NumGets         int
 	// Data is returned for names that were never stored.
@@ -62,4 +65,14 @@ func (r *FileStore) Get(name string) (io.ReadCloser, error) {
 		return nil, r.ErrOnGet
 	}
 	return io.NopCloser(bytes.NewReader(r.content(name))), nil
+}
+
+func (r *FileStore) Exists(name string) (bool, error) {
+	if r.ErrOnExists != nil {
+		return false, r.ErrOnExists
+	}
+	if _, ok := r.files[name]; ok {
+		return true, nil
+	}
+	return !r.Missing, nil
 }

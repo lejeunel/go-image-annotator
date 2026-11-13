@@ -25,6 +25,8 @@ type ImageStore struct {
 	GotPagination           pag.PaginationParams
 	IterateImageIds         []im.ImageId
 	ExistingImageFileIds    []im.ImageId
+	ErrOnIterateImageIDs    error
+	ErrOnExists             error
 }
 
 func (s *ImageStore) Find(baseImage im.BaseImage) (*im.Image, error) {
@@ -90,6 +92,10 @@ func (s *ImageStore) Copy(
 
 func (s ImageStore) IterateImageIDs(pageSize int) iter.Seq2[im.ImageId, error] {
 	return func(yield func(im.ImageId, error) bool) {
+		if s.ErrOnIterateImageIDs != nil {
+			yield(im.ImageId{}, s.ErrOnIterateImageIDs)
+			return
+		}
 		for id := range slices.Values(s.IterateImageIds) {
 			if !yield(id, nil) {
 				return
@@ -99,6 +105,9 @@ func (s ImageStore) IterateImageIDs(pageSize int) iter.Seq2[im.ImageId, error] {
 }
 
 func (s ImageStore) Exists(id im.ImageId) (*bool, error) {
+	if s.ErrOnExists != nil {
+		return nil, s.ErrOnExists
+	}
 	result := false
 	if slices.Contains(s.ExistingImageFileIds, id) {
 		result = true

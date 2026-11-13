@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"iter"
+	"sync"
 	"time"
 
 	"github.com/lejeunel/go-image-annotator/config"
@@ -13,6 +14,7 @@ import (
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	"golang.org/x/sync/errgroup"
 )
 
 // probePayload is the content written to the file store by checkFileStore.
@@ -49,13 +51,15 @@ type Interactor struct {
 	FileStoreProvider
 	DBStoreProvider
 	ImageStoreProvider
+	ImageFetchIdPageSize int
+	ImageCheckNumWorkers int
 }
 
 func New(cfgp ConfigProvider, pvp PasswordValidatorProvider, fsp FileStoreProvider,
 	dbdp DBStoreProvider, imsp ImageStoreProvider,
 ) Interactor {
 	return Interactor{
-		pvp, cfgp, fsp, dbdp, imsp,
+		pvp, cfgp, fsp, dbdp, imsp, 10, 16,
 	}
 }
 
@@ -84,7 +88,13 @@ func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 			Error:       err,
 		})
 	} else {
-		checkImageStoreIntegrity(imageStore, 10, out)
+		checkImageStoreIntegrity(
+			ctx,
+			imageStore,
+			i.ImageFetchIdPageSize,
+			i.ImageCheckNumWorkers,
+			out,
+		)
 	}
 }
 
@@ -141,25 +151,62 @@ func checkFileStore(store fs.FileStore) error {
 	return nil
 }
 
-func checkImageStoreIntegrity(store ImageStore, pageSize int, out OutputPort) {
-	response := Response{Description: "Image store integrity"}
-	for id, err := range store.IterateImageIDs(pageSize) {
-		if err != nil {
-			response.Error = err
-			out.PresentExam(response)
-			return
-		}
-		exists, err := store.Exists(id)
-		if err != nil {
-			response.Error = err
-			out.PresentExam(response)
-			return
-		}
-		if !*exists {
-			out.ErrorCheckImageIntegrity(id)
-		} else {
-			out.SuccessCheckImageIntegrity(id)
-		}
-
+func checkImageStoreIntegrity(ctx context.Context, store ImageStore, pageSize int,
+	imageCheckWorkers int,
+	out OutputPort,
+) {
+	err := checkImageFiles(ctx, store, pageSize, imageCheckWorkers, out)
+	out.DoneCheckImageIntegrity()
+	if err != nil {
+		out.PresentExam(Response{Description: "Image store integrity", Error: err})
 	}
+}
+
+// checkImageFiles reports, for each image, whether its file exists in the
+// store. Workers report under a lock, so that out is never called
+// concurrently.
+func checkImageFiles(ctx context.Context, store ImageStore, pageSize, workers int,
+	out OutputPort,
+) error {
+	g, ctx := errgroup.WithContext(ctx)
+	ids := make(chan im.ImageId, workers)
+
+	g.Go(func() error {
+		defer close(ids)
+		for id, err := range store.IterateImageIDs(pageSize) {
+			if err != nil {
+				return err
+			}
+			select {
+			case ids <- id:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+		}
+		return nil
+	})
+
+	var mu sync.Mutex
+	for range workers {
+		g.Go(func() error {
+			for id := range ids {
+				if err := ctx.Err(); err != nil {
+					return err // another goroutine failed
+				}
+				exists, err := store.Exists(id)
+				if err != nil {
+					return err
+				}
+				mu.Lock()
+				if *exists {
+					out.SuccessCheckImageIntegrity(id)
+				} else {
+					out.ErrorCheckImageIntegrity(id)
+				}
+				mu.Unlock()
+			}
+			return nil
+		})
+	}
+	return g.Wait()
 }

@@ -1,6 +1,7 @@
 package doctor
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/lejeunel/go-image-annotator/config"
@@ -135,4 +136,90 @@ func TestExistingImageFileShouldSucceed(t *testing.T) {
 	itr.Execute(t.Context(), p)
 	assert.False(t, p.GotErr(e.ErrNotFound))
 	assert.Equal(t, 1, p.CheckedImages)
+}
+
+func TestImageIntegrityDoneAfterAllImages(t *testing.T) {
+	p := NewFakePresenter()
+	itr := NewTestingInteractor()
+	ids := []im.ImageId{im.NewImageId(), im.NewImageId()}
+	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+		IterateImageIds:      ids,
+		ExistingImageFileIds: ids[:1],
+	}}
+	itr.Execute(t.Context(), p)
+	assert.Equal(t, 1, p.NumDone)
+	assert.Equal(t, 2, p.CheckedImagesAtDone)
+}
+
+func TestImageIntegrityDoneWithoutImages(t *testing.T) {
+	p := NewFakePresenter()
+	itr := NewTestingInteractor()
+	itr.Execute(t.Context(), p)
+	assert.Equal(t, 1, p.NumDone)
+	assert.Equal(t, 0, p.CheckedImagesAtDone)
+}
+
+func TestImageIntegrityDoneBeforeIterationError(t *testing.T) {
+	p := NewFakePresenter()
+	itr := NewTestingInteractor()
+	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+		ErrOnIterateImageIDs: e.ErrInternal,
+	}}
+	itr.Execute(t.Context(), p)
+	assert.Equal(t, 1, p.NumDone)
+	assert.ErrorIs(t, p.LastExam.Error, e.ErrInternal)
+	assert.Equal(t, "Image store integrity", p.LastExam.Description)
+}
+
+func TestImageIntegrityDoneBeforeExistsError(t *testing.T) {
+	p := NewFakePresenter()
+	itr := NewTestingInteractor()
+	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+		IterateImageIds: []im.ImageId{im.NewImageId()},
+		ErrOnExists:     e.ErrInternal,
+	}}
+	itr.Execute(t.Context(), p)
+	assert.Equal(t, 1, p.NumDone)
+	assert.Equal(t, 0, p.CheckedImagesAtDone)
+	assert.ErrorIs(t, p.LastExam.Error, e.ErrInternal)
+}
+
+func manyImageIds(n int) []im.ImageId {
+	ids := make([]im.ImageId, n)
+	for i := range ids {
+		ids[i] = im.NewImageId()
+	}
+	return ids
+}
+
+func TestImageIntegrityChecksEveryImageConcurrently(t *testing.T) {
+	p := NewFakePresenter()
+	itr := NewTestingInteractor()
+	ids := manyImageIds(500)
+	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+		IterateImageIds:      ids,
+		ExistingImageFileIds: ids[100:],
+	}}
+	itr.Execute(t.Context(), p)
+	assert.Equal(t, 500, p.CheckedImagesAtDone)
+	assert.Equal(t, 1, p.NumDone)
+	missing := 0
+	for _, err := range p.Errors {
+		if errors.Is(err, e.ErrNotFound) {
+			missing++
+		}
+	}
+	assert.Equal(t, 100, missing)
+}
+
+func TestImageIntegrityStopsOnExistsErrorWithManyImages(t *testing.T) {
+	p := NewFakePresenter()
+	itr := NewTestingInteractor()
+	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+		IterateImageIds: manyImageIds(500),
+		ErrOnExists:     e.ErrInternal,
+	}}
+	itr.Execute(t.Context(), p)
+	assert.Equal(t, 1, p.NumDone)
+	assert.ErrorIs(t, p.LastExam.Error, e.ErrInternal)
 }

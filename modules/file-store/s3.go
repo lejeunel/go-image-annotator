@@ -87,3 +87,24 @@ func (s *S3FileStore) Get(name string) (io.ReadCloser, error) {
 
 	return result.Body, nil
 }
+
+// Exists sends a HEAD request, which returns the object's metadata but not
+// its content.
+func (s *S3FileStore) Exists(name string) (bool, error) {
+	key := s.key(name)
+	_, err := s.client.HeadObject(context.Background(), &s3.HeadObjectInput{
+		Bucket: &s.bucket,
+		Key:    &key,
+	})
+	if err == nil {
+		return true, nil
+	}
+	// A HEAD response has no body to carry the NoSuchKey code, so S3 reports a
+	// missing key as NotFound. Some S3-compatible services send NoSuchKey.
+	var notFound *types.NotFound
+	var noSuchKey *types.NoSuchKey
+	if errors.As(err, &notFound) || errors.As(err, &noSuchKey) {
+		return false, nil
+	}
+	return false, fmt.Errorf("head %q: %w: %w", name, err, e.ErrInternal)
+}

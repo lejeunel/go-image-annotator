@@ -1,7 +1,6 @@
 package image_store
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"iter"
@@ -307,17 +306,11 @@ func (s ImageStore) Exists(id im.ImageId) (*bool, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fetching image specs: %w", err)
 	}
-	result := true
-
-	_, err = s.FileStore.Get(im.MakeImageFileName(id, specs.MIMEType))
-	if errors.Is(err, e.ErrNotFound) {
-		result = false
-		return &result, nil
-	}
+	result, err := s.FileStore.Exists(im.MakeImageFileName(id, specs.MIMEType))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("checking image file: %w", err)
 	}
-	return &result, err
+	return &result, nil
 }
 
 func (s ImageStore) IterateImageIDs(pageSize int) iter.Seq2[im.ImageId, error] {

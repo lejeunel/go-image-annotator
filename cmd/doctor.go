@@ -15,7 +15,7 @@ var DoctorCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		itr := dr.New(FromEnvConfigProvider{}, PasswordValidatorProvider{},
 			FileStoreProvider{}, DBStoreProvider{}, ImageStoreProvider{})
-		p := &DoctorCLIPresenter{}
+		p := NewDoctorCLIPresenter()
 		itr.Execute(context.Background(), p)
 		p.Summarize()
 		if p.NumErrors > 0 {

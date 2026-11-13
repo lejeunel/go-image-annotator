@@ -265,11 +265,19 @@ func TestPaginateCollection(t *testing.T) {
 
 func TestExistsOnMissingFileShouldReturnFalse(t *testing.T) {
 	store, _, _, _ := Setup()
-	store.FileStore = &fk.FileStore{ErrOnGet: e.ErrNotFound}
+	store.FileStore = &fk.FileStore{Missing: true}
 	store.ImageRepo = &fk.ImageRepo{ReturnSpecs: &im.Specs{MIMEType: "image/jpeg"}}
 	exists, err := store.Exists(im.NewImageId())
 	assert.NoError(t, err)
 	assert.False(t, *exists)
+}
+
+func TestExistsOnFileStoreErrorShouldFail(t *testing.T) {
+	store, _, _, _ := Setup()
+	store.FileStore = &fk.FileStore{ErrOnExists: e.ErrInternal}
+	store.ImageRepo = &fk.ImageRepo{ReturnSpecs: &im.Specs{MIMEType: "image/jpeg"}}
+	_, err := store.Exists(im.NewImageId())
+	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
 func TestExistsOnExistingFileShouldReturnTrue(t *testing.T) {

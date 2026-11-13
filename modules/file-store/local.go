@@ -62,6 +62,18 @@ func (r LocalFileStore) Get(path string) (io.ReadCloser, error) {
 	return reader, nil
 }
 
+// Exists reports whether a regular file is stored under path.
+func (r LocalFileStore) Exists(path string) (bool, error) {
+	info, err := os.Stat(r.filePath(path))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, fmt.Errorf("%w: %w", err, e.ErrInternal)
+	}
+	return info.Mode().IsRegular(), nil
+}
+
 func (r LocalFileStore) GetReaderAt(path string) (io.ReaderAt, int64, error) {
 	path = r.filePath(path)
 
