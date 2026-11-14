@@ -17,7 +17,7 @@ func NewTestingInteractor() Interactor {
 		&fk.StringValidator{},
 		&FakeFileStoreProvider{FileStore: &fk.FileStore{}},
 		&FakeDBStoreProvider{FileStore: &fk.FileStore{}},
-		&FakeImageStoreProvider{&fk.ImageStore{}},
+		&FakeImageStoreProvider{ImageStore: &fk.ImageStore{}},
 	)
 }
 
@@ -122,12 +122,20 @@ func TestDBStoreWriteFailure(t *testing.T) {
 	assert.True(t, p.GotErr(e.ErrInternal))
 }
 
+func TestHandleNonExistingDatabase(t *testing.T) {
+	p := &FakePresenter{}
+	itr := NewTestingInteractor()
+	itr.ImageStoreProvider = FakeImageStoreProvider{Err: e.ErrNotFound}
+	itr.Execute(t.Context(), p)
+	assert.Equal(t, 0, len(p.Errors))
+}
+
 func TestMissingImageFileShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	id := im.NewImageId()
 	itr.ImageStoreProvider = FakeImageStoreProvider{
-		fk.ImageStore{IterateImageIds: []im.ImageId{id}},
+		ImageStore: fk.ImageStore{IterateImageIds: []im.ImageId{id}},
 	}
 	itr.Execute(t.Context(), p)
 	assert.True(t, p.GotErr(e.ErrNotFound))
@@ -138,7 +146,7 @@ func TestExistingImageFileShouldSucceed(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
 	id := im.NewImageId()
-	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+	itr.ImageStoreProvider = FakeImageStoreProvider{ImageStore: fk.ImageStore{
 		IterateImageIds:      []im.ImageId{id},
 		ExistingImageFileIds: []im.ImageId{id},
 	}}
@@ -151,7 +159,7 @@ func TestImageIntegrityDoneAfterAllImages(t *testing.T) {
 	p := NewFakePresenter()
 	itr := NewTestingInteractor()
 	ids := []im.ImageId{im.NewImageId(), im.NewImageId()}
-	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+	itr.ImageStoreProvider = FakeImageStoreProvider{ImageStore: fk.ImageStore{
 		IterateImageIds:      ids,
 		ExistingImageFileIds: ids[:1],
 	}}
@@ -171,7 +179,7 @@ func TestImageIntegrityDoneWithoutImages(t *testing.T) {
 func TestImageIntegrityDoneBeforeIterationError(t *testing.T) {
 	p := NewFakePresenter()
 	itr := NewTestingInteractor()
-	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+	itr.ImageStoreProvider = FakeImageStoreProvider{ImageStore: fk.ImageStore{
 		ErrOnIterateImageIDs: e.ErrInternal,
 	}}
 	itr.Execute(t.Context(), p)
@@ -183,7 +191,7 @@ func TestImageIntegrityDoneBeforeIterationError(t *testing.T) {
 func TestImageIntegrityDoneBeforeExistsError(t *testing.T) {
 	p := NewFakePresenter()
 	itr := NewTestingInteractor()
-	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+	itr.ImageStoreProvider = FakeImageStoreProvider{ImageStore: fk.ImageStore{
 		IterateImageIds: []im.ImageId{im.NewImageId()},
 		ErrOnExists:     e.ErrInternal,
 	}}
@@ -205,7 +213,7 @@ func TestImageIntegrityChecksEveryImageConcurrently(t *testing.T) {
 	p := NewFakePresenter()
 	itr := NewTestingInteractor()
 	ids := manyImageIds(500)
-	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+	itr.ImageStoreProvider = FakeImageStoreProvider{ImageStore: fk.ImageStore{
 		IterateImageIds:      ids,
 		ExistingImageFileIds: ids[100:],
 	}}
@@ -224,7 +232,7 @@ func TestImageIntegrityChecksEveryImageConcurrently(t *testing.T) {
 func TestImageIntegrityStopsOnExistsErrorWithManyImages(t *testing.T) {
 	p := NewFakePresenter()
 	itr := NewTestingInteractor()
-	itr.ImageStoreProvider = FakeImageStoreProvider{fk.ImageStore{
+	itr.ImageStoreProvider = FakeImageStoreProvider{ImageStore: fk.ImageStore{
 		IterateImageIds: manyImageIds(500),
 		ErrOnExists:     e.ErrInternal,
 	}}

@@ -22,7 +22,7 @@ func NewDBManagerFromEnv(logger *slog.Logger) (*SQLiteDBManager, error) {
 	if err != nil {
 		return nil, err
 	}
-	conn := NewSQLiteConnection(DBPath(cfg.DBPath))
+	conn := NewSQLiteConnection(MakeDBPath(cfg.DBPath))
 	m := NewSQLiteDBManager(conn.DB, logger)
 	return &m, nil
 }

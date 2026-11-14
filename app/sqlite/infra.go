@@ -43,7 +43,7 @@ type Infra struct {
 
 func BuildInfra(localPath string, imageStore fs.FileStore) Infra {
 	filterParser, orderingParser := im.MakeQueryParsers()
-	db := db.NewSQLiteConnection(db.DBPath(localPath))
+	db := db.NewSQLiteConnection(db.MakeDBPath(localPath))
 	userRepo := usr.NewUserRepo(db)
 	roleRepo := r.NewRoleRepo(db)
 	groupRepo := grp.NewGroupRepo(db)

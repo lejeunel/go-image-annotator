@@ -3,6 +3,7 @@ package doctor
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"iter"
@@ -90,9 +91,12 @@ func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 	examineFileStore("file store", fileStore, err, out)
 
 	dbDir, err := i.DBStoreProvider.Get(config.DBPath)
-	examineFileStore("database store", dbDir, err, out)
+	examineFileStore("database directory", dbDir, err, out)
 
 	imageStore, err := i.ImageStoreProvider.Get(*config)
+	if errors.Is(err, e.ErrNotFound) {
+		return
+	}
 	if err != nil {
 		out.PresentExam(Response{
 			Description: "Instantiating image store",

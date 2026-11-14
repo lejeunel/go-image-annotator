@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"errors"
 	"fmt"
 	"io/fs"
 	"net/url"
@@ -24,10 +25,17 @@ var MigrationsFS embed.FS
 // artefact directory.
 const DBFileName = "db.sqlite"
 
-// DBPath returns the path of the database file within the local artefact
+// MakeDBPath returns the path of the database file within the local artefact
 // directory localPath.
-func DBPath(localPath string) string {
+func MakeDBPath(localPath string) string {
 	return filepath.Join(localPath, DBFileName)
+}
+
+func DBExists(localPath string) bool {
+	if _, err := os.Stat(MakeDBPath(localPath)); errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+	return true
 }
 
 func NewSQLiteConnection(path string) *sqlx.DB {

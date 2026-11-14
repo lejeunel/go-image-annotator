@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	db "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	app "github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	dr "github.com/lejeunel/go-image-annotator/use-cases/doctor"
 )
 
@@ -40,6 +42,9 @@ func (p ImageStoreProvider) Get(c config.Config) (dr.ImageStore, error) {
 		return nil, err
 	}
 
-	imageStore := app.BuildImageStoreFromInfra(app.BuildInfra(c.DBPath, fileStore))
-	return &imageStore, nil
+	if db.DBExists(c.DBPath) {
+		imageStore := app.BuildImageStoreFromInfra(app.BuildInfra(c.DBPath, fileStore))
+		return &imageStore, nil
+	}
+	return nil, e.ErrNotFound
 }

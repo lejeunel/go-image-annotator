@@ -116,9 +116,13 @@ func (s CorruptedFileStore) Get(string) (io.ReadCloser, error) {
 }
 
 type FakeImageStoreProvider struct {
+	Err error
 	ImageStore
 }
 
 func (p FakeImageStoreProvider) Get(config.Config) (ImageStore, error) {
+	if p.Err != nil {
+		return nil, p.Err
+	}
 	return p.ImageStore, nil
 }
