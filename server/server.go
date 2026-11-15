@@ -139,11 +139,13 @@ func MakeRootHandler(port int) (http.Handler, *slog.Logger) {
 		app.Config.SMTPPassword,
 		app.Logger,
 	)
-	app.Logger.Error(
-		"notification module creation failed. Defaulting to void notifier. Users will not receive password reset emails!",
-		"error",
-		err,
-	)
+	if err != nil {
+		app.Logger.Error(
+			"notification module creation failed. Defaulting to void notifier. Users will not receive password reset emails!",
+			"error",
+			err,
+		)
+	}
 	authServer := wauth.New(
 		fmt.Sprintf("%v:%v", app.Config.URL, port),
 		app.Config,
