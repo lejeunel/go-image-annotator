@@ -53,12 +53,42 @@ type DoctorCLIPresenter struct {
 	progress         Progress
 	lastRender       time.Time
 	lastCheck        time.Time
+	// missingLogPath receives the IDs of missing images. The file is only
+	// created once the first missing image is found.
+	missingLogPath string
+	missingLog     *os.File
+	missingLogErr  error
 }
 
-func NewDoctorCLIPresenter() *DoctorCLIPresenter {
-	p := &DoctorCLIPresenter{}
+func NewDoctorCLIPresenter(missingLogPath string) *DoctorCLIPresenter {
+	p := &DoctorCLIPresenter{missingLogPath: missingLogPath}
 	p.progress = Progress{w: os.Stdout}
 	return p
+}
+
+// logMissingImage appends id to the missing images log. On failure, the error
+// is kept for Summarize and further images are not logged.
+func (p *DoctorCLIPresenter) logMissingImage(id im.ImageId) {
+	if p.missingLogErr != nil {
+		return
+	}
+	if p.missingLog == nil {
+		p.missingLog, p.missingLogErr = os.Create(p.missingLogPath)
+		if p.missingLogErr != nil {
+			return
+		}
+	}
+	_, p.missingLogErr = fmt.Fprintln(p.missingLog, id)
+}
+
+func (p *DoctorCLIPresenter) closeMissingLog() {
+	if p.missingLog == nil {
+		return
+	}
+	if err := p.missingLog.Close(); err != nil && p.missingLogErr == nil {
+		p.missingLogErr = err
+	}
+	p.missingLog = nil
 }
 
 func (p *DoctorCLIPresenter) PresentExam(r dr.Response) {
@@ -84,8 +114,8 @@ func (p *DoctorCLIPresenter) ErrorCheckImageIntegrity(id im.ImageId) {
 	p.lastCheck = time.Now()
 	p.NumImagesChecked += 1
 	p.NumMissingImages += 1
+	p.logMissingImage(id)
 	p.progress.Clear()
-	fmt.Printf("Image %s: %s file not found in image store\n", id, red("ERROR"))
 	p.renderImageIntegrity(true)
 }
 
@@ -110,6 +140,7 @@ func (p *DoctorCLIPresenter) renderImageIntegrity(force bool) {
 
 func (p *DoctorCLIPresenter) DoneCheckImageIntegrity() {
 	p.progress.Clear()
+	p.closeMissingLog()
 
 	p.NumExams += 1
 	status := green("OK")
@@ -122,5 +153,16 @@ func (p *DoctorCLIPresenter) DoneCheckImageIntegrity() {
 
 // Summarize prints a summary of exams and error counts.
 func (p *DoctorCLIPresenter) Summarize() {
+	p.closeMissingLog()
+	if p.missingLogErr != nil {
+		fmt.Printf(
+			"Missing images log %s: %s %v\n",
+			p.missingLogPath,
+			red("ERROR"),
+			p.missingLogErr,
+		)
+	} else if p.NumMissingImages > 0 {
+		fmt.Printf("%d missing image(s) written to %s\n", p.NumMissingImages, p.missingLogPath)
+	}
 	fmt.Printf("Performed %v exams and got %v error(s)\n", p.NumExams, p.NumErrors)
 }

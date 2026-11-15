@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"log/slog"
+
 	db "github.com/lejeunel/go-image-annotator/adapters/db/sqlite"
 	app "github.com/lejeunel/go-image-annotator/app/sqlite"
 	"github.com/lejeunel/go-image-annotator/config"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
+	ntf "github.com/lejeunel/go-image-annotator/modules/notifier"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
-	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	dr "github.com/lejeunel/go-image-annotator/use-cases/doctor"
 )
 
@@ -42,9 +44,22 @@ func (p ImageStoreProvider) Get(c config.Config) (dr.ImageStore, error) {
 		return nil, err
 	}
 
+	imageStore := app.BuildImageStoreFromInfra(app.BuildInfra(c.DBPath, fileStore))
+	return &imageStore, nil
+}
+
+func (p ImageStoreProvider) IsInstantiated(c config.Config) bool {
 	if db.DBExists(c.DBPath) {
-		imageStore := app.BuildImageStoreFromInfra(app.BuildInfra(c.DBPath, fileStore))
-		return &imageStore, nil
+		return true
+	} else {
+		return false
 	}
-	return nil, e.ErrNotFound
+}
+
+type NotifierProvider struct{}
+
+func (p NotifierProvider) Get(c config.Config) (ntf.Notifier, error) {
+	l := slog.New(slog.DiscardHandler)
+	return ntf.NewNotifierWithVoidDefault(c.SMTPHost, c.SMTPPort, c.SMTPUsername, c.SMTPPassword,
+		*l)
 }

@@ -18,6 +18,7 @@ func NewTestingInteractor() Interactor {
 		&FakeFileStoreProvider{FileStore: &fk.FileStore{}},
 		&FakeDBStoreProvider{FileStore: &fk.FileStore{}},
 		&FakeImageStoreProvider{ImageStore: &fk.ImageStore{}},
+		&FakeNotifierProvider{Notifier: &FakeNotifier{}},
 	)
 }
 
@@ -29,13 +30,20 @@ func TestFetchingConfigFailure(t *testing.T) {
 	assert.Error(t, p.LastExam.Error)
 }
 
-func TestInvalidAdminPasswordShouldFail(t *testing.T) {
+func TestInvalidNotifierParams(t *testing.T) {
 	p := &FakePresenter{}
-	pwval := &fk.StringValidator{Invalid: true}
 	itr := NewTestingInteractor()
-	itr.PasswordValidatorProvider = &FakePasswordValidatorProvider{pwval}
+	itr.NotifierProvider = &FakeNotifierProvider{Err: e.ErrValidation}
 	itr.Execute(t.Context(), p)
 	assert.True(t, p.GotErr(e.ErrValidation))
+}
+
+func TestCheckNotifier(t *testing.T) {
+	p := &FakePresenter{}
+	itr := NewTestingInteractor()
+	itr.NotifierProvider = &FakeNotifierProvider{Notifier: FakeNotifier{Err: e.ErrInternal}}
+	itr.Execute(t.Context(), p)
+	assert.True(t, p.GotErr(e.ErrInternal))
 }
 
 func TestInvalidAdminEmailShouldFail(t *testing.T) {
@@ -125,7 +133,7 @@ func TestDBStoreWriteFailure(t *testing.T) {
 func TestHandleNonExistingDatabase(t *testing.T) {
 	p := &FakePresenter{}
 	itr := NewTestingInteractor()
-	itr.ImageStoreProvider = FakeImageStoreProvider{Err: e.ErrNotFound}
+	itr.ImageStoreProvider = FakeImageStoreProvider{IsFirstRun: true}
 	itr.Execute(t.Context(), p)
 	assert.Equal(t, 0, len(p.Errors))
 }

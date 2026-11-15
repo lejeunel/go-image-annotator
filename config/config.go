@@ -33,10 +33,10 @@ type Config struct {
 	PasswordMinEntropy                   int      `                split_words:"true" default:"50"`
 	MaxNumTasksPerUser                   int      `                split_words:"true" default:"50"`
 	MaxArchiveMB                         int      `                split_words:"true" default:"500"`
-	SMTPUsername                         string   `                split_words:"true"`
-	SMTPPassword                         string   `                split_words:"true"`
-	SMTPHost                             string   `                split_words:"true"`
-	SMTPPort                             int      `                split_words:"true"`
+	SMTPUsername                         *string  `                split_words:"true"`
+	SMTPPassword                         *string  `                split_words:"true"`
+	SMTPHost                             *string  `                split_words:"true"`
+	SMTPPort                             int      `                split_words:"true" default:"587"`
 	SessionSecret                        string   `                split_words:"true"`
 	GoogleClientId                       string   `                split_words:"true"`
 	GoogleClientSecret                   string   `                split_words:"true"`

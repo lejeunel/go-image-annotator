@@ -9,6 +9,7 @@ import (
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
+	ntf "github.com/lejeunel/go-image-annotator/modules/notifier"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 )
@@ -116,7 +117,8 @@ func (s CorruptedFileStore) Get(string) (io.ReadCloser, error) {
 }
 
 type FakeImageStoreProvider struct {
-	Err error
+	Err        error
+	IsFirstRun bool
 	ImageStore
 }
 
@@ -125,4 +127,34 @@ func (p FakeImageStoreProvider) Get(config.Config) (ImageStore, error) {
 		return nil, p.Err
 	}
 	return p.ImageStore, nil
+}
+
+func (p FakeImageStoreProvider) IsInstantiated(config.Config) bool {
+	if p.IsFirstRun {
+		return false
+	}
+	return true
+}
+
+type FakeNotifierProvider struct {
+	Err error
+	ntf.Notifier
+}
+
+func (p FakeNotifierProvider) Get(config.Config) (ntf.Notifier, error) {
+	if p.Err != nil {
+		return nil, p.Err
+	}
+	return p.Notifier, nil
+}
+
+type FakeNotifier struct {
+	Err error
+}
+
+func (n FakeNotifier) Notify(ntf.Notification) {
+}
+
+func (n FakeNotifier) Check() error {
+	return n.Err
 }

@@ -5,6 +5,7 @@ import (
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
 	cfg "github.com/lejeunel/go-image-annotator/config"
+	ntf "github.com/lejeunel/go-image-annotator/modules/notifier"
 	sm "github.com/lejeunel/go-image-annotator/shared/session"
 	reqpw "github.com/lejeunel/go-image-annotator/use-cases/user/forgot-password"
 	respw "github.com/lejeunel/go-image-annotator/use-cases/user/reset-forgotten-password"
@@ -19,7 +20,7 @@ type Server struct {
 	requestTokenItr  reqpw.Interactor
 	ResetPasswordItr respw.Interactor
 	baseURL          string
-	Notifier
+	ntf.Notifier
 }
 
 func New(
@@ -28,7 +29,7 @@ func New(
 	basePageBuilder b.BasePageBuilder,
 	logger slog.Logger,
 	sm sm.SessionManager,
-	nf Notifier,
+	nf ntf.Notifier,
 	reqForgottenPw reqpw.Interactor,
 	resForgottenPw respw.Interactor,
 ) Server {

@@ -7,12 +7,13 @@ import (
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 
+	ntf "github.com/lejeunel/go-image-annotator/modules/notifier"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 	fpw "github.com/lejeunel/go-image-annotator/use-cases/user/forgot-password"
 )
 
 type NotifyPasswordResetPresenter struct {
-	Notifier
+	ntf.Notifier
 	slog.Logger
 	w       http.ResponseWriter
 	baseURL string
@@ -20,7 +21,7 @@ type NotifyPasswordResetPresenter struct {
 
 func (p NotifyPasswordResetPresenter) SuccessGetForgotPasswordToken(r fpw.Response) {
 	url := rt.AddQueryParams(p.baseURL, "token", r.PasswordResetToken)
-	p.Notify(Notification{Email: r.Email, URL: url.String()})
+	p.Notify(ntf.Notification{Email: r.Email, URL: url.String()})
 	p.redirect()
 }
 

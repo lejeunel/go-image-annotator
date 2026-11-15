@@ -27,6 +27,7 @@ import (
 	a "github.com/lejeunel/go-image-annotator/app"
 	"github.com/lejeunel/go-image-annotator/app/sqlite"
 	g "github.com/lejeunel/go-image-annotator/globals"
+	ntf "github.com/lejeunel/go-image-annotator/modules/notifier"
 	rt "github.com/lejeunel/go-image-annotator/routes"
 
 	"github.com/go-chi/chi/v5"
@@ -131,7 +132,18 @@ func MakeRootHandler(port int) (http.Handler, *slog.Logger) {
 		app.Itrs.Label.Delete, app.Itrs.Label.Find)
 	labelServer.Route(router, webAuth)
 
-	notifier := wauth.MakeNotifierFromEnv(app.Logger)
+	notifier, err := ntf.NewNotifierWithVoidDefault(
+		app.Config.SMTPHost,
+		app.Config.SMTPPort,
+		app.Config.SMTPUsername,
+		app.Config.SMTPPassword,
+		app.Logger,
+	)
+	app.Logger.Error(
+		"notification module creation failed. Defaulting to void notifier. Users will not receive password reset emails!",
+		"error",
+		err,
+	)
 	authServer := wauth.New(
 		fmt.Sprintf("%v:%v", app.Config.URL, port),
 		app.Config,

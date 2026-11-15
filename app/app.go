@@ -68,17 +68,17 @@ func NewApp(
 	}
 }
 
-type InitialAdminPresenter struct {
+type BootstrapPresenter struct {
 	slog.Logger
 }
 
-func (p InitialAdminPresenter) SuccessBootstrap(r bst.Response) {
+func (p BootstrapPresenter) SuccessBootstrap(r bst.Response) {
 	if !r.Skipped {
 		p.Logger.Info("successfully bootstrapped application with initial admin")
 	}
 }
 
-func (p InitialAdminPresenter) Error(err error) {
+func (p BootstrapPresenter) Error(err error) {
 	p.Logger.Error("failed bootstrapping application", "error", err)
 	os.Exit(1)
 }
@@ -87,6 +87,6 @@ func BootstrapInitialAdmin(itr bst.Interactor, email, password string, logger sl
 	role := r.NewRole(r.NewRoleId(), "admin", r.WithMethods([]string{"*"}))
 	user := u.NewUser("anonymous", u.WithRoles([]r.Role{role}))
 	ctx := u.AppendUserToContext(context.Background(), user)
-	pres := InitialAdminPresenter{logger}
+	pres := BootstrapPresenter{logger}
 	itr.Execute(ctx, bst.Request{InitialAdminEmail: email, InitialAdminPassword: password}, pres)
 }

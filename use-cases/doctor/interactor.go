@@ -3,7 +3,6 @@ package doctor
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"iter"
@@ -13,6 +12,7 @@ import (
 	"github.com/lejeunel/go-image-annotator/config"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	fs "github.com/lejeunel/go-image-annotator/modules/file-store"
+	ntf "github.com/lejeunel/go-image-annotator/modules/notifier"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"golang.org/x/sync/errgroup"
@@ -37,12 +37,17 @@ type PasswordValidatorProvider interface {
 	Get(minEntropy int) pv.PasswordValidator
 }
 
+type NotifierProvider interface {
+	Get(config.Config) (ntf.Notifier, error)
+}
+
 type ImageStore interface {
 	IterateImageIDs(int) iter.Seq2[im.ImageId, error]
 	Exists(im.ImageId) (*bool, error)
 }
 
 type ImageStoreProvider interface {
+	IsInstantiated(config.Config) bool
 	Get(config.Config) (ImageStore, error)
 }
 
@@ -57,6 +62,7 @@ type Interactor struct {
 	FileStoreProvider
 	DBStoreProvider
 	ImageStoreProvider
+	NotifierProvider
 	ImageFetchIdPageSize int
 	ImageCheckNumWorkers int
 }
@@ -68,9 +74,10 @@ func New(
 	fsp FileStoreProvider,
 	dbdp DBStoreProvider,
 	imsp ImageStoreProvider,
+	ntfp NotifierProvider,
 ) Interactor {
 	return Interactor{
-		pvp, ev, cfgp, fsp, dbdp, imsp, 10, 16,
+		pvp, ev, cfgp, fsp, dbdp, imsp, ntfp, 10, 16,
 	}
 }
 
@@ -84,8 +91,21 @@ func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 	}
 	out.PresentExam(parseResponse)
 
-	i.examinePassword(*config, out)
-	i.examineEmail(config.InitialAdminEmail, out)
+	i.examineAdminPassword(*config, out)
+	i.examineAdminEmail(config.InitialAdminEmail, out)
+
+	notifier, err := i.NotifierProvider.Get(*config)
+	if err != nil {
+		out.PresentExam(Response{
+			Description: "Instantiating notification module",
+			Error:       err,
+		})
+	} else {
+		out.PresentExam(Response{
+			Description: "Checking notification module",
+			Error:       notifier.Check(),
+		})
+	}
 
 	fileStore, err := i.FileStoreProvider.Get(*config)
 	examineFileStore("file store", fileStore, err, out)
@@ -93,16 +113,17 @@ func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 	dbDir, err := i.DBStoreProvider.Get(config.DBPath)
 	examineFileStore("database directory", dbDir, err, out)
 
-	imageStore, err := i.ImageStoreProvider.Get(*config)
-	if errors.Is(err, e.ErrNotFound) {
+	if i.ImageStoreProvider.IsInstantiated(*config) == false {
 		return
-	}
-	if err != nil {
-		out.PresentExam(Response{
-			Description: "Instantiating image store",
-			Error:       err,
-		})
 	} else {
+		imageStore, err := i.ImageStoreProvider.Get(*config)
+		if err != nil {
+			if err != nil {
+				parseResponse.Error = err
+				out.PresentExam(Response{Description: "Build image store", Error: err})
+				return
+			}
+		}
 		checkImageStoreIntegrity(
 			ctx,
 			imageStore,
@@ -113,7 +134,7 @@ func (i *Interactor) Execute(ctx context.Context, out OutputPort) {
 	}
 }
 
-func (i *Interactor) examinePassword(c config.Config, out OutputPort) {
+func (i *Interactor) examineAdminPassword(c config.Config, out OutputPort) {
 	pwValidator := i.PasswordValidatorProvider.Get(c.PasswordMinEntropy)
 	out.PresentExam(Response{
 		Description: "Initial administrator password",
@@ -121,7 +142,7 @@ func (i *Interactor) examinePassword(c config.Config, out OutputPort) {
 	})
 }
 
-func (i *Interactor) examineEmail(email string, out OutputPort) {
+func (i *Interactor) examineAdminEmail(email string, out OutputPort) {
 	out.PresentExam(Response{
 		Description: "Initial administrator email",
 		Error:       i.EmailValidator.Validate(email),
