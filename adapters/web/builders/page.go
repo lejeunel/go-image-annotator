@@ -77,6 +77,7 @@ type PageBuilder struct {
 	markdownPreamble    string
 	postamble           string
 	content             Node
+	preamble            Node
 	Title               string
 	columnMode          PageColumnMode
 	QueryModalData
@@ -162,6 +163,11 @@ func (b *PageBuilder) markdownToHTML(data string) string {
 	return buf.String()
 }
 
+func (b *PageBuilder) AddPreamble(preamble Node) *PageBuilder {
+	b.preamble = preamble
+	return b
+}
+
 func (b *PageBuilder) AddMarkdownPreamble(md string) *PageBuilder {
 	b.markdownPreamble = b.markdownToHTML(md)
 	return b
@@ -211,6 +217,12 @@ func (b *PageBuilder) Render(w io.Writer) {
 				Article(Class("prose dark:prose-invert max-w-none mb-4"), Raw(b.markdownPreamble)),
 			),
 		)
+	}
+
+	if b.preamble != nil {
+		content = Div(
+			content,
+			b.preamble)
 	}
 
 	var postamble Node

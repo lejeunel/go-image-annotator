@@ -109,3 +109,9 @@ func MakeColoredHexagonIcon(color string) string {
 		color,
 	)
 }
+
+//go:embed svg/clipboard.svg
+var Clipboard string
+
+//go:embed svg/check.svg
+var Check string

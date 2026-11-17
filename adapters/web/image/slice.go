@@ -1,7 +1,6 @@
 package image
 
 import (
-	"fmt"
 	"net/http"
 
 	b "github.com/lejeunel/go-image-annotator/adapters/web/builders"
@@ -28,10 +27,12 @@ func NewSlicePresenter(
 ) SlicePresenter {
 	p.SetTitle("Slice").SetHTMLTitle("Slice")
 	p.SetActiveSection(cmp.NoPageActive)
-	p.AddMarkdownPreamble(fmt.Sprintf(`
-**filters**: %v\
-**ordering**: %v
-`, filters, ordering))
+	cb := cmp.CopyURLButton()
+	filteringCard := cmp.SpecCard{Fields: []cmp.SpecFields{
+		{Name: "Filters", Value: filters},
+		{Name: "Ordering", Value: ordering},
+	}, Button: &cb}
+	p.AddPreamble(filteringCard.Render())
 	b := b.NewPaginatedListBuilder(p, listImagesFields)
 	return SlicePresenter{b, w, htmx.NewErrorPresenter("querying", w), filters, ordering}
 }

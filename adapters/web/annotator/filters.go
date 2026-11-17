@@ -15,5 +15,7 @@ func (p *QueryView) Build(f im.FilterStr, o im.OrderStr) Node {
 	s.Fields = append(s.Fields,
 		c.SpecFields{Name: "filters", Value: f},
 		c.SpecFields{Name: "ordering", Value: o})
+	b := c.CopyURLButton()
+	s.Button = &b
 	return s.Render()
 }

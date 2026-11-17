@@ -1533,6 +1533,10 @@
   .text-\[10px\] {
     font-size: 10px;
   }
+  .leading-none {
+    --tw-leading: 1;
+    line-height: 1;
+  }
   .leading-tight {
     --tw-leading: var(--leading-tight);
     line-height: var(--leading-tight);
@@ -2297,6 +2301,10 @@
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-surface) 5%, transparent);
     }
+  }
+  .\[\&_svg\]\:size-5 svg {
+    width: calc(var(--spacing) * 5);
+    height: calc(var(--spacing) * 5);
   }
   .\[\&\>svg\]\:h-full > svg {
     height: 100%;
