@@ -68,3 +68,9 @@ func AddQueryParams(baseURL string, params ...string) url.URL {
 	u.RawQuery = q.Encode()
 	return *u
 }
+
+func MakeSliceURL(filter, order string) url.URL {
+	return AddQueryParams(SliceUrl,
+		FilterQueryArgName, filter,
+		OrderingQueryArgName, order)
+}

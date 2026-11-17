@@ -38,9 +38,7 @@ func NewSlicePresenter(
 }
 
 func (p SlicePresenter) SuccessSliceImages(r slice.Response) {
-	baseURL := rt.AddQueryParams(rt.SliceUrl,
-		rt.FilterQueryArgName, r.FilterStr,
-		rt.OrderingQueryArgName, r.OrderStr)
+	baseURL := rt.MakeSliceURL(r.FilterStr, r.OrderStr)
 	p.SetPagination(r.Pagination, baseURL.String())
 	for _, im := range r.Images {
 		p.AddRow(makeImageRow(im, MakeAnnotateImageURLFunc(im, p.FilterStr, p.OrderStr)))

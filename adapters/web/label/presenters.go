@@ -2,6 +2,7 @@ package label
 
 import (
 	_ "embed"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -99,7 +100,8 @@ func MakeRow(u b.RowURL, l lbl.Label) tb.Row {
 	actions.SetEdit(u.SetMode(b.ModeEdit).Url)
 	actions.SetConfirmDelete(u.SetMode(b.ModeConfirmDelete).Url)
 	row := tb.NewRow()
-	row.AddCell(tb.NewCell(Text(l.Name)))
+	url := rt.MakeSliceURL(fmt.Sprintf("annotation=%v", l.Name), "")
+	row.AddCell(tb.NewCell(cmp.MakeTextLink(url.String(), l.Name)))
 	var description string
 	if l.Description != nil {
 		description = *l.Description

@@ -16,11 +16,13 @@ func (p *FakePresenter) SuccessSubmitCloneTask(r Response) {
 	p.GotSuccess = true
 }
 
-func NewTestingCloner() Interactor {
-	return New(
+func Setup() (Interactor, FakePresenter) {
+	itr := New(
 		&fk.ImageStore{},
 		&fk.ImageRepo{},
 		&fk.CollectionRepo{},
 		&fk.GroupRepo{},
 		&fk.EventLogger{}, fk.NewLogger(), &fk.JobQueue{})
+	p := FakePresenter{}
+	return itr, p
 }

@@ -14,30 +14,27 @@ import (
 )
 
 func TestSubmitTaskWithoutIdentity(t *testing.T) {
-	itr := NewTestingCloner()
-	p := &FakePresenter{}
-	itr.Execute(t.Context(), Request{}, p)
+	itr, p := Setup()
+	itr.Execute(t.Context(), Request{}, &p)
 	assert.NotNil(t, p.GotErr)
 	assert.False(t, p.GotSuccess)
 }
 
 func TestHandleAuthErr(t *testing.T) {
 	group := "my-group"
-	itr := NewTestingCloner()
+	itr, p := Setup()
 	itr.Auth = fk.Auth{ErrOnAuth: e.ErrAuthorization}
-	p := &FakePresenter{}
 	itr.Execute(
 		st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
 		Request{DestinationGroup: &group},
-		p,
+		&p,
 	)
 	assert.True(t, p.GotAuthErr)
 	assert.False(t, p.GotSuccess)
 }
 
 func TestReceiveTaskPayload(t *testing.T) {
-	itr := NewTestingCloner()
-	p := &FakePresenter{}
+	itr, p := Setup()
 	sourceCollection := clc.NewCollection(clc.NewCollectionId(), "source-collection")
 	destinationCollection := clc.NewCollection(clc.NewCollectionId(), "destination-collection")
 	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{sourceCollection}}
@@ -45,36 +42,34 @@ func TestReceiveTaskPayload(t *testing.T) {
 		Request{
 			Source:      sourceCollection.Name,
 			Destination: destinationCollection.Name,
-		}, p)
+		}, &p)
 	assert.Equal(t, task.CollectionCloneTask.String(), p.Got.Type)
 	assert.True(t, p.GotSuccess)
 }
 
 func TestCloningToAlreadyExistingCollectionShouldFail(t *testing.T) {
-	itr := NewTestingCloner()
+	itr, p := Setup()
 	destinationCollection := clc.NewCollection(clc.NewCollectionId(), "destination-collection")
 	itr.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{destinationCollection}}
-	p := &FakePresenter{}
 	itr.Execute(
 		st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
 		Request{Destination: destinationCollection.Name},
-		p,
+		&p,
 	)
 	assert.Error(t, p.GotErr)
 }
 
 func TestErrorOnFindGroup(t *testing.T) {
-	itr := NewTestingCloner()
+	itr, p := Setup()
 	itr.GroupRepo = &fk.GroupRepo{ErrOnFind: e.ErrNotFound}
-	p := &FakePresenter{}
 	dstGroup := "my-group"
 	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
-		Request{Destination: "destination-collection", DestinationGroup: &dstGroup}, p)
+		Request{Destination: "destination-collection", DestinationGroup: &dstGroup}, &p)
 	assert.Error(t, p.GotErr)
 }
 
 func TestClone(t *testing.T) {
-	itr := NewTestingCloner()
+	itr, p := Setup()
 	dst := "destination-collection"
 	src := clc.NewCollection(clc.NewCollectionId(), "source-collection",
 		clc.WithCreatedAt(time.Now()), clc.WithGroup("a-group"), clc.WithProfile("a-profile"))
@@ -88,9 +83,8 @@ func TestClone(t *testing.T) {
 			{ImageId: im.NewImageId(), Collection: src.Name},
 		},
 	}
-	p := &FakePresenter{}
 	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
-		Request{Source: src.Name, Destination: dst}, p)
+		Request{Source: src.Name, Destination: dst}, &p)
 	assert.Equal(t, dst, s.CopiedToCollection)
 	assert.Equal(t, *src.Group, *collectionRepo.Created.Group)
 	assert.Equal(t, *src.Profile, *collectionRepo.Created.Profile)
