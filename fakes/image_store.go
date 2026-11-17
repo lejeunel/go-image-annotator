@@ -10,23 +10,24 @@ import (
 )
 
 type ImageStore struct {
-	ErrOnFind               error
-	ErrOnDelete             error
-	ErrOnPaginateCollection error
-	ErrOnSlice              error
-	Return                  *im.Image
-	DeletedAssetId          *im.ImageId
-	DeletedId               *im.ImageId
-	DeletedBatch            bool
-	CopiedToCollection      string
-	ReturnPaginated         []im.Image
-	ReturnCount             int64
-	ReturnPagination        pag.Pagination
-	GotPagination           pag.PaginationParams
-	IterateImageIds         []im.ImageId
-	ExistingImageFileIds    []im.ImageId
-	ErrOnIterateImageIDs    error
-	ErrOnExists             error
+	ErrOnFind                 error
+	ErrOnDelete               error
+	ErrOnPaginateCollection   error
+	ErrOnSlice                error
+	Return                    *im.Image
+	DeletedAssetId            *im.ImageId
+	DeletedId                 *im.ImageId
+	DeletedBatch              bool
+	DeepCopiedToCollection    string
+	ShallowCopiedToCollection string
+	ReturnPaginated           []im.Image
+	ReturnCount               int64
+	ReturnPagination          pag.Pagination
+	GotPagination             pag.PaginationParams
+	IterateImageIds           []im.ImageId
+	ExistingImageFileIds      []im.ImageId
+	ErrOnIterateImageIDs      error
+	ErrOnExists               error
 }
 
 func (s *ImageStore) Find(baseImage im.BaseImage) (*im.Image, error) {
@@ -80,13 +81,20 @@ func (s *ImageStore) DeleteBatch([]im.ImageId, clc.CollectionName) error {
 	return nil
 }
 
-func (s *ImageStore) Copy(
+func (s *ImageStore) DeepCopy(
 	src clc.CollectionName,
 	id im.ImageId,
 	dst clc.CollectionName,
-	deep bool,
 ) error {
-	s.CopiedToCollection = dst
+	s.DeepCopiedToCollection = dst
+	return nil
+}
+
+func (s *ImageStore) ShallowCopy(
+	id im.ImageId,
+	dst clc.CollectionName,
+) error {
+	s.ShallowCopiedToCollection = dst
 	return nil
 }
 

@@ -232,15 +232,15 @@ func TestRetrieveMetaData(t *testing.T) {
 }
 
 func TestShallowCopyOneImage(t *testing.T) {
-	store, srcCollection, image, dstCollection, imrepo, _ := SetupCopy()
-	err := store.Copy(srcCollection.Name, image.Id, dstCollection.Name, false)
+	store, _, image, dstCollection, imrepo, _ := SetupCopy()
+	err := store.ShallowCopy(image.Id, dstCollection.Name)
 	assert.NoError(t, err)
 	assert.Equal(t, dstCollection.Name, *imrepo.AddedIntoCollection)
 }
 
 func TestDeepCopyOneImage(t *testing.T) {
 	store, srcCollection, image, dstCollection, _, anrepo := SetupCopy()
-	err := store.Copy(srcCollection.Name, image.Id, dstCollection.Name, true)
+	err := store.DeepCopy(srcCollection.Name, image.Id, dstCollection.Name)
 	assert.NoError(t, err)
 	assert.NotNil(t, anrepo.AddedAnnotationId)
 }

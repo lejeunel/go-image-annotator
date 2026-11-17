@@ -210,13 +210,23 @@ func (s ImageStore) DeleteBatch(ids []im.ImageId, collection clc.CollectionName)
 	return nil
 }
 
-func (s ImageStore) Copy(
+func (s ImageStore) ShallowCopy(
+	id im.ImageId,
+	dst clc.CollectionName,
+) error {
+	errCtx := fmt.Errorf("shallow-copying image %v to collection %v", id, dst)
+	if err := s.ImageRepo.AddToCollection(id, dst); err != nil {
+		return fmt.Errorf("%w: adding image to collection: %w", errCtx, err)
+	}
+	return nil
+}
+
+func (s ImageStore) DeepCopy(
 	src clc.CollectionName,
 	id im.ImageId,
 	dst clc.CollectionName,
-	deep bool,
 ) error {
-	errCtx := fmt.Errorf("copying image %v from collection %v to collection %v", id, src, dst)
+	errCtx := fmt.Errorf("deep-copying image %v from collection %v to collection %v", id, src, dst)
 	image, err := s.Find(im.BaseImage{ImageId: id, Collection: src})
 	if err != nil {
 		return fmt.Errorf("%w: finding source image: %w", errCtx, err)
@@ -226,49 +236,47 @@ func (s ImageStore) Copy(
 		if err := tx.ImageRepo.AddToCollection(image.Id, dst); err != nil {
 			return fmt.Errorf("%w: adding image to collection: %w", errCtx, err)
 		}
-		if deep {
-			for _, label := range image.Labels {
-				label.Id = a.NewAnnotationId()
-				if err := tx.AnnotationRepo.AddImageLabel(
-					image.Id,
-					dst,
-					label,
-					label.Author,
-					label.Time,
-				); err != nil {
-					return fmt.Errorf("%w: adding image label: %w", errCtx, err)
-				}
+		for _, label := range image.Labels {
+			label.Id = a.NewAnnotationId()
+			if err := tx.AnnotationRepo.AddImageLabel(
+				image.Id,
+				dst,
+				label,
+				label.Author,
+				label.Time,
+			); err != nil {
+				return fmt.Errorf("%w: adding image label: %w", errCtx, err)
 			}
+		}
 
-			for _, box := range image.BoundingBoxes {
-				box.Id = a.NewAnnotationId()
-				if err := tx.AnnotationRepo.AddBoundingBox(
-					image.Id,
-					dst,
-					box,
-					box.Author,
-					box.Time,
-				); err != nil {
-					return fmt.Errorf("%w: adding bounding boxes: %w", errCtx, err)
-				}
+		for _, box := range image.BoundingBoxes {
+			box.Id = a.NewAnnotationId()
+			if err := tx.AnnotationRepo.AddBoundingBox(
+				image.Id,
+				dst,
+				box,
+				box.Author,
+				box.Time,
+			); err != nil {
+				return fmt.Errorf("%w: adding bounding boxes: %w", errCtx, err)
 			}
-			for _, poly := range image.Polygons {
-				poly.Id = a.NewAnnotationId()
-				if err := tx.AnnotationRepo.AddPolygon(
-					image.Id,
-					dst,
-					poly,
-					poly.Author,
-					poly.Time,
-				); err != nil {
-					return fmt.Errorf("%w: adding polygons: %w", errCtx, err)
-				}
+		}
+		for _, poly := range image.Polygons {
+			poly.Id = a.NewAnnotationId()
+			if err := tx.AnnotationRepo.AddPolygon(
+				image.Id,
+				dst,
+				poly,
+				poly.Author,
+				poly.Time,
+			); err != nil {
+				return fmt.Errorf("%w: adding polygons: %w", errCtx, err)
 			}
+		}
 
-			for _, m := range image.Meta {
-				if err := tx.MetaRepo.Add(dst, image.Id, m.Key, m.Value); err != nil {
-					return fmt.Errorf("%w: adding meta-data with key %v: %w", errCtx, m.Key, err)
-				}
+		for _, m := range image.Meta {
+			if err := tx.MetaRepo.Add(dst, image.Id, m.Key, m.Value); err != nil {
+				return fmt.Errorf("%w: adding meta-data with key %v: %w", errCtx, m.Key, err)
 			}
 		}
 		return nil

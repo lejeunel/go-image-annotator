@@ -21,7 +21,8 @@ import (
 
 type ImageStore interface {
 	Find(base im.BaseImage) (*im.Image, error)
-	Copy(src clc.CollectionName, id im.ImageId, dst clc.CollectionName, deep bool) error
+	DeepCopy(src clc.CollectionName, id im.ImageId, dst clc.CollectionName) error
+	ShallowCopy(id im.ImageId, dst clc.CollectionName) error
 }
 
 type Interactor struct {
@@ -201,10 +202,15 @@ func (i *Interactor) runTask(
 			i.LogError(task.Id, err)
 			return
 		}
-		if err := i.ImageStore.Copy(sourceName, baseImage.ImageId, dst.Name, deep); err != nil {
-			i.LogError(task.Id, err)
+		var copyErr error
+		if deep {
+			copyErr = i.ImageStore.DeepCopy(sourceName, baseImage.ImageId, dst.Name)
+		} else {
+			copyErr = i.ImageStore.ShallowCopy(baseImage.ImageId, dst.Name)
+		}
+		if copyErr != nil {
+			i.LogError(task.Id, copyErr)
 			return
-
 		}
 	}
 	i.IEventLogger.AddEvent(task.Id, e.Event{Time: i.Clock.Now(), State: e.DoneTask})

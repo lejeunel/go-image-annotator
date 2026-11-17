@@ -68,13 +68,21 @@ func TestErrorOnFindGroup(t *testing.T) {
 	assert.Error(t, p.GotErr)
 }
 
-func TestClone(t *testing.T) {
+type cloneTest struct {
+	itr            Interactor
+	p              FakePresenter
+	store          *fk.ImageStore
+	collectionRepo *fk.CollectionRepo
+	src            clc.Collection
+	dst            string
+}
+
+func setupCloneTest() cloneTest {
 	itr, p := Setup()
-	dst := "destination-collection"
 	src := clc.NewCollection(clc.NewCollectionId(), "source-collection",
 		clc.WithCreatedAt(time.Now()), clc.WithGroup("a-group"), clc.WithProfile("a-profile"))
-	s := fk.ImageStore{}
-	itr.ImageStore = &s
+	store := &fk.ImageStore{}
+	itr.ImageStore = store
 	collectionRepo := &fk.CollectionRepo{Existing: []clc.Collection{src}}
 	itr.CollectionRepo = collectionRepo
 	itr.ImageRepo = &fk.ImageRepo{
@@ -83,10 +91,31 @@ func TestClone(t *testing.T) {
 			{ImageId: im.NewImageId(), Collection: src.Name},
 		},
 	}
-	itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
-		Request{Source: src.Name, Destination: dst}, &p)
-	assert.Equal(t, dst, s.CopiedToCollection)
-	assert.Equal(t, *src.Group, *collectionRepo.Created.Group)
-	assert.Equal(t, *src.Profile, *collectionRepo.Created.Profile)
-	assert.NotEqual(t, src.Id, collectionRepo.Created.Id)
+	return cloneTest{itr, p, store, collectionRepo, src, "destination-collection"}
+}
+
+func TestCloneInheritsSourceAttributes(t *testing.T) {
+	tc := setupCloneTest()
+	tc.itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
+		Request{Source: tc.src.Name, Destination: tc.dst}, &tc.p)
+	assert.Equal(t, *tc.src.Group, *tc.collectionRepo.Created.Group)
+	assert.Equal(t, *tc.src.Profile, *tc.collectionRepo.Created.Profile)
+	assert.NotEqual(t, tc.src.Id, tc.collectionRepo.Created.Id)
+}
+
+func TestShallowCloneByDefault(t *testing.T) {
+	tc := setupCloneTest()
+	tc.itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
+		Request{Source: tc.src.Name, Destination: tc.dst}, &tc.p)
+	assert.Equal(t, tc.dst, tc.store.ShallowCopiedToCollection)
+	assert.Empty(t, tc.store.DeepCopiedToCollection)
+}
+
+func TestDeepClone(t *testing.T) {
+	tc := setupCloneTest()
+	deep := true
+	tc.itr.Execute(st.CreateCtxWithUserId(t.Context(), "user@mail.com"),
+		Request{Source: tc.src.Name, Destination: tc.dst, Deep: &deep}, &tc.p)
+	assert.Equal(t, tc.dst, tc.store.DeepCopiedToCollection)
+	assert.Empty(t, tc.store.ShallowCopiedToCollection)
 }
