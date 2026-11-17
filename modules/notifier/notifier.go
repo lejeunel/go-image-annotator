@@ -17,44 +17,22 @@ import (
 const smtpCheckTimeout = 10 * time.Second
 
 type Notifier interface {
-	Notify(n Notification)
+	Notify(recipient, url string)
 	Check() error
 }
 
-type Notification struct {
-	Email string
-	URL   string
-}
-
-type VoidNotifier struct {
-	slog.Logger
-}
-
-func (n VoidNotifier) Notify(notification Notification) {
-	n.Logger.Info("notifying password reset token", "notification", notification)
-}
-
-func (n VoidNotifier) Check() error {
-	return nil
-}
-
-type SMTPPasswordResetNotifier struct {
-	slog.Logger
+type SMTPNotifier struct {
 	Username string
 	Password string
 	Host     string
 	Port     int
 }
 
-func NewSMTPPasswordResetNotifier(
-	l slog.Logger,
-	u, p, h string,
-	port int,
-) SMTPPasswordResetNotifier {
-	return SMTPPasswordResetNotifier{l, u, p, h, port}
+func NewSMTPNotifier(username, password, host string, port int) SMTPNotifier {
+	return SMTPNotifier{username, password, host, port}
 }
 
-func (n SMTPPasswordResetNotifier) Notify(notification Notification) {
+func (n SMTPNotifier) Notify(recipient, subject, body string) error {
 	auth := smtp.PlainAuth(
 		"",
 		n.Username,
@@ -63,29 +41,54 @@ func (n SMTPPasswordResetNotifier) Notify(notification Notification) {
 	)
 
 	msg := fmt.Appendf(nil, "To: %v\r\n"+
-		"Subject: [%v] Password reset\r\n"+
+		"Subject: [%v] %v\r\n"+
 		"MIME-Version: 1.0\r\n"+
 		"Content-Type: text/plain; charset=UTF-8\r\n"+
 		"\r\n"+
-		"You have requested a password reset to %v.\r\n"+
-		"Click the following link to reset your password.\r\n"+
 		"%v\r\n",
-		notification.Email,
+		recipient,
 		g.AppName,
-		g.AppName,
-		notification.URL)
+		subject,
+		body)
 
-	err := smtp.SendMail(
+	if err := smtp.SendMail(
 		fmt.Sprintf("%v:%v", n.Host, n.Port),
 		auth,
 		n.Username,
-		[]string{notification.Email},
+		[]string{recipient},
 		msg,
-	)
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+type SMTPPasswordResetNotifier struct {
+	slog.Logger
+	SMTPNotifier
+}
+
+func NewSMTPPasswordResetNotifier(
+	l slog.Logger,
+	u, p, h string,
+	port int,
+) SMTPPasswordResetNotifier {
+	return SMTPPasswordResetNotifier{l, NewSMTPNotifier(u, p, h, port)}
+}
+
+func (n SMTPPasswordResetNotifier) Notify(recipient, resetPasswordURL string) {
+	body := fmt.Appendf(nil,
+		"You have requested a password reset to %v.\r\n"+
+			"Click the following link to reset your password.\r\n"+
+			"%v\r\n",
+		g.AppName,
+		resetPasswordURL)
+
+	err := n.SMTPNotifier.Notify(recipient, "Password reset", string(body))
 	if err != nil {
 		n.Logger.Error(fmt.Errorf("sending password reset email: %w", err).Error())
 	}
-	n.Logger.Info("notified password reset token", "recipient", notification.Email)
+	n.Logger.Info("notified password reset token", "recipient", recipient)
 }
 
 // Check attempts to connects and authenticates to the SMTP server.

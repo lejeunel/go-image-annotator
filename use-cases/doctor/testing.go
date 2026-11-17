@@ -152,7 +152,7 @@ type FakeNotifier struct {
 	Err error
 }
 
-func (n FakeNotifier) Notify(ntf.Notification) {
+func (n FakeNotifier) Notify(recipient, msg string) {
 }
 
 func (n FakeNotifier) Check() error {
