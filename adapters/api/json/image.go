@@ -14,6 +14,7 @@ import (
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	s "github.com/lejeunel/go-image-annotator/shared"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
+	cp "github.com/lejeunel/go-image-annotator/use-cases/image/copy"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/raw"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
@@ -83,6 +84,10 @@ func (p ImagePresenter) SuccessReadImage(image im.Image) {
 
 func (p ImagePresenter) SuccessDeleteImage(r delete.Response) {
 	p.Writer.WriteHeader(http.StatusNoContent)
+}
+
+func (p ImagePresenter) SuccessCopyImage(r cp.Response) {
+	s.WriteJSON(p.Writer, 200, BuildImageResponse(r.Image))
 }
 
 func (p ImagePresenter) SuccessSliceImages(r slice.Response) {

@@ -28,15 +28,23 @@ func TestHandleAuthError(t *testing.T) {
 func TestNonExistingResourceShouldFail(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.ImageStore{ErrOnFind: e.ErrNotFound})
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotNotFoundErr)
+	assert.False(t, p.GotSuccess)
+}
+
+func TestErrorOnIdParsing(t *testing.T) {
+	p := &FakePresenter{}
+	itr := New(&fk.ImageStore{})
+	itr.Execute(t.Context(), Request{ImageId: "invalid-id"}, p)
+	assert.True(t, p.GotValidationErr)
 	assert.False(t, p.GotSuccess)
 }
 
 func TestErrorOnDelete(t *testing.T) {
 	p := &FakePresenter{}
 	itr := New(&fk.ImageStore{ErrOnDelete: e.ErrInternal})
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotInternalErr)
 	assert.False(t, p.GotSuccess)
 }
@@ -45,7 +53,7 @@ func TestDelete(t *testing.T) {
 	p := &FakePresenter{}
 	s := fk.ImageStore{}
 	itr := New(&s)
-	itr.Execute(t.Context(), Request{}, p)
+	itr.Execute(t.Context(), Request{ImageId: im.NewImageId().String()}, p)
 	assert.True(t, p.GotSuccess)
 	assert.NotNil(t, s.DeletedId)
 }

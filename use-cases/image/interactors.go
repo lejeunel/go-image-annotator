@@ -2,6 +2,7 @@ package image
 
 import (
 	auth "github.com/lejeunel/go-image-annotator/modules/authorizer"
+	cp "github.com/lejeunel/go-image-annotator/use-cases/image/copy"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
@@ -21,6 +22,7 @@ type Interactors struct {
 	Scroll          scroll.Interactor
 	Raw             raw.Interactor
 	Delete          delete.Interactor
+	Copy            cp.Interactor
 	DefaultPageSize int
 	Authorizer      auth.Authorizer
 }

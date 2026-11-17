@@ -12,6 +12,7 @@ import (
 	ims "github.com/lejeunel/go-image-annotator/modules/image-store"
 	q "github.com/lejeunel/go-image-annotator/modules/job-queue"
 	im "github.com/lejeunel/go-image-annotator/use-cases/image"
+	cp "github.com/lejeunel/go-image-annotator/use-cases/image/copy"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	ing "github.com/lejeunel/go-image-annotator/use-cases/image/ingest"
@@ -57,6 +58,7 @@ func NewImageInteractors(
 		Slice:  slice.New(ims, fv, ov, defaultPageSize, maxPageSize),
 		List:   list.New(ims, defaultPageSize, maxPageSize),
 		Scroll: scroll.New(imr, fv, ov),
-		Delete: delete.New(ims),
+		Delete: delete.New(ims, delete.WithAuth(auth)),
+		Copy:   cp.New(ims, clr, cp.WithAuth(auth)),
 	}
 }

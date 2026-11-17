@@ -107,6 +107,21 @@ type Collection struct {
 	Profile *string `json:"profile,omitempty"`
 }
 
+// CopyImage defines model for CopyImage.
+type CopyImage struct {
+	// Deep Also copy annotations and meta-data
+	Deep *bool `json:"deep,omitempty"`
+
+	// Destination Name of the existing collection to copy the image to
+	Destination string `json:"destination"`
+
+	// ImageId ID of the image to copy
+	ImageId string `json:"image_id"`
+
+	// Source Name of the collection the image is in
+	Source string `json:"source"`
+}
+
 // Error defines model for Error.
 type Error struct {
 	// Code Error code
@@ -537,6 +552,9 @@ type UpdateGroupJSONRequestBody = UpdateGroup
 // IngestImageMultipartRequestBody defines body for IngestImage for multipart/form-data ContentType.
 type IngestImageMultipartRequestBody IngestImageMultipartBody
 
+// CopyImageJSONRequestBody defines body for CopyImage for application/json ContentType.
+type CopyImageJSONRequestBody = CopyImage
+
 // CreateLabelJSONRequestBody defines body for CreateLabel for application/json ContentType.
 type CreateLabelJSONRequestBody = NewLabel
 
@@ -728,6 +746,9 @@ type ServerInterface interface {
 	// IngestImage Ingest a new image
 	// (POST /images)
 	IngestImage(w http.ResponseWriter, r *http.Request)
+	// CopyImage Copy an image
+	// (POST /images/copy)
+	CopyImage(w http.ResponseWriter, r *http.Request)
 	// DeleteImage Delete an image
 	// (DELETE /images/{collection_name}/{image_id})
 	DeleteImage(w http.ResponseWriter, r *http.Request, collectionName string, imageId string)
@@ -1232,6 +1253,20 @@ func (siw *ServerInterfaceWrapper) IngestImage(w http.ResponseWriter, r *http.Re
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.IngestImage(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CopyImage operation middleware
+func (siw *ServerInterfaceWrapper) CopyImage(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CopyImage(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1977,6 +2012,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/images/{collection_name}/{image_id}", wrapper.ReadImage)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/images", wrapper.ListImages)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/images", wrapper.IngestImage)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/images/copy", wrapper.CopyImage)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/collections/{name}", wrapper.DeleteCollection)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/collections/{name}", wrapper.FindCollectionByName)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/collections/{name}", wrapper.UpdateCollection)

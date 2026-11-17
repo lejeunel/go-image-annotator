@@ -6,6 +6,7 @@ var ValidMethods = []string{
 	"AddMetadata",
 	"Annotate",
 	"CloneCollection",
+	"CopyImage",
 	"CreateCollection",
 	"CreateGroup",
 	"CreateLabel",

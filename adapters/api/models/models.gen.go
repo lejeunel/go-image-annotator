@@ -102,6 +102,21 @@ type Collection struct {
 	Profile *string `json:"profile,omitempty"`
 }
 
+// CopyImage defines model for CopyImage.
+type CopyImage struct {
+	// Deep Also copy annotations and meta-data
+	Deep *bool `json:"deep,omitempty"`
+
+	// Destination Name of the existing collection to copy the image to
+	Destination string `json:"destination"`
+
+	// ImageId ID of the image to copy
+	ImageId string `json:"image_id"`
+
+	// Source Name of the collection the image is in
+	Source string `json:"source"`
+}
+
 // Error defines model for Error.
 type Error struct {
 	// Code Error code
@@ -531,6 +546,9 @@ type UpdateGroupJSONRequestBody = UpdateGroup
 
 // IngestImageMultipartRequestBody defines body for IngestImage for multipart/form-data ContentType.
 type IngestImageMultipartRequestBody IngestImageMultipartBody
+
+// CopyImageJSONRequestBody defines body for CopyImage for application/json ContentType.
+type CopyImageJSONRequestBody = CopyImage
 
 // CreateLabelJSONRequestBody defines body for CreateLabel for application/json ContentType.
 type CreateLabelJSONRequestBody = NewLabel

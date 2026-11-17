@@ -6,6 +6,7 @@ import (
 
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	pag "github.com/lejeunel/go-image-annotator/shared/pagination"
 )
 
@@ -28,11 +29,23 @@ type ImageStore struct {
 	ExistingImageFileIds      []im.ImageId
 	ErrOnIterateImageIDs      error
 	ErrOnExists               error
+	// Existing, when non-nil, makes Find resolve images per collection:
+	// only listed (image, collection) pairs are found, and copies add to it.
+	Existing []im.BaseImage
 }
 
 func (s *ImageStore) Find(baseImage im.BaseImage) (*im.Image, error) {
 	if s.ErrOnFind != nil {
 		return nil, s.ErrOnFind
+	}
+	if s.Existing != nil {
+		if !slices.Contains(s.Existing, baseImage) {
+			return nil, e.ErrNotFound
+		}
+		return &im.Image{
+			Id:         baseImage.ImageId,
+			Collection: clc.Collection{Name: baseImage.Collection},
+		}, nil
 	}
 	if s.Return != nil {
 		return s.Return, nil
@@ -87,6 +100,7 @@ func (s *ImageStore) DeepCopy(
 	dst clc.CollectionName,
 ) error {
 	s.DeepCopiedToCollection = dst
+	s.recordCopy(id, dst)
 	return nil
 }
 
@@ -95,6 +109,7 @@ func (s *ImageStore) ShallowCopy(
 	dst clc.CollectionName,
 ) error {
 	s.ShallowCopiedToCollection = dst
+	s.recordCopy(id, dst)
 	return nil
 }
 
@@ -122,4 +137,10 @@ func (s ImageStore) Exists(id im.ImageId) (*bool, error) {
 		return &result, nil
 	}
 	return &result, nil
+}
+
+func (s *ImageStore) recordCopy(id im.ImageId, dst clc.CollectionName) {
+	if s.Existing != nil {
+		s.Existing = append(s.Existing, im.BaseImage{ImageId: id, Collection: dst})
+	}
 }

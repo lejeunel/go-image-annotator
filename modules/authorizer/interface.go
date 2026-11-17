@@ -16,6 +16,7 @@ type Interface interface {
 	UpdateLabel(ctx context.Context) error
 	Annotate(ctx context.Context, group *string) error
 	DeleteImage(ctx context.Context, group *string) error
+	CopyImage(ctx context.Context, group *string) error
 	ImportImage(ctx context.Context, group *string) error
 	IngestImage(ctx context.Context, group *string) error
 	CreateUser(ctx context.Context) error

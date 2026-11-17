@@ -44,6 +44,7 @@ func (i *Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	imageId, err := im.NewImageIdFromString(r.ImageId)
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
 	}
 
 	image, err := i.findImage(imageId, r.Collection)

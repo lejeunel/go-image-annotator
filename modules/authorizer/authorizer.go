@@ -104,6 +104,10 @@ func (a Authorizer) DeleteImage(ctx context.Context, group *string) error {
 	return a.check(ctx, "DeleteImage", group)
 }
 
+func (a Authorizer) CopyImage(ctx context.Context, group *string) error {
+	return a.check(ctx, "CopyImage", group)
+}
+
 func (a Authorizer) ImportImage(ctx context.Context, group *string) error {
 	return a.check(ctx, "ImportImage", group)
 }

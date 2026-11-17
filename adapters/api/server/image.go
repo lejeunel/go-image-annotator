@@ -11,6 +11,7 @@ import (
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
+	cp "github.com/lejeunel/go-image-annotator/use-cases/image/copy"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/delete"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/find"
 	"github.com/lejeunel/go-image-annotator/use-cases/image/slice"
@@ -79,6 +80,20 @@ func (s *Server) DeleteImage(
 		delete.Request{ImageId: imageId, Collection: collectionName},
 		apijson.NewImagePresenter(w, s.Logger),
 	)
+}
+
+func (s *Server) CopyImage(w http.ResponseWriter, r *http.Request) {
+	body, ok := apijson.MustDecodeJSON[models.CopyImage](w, r)
+	if !ok {
+		return
+	}
+	req := cp.Request{
+		ImageId:     body.ImageId,
+		Source:      body.Source,
+		Destination: body.Destination,
+		Deep:        body.Deep != nil && *body.Deep,
+	}
+	s.Image.Copy.Execute(r.Context(), req, apijson.NewImagePresenter(w, s.Logger))
 }
 
 func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams) {

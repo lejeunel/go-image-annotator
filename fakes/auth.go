@@ -43,6 +43,10 @@ func (f Auth) DeleteImage(ctx context.Context, g *string) error {
 	return f.ErrOnAuth
 }
 
+func (f Auth) CopyImage(ctx context.Context, g *string) error {
+	return f.ErrOnAuth
+}
+
 func (f Auth) ImportImage(ctx context.Context, dstGroup *string) error {
 	return f.ErrOnAuth
 }

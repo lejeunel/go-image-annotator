@@ -46,6 +46,10 @@ func (a VoidAuthorizer) DeleteImage(ctx context.Context, group *string) error {
 	return nil
 }
 
+func (a VoidAuthorizer) CopyImage(ctx context.Context, group *string) error {
+	return nil
+}
+
 func (a VoidAuthorizer) ImportImage(ctx context.Context, group *string) error {
 	return nil
 }

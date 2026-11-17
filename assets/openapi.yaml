@@ -189,6 +189,41 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/UnexpectedError'
+  /images/copy:
+    post:
+      summary: Copy an image
+      description: >
+        Copy an existing image to another collection. A shallow copy (default)
+        only adds the image; a deep copy also copies its annotations
+        and meta-data.
+      operationId: copyImage
+      tags: [Image]
+      requestBody:
+        description: Copy image payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CopyImage'
+      responses:
+        '200':
+          description: copied image, as found in the destination collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
   /collections/{name}:
     get:
       summary: Find a collection by name
@@ -1287,6 +1322,25 @@ components:
         profile:
           type: string
           description: New profile
+    CopyImage:
+      type: object
+      required:
+        - image_id
+        - source
+        - destination
+      properties:
+        image_id:
+          type: string
+          description: ID of the image to copy
+        source:
+          type: string
+          description: Name of the collection the image is in
+        destination:
+          type: string
+          description: Name of the existing collection to copy the image to
+        deep:
+          type: boolean
+          description: Also copy annotations and meta-data
     CloneCollection:
       type: object
       required:
