@@ -64,7 +64,7 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return
 	}
-	image, err := i.ImageStore.Find(im.BaseImage{})
+	image, err := i.ImageStore.Find(im.BaseImage{ImageId: imageId, Collection: r.Collection})
 	if err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

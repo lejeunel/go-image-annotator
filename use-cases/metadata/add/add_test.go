@@ -73,12 +73,15 @@ func TestErrorAddMetaData(t *testing.T) {
 func TestAddMetaData(t *testing.T) {
 	itr, image := Setup()
 	key, value := "the-key", "the-value"
+	target := im.BaseImage{ImageId: image.Id, Collection: image.Collection.Name}
+	s := &fk.ImageStore{Existing: []im.BaseImage{target}}
 	m := &fk.MetaDataRepo{ReturnList: []m.MetaData{{Key: key, Value: value}}}
 	itr.MetaDataRepo = m
+	itr.ImageStore = s
 	p := &FakePresenter{}
 	itr.Execute(t.Context(),
 		Request{
-			ImageId: image.Id.String(), Collection: image.Collection.Name,
+			ImageId: target.ImageId.String(), Collection: target.Collection,
 			Key: key, Value: value,
 		},
 		p)
