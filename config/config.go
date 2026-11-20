@@ -33,6 +33,7 @@ type Config struct {
 	PasswordMinEntropy                   int      `                split_words:"true" default:"50"`
 	MaxNumTasksPerUser                   int      `                split_words:"true" default:"50"`
 	MaxArchiveMB                         int      `                split_words:"true" default:"500"`
+	MaxConcurrentJobs                    int      `                split_words:"true" default:"4"`
 	SMTPUsername                         *string  `                split_words:"true"`
 	SMTPPassword                         *string  `                split_words:"true"`
 	SMTPHost                             *string  `                split_words:"true"`

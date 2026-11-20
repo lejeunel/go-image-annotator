@@ -13,6 +13,7 @@ import (
 	ev "github.com/lejeunel/go-image-annotator/modules/email-validator"
 	el "github.com/lejeunel/go-image-annotator/modules/event-logger"
 	iig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
+	jq "github.com/lejeunel/go-image-annotator/modules/job-queue"
 	pv "github.com/lejeunel/go-image-annotator/modules/password-validator"
 	rea "github.com/lejeunel/go-image-annotator/modules/reader"
 	tk "github.com/lejeunel/go-image-annotator/modules/token"
@@ -44,6 +45,7 @@ func BuildInteractors(
 		rea.NewImageSpecsDetector(cfg.AllowedImageMIMETypes),
 	)
 	archiveIngester := aig.New(imstore, imageIngester)
+	jobQueue := jq.NewAsyncJobQueue(cfg.MaxConcurrentJobs)
 
 	return itr.Interactors{
 		Label: NewLabelInteractors(infra.LabelRepo, cfg.DefaultPageSize, cfg.MaxPageSize, auth),
@@ -59,6 +61,7 @@ func BuildInteractors(
 			logger,
 			cfg.DefaultPageSize,
 			auth,
+			jobQueue,
 		),
 		Image: NewImageInteractors(
 			infra.ImageRepo,
@@ -77,6 +80,7 @@ func BuildInteractors(
 			cfg.DefaultPageSize,
 			cfg.MaxPageSize,
 			auth,
+			jobQueue,
 		),
 		User: NewUserInteractors(infra.UserRepo, infra.UserStore,
 			infra.GroupRepo, infra.RoleRepo,

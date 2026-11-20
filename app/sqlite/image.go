@@ -40,6 +40,7 @@ func NewImageInteractors(
 	defaultPageSize int,
 	maxPageSize int,
 	auth auth.Interface,
+	jobQueue q.JobQueue,
 ) im.Interactors {
 	return im.Interactors{
 		Ingest: *ing.New(imageIngester, clr, ing.WithAuth(auth)),
@@ -49,7 +50,7 @@ func NewImageInteractors(
 			tmpfs,
 			el,
 			logger,
-			q.NewAsyncJobQueue(),
+			jobQueue,
 			maxArchiveMB,
 			ia.WithAuth(auth),
 		),

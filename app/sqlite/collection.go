@@ -35,13 +35,14 @@ func NewCollectionInteractors(
 	el el.EventLogger,
 	logger slog.Logger,
 	pageSize int, auth auth.Interface,
+	jobQueue q.JobQueue,
 ) clc.Interactors {
 	return clc.Interactors{
 		Find: find.New(cr),
 		Create: create.New(cr, gr, pr, create.WithNameValidator(v.NewNameValidator()),
 			create.WithClock(clockwork.NewRealClock()), create.WithAuth(auth)),
 		Delete: delete.New(ims, ir, cr,
-			q.NewAsyncJobQueue(), el, logger, delete.WithAuth(auth)),
+			jobQueue, el, logger, delete.WithAuth(auth)),
 		List:   list.New(cr, pageSize, pageSize),
 		Update: update.New(cr, gr, pr, update.WithAuth(auth)),
 		Clone: clone.New(
@@ -51,7 +52,7 @@ func NewCollectionInteractors(
 			gr,
 			el,
 			logger,
-			q.NewAsyncJobQueue(),
+			jobQueue,
 		),
 	}
 }
