@@ -8,6 +8,7 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/collection"
 	im "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/image"
 	lbl "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/label"
+	md "github.com/lejeunel/go-image-annotator/adapters/db/sqlite/metadata"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	in "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
@@ -35,6 +36,7 @@ func (u *IngestionTransactor) RunInTx(
 		LabelRepo:      lbl.NewLabelRepo(tx),
 		CollectionRepo: clc.NewCollectionRepo(tx),
 		AnnotationRepo: an.NewAnnotationRepo(tx),
+		MetaDataRepo:   md.NewMetaRepo(tx),
 	}
 
 	if err := fn(stores); err != nil {

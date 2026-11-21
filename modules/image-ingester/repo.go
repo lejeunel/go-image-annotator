@@ -24,6 +24,10 @@ type AnnotationRepo interface {
 	AddPolygon(im.ImageId, clc.CollectionName, an.Polygon, *u.UserId, *time.Time) error
 }
 
+type MetaDataRepo interface {
+	Add(clc.CollectionName, im.ImageId, string, any) error
+}
+
 type ImageRepo interface {
 	AddImage(im.ImageId, []byte, im.Specs) error
 	AddToCollection(im.ImageId, clc.CollectionName) error

@@ -7,6 +7,7 @@ import (
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	grp "github.com/lejeunel/go-image-annotator/entities/group"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
@@ -60,6 +61,10 @@ func TestIngestion(t *testing.T) {
 				Points: an.Points{Coordinates: [][2]float32{{0, 0}, {1, 0}, {1, 1}}},
 			},
 		},
+		Meta: []m.MetaData{
+			{Key: "a-key", Value: "a-value"},
+			{Key: "another-key", Value: 1.5},
+		},
 		Reader: reader,
 	}
 
@@ -73,5 +78,6 @@ func TestIngestion(t *testing.T) {
 	assert.Equal(t, req.Labels, ingester.Got.Labels)
 	assert.Equal(t, req.BoundingBoxes, ingester.Got.BoundingBoxes)
 	assert.Equal(t, req.Polygons, ingester.Got.Polygons)
+	assert.Equal(t, req.Meta, ingester.Got.Meta)
 	assert.Same(t, reader, ingester.Got.Reader)
 }

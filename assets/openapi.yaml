@@ -1424,6 +1424,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/IngestBoundingBox'
+        meta:
+          type: object
+          description: metadata of the image, as key-value pairs
+          additionalProperties: {}
     IngestBoundingBox:
       required:
         - label

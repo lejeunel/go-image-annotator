@@ -16,8 +16,11 @@ import (
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
 	lbl "github.com/lejeunel/go-image-annotator/entities/label"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	u "github.com/lejeunel/go-image-annotator/entities/user"
 	ast "github.com/lejeunel/go-image-annotator/modules/file-store"
+	kv "github.com/lejeunel/go-image-annotator/modules/string-validator"
+	vv "github.com/lejeunel/go-image-annotator/modules/value-validator"
 )
 
 type ImageSpecsDetector interface {
@@ -34,6 +37,7 @@ type Repos struct {
 	LabelRepo
 	CollectionRepo
 	AnnotationRepo
+	MetaDataRepo
 }
 type Transactor interface {
 	RunInTx(fn func(Repos) error) error
@@ -44,6 +48,8 @@ type ImageIngester struct {
 	Transactor
 	ArtefactRepo
 	ImageSpecsDetector
+	KeyValidator   kv.Validator
+	ValueValidator vv.Validator
 	clockwork.Clock
 	mu sync.Mutex
 }
@@ -56,15 +62,34 @@ func WithClock(c clockwork.Clock) Option {
 	}
 }
 
+// WithKeyValidator overrides the validator applied to metadata keys.
+func WithKeyValidator(v kv.Validator) Option {
+	return func(i *ImageIngester) {
+		i.KeyValidator = v
+	}
+}
+
+// WithValueValidator overrides the validator applied to metadata values.
+func WithValueValidator(v vv.Validator) Option {
+	return func(i *ImageIngester) {
+		i.ValueValidator = v
+	}
+}
+
 func New(imr ImageRepo, clr CollectionRepo,
-	lr LabelRepo, ar AnnotationRepo, tra Transactor,
+	lr LabelRepo, ar AnnotationRepo, mr MetaDataRepo, tra Transactor,
 	fileStore ast.FileStore, hasher hash.Hash, specsDetector ImageSpecsDetector, opts ...Option,
 ) *ImageIngester {
 	i := &ImageIngester{
-		Repos:        Repos{imr, lr, clr, ar},
+		Repos: Repos{
+			ImageRepo: imr, LabelRepo: lr, CollectionRepo: clr,
+			AnnotationRepo: ar, MetaDataRepo: mr,
+		},
 		Transactor:   tra,
 		ArtefactRepo: fileStore, Hasher: hasher,
 		ImageSpecsDetector: specsDetector,
+		KeyValidator:       kv.NewNameValidator(),
+		ValueValidator:     vv.BaseTypeValidator{},
 		Clock:              clockwork.NewRealClock(),
 	}
 	for _, opt := range opts {
@@ -82,7 +107,7 @@ func (i *ImageIngester) Ingest(r Request) (*Response, error) {
 
 	imageId := im.NewImageId()
 	image, err := i.buildImage(imageId, *collection, r.Labels, r.BoundingBoxes,
-		r.Polygons)
+		r.Polygons, r.Meta)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", errCtx, err)
 	}
@@ -188,11 +213,22 @@ func (i *ImageIngester) ingestImage(
 			return fmt.Errorf("adding polygon: %w", err)
 		}
 	}
+
+	for _, meta := range image.Meta {
+		if err := tx.MetaDataRepo.Add(
+			image.Collection.Name,
+			image.Id,
+			meta.Key,
+			meta.Value,
+		); err != nil {
+			return fmt.Errorf("adding metadata with key %v: %w", meta.Key, err)
+		}
+	}
 	return nil
 }
 
 func (i *ImageIngester) buildImage(id im.ImageId, collection clc.Collection, labelNames []string,
-	bboxes []a.BoundingBoxRequest, polygons []a.PolygonRequest,
+	bboxes []a.BoundingBoxRequest, polygons []a.PolygonRequest, meta []m.MetaData,
 ) (*im.Image, error) {
 	image := im.NewImage(id, collection)
 
@@ -204,6 +240,9 @@ func (i *ImageIngester) buildImage(id im.ImageId, collection clc.Collection, lab
 		return nil, err
 	}
 	if err := i.appendPolygons(&image, polygons); err != nil {
+		return nil, err
+	}
+	if err := i.appendMeta(&image, meta); err != nil {
 		return nil, err
 	}
 
@@ -261,6 +300,22 @@ func (i *ImageIngester) appendPolygons(image *im.Image, polygons []a.PolygonRequ
 			return fmt.Errorf("%w: %w", baseErr, err)
 		}
 	}
+	return nil
+}
+
+// appendMeta validates metadata before anything is stored, so an invalid
+// key or value is rejected without touching the file store.
+func (i *ImageIngester) appendMeta(image *im.Image, meta []m.MetaData) error {
+	baseErr := fmt.Errorf("appending metadata")
+	for _, md := range meta {
+		if err := i.KeyValidator.Validate(md.Key); err != nil {
+			return fmt.Errorf("%w: validating key %v: %w", baseErr, md.Key, err)
+		}
+		if err := i.ValueValidator.Validate(md.Value); err != nil {
+			return fmt.Errorf("%w: validating value of key %v: %w", baseErr, md.Key, err)
+		}
+	}
+	image.Meta = meta
 	return nil
 }
 

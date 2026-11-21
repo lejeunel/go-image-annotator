@@ -267,6 +267,9 @@ type NewImage struct {
 	// Collection name of collection in which to add the image
 	Collection string    `json:"collection"`
 	Labels     *[]string `json:"labels,omitempty"`
+
+	// Meta metadata of the image, as key-value pairs
+	Meta *map[string]interface{} `json:"meta,omitempty"`
 }
 
 // NewLabel defines model for NewLabel.

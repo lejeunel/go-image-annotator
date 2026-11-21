@@ -4,11 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"maps"
 	"net/http"
+	"slices"
 
 	apijson "github.com/lejeunel/go-image-annotator/adapters/api/json"
 	"github.com/lejeunel/go-image-annotator/adapters/api/models"
 	an "github.com/lejeunel/go-image-annotator/entities/annotation"
+	md "github.com/lejeunel/go-image-annotator/entities/meta"
 	ig "github.com/lejeunel/go-image-annotator/modules/image-ingester"
 	pa "github.com/lejeunel/go-image-annotator/shared/pagination"
 	cp "github.com/lejeunel/go-image-annotator/use-cases/image/copy"
@@ -121,19 +124,30 @@ func NewImageIngestRequest(meta models.NewImage, reader io.Reader) ig.Request {
 	}
 	appendLabelsToIngestImageRequest(&ingestReq, meta.Labels)
 	appendBoundingBoxesToIngestImageRequest(&ingestReq, meta.BoundingBoxes)
+	appendMetaToIngestImageRequest(&ingestReq, meta.Meta)
 	return ingestReq
 }
 
+func appendMetaToIngestImageRequest(req *ig.Request, meta *map[string]any) {
+	if meta == nil {
+		return
+	}
+	for _, key := range slices.Sorted(maps.Keys(*meta)) {
+		req.Meta = append(req.Meta, md.MetaData{Key: key, Value: (*meta)[key]})
+	}
+}
+
 func appendBoundingBoxesToIngestImageRequest(req *ig.Request, boxes *[]models.IngestBoundingBox) {
-	if boxes != nil {
-		for _, box := range *boxes {
-			req.BoundingBoxes = append(req.BoundingBoxes,
-				an.BoundingBoxRequest{
-					Label: box.Label,
-					Xc:    box.Xc, Yc: box.Yc,
-					Width: box.Width, Height: box.Height,
-				})
-		}
+	if boxes == nil {
+		return
+	}
+	for _, box := range *boxes {
+		req.BoundingBoxes = append(req.BoundingBoxes,
+			an.BoundingBoxRequest{
+				Label: box.Label,
+				Xc:    box.Xc, Yc: box.Yc,
+				Width: box.Width, Height: box.Height,
+			})
 	}
 }
 

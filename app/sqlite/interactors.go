@@ -39,6 +39,7 @@ func BuildInteractors(
 		infra.CollectionRepo,
 		infra.LabelRepo,
 		infra.AnnotationRepo,
+		infra.MetaRepo,
 		tra.NewIngestionTransactor(infra.DB),
 		infra.ImageFileStore,
 		sha256.New(),

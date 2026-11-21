@@ -9,6 +9,7 @@ import (
 	a "github.com/lejeunel/go-image-annotator/entities/annotation"
 	clc "github.com/lejeunel/go-image-annotator/entities/collection"
 	im "github.com/lejeunel/go-image-annotator/entities/image"
+	m "github.com/lejeunel/go-image-annotator/entities/meta"
 	fk "github.com/lejeunel/go-image-annotator/fakes"
 	e "github.com/lejeunel/go-image-annotator/shared/errors"
 	"github.com/stretchr/testify/assert"
@@ -298,4 +299,71 @@ func TestHandleInvalidSpecsError(t *testing.T) {
 	ing.ImageSpecsDetector = &fk.SpecsDetector{Err: e.ErrValidation}
 	_, err := ing.Ingest(Request{Collection: collection.Name})
 	assert.Error(t, err)
+}
+
+func TestAddMetadata(t *testing.T) {
+	repos := NewTestingRepos()
+	metaRepo := &fk.MetaDataRepo{}
+	repos.MetaDataRepo = metaRepo
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	repos.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
+	ing := NewTestingImageIngester(repos)
+
+	_, err := ing.Ingest(Request{
+		Collection: collection.Name,
+		Meta:       []m.MetaData{{Key: "a-key", Value: "a-value"}},
+		Reader:     &fk.ImageReader{},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, "a-key", metaRepo.AddedKey)
+	assert.Equal(t, "a-value", metaRepo.AddedValue)
+}
+
+func TestInvalidMetadataShouldFailBeforeStoringImage(t *testing.T) {
+	tests := []struct {
+		name string
+		opt  Option
+	}{
+		{"invalid key", WithKeyValidator(&fk.StringValidator{Invalid: true})},
+		{"invalid value", WithValueValidator(&fk.ValueValidator{Invalid: true})},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repos := NewTestingRepos()
+			metaRepo := &fk.MetaDataRepo{}
+			repos.MetaDataRepo = metaRepo
+			collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+			repos.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
+			fileStore := &fk.FileStore{}
+			ing := NewTestingImageIngester(repos, tt.opt)
+			ing.ArtefactRepo = fileStore
+
+			_, err := ing.Ingest(Request{
+				Collection: collection.Name,
+				Meta:       []m.MetaData{{Key: "a-key", Value: "a-value"}},
+				Reader:     &fk.ImageReader{Buffer: *bytes.NewBufferString("the-data")},
+			})
+			assert.ErrorIs(t, err, e.ErrValidation)
+			assert.Nil(t, fileStore.GotData)
+			assert.Empty(t, metaRepo.AddedKey)
+		})
+	}
+}
+
+func TestInternalErrOnAddMetadataMustDeleteImage(t *testing.T) {
+	repos := NewTestingRepos()
+	repos.MetaDataRepo = &fk.MetaDataRepo{ErrOnAdd: e.ErrInternal}
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	repos.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
+	fileStore := &fk.FileStore{}
+	ing := NewTestingImageIngester(repos)
+	ing.ArtefactRepo = fileStore
+
+	_, err := ing.Ingest(Request{
+		Collection: collection.Name,
+		Meta:       []m.MetaData{{Key: "a-key", Value: "a-value"}},
+		Reader:     &fk.ImageReader{},
+	})
+	assert.ErrorIs(t, err, e.ErrInternal)
+	assert.Equal(t, 1, fileStore.NumDeletedItems)
 }
