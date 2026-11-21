@@ -129,7 +129,8 @@ func appendBoundingBoxesToIngestImageRequest(req *ig.Request, boxes *[]models.In
 		for _, box := range *boxes {
 			req.BoundingBoxes = append(req.BoundingBoxes,
 				an.BoundingBoxRequest{
-					Xc: box.Xc, Yc: box.Yc,
+					Label: box.Label,
+					Xc:    box.Xc, Yc: box.Yc,
 					Width: box.Width, Height: box.Height,
 				})
 		}
