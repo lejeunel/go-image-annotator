@@ -66,7 +66,7 @@ func (i Interactor) Execute(ctx context.Context, r ing.Request, out OutputPort) 
 	}
 	response, err := i.Ingester.Ingest(ing.Request{
 		UserId: user.Id, Collection: collection.Name, Labels: r.Labels,
-		BoundingBoxes: r.BoundingBoxes, Reader: r.Reader,
+		BoundingBoxes: r.BoundingBoxes, Polygons: r.Polygons, Reader: r.Reader,
 	})
 	if err != nil {
 		out.Error(fmt.Errorf("%w: %w", errCtx, err))

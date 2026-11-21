@@ -6,14 +6,18 @@ import (
 	t "github.com/lejeunel/go-image-annotator/shared/testing"
 )
 
-type TestingIngester struct{}
-
-func (i TestingIngester) Ingest(ing.Request) (*ing.Response, error) {
-	return nil, nil
+// TestingIngester records the request it receives.
+type TestingIngester struct {
+	Got *ing.Request
 }
 
-func NewTestingIngester() TestingIngester {
-	return TestingIngester{}
+func (i *TestingIngester) Ingest(r ing.Request) (*ing.Response, error) {
+	i.Got = &r
+	return &ing.Response{Collection: r.Collection}, nil
+}
+
+func NewTestingIngester() *TestingIngester {
+	return &TestingIngester{}
 }
 
 func NewTestingInteractor(repo CollectionRepo, opts ...Option) *Interactor {
