@@ -124,6 +124,7 @@ func NewImageIngestRequest(meta models.NewImage, reader io.Reader) ig.Request {
 	}
 	appendLabelsToIngestImageRequest(&ingestReq, meta.Labels)
 	appendBoundingBoxesToIngestImageRequest(&ingestReq, meta.BoundingBoxes)
+	appendPolygonsToIngestImageRequest(&ingestReq, meta.Polygons)
 	appendMetaToIngestImageRequest(&ingestReq, meta.Meta)
 	return ingestReq
 }
@@ -148,6 +149,19 @@ func appendBoundingBoxesToIngestImageRequest(req *ig.Request, boxes *[]models.In
 				Xc:    box.Xc, Yc: box.Yc,
 				Width: box.Width, Height: box.Height,
 			})
+	}
+}
+
+func appendPolygonsToIngestImageRequest(req *ig.Request, polygons *[]models.IngestPolygon) {
+	if polygons == nil {
+		return
+	}
+	for _, polygon := range *polygons {
+		p := an.PolygonRequest{Label: polygon.Label}
+		for _, point := range polygon.Points {
+			p.Points.Append(point[0], point[1])
+		}
+		req.Polygons = append(req.Polygons, p)
 	}
 }
 

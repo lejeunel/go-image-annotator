@@ -1424,10 +1424,27 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/IngestBoundingBox'
+        polygons:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestPolygon'
         meta:
           type: object
           description: metadata of the image, as key-value pairs
           additionalProperties: {}
+    IngestPolygon:
+      required:
+        - label
+        - points
+      properties:
+        label:
+          type: string
+          description: label of the polygon
+        points:
+          type: array
+          minItems: 3
+          items:
+            $ref: '#/components/schemas/Point'
     IngestBoundingBox:
       required:
         - label

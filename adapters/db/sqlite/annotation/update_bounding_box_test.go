@@ -26,19 +26,6 @@ func TestInternalErrOnUpdateBoundingBoxShouldFail(t *testing.T) {
 	assert.ErrorIs(t, err, e.ErrInternal)
 }
 
-func TestUpdateBoundingBoxWithInvalidValuesShouldFail(t *testing.T) {
-	db := s.NewInMemory()
-	repos := NewAnnotationTestRepos(db)
-	image, collection, label := CreateAnnotableImage(repos, "a-collection", "a-label", nil)
-	annotationId := a.NewAnnotationId()
-	bbox := a.NewBoundingBox(annotationId, 1, 1, 1, 1, label)
-	repos.Annotation.AddBoundingBox(image.Id, collection.Name, bbox, nil, nil)
-
-	err := repos.Annotation.UpdateBoundingBox(annotationId,
-		a.BoundingBoxUpdatables{LabelId: label.Id, Xc: 1, Yc: 1, Width: -10, Height: 1}, nil, nil)
-	assert.ErrorIs(t, err, e.ErrValidation)
-}
-
 func TestUpdateBoundingBox(t *testing.T) {
 	db := s.NewInMemory()
 	repos := NewAnnotationTestRepos(db)

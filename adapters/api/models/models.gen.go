@@ -173,6 +173,13 @@ type IngestBoundingBox struct {
 	Yc float32 `json:"yc"`
 }
 
+// IngestPolygon defines model for IngestPolygon.
+type IngestPolygon struct {
+	// Label label of the polygon
+	Label  string  `json:"label"`
+	Points []Point `json:"points"`
+}
+
 // Label defines model for Label.
 type Label struct {
 	// Description Description of the label
@@ -269,7 +276,8 @@ type NewImage struct {
 	Labels     *[]string `json:"labels,omitempty"`
 
 	// Meta metadata of the image, as key-value pairs
-	Meta *map[string]interface{} `json:"meta,omitempty"`
+	Meta     *map[string]interface{} `json:"meta,omitempty"`
+	Polygons *[]IngestPolygon        `json:"polygons,omitempty"`
 }
 
 // NewLabel defines model for NewLabel.

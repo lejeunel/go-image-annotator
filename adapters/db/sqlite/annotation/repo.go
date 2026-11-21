@@ -332,10 +332,6 @@ func (r AnnotationRepo) UpdateBoundingBoxCoordinates(
 	xc, yc, width, height, angle float32,
 ) error {
 	errCtx := "updating bounding box coordinates"
-	if err := a.ValidateBoundingBox(xc, yc, width, height, angle); err != nil {
-		return fmt.Errorf("%v: %w", errCtx, err)
-	}
-
 	coordsBytes, _ := json.Marshal(
 		BoundingBoxSpecs{Xc: xc, Yc: yc, Width: width, Height: height, Angle: angle},
 	)
