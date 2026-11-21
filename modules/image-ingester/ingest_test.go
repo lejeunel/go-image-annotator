@@ -188,7 +188,7 @@ func TestAddPolygon(t *testing.T) {
 		Polygons: []a.PolygonRequest{
 			{
 				Label:  "a-label",
-				Points: a.Points{Coordinates: [][2]float32{{0, 0}, {0, 1}}},
+				Points: a.Points{Coordinates: [][2]float32{{0, 0}, {0, 1}, {1, 1}}},
 			},
 		},
 		Reader: &fk.ImageReader{},
@@ -366,4 +366,26 @@ func TestInternalErrOnAddMetadataMustDeleteImage(t *testing.T) {
 	})
 	assert.ErrorIs(t, err, e.ErrInternal)
 	assert.Equal(t, 1, fileStore.NumDeletedItems)
+}
+
+func TestInvalidPolygonShouldFailBeforeStoringImage(t *testing.T) {
+	repos := NewTestingRepos()
+	anRepo := &fk.AnnotationRepo{}
+	repos.AnnotationRepo = anRepo
+	collection := clc.NewCollection(clc.NewCollectionId(), "a-collection")
+	repos.CollectionRepo = &fk.CollectionRepo{Existing: []clc.Collection{collection}}
+	fileStore := &fk.FileStore{}
+	ing := NewTestingImageIngester(repos)
+	ing.ArtefactRepo = fileStore
+
+	_, err := ing.Ingest(Request{
+		Collection: collection.Name,
+		Polygons: []a.PolygonRequest{
+			{Label: "a-label", Points: a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}}},
+		},
+		Reader: &fk.ImageReader{Buffer: *bytes.NewBufferString("the-data")},
+	})
+	assert.ErrorIs(t, err, e.ErrValidation)
+	assert.Nil(t, fileStore.GotData)
+	assert.Equal(t, 0, anRepo.NumPolygonsAdded)
 }

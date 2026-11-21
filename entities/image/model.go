@@ -86,6 +86,9 @@ func (i *Image) AddBoundingBox(box a.BoundingBox) error {
 }
 
 func (i *Image) AddPolygon(polygon a.Polygon) error {
+	if err := a.ValidatePolygon(polygon.Points); err != nil {
+		return fmt.Errorf("adding polygon to image: %w", err)
+	}
 	i.Polygons = append(i.Polygons, polygon)
 	return nil
 }

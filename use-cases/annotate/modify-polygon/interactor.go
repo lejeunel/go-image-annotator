@@ -73,6 +73,10 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 		out.Error(fmt.Errorf("%v: fetching label %v: %w", errCtx, r.Label, err))
 		return
 	}
+	if err := a.ValidatePolygon(r.Points); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
 	if err := i.update(
 		ctx,
 		*annotationId,

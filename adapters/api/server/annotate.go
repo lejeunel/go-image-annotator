@@ -33,14 +33,16 @@ func (s *Server) AddPolygon(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	points, err := pointsFromModel(body.Points)
+	if err != nil {
+		json.WriteError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	req := addply.Request{
 		ImageId:    body.ImageId,
 		Collection: body.Collection,
 		Label:      body.Label,
-	}
-
-	for _, point := range body.Points {
-		req.Points.Append(point[0], point[1])
+		Points:     points,
 	}
 	s.Annotation.AddPolygon.Execute(r.Context(), req, json.NewAnnotationPresenter(w, s.Logger))
 }

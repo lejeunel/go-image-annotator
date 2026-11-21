@@ -199,6 +199,63 @@ func ValidateBoundingBox(
 	return nil
 }
 
+// minPolygonArea is the smallest area, in squared pixels, that a polygon
+// may enclose. Comparing with a tolerance rather than with zero absorbs
+// floating-point rounding: collinear points with non-integer coordinates
+// can yield a tiny, non-zero area.
+const minPolygonArea = 1e-6
+
+// ValidatePolygon checks that points describe a usable polygon: at least
+// three points, finite coordinates, and a non-zero enclosed area (see
+// Points.Area).
+func ValidatePolygon(points Points) error {
+	errCtx := "validating polygon"
+	n := len(points.Coordinates)
+	if n < 3 {
+		return fmt.Errorf(
+			"%v: checking whether number of points (%v) < 3: %w",
+			errCtx,
+			n,
+			e.ErrValidation,
+		)
+	}
+	for i, p := range points.Coordinates {
+		for _, c := range p {
+			if math.IsNaN(float64(c)) || math.IsInf(float64(c), 0) {
+				return fmt.Errorf(
+					"%v: checking whether point %v (%v) has finite coordinates: %w",
+					errCtx,
+					i,
+					p,
+					e.ErrValidation,
+				)
+			}
+		}
+	}
+	if area := points.Area(); area < minPolygonArea {
+		return fmt.Errorf(
+			"%v: checking whether area (%v) is zero: points are collinear or repeated: %w",
+			errCtx,
+			area,
+			e.ErrValidation,
+		)
+	}
+	return nil
+}
+
+// Area returns the area enclosed by the polygon whose vertices are the
+// points, taken in order, using the shoelace formula (also called Gauss's
+// area formula)
+func (p Points) Area() float64 {
+	n := len(p.Coordinates)
+	var sum float64
+	for i := range n {
+		cur, next := p.Coordinates[i], p.Coordinates[(i+1)%n]
+		sum += float64(cur[0])*float64(next[1]) - float64(next[0])*float64(cur[1])
+	}
+	return math.Abs(sum) / 2
+}
+
 func NewImageLabel(label lbl.Label) ImageLabel {
 	return ImageLabel{Id: NewAnnotationId(), Label: label}
 }

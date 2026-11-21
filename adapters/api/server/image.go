@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"maps"
 	"net/http"
@@ -60,8 +61,12 @@ func (s *Server) IngestImage(w http.ResponseWriter, r *http.Request) {
 		apijson.WriteError(w, http.StatusBadRequest, "missing image part")
 		return
 	}
-	s.Image.Ingest.Execute(r.Context(), NewImageIngestRequest(meta, imageReader),
-		apijson.NewImagePresenter(w, s.Logger))
+	ingestReq, err := NewImageIngestRequest(meta, imageReader)
+	if err != nil {
+		apijson.WriteError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	s.Image.Ingest.Execute(r.Context(), ingestReq, apijson.NewImagePresenter(w, s.Logger))
 }
 
 func (s *Server) ReadRawImage(w http.ResponseWriter, r *http.Request, imageId string) {
@@ -117,16 +122,18 @@ func (s *Server) ListImages(w http.ResponseWriter, r *http.Request, params ListI
 	s.Image.Slice.Execute(req, apijson.NewImagePresenter(w, s.Logger))
 }
 
-func NewImageIngestRequest(meta models.NewImage, reader io.Reader) ig.Request {
+func NewImageIngestRequest(meta models.NewImage, reader io.Reader) (ig.Request, error) {
 	ingestReq := ig.Request{
 		Collection: meta.Collection,
 		Reader:     reader,
 	}
 	appendLabelsToIngestImageRequest(&ingestReq, meta.Labels)
 	appendBoundingBoxesToIngestImageRequest(&ingestReq, meta.BoundingBoxes)
-	appendPolygonsToIngestImageRequest(&ingestReq, meta.Polygons)
+	if err := appendPolygonsToIngestImageRequest(&ingestReq, meta.Polygons); err != nil {
+		return ig.Request{}, err
+	}
 	appendMetaToIngestImageRequest(&ingestReq, meta.Meta)
-	return ingestReq
+	return ingestReq, nil
 }
 
 func appendMetaToIngestImageRequest(req *ig.Request, meta *map[string]any) {
@@ -152,17 +159,21 @@ func appendBoundingBoxesToIngestImageRequest(req *ig.Request, boxes *[]models.In
 	}
 }
 
-func appendPolygonsToIngestImageRequest(req *ig.Request, polygons *[]models.IngestPolygon) {
+func appendPolygonsToIngestImageRequest(
+	req *ig.Request,
+	polygons *[]models.IngestPolygon,
+) error {
 	if polygons == nil {
-		return
+		return nil
 	}
-	for _, polygon := range *polygons {
-		p := an.PolygonRequest{Label: polygon.Label}
-		for _, point := range polygon.Points {
-			p.Points.Append(point[0], point[1])
+	for i, polygon := range *polygons {
+		points, err := pointsFromModel(polygon.Points)
+		if err != nil {
+			return fmt.Errorf("polygon %v: %w", i, err)
 		}
-		req.Polygons = append(req.Polygons, p)
+		req.Polygons = append(req.Polygons, an.PolygonRequest{Label: polygon.Label, Points: points})
 	}
+	return nil
 }
 
 func appendLabelsToIngestImageRequest(req *ig.Request, labels *[]string) {

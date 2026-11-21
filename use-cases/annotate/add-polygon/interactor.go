@@ -83,6 +83,10 @@ func (i Interactor) Execute(ctx context.Context, r Request, out OutputPort) {
 	}
 
 	poly := a.NewPolygon(a.NewAnnotationId(), r.Points, *label)
+	if err := a.ValidatePolygon(poly.Points); err != nil {
+		out.Error(fmt.Errorf("%v: %w", errCtx, err))
+		return
+	}
 	if err := i.addPolygon(ctx, image, poly); err != nil {
 		out.Error(fmt.Errorf("%v: %w", errCtx, err))
 		return

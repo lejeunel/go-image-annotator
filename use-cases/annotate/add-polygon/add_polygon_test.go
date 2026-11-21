@@ -62,7 +62,7 @@ func CreateTestAddPolygonRequest() Request {
 	return Request{
 		ImageId: im.NewImageId().String(), Collection: "a-collection",
 
-		Label: "a-label", Points: a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}},
+		Label: "a-label", Points: a.Points{Coordinates: [][2]float32{{0, 0}, {1, 0}, {1, 1}}},
 	}
 }
 
@@ -119,4 +119,16 @@ func TestAddPolygon(t *testing.T) {
 	assert.Equal(t, collection.Name, repo.GotCollection)
 	assert.Equal(t, req.Label, repo.GotPolygon.Label.Name)
 	assert.Equal(t, req.Points, repo.GotPolygon.Points)
+}
+
+func TestInvalidPolygonShouldFail(t *testing.T) {
+	p := &FakePresenter{}
+	repo := &fk.AnnotationRepo{}
+	itr := New(&fk.ImageStore{}, repo, &fk.LabelRepo{})
+	req := CreateTestAddPolygonRequest()
+	req.Points = a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}}
+	itr.Execute(t.Context(), req, p)
+	assert.True(t, p.GotValidationErr)
+	assert.False(t, p.GotSuccess)
+	assert.Equal(t, 0, repo.NumPolygonsAdded)
 }

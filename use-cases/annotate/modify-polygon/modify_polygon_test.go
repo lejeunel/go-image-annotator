@@ -19,7 +19,7 @@ func CreateRequestAndUpdatable() (Request, a.PolygonUpdatables, lbl.Label) {
 
 	req := Request{
 		AnnotationId: a.NewAnnotationId().String(),
-		Points:       a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}}},
+		Points:       a.Points{Coordinates: [][2]float32{{0, 0}, {1, 0}, {1, 1}}},
 		Label:        label.Name,
 	}
 	upd := a.PolygonUpdatables{LabelId: label.Id, Points: req.Points}
@@ -104,4 +104,16 @@ func TestUpdate(t *testing.T) {
 	itr.Execute(t.Context(), req, p)
 	assert.True(t, p.GotSuccess)
 	AssertUpdated(t, upd, repo.GotUpdatablePoly)
+}
+
+func TestInvalidPolygonShouldFail(t *testing.T) {
+	p := &FakePresenter{}
+	repo := &fk.AnnotationRepo{}
+	itr := New(repo, &fk.LabelRepo{})
+	req, _, _ := CreateRequestAndUpdatable()
+	req.Points = a.Points{Coordinates: [][2]float32{{0, 0}, {1, 1}, {2, 2}}}
+	itr.Execute(t.Context(), req, p)
+	assert.True(t, p.GotValidationErr)
+	assert.False(t, p.GotSuccess)
+	assert.Empty(t, repo.GotUpdatablePoly.Points.Coordinates)
 }
